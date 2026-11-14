@@ -63,7 +63,7 @@
     "rect": "Rectangle outline (R)",
     "filledRect": "Filled rectangle (Shift+R)",
     "fill": "Fill area (F)",
-    "eraser": "Eraser (E) — erases crosses, beads, partial stitches, knots and backstitch",
+    "eraser": "Eraser (E) — erases crosses, beads, partial stitches, knots and backstitch. Point at a backstitch line to delete only that line",
     "picker": "Pick a key entry from the chart (I, or hold Alt/⌥)",
     "pan": "Move (H, or hold Space)",
     "select": "Select (S) — drag a box; Shift adds",

@@ -3,7 +3,7 @@ import type { Finding } from "@/core/checks/types";
 import type { Fragment } from "@/core/pattern/fragment";
 import type { Palette } from "@/core/pattern/palette";
 import { createPattern } from "@/core/pattern/createPattern";
-import type { KeyIndex, PartialKindId, PartialStitch, Pattern, Point, Rect } from "@/core/pattern/types";
+import type { KeyIndex, PartialKindId, PartialStitch, Pattern, Point, Rect, Segment } from "@/core/pattern/types";
 import type { MirrorMode } from "@/core/transform/mirror";
 import type { ChartView } from "@/render/chart";
 import type { Viewport } from "@/render/ChartRenderer";
@@ -42,6 +42,8 @@ export interface Overlay {
   chain: { last: Point; hover: Point | null; key: KeyIndex } | null;
   hoverPoint: Point | null;
   marquee: Rect | null;
+  /** Backstitch the eraser would delete on press (SPEC §6.2). */
+  eraseHighlight: Segment[] | null;
 }
 
 export interface FloatingContent {
@@ -96,7 +98,7 @@ export interface EditorState {
   hasClipboard: boolean;
 }
 
-export const emptyOverlay: Overlay = { hover: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null };
+export const emptyOverlay: Overlay = { hover: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null };
 
 export const createEditorStore = () =>
   createStore<EditorState>()(() => ({

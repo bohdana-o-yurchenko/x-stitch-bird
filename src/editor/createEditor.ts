@@ -139,13 +139,13 @@ export class Editor {
 
   setHover(cell: Point | null, size: number, showSquare: boolean) {
     const prev = this.state.hoverCell;
-    if (prev?.x === cell?.x && prev?.y === cell?.y && this.state.overlay.hover?.size === size) return;
+    if (prev?.x === cell?.x && prev?.y === cell?.y && this.state.overlay.hover?.size === size && !!this.state.overlay.hover === showSquare) return;
     this.store.setState({ hoverCell: cell, overlay: { ...this.state.overlay, hover: cell && showSquare ? { ...cell, size } : null } });
   }
 
   setTool(tool: ToolId) {
     this.tools.cancel();
-    this.store.setState({ tool, overlay: { ...this.state.overlay, preview: null, partialPreview: null, knotPreview: null, hoverPoint: null, marquee: null } });
+    this.store.setState({ tool, overlay: { ...this.state.overlay, preview: null, partialPreview: null, knotPreview: null, hoverPoint: null, marquee: null, eraseHighlight: null } });
   }
 
   setMomentaryTool(tool: ToolId) {

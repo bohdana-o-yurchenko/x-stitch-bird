@@ -73,6 +73,49 @@ describe("drawing and history", () => {
   });
 });
 
+describe("eraser on a backstitch line (SPEC §6.2)", () => {
+  beforeEach(() => {
+    ed.doc.layers.stitches.fill(red, 0, 30);
+    ed.doc.layers.segments.push({ x1: 0, y1: 1, x2: 5, y2: 1, k: red });
+    ed.store.setState({ viewport: { zoom: 20, offX: 0, offY: 0 } });
+    ed.setTool("eraser");
+  });
+
+  it("highlights the line on hover and hides the cell cursor", () => {
+    ed.tools.move(at(2, 0, { grid: { x: 2.5, y: 1.1 } }));
+    expect(ed.state.overlay.eraseHighlight).toHaveLength(1);
+    expect(ed.state.overlay.hover).toBeNull();
+    ed.tools.move(at(2, 2, { grid: { x: 2.5, y: 2.5 } }));
+    expect(ed.state.overlay.eraseHighlight).toBeNull();
+  });
+
+  it("deletes only backstitch when the press starts on the line", () => {
+    ed.tools.down(at(2, 0, { grid: { x: 2.5, y: 1.1 } }));
+    ed.tools.up(at(2, 0, { grid: { x: 2.5, y: 1.1 } }));
+    expect(ed.doc.layers.segments).toHaveLength(0);
+    expect(ed.doc.layers.stitches[2]).toBe(red);
+    ed.history.undo();
+    expect(ed.doc.layers.segments).toHaveLength(1);
+  });
+
+  it("erases cells and nearby backstitch when the press starts elsewhere", () => {
+    ed.tools.down(at(2, 2, { grid: { x: 2.5, y: 2.5 } }));
+    ed.tools.up(at(2, 2, { grid: { x: 2.5, y: 2.5 } }));
+    expect(ed.doc.layers.stitches[22]).toBe(0);
+    expect(ed.doc.layers.segments).toHaveLength(1);
+  });
+
+  it("also hits the mirror image of the line", () => {
+    ed.store.setState({ mirror: "vertical" });
+    ed.doc.layers.segments = [{ x1: 8, y1: 4, x2: 9, y2: 4, k: red }];
+    ed.doc.layers.stitches[41] = red;
+    ed.tools.down(at(1, 3, { grid: { x: 1.5, y: 4 } }));
+    ed.tools.up(at(1, 3, { grid: { x: 1.5, y: 4 } }));
+    expect(ed.doc.layers.segments).toHaveLength(0);
+    expect(ed.doc.layers.stitches[41]).toBe(red);
+  });
+});
+
 describe("shortcuts", () => {
   it("tells R from Shift+R and ignores keys while typing", () => {
     ed.shortcuts.keyDown(key("R", { shift: true }));

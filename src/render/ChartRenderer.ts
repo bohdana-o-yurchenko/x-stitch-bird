@@ -1,6 +1,6 @@
 import { rulerLabels } from "@/core/grid/numbering";
 import type { Palette } from "@/core/pattern/palette";
-import type { KeyIndex, PartialStitch, Pattern, Point, Rect } from "@/core/pattern/types";
+import type { KeyIndex, PartialStitch, Pattern, Point, Rect, Segment } from "@/core/pattern/types";
 import type { MirrorMode } from "@/core/transform/mirror";
 import { drawCells, drawGrid, drawLines, viewStyle, type ChartFrame, type ChartView } from "./chart";
 import { drawBackstitch, drawBeadCell, drawKnot, drawPartial, drawStitchCell } from "./primitives/cells";
@@ -29,6 +29,7 @@ export interface ChartScene {
   selection: { mask: Uint8Array; bounds: Rect } | null;
   floating: { pattern: Pattern; palette: Palette; at: Point } | null;
   marquee: Rect | null;
+  eraseHighlight: Segment[] | null;
   finding: { cells: number[] } | null;
   flash: { cell: number; until: number } | null;
 }
@@ -140,6 +141,19 @@ export class ChartRenderer {
         g.closePath();
         g.fill();
       }
+    }
+    if (s.eraseHighlight) {
+      g.save();
+      g.lineCap = "round";
+      g.strokeStyle = t.eraser.highlight;
+      g.lineWidth = Math.max(t.eraser.minWidth, z * t.eraser.width);
+      g.beginPath();
+      for (const seg of s.eraseHighlight) {
+        g.moveTo(ox + seg.x1 * z, oy + seg.y1 * z);
+        g.lineTo(ox + seg.x2 * z, oy + seg.y2 * z);
+      }
+      g.stroke();
+      g.restore();
     }
     if (s.chain && s.chain.hover) {
       const slot = s.palette[s.chain.key];

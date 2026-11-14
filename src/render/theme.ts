@@ -13,6 +13,7 @@ export interface CanvasTheme {
   partials: { splitLine: string; symbolsFill: string };
   knots: { radius: number; outline: string; symbolsDot: string };
   ambiguous: { corner: number; minZoom: number };
+  eraser: { highlight: string; minWidth: number; width: number };
   selection: { ants: [string, string]; dash: number[]; floatingAlpha: number };
   findings: { ring: number; padding: number };
   flash: { durationMs: number };
@@ -33,6 +34,7 @@ export const defaultCanvasTheme: CanvasTheme = {
   partials: { splitLine: "rgba(0,0,0,.45)", symbolsFill: "rgba(0,0,0,.06)" },
   knots: { radius: 0.2, outline: "rgba(0,0,0,.6)", symbolsDot: "#1d1a16" },
   ambiguous: { corner: 0.28, minZoom: 6 },
+  eraser: { highlight: "rgba(181,69,47,.5)", minWidth: 7, width: 0.32 },
   selection: { ants: ["#000", "#fff"], dash: [4, 4], floatingAlpha: 0.8 },
   findings: { ring: 3, padding: 0.3 },
   flash: { durationMs: 900 },

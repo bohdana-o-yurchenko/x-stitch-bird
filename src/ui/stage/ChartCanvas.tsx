@@ -25,6 +25,7 @@ function scene(ed: Editor): ChartScene {
     selection: st.selection,
     floating: st.floating && { pattern: st.floating.preview.pattern, palette: st.floating.preview.palette, at: st.floating.at },
     marquee: st.overlay.marquee,
+    eraseHighlight: (st.momentaryTool ?? st.tool) === "eraser" ? st.overlay.eraseHighlight : null,
     finding: (() => {
       const f = st.checksOpen ? ed.checks.current() : undefined;
       return f?.cell !== undefined ? { cells: f.related ?? [f.cell] } : null;

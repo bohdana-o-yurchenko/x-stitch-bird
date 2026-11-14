@@ -60,10 +60,10 @@ export class ToolManager {
 
   move(p: ToolPointer) {
     const ed = this.ed, size = this.active?.usesBrush || (!this.active && this.resolve().usesBrush) ? ed.state.brush : 1;
+    if (!this.active && !ed.state.floating) this.resolve().hover?.(ed, p);
     ed.setHover(p.cell, size, this.showsHoverSquare());
     if (ed.state.floating && !this.active) return ed.selection.drag(p.cell);
-    if (this.active) this.active.move?.(ed, p);
-    else this.resolve().hover?.(ed, p);
+    this.active?.move?.(ed, p);
   }
 
   up(p: ToolPointer) {
@@ -76,7 +76,7 @@ export class ToolManager {
 
   leave() {
     this.ed.setHover(null, 1, false);
-    this.ed.setOverlay({ hoverPoint: null, knotPreview: null, partialPreview: null });
+    this.ed.setOverlay({ hoverPoint: null, knotPreview: null, partialPreview: null, eraseHighlight: null });
   }
 
   /** Esc / tool switch: end chains, drop previews, close open strokes. */
@@ -89,6 +89,7 @@ export class ToolManager {
 
   private showsHoverSquare(): boolean {
     const t = this.resolve();
-    return t.id !== "pan" && t.id !== "backstitch" && t.id !== "knot" && t.id !== "partial" && !this.ed.state.floating;
+    const onLine = t.id === "eraser" && !!this.ed.state.overlay.eraseHighlight;
+    return t.id !== "pan" && t.id !== "backstitch" && t.id !== "knot" && t.id !== "partial" && !onLine && !this.ed.state.floating;
   }
 }

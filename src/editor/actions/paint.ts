@@ -1,8 +1,9 @@
 import { brushCells, floodRegion, snapHalf } from "@/core/geometry/geometry";
 import { LAYERS, PICK_ORDER } from "@/core/layers/registry";
+import { segmentDistance } from "@/core/layers/maskGeometry";
 import { findOrCreateTwin } from "@/core/pattern/keyEntries";
 import { clearPartialsUnder, canPlacePartial, clearForPartial, isOccupied } from "@/core/pattern/occupancy";
-import type { Corner, KeyEntry, KeyIndex, Point } from "@/core/pattern/types";
+import type { Corner, KeyEntry, KeyIndex, Point, Segment } from "@/core/pattern/types";
 import { mirrorCells, mirrorPoints, mirrorTransforms } from "@/core/transform/mirror";
 import type { Editor } from "../createEditor";
 
@@ -47,6 +48,23 @@ export function paintCells(ed: Editor, cells: Point[], k: KeyIndex): void {
 
 export function brushAt(ed: Editor, at: Point): Point[] {
   return brushCells(at.x, at.y, ed.state.brush, { w: ed.doc.w, h: ed.doc.h });
+}
+
+/** Eraser hit radius for backstitch in grid units: ~6 screen px, but 0.2–0.45 of a cell so a cell centre still erases the cell. */
+export const backstitchHitRadius = (zoom: number) => Math.min(0.45, Math.max(0.2, 6 / zoom));
+
+/** Backstitch segments within `radius` of the pointer or of its mirror images (SPEC §6.2 eraser). */
+export function segmentsAt(ed: Editor, grid: Point, radius: number): Segment[] {
+  const p = ed.doc, points = mirrorPoints(grid.x, grid.y, ed.state.mirror, p);
+  return p.layers.segments.filter((s) => points.some((m) => segmentDistance(m.x, m.y, s.x1, s.y1, s.x2, s.y2) <= radius));
+}
+
+/** Delete only backstitch near the pointer (and its mirror images); crosses and beads stay. */
+export function eraseSegmentsAt(ed: Editor, grid: Point, radius: number): boolean {
+  const hit = new Set(segmentsAt(ed, grid, radius));
+  if (!hit.size) return false;
+  ed.doc.layers.segments = ed.doc.layers.segments.filter((s) => !hit.has(s));
+  return true;
 }
 
 /** Eraser: clears cells under the brush and lines/knots near the pointer, mirrored (SPEC §6.2). */
