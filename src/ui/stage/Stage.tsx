@@ -16,7 +16,7 @@ function ViewSwitch() {
   const run = useCommand();
   const view = useEditorState((st) => st.view);
   return (
-    <div className={s.viewSwitch} role="group" aria-label={t("label")}>
+    <div className={s.viewSwitch} role="group" aria-label={t("label")} data-guide="views">
       {(["color", "both", "symbols"] as ChartView[]).map((v) => (
         <button key={v} type="button" className={cx(view === v && s.on)} aria-pressed={view === v} onClick={() => run("view.set", v)}>
           {t(v)}

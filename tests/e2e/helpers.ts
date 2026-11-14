@@ -6,13 +6,15 @@ export const fixture = (name: string) => resolve(process.cwd(), "tests/fixtures"
 export const fixtureText = (name: string) => readFileSync(fixture(name), "utf8");
 export const fixtureDataUrl = (name: string) => `data:image/png;base64,${readFileSync(fixture(name)).toString("base64")}`;
 
-/** Fresh browser storage, editor loaded with the demo pattern. */
-export async function openEditor(page: Page, locale = "en") {
+/** Fresh browser storage, editor loaded with the demo pattern (guide already seen unless `firstVisit`). */
+export async function openEditor(page: Page, locale = "en", o: { firstVisit?: boolean } = {}) {
   await page.goto(`/${locale}`);
-  await page.evaluate(async () => {
+  await page.evaluate(async (first) => {
     localStorage.clear();
+    // the quick-start guide opens on a first visit; tests start past it unless they ask
+    if (!first) localStorage.setItem("stitchwork.guideSeen", "1");
     await new Promise((r) => { const q = indexedDB.deleteDatabase("stitchwork"); q.onsuccess = q.onerror = q.onblocked = r; });
-  });
+  }, !!o.firstVisit);
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
 }
@@ -34,7 +36,7 @@ const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** Click through the File menu: `fileAction(page, "Export", "Shopping list (CSV)")`. Items match by label start. */
 export async function fileAction(page: Page, ...path: string[]) {
-  await page.getByRole("button", { name: "Menu ▾" }).click();
+  await page.getByRole("button", { name: /^(Menu|Меню) ▾$/ }).click();
   for (const name of path) await page.getByRole("menuitem", { name: new RegExp(`^${escape(name)}`) }).click();
 }
 

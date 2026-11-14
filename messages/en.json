@@ -481,7 +481,9 @@
     "refUnderlay": "Image behind the chart…",
     "refUnderlayHint": "Lies under your stitches, aligned to the grid, to trace over",
     "info": "Pattern info…",
-    "infoHint": "Designer, source, copyright, notes"
+    "infoHint": "Designer, source, copyright, notes",
+    "guide": "Quick start guide",
+    "guideHint": "Step by step: an e-copy of a paper chart"
   },
   "toolNames": {
     "pencil": "Draw",
@@ -558,5 +560,56 @@
     "cancel": "Use as it is",
     "apply": "Straighten",
     "working": "Straightening…"
+  },
+  "guide": {
+    "title": "Quick start guide",
+    "count": "Step {n} of {total}",
+    "skip": "Skip the guide",
+    "back": "Back",
+    "next": "Next",
+    "finish": {
+      "title": "8. Finish and export",
+      "body": "Fill in the pattern info — title, designer, copyright — then export an <b>.oxs</b> file: it opens in Хрестики and Ruta Stitch for stitching."
+    },
+    "welcome": {
+      "title": "Make an e-copy of a paper chart",
+      "body": "This short tour shows the quickest way to turn a paper chart into a digital one you can stitch from. It takes a couple of minutes, and you can open it again any time from <b>Menu ▸ Quick start guide</b>."
+    },
+    "create": {
+      "title": "1. Create a new pattern",
+      "body": "Start a blank pattern with the chart’s size in stitches — columns × rows, usually printed on the chart or its cover — and pick the fabric."
+    },
+    "key": {
+      "title": "2. Fill in the key",
+      "body": "Add every line of the paper key with <b>+ Add to key</b>: a floss by its DMC number, a Mill Hill bead, a blend of two flosses, or floss and bead together. Strands and the stitch type are set in the same window.",
+      "tip": "Keep the paper key in view: open a photo of it in a floating window (the path above). Use its <b>marker</b> to tick off each key line once it’s added — nothing gets missed or added twice."
+    },
+    "trace": {
+      "title": "3. Put the chart behind your stitches and trace",
+      "body": "Add a photo or scan of the chart page. In the window that opens, drag the 4 corners onto the corners of the chart’s grid and enter its size — the photo snaps flat onto the grid. Then draw over the symbols with the matching key entries.",
+      "tip": "Photo not perfect? In the side panel’s <b>Image behind the chart</b> section, turn on the <b>quick move & resize panel</b> and nudge the image block by block (say, every 10×10) while you trace."
+    },
+    "views": {
+      "title": "4. Switch views",
+      "body": "<b>Colour</b>, <b>Both</b> or <b>Symbols</b>: compare the symbols with the paper chart, or check the colours at a glance."
+    },
+    "tools": {
+      "title": "5. Work fast, without mistakes",
+      "body": "<b>Ctrl/⌘+Z</b> undoes. <b>Hold Alt/⌥</b> and click to pick a colour from the chart. <b>Select</b> (S) an area to copy, paste and move it. Override is off by default: drawing only fills empty squares, so you can’t overwrite stitches by accident.",
+      "tip": "Every shortcut is listed behind the <b>i</b> button."
+    },
+    "save": {
+      "title": "6. Keep a copy on your device",
+      "body": "Your work saves itself in this browser as you go. But browser storage can be cleared — download the pattern file to your device regularly so valuable work is never lost."
+    },
+    "versions": {
+      "title": "7. Go back in time",
+      "body": "Made a mess? <b>Versions</b> keeps automatic snapshots, so you can return to an earlier state."
+    },
+    "done": {
+      "title": "Voilà!",
+      "body": "Your e-copy is ready. Open this guide again any time from <b>Menu ▸ Quick start guide</b>.",
+      "button": "Start stitching"
+    }
   }
 }

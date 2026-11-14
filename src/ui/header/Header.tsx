@@ -54,8 +54,14 @@ function FileMenu() {
     ] },
     "-",
     { label: t("info"), hint: t("infoHint"), onClick: go("pattern.editInfo") },
+    "-",
+    { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
   ];
-  return <Dropdown className={cx(ui.btn, ui.ghost)} label={t("label")} items={items} />;
+  return (
+    <span data-guide="menu">
+      <Dropdown className={cx(ui.btn, ui.ghost)} label={t("label")} items={items} />
+    </span>
+  );
 }
 
 /** True when the header's items don't fit on one row; the toolbar then gets a row of its own. */

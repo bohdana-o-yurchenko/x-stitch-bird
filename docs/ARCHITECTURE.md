@@ -1040,6 +1040,8 @@ Decisions taken while implementing this plan. Each one lives in the single place
   entries at `theme.highlight.dimAlpha`, then the highlighted one.
 - Pattern file extension: `PATTERN_EXT` (`xbird`) in `editor/actions/importExport.ts`; export format id `"pattern"`.
   Reading tells OXS from our format by content, so `.json` files from earlier versions still open.
+- Quick-start guide (SPEC §9.8): `ui/guide/Guide.tsx` — steps list (ids, `data-guide` targets, menu paths as message
+  keys), texts in the `guide` namespace; `guideOpen` in the store, command `help.guide`.
 - Side panel width: `ui/layout/EditorLayout.tsx` (`--side-w`, drag handle, `localStorage`).
 - Shortcut help: `ui/header/ShortcutsInfo.tsx` builds its list from `KEYMAP` via `shortcutLabels`/`formatKeys`, so
   a new binding only needs a row there.

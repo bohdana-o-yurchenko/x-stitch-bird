@@ -39,7 +39,7 @@ export function ToolBar() {
     if (tool !== "partial") run("tool.select", "partial");
   };
   return (
-    <div className={s.tools} role="toolbar" aria-label={t("toolbar")}>
+    <div className={s.tools} role="toolbar" aria-label={t("toolbar")} data-guide="toolbar">
       <button type="button" className={ui.tool} title={t("undo")} disabled={!canUndo} onClick={() => run("history.undo")}><Icon name="undo" size={18} /></button>
       <button type="button" className={ui.tool} title={t("redo")} disabled={!canRedo} onClick={() => run("history.redo")}><Icon name="redo" size={18} /></button>
       <span className={s.sep} />

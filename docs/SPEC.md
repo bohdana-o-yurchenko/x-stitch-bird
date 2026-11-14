@@ -546,6 +546,22 @@ File ▸ Save) still saves at once, with a toast.
   Warning "Unsaved changes to the current pattern will be lost — save first if you want to keep it."
   New project gets a new id; `strands` carried over.
 
+### 9.8 Quick-start guide (new app, 2026-11-14)
+A guided tour for making a **перенабір** (an e-copy of a paper chart). It opens by itself on the **first visit only**
+(flag `stitchwork.guideSeen` in localStorage, set as soon as it opens, so a reload never shows it again) and any time
+from **Menu ▸ Quick start guide** (uk: "Як зробити перенабір").
+- The screen is dimmed except for the elements the step talks about (pulsing outline); a card beside them has the
+  step counter, title, text, the menu path as chips (e.g. Меню ▸ Нова ▸ Порожня схема…), sometimes a tip, and
+  Skip / Back / Next. Keys: → or Enter next, ← back, Esc closes.
+- Steps: welcome · 1 create a pattern with the chart's size · 2 fill in the key (floss, bead, blends, floss + bead;
+  the paper key in a floating photo window, ticking lines off with its marker) · 3 image behind the chart,
+  straighten by 4 corners, trace (tip: the quick move & resize panel, block by block) · 4 Colour / Both / Symbols ·
+  5 undo, hold Alt/⌥ to pick, select / copy / paste / move, override off by default (tip: the **i** button) ·
+  6 automatic saving in the browser, and download the .xbird file to the device · 7 Versions · 8 pattern info and
+  export .oxs for Хрестики and Ruta Stitch · Voilà.
+- Highlight targets are `data-guide` attributes (menu, add-key, views, toolbar, shortcuts, saved); a missing target
+  (e.g. side panel hidden) just isn't highlighted.
+
 ### 9.6 Image store (new app, 2026-11-14)
 The single-file app kept pictures as base64 data URLs inside its records (reference windows: photo and marks), so
 every window move or marker stroke rewrote megabytes, and photos were re-compressed when added. The new app:

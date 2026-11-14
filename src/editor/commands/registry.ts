@@ -50,6 +50,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "view.fit", run: (ed) => ed.viewport.fit() },
   { id: "view.goToCell", run: (ed) => ed.openDialog({ type: "goToCell" }) },
   { id: "view.toggleHighlight", run: (ed) => ed.store.setState({ highlight: !ed.state.highlight }) },
+  { id: "help.guide", run: (ed) => ed.store.setState({ guideOpen: true }) },
   { id: "panel.toggle", run: (ed) => ed.store.setState({ panelCollapsed: !ed.state.panelCollapsed }) },
   // key
   { id: "key.selectNth", run: (ed, n) => { const list = ed.doc.key.flatMap((e, i) => (e && i ? [i] : [])); const k = list[Number(n) - 1]; if (k) ed.setActiveEntry(k); } },

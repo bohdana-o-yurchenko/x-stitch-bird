@@ -194,6 +194,26 @@ test("deleting a saved pattern asks first", async ({ page }) => {
   await expect(page.getByText("No saved patterns", { exact: false })).toBeVisible();
 });
 
+test("the quick-start guide opens on the first visit only, highlights what it explains, and reopens from the menu", async ({ page }) => {
+  await openEditor(page, "uk", { firstVisit: true });
+  const guide = page.getByTestId("guide");
+  await expect(guide).toContainText("перенабір");
+  await guide.getByRole("button", { name: "Далі" }).click();
+  await expect(guide).toContainText("Створіть нову схему");
+  await expect(guide).toContainText("Порожня схема");
+  await page.keyboard.press("ArrowRight");
+  await expect(guide).toContainText("Заповніть ключ");
+  await page.keyboard.press("Escape");
+  await expect(guide).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await expect(guide).toHaveCount(0);
+  await fileAction(page, "Як зробити перенабір");
+  await expect(guide).toBeVisible();
+  for (let i = 0; i < 10; i++) await guide.getByRole("button", { name: /^(Далі|До вишивання)$/ }).click();
+  await expect(guide).toHaveCount(0);
+});
+
 test("brush size takes one click", async ({ page }) => {
   await page.getByRole("button", { name: "Brush 3×3" }).click();
   expect(await editorState<number>(page, "(ed) => ed.state.brush")).toBe(3);

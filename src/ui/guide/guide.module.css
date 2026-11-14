@@ -1,0 +1,90 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+}
+.shade {
+  position: absolute;
+  inset: 0;
+}
+.ring {
+  position: absolute;
+  border: 2px solid var(--accent);
+  border-radius: 9px;
+  box-shadow: 0 0 0 4px rgba(181, 69, 47, 0.25);
+  pointer-events: none;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    box-shadow: 0 0 0 8px rgba(181, 69, 47, 0.12);
+  }
+}
+.card {
+  position: absolute;
+  max-width: calc(100vw - 16px);
+  padding: 16px 18px 14px;
+  background: var(--panel);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(40, 25, 10, 0.35);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.card h3 {
+  margin: 2px 0 6px;
+  font-family: var(--font-heading);
+  font-size: 18px;
+}
+.card p {
+  margin: 0 0 8px;
+}
+.count {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 8px;
+}
+.chip {
+  padding: 1px 8px;
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.arrow {
+  color: var(--muted);
+  font-size: 11px;
+}
+.tip {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--sel);
+  font-size: 12.5px;
+}
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.spacer {
+  flex: 1;
+}
+.skip {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12.5px;
+  padding: 4px 0;
+  text-decoration: underline;
+}

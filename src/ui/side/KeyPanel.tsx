@@ -29,7 +29,7 @@ export function KeyPanel() {
         <span className={s.count}>{rows.length ? t("count", { count: rows.length }) : ""}</span>
         <span className={s.spacer} />
         <button type="button" className={cx(ui.tool, highlight && ui.on)} title={t("highlight")} aria-label={t("highlight")} aria-pressed={highlight} data-testid="highlight-toggle" onClick={() => run("view.toggleHighlight")}><Icon name="highlight" size={18} /></button>
-        <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} onClick={() => run("key.add")}>{t("add")}</button>
+        <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} data-guide="add-key" onClick={() => run("key.add")}>{t("add")}</button>
       </div>
       <div className={s.keyList} data-shrink>
         {!rows.length && (

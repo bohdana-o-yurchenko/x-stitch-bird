@@ -110,6 +110,7 @@ export function ShortcutsInfo() {
         ref={button}
         type="button"
         className={s.info}
+        data-guide="shortcuts"
         aria-label={t("title")}
         aria-expanded={!!pos}
         data-shortcuts

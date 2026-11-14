@@ -11,6 +11,7 @@ import { useTranslate } from "./i18n/labels";
 import { DropZoneOverlay, EditorLayout } from "./layout/EditorLayout";
 import { ReferenceLayer } from "./references/ReferenceLayer";
 import { Tooltips } from "./common/Tooltips";
+import { Guide } from "./guide/Guide";
 import { SidePanel } from "./side/SidePanel";
 import { Stage } from "./stage/Stage";
 import { StatusBar } from "./status/StatusBar";
@@ -63,6 +64,7 @@ function Shell() {
           <DialogHost />
           <Toasts />
           <Tooltips />
+          <Guide />
           {dragging && <DropZoneOverlay text={t("drop")} />}
         </>
       }

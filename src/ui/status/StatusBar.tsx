@@ -75,7 +75,7 @@ export function StatusBar() {
       <AmbiguousStatus />
       {underlayEditing && <span className={s.hint}>{t("underlayHint")}</span>}
       <span>{`${p.w}×${p.h}`}</span>
-      <span>{savedAt ? t("savedAt", { time: new Date(savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }) : t("savesLocal")}</span>
+      <span data-guide="saved">{savedAt ? t("savedAt", { time: new Date(savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }) : t("savesLocal")}</span>
     </div>
   );
 }
