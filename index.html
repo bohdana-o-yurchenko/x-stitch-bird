@@ -1471,6 +1471,7 @@ function keyIcon(i,size=26,mode){const c=document.createElement('canvas');const 
   g.textAlign='center';g.textBaseline='middle';
   if(pal.t[i]==='bead')drawBeadCell(g,0,0,size,i,showCol,true);
   else if(pal.t[i]==='back'){drawBackLine(g,size*.15,size*.85,size*.85,size*.15,i,size*.9,showCol);g.globalAlpha=.9;drawSym(g,size*.5,0,size*.5,pal.sym[i],'#1d1a16',.7,true);g.globalAlpha=1}
+  else if(pal.t[i]==='combo'&&(mode||view)==='color'){drawStitch(g,0,0,size,i,true,false);drawSym(g,0,0,size,pal.sym[i],pal.bink[i],.5)} // Colour view: bead + symbol so the key still tells floss+bead apart
   else drawStitch(g,0,0,size,i,showCol,true);return c}
 
 /* ============================================================ CANVAS */
@@ -1497,8 +1498,9 @@ function drawStitch(g,px,py,z,v,showCol,showSym){
   if(st==='full'){if(showCol){g.fillStyle=pal.hex[v];g.fillRect(px,py,z,z)}}
   else{g.save();g.beginPath();g.rect(px,py,z,z);g.clip();g.strokeStyle=showCol?pal.hex[v]:'rgba(0,0,0,.38)';g.lineWidth=Math.max(1.2,z*(showCol?.34:.07));g.lineCap='butt';g.beginPath();
     if(st==='half'){g.moveTo(px-1,py+z+1);g.lineTo(px+z+1,py-1)}else{g.moveTo(px-1,py-1);g.lineTo(px+z+1,py+z+1)}g.stroke();g.restore()}
-  if(pal.t[v]==='combo'){const sh=pal.shape[v]||{};drawBeadShape(g,px,py,z,pal.bhex[v],sh.bugle?sh:{...sh,r:(sh.r||.4)*.8},showCol);
-    if(showSym&&z>=9)drawSym(g,px,py,z,pal.sym[v],showCol?pal.bink[v]:'#1d1a16',.5);return}
+  // combo (floss + bead): when its symbol is visible, show the symbol as-is like any cross stitch (no bead circle);
+  // the bead is drawn only when no symbol is shown (Colour view, or zoomed out too far for symbols)
+  if(pal.t[v]==='combo'&&!(showSym&&z>=9)){const sh=pal.shape[v]||{};drawBeadShape(g,px,py,z,pal.bhex[v],sh.bugle?sh:{...sh,r:(sh.r||.4)*.8},showCol);return}
   if(showSym&&z>=9){
     if(st==='full')drawSym(g,px,py,z,pal.sym[v],showCol?pal.ink[v]:'#1d1a16',.68);
     else drawSym(g,px,py,z,pal.sym[v],'#1d1a16',.56,true)}}

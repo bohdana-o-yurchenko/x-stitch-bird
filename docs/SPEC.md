@@ -214,9 +214,11 @@ Order of drawing:
    - full: fill cell with colour (colour views only).
    - half: diagonal line clipped to cell; colour views → colour, width `max(1.2, 0.34z)`;
      symbols view → `rgba(0,0,0,.38)`, width `max(1.2, 0.07z)`. `half` = ╱, `halfb` = ╲.
-   - combo: additionally draw bead shape at 80 % radius (bugles unchanged) on top.
+   - combo: when its symbol is **not** shown (Colour view, or `z < 9`), additionally draw the bead shape at 80 %
+     radius (bugles unchanged) on top. When the symbol is shown, no bead is drawn — the symbol appears as-is,
+     exactly like a plain cross stitch of the same `st`.
    - Symbol drawn if view ≠ colour, `z ≥ 9`, and **no bead in that cell**:
-     full → `ink` colour (or dark in symbols view) at 68 % size; half → dark with white halo, 56 %; combo → bead ink, 50 %.
+     full → `ink` colour (or dark in symbols view) at 68 % size; half → dark with white halo, 56 % (combos included).
 5. **Bead layer**: bead shape — radial gradient highlight (white → hex → hex darkened 35 %), dark outline
    `max(1, z/14)`, centre hole (for non-bugles, `z ≥ 6`). Symbols view: white fill. Symbol at 50 % if `z ≥ 9`.
 6. **Preview** of line/rect shapes at 55 % alpha.
