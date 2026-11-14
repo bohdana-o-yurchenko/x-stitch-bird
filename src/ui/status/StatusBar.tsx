@@ -36,6 +36,7 @@ export function StatusBar() {
   useEditorState((st) => st.docRevision);
   const p = useEditorState((st) => st.doc);
   const savedAt = useEditorState((st) => st.savedAt);
+  const underlayEditing = useEditorState((st) => !!st.underlay && st.underlay.visible && !st.underlay.behind);
   const label = useEntryLabel();
   const inside = hover && hover.x >= 0 && hover.y >= 0 && hover.x < p.w && hover.y < p.h;
   const i = inside ? hover.y * p.w + hover.x : -1;
@@ -54,7 +55,7 @@ export function StatusBar() {
       <span className={s.cell}>{parts.join("  ·  ")}</span>
       <span className={s.spacer} />
       <AmbiguousStatus />
-      <span className={s.hint}>{t("hint")}</span>
+      <span className={s.hint}>{underlayEditing ? t("underlayHint") : t("hint")}</span>
       <span>{`${p.w}×${p.h}`}</span>
       <span>{savedAt ? t("savedAt", { time: new Date(savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }) : t("savesLocal")}</span>
     </div>

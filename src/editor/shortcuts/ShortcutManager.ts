@@ -42,6 +42,8 @@ export class ShortcutManager {
     const s = this.ed.state;
     if (c === "floating") return !!s.floating;
     if (c === "hasSelection") return !!s.selection || !!s.floating;
+    if (c === "underlayEditing") return this.ed.underlay.editing;
+    if (c === "hasUnderlay") return !!s.underlay;
     return !!s.overlay.chain;
   }
 

@@ -58,7 +58,7 @@
 .fileMenu {
   display: none;
 }
-@media (max-width: 1560px) {
+@media (max-width: 1720px) {
   .inlineFiles {
     display: none;
   }

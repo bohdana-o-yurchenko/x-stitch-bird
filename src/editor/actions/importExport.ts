@@ -11,6 +11,7 @@ import { addEntry } from "@/core/pattern/keyEntries";
 import { createPattern } from "@/core/pattern/createPattern";
 import { buildPalette } from "@/core/pattern/palette";
 import type { Pattern } from "@/core/pattern/types";
+import type { UnderlayData } from "@/core/underlay/underlay";
 import { renderChartImage, type KeyLine } from "@/render/exportChart";
 import type { ChartView } from "@/render/chart";
 import { downloadFile, isImageFile, isPatternFile, readText } from "@/platform/files";
@@ -45,7 +46,7 @@ export const shoppingList = (p: Pattern) => calculator().calculate({ pattern: p,
 
 export async function exportAs(ed: Editor, format: ExportFormat) {
   const p = ed.doc, base = safeName(p);
-  if (format === "json") return offer(ed, `${base}.json`, JSON.stringify({ ...serializePattern(p), refs: ed.references.exportAll() }), "json");
+  if (format === "json") return offer(ed, `${base}.json`, JSON.stringify({ ...serializePattern(p), refs: ed.references.exportAll(), underlay: ed.underlay.data ?? undefined }), "json");
   if (format === "oxs") return offer(ed, `${base}.oxs`, exportOxs(p), "oxs");
   if (format === "csv") return offer(ed, `${base}-shopping-list.csv`, exportCsv(p, shoppingList(p), ed.t), "csv");
   const view: ChartView = format === "png-color" ? "color" : format === "png-symbols" ? "symbols" : "both";
@@ -55,20 +56,20 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
 }
 
 /** Read a .json or .oxs file into a pattern; throws on anything else. */
-export async function readPatternFile(ed: Editor, file: File): Promise<{ pattern: Pattern; refs: unknown[] | null; simplified: number }> {
+export async function readPatternFile(ed: Editor, file: File): Promise<{ pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; simplified: number }> {
   const text = await readText(file);
   if (text.startsWith("<")) {
     const { pattern, report } = importOxs(text, ed.state.symbols);
-    return { pattern, refs: null, simplified: report.simplified };
+    return { pattern, refs: null, underlay: null, simplified: report.simplified };
   }
-  const { pattern, refs } = parsePattern(JSON.parse(text), ed.state.symbols);
-  return { pattern, refs, simplified: 0 };
+  const { pattern, refs, underlay } = parsePattern(JSON.parse(text), ed.state.symbols);
+  return { pattern, refs, underlay, simplified: 0 };
 }
 
 export async function loadFile(ed: Editor, file: File) {
   try {
-    const { pattern, refs, simplified } = await readPatternFile(ed, file);
-    loadPattern(ed, pattern, refs as never);
+    const { pattern, refs, underlay, simplified } = await readPatternFile(ed, file);
+    loadPattern(ed, pattern, refs as never, underlay);
     ed.toast(simplified ? "toasts.loadedReport" : "toasts.loaded", { name: file.name, count: simplified });
   } catch (e) {
     console.error(e);

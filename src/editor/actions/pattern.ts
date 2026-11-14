@@ -5,10 +5,11 @@ import { invalidateColors } from "@/core/pattern/resolve";
 import type { GridNumbering, Pattern, PatternMeta, Point, Size } from "@/core/pattern/types";
 import { reframe as reframeCore, resizePattern } from "@/core/transform/wholeChart";
 import type { RefWindowData } from "@/persistence/ports";
+import type { UnderlayData } from "@/core/underlay/underlay";
 import type { Editor } from "../createEditor";
 
 /** Make `p` the edited pattern: fresh history, no selection, view fitted, its reference windows restored. */
-export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null = null) {
+export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null = null, underlay: UnderlayData | null = null) {
   invalidateColors(p);
   ed.history.clear();
   ed.tools.cancel();
@@ -17,6 +18,7 @@ export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null
   ed.changed({ keys: true, structural: true });
   ed.viewport.fit();
   void ed.references.switchTo(p.id, refs);
+  void ed.underlay.switchTo(p.id, underlay);
 }
 
 export function newPattern(ed: Editor, o: { name: string; w: number; h: number; count: number; keepKey: boolean }) {

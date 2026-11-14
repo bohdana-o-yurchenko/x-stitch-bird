@@ -11,6 +11,7 @@ function memoryPersistence(snaps: Snapshot[]): Persistence {
   return {
     patterns: { list: async () => [], load: async () => null, save: async () => ({ ok: true }), remove: async () => {} },
     references: { load: async () => [], save: async () => ({ ok: true }) },
+    underlays: { load: async () => null, save: async () => ({ ok: true }) },
     draft: { load: () => null, save: () => {} },
     snapshots: { add: async (s) => void snaps.push(s), list: async () => [], get: async () => null, removeMany: async () => {} },
   };
@@ -113,6 +114,35 @@ describe("eraser on a backstitch line (SPEC §6.2)", () => {
     ed.tools.up(at(1, 3, { grid: { x: 1.5, y: 4 } }));
     expect(ed.doc.layers.segments).toHaveLength(0);
     expect(ed.doc.layers.stitches[41]).toBe(red);
+  });
+});
+
+describe("chart underlay (SPEC §15.15)", () => {
+  beforeEach(() => {
+    ed.store.setState({
+      underlay: { src: "data:image/png;base64,x", imageW: 100, imageH: 100, crop: { x: 0, y: 0, w: 100, h: 100 }, rect: { x: 2, y: 2, w: 5, h: 5 }, opacity: 0.5, behind: false, visible: true, tool: "move" },
+      viewport: { zoom: 20, offX: 0, offY: 0 },
+    });
+  });
+
+  it("edit mode: the pointer moves the image and never paints", () => {
+    ed.tools.down(at(4, 4));
+    ed.tools.move(at(6, 5));
+    ed.tools.up(at(6, 5));
+    expect(ed.state.underlay!.rect).toMatchObject({ x: 4, y: 3 });
+    expect(ed.doc.layers.stitches.some(Boolean)).toBe(false);
+  });
+
+  it("behind mode: tools work as usual; Esc and U switch modes, arrows nudge", () => {
+    ed.shortcuts.keyDown(key("ArrowRight", { shift: true }));
+    expect(ed.state.underlay!.rect.x).toBe(3);
+    ed.shortcuts.keyDown(key("Escape"));
+    expect(ed.state.underlay!.behind).toBe(true);
+    ed.tools.down(at(4, 4));
+    ed.tools.up(at(4, 4));
+    expect(ed.doc.layers.stitches[44]).toBe(red);
+    ed.shortcuts.keyDown(key("u"));
+    expect(ed.underlay.editing).toBe(true);
   });
 });
 

@@ -1,6 +1,6 @@
 import { isMajorLine, majorOffset } from "@/core/grid/numbering";
 import type { Palette } from "@/core/pattern/palette";
-import type { Pattern } from "@/core/pattern/types";
+import type { Pattern, Rect } from "@/core/pattern/types";
 import { drawBackstitch, drawBeadCell, drawKnot, drawPartial, drawStitchCell, type CellStyle, type Ctx } from "./primitives/cells";
 import type { CanvasTheme } from "./theme";
 
@@ -21,13 +21,36 @@ export const viewStyle = (view: ChartView, theme: CanvasTheme): CellStyle => ({ 
 
 export const fullFrame = (p: Pattern, z: number, ox: number, oy: number): ChartFrame => ({ z, ox, oy, x0: 0, y0: 0, x1: p.w, y1: p.h });
 
-/** Fabric, crosses, partial stitches and beads (everything below the grid). */
-export function drawCells(g: Ctx, p: Pattern, palette: Palette, f: ChartFrame, style: CellStyle, withFabric = true) {
+/** A chart underlay image and where it goes (SPEC §15.15). */
+export interface UnderlayView {
+  image: CanvasImageSource;
+  crop: Rect;
+  rect: Rect;
+  opacity: number;
+}
+
+/** The underlay at its opacity; `clip` keeps it inside the chart (behind mode). */
+export function drawUnderlay(g: Ctx, p: Pattern, u: UnderlayView, f: ChartFrame, clip: boolean) {
+  const { z, ox, oy } = f;
+  g.save();
+  if (clip) {
+    g.beginPath();
+    g.rect(ox, oy, p.w * z, p.h * z);
+    g.clip();
+  }
+  g.globalAlpha = u.opacity;
+  g.drawImage(u.image, u.crop.x, u.crop.y, u.crop.w, u.crop.h, ox + u.rect.x * z, oy + u.rect.y * z, u.rect.w * z, u.rect.h * z);
+  g.restore();
+}
+
+/** Fabric, (underlay,) crosses, partial stitches and beads — everything below the grid. */
+export function drawCells(g: Ctx, p: Pattern, palette: Palette, f: ChartFrame, style: CellStyle, withFabric = true, underlay?: UnderlayView) {
   const { z, ox, oy } = f, { stitches, beads, partials } = p.layers;
   if (withFabric) {
     g.fillStyle = style.showColour ? p.fabric : "#FFFFFF";
     g.fillRect(ox, oy, p.w * z, p.h * z);
   }
+  if (underlay) drawUnderlay(g, p, underlay, f, true);
   for (let y = f.y0; y < f.y1; y++)
     for (let x = f.x0; x < f.x1; x++) {
       const i = y * p.w + x, s = palette[stitches[i] ?? 0];

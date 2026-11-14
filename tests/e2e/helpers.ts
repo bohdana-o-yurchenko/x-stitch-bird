@@ -29,8 +29,16 @@ export async function cellPoint(page: Page, x: number, y: number) {
 export const editorState = <T>(page: Page, fn: string): Promise<T> =>
   page.evaluate(`(() => { const ed = window.__stitchwork; return (${fn})(ed); })()`) as Promise<T>;
 
+/** Click a header file action, inline or inside the File menu depending on the screen width. */
+export async function fileAction(page: Page, name: string) {
+  const inline = page.getByRole("button", { name, exact: true });
+  if (await inline.isVisible()) return inline.click();
+  await page.getByRole("button", { name: "File ▾" }).click();
+  await page.getByRole("menuitem", { name, exact: true }).click();
+}
+
 export async function loadFixture(page: Page, name: string) {
   const chooser = page.waitForEvent("filechooser");
-  await page.getByRole("button", { name: "Load file" }).click();
+  await fileAction(page, "Load file");
   await (await chooser).setFiles(fixture(name));
 }

@@ -21,6 +21,7 @@ import { ShortcutManager } from "./shortcuts/ShortcutManager";
 import { SnapshotService } from "./snapshots/SnapshotService";
 import { createEditorStore, type DialogRequest, type EditorState, type Overlay, type ToolId } from "./store/editorStore";
 import { ToolManager } from "./tools/ToolManager";
+import { UnderlayService } from "./underlay/UnderlayService";
 import { ViewportService } from "./viewport/viewport";
 
 let toastId = 0;
@@ -39,6 +40,7 @@ export class Editor {
   readonly shortcuts: ShortcutManager;
   readonly selection: SelectionService;
   readonly references: ReferenceService;
+  readonly underlay: UnderlayService;
   readonly snapshots: SnapshotService;
   readonly checks: ChecksSession;
   readonly autosave: Autosave;
@@ -62,6 +64,7 @@ export class Editor {
     this.shortcuts = new ShortcutManager(this, isMac);
     this.selection = new SelectionService(this);
     this.references = new ReferenceService(this);
+    this.underlay = new UnderlayService(this);
     this.snapshots = new SnapshotService(this);
     this.checks = new ChecksSession(this);
     this.autosave = new Autosave(persistence.draft, () => this.doc);
@@ -115,6 +118,7 @@ export class Editor {
   flush() {
     this.autosave.flush();
     this.references.flush();
+    this.underlay.flush();
   }
 
   toast(key: string, values?: Record<string, string | number>) {

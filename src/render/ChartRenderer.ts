@@ -2,7 +2,7 @@ import { rulerLabels } from "@/core/grid/numbering";
 import type { Palette } from "@/core/pattern/palette";
 import type { KeyIndex, PartialStitch, Pattern, Point, Rect, Segment } from "@/core/pattern/types";
 import type { MirrorMode } from "@/core/transform/mirror";
-import { drawCells, drawGrid, drawLines, viewStyle, type ChartFrame, type ChartView } from "./chart";
+import { drawCells, drawGrid, drawLines, drawUnderlay, viewStyle, type ChartFrame, type ChartView, type UnderlayView } from "./chart";
 import { drawBackstitch, drawBeadCell, drawKnot, drawPartial, drawStitchCell } from "./primitives/cells";
 import { font, type CanvasTheme } from "./theme";
 
@@ -32,6 +32,8 @@ export interface ChartScene {
   eraseHighlight: Segment[] | null;
   finding: { cells: number[] } | null;
   flash: { cell: number; until: number } | null;
+  /** Behind: drawn under the stitches. Editing: drawn on top with handles. */
+  underlay: (UnderlayView & { editing: boolean }) | null;
 }
 
 export const RULER_SIZE = 26;
@@ -90,7 +92,7 @@ export class ChartRenderer {
     g.fillRect(0, 0, this.width, this.height);
     const f = this.frame(s), style = viewStyle(s.view, t), { z, ox, oy } = f;
 
-    drawCells(g, p, s.palette, f, style);
+    drawCells(g, p, s.palette, f, style, true, s.underlay && !s.underlay.editing ? s.underlay : undefined);
     if (s.preview) {
       g.globalAlpha = t.preview.alpha;
       const slot = s.palette[s.preview.key];
@@ -110,6 +112,7 @@ export class ChartRenderer {
     }
     drawGrid(g, p, f, t, s.view === "symbols");
     drawLines(g, p, s.palette, f, style);
+    if (s.underlay?.editing) this.drawUnderlayEditor(s.underlay, p, f);
     this.drawOverlays(s, f);
     this.drawRulers(s, f);
     const flashing = !!s.flash && s.flash.until > Date.now();
@@ -227,6 +230,25 @@ export class ChartRenderer {
       g.lineWidth = 2;
       g.strokeRect(ox + (s.hover.x - o) * z + 1, oy + (s.hover.y - o) * z + 1, s.hover.size * z - 2, s.hover.size * z - 2);
     }
+  }
+
+  /** Edit mode: the image above the stitches, its outline and 8 handles. */
+  private drawUnderlayEditor(u: UnderlayView, p: Pattern, f: ChartFrame) {
+    const g = this.g, t = this.theme, { z, ox, oy } = f;
+    drawUnderlay(g, p, u, f, false);
+    const x = ox + u.rect.x * z, y = oy + u.rect.y * z, w = u.rect.w * z, h = u.rect.h * z;
+    g.save();
+    g.setLineDash(t.selection.dash);
+    g.lineWidth = 1.5;
+    g.strokeStyle = t.accent;
+    g.strokeRect(x + 0.5, y + 0.5, w, h);
+    g.setLineDash([]);
+    g.fillStyle = "#fff";
+    for (const [hx, hy] of [[0, 0], [0.5, 0], [1, 0], [1, 0.5], [1, 1], [0.5, 1], [0, 1], [0, 0.5]] as const) {
+      g.fillRect(x + hx * w - 4, y + hy * h - 4, 8, 8);
+      g.strokeRect(x + hx * w - 4 + 0.5, y + hy * h - 4 + 0.5, 8, 8);
+    }
+    g.restore();
   }
 
   /** Dashed outline around masked cells, animated. */

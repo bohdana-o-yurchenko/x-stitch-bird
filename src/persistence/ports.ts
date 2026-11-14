@@ -1,4 +1,5 @@
 import type { PatternFile } from "@/core/formats/json/serialize";
+import type { UnderlayData } from "@/core/underlay/underlay";
 
 /*
  * Storage interfaces (ARCHITECTURE §13). The editor only knows these; `persistence/index.ts` picks the
@@ -48,6 +49,12 @@ export interface ReferenceRepository {
   save(patternId: string, refs: RefWindowData[]): Promise<SaveResult>;
 }
 
+/** The chart underlay per pattern (SPEC §15.15); `null` removes it. */
+export interface UnderlayRepository {
+  load(patternId: string): Promise<UnderlayData | null>;
+  save(patternId: string, underlay: UnderlayData | null): Promise<SaveResult>;
+}
+
 /** The pattern being edited, written on every change and read at start-up. */
 export interface DraftStore {
   load(): PatternFile | null;
@@ -75,6 +82,7 @@ export interface SnapshotRepository {
 export interface Persistence {
   patterns: PatternRepository;
   references: ReferenceRepository;
+  underlays: UnderlayRepository;
   draft: DraftStore;
   snapshots: SnapshotRepository;
 }

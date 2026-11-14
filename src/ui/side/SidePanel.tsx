@@ -6,6 +6,7 @@ import { FabricPanel } from "./FabricPanel";
 import { KeyPanel } from "./KeyPanel";
 import { ToolBar } from "./ToolBar";
 import { TotalsPanel } from "./TotalsPanel";
+import { UnderlayPanel } from "./UnderlayPanel";
 
 export function SidePanel() {
   const checksOpen = useEditorState((st) => st.checksOpen);
@@ -14,6 +15,7 @@ export function SidePanel() {
       <ToolBar />
       {checksOpen && <ChecksPanel />}
       <KeyPanel />
+      <UnderlayPanel />
       <FabricPanel />
       <TotalsPanel />
     </>

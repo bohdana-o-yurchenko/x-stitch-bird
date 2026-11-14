@@ -183,7 +183,7 @@ export function DropChoiceDialog({ file, onClose }: Close & { file: File }) {
   const t = useTranslations("dialogs");
   const run = useCommand();
   return (
-    <Modal title={t("dropChoiceTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("openAsReference"), onClick: () => run("reference.open", file) }, { label: t("turnIntoPattern"), primary: true, onClick: () => run("image.open", file) }]}>
+    <Modal title={t("dropChoiceTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("openAsReference"), onClick: () => run("reference.open", file) }, { label: t("putBehind"), onClick: () => run("underlay.open", file) }, { label: t("turnIntoPattern"), primary: true, onClick: () => run("image.open", file) }]}>
       <p className={ui.hint}>“{file.name}”</p>
     </Modal>
   );

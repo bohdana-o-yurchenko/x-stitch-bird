@@ -1024,3 +1024,7 @@ Decisions taken while implementing this plan. Each one lives in the single place
 - Golden outputs of the single-file app live in `tests/fixtures/legacy/` (recorded from `index.html` at commit
   `2d15ee4`); `src/core/formats/legacyParity.test.ts` compares against them.
 - SPEC §2.2 says 11 bead series; the data has **12** (it lists 12 by name).
+- Chart underlay (SPEC §15.15): geometry in `core/underlay/`, `UnderlayService` in `editor/underlay/`, its own
+  `UnderlayRepository` port and IndexedDB store (database version 3). In edit mode `ToolManager` routes the
+  pointer to the service; middle/right-drag and Space still pan. It is reference material, so it is outside the
+  layer registry, undo and exports.

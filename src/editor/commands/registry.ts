@@ -107,6 +107,16 @@ export const COMMANDS: readonly Command[] = [
   { id: "clipboard.paste", run: (ed) => ed.selection.paste() },
   { id: "floating.commit", run: (ed) => ed.selection.commitFloating() },
   { id: "floating.cancel", run: (ed) => ed.selection.cancelFloating() },
+  // chart underlay (SPEC §15.15)
+  { id: "underlay.pick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await ed.underlay.addFromFile(f); } },
+  { id: "underlay.replacePick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await ed.underlay.addFromFile(f, true); } },
+  { id: "underlay.open", run: (ed, f) => ed.underlay.addFromFile(f as File) },
+  { id: "underlay.toggleBehind", run: (ed) => ed.underlay.data && ed.underlay.setBehind(!ed.underlay.data.behind) },
+  { id: "underlay.update", run: (ed, patch) => ed.underlay.update(patch as never) },
+  { id: "underlay.nudge", run: (ed, d) => { const { dx, dy } = d as { dx: number; dy: number }; ed.underlay.nudge(dx, dy); } },
+  { id: "underlay.fit", run: (ed) => ed.underlay.fit() },
+  { id: "underlay.resetCrop", run: (ed) => ed.underlay.resetCrop() },
+  { id: "underlay.remove", run: (ed) => ed.underlay.remove() },
   // checks
   { id: "checks.toggle", run: (ed) => (ed.state.checksOpen ? ed.checks.close() : ed.checks.open()) },
   { id: "checks.run", run: (ed) => ed.checks.run() },

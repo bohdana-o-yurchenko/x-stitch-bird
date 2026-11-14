@@ -1,6 +1,8 @@
-/** The "stitchwork" IndexedDB database: v1 had "refs"; v2 adds "snaps" (SPEC §15.7). */
+/** The "stitchwork" IndexedDB database: v1 had "refs"; v2 adds "snaps" (SPEC §15.7); v3 adds "underlays" (§15.15). */
 export const DB_NAME = "stitchwork";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
+const STORES = ["refs", "snaps", "underlays"] as const;
+export type StoreName = (typeof STORES)[number];
 
 let opening: Promise<IDBDatabase> | null = null;
 
@@ -9,8 +11,7 @@ export function openDb(): Promise<IDBDatabase> {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
-      if (!db.objectStoreNames.contains("refs")) db.createObjectStore("refs");
-      if (!db.objectStoreNames.contains("snaps")) db.createObjectStore("snaps");
+      for (const name of STORES) if (!db.objectStoreNames.contains(name)) db.createObjectStore(name);
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => {
@@ -22,7 +23,7 @@ export function openDb(): Promise<IDBDatabase> {
 }
 
 /** Run one request in a transaction and resolve when the transaction completes. */
-export async function run<T>(store: "refs" | "snaps", mode: IDBTransactionMode, fn: (s: IDBObjectStore) => { readonly result: unknown } | void): Promise<T | undefined> {
+export async function run<T>(store: StoreName, mode: IDBTransactionMode, fn: (s: IDBObjectStore) => { readonly result: unknown } | void): Promise<T | undefined> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(store, mode);

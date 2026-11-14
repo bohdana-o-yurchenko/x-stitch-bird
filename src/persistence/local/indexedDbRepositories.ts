@@ -1,4 +1,5 @@
-import type { ReferenceRepository, RefWindowData, Snapshot, SnapshotRepository, SnapshotSummary } from "../ports";
+import type { ReferenceRepository, RefWindowData, Snapshot, SnapshotRepository, SnapshotSummary, UnderlayRepository } from "../ports";
+import { cleanUnderlay, type UnderlayData } from "@/core/underlay/underlay";
 import { run } from "./indexedDb";
 
 const legacyRefsKey = (patternId: string) => `stitchwork.refs.${patternId}`;
@@ -46,5 +47,20 @@ export const indexedDbSnapshotRepository: SnapshotRepository = {
   async removeMany(keys) {
     if (!keys.length) return;
     await run("snaps", "readwrite", (s) => void keys.forEach(([id, t]) => s.delete(snapKey(id, t))));
+  },
+};
+
+export const indexedDbUnderlayRepository: UnderlayRepository = {
+  async load(patternId) {
+    const raw = await run<UnderlayData>("underlays", "readonly", (s) => s.get(patternId)).catch(() => undefined);
+    return cleanUnderlay(raw);
+  },
+  async save(patternId, underlay) {
+    try {
+      await run("underlays", "readwrite", (s) => (underlay ? s.put(underlay, patternId) : s.delete(patternId)));
+      return { ok: true };
+    } catch {
+      return { ok: false, reason: "quota" };
+    }
   },
 };

@@ -5,6 +5,7 @@ import { cleanMeta } from "../../pattern/meta";
 import { createPattern, DEFAULT_FABRIC, DEFAULT_GRID } from "../../pattern/createPattern";
 import type { CustomColor, GridNumbering, KeyEntry, Pattern } from "../../pattern/types";
 import { normalizeSymbol } from "../../symbols/symbols";
+import { cleanUnderlay, type UnderlayData } from "../../underlay/underlay";
 import { OPTIONAL_LAYER_FIELDS, type PatternFile } from "./serialize";
 
 export class PatternFormatError extends Error {}
@@ -30,7 +31,7 @@ function cleanGrid(raw: unknown): GridNumbering {
 }
 
 /** Reads any Stitchwork JSON (v1–v4). `symbols` normalises chart symbols to this device's set. */
-export function parsePattern(raw: unknown, symbols: readonly string[]): { pattern: Pattern; refs: unknown[] | null } {
+export function parsePattern(raw: unknown, symbols: readonly string[]): { pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null } {
   const d = raw as Partial<PatternFile> & { pal?: unknown[] };
   if (!d || d.app !== "stitchwork" || !d.w || !d.h) throw new PatternFormatError("Not a Stitchwork pattern file");
   const p = createPattern(d.w, d.h, d.name || "Untitled pattern");
@@ -52,5 +53,5 @@ export function parsePattern(raw: unknown, symbols: readonly string[]): { patter
   p.key = [null, ...pal];
   const size = { w: p.w, h: p.h };
   for (const l of LAYERS) l.set(p.layers, l.parse((d as Record<string, unknown>)[LAYER_FIELD[l.id]!], size));
-  return { pattern: p, refs: Array.isArray(d.refs) ? d.refs : null };
+  return { pattern: p, refs: Array.isArray(d.refs) ? d.refs : null, underlay: cleanUnderlay(d.underlay) };
 }

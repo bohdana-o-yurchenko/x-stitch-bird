@@ -27,6 +27,7 @@ export interface PatternFile {
   knots?: number[][];
   amb?: number[];
   refs?: unknown[];
+  underlay?: unknown;
 }
 
 export const FORMAT_VERSION = 4;

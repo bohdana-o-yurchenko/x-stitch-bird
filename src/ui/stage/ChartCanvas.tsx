@@ -31,6 +31,7 @@ function scene(ed: Editor): ChartScene {
       return f?.cell !== undefined ? { cells: f.related ?? [f.cell] } : null;
     })(),
     flash: st.flash,
+    underlay: st.underlay && st.underlay.visible && st.underlayImage ? { image: st.underlayImage, crop: st.underlay.crop, rect: st.underlay.rect, opacity: st.underlay.opacity, editing: !st.underlay.behind } : null,
   };
 }
 

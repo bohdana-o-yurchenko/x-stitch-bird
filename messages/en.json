@@ -29,7 +29,9 @@
     "check": "Check…",
     "checkTitle": "Check the chart for likely mistakes",
     "export": "Export ▾",
-    "file": "File ▾"
+    "file": "File ▾",
+    "underlay": "Reference on canvas…",
+    "underlayTitle": "Put a picture of the paper chart behind your stitches, aligned to the grid"
   },
   "view": {
     "label": "Chart view",
@@ -99,7 +101,8 @@
     "ambiguous": "⚑ {count} ambiguous",
     "ambiguousNext": "Next mark (Shift+A)",
     "ambiguousClear": "Clear all marks",
-    "markedAmbiguous": "marked ambiguous"
+    "markedAmbiguous": "marked ambiguous",
+    "underlayHint": "Editing the underlay · drag to move · corners resize (Shift = free) · arrows nudge · Esc or U = put behind stitches"
   },
   "key": {
     "heading": "Key",
@@ -311,7 +314,8 @@
     "closeRefTitle": "Close “{name}”?",
     "closeRefBody": "Its marks will be deleted too.",
     "closeWindow": "Close window",
-    "drop": "Drop a .json or .oxs pattern, or a picture"
+    "drop": "Drop a .json or .oxs pattern, or a picture",
+    "putBehind": "Put behind the chart"
   },
   "meta": {
     "designer": "Designer",
@@ -466,6 +470,25 @@
     "clipboardEmpty": "Nothing to paste",
     "restored": "Snapshot restored",
     "partialKind": "Partial stitch: {kind}",
-    "partialNeedsCross": "Partial stitches use a cross-stitch entry — pick one in the key"
+    "partialNeedsCross": "Partial stitches use a cross-stitch entry — pick one in the key",
+    "underlayAdded": "Underlay added — move and resize it, then tick “Behind stitches”"
+  },
+  "underlay": {
+    "heading": "Underlay (reference on the chart)",
+    "behind": "Behind stitches",
+    "behindHint": "The image sits under your stitches; all tools work. Turn off (or press U) to move, resize or crop it.",
+    "editHint": "Edit mode: drag to move, corners resize (Shift = free), Crop trims edges. Tick “Behind stitches” or press Esc when done.",
+    "show": "Show",
+    "opacity": "Opacity",
+    "move": "Move & resize",
+    "crop": "Crop",
+    "x": "X (cells)",
+    "y": "Y (cells)",
+    "w": "Width (cells)",
+    "h": "Height (cells)",
+    "fit": "Fit to chart",
+    "resetCrop": "Reset crop",
+    "replace": "Replace image…",
+    "remove": "Remove"
   }
 }

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
-import { cellPoint, editorState, loadFixture, openEditor } from "./helpers";
+import { cellPoint, editorState, fileAction, loadFixture, openEditor } from "./helpers";
 
 test.beforeEach(async ({ page }) => openEditor(page));
 
@@ -41,7 +41,7 @@ test("holding Alt picks an entry from the chart and returns to the previous tool
 
 test("downloads a JSON file that loads back", async ({ page }) => {
   const download = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Save to file" }).click();
+  await fileAction(page, "Save to file");
   await page.getByText("Stitchwork file (.json)").click();
   const file = await (await download).path();
   const doc = JSON.parse(readFileSync(file, "utf8"));
@@ -103,4 +103,29 @@ test("the File menu on narrow screens opens above the chart and works", async ({
   await expect(page.locator("[data-entry]")).toHaveCount(12);
   await page.getByRole("button", { name: "Export ▾" }).click();
   await expect(page.getByRole("menuitem", { name: "Shopping list (CSV)" })).toBeInViewport();
+});
+
+test("puts a reference image behind the chart and keeps it after a reload", async ({ page }) => {
+  const chooser = page.waitForEvent("filechooser");
+  await fileAction(page, "Reference on canvas…");
+  await (await chooser).setFiles("tests/fixtures/underlay.png");
+  const panel = page.getByTestId("underlay-panel");
+  await expect(panel).toBeVisible();
+  await expect(page.getByText(/Editing the underlay/)).toBeVisible();
+  const a = await cellPoint(page, 30, 30), b = await cellPoint(page, 33, 30);
+  const before = await editorState<number>(page, "(ed) => ed.state.underlay.rect.x");
+  await page.mouse.move(a.x, a.y);
+  await page.mouse.down();
+  await page.mouse.move(b.x, b.y, { steps: 3 });
+  await page.mouse.up();
+  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.x")).toBeCloseTo(before + 3, 0);
+  await panel.getByLabel("Behind stitches").check();
+  await page.waitForTimeout(1000);
+  await page.reload();
+  await expect(page.getByTestId("underlay-panel").getByLabel("Behind stitches")).toBeChecked();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export ▾" }).click();
+  await page.getByRole("menuitem", { name: "Stitchwork pattern file (JSON)" }).click();
+  const doc = JSON.parse(readFileSync(await (await download).path(), "utf8"));
+  expect(doc.underlay).toMatchObject({ behind: true, imageW: 40, imageH: 20 });
 });

@@ -8,6 +8,7 @@ import type { MirrorMode } from "@/core/transform/mirror";
 import type { ChartView } from "@/render/chart";
 import type { Viewport } from "@/render/ChartRenderer";
 import type { RefWindowData } from "@/persistence/ports";
+import type { UnderlayData } from "@/core/underlay/underlay";
 
 export type ToolId = "pencil" | "line" | "rect" | "filledRect" | "fill" | "eraser" | "picker" | "pan" | "select" | "magicWand" | "partial";
 
@@ -95,6 +96,8 @@ export interface EditorState {
   dialog: DialogRequest | null;
   toasts: Toast[];
   references: RefWindowData[];
+  underlay: UnderlayData | null;
+  underlayImage: HTMLImageElement | null;
   hasClipboard: boolean;
 }
 
@@ -131,6 +134,8 @@ export const createEditorStore = () =>
     dialog: null,
     toasts: [],
     references: [],
+    underlay: null,
+    underlayImage: null,
     hasClipboard: false,
   }));
 

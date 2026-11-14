@@ -106,34 +106,35 @@ export function Toasts() {
 
 /**
  * Dropdown menu. The menu is rendered into <body> and positioned from the button, so scrolling or clipped
- * containers (like the header) can't hide it. Closes on outside click, Esc, resize or scroll.
+ * containers (like the header) can't hide it. Follows the button on scroll and resize; closes on outside click or Esc.
  */
 export function Dropdown({ label, title, items, className }: { label: string; title?: string; className?: string; items: { label: string; onClick: () => void; disabled?: boolean }[] }) {
   const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
   const button = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
+  const place = () => {
+    const r = button.current!.getBoundingClientRect();
+    // open towards the side with more room
+    setPos(r.left < window.innerWidth / 2 ? { top: r.bottom + 6, left: r.left } : { top: r.bottom + 6, right: window.innerWidth - r.right });
+  };
+  const open = !!pos;
   useEffect(() => {
-    if (!pos) return;
+    if (!open) return;
     const close = () => setPos(null);
     const outside = (e: PointerEvent) => !menu.current?.contains(e.target as Node) && !button.current?.contains(e.target as Node) && close();
     const esc = (e: KeyboardEvent) => e.key === "Escape" && close();
     document.addEventListener("pointerdown", outside);
     window.addEventListener("keydown", esc);
-    window.addEventListener("resize", close);
-    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
     return () => {
       document.removeEventListener("pointerdown", outside);
       window.removeEventListener("keydown", esc);
-      window.removeEventListener("resize", close);
-      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
     };
-  }, [pos]);
-  const toggle = () => {
-    if (pos) return setPos(null);
-    const r = button.current!.getBoundingClientRect();
-    // open towards the side with more room
-    setPos(r.left < window.innerWidth / 2 ? { top: r.bottom + 6, left: r.left } : { top: r.bottom + 6, right: window.innerWidth - r.right });
-  };
+  }, [open]);
+  const toggle = () => (pos ? setPos(null) : place());
   return (
     <>
       <button ref={button} type="button" className={className ?? s.btn} title={title} aria-haspopup="menu" aria-expanded={!!pos} onClick={toggle}>

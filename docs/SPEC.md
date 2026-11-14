@@ -721,6 +721,7 @@ Effort is relative: **S** small · **M** medium · **L** large.
 | 9  | Scan calibration in reference windows (§15.9)        | M–L         | `calib` field on reference windows | —          |
 | 10 | PDF chart export, Pattern Keeper–compatible (§15.10) | L           | none                               | #1, #2     |
 | 11 | Symbol matching — semi-automatic mapping (§15.11)    | L           | templates stored with ref windows  | #9         |
+| —  | Chart underlay behind the stitches (§15.15) — **done** | M         | new IndexedDB store, `underlay` in .json | —   |
 
 **High priority — the design must be agreed before implementation** (paper charts use these all the time, and a
 faithful copy is impossible without them):
@@ -953,8 +954,9 @@ Prerequisite: §15.9 calibration.
   symbol shape.
 
 ### 15.12 Parked / rejected / not yet discussed
-- **Rejected**: a scan underlay inside the chart canvas (tried in another tool, poor UX). Calibrated reference
-  windows (§15.9) are used instead.
+- ~~**Rejected**: a scan underlay inside the chart canvas (tried in another tool, poor UX).~~ **Reversed
+  2026-11-14** — specified and implemented as §15.15, with an explicit edit mode to address the UX problems.
+  Reference windows (§11, §15.9) stay.
 - **Rejected**: AI / ML-based features.
 - **Parked**: exporting Pattern Maker `.xsd`. The format is proprietary, binary and undocumented.
 - **Not yet discussed** (from the first brainstorm):
@@ -1052,6 +1054,48 @@ Combinations that must fit into one cell:
 3. Should beads get the same point-based placement option? Charts sometimes place beads on intersections.
 4. Should long stitches and lazy daisies be designed together with knots, since they are also point- or
    segment-based "specialty" stitches?
+
+### 15.15 Chart underlay — a reference image behind the stitches (implemented 2026-11-14)
+Goal: put a scan or photo of the paper chart **on the chart canvas itself**, line it up with the grid, then stitch
+over it. One underlay per pattern.
+
+**Two modes**, switched by the **Behind stitches** toggle (or `U`):
+- **Edit mode** (toggle off) — for placing the image. The image is drawn **above** the stitches at its opacity, with
+  a dashed outline and 8 handles (corners and edge midpoints). Chart tools are paused: the pointer edits the image.
+  The rest of the image outside the chart is still visible, so it can be dragged in from anywhere.
+- **Behind mode** (toggle on) — for stitching. The image is drawn **under** the stitches (after the fabric, before
+  crosses, partial stitches, beads, grid, backstitch and knots), clipped to the chart. It cannot be touched; every
+  tool works as usual.
+- A newly added underlay starts in edit mode. `Esc` in edit mode switches to behind mode.
+
+**Editing** (edit mode). Two sub-tools: **Move & resize** (default) and **Crop**.
+- Drag inside the image: move it. Arrow keys move by 0.1 cell, Shift+arrows by 1 cell.
+- Move & resize, corner handles: resize from the opposite corner, **keeping the aspect ratio**; hold Shift to resize
+  freely. Edge handles: stretch one side (free).
+- Crop, any handle: trims that side of the image. The visible part keeps its position and scale — only the edge
+  moves. A crop can never go past the image's own edges, and nothing gets smaller than 1 cell.
+- Precise values in the side panel: X, Y, width, height of the visible part in cells (decimals allowed).
+- **Fit to chart**: scale the visible part to fit the chart, keep aspect, centre it.
+- **Reset crop**: show the whole image again at the current scale.
+
+**Side panel section "Underlay"** (only when one exists): Behind stitches toggle, Show/hide, opacity slider
+(10–100 %, default 50 %), Move & resize / Crop (edit mode only), X / Y / W / H fields, Fit to chart, Reset crop,
+Replace image…, Remove.
+
+**Adding**: File menu → **Reference on canvas…**, or drop a picture and choose **Put behind the chart**. The image is
+downscaled to at most 3000 px on its longest side (JPEG, quality 0.9) and fitted to the chart. Replacing keeps the
+placement (rect) and resets the crop to the whole new image.
+
+**Not part of the chart**
+- Never exported to PNG, PDF, OXS or CSV; never counted; not part of undo/redo or snapshots.
+- Not affected by resize or transforms (it is reference material; re-fit it if needed).
+- Shown in all three chart views.
+
+**Data**: `{ src, crop: {x, y, w, h} (image px), rect: {x, y, w, h} (grid units), opacity, behind, visible,
+tool }`.
+- Saved per pattern in the browser like reference windows (IndexedDB, own store), debounced, flushed on page hide.
+- Included in Stitchwork `.json` files as `underlay` (with `src`), next to `refs`.
+- Not in the draft (`stitchwork.current`) or the library — they stay small.
 
 ---
 

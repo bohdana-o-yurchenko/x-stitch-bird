@@ -12,7 +12,7 @@ export interface HoldBinding {
   tool: "pan" | "picker";
 }
 
-export type Context = "hasSelection" | "floating" | "chain";
+export type Context = "hasSelection" | "floating" | "chain" | "underlayEditing" | "hasUnderlay";
 
 export const HOLD_BINDINGS: readonly HoldBinding[] = [
   { hold: "Space", tool: "pan" },
@@ -31,6 +31,12 @@ export const KEYMAP: readonly KeyBinding[] = [
   { keys: "mod+x", command: "clipboard.cut", when: "hasSelection" },
   { keys: "mod+v", command: "clipboard.paste" },
   { keys: "mod+d", command: "selection.none", when: "hasSelection" },
+  { keys: "u", command: "underlay.toggleBehind", when: "hasUnderlay" },
+  { keys: "escape", command: "underlay.toggleBehind", when: "underlayEditing" },
+  ...([["arrowleft", -1, 0], ["arrowright", 1, 0], ["arrowup", 0, -1], ["arrowdown", 0, 1]] as const).flatMap(([k, dx, dy]) => [
+    { keys: k, command: "underlay.nudge", args: { dx: dx / 10, dy: dy / 10 }, when: "underlayEditing" as const },
+    { keys: `shift+${k}`, command: "underlay.nudge", args: { dx, dy }, when: "underlayEditing" as const },
+  ]),
   { keys: "enter", command: "floating.commit", when: "floating" },
   { keys: "escape", command: "floating.cancel", when: "floating" },
   { keys: "escape", command: "selection.none", when: "hasSelection" },

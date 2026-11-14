@@ -67,6 +67,7 @@ const FILE_ACTIONS = [
   ["loadFile", "file.pickToLoad"],
   ["image", "image.pick"],
   ["reference", "reference.pick"],
+  ["underlay", "underlay.pick"],
 ] as const;
 
 export function Header() {
