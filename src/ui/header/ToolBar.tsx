@@ -7,6 +7,7 @@ import { Icon } from "../common/Icon";
 import { cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
 import s from "./header.module.css";
+import { ShortcutsInfo } from "./ShortcutsInfo";
 
 const MIRROR_LABEL = { off: "mirrorOff", vertical: "mirrorVertical", horizontal: "mirrorHorizontal", quad: "mirrorQuad" } as const;
 
@@ -49,6 +50,7 @@ export function ToolBar() {
       <span className={s.sep} />
       <button type="button" className={ui.tool} title={t("undo")} disabled={!canUndo} onClick={() => run("history.undo")}><Icon name="undo" size={18} /></button>
       <button type="button" className={ui.tool} title={t("redo")} disabled={!canRedo} onClick={() => run("history.redo")}><Icon name="redo" size={18} /></button>
+      <ShortcutsInfo />
     </div>
   );
 }

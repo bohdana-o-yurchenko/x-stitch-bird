@@ -102,7 +102,7 @@ stitchwork/
 │  │  │  ├─ EditorLayout.tsx         slot-based shell: header | stage | side | status
 │  │  │  └─ layout.module.css
 │  │  ├─ header/                     PatternName, PatternInfoButton, FileMenu, TransformMenu, ViewSwitch, ExportMenu
-│  │  ├─ stage/                      ChartCanvas, ZoomControls, MiniToolbar, DropZone, SelectionActions
+│  │  ├─ stage/                      ChartCanvas, ZoomControls (+ view switch), UnderlayPad, SelectionActions
 │  │  ├─ side/                       ToolBar, KeyPanel, KeyRow, FabricPanel (+ grid numbering), TotalsPanel, UnderlayPanel
 │  │  ├─ status/                     StatusBar, AmbiguousStatus (only rendered when N > 0)
 │  │  ├─ dialogs/
@@ -159,7 +159,7 @@ stitchwork/
 │  │  ├─ theme.ts                    CanvasTheme: every colour / width / ratio (see §8)
 │  │  ├─ ChartRenderer.ts            screen: culling, rAF batching, overlays from active tool
 │  │  ├─ exportChart.ts              PNG chart & preview (uses the same primitives)
-│  │  ├─ keyIcon.ts                  small key-entry icons (list, PNG key, mini toolbar)
+│  │  ├─ keyIcon.ts                  small key-entry icons (list, status bar, PNG key)
 │  │  ├─ referenceRenderer.ts
 │  │  └─ primitives/
 │  │     ├─ stitches.ts              one draw function per stitch type id (see §9)
@@ -350,7 +350,7 @@ export interface Tool {
 }
 ```
 **Recipe:** create `editor/tools/myTool.ts` → add it to `tools/registry.ts` (order = toolbar order) → add
-`tools.myTool` to `messages/*.json` → optionally bind a key in `keymap.ts`. Toolbar, mini toolbar, tooltips and
+`tools.myTool` to `messages/*.json` → optionally bind a key in `keymap.ts`. Toolbar, shortcut help, tooltips and
 the help list are generated from the registry.
 
 ### 6.2 Adding a shortcut
@@ -602,7 +602,8 @@ export interface ShoppingList {
 
 ## 11. Localization
 
-- **Library:** `next-intl`. Locale in the URL (`/en`, `/uk`), detected by middleware, default `en`.
+- **Library:** `next-intl`. Locale in the URL (`/en`, `/uk`), default `uk` (`localeDetection: false`, so the
+  browser language is ignored; `src/i18n/routing.ts`).
 - **Messages:** `messages/<locale>.json`, namespaced by area: `header.*`, `tools.*`, `keyDialog.*`, `toasts.*`,
   `export.*`, `stitches.*`, `calculator.*`. All strings from SPEC §13 move here verbatim as `en`.
 - **Rule:** `core`, `editor` and `render` never build user-visible sentences. They emit message keys + params
@@ -1027,17 +1028,21 @@ Decisions taken while implementing this plan. Each one lives in the single place
   older files. Drawing is `render/primitives/lineStyles.ts`; strand thickness is `strandFactor` with
   `theme.backstitch.strandFirst`/`strandStep`. Adding a style = one id in core + one drawing entry in render.
 - Chart checks (SPEC §15.4) were removed on 2026-11-14 for a redesign: no `core/checks`, `editor/checks` or panel.
-  The disabled **Check…** button in `ui/header/Header.tsx` is the placeholder. A new design should come back as a
+  Nothing is left in the UI. A new design should come back as a
   core module (pure functions over a `Pattern`) + an editor session + a side-panel section, like before.
 - The main toolbar is `ui/header/ToolBar.tsx`; the header measures whether everything fits on one row and otherwise
   gives the toolbar its own row (`useStacked`). `ui/side/CurrentTool.tsx` is the "Drawing with" card; it and the
   canvas share `resolveTool` (`editor/tools/registry.ts`), and shortcut labels come from `shortcutLabel` (keymap).
 - App name and icon: `app.brand` / `app.title` messages and `src/app/icon.png` (Next's icon file convention).
+- Saving: `editor/autosave.ts` writes the draft after each change and the library once a minute when changed
+  (`markSaved` after opening from the library or a manual save).
+- Shortcut help: `ui/header/ShortcutsInfo.tsx` builds its list from `KEYMAP` via `shortcutLabels`/`formatKeys`, so
+  a new binding only needs a row there.
 - Tooltips: elements keep plain `title` attributes; `ui/common/Tooltips.tsx` (mounted once) shows them after
   600 ms instead of the browser's own delay.
 - Menus: `Dropdown` in `ui/common/widgets.tsx` takes `MenuItem[]` (actions, `"-"` separators, nested `items` for
   submenus, optional `hint` line). The File menu is defined in `ui/header/Header.tsx`.
-- Floating stage panels (collapsed toolbar, underlay alignment pad) use `ui/stage/FloatingPanel.tsx`: draggable
+- Floating stage panels (the underlay alignment pad) use `ui/stage/FloatingPanel.tsx`: draggable
   by a grip, position kept in `localStorage` (a per-browser convenience).
 - Underlay stretching keeps the screen centre fixed: `stretchUnderlay` in `core/underlay/`, `ViewportService.centre()`.
 - Small dialogs share `ui/dialogs/simpleDialogs.tsx`; the key-entry dialog has its own folder.

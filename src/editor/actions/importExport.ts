@@ -111,12 +111,14 @@ export function createFromImage(ed: Editor, r: QuantizeResult, image: HTMLImageE
   if (keepReference) ed.references.add({ src: downscaleToDataUrl(image), name: ed.t("references.photo"), grid: true });
 }
 
-export async function saveToLibrary(ed: Editor) {
+/** Into the saved-patterns library. `quiet`: the minute autosave — no toast unless it fails. */
+export async function saveToLibrary(ed: Editor, o: { quiet?: boolean } = {}) {
   const doc = serializePattern(ed.doc);
+  if (!o.quiet) ed.autosave.markSaved();
   const r = await ed.persistence.patterns.save(doc);
   if (r.ok) {
     ed.store.setState({ savedAt: Date.now() });
-    ed.toast("toasts.savedLocal", { name: doc.name });
+    if (!o.quiet) ed.toast("toasts.savedLocal", { name: doc.name });
   } else ed.toast(r.reason === "quota" ? "toasts.tooLarge" : "toasts.saveFailed");
 }
 
@@ -126,6 +128,7 @@ export async function openFromLibrary(ed: Editor, id: string) {
   try {
     const { pattern } = parsePattern(doc, ed.state.symbols);
     loadPattern(ed, pattern);
+    ed.autosave.markSaved();
     ed.toast("toasts.opened", { name: pattern.name });
   } catch {
     ed.toast("toasts.openFailed");

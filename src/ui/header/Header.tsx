@@ -3,8 +3,9 @@
 import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import type { ChartView } from "@/render/chart";
 import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
+import { Icon } from "../common/Icon";
+import { LanguageSwitch } from "./LanguageSwitch";
 import { ToolBar } from "./ToolBar";
 import { useCommand, useEditorState } from "../hooks/editor";
 import s from "./header.module.css";
@@ -21,20 +22,6 @@ function PatternNameInput({ name }: { name: string }) {
   return <input className={s.name} aria-label={t("patternName")} value={value} onChange={(e) => setValue(e.target.value)} onBlur={() => run("pattern.rename", value)} onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()} />;
 }
 
-function ViewSwitch() {
-  const t = useTranslations("view");
-  const run = useCommand();
-  const view = useEditorState((st) => st.view);
-  return (
-    <div className={ui.seg} title={t("label")}>
-      {(["color", "both", "symbols"] as ChartView[]).map((v) => (
-        <button key={v} type="button" className={cx(view === v && ui.on)} onClick={() => run("view.set", v)}>
-          {t(v)}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function FileMenu() {
   const t = useTranslations("fileMenu");
@@ -91,6 +78,18 @@ function useStacked(bar: RefObject<HTMLElement | null>) {
   return stacked;
 }
 
+function PanelToggle() {
+  const t = useTranslations("header");
+  const run = useCommand();
+  const open = useEditorState((st) => !st.panelCollapsed);
+  const label = open ? t("hidePanel") : t("showPanel");
+  return (
+    <button type="button" className={cx(ui.tool, open && ui.on)} title={label} aria-label={label} aria-pressed={open} data-testid="panel-toggle" onClick={() => run("panel.toggle")}>
+      <Icon name="panel" size={18} />
+    </button>
+  );
+}
+
 export function Header() {
   const t = useTranslations();
   const run = useCommand();
@@ -106,7 +105,6 @@ export function Header() {
       </div>
       <PatternName />
       <FileMenu />
-      <button type="button" className={btn} title={t("header.saveTitle")} onClick={() => run("file.save")}>{t("header.save")}</button>
       <div className={s.spacer} data-slot="spacer" />
       <div className={s.toolSlot} data-slot="tools">
         <ToolBar />
@@ -125,9 +123,8 @@ export function Header() {
           { label: t("transformMenu.resize"), onClick: () => run("pattern.requestResize") },
         ]}
       />
-      {/* Chart checks are being redesigned (SPEC §15.4); the button stays as the placeholder */}
-      <button type="button" className={btn} disabled title={t("header.checkSoon")}>{t("header.check")}</button>
-      <ViewSwitch />
+      <LanguageSwitch />
+      <PanelToggle />
     </header>
   );
 }

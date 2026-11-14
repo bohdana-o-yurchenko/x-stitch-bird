@@ -10,11 +10,9 @@
   },
   "header": {
     "patternName": "Pattern name",
-    "save": "Save",
-    "saveTitle": "Save pattern (Ctrl/⌘+S)",
     "transform": "Transform ▾",
-    "check": "Check…",
-    "checkSoon": "Chart checks are being redesigned — coming back soon"
+    "hidePanel": "Hide side panel (K)",
+    "showPanel": "Show side panel (K)"
   },
   "view": {
     "label": "Chart view",
@@ -54,10 +52,6 @@
     "mirrorQuad": "Mirror 4-way",
     "undo": "Undo (Ctrl/⌘+Z)",
     "redo": "Redo (Ctrl+Y / ⌘⇧Z)",
-    "collapse": "Hide panel (K)",
-    "expand": "Show panel (K)",
-    "activeEntry": "Active: {label}",
-    "noActiveEntry": "No key entry selected",
     "partialKind": {
       "quarter": "Quarter",
       "threeQuarter": "Three-quarter",
@@ -71,14 +65,14 @@
   },
   "status": {
     "position": "Column <b>{col}</b> · Row <b>{row}</b>",
-    "hint": "Space = move · hold Alt/⌥ = pick · O = override · Esc ends a backstitch line · 1–9 pick key entries · K hides the panel",
     "savesLocal": "Patterns save in this browser",
     "savedAt": "Saved {time}",
     "ambiguous": "⚑ {count} ambiguous",
     "ambiguousNext": "Next mark (Shift+A)",
     "ambiguousClear": "Clear all marks",
     "markedAmbiguous": "marked ambiguous",
-    "underlayHint": "Editing the image behind the chart · drag to move · corners resize (Shift = free) · arrows nudge · Esc or U = done"
+    "underlayHint": "Editing the image behind the chart · drag to move · corners resize (Shift = free) · arrows nudge · Esc or U = done",
+    "noEntry": "No key entry chosen"
   },
   "key": {
     "heading": "Key",
@@ -505,5 +499,37 @@
     "noEntry": "No key entry chosen",
     "noEntryHint": "Pick one in the key below",
     "edit": "Edit"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "tools": "Tools",
+    "drawing": "Drawing",
+    "edit": "Edit",
+    "view": "View & file",
+    "underlay": "Image behind the chart",
+    "hold": "hold {key}",
+    "space": "Space",
+    "override": "Override on/off",
+    "mirror": "Mirror drawing: off → ↔ → ↕ → 4-way",
+    "pickEntry": "Pick key entry 1–9",
+    "endLine": "End a backstitch line / cancel",
+    "ambiguous": "Mark cell as ambiguous",
+    "ambiguousNext": "Next ambiguous mark",
+    "undo": "Undo",
+    "redo": "Redo",
+    "copyCutPaste": "Copy · cut · paste",
+    "selectAll": "Select all",
+    "deselect": "Deselect",
+    "deleteSelection": "Delete selection",
+    "nudge": "Move",
+    "shiftTen": "{shift} = 10 cells",
+    "shiftOne": "{shift} = 1 cell (else 0.1)",
+    "place": "Place pasted stitches",
+    "zoom": "Zoom in · out",
+    "fit": "Fit to screen",
+    "goToCell": "Go to cell",
+    "panel": "Show/hide side panel",
+    "save": "Save now (also automatic)",
+    "underlayEdit": "Edit / done"
   }
 }

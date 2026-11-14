@@ -96,3 +96,84 @@
   background: var(--ink);
   color: #fff;
 }
+.info {
+  width: 26px;
+  height: 26px;
+  margin: 0 4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line2);
+  background: #fff;
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+}
+.info:hover,
+.info[aria-expanded="true"] {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.shortcuts {
+  position: fixed;
+  z-index: 85;
+  width: min(760px, calc(100vw - 16px));
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  padding: 14px 16px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  font-size: 12.5px;
+}
+.shortcuts h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+}
+.shortcutGroups {
+  columns: 3 220px;
+  column-gap: 22px;
+}
+.shortcutGroups section {
+  break-inside: avoid;
+  margin-bottom: 12px;
+}
+.shortcutGroups h4 {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.shortcutRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 2px 0;
+}
+.shortcutRow kbd {
+  display: inline-block;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--line2);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 0 5px;
+  margin-left: 3px;
+  background: #fff;
+  white-space: nowrap;
+}
+.lang {
+  font-size: 12px;
+  border: 1px solid var(--line2);
+  border-radius: 7px;
+  padding: 4px;
+  background: #fff;
+}

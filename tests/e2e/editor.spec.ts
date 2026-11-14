@@ -132,21 +132,34 @@ test("brush size takes one click", async ({ page }) => {
   expect(await editorState<number>(page, "(ed) => ed.state.brush")).toBe(3);
 });
 
-test("the collapsed toolbar sits on the right and can be dragged", async ({ page }) => {
-  await page.keyboard.press("k");
-  const bar = page.getByTestId("mini-toolbar");
-  const box = (await bar.boundingBox())!;
-  expect(box.x).toBeGreaterThan(1000);
-  await page.mouse.move(box.x + box.width / 2, box.y + 6);
-  await page.mouse.down();
-  await page.mouse.move(box.x - 400, box.y + 200, { steps: 4 });
-  await page.mouse.up();
-  const moved = (await bar.boundingBox())!;
-  expect(moved.x).toBeLessThan(box.x - 300);
-  await page.reload();
-  await expect(page.locator("[data-entry]").first()).toBeVisible();
-  await page.keyboard.press("k");
-  expect((await page.getByTestId("mini-toolbar").boundingBox())!.x).toBeCloseTo(moved.x, 0);
+test("the side panel hides and shows from the header button", async ({ page }) => {
+  const toggle = page.getByTestId("panel-toggle");
+  await toggle.click();
+  await expect(page.locator("aside")).toBeHidden();
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await toggle.click();
+  await expect(page.locator("aside")).toBeVisible();
+});
+
+test("the i button lists the keyboard shortcuts on hover", async ({ page }) => {
+  await page.getByRole("button", { name: "Keyboard shortcuts" }).hover();
+  const list = page.getByTestId("shortcuts");
+  await expect(list).toBeVisible();
+  await expect(list).toContainText("Fit to screen");
+  await expect(list.getByText("⇧R")).toBeVisible();
+});
+
+test("the status bar shows the colour being drawn with; the view switch sits with the zoom", async ({ page }) => {
+  await expect(page.getByTestId("status-entry")).toContainText("DMC 321");
+  await page.keyboard.press("2");
+  await expect(page.getByTestId("status-entry")).toContainText("DMC 498");
+  await page.getByRole("group", { name: "Chart view" }).getByRole("button", { name: "Symbols" }).click();
+  expect(await editorState<string>(page, "(ed) => ed.state.view")).toBe("symbols");
+});
+
+test("opens in Ukrainian by default", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/uk$/);
 });
 
 test("puts a reference image behind the chart and keeps it after a reload", async ({ page }) => {

@@ -2,13 +2,29 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import type { ChartView } from "@/render/chart";
 import { Icon } from "../common/Icon";
-import { KeyIcon, cx, ui } from "../common/widgets";
-import { useCommand, useEditor, useEditorState } from "../hooks/editor";
-import { useCurrentTool } from "../side/CurrentTool";
+import { cx, ui } from "../common/widgets";
+import { useCommand, useEditorState } from "../hooks/editor";
 import { ChartCanvas } from "./ChartCanvas";
 import { FloatingPanel } from "./FloatingPanel";
 import s from "./stage.module.css";
+
+/** Colour / Both / Symbols — how the chart is drawn; sits with the zoom. */
+function ViewSwitch() {
+  const t = useTranslations("view");
+  const run = useCommand();
+  const view = useEditorState((st) => st.view);
+  return (
+    <div className={s.viewSwitch} role="group" aria-label={t("label")}>
+      {(["color", "both", "symbols"] as ChartView[]).map((v) => (
+        <button key={v} type="button" className={cx(view === v && s.on)} aria-pressed={view === v} onClick={() => run("view.set", v)}>
+          {t(v)}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function ZoomControls() {
   const t = useTranslations("tools");
@@ -16,31 +32,13 @@ function ZoomControls() {
   const zoom = useEditorState((st) => st.viewport.zoom);
   return (
     <div className={s.zoom}>
+      <ViewSwitch />
+      <div className={s.zoomSep} />
       <button type="button" title={t("zoomOut")} onClick={() => run("view.zoomOut")}>−</button>
       <span>{Math.round((zoom / 12) * 100)}%</span>
       <button type="button" title={t("zoomIn")} onClick={() => run("view.zoomIn")}>+</button>
       <button type="button" title={t("fit")} onClick={() => run("view.fit")}>⤢</button>
     </div>
-  );
-}
-
-/** Shown while the side panel is hidden (SPEC §4.2): what you are drawing with, movable, on the right. */
-function MiniToolbar() {
-  const t = useTranslations("tools");
-  const tn = useTranslations("toolNames");
-  const run = useCommand();
-  const ed = useEditor();
-  const { effective, active, slot } = useCurrentTool();
-  return (
-    <FloatingPanel id="miniToolbar" corner="topRight" testId="mini-toolbar">
-      <div className={s.mini}>
-        <button type="button" className={ui.tool} title={t("expand")} aria-label={t("expand")} onClick={() => run("panel.toggle")}><Icon name="expand" size={18} /></button>
-        <span className={s.miniTool} title={tn(effective.id)} aria-label={tn(effective.id)}><Icon name={effective.icon} size={18} /></span>
-        <button type="button" className={s.miniKey} title={active ? t("activeEntry", { label: ed.entryLabel(active) }) : t("noActiveEntry")} onClick={() => run("panel.toggle")}>
-          {slot && <KeyIcon slot={slot} size={34} />}
-        </button>
-      </div>
-    </FloatingPanel>
   );
 }
 
@@ -149,13 +147,11 @@ function SelectionActions() {
 }
 
 export function Stage() {
-  const collapsed = useEditorState((st) => st.panelCollapsed);
   const hasSelection = useEditorState((st) => !!st.selection || !!st.floating);
   const hasUnderlay = useEditorState((st) => !!st.underlay?.visible && !!st.underlayImage);
   return (
     <>
       <ChartCanvas />
-      {collapsed && <MiniToolbar />}
       {hasSelection && <SelectionActions />}
       {hasUnderlay && <UnderlayPad />}
       <ZoomControls />

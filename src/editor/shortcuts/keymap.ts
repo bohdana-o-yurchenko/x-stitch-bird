@@ -19,10 +19,25 @@ export const HOLD_BINDINGS: readonly HoldBinding[] = [
   { hold: "Alt", tool: "picker" },
 ];
 
+const KEY_NAMES: Record<string, string> = { arrowleft: "←", arrowright: "→", arrowup: "↑", arrowdown: "↓", escape: "Esc", delete: "Del", backspace: "⌫", enter: "Enter" };
+
+/** Display form of a binding's keys: "⌘⇧Z" on a Mac, "Ctrl+Shift+Z" elsewhere. */
+export function formatKeys(keys: string, mac: boolean): string {
+  if (keys === "+") return "+";
+  return keys
+    .split("+")
+    .map((p) => (p === "mod" ? (mac ? "⌘" : "Ctrl+") : p === "shift" ? (mac ? "⇧" : "Shift+") : (KEY_NAMES[p] ?? (p.length === 1 ? p.toUpperCase() : p))))
+    .join("");
+}
+
+/** Every binding for a command (and args), formatted for display. */
+export function shortcutLabels(command: string, args: unknown, mac: boolean): string[] {
+  return KEYMAP.filter((k) => k.command === command && JSON.stringify(k.args) === JSON.stringify(args)).map((k) => formatKeys(k.keys, mac));
+}
+
 /** Display form of the first binding for a command (and args), e.g. "P" or "⇧R"; null when unbound. */
 export function shortcutLabel(command: string, args?: unknown): string | null {
-  const b = KEYMAP.find((k) => k.command === command && k.args === args && !k.when);
-  return b ? b.keys.split("+").map((p) => (p === "shift" ? "⇧" : p === "mod" ? "Ctrl/⌘" : p.length === 1 ? p.toUpperCase() : p)).join("") : null;
+  return shortcutLabels(command, args, true)[0] ?? null;
 }
 
 /** `mod` = ⌘ on macOS, Ctrl elsewhere. Letters respect Shift; symbols and digits ignore it. */

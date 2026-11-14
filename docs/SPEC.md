@@ -185,10 +185,13 @@ buttons **New**, **Open**, **Save**, **Save to file**, **Load file**, **Image �
 view segmented control **Colour / Both / Symbols** (default Both) · **Export ▾** menu.
 
 *New app (2026-11-14):* app name **бджілка** with the bee icon (`src/app/icon.png`, also the favicon) · pattern name
-(`clamp(140px, 13vw, 260px)` wide) · **File ▾** · **Save** · **main toolbar** (all tools, brush size 1–5, override,
-mirror, undo, redo — moved here from the side panel) · **Transform ▾** · **Check…** (disabled placeholder, §15.4) ·
-view switch. When one row doesn't fit (measured, so it works for every language), the toolbar moves to its own
-centred row under the app bar. The language picker moved to the right end of the status bar. The File menu groups everything file-related;
+(`clamp(140px, 13vw, 260px)` wide) · **File ▾** · **main toolbar** (all tools, brush size 1–5, override, mirror,
+undo, redo, then an **i** button — hovering or clicking it shows every keyboard shortcut, grouped and generated
+from the keymap) · **Transform ▾** · language (UK/EN) · **side panel** toggle (K). No Save button (saving is
+automatic, §9.2; ⌘/Ctrl+S and File ▸ Save still save at once) and no Check button (§15.4). The view switch moved to
+the zoom control (§4.2). When one row doesn't fit (measured, so it works for every language), the toolbar moves to
+its own centred row under the app bar. **Ukrainian is the default language**: `/` opens `/uk`; the browser language
+is not used; `/en` is English. The File menu groups everything file-related;
 items carry a muted second line saying what they do, and `▸` items open a submenu on hover or click:
 - **New ▸** Blank pattern… · From a picture…
 - Open saved pattern… · Open file from computer… (.json/.oxs) · **Versions…** (automatic snapshots, §15.7 — no
@@ -205,15 +208,17 @@ The separate Export menu and the "Save to file" format dialog are gone (their it
 - Full-size `<canvas>` with rulers (§5).
 - Zoom control (bottom-right): `−`, percentage label (`round(zoom/12*100)%`), `+`, fit `⤢`.
 - **Mini toolbar** (only when side panel collapsed): expand button, active-key icon (click = expand),
-  pencil, eraser, picker, pan, override, undo, redo. *New app:* the tools live in the header, so it shows only the
-  expand button, the current tool's icon and the active entry; it appears at the **top right**, where the panel was,
-  and can be dragged anywhere on the stage by its dotted grip; the position is remembered in this browser (double-click
-  the grip to put it back).
+  pencil, eraser, picker, pan, override, undo, redo. *New app:* removed — the tools are in the header and the
+  panel's toggle is a header button.
+- *New app:* the zoom control also holds the view switch: **Colour / Both / Symbols** | `−` % `+` `⤢`.
 
 ### 4.3 Status bar
 `Column X · Row Y` (1-based) of hovered cell, labels of what's in that cell (stitch and bead
 `keyLabel`s joined by `  ·  `), fixed hint text (`Space = move · O = override · Esc ends a backstitch line · 1–9 pick key entries · K hides the panel`),
 grid size `W×H`, save status (`Patterns save in this browser` / `…to your account` / `Saved HH:MM`).
+*New app:* starts with the **active key entry** (icon, code, details) — what the brush paints with, visible even with
+the panel hidden. The fixed hint is gone (shortcuts are behind the header's **i**); the underlay edit-mode hint
+still appears while editing the image.
 
 ### 4.4 Side panel
 1. **Tool row**: pencil, line, rect, filled rect, fill, eraser, picker, pan | brush size select (1×1…5×5) | override toggle, mirror toggle | undo, redo | collapse.
@@ -484,6 +489,12 @@ edit loses nothing.
    three combo cells (DMC 3371 + MH 00557, half), four MH 02011 beads, a backstitch box (DMC 3371, 1 str),
    and an unused DMC 3865 entry.
 3. Set up canvas observer, fit, select pencil.
+
+*New app — automatic saving (2026-11-14):* the open pattern is written as a draft 0.6 s after each change (as
+before), and **into the saved-patterns library at most once a minute** while it has unsaved changes, plus right away
+when the page is hidden. A pattern that was just opened from the library, a restored draft and the demo are not
+re-saved until they are edited. The status bar shows `Saved HH:MM` after each library save. Manual Save (⌘/Ctrl+S,
+File ▸ Save) still saves at once, with a toast.
 
 ### 9.3 Native JSON format (v3) (`serialize`, `index.html:1905`)
 ```json
@@ -838,7 +849,7 @@ Rules:
 ### 15.4 Error detectors
 
 > **Removed 2026-11-14 — to be redesigned from scratch.** The first implementation (below) was taken out of the
-> new app. Only a disabled **Check…** button in the header remains as the placeholder. The text below is kept as
+> new app, including its header button. The text below is kept as
 > history, not as the plan.
 
 A **Check chart…** panel that runs on demand, never continuously. Findings appear in a list. Prev/Next steps

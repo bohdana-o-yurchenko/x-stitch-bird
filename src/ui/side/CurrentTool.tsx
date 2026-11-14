@@ -51,8 +51,6 @@ export function CurrentTool() {
     <section className={s.current} aria-label={t("title")} data-testid="current-tool">
       <div className={s.currentHead}>
         <span>{t("title")}</span>
-        <span className={s.spacer} />
-        <button type="button" className={ui.tool} title={tt("collapse")} aria-label={tt("collapse")} onClick={() => run("panel.toggle")}><Icon name="collapse" size={18} /></button>
       </div>
       <div className={s.currentRow}>
         <span className={cx(s.toolBadge, hold && s.held)}><Icon name={effective.icon} size={20} /></span>

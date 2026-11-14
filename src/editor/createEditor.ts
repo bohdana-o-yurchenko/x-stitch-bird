@@ -9,7 +9,7 @@ import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
 import { createPersistence, type Persistence } from "@/persistence";
 import { downscaleToDataUrl, loadImage } from "@/platform/images";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
-import { createFromImage } from "./actions/importExport";
+import { createFromImage, saveToLibrary } from "./actions/importExport";
 import { demoPattern, loadPattern } from "./actions/pattern";
 import { Autosave } from "./autosave";
 import { CommandRegistry } from "./commands/registry";
@@ -53,7 +53,7 @@ export class Editor {
   momentaryPicked = false;
   private initialising: Promise<void> | null = null;
 
-  constructor(persistence = createPersistence(), isMac = false) {
+  constructor(persistence = createPersistence(), readonly isMac = false) {
     this.persistence = persistence;
     this.history = new History(() => this.doc, (info) => this.changed({ keys: info.keys, structural: info.structural }));
     this.viewport = new ViewportService(this.store, RULER_SIZE);
@@ -64,7 +64,7 @@ export class Editor {
     this.references = new ReferenceService(this);
     this.underlay = new UnderlayService(this);
     this.snapshots = new SnapshotService(this);
-    this.autosave = new Autosave(persistence.draft, () => this.doc);
+    this.autosave = new Autosave(persistence.draft, () => this.doc, () => saveToLibrary(this, { quiet: true }));
   }
 
   get state(): EditorState {
@@ -96,6 +96,8 @@ export class Editor {
         console.warn(e);
       }
     loadPattern(this, pattern ?? demoPattern(symbols));
+    // a restored draft is saved to the library once it's edited; the demo only then too
+    this.autosave.markSaved();
     this.store.setState({ ready: true });
   }
 

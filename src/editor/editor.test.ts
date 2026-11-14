@@ -1,11 +1,12 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPattern } from "@/core/pattern/createPattern";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import type { Persistence, Snapshot } from "@/persistence/ports";
 import { loadPattern } from "./actions/pattern";
+import { LIBRARY_EVERY } from "./autosave";
 import { Editor } from "./createEditor";
-import { shortcutLabel } from "./shortcuts/keymap";
+import { shortcutLabel, shortcutLabels } from "./shortcuts/keymap";
 import { resolveTool } from "./tools/registry";
 import type { ToolPointer } from "./tools/types";
 
@@ -160,9 +161,27 @@ describe("chart underlay (SPEC §15.15)", () => {
   });
 });
 
+describe("autosave", () => {
+  it("saves changes to the library once a minute, and not after opening an unchanged pattern", async () => {
+    vi.useFakeTimers();
+    const saved: string[] = [];
+    ed.persistence.patterns.save = async (d) => (saved.push(d.name), { ok: true });
+    ed.autosave.markSaved();
+    vi.advanceTimersByTime(LIBRARY_EVERY * 2);
+    expect(saved).toEqual([]);
+    ed.changed();
+    ed.changed();
+    await vi.advanceTimersByTimeAsync(LIBRARY_EVERY);
+    expect(saved).toHaveLength(1);
+    vi.useRealTimers();
+  });
+});
+
 describe("shortcuts", () => {
   it("labels tool shortcuts for display", () => {
     expect([shortcutLabel("tool.select", "pencil"), shortcutLabel("tool.select", "filledRect"), shortcutLabel("nope")]).toEqual(["P", "⇧R", null]);
+    expect(shortcutLabels("view.zoomIn", undefined, false)).toEqual(["+", "="]);
+    expect(shortcutLabels("history.redo", undefined, false)).toEqual(["Ctrl+Shift+Z", "Ctrl+Y"]);
   });
 
   it("reports the tool that will act: held tools win, and drawing with a backstitch entry draws lines", () => {

@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { cellLabel } from "@/core/grid/numbering";
-import { cx, ui } from "../common/widgets";
-import { useCommand, useEditor, useEditorState } from "../hooks/editor";
+import { KeyIcon, cx, ui } from "../common/widgets";
+import { useCommand, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
 import s from "./status.module.css";
 
@@ -31,24 +29,20 @@ function AmbiguousStatus() {
   );
 }
 
-function LanguageSwitch() {
-  const t = useTranslations("app");
-  const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
-  const ed = useEditor();
-  const change = (next: string) => {
-    ed.flush();
-    router.replace(pathname, { locale: next });
-  };
+/** The active key entry — what the brush paints with. */
+function CurrentEntry() {
+  const t = useTranslations("status");
+  const active = useEditorState((st) => st.activeEntry);
+  const slot = useEditorState((st) => st.palette[st.activeEntry]);
+  const label = useEntryLabel();
+  if (!active || !slot) return <span>{t("noEntry")}</span>;
+  const l = label(active);
   return (
-    <select className={s.lang} aria-label={t("language")} value={locale} onChange={(e) => change(e.target.value)}>
-      {routing.locales.map((l) => (
-        <option key={l} value={l}>
-          {l.toUpperCase()}
-        </option>
-      ))}
-    </select>
+    <span className={s.entry} data-testid="status-entry">
+      <KeyIcon slot={slot} size={18} />
+      <b>{l.title}</b>
+      <span className={s.entrySub}>{l.sub}</span>
+    </span>
   );
 }
 
@@ -74,14 +68,14 @@ export function StatusBar() {
   const size = { w: p.w, h: p.h };
   return (
     <div className={s.bar}>
+      <CurrentEntry />
       <span>{inside ? t.rich("position", { col: cellLabel(p.grid, "x", hover.x, size), row: cellLabel(p.grid, "y", hover.y, size), b: (c) => <b>{c}</b> }) : "—"}</span>
       <span className={s.cell}>{parts.join("  ·  ")}</span>
       <span className={s.spacer} />
       <AmbiguousStatus />
-      <span className={s.hint}>{underlayEditing ? t("underlayHint") : t("hint")}</span>
+      {underlayEditing && <span className={s.hint}>{t("underlayHint")}</span>}
       <span>{`${p.w}×${p.h}`}</span>
       <span>{savedAt ? t("savedAt", { time: new Date(savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }) : t("savesLocal")}</span>
-      <LanguageSwitch />
     </div>
   );
 }

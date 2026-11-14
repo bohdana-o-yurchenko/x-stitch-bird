@@ -28,6 +28,25 @@
 .zoom button:hover {
   background: var(--sel);
 }
+.zoom .viewSwitch {
+  display: flex;
+  gap: 2px;
+}
+.zoom .viewSwitch button {
+  width: auto;
+  padding: 0 9px;
+  font-size: 12.5px;
+}
+.zoom .viewSwitch button.on {
+  background: var(--ink);
+  color: #fff;
+}
+.zoomSep {
+  width: 1px;
+  align-self: stretch;
+  margin: 2px 2px;
+  background: var(--line2);
+}
 .zoom span {
   min-width: 44px;
   text-align: center;
@@ -64,29 +83,6 @@
 }
 .grip:active {
   cursor: grabbing;
-}
-.mini {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 2px 5px 5px;
-}
-.miniTool {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  background: var(--ink);
-  color: #fff;
-}
-.miniKey {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  display: grid;
-  place-items: center;
-  margin: 2px 0;
 }
 .selectionBar {
   position: absolute;
