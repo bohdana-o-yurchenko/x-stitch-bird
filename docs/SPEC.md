@@ -259,10 +259,14 @@ All painting requires an active key entry; otherwise toast:
 | Filled rect (`frect`) | Shift+R | Drag; filled box. |
 | Fill (`fill`) | F | 4-connected flood fill on the active entry's layer (beads layer for bead entries, else stitches), replacing cells equal to the start value. Not available for backstitch (toast "Fill doesn’t apply to backstitch — use draw or line"). No-op if target already equals the active entry. |
 | Eraser (`eraser`) | E | Clears **both** stitch and bead layers within brush; also deletes backstitch segments whose distance to the pointer (grid units) ≤ `0.3 × max(1, brush/2)`. |
-| Picker (`picker`) | I | Selects the entry under the pointer: backstitch within 0.25 units (topmost/last) wins, then bead, then stitch. Toast "Picked …" or "Nothing here to pick". |
+| Picker (`picker`) | I, or hold Alt/⌥ | Selects the entry under the pointer: backstitch within 0.25 units (topmost/last) wins, then bead, then stitch. Toast "Picked …" or "Nothing here to pick". |
 | Pan (`pan`) | H / hold Space | Drag to pan. |
 
-- Selecting a key entry while on eraser/picker/pan switches to pencil.
+- Selecting a key entry while on eraser/picker/pan switches to pencil (except during a held-Alt pick).
+- **Hold Alt/⌥ = temporary picker**: Alt keydown (not auto-repeat-sensitive) switches to the picker and remembers
+  the previous tool; the tool stays picker while Alt is held, so several picks are possible. On Alt keyup or
+  window blur the previous tool returns — or pencil, if something was picked while the previous tool was
+  eraser or pan. An Alt+left-click on the canvas always picks, even if the keydown was missed.
 - Switching to a tool other than pencil/line/rect/frect ends the backstitch chain.
 - Cursors: pan/space → grab, picker → copy, otherwise crosshair.
 
@@ -297,7 +301,7 @@ re-render key panel and autosave.
 
 ### 6.6 Keyboard shortcuts (ignored while focus is in input/select/textarea or a modal is open)
 `Ctrl/⌘+Z`, `Ctrl/⌘+Shift+Z`, `Ctrl/⌘+Y`, `Ctrl/⌘+S` (save to library) · `Space` (hold to pan) ·
-`Esc` (end chain) · `K` (toggle side panel) · `O` (override) · `1`–`9` (select the n-th non-null key entry) ·
+`Esc` (end chain) · hold `Alt/⌥` (temporary picker) · `K` (toggle side panel) · `O` (override) · `1`–`9` (select the n-th non-null key entry) ·
 `P`/`B` pencil · `L` line · `R` rect · `Shift+R` filled rect · `F` fill · `E` eraser · `I` picker · `H` pan ·
 `+`/`=` zoom in · `-` zoom out · `0` fit. Window blur releases Space.
 
@@ -411,9 +415,16 @@ bead MH 00557, strands = `P.strands` (2), full cross.
 |-----|---------|
 | `stitchwork.current` | Serialized current project (§9.3), written by **autosave** 600 ms after changes. No refs. |
 | `stitchwork.library` | `{ [projectId]: { name, updated (ms), w, h, data: JSON string of §9.3 } }` |
-| `stitchwork.refs.<projectId>` | Array of serialized reference windows (§11.4). Removed when there are none. |
+| `stitchwork.refs.<projectId>` | **Legacy / fallback only** — see IndexedDB below. |
+
+**IndexedDB** database `stitchwork` (v1), object store `refs`, key = project id, value = array of serialized
+reference windows (§11.4). Used because photos + marks quickly exceed localStorage's ~5 MB.
 
 All storage access is wrapped in try/catch; quota failures are silent except where noted.
+
+**Flush on leave**: on `pagehide` and when the page becomes hidden, the current project is written to
+`stitchwork.current` immediately and any pending reference-window save is written, so a refresh right after an
+edit loses nothing.
 
 ### 9.2 Boot
 1. Try to load `stitchwork.current`. 
@@ -469,10 +480,11 @@ If `window.claude.use` exists, the app requests `db`, `user` and `downloads`:
 - `cloud = db.collection('data/users/' + userId)`, documents keyed by project id, same body as the local library.
 - `downloads.save({filename, data})` is used for all exports (§10).
 
-> **Known issue:** outside the Claude artifact runtime `downloads` is `null`, so every export falls back to a
-> modal: "Downloads aren’t available here. Copy this text into a file ending in .ext" with a textarea and Copy
-> button (PNG → "right-click the image to save it"). This is why "Save to file" does not download in a normal
-> browser. A rewrite should use a standard `Blob` + `<a download>` (or the File System Access API).
+Outside the Claude runtime (`downloads` is `null`) exports use a standard browser download (`downloadFile`):
+a `Blob` with the right MIME type (`application/json`, `application/xml`, `text/csv;charset=utf-8` with a UTF-8
+BOM so Excel shows symbols correctly, `image/png`) and a temporary `<a download>`; toast "Downloaded <filename>".
+Only if that throws does the old fallback modal appear ("Downloads aren’t available here…" with textarea + Copy,
+or for PNG "right-click the image to save it").
 
 ---
 
@@ -582,19 +594,33 @@ New windows cascade from the stage's top-right (28 px offset per window).
 - Re-rendered whenever the chart changes or (for grid windows) the hover cell changes.
 
 ### 11.4 Persistence
-- Any change → debounced 700 ms save to `stitchwork.refs.<P.id>` (+ autosave). On quota failure, warn once:
+- Any change → debounced 700 ms save to IndexedDB `refs[P.id]` (+ autosave); an empty list deletes the record.
+  If IndexedDB fails, falls back to localStorage `stitchwork.refs.<P.id>`; if that fails too, warn once:
   "Reference photos are too big to remember in this browser — use Save to file (.json) to keep them".
-- Switching project saves the old project's refs, removes all windows, and restores the new project's refs
-  (from the loaded file's `refs` if any, else localStorage).
+  After a successful IndexedDB write the legacy localStorage key is removed (one-time migration).
+- Switching project saves pending refs, removes all windows, and restores the new project's refs (from the
+  loaded file's `refs` if any, else IndexedDB, else legacy localStorage). Restoring is async; until it finishes
+  saving is disabled (`refsReady`) so an empty window list can never overwrite stored refs, and a stale restore
+  is discarded if another project was opened meanwhile.
+- Saved marks are drawn back in asynchronously; until they are (`marksReady`), serialization re-uses the stored
+  marks data URL instead of reading the still-empty canvas (this used to wipe marks on refresh).
 - Included in JSON file exports as `refs`. Not included in the library body or `stitchwork.current`.
 
 ---
 
 ## 12. Import
 
-### 12.1 Load file (`#fileJson`, accepts `.json,.oxs,.xml`)
-Content starting with `<` → OXS import; otherwise JSON `load`. Success toast "Loaded <filename>" (+ OXS report),
-failure toast "Couldn’t read that file — it should be a Stitchwork .json or an .oxs". Then autosave.
+### 12.1 Load file (`#fileJson`, accepts `.json,.oxs,.xml`) — `loadPatternFile`
+A leading UTF-8 BOM is stripped. Content starting with `<` → OXS import; otherwise JSON `load`. Success toast
+"Loaded <filename>" (+ OXS report), failure toast "Couldn’t read that file — it should be a Stitchwork .json or
+an .oxs". Then autosave.
+
+**Drag & drop** anywhere on the window: while files are dragged over, a full-window dashed overlay reads
+"Drop a .json or .oxs pattern, or a picture". On drop:
+- a pattern file (`.json/.oxs/.xml` extension or json/xml MIME) → `loadPatternFile` (takes priority if several files);
+- else an image → modal "What should this picture be?" with *Cancel*, *Open as reference* (reference window, §11)
+  and *Turn into pattern* (image → pattern dialog, §12.3);
+- else toast "Drop a .json or .oxs pattern, or a picture".
 
 ### 12.2 OXS import (`fromOXS`, `index.html:2061`)
 - Requires `<properties>` with positive `chartwidth`/`chartheight`. Title → name (default "Imported pattern").
@@ -649,11 +675,12 @@ All toasts/modals listed in the sections above should be kept verbatim; they are
 
 ## 14. Known quirks / technical debt (do not necessarily preserve)
 
-1. Exports don't download outside the Claude runtime (§9.5).
+1. ~~Exports don't download outside the Claude runtime~~ — fixed 2026-11-14 (§9.5).
 2. `dirty` flag is tracked but never used (no "unsaved changes" prompt anywhere).
 3. Library delete has no confirmation; "New" discards current work without saving.
 4. Deleting a key entry or resizing wipes the whole undo history.
-5. Reference photos are stored as base64 in localStorage — easily exceeds the ~5 MB quota.
+5. ~~Reference photos stored in localStorage (quota) and marks wiped on refresh~~ — fixed 2026-11-14: IndexedDB +
+   marks-overwrite guard (§11.4). Photos are still base64 data URLs; Blobs would be ~25 % smaller.
 6. Library save limited to 240 000 characters of JSON (designed for the cloud doc limit; applied to local too).
 7. `count` uses `14.01`/`16.01` to encode "over 2" fabrics; OXS import cannot restore them.
 8. OXS export: combo beads are only represented inside the blend palette item; quarter/three-quarter stitches

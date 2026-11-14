@@ -180,6 +180,8 @@ header{grid-area:top;display:flex;align-items:center;gap:6px;padding:0 12px;bord
 .modal .seg button{padding:6px 12px}
 .toast{position:fixed;left:50%;bottom:44px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:8px 14px;border-radius:9px;opacity:0;transition:.2s;pointer-events:none;z-index:60;font-size:13px}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.dropzone{position:fixed;inset:10px;z-index:70;display:none;align-items:center;justify-content:center;border:3px dashed var(--accent);border-radius:16px;background:rgba(244,239,230,.85);pointer-events:none;font-family:Fraunces,serif;font-size:22px;font-weight:600;color:var(--accent)}
+.dropzone.on{display:flex}
 .sugg{display:flex;align-items:center;gap:8px;padding:6px 4px;border-radius:7px;cursor:pointer}
 .sugg:hover{background:var(--sel)}
 .sugg .de{margin-left:auto;font-size:11.5px;color:var(--muted)}
@@ -227,7 +229,7 @@ canvas.prev{max-width:100%;image-rendering:pixelated;border:1px solid var(--line
       <div class="mini-key" id="miniKey" title="Active key entry"></div>
       <button class="tool" data-t="pencil" title="Draw (P)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/></svg></button>
       <button class="tool" data-t="eraser" title="Eraser (E)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 20h12M4.5 14.5l9-9 6 6-8.5 8.5H9z"/></svg></button>
-      <button class="tool" data-t="picker" title="Pick from chart (I)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5a2.1 2.1 0 013 3l-1.5 1.5-3-3z"/><path d="M13.5 6l4.5 4.5M15 9l-8.5 8.5L4 20l2.5-2.5"/></svg></button>
+      <button class="tool" data-t="picker" title="Pick from chart (I, or hold Alt/⌥)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5a2.1 2.1 0 013 3l-1.5 1.5-3-3z"/><path d="M13.5 6l4.5 4.5M15 9l-8.5 8.5L4 20l2.5-2.5"/></svg></button>
       <button class="tool" data-t="pan" title="Move (H, or hold Space)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg></button>
       <button class="tool bOverride" title="Override (O): when on, drawing replaces stitches already on the chart. Off = only empty squares are filled."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="11" height="11" rx="1.5"/><rect x="9.5" y="9.5" width="11" height="11" rx="1.5" fill="currentColor" fill-opacity=".25"/></svg></button>
       <button class="tool bUndo" title="Undo (Ctrl/⌘+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg></button>
@@ -239,7 +241,7 @@ canvas.prev{max-width:100%;image-rendering:pixelated;border:1px solid var(--line
   </main>
 
   <div class="status" id="status">
-    <span id="stPos">—</span><span id="stCell"></span><span class="sp"></span><span class="hint" style="margin:0">Space = move · O = override · Esc ends a backstitch line · 1–9 pick key entries · K hides the panel</span><span id="stSize"></span><span id="stSave"></span>
+    <span id="stPos">—</span><span id="stCell"></span><span class="sp"></span><span class="hint" style="margin:0">Space = move · hold Alt/⌥ = pick · O = override · Esc ends a backstitch line · 1–9 pick key entries · K hides the panel</span><span id="stSize"></span><span id="stSave"></span>
   </div>
 
   <aside class="side" id="side">
@@ -250,7 +252,7 @@ canvas.prev{max-width:100%;image-rendering:pixelated;border:1px solid var(--line
       <button class="tool" data-t="frect" title="Filled rectangle (Shift+R)"><svg viewBox="0 0 24 24"><rect x="4.5" y="6.5" width="15" height="11" rx="1" fill="currentColor"/></svg></button>
       <button class="tool" data-t="fill" title="Fill area (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 12l7-7 8 8-7 7z"/><path d="M19 15c1 1.6 1.5 2.6 1.5 3.3a1.5 1.5 0 01-3 0c0-.7.5-1.7 1.5-3.3z" fill="currentColor"/></svg></button>
       <button class="tool" data-t="eraser" title="Eraser (E) — erases crosses, beads and backstitch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 20h12M4.5 14.5l9-9 6 6-8.5 8.5H9z"/></svg></button>
-      <button class="tool" data-t="picker" title="Pick a key entry from the chart (I)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5a2.1 2.1 0 013 3l-1.5 1.5-3-3z"/><path d="M13.5 6l4.5 4.5M15 9l-8.5 8.5L4 20l2.5-2.5"/></svg></button>
+      <button class="tool" data-t="picker" title="Pick a key entry from the chart (I, or hold Alt/⌥)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5a2.1 2.1 0 013 3l-1.5 1.5-3-3z"/><path d="M13.5 6l4.5 4.5M15 9l-8.5 8.5L4 20l2.5-2.5"/></svg></button>
       <button class="tool" data-t="pan" title="Move (H, or hold Space)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg></button>
       <span class="psep"></span>
       <select id="brushSize" class="bsel" title="Brush size"><option value="1">1×1</option><option value="2">2×2</option><option value="3">3×3</option><option value="4">4×4</option><option value="5">5×5</option></select>
@@ -290,6 +292,7 @@ canvas.prev{max-width:100%;image-rendering:pixelated;border:1px solid var(--line
 
 <div class="modal-back" id="modalBack"><div class="modal" id="modal"><h2 id="mTitle"></h2><div class="mbody" id="mBody"></div><div class="mfoot" id="mFoot"></div></div></div>
 <div class="toast" id="toast"></div>
+<div class="dropzone" id="dropzone"><div>Drop a .json or .oxs pattern, or a picture</div></div>
 <input type="file" id="fileImg" accept="image/*" hidden>
 <input type="file" id="fileJson" accept=".json,.oxs,.xml,application/json,text/xml" hidden>
 
@@ -1619,7 +1622,7 @@ cv.addEventListener('pointerdown',e=>{
   if(e.button===1||e.button===2||tool==='pan'||spaceDown){panning={sx,sy,ox:offX,oy:offY};cv.style.cursor='grabbing';return}
   if(e.button!==0)return;
   const c=toCell(sx,sy);const inside=c.x>=0&&c.y>=0&&c.x<P.w&&c.y<P.h;
-  if(tool==='picker'){pickAt(sx,sy);return}
+  if(tool==='picker'||e.altKey){pickAt(sx,sy);if(altPrev)altPicked=true;return}
   if(tool==='eraser'){snapshot();stroke={last:c,snap:true,erase:true};paintCells(cellsFor(c.x,c.y,brush),true);eraseBackNear(toGrid(sx,sy),.3*Math.max(1,brush/2));render();return}
   const p=needKey();if(!p)return;
   if(isBackDraw()){const pt=snapPt(toGrid(sx,sy));
@@ -1685,6 +1688,7 @@ window.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&k==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
   if((e.ctrlKey||e.metaKey)&&k==='y'){e.preventDefault();redo();return}
   if((e.ctrlKey||e.metaKey)&&k==='s'){e.preventDefault();saveProject();return}
+  if(e.key==='Alt'){e.preventDefault();if(!altPrev&&tool!=='picker'){altPrev=tool;altPicked=false;setTool('picker')}return}
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   if(k===' '){if(!spaceDown){spaceDown=true;cv.style.cursor='grab'}e.preventDefault();return}
   if(k==='escape'){endChain();return}
@@ -1696,12 +1700,15 @@ window.addEventListener('keydown',e=>{
   if(map[k])setTool(map[k]);
   if(k==='+'||k==='=')zoomAt(1.25,CW/2,CH/2);if(k==='-')zoomAt(.8,CW/2,CH/2);if(k==='0')fit();
 });
-window.addEventListener('keyup',e=>{if(e.key===' '){spaceDown=false;cv.style.cursor=curCursor()}});
-window.addEventListener('blur',()=>{spaceDown=false;cv.style.cursor=curCursor()});
+/* hold Alt/⌥ = picker; on release go back to the previous tool (to pencil if something was picked while erasing/panning) */
+let altPrev=null,altPicked=false;
+function altRelease(){if(!altPrev)return;const t=altPicked&&(altPrev==='eraser'||altPrev==='pan')?'pencil':altPrev;altPrev=null;if(tool==='picker')setTool(t)}
+window.addEventListener('keyup',e=>{if(e.key===' '){spaceDown=false;cv.style.cursor=curCursor()}if(e.key==='Alt'){e.preventDefault();altRelease()}});
+window.addEventListener('blur',()=>{spaceDown=false;altRelease();cv.style.cursor=curCursor()});
 
 /* ============================================================ ACTIVE KEY */
 function setActiveK(i){activeK=i&&P.pal[i]?i:0;chain=null;
-  if(tool==='eraser'||tool==='picker'||tool==='pan')setTool('pencil');
+  if(!altPrev&&(tool==='eraser'||tool==='picker'||tool==='pan'))setTool('pencil');
   document.querySelectorAll('.krow').forEach(r=>r.classList.toggle('on',+r.dataset.k===activeK));
   const m=$('#miniKey');m.innerHTML='';if(activeK)m.append(keyIcon(activeK,34));
   m.title=activeK?'Active: '+keyLabel(P.pal[activeK]):'No key entry selected';render()}
@@ -1968,9 +1975,15 @@ $('#bExport').onclick=e=>{const m=$('#exportMenu'),r=e.currentTarget.getBounding
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('#exportMenu,#bExport'))$('#exportMenu').classList.remove('on')});
 document.querySelectorAll('#exportMenu button').forEach(b=>b.onclick=()=>{$('#exportMenu').classList.remove('on');doExport(b.dataset.x)});
 const safeName=()=>(P.name||'pattern').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-')||'pattern';
+const MIME={json:'application/json',oxs:'application/xml',csv:'text/csv;charset=utf-8',png:'image/png'};
+function downloadFile(filename,data){
+  const ext=filename.split('.').pop().toLowerCase();
+  const blob=data instanceof Blob?data:new Blob([ext==='csv'?'﻿'+data:data],{type:MIME[ext]||'application/octet-stream'});   // BOM so Excel reads the symbols as UTF-8
+  const url=URL.createObjectURL(blob);const a=el('a',{href:url,download:filename,style:'display:none'});
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
 async function offer(filename,data,fallback){
   if(downloads){try{await downloads.save({filename,data});return}catch(e){if(e&&e.code==='declined')return}}
-  fallback()}
+  try{downloadFile(filename,data);toast('Downloaded '+filename)}catch(e){console.error(e);fallback()}}
 function textFallback(title,ext,s){const ta=el('textarea',{style:'width:100%;height:200px;font:12px monospace'});ta.value=s;
   modal(title,el('div',{},el('p',{class:'hint'},`Downloads aren’t available here. Copy this text into a file ending in .${ext}.`),ta),[{label:'Copy',primary:true,action:async()=>{try{await navigator.clipboard.writeText(s);toast('Copied')}catch(e){ta.select();toast('Press Ctrl+C to copy')}return false}},{label:'Close'}])}
 async function doExport(x){
@@ -2107,16 +2120,29 @@ function fromOXS(text){
 
 /* ============================================================ FILES, IMAGE → PATTERN */
 $('#bImport').onclick=()=>$('#fileImg').click();
-$('#fileJson').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;f.text().then(t=>{
-  try{const tt=t.trim();if(tt.startsWith('<')){const rep=fromOXS(tt);toast('Loaded '+f.name+(rep?' — '+rep:''))}else{load(JSON.parse(tt));toast('Loaded '+f.name)}autosave()}
-  catch(err){console.error(err);toast('Couldn’t read that file — it should be a Stitchwork .json or an .oxs')}})};
+function loadPatternFile(f){f.text().then(t=>{
+  try{const tt=t.replace(/^﻿/,'').trim();if(tt.startsWith('<')){const rep=fromOXS(tt);toast('Loaded '+f.name+(rep?' — '+rep:''))}else{load(JSON.parse(tt));toast('Loaded '+f.name)}autosave()}
+  catch(err){console.error(err);toast('Couldn’t read that file — it should be a Stitchwork .json or an .oxs')}})}
+$('#fileJson').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)loadPatternFile(f)};
+function imageFile(f,then){const img=new Image();img.onload=()=>then(img);img.onerror=()=>toast('Couldn’t read that image');img.src=URL.createObjectURL(f)}
+/* drag & drop: pattern files load, pictures ask whether to convert or open as a reference */
+const isPatternFile=f=>/\.(json|oxs|xml)$/i.test(f.name)||/json|xml/.test(f.type);
+let dragN=0;
+window.addEventListener('dragenter',e=>{if(!e.dataTransfer.types.includes('Files'))return;e.preventDefault();dragN++;$('#dropzone').classList.add('on')});
+window.addEventListener('dragleave',e=>{if(!e.dataTransfer.types.includes('Files'))return;if(--dragN<=0){dragN=0;$('#dropzone').classList.remove('on')}});
+window.addEventListener('dragover',e=>{if(e.dataTransfer.types.includes('Files')){e.preventDefault();e.dataTransfer.dropEffect='copy'}});
+window.addEventListener('drop',e=>{if(!e.dataTransfer.types.includes('Files'))return;e.preventDefault();dragN=0;$('#dropzone').classList.remove('on');
+  const files=[...e.dataTransfer.files];const pat=files.find(isPatternFile),img=files.find(f=>f.type.startsWith('image/'));
+  if(pat){loadPatternFile(pat);return}
+  if(img){modal('What should this picture be?',`<p class="hint">“${xesc(img.name)}”</p>`,[{label:'Cancel'},{label:'Open as reference',action:()=>refFromFile(img)},{label:'Turn into pattern',primary:true,action:()=>imageFile(img,importDialog)}]);return}
+  toast('Drop a .json or .oxs pattern, or a picture')});
 $('#bFileLoad').onclick=()=>$('#fileJson').click();
 $('#bFileSave').onclick=()=>{
   const body=el('div',{},el('p',{class:'hint',style:'margin:0'},'Keep this file anywhere (computer, cloud drive, email) and open it again with “Load file”.'),
     el('div',{class:'sugg',onclick:()=>{closeModal();doExport('json')}},el('div',{class:'sw',style:'background:#2F5D62;display:grid;place-items:center;color:#fff;font-size:10px'},'JSON'),el('div',{},el('b',{},'Stitchwork file (.json)'),el('div',{class:'hint',style:'margin:0'},'Everything: your key (including unused entries), blends, floss + bead, backstitch, symbols, custom colours, and reference photo windows with their marks. Best for saving progress.'))),
     el('div',{class:'sugg',onclick:()=>{closeModal();doExport('oxs')}},el('div',{class:'sw',style:'background:#B5452F;display:grid;place-items:center;color:#fff;font-size:10px'},'OXS'),el('div',{},el('b',{},'Open Cross Stitch (.oxs)'),el('div',{class:'hint',style:'margin:0'},'Opens in Pattern Keeper, WinStitch/MacStitch, FlossCross and others. Floss + bead is saved as one blend item (e.g. “00557 + 310”). Can also be loaded back here.'))));
   modal('Save to file',body,[{label:'Cancel'}])};
-$('#fileImg').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const img=new Image();img.onload=()=>importDialog(img);img.onerror=()=>toast('Couldn’t read that image');img.src=URL.createObjectURL(f)};
+$('#fileImg').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)imageFile(f,importDialog)};
 function importDialog(img){
   const pv=el('canvas',{class:'prev'});const info=el('p',{class:'hint',style:'text-align:center;margin:0'});const sn=P.strands||2;
   const body=el('div',{},el('div',{class:'grid2'},
@@ -2177,6 +2203,7 @@ function refCreate(d){
   const r={id:d.id||('r'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),name:d.name||'Reference',src:d.src,
     x:d.x??Math.max(8,stage.right-380-n*28),y:d.y??Math.max(60,stage.top+16+n*28),w:d.w||360,h:d.h||320,min:!!d.min,op:d.op??1,
     view:d.view||null,tool:d.tool||'marker',color:d.color||'#16A34A',size:d.size||14,grid:!!d.grid,showSt:!!d.showSt,hasMarks:!!d.marks,
+    marksSrc:d.marks||null,marksReady:!d.marks,   // until the saved marks are drawn back in, keep saving the original data URL
     img:null,marks:document.createElement('canvas'),undo:[],hoverCell:null};
   // DOM
   const tb=el('div',{class:'rtb'});const body=el('div',{class:'rb'});const cvs=el('canvas');const info=el('div',{class:'rinfo'});body.append(cvs,info);
@@ -2217,7 +2244,7 @@ function refCreate(d){
   refCanvasEvents(r);
   // image + marks
   const img=new Image();img.onload=()=>{r.img=img;r.marks.width=img.width;r.marks.height=img.height;
-    if(d.marks){const m=new Image();m.onload=()=>{r.marks.getContext('2d').drawImage(m,0,0);refDraw(r)};m.src=d.marks}
+    if(d.marks){const m=new Image();m.onload=()=>{r.marks.getContext('2d').drawImage(m,0,0);r.marksReady=true;r.marksSrc=null;refDraw(r)};m.src=d.marks}
     if(!r.view)refFit(r);refDraw(r)};img.src=r.src;
   win.style.opacity=r.op;refPlace(r);refUI(r);REFS.push(r);refSave();return r}
 function refPlace(r){const W=innerWidth,H=innerHeight;r.w=Math.min(r.w,W-8);r.h=Math.min(r.h,H-8);
@@ -2265,18 +2292,33 @@ function refDraw(r){if(!r.el.isConnected||r.min)return;const c=r.cv,b=r.body.get
   g.restore()}
 let refRQ=false;function refsRender(onlyGrid){if(!REFS.length||refRQ)return;refRQ=true;requestAnimationFrame(()=>{refRQ=false;REFS.forEach(r=>{if(!onlyGrid||r.grid)refDraw(r)})})}
 function refsHover(){if(REFS.some(r=>r.grid))refsRender(true)}
-function refSerialize(r){let marks=null;if(r.hasMarks){try{marks=r.marks.toDataURL('image/png')}catch(e){}}
+function refSerialize(r){let marks=null;if(r.hasMarks){if(!r.marksReady)marks=r.marksSrc;else try{marks=r.marks.toDataURL('image/png')}catch(e){}}
   return{id:r.id,name:r.name,src:r.src,x:Math.round(r.x),y:Math.round(r.y),w:Math.round(r.w),h:Math.round(r.h),min:r.min,op:r.op,view:r.view,tool:r.tool,color:r.color,size:r.size,grid:r.grid,showSt:r.showSt,marks}}
 function refsExport(){return REFS.map(refSerialize)}
-function refSave(){clearTimeout(refsSaveT);refsSaveT=setTimeout(()=>{refsSaveNow();autosave()},700)}
-function refsSaveNow(){clearTimeout(refsSaveT);if(!refsPid)return;const key='stitchwork.refs.'+refsPid;
-  try{if(REFS.length)localStorage.setItem(key,JSON.stringify(refsExport()));else localStorage.removeItem(key)}
-  catch(e){if(!refsWarned){refsWarned=true;toast('Reference photos are too big to remember in this browser — use Save to file (.json) to keep them')}}}
-function refsSwitch(pid,incoming){
-  if(refsPid&&refsPid!==pid)refsSaveNow();
-  REFS.forEach(r=>r.el.remove());REFS=[];refsPid=pid;let data=incoming;
-  if(!data){try{data=JSON.parse(localStorage.getItem('stitchwork.refs.'+pid)||'[]')}catch(e){data=[]}}
-  (data||[]).forEach(d=>{if(d&&d.src)refCreate(d)})}
+/* Photos + marks live in IndexedDB (store "refs", key = project id): localStorage's ~5 MB fills up after a photo or two.
+   Older versions kept them in localStorage under stitchwork.refs.<id>; those are read once and moved over. */
+const IDB=(()=>{let dbp=null;
+  const open=()=>dbp||(dbp=new Promise((res,rej)=>{const q=indexedDB.open('stitchwork',1);q.onupgradeneeded=()=>q.result.createObjectStore('refs');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)}));
+  const run=(mode,fn)=>open().then(db=>new Promise((res,rej)=>{const t=db.transaction('refs',mode),q=fn(t.objectStore('refs'));t.oncomplete=()=>res(q.result);t.onerror=t.onabort=()=>rej(t.error)}));
+  return{get:k=>run('readonly',s=>s.get(k)),set:(k,v)=>run('readwrite',s=>s.put(v,k)),del:k=>run('readwrite',s=>s.delete(k))}})();
+let refsReady=false,refsDirty=false;   // ready = this project's windows have been restored, so saving can't overwrite them with nothing
+function refSave(){refsDirty=true;clearTimeout(refsSaveT);refsSaveT=setTimeout(()=>{refsSaveNow();autosave()},700)}
+function refsSaveNow(){clearTimeout(refsSaveT);if(!refsPid||!refsReady)return;refsDirty=false;
+  const pid=refsPid,data=refsExport(),lsKey='stitchwork.refs.'+pid;
+  (data.length?IDB.set(pid,data):IDB.del(pid)).then(()=>{try{localStorage.removeItem(lsKey)}catch(e){}})
+    .catch(()=>{try{if(data.length)localStorage.setItem(lsKey,JSON.stringify(data));else localStorage.removeItem(lsKey)}
+      catch(e){if(!refsWarned){refsWarned=true;toast('Reference photos are too big to remember in this browser — use Save to file (.json) to keep them')}}})}
+async function refsSwitch(pid,incoming){
+  if(refsDirty)refsSaveNow();
+  REFS.forEach(r=>r.el.remove());REFS=[];refsPid=pid;refsReady=false;let data=incoming;
+  if(!data){data=await IDB.get(pid).catch(()=>undefined);
+    if(!data){try{data=JSON.parse(localStorage.getItem('stitchwork.refs.'+pid)||'[]')}catch(e){data=[]}}
+    if(refsPid!==pid)return}   // another pattern was opened while this one was loading
+  refsReady=true;(data||[]).forEach(d=>{if(d&&d.src)refCreate(d)})}
+/* write pending work straight away when the page is refreshed, closed or hidden */
+function flushAll(){if(refsDirty)refsSaveNow();if(!P)return;clearTimeout(autoT);try{localStorage.setItem('stitchwork.current',JSON.stringify(serialize()))}catch(e){}}
+window.addEventListener('pagehide',flushAll);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushAll()});
 window.addEventListener('resize',()=>REFS.forEach(refPlace));
 $('#bRef').onclick=refAdd;
 
