@@ -3,6 +3,11 @@
 > Status: **plan**, 2026-11-14. Source of truth for behaviour: [`SPEC.md`](./SPEC.md) and the current `index.html`.
 > Goal: a codebase a person can find their way around in minutes, where each kind of change
 > touches a small, predictable set of files.
+>
+> The initial draft also covers the first backlog features from SPEC §15: #1–#7 (metadata, grid numbering, transforms
+> and mirror modes, error detectors, ambiguous marks, selection, snapshots) and the two high-priority drafts
+> (fractional stitches §15.13, French knots §15.14). Their groundwork (layers §7.1, transforms, structural undo,
+> JSON v4) is built **from the start**. The features themselves are delivered after parity (§15 phases).
 
 ---
 
@@ -13,14 +18,21 @@
 2. **The editor is a client app inside a Next.js shell.** Next.js provides routing, i18n, fonts, metadata, and
    later auth/API/DB. The editor itself is browser-only (canvas, pointer events, IndexedDB) and is rendered as a
    single client boundary. We don't force server rendering where it adds nothing.
-3. **Registries over `if/else` chains.** Tools, shortcuts/commands, stitch types and shopping calculators are
-   each a list of plain objects. Adding one means adding a file and one line to the registry.
-4. **Ports for anything that will change backend.** Saving/loading goes through interfaces. Today they're backed
+3. **Registries over `if/else` chains.** Tools, shortcuts/commands, stitch types, key-entry kinds, layers, chart
+   checks and shopping calculators are each a list of plain objects. Adding one means adding a file and one line
+   to the registry.
+4. **Every layer obeys one contract.** Stitches, beads, backstitch, fractional stitches, knots and ambiguous marks
+   all implement the same `LayerHandler` (§7.1). Resize, transforms, selection, eraser, picker, counting and
+   serialization loop over the layer registry instead of naming layers. A new layer can't be forgotten.
+5. **Ports for anything that will change backend.** Saving/loading goes through interfaces. Today they're backed
    by localStorage/IndexedDB; tomorrow by an API + database — with no changes to the editor or UI.
-5. **No user-facing strings below the UI level.** Core returns data and message keys, and the UI translates them.
-6. **Pixels are configuration.** Every canvas colour, line width and ratio lives in one theme object shared by the
+6. **No user-facing strings below the UI level.** Core returns data and message keys, and the UI translates them.
+7. **Pixels are configuration.** Every canvas colour, line width and ratio lives in one theme object shared by the
    screen renderer and the PNG exporter.
-7. **File format compatibility is sacred.** JSON v3 and OXS round-trip exactly like today (golden tests).
+8. **File format compatibility is sacred.** v1–v3 JSON files load exactly as today. The new app writes JSON v4,
+   which only *adds* optional fields, so the old app can still open it (golden tests). OXS round-trips as today.
+9. **Everything is undoable.** Whole-chart operations (resize, transforms, key deletion) record structural patches
+   instead of wiping history (SPEC §15 groundwork).
 
 ---
 
@@ -84,14 +96,17 @@ stitchwork/
 │  │  ├─ layout/
 │  │  │  ├─ EditorLayout.tsx         slot-based shell: header | stage | side | status
 │  │  │  └─ layout.module.css
-│  │  ├─ header/                     PatternName, FileMenu, ViewSwitch, ExportMenu
-│  │  ├─ stage/                      ChartCanvas, ZoomControls, MiniToolbar, DropZone
-│  │  ├─ side/                       ToolBar, KeyPanel, KeyRow, FabricPanel, TotalsPanel
-│  │  ├─ status/                     StatusBar
+│  │  ├─ header/                     PatternName, PatternInfoButton, FileMenu, TransformMenu, ViewSwitch, ExportMenu
+│  │  ├─ stage/                      ChartCanvas, ZoomControls, MiniToolbar, DropZone, SelectionActions
+│  │  ├─ side/                       ToolBar, KeyPanel, KeyRow, FabricPanel (+ grid numbering), TotalsPanel, ChecksPanel
+│  │  ├─ status/                     StatusBar, AmbiguousStatus (only rendered when N > 0)
 │  │  ├─ dialogs/
 │  │  │  ├─ key-entry/               KeyEntryDialog, ThreadPicker, BeadPicker, BlendEditor, SymbolGrid
-│  │  │  ├─ NewPatternDialog.tsx, OpenPatternDialog.tsx, ResizeDialog.tsx
+│  │  │  ├─ NewPatternDialog.tsx, OpenPatternDialog.tsx (+ SnapshotHistory), ResizeDialog.tsx
 │  │  │  ├─ ImageImportDialog.tsx, SaveToFileDialog.tsx, ConfirmDialog.tsx
+│  │  │  ├─ PatternInfoDialog.tsx    metadata form (§14.1)
+│  │  │  ├─ GoToCellDialog.tsx       Ctrl/⌘+G (§14.2)
+│  │  │  ├─ MirrorFromCentreDialog.tsx, ExtendCanvasDialog.tsx, ReplaceKeyDialog.tsx
 │  │  ├─ references/                 ReferenceLayer, ReferenceWindow, ReferenceToolbar
 │  │  ├─ common/                     Modal, Toast, Menu, Swatch, KeyIcon, IconButton, Icon
 │  │  ├─ i18n/                       formatKeyLabel(), formatShoppingLine() — data → translated text
@@ -103,11 +118,19 @@ stitchwork/
 │  │  │  ├─ editorStore.ts           Zustand vanilla store (see §5)
 │  │  │  └─ selectors.ts
 │  │  ├─ actions/                    every state change goes through here
-│  │  │  ├─ paint.ts                 paintCells, eraseCells, fill, addSegment, eraseSegments
+│  │  │  ├─ paint.ts                 paintCells, eraseAt, fill, addSegment, placePartial, placeKnot
 │  │  │  ├─ keyEntries.ts            addEntry, updateEntry, deleteEntry, setActive
-│  │  │  ├─ pattern.ts               newPattern, resize, setFabric, rename, loadDocument
+│  │  │  ├─ pattern.ts               newPattern, resize, setFabric, rename, setMeta, setGridNumbering, loadDocument
+│  │  │  ├─ transforms.ts            flip, rotate, mirrorFromCentre, cropToContent, extendCanvas (§14.3)
+│  │  │  ├─ ambiguous.ts             toggleAt, next, clearAll (§14.5)
 │  │  │  └─ importExport.ts          exportAs(format), importFile(file)
-│  │  ├─ history/history.ts          patch-based undo/redo (see §5.3)
+│  │  ├─ history/history.ts          patch-based undo/redo, including structural patches (see §5.3)
+│  │  ├─ selection/                  §14.6
+│  │  │  ├─ selection.ts             cell mask + bounds, add/replace, select all, select by key
+│  │  │  ├─ floating.ts              floating fragment: move, nudge, flip/rotate, commit, cancel
+│  │  │  └─ clipboard.ts             in-memory clipboard (survives project switch) + optional system clipboard
+│  │  ├─ checks/checksSession.ts     run checks, findings list, prev/next, session-only ignores (§14.4)
+│  │  ├─ snapshots/SnapshotService.ts  5-min timer + "before destructive command" hook (§14.7)
 │  │  ├─ commands/
 │  │  │  ├─ types.ts                 Command { id, labelKey, run, isEnabled? }
 │  │  │  └─ registry.ts              all commands (tool.select, history.undo, view.zoomIn, file.save…)
@@ -120,8 +143,11 @@ stitchwork/
 │  │  │  ├─ ToolManager.ts           routes pointer events to the active tool, momentary tools
 │  │  │  ├─ pencil.ts  line.ts  rect.ts  filledRect.ts  fill.ts
 │  │  │  ├─ eraser.ts  picker.ts  pan.ts
-│  │  │  └─ backstitch.ts            used automatically when the active entry is a backstitch
-│  │  ├─ viewport/viewport.ts        zoom, pan, fit, screen ↔ grid conversion
+│  │  │  ├─ select.ts  magicWand.ts  (§14.6)
+│  │  │  ├─ partial.ts               fractional stitches: nearest corner, kind cycling, live preview (§14.8)
+│  │  │  ├─ backstitch.ts            used automatically when the active entry is a backstitch
+│  │  │  └─ knot.ts                  used automatically when the active entry is a French knot (§14.9)
+│  │  ├─ viewport/viewport.ts        zoom, pan, fit, screen ↔ grid conversion, centreOn(cell) + flash
 │  │  ├─ references/references.ts    reference windows state + persistence
 │  │  └─ autosave.ts                 debounced draft save + flush on pagehide
 │  │
@@ -133,7 +159,9 @@ stitchwork/
 │  │  ├─ referenceRenderer.ts
 │  │  └─ primitives/
 │  │     ├─ stitches.ts              one draw function per stitch type id (see §9)
-│  │     ├─ beads.ts  backstitch.ts  symbols.ts  grid.ts  rulers.ts
+│  │     ├─ partials.ts  knots.ts    fractional triangles/squares, knot dots
+│  │     ├─ beads.ts  backstitch.ts  symbols.ts  grid.ts  rulers.ts (use core/grid numbering)
+│  │     └─ overlays.ts              ambiguous corners, selection marching ants, check rings, go-to flash, mirror guides
 │  │
 │  ├─ core/                          ── L1 domain (pure TS) ────────────────────────
 │  │  ├─ color/                      colorMath.ts (sRGB, linear, Lab, ΔE), colorEntry.ts (mkColor)
@@ -144,16 +172,33 @@ stitchwork/
 │  │  │  └─ beadShapes.ts
 │  │  ├─ symbols/symbols.ts          ordered symbol list, firstFreeSymbol, normalise (U+FE0E)
 │  │  ├─ pattern/
-│  │  │  ├─ types.ts                 Pattern, KeyEntry, Layers, Segment, Blend, Combo, CustomColor
+│  │  │  ├─ types.ts                 Pattern, KeyEntry, Segment, Knot, Partial, Blend, Combo, CustomColor
+│  │  │  ├─ meta.ts                  PatternMeta fields + defaults (§14.1)
 │  │  │  ├─ createPattern.ts
 │  │  │  ├─ resolve.ts               getEntry(id) for dmc/bead/custom/blend/combo
-│  │  │  ├─ keyEntries.ts            sameKey, findSameKey, occupancy rules (override)
-│  │  │  ├─ blends.ts  combos.ts
-│  │  │  └─ resize.ts
+│  │  │  ├─ keyEntries.ts            sameKey, findSameKey, findOrCreateTwin (opposite half-cross direction)
+│  │  │  ├─ occupancy.ts             override rules across layers (SPEC §6.2, §15.13 Q4)
+│  │  │  ├─ fragment.ts              extract / insert a multi-layer piece + its key entries (selection, paste)
+│  │  │  └─ blends.ts  combos.ts
+│  │  ├─ entryKinds/                 key-entry kinds: thread, combo, bead, back, knot (§7.2)
+│  │  │  ├─ types.ts  registry.ts
+│  │  ├─ layers/                     one handler per layer, same contract (§7.1)
+│  │  │  ├─ types.ts                 LayerHandler
+│  │  │  ├─ registry.ts              stitches, beads, partials, segments, knots, ambiguous
+│  │  │  └─ stitches.ts beads.ts partials.ts segments.ts knots.ts ambiguous.ts
+│  │  ├─ transform/                  shared by transforms, mirror drawing, selection, near-symmetry
+│  │  │  ├─ cellTransform.ts         flipH/flipV/rot90/rot180/translate as index + point mappers
+│  │  │  └─ direction.ts             ╱↔╲ and corner remapping rules
+│  │  ├─ grid/numbering.ts           column/row labels, centre numbering, major-line offset, parse "col, row" (§14.2)
 │  │  ├─ stitches/
 │  │  │  ├─ types.ts                 StitchType interface
-│  │  │  └─ registry.ts              full, half, halfb (+ future types)
-│  │  ├─ geometry/                   bresenham, floodFill, shapes, brush, mirror, segmentDistance, snap
+│  │  │  ├─ registry.ts              full, half, halfb
+│  │  │  └─ partialKinds.ts          quarter, three-quarter, petite: geometry, thread factor, OXS mapping (§14.8)
+│  │  ├─ checks/                     on-demand chart checks (§14.4)
+│  │  │  ├─ types.ts  registry.ts
+│  │  │  └─ isolated.ts  nearSymmetry.ts  unusedEntries.ts  rareEntries.ts  duplicateEntries.ts
+│  │  ├─ snapshots/retention.ts      which snapshots to keep (pure function, §14.7)
+│  │  ├─ geometry/                   bresenham, floodFill, shapes, brush, mirrorPoints, segmentDistance, snap, nearestCorner
 │  │  ├─ calculator/
 │  │  │  ├─ usage.ts                 counts per entry, backstitch lengths (pure facts)
 │  │  │  ├─ types.ts                 ShoppingCalculator, ShoppingList
@@ -161,16 +206,18 @@ stitchwork/
 │  │  │  └─ classicSkeins.ts         today's algorithm (SPEC §7.2)
 │  │  ├─ labels/keyLabel.ts          returns structured label parts, NOT text
 │  │  ├─ formats/
-│  │  │  ├─ json/  serialize.ts  parse.ts  rle.ts  migrations.ts (v1→v3)
+│  │  │  ├─ json/  serialize.ts (writes v4)  parse.ts (reads v1–v4)  rle.ts  migrations.ts
 │  │  │  ├─ oxs/   exportOxs.ts  importOxs.ts  resolveCodes.ts
 │  │  │  └─ csv/   exportCsv.ts
 │  │  └─ imageToPattern/             quantize.ts (works on pixel arrays), findBlends.ts
 │  │
 │  ├─ persistence/                   ── ports + adapters ─────────────────────────
-│  │  ├─ ports.ts                    PatternRepository, ReferenceRepository, DraftStore
+│  │  ├─ ports.ts                    PatternRepository, ReferenceRepository, DraftStore, SnapshotRepository
 │  │  ├─ local/
 │  │  │  ├─ localPatternRepository.ts    "stitchwork.library" (compatible keys)
-│  │  │  ├─ indexedDbReferenceRepository.ts  "stitchwork" DB, "refs" store (compatible)
+│  │  │  ├─ indexedDb.ts                 opens "stitchwork" DB; v1 → v2 upgrade adds "snaps"
+│  │  │  ├─ indexedDbReferenceRepository.ts  "refs" store (compatible)
+│  │  │  ├─ indexedDbSnapshotRepository.ts   "snaps" store, key [projectId, time] (§14.7)
 │  │  │  └─ localDraftStore.ts           "stitchwork.current"
 │  │  └─ index.ts                    the ONE place that picks implementations
 │  │
@@ -226,13 +273,19 @@ interface EditorState {
   ui: {
     tool: ToolId; momentaryTool: ToolId | null;
     activeEntry: number;     // key index, 0 = none
+    partialKind: 'quarter' | 'threeQuarter' | 'petite';   // current kind for the Partial tool (§14.8)
     view: 'color' | 'both' | 'symbols';
-    brush: 1|2|3|4|5; mirror: boolean; override: boolean;
+    brush: 1|2|3|4|5; override: boolean;
+    mirror: 'off' | 'vertical' | 'horizontal' | 'quad';    // cycles (§14.3)
     panelCollapsed: boolean;
   };
+  selection: { mask: Uint8Array | null; bounds: Rect | null; floating: Fragment | null };   // §14.6
+  checks: { findings: Finding[]; index: number; ignored: Set<string> } | null;               // §14.4, session only
+  flash: { cell: number; until: number } | null;                                             // Go to cell, findings
   status: { hoverCell: Cell | null; saveState: SaveState };
 }
 ```
+The clipboard lives in the editor instance, **outside** the store, so it survives project switches (§14.6).
 Typed arrays are **not** copied into React state. Actions mutate the document and bump a revision number.
 React components subscribe with selectors, for example `useEditor(s => s.keyRevision)`. Derived data such as
 usage counts and the shopping list is memoised per revision and computed off the pointer path (debounced like today).
@@ -241,13 +294,21 @@ usage counts and the shopping list is memoised per revision and computed off the
 Today each undo step copies all layers. For a 500×500 pattern that's ~1 MB × 60 steps. The new history stores **patches**:
 ```ts
 type Patch =
-  | { kind: 'cells'; layer: LayerId; indices: Uint32Array; before: Uint16Array; after: Uint16Array }
-  | { kind: 'segments'; added: Segment[]; removed: Segment[] };
+  | { kind: 'cells';    layer: LayerId; indices: Uint32Array; before: Uint16Array; after: Uint16Array }
+  | { kind: 'items';    layer: LayerId; added: unknown[]; removed: unknown[] }   // segments, knots, partials, ambiguous
+  | { kind: 'keys';     before: KeyEntryChange[]; after: KeyEntryChange[] }      // added / edited / deleted entries
+  | { kind: 'document'; before: DocumentState; after: DocumentState };           // w, h + all layers (structural)
 history.transaction(label, () => { /* actions record patches */ });
 ```
-A stroke is one transaction. Empty transactions are dropped, which matches "a stroke that changed nothing is not
-an undo step". Key-entry deletion and resize stay as "clear history" events, as in the spec. Changing that later
-is a local change in `history.ts`.
+- A stroke is one transaction. Empty transactions are dropped, which matches "a stroke that changed nothing is not
+  an undo step".
+- Small edits use `cells` / `items` patches. **Whole-chart operations** (resize, flip, rotate, mirror from centre,
+  crop, extend, delete key entry, replace key) use one `document` patch. It holds `w`, `h` and every layer,
+  including ambiguous marks, as SPEC §15 groundwork requires. These operations are rare, so a full copy is fine.
+- So, unlike the single-file app, **resize and deleting a key entry no longer clear the history** (SPEC §14.4).
+  Loading another pattern still starts a fresh history.
+- The patch kinds don't name specific layers. `items` patches are applied through the layer's handler (§7.1), so
+  knots and partials need no new history code.
 
 ### 5.4 Flow of a pencil stroke
 ```
@@ -302,11 +363,35 @@ export const keymap: Binding[] = [
   { keys: '1..9',        command: 'key.selectNth' },
   { hold: 'Space',       command: 'tool.momentary', args: 'pan' },
   { hold: 'Alt',         command: 'tool.momentary', args: 'picker' },
+  { keys: 'mod+g',       command: 'view.goToCell' },                         // §14.2
+  { keys: 'a',           command: 'ambiguous.toggleAtHover' },               // §14.5
+  { keys: 'shift+a',     command: 'ambiguous.next' },
+  { keys: 's',           command: 'tool.select', args: 'select' },           // §14.6
+  { keys: 'w',           command: 'tool.select', args: 'magicWand' },
+  { keys: 'mod+a',       command: 'selection.all' },
+  { keys: 'mod+c',       command: 'clipboard.copy',   when: 'hasSelection' },
+  { keys: 'mod+x',       command: 'clipboard.cut',    when: 'hasSelection' },
+  { keys: 'mod+v',       command: 'clipboard.paste' },
+  { keys: 'delete|backspace', command: 'selection.clear', when: 'hasSelection' },
+  { keys: 'arrows',      command: 'selection.nudge',  when: 'hasSelection' },    // shift = 10 cells
+  { keys: 'enter',       command: 'floating.commit',  when: 'floating' },
+  // Esc: first matching binding wins → cancel paste, then deselect, then end backstitch chain
+  { keys: 'escape',      command: 'floating.cancel',  when: 'floating' },
+  { keys: 'escape',      command: 'selection.none',   when: 'hasSelection' },
+  { keys: 'mod+d',       command: 'selection.none',   when: 'hasSelection' },
+  { keys: 'escape',      command: 'tool.cancel' },
   // …
 ];
 ```
-`mod` = ⌘ on macOS, Ctrl elsewhere. `ShortcutManager` handles the rules from the spec: ignore keys while typing
+`mod` = ⌘ on macOS, Ctrl elsewhere. `when` names a context flag computed from the store (`hasSelection`,
+`floating`, `checksOpen`, …), like VS Code's keybinding contexts. Bindings are tried top to bottom and the first
+match wins. That's how one key can do different things in different situations without `if` chains in handlers.
+
+Still open: the key that cycles the partial kind (§14.8). `Q` is free. `ShortcutManager` handles the rules from the spec: ignore keys while typing
 in inputs or while a modal is open, release hold-keys on window blur, and ignore auto-repeat for hold bindings.
+Commands can be flagged `destructive: '<reason>'`. The command registry then asks the snapshot service for a
+snapshot **before** running them (§14.7). A new destructive command gets this protection by adding one field.
+
 **Recipe:** add one line (and a command if it's a new action). The status-bar hint and a future "Keyboard
 shortcuts" dialog are generated from the keymap, and later user-customisable keymaps only need to merge a user
 override over this list.
@@ -320,7 +405,7 @@ making panels collapsible/tabbed, or building a mobile layout means editing `Edi
 See §8: one `CanvasTheme` object. The UI chrome uses CSS variables in `globals.css`.
 
 ### 6.5 Adding new kinds of stitches ("added crosses")
-See §9: the stitch-type registry.
+See §9 for the stitch-type registry, §7.2 for key-entry kinds, and §14.8–14.9 for fractional stitches and knots.
 
 ### 6.6 Changing how the shopping list is calculated
 See §10: usage facts are separate from calculator strategies.
@@ -335,8 +420,82 @@ See §13.
 
 ## 7. Core domain notes
 
-- **Types mirror the spec** (SPEC §3). `Pattern.layers` is a record `{ stitches: Uint16Array; beads: Uint16Array }`
-  plus `segments: Segment[]`. Keeping layers as a map rather than fixed fields leaves room for new layers.
+- **Types mirror the spec** (SPEC §3), extended with the v4 fields:
+  ```ts
+  interface Pattern {
+    id; name; w; h; count; strands; fabric;
+    meta: PatternMeta;                         // §14.1, all fields optional
+    grid: GridNumbering;                       // §14.2, default { x0: 1, y0: 1, label: 10, fromCentre: false }
+    key: (KeyEntry | null)[];                  // index 0 always null
+    blends; combos; customs;
+    layers: {
+      stitches: Uint16Array;                   // dense, one key index per cell
+      beads: Uint16Array;                      // dense
+      partials: Map<number, PartialStitch[]>;  // sparse, ≤ 4 per cell (§14.8)
+      segments: Segment[];                     // backstitch, half-grid points
+      knots: Knot[];                           // French knots, half-grid points (§14.9)
+      ambiguous: Set<number>;                  // cell indices (§14.5)
+    };
+  }
+  ```
+
+### 7.1 Layers — one contract for all of them
+
+Every layer has a handler in `core/layers/`. Code that must touch "everything on the chart" loops over
+`layerRegistry` and never names a layer:
+
+```ts
+export interface LayerHandler<T = unknown> {
+  id: LayerId;                               // 'stitches' | 'beads' | 'partials' | 'segments' | 'knots' | 'ambiguous'
+  geometry: 'cell' | 'point';                // cells (by index) or half-grid points (x, y)
+  exported: boolean;                         // false for 'ambiguous' — never in PNG/PDF/OXS/CSV
+  countsUsage: boolean;                      // false for 'ambiguous'
+  // structure
+  clone(layer: T): T;
+  resize(layer: T, from: Size, to: Size, offset: Point): T;
+  transform(layer: T, t: CellTransform, ctx: TransformContext): T;   // flips/rotations; ctx re-points ╱↔╲ entries
+  // selection & clipboard
+  extract(layer: T, mask: Uint8Array, size: Size): T;
+  insert(layer: T, piece: T, at: Point, opts: { override: boolean; keyMap: KeyIndexMap }): T;
+  // editing helpers
+  eraseAt(layer: T, at: GridPoint, radius: number): Patch | null;
+  pickAt(layer: T, at: GridPoint): number;    // key index or 0
+  remapKeys(layer: T, map: KeyIndexMap): T;   // delete / replace key entry
+  // facts
+  usage(layer: T, add: (keyIndex: number, unit: UsageUnit, amount: number) => void): void;
+  // persistence (JSON v4 field)
+  serialize(layer: T, keyMap: KeyIndexMap): unknown;
+  parse(raw: unknown, size: Size): T;
+}
+```
+Benefits:
+- **Resize, transforms (§14.3), selection (§14.6), the eraser, the picker, delete key, counting and JSON** each
+  become one loop over the registry. Adding knots or partials automatically gets them resize, flips, copy/paste,
+  undo and saving.
+- **Picker priority** (SPEC §6.2 plus §15.14: knots and backstitch first, then beads, then partials, then stitches)
+  is simply the registry order used by `pickAt`.
+- The renderer has a matching painter per layer id (`render/primitives`), drawn in a fixed z-order:
+  stitches → partials → beads → grid → segments → knots → ambiguous → tool overlays.
+
+### 7.2 Key-entry kinds — `core/entryKinds`
+
+Today's kinds (`thread`, `combo`, `bead`, `back`) and the new `knot` are registry entries:
+```ts
+export interface EntryKind {
+  id: 'thread' | 'combo' | 'bead' | 'back' | 'knot';
+  labelKey: MessageKey;            // dialog Type button
+  layer: LayerId;                  // where pencil-style tools put it
+  placement: 'cell' | 'point' | 'segment';   // chooses the tool behaviour: brush, knot.ts, backstitch.ts
+  fields: Array<'colour' | 'blend' | 'bead' | 'stitchType' | 'strands' | 'wraps' | 'symbol'>;  // dialog sections shown
+  label(entry, resolved): LabelData;          // title/subtitle parts (SPEC §3.4)
+  oxs: { exportItem; importMatch };
+}
+```
+The key-entry dialog builds its form from `fields`. The ToolManager uses `placement` to pick the tool behaviour,
+the same way backstitch entries switch pencil/line/rect today. So knots are "one kind + one layer + one painter +
+one tool behaviour".
+
+### 7.3 Other domain notes
 - **Key labels are data**:
   `keyLabel(entry) → { kind:'thread', brand:'DMC', code:'310', name:'Black', strands:2, stitchType:'full' }`.
   The UI turns it into "DMC 310 — Black · 2 strands · full cross" in the current language.
@@ -365,6 +524,12 @@ export const defaultCanvasTheme = {
   backstitch: { baseWidth: .07, perStrand: .035, maxStrands: 4, lightThreshold: 215, darken: -.45 },
   rulers: { size: 26, background: '#F4EFE6', text: '#7A7064' },
   preview: { alpha: .55 },
+  partials: { symbolScale: .45, splitLine: 'rgba(0,0,0,.45)' },                   // §14.8
+  knots: { radius: .2, outline: 'rgba(0,0,0,.6)', symbolsViewDot: '#1d1a16' },    // §14.9
+  ambiguous: { corner: .28, minZoom: 6 },                                         // accent-coloured corner triangle
+  selection: { ants: ['#000', '#fff'], dash: [4, 4], floatingAlpha: .8 },
+  findings: { ring: 3, ringPadding: .3 },
+  flash: { durationMs: 900 },
   export: { chartCell: [16, 24], previewCell: [4, 12], margin: { chart: 40, preview: 16 }, keyColumnWidth: 420 },
 } satisfies CanvasTheme;
 ```
@@ -392,9 +557,8 @@ export const stitchPainters: Record<StitchTypeId, StitchPainter> = { full, half,
 `core/stitches/registry.ts`, add a painter, add translations, and add OXS mapping if one exists. The key-entry
 dialog, totals, calculator, PNG export and OXS export pick it up automatically.
 
-**Sub-cell stitches** (quarter, three-quarter, French knots) need more than one stitch per square. The model
-already allows a new layer (`layers.partials` as a sparse list `{ cell, corner, entry }`). That would be a planned
-feature touching core, renderer, eraser/picker and OXS. The structure doesn't block it, but it isn't free.
+**Sub-cell stitches** (quarter, three-quarter, petite) and **French knots** don't fit "one stitch type per cell".
+They get their own layers (`partials`, `knots`) through the layer contract (§7.1). Details are in §14.8–14.9.
 
 ---
 
@@ -405,7 +569,9 @@ Two separate steps:
 ```ts
 // 1. Facts — never changes when the shopping rules change
 export function computeUsage(p: Pattern): UsageReport;
-// per key entry: { cells, segments, segmentLength } + totals by stitch type
+// built by asking every counting layer (§7.1) to report units per key entry:
+//   'cell' (by stitch type), 'quarter' | 'threeQuarter' | 'petite', 'segmentLength', 'segment', 'knot'
+// + totals by unit. New layers add units here without touching calculators that ignore them.
 
 // 2. Strategy — swap or add freely
 export interface ShoppingCalculator {
@@ -422,7 +588,9 @@ export interface ShoppingList {
 ```
 - `classicSkeins.ts` is today's logic (SPEC §7.2) with its constants turned into `defaults`.
 - Panel, CSV and PNG key all render a `ShoppingList`, so a new calculator needs no UI or export changes.
-- Stitch factors come from the stitch-type registry (`threadFactor`), not hard-coded `0.5`.
+- Stitch factors come from the registries (`threadFactor`: full 1, half 0.5, quarter 0.25, three-quarter 0.75,
+  petite 0.5), not hard-coded `0.5`. Knots use a `knotAllowance` setting × strands (SPEC §15.14).
+- The totals panel shows partial and knot counts only when they exist, e.g. `120 + 14¾` (SPEC §15.13 Q7).
 - Room for: thread length in metres, waste %, cost per item, packs of beads, per-brand skein sizes, user-adjustable
   settings stored on the pattern (`pattern.calculator = { id, settings }`).
 
@@ -449,7 +617,9 @@ export interface ShoppingList {
 | What | Tool | Notes |
 |---|---|---|
 | Domain logic | Vitest | Geometry, colour maths, occupancy rules, calculator, formats |
-| **Golden files** | Vitest | `tests/fixtures/1.json` and `1.oxs`: parse → serialize must be identical. OXS export snapshot. Shopping list snapshot |
+| **Golden files** | Vitest | `tests/fixtures/1.json` and `1.oxs`: v3 parse → v4 serialize → parse gives the same pattern; v4 adds only defaulted fields. OXS export snapshot. Shopping list snapshot |
+| Layer contract | Vitest | One shared test suite run against **every** registered layer: resize, flip twice = identity, rotate ×4 = identity, extract + insert = identity, serialize + parse = identity. A new layer must pass it |
+| Transforms & checks | Vitest | ╱↔╲ re-pointing, corner remapping, near-symmetry on fixtures with planted errors |
 | Parity with old app | Vitest | Run the same fixtures through the old `index.html` functions (extracted) and compare outputs during migration |
 | Editor flows | Vitest + jsdom | Tool manager, history transactions, shortcut manager |
 | UI end-to-end | Playwright | Draw, undo, key dialog, save/open, import/export download, Alt-pick, reference persistence across reload |
@@ -463,20 +633,26 @@ export interface ShoppingList {
 **Today** — ports in `persistence/ports.ts`:
 ```ts
 export interface PatternRepository {
-  list(): Promise<PatternSummary[]>;             // id, name, w, h, updatedAt
-  load(id: string): Promise<PatternFile>;        // JSON v3 document
+  list(): Promise<PatternSummary[]>;             // id, name, w, h, updatedAt, designer (§14.1, shown in Open)
+  load(id: string): Promise<PatternFile>;        // JSON v4 document (v1–v3 accepted)
   save(doc: PatternFile): Promise<SaveResult>;
   remove(id: string): Promise<void>;
 }
 export interface ReferenceRepository { load(patternId: string): Promise<RefWindowData[]>; save(patternId: string, refs: RefWindowData[]): Promise<void> }
 export interface DraftStore { load(): PatternFile | null; save(doc: PatternFile): void }
+export interface SnapshotRepository {                           // §14.7
+  add(s: Snapshot): Promise<void>;                              // { projectId, time, reason, w, h, data, thumb }
+  list(projectId: string): Promise<SnapshotSummary[]>;          // without `data`, for the History list
+  get(projectId: string, time: number): Promise<Snapshot>;
+  removeMany(keys: Array<[projectId: string, time: number]>): Promise<void>;
+}
 ```
 Local adapters keep **today's storage keys** (`stitchwork.library`, `stitchwork.current`, IndexedDB `stitchwork/refs`),
-so users moving from the single-file app keep their work.
+so users moving from the single-file app keep their work. Snapshots add the `snaps` store (IndexedDB version 2).
 
 **Later**, without touching `editor/` or `ui/` panels:
 1. `src/server/db/` — Postgres via Drizzle. Table `patterns(id, user_id, name, w, h, data jsonb, updated_at)`.
-   `data` is the same JSON v3 document.
+   `data` is the same JSON v4 document. Snapshots can later move to a `pattern_snapshots` table behind the same port.
 2. `src/server/auth/` — Auth.js or Better Auth. Session read in `[locale]/layout.tsx` (server) and passed down.
 3. `app/api/patterns/route.ts` and `[id]/route.ts` — Route Handlers implementing list/load/save/remove.
 4. `persistence/api/` — `ApiPatternRepository` calling those routes; reference photos uploaded to object storage
@@ -492,23 +668,206 @@ Choices made now so that later step is easy:
 
 ---
 
-## 14. Migration plan
+## 14. Planned features (SPEC §15) — where each one lives
+
+Each feature below lists its stored data, its modules by level, and its commands/shortcuts. Shared groundwork
+used by several of them:
+
+| Groundwork | Module | Used by |
+|---|---|---|
+| Layer contract | `core/layers` (§7.1) | 14.3, 14.5, 14.6, 14.8, 14.9, resize, eraser, picker, JSON |
+| Transform helpers | `core/transform` | 14.3 transforms + mirror modes, 14.4 near symmetry, 14.6 flip/rotate selection |
+| Structural undo | `editor/history` `document` patch (§5.3) | 14.3, 14.6 crop, resize, delete key |
+| JSON v4 | `core/formats/json` | 14.1 `meta`, 14.2 `grid`, 14.5 `amb`, 14.8 `part`, 14.9 `knots` |
+| Context-aware shortcuts | `editor/shortcuts` `when` (§6.2) | 14.6 Esc/Enter/arrows, 14.5 `A` |
+| Destructive-command hook | `editor/commands` `destructive` flag | 14.7 snapshots before risky operations |
+
+**JSON v4** (`formats/json`): `serialize` always writes `v: 4`. `parse` accepts v1–v4, and `migrations.ts`
+upgrades older documents step by step (v1 → v2 → v3 → v4), with missing fields getting defaults. New fields:
+`meta`, `grid`, `amb` (sorted cell indices), `part` (`[[i, kind, c, k], …]`), `knots` (`[[x, y, k], …]`). The
+single-file app ignores unknown fields when opening v4. But if you re-save from the old app, those fields are lost.
+The Save to file dialog should mention this during the transition.
+
+### 14.1 Pattern metadata — priority one (SPEC §15.1)
+- **Data:** `pattern.meta: PatternMeta` (`core/pattern/meta.ts`). All optional strings: designer, publisher, source,
+  sourceYear, sourceRef, copyright, notes, instructions, mappedBy, mappedDate. JSON v4 `meta`.
+- **UI:** `PatternInfoButton` next to the name opens `dialogs/PatternInfoDialog`. Labels for every field come from messages.
+- **Exports:** `formats/oxs` writes and reads `author`/`copyright`/`instructions`. `formats/csv` appends a "Pattern
+  info" block at the end. `render/exportChart` adds the `Designer · ©` line under the key heading. The PDF cover
+  (SPEC #10) will read the same object.
+- **Persistence:** `PatternSummary.designer`, so the Open list can show it without loading the whole document.
+- **Command:** `pattern.editInfo`.
+
+### 14.2 Grid numbering + Go to cell (SPEC §15.2)
+- **Data:** `pattern.grid = { x0, y0, label: 10 | 5, fromCentre }`, JSON v4 `grid`.
+- **Core:** `core/grid/numbering.ts` is the **only** place that turns indices into paper numbers and back:
+  `columnLabel(i)`, `rowLabel(i)`, `majorLineOffset()` (so major lines align with the numbering) and
+  `parseCellRef("12, 40") → cell | error`.
+- **Users:** `render/primitives/rulers.ts`, `ui/status/StatusBar`, `render/exportChart`, `render/referenceRenderer`
+  (grid read-out), `GoToCellDialog`. Nobody else does `x + 1`.
+- **UI:** numbering controls in `FabricPanel`. **Command** `view.goToCell` (mod+G) opens `GoToCellDialog`, then
+  `viewport.centreOn(cell)` and `store.flash` (painted by `overlays.ts`).
+
+### 14.3 Whole-chart transforms & mirror modes (SPEC §15.3)
+- **Core:** `core/transform/cellTransform.ts` defines `CellTransform` (flipH, flipV, rot90cw, rot90ccw, rot180,
+  translate). It maps cell indices and half-grid points and gives the new size. `direction.ts` holds the rules:
+  ╱↔╲ for flips and 90° turns (none for 180°), and corner remapping for partials (TL↔TR on flipH, …).
+- **Half-cross re-pointing:** `TransformContext.repoint(keyIndex)` uses `keyEntries.findOrCreateTwin()` to find an
+  entry with the same colour and strands and the opposite direction, or creates one with the next free symbol.
+  It collects a report (`{ code: 'transform.newTwins', count }`) for the toast.
+- **Editor:** `actions/transforms.ts`. Each operation is **one `document` patch** and a destructive command
+  (snapshot first). It applies `layerHandler.transform` to every layer, so beads, backstitch, knots, partials and
+  ambiguous marks all move.
+- **Mirror from centre / Crop to content / Extend canvas:** also in `actions/transforms.ts`. Mirror from centre
+  = extract the source half (`fragment.ts`) + transform + insert. Crop and extend = `layerHandler.resize` with an offset.
+- **Mirror drawing modes:** `ui.mirror` cycles off → vertical → horizontal → quad (command `draw.cycleMirror`).
+  `core/geometry/mirrorPoints(cell | point, mode, size)` returns the mirrored copies. Painting actions apply the
+  direction rule to them through the same `repoint`, which fixes SPEC quirk §14.12. Guides: `overlays.ts`.
+- **UI:** `header/TransformMenu`, `MirrorFromCentreDialog` (with confirm when the target isn't empty), `ExtendCanvasDialog`.
+
+### 14.4 Error detectors (SPEC §15.4)
+- **Core:** `core/checks/` is a registry of checks:
+  ```ts
+  interface ChartCheck {
+    id: 'isolated' | 'nearSymmetry' | 'unusedEntries' | 'rareEntries' | 'duplicateEntries' | string;
+    labelKey: MessageKey;
+    options: OptionSpec[];                        // e.g. cluster size, include beads — with defaults
+    run(p: Pattern, opts: Record<string, unknown>): Finding[];
+  }
+  interface Finding {
+    id: string;                                   // stable, so "Ignore" can hide it for the session
+    checkId: string; at: CellRef | PointRef; related?: CellRef[];
+    messageKey: MessageKey; params?: Record<string, unknown>;
+    suggestion?: { cells: Array<{ i: number; key: number }> };   // near symmetry: the majority side's value
+  }
+  ```
+  `nearSymmetry.ts` uses `core/transform` (including the direction rule) to compare mirrored pairs. All checks are
+  linear in the number of cells. If big charts ever feel slow, they can move to a worker without API changes.
+- **Editor:** `checks/checksSession.ts` runs checks on demand, keeps the findings, the current index and the
+  session-only ignores. Commands: `checks.open`, `checks.run`, `checks.next`, `checks.prev`, `checks.ignore`,
+  `checks.applySuggestion` (one undo step).
+- **UI:** `side/ChecksPanel` (options form generated from `options`, findings list). The canvas centres on the
+  finding and draws a ring (`overlays.ts`).
+- **Adding a check later** = one file in `core/checks/` + registry line + messages.
+
+### 14.5 Mark cell as ambiguous (SPEC §15.5)
+- **Data:** layer `ambiguous` (a `Set<number>`; JSON v4 `amb` as a sorted array). Its handler has `exported: false`
+  and `countsUsage: false`, and `pickAt` always returns 0. Occupancy ignores it. So it **can't** leak into
+  exports, totals, the picker or painting. That's enforced by the layer flags, not by remembering.
+- Resize, transforms, selection moves and undo work for free through the layer contract.
+- **No footprint:** no toolbar/tool registry entry. Only keymap lines (`A` → `ambiguous.toggleAtHover`,
+  `Shift+A` → `ambiguous.next`), the overlay painter (corner triangle at `z ≥ 6`, theme `ambiguous`), the hover
+  label in the status bar, and `status/AmbiguousStatus`, which renders **only when N > 0** (with a "Clear all"
+  popover → `ambiguous.clearAll`).
+
+### 14.6 Selection, copy/paste, move, flip/rotate (SPEC §15.6)
+- **Core:** `core/pattern/fragment.ts`
+  ```ts
+  interface Fragment {
+    size: Size; mask: Uint8Array;                 // cells covered
+    layers: Partial<Record<LayerId, unknown>>;    // produced by each handler's extract()
+    keys: KeyEntry[]; blends; combos; customs;    // only what the fragment uses, so it can travel between projects
+  }
+  extractFragment(p, mask) / insertFragment(p, f, at, { override }) → patch
+  ```
+  Backstitch extract keeps segments whose **both** endpoints are inside the selection outline (segments handler).
+  Pasting into another project builds a `KeyIndexMap` with `sameKey`, appending missing entries with their
+  blends, combos and customs.
+- **Editor:** `selection/selection.ts` (mask + bounds; marquee, add with Shift, magic wand contiguous / all-of-key),
+  `selection/floating.ts` (follows pointer/arrows, flip/rotate via `core/transform`, commit = one undo step,
+  respects Override, ignores mirror mode), and `selection/clipboard.ts` (in-memory and kept across project switches;
+  optional JSON copy to the system clipboard through `platform/clipboard`).
+- **ToolManager rule:** while a fragment is floating, pointer events go to the floating controller first, then to
+  the active tool.
+- **Tools:** `select.ts` (`S`) and `magicWand.ts` (`W`). **Commands:** `selection.all/none/clear/nudge/flipH/flipV/
+  rotate/replaceKey/cropToSelection`, `clipboard.copy/cut/paste`, `floating.commit/cancel` (keymap in §6.2).
+- **UI:** `stage/SelectionActions` (small floating bar with flip/rotate/delete/replace), `ReplaceKeyDialog`;
+  marching ants in `overlays.ts`.
+
+### 14.7 Automatic snapshots — minimal versioning (SPEC §15.7)
+- **Persistence:** `SnapshotRepository` port (§13) + `indexedDbSnapshotRepository.ts`. `local/indexedDb.ts` upgrades
+  the `stitchwork` database to version 2 and adds the `snaps` store, key `[projectId, time]`, value
+  `{ time, reason, w, h, data, thumb }`.
+- **Core:** `core/snapshots/retention.ts`, a pure function `pick(snapshots, now) → toDelete` (last 10, hourly for
+  24 h, daily for 14 days, cap ~50). Fully unit-tested with fake clocks.
+- **Editor:** `snapshots/SnapshotService.ts`
+  - Timer: every 5 minutes, only if `docRevision` changed since the last snapshot.
+  - **Before destructive commands**: the command registry calls `snapshotService.before(reason)` for every command
+    with `destructive` set (delete key, resize, transforms, mirror from centre, Open, New, file/OXS import,
+    image → pattern, later brand conversion). New destructive commands are covered by setting that one field.
+  - Thumbnail: `render/exportChart` in preview mode at a small cell size.
+  - Quota errors: drop the oldest and retry once.
+- **UI:** a **History…** section in `OpenPatternDialog` (`time · reason · W×H` + thumbnail). **Restore** snapshots
+  the current state first, then loads the chosen one with the same project id. Reasons are message keys, so the
+  list is translated.
+
+### 14.8 Fractional stitches — quarter, three-quarter, petite (SPEC §15.13, **design gate**)
+SPEC §15.13 still has open questions. The architecture keeps the stored data independent of most answers:
+- **Data:** layer `partials`, sparse `Map<cellIndex, PartialStitch[]>` with `{ kind: 'quarter' | 'threeQuarter' |
+  'petite', corner: 0..3 (TL, TR, BR, BL), key: number }`. JSON v4 `part: [[i, kind, c, k], …]`. This is the SPEC's
+  recommended model: stitches, not areas, and 1:1 with OXS `<partstitch>`.
+- **Kinds:** `core/stitches/partialKinds.ts` registry. Each kind has its corner geometry (for drawing and
+  hit-testing), `threadFactor` (0.25 / 0.75 / 0.5), allowed combinations within one cell, and an optional OXS
+  mapping (petite may have none, so export skips it and reports it).
+- **How the open questions map to code:**
+
+  | SPEC question | Where the decision lands | Cost of either answer |
+  |---|---|---|
+  | Q1 kind on the cell vs on the key entry | `PartialStitch.key` points at the colour's cross entry (cell-level kind). If you decide "on the entry", add an `EntryKind` `partial` instead. The layer data stays the same | small |
+  | Q2 which kinds in v1 | entries in `partialKinds.ts` | one registry line each |
+  | Q3 placement feel | `tools/partial.ts` (nearest corner via `core/geometry/nearestCorner`, kind from `ui.partialKind`, cycle key TBD) | local to the tool |
+  | Q4 coexistence with full/half | `core/pattern/occupancy.ts`, the only place with "what may share a cell" rules | local |
+  | Q5 erase / pick / fill | `layers/partials.ts` `eraseAt` (corner under pointer; brush > 1 clears cells) and `pickAt`; fill only targets its own layer | local |
+  | Q6 rendering | `render/primitives/partials.ts` + theme `partials` | local |
+  | Q7 counting | `usage()` reports `quarter` / `threeQuarter` / `petite` units; totals panel formatting | local |
+  | Q8 transforms | `core/transform/direction.ts` corner remap | already designed |
+  | Q9 OXS | `formats/oxs`: `<partstitch>` with directions and `palindex1/2`. Replaces today's "simplified" path in import | local |
+
+### 14.9 French knots (SPEC §15.14, **design gate**)
+- **Data:** layer `knots`, `Knot = { x, y, key }` with half-grid coordinates (JSON v4 `knots: [[x, y, k], …]`).
+  New `EntryKind` `knot` with fields `colour | blend`, `strands`, `wraps` (1–3) and an optional `symbol`.
+- **Placement:** `placement: 'point'` → `tools/knot.ts` is used whenever the active entry is a knot (pencil places
+  one; dragging places one per half-unit passed; never two on the same point; override off = no second knot on an
+  occupied point). Snapping is a function on the entry kind (`snap: 'halfGrid'`), so the SPEC Q2 answer "free
+  placement" is a one-line change.
+- **Layer handler:** `eraseAt` uses the eraser radius. `pickAt` runs before beads and stitches (registry order,
+  §7.1). Transforms and mirror move knots like backstitch points.
+- **Rendering:** `render/primitives/knots.ts`, drawn above backstitch. In symbol view it draws a black dot, or the
+  symbol if the entry has one (SPEC Q1 is just whether the dialog shows the `symbol` field).
+- **Totals / calculator:** `knot` usage unit; the classic calculator uses the `knotAllowance` setting.
+- **OXS:** `<object objecttype="knot">` export and import, replacing today's "simplified" path.
+- **Open questions** Q3 (point-placed beads) and Q4 (long stitches, lazy daisies) fit the same model. Point beads
+  = a `point` placement option for the bead kind plus a points layer. Long stitches / lazy daisies = new entry kinds
+  with `placement: 'segment'` and their own painter. Neither needs structural changes.
+
+---
+
+## 15. Migration plan
+
+The groundwork for §14 is built **in the first phases**, even though the features come later. Retrofitting the
+layer contract or structural undo after parity would mean rewriting half of `core` and `editor`.
 
 | Phase | Deliverable | Done when |
 |---|---|---|
 | 0 | Repo setup: Next.js + TS strict, ESLint boundaries, Vitest, Playwright, next-intl with `en` | CI green on an empty app |
-| 1 | `core/`: catalog JSON extracted, colour maths, pattern model, geometry, formats, calculator | Golden tests pass on `1.json` / `1.oxs`; outputs match the old app |
+| 1 | `core/`: catalog JSON extracted, colour maths, pattern model, **layer contract**, **transform helpers**, geometry, formats (**JSON v4**), calculator | Golden tests pass on `1.json` / `1.oxs`; outputs match the old app; layer contract suite green |
 | 2 | `render/` + theme: screen renderer and PNG export | Screenshot comparison of the chart matches the old app at several zooms |
-| 3 | `editor/`: store, history, viewport, tools, commands, shortcuts, autosave, local persistence | Editor drivable from tests without React |
+| 3 | `editor/`: store, history (**with `document` patches**), viewport, tools, commands (**with `when` + `destructive`**), shortcuts, autosave, local persistence | Editor drivable from tests without React |
 | 4 | `ui/`: layout, panels, dialogs, reference windows, drop zone, toasts | Full SPEC parity checklist ticked (one checkbox per SPEC section) |
 | 5 | Polish: workers for heavy jobs, `uk` translation, accessibility pass (focus, labels) | Lighthouse a11y ≥ 90; no UI freeze on 400-wide image import |
-| 6 (later) | Login + DB per §13 | — |
+| 6 | §14.1 metadata + §14.2 grid numbering / Go to cell | Fields round-trip through JSON v4 and OXS; numbering used everywhere |
+| 7 | §14.3 transforms & mirror modes | Flip/rotate identity tests; twins toast; one undo step each |
+| 8 | §14.5 ambiguous marks + §14.4 error detectors | Marks never appear in exports (test); planted-error fixtures found |
+| 9 | §14.6 selection, clipboard, floating paste | Cross-project paste maps keys; Esc/Enter priority tests |
+| 10 | §14.7 snapshots | Retention tests; restore after resize / New works |
+| 11 | §14.8 fractional stitches, §14.9 French knots — **after SPEC §15.13/§15.14 questions are answered** | OXS partstitch/knot round-trip; layer contract suite green for both layers |
+| 12 (later) | Login + DB per §13 | — |
 
 Until phase 4 is finished, `index.html` stays the working product.
 
 ---
 
-## 15. Quick map: "I want to change…"
+## 16. Quick map: "I want to change…"
 
 | Change | Where |
 |---|---|
@@ -524,3 +883,13 @@ Until phase 4 is finished, `index.html` stays the working product.
 | OXS import/export | `core/formats/oxs/` |
 | Where patterns are saved | `persistence/index.ts` (+ a new adapter) |
 | DMC / bead data | `core/catalog/data/*.json` |
+| A new layer (something new on the chart) | `core/layers/<layer>.ts` + `layers/registry.ts` + painter in `render/primitives` |
+| A new key-entry kind | `core/entryKinds/registry.ts` (+ layer and tool behaviour if it places differently) |
+| A chart check | `core/checks/<check>.ts` + `checks/registry.ts` + messages |
+| Pattern info fields | `core/pattern/meta.ts` + `PatternInfoDialog` + messages |
+| Column/row numbering | `core/grid/numbering.ts` |
+| Flip / rotate / mirror rules | `core/transform/` |
+| Which operations create a snapshot | `destructive` flag on the command in `editor/commands/registry.ts` |
+| Snapshot retention | `core/snapshots/retention.ts` |
+| Fractional stitch kinds | `core/stitches/partialKinds.ts` + `render/primitives/partials.ts` |
+| What may share a cell | `core/pattern/occupancy.ts` |
