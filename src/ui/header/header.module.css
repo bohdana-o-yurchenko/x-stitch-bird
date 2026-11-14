@@ -41,6 +41,11 @@
   display: flex;
   justify-content: center;
 }
+.toolGroup {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
 /* Not enough room for one row (measured in Header.tsx): the toolbar gets its own row under the app bar */
 .stacked .toolSlot {
   order: 10;

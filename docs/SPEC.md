@@ -186,8 +186,8 @@ view segmented control **Colour / Both / Symbols** (default Both) · **Export �
 
 *New app (2026-11-14):* app name **бджілка** with the bee icon (`src/app/icon.png`, also the favicon) · pattern name
 (`clamp(140px, 13vw, 260px)` wide) · **File ▾** · **main toolbar** (all tools, brush size 1–5, override, mirror,
-undo, redo, then an **i** button — hovering or clicking it shows every keyboard shortcut, grouped and generated
-from the keymap) · **Transform ▾** · language (UK/EN) · **side panel** toggle (K). No Save button (saving is
+undo, redo, **Transform ▾**) · **i** (hover or click: every keyboard shortcut, grouped, generated from the keymap) ·
+language (UK/EN) · **side panel** toggle (K). No Save button (saving is
 automatic, §9.2; ⌘/Ctrl+S and File ▸ Save still save at once) and no Check button (§15.4). The view switch moved to
 the zoom control (§4.2). When one row doesn't fit (measured, so it works for every language), the toolbar moves to
 its own centred row under the app bar. **Ukrainian is the default language**: `/` opens `/uk`; the browser language
@@ -210,7 +210,11 @@ The separate Export menu and the "Save to file" format dialog are gone (their it
 - **Mini toolbar** (only when side panel collapsed): expand button, active-key icon (click = expand),
   pencil, eraser, picker, pan, override, undo, redo. *New app:* removed — the tools are in the header and the
   panel's toggle is a header button.
-- *New app:* the zoom control also holds the view switch: **Colour / Both / Symbols** | `−` % `+` `⤢`.
+- *New app:* the zoom control also holds the view switch, stacked: **Colour / Both / Symbols** on top, `−` % `+` `⤢`
+  below. Trackpad pinch (Ctrl + small pixel deltas) zooms ~5× faster per delta unit than a mouse wheel notch
+  (`exp(-0.012·d)` vs `exp(-0.0025·d)`).
+- *New app:* the side panel's width can be dragged at its left edge (280 px … min(720 px, 60 % of the window));
+  remembered in this browser; double-click the edge for the default 360 px.
 
 ### 4.3 Status bar
 `Column X · Row Y` (1-based) of hovered cell, labels of what's in that cell (stitch and bead

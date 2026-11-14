@@ -141,6 +141,21 @@ test("the side panel hides and shows from the header button", async ({ page }) =
   await expect(page.locator("aside")).toBeVisible();
 });
 
+test("the side panel can be resized and keeps its width", async ({ page }) => {
+  const aside = page.locator("aside");
+  const before = (await aside.boundingBox())!.width;
+  const handle = (await page.getByTestId("side-resizer").boundingBox())!;
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + 200);
+  await page.mouse.down();
+  await page.mouse.move(handle.x - 120, handle.y + 200, { steps: 4 });
+  await page.mouse.up();
+  const after = (await aside.boundingBox())!.width;
+  expect(after).toBeGreaterThan(before + 100);
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  expect((await aside.boundingBox())!.width).toBeCloseTo(after, 0);
+});
+
 test("the i button lists the keyboard shortcuts on hover", async ({ page }) => {
   await page.getByRole("button", { name: "Keyboard shortcuts" }).hover();
   const list = page.getByTestId("shortcuts");

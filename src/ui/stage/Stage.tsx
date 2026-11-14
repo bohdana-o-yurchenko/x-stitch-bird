@@ -33,11 +33,12 @@ function ZoomControls() {
   return (
     <div className={s.zoom}>
       <ViewSwitch />
-      <div className={s.zoomSep} />
-      <button type="button" title={t("zoomOut")} onClick={() => run("view.zoomOut")}>−</button>
-      <span>{Math.round((zoom / 12) * 100)}%</span>
-      <button type="button" title={t("zoomIn")} onClick={() => run("view.zoomIn")}>+</button>
-      <button type="button" title={t("fit")} onClick={() => run("view.fit")}>⤢</button>
+      <div className={s.zoomRow}>
+        <button type="button" title={t("zoomOut")} onClick={() => run("view.zoomOut")}>−</button>
+        <span>{Math.round((zoom / 12) * 100)}%</span>
+        <button type="button" title={t("zoomIn")} onClick={() => run("view.zoomIn")}>+</button>
+        <button type="button" title={t("fit")} onClick={() => run("view.fit")}>⤢</button>
+      </div>
     </div>
   );
 }

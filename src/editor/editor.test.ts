@@ -161,6 +161,19 @@ describe("chart underlay (SPEC §15.15)", () => {
   });
 });
 
+describe("viewport", () => {
+  it("zooms noticeably on a trackpad pinch, and by a notch on a mouse wheel", () => {
+    ed.viewport.setSize(800, 600);
+    const zoom = () => ed.state.viewport.zoom;
+    const z0 = zoom();
+    for (let i = 0; i < 10; i++) ed.viewport.wheel({ deltaX: 0, deltaY: -4.5, deltaMode: 0, ctrlKey: true, metaKey: false, shiftKey: false }, 400, 300);
+    expect(zoom() / z0).toBeGreaterThan(1.6);
+    const z1 = zoom();
+    ed.viewport.wheel({ deltaX: 0, deltaY: -100, deltaMode: 0, ctrlKey: false, metaKey: false, shiftKey: false }, 400, 300);
+    expect(zoom() / z1).toBeCloseTo(Math.exp(0.25), 5);
+  });
+});
+
 describe("autosave", () => {
   it("saves changes to the library once a minute, and not after opening an unchanged pattern", async () => {
     vi.useFakeTimers();

@@ -1036,6 +1036,7 @@ Decisions taken while implementing this plan. Each one lives in the single place
 - App name and icon: `app.brand` / `app.title` messages and `src/app/icon.png` (Next's icon file convention).
 - Saving: `editor/autosave.ts` writes the draft after each change and the library once a minute when changed
   (`markSaved` after opening from the library or a manual save).
+- Side panel width: `ui/layout/EditorLayout.tsx` (`--side-w`, drag handle, `localStorage`).
 - Shortcut help: `ui/header/ShortcutsInfo.tsx` builds its list from `KEYMAP` via `shortcutLabels`/`formatKeys`, so
   a new binding only needs a row there.
 - Tooltips: elements keep plain `title` attributes; `ui/common/Tooltips.tsx` (mounted once) shows them after

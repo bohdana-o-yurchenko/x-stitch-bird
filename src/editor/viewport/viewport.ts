@@ -2,6 +2,8 @@ import type { Point } from "@/core/pattern/types";
 import type { EditorStore } from "../store/editorStore";
 
 const MIN_ZOOM = 2, MAX_ZOOM = 60, MAX_FIT_ZOOM = 40;
+/** Zoom per wheel delta unit: a mouse notch is ~100 units, a trackpad pinch sends many small deltas. */
+const WHEEL_SPEED = 0.0025, PINCH_SPEED = 0.012;
 
 /** Zoom and pan of the chart canvas (SPEC §5.1). Screen points are relative to the canvas element. */
 export class ViewportService {
@@ -68,8 +70,10 @@ export class ViewportService {
   wheel(e: { deltaX: number; deltaY: number; deltaMode: number; ctrlKey: boolean; metaKey: boolean; shiftKey: boolean }, sx: number, sy: number) {
     const mouseWheel = e.deltaMode !== 0 || (e.deltaX === 0 && Math.abs(e.deltaY) >= 50 && Number.isInteger(e.deltaY));
     if (e.ctrlKey || e.metaKey || (mouseWheel && !e.shiftKey)) {
+      // trackpad pinch arrives as ctrl + small pixel deltas
+      const pinch = !mouseWheel && e.deltaMode === 0;
       const d = Math.max(-120, Math.min(120, e.deltaY * (e.deltaMode ? 33 : 1)));
-      this.zoomAt(Math.exp(-d * 0.0025), sx, sy);
+      this.zoomAt(Math.exp(-d * (pinch ? PINCH_SPEED : WHEEL_SPEED)), sx, sy);
     } else if (e.shiftKey && !e.deltaX) this.panBy(-e.deltaY, 0);
     else this.panBy(-e.deltaX, -e.deltaY);
   }

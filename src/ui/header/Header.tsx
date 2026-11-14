@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
 import { Icon } from "../common/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { ShortcutsInfo } from "./ShortcutsInfo";
 import { ToolBar } from "./ToolBar";
 import { useCommand, useEditorState } from "../hooks/editor";
 import s from "./header.module.css";
@@ -107,22 +108,26 @@ export function Header() {
       <FileMenu />
       <div className={s.spacer} data-slot="spacer" />
       <div className={s.toolSlot} data-slot="tools">
-        <ToolBar />
+        <div className={s.toolGroup}>
+          <ToolBar />
+          <span className={s.sep} />
+          <Dropdown
+            className={btn}
+            label={t("header.transform")}
+            items={[
+              ...(["flipH", "flipV", "rot90cw", "rot90ccw", "rot180"] as const).map((id) => ({ label: t(`transformMenu.${id}`), onClick: () => run("transform.apply", id) })),
+              "-",
+              { label: t("transformMenu.mirrorFromCentre"), onClick: () => run("transform.requestMirror") },
+              "-",
+              { label: t("transformMenu.cropToContent"), onClick: () => run("transform.crop") },
+              { label: t("transformMenu.extendCanvas"), onClick: () => run("transform.requestExtend") },
+              { label: t("transformMenu.resize"), onClick: () => run("pattern.requestResize") },
+            ]}
+          />
+        </div>
       </div>
       <div className={s.spacer} data-slot="spacer" />
-      <Dropdown
-        className={btn}
-        label={t("header.transform")}
-        items={[
-          ...(["flipH", "flipV", "rot90cw", "rot90ccw", "rot180"] as const).map((id) => ({ label: t(`transformMenu.${id}`), onClick: () => run("transform.apply", id) })),
-          "-",
-          { label: t("transformMenu.mirrorFromCentre"), onClick: () => run("transform.requestMirror") },
-          "-",
-          { label: t("transformMenu.cropToContent"), onClick: () => run("transform.crop") },
-          { label: t("transformMenu.extendCanvas"), onClick: () => run("transform.requestExtend") },
-          { label: t("transformMenu.resize"), onClick: () => run("pattern.requestResize") },
-        ]}
-      />
+      <ShortcutsInfo />
       <LanguageSwitch />
       <PanelToggle />
     </header>
