@@ -26,10 +26,6 @@ function scene(ed: Editor): ChartScene {
     floating: st.floating && { pattern: st.floating.preview.pattern, palette: st.floating.preview.palette, at: st.floating.at },
     marquee: st.overlay.marquee,
     eraseHighlight: (st.momentaryTool ?? st.tool) === "eraser" ? st.overlay.eraseHighlight : null,
-    finding: (() => {
-      const f = st.checksOpen ? ed.checks.current() : undefined;
-      return f?.cell !== undefined ? { cells: f.related ?? [f.cell] } : null;
-    })(),
     flash: st.flash,
     underlay: st.underlay && st.underlay.visible && st.underlayImage ? { image: st.underlayImage, crop: st.underlay.crop, rect: st.underlay.rect, opacity: st.underlay.opacity, editing: !st.underlay.behind } : null,
   };

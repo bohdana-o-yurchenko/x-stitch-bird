@@ -20,6 +20,11 @@ export class ViewportService {
     return { x: (sx - this.ruler - offX) / zoom, y: (sy - this.ruler - offY) / zoom };
   }
 
+  /** Grid point at the middle of the visible chart area (right of and below the rulers). */
+  centre(): Point {
+    return this.toGrid((this.width + this.ruler) / 2, (this.height + this.ruler) / 2);
+  }
+
   toCell(sx: number, sy: number): Point {
     const g = this.toGrid(sx, sy);
     return { x: Math.floor(g.x), y: Math.floor(g.y) };

@@ -15,7 +15,6 @@ export interface CanvasTheme {
   ambiguous: { corner: number; minZoom: number };
   eraser: { highlight: string; minWidth: number; width: number };
   selection: { ants: [string, string]; dash: number[]; floatingAlpha: number };
-  findings: { ring: number; padding: number };
   flash: { durationMs: number };
   export: { chartCell: [number, number]; previewCell: [number, number]; margin: { chart: number; preview: number }; keyColumnWidth: number; text: string; subText: string };
 }
@@ -36,7 +35,6 @@ export const defaultCanvasTheme: CanvasTheme = {
   ambiguous: { corner: 0.28, minZoom: 6 },
   eraser: { highlight: "rgba(181,69,47,.5)", minWidth: 7, width: 0.32 },
   selection: { ants: ["#000", "#fff"], dash: [4, 4], floatingAlpha: 0.8 },
-  findings: { ring: 3, padding: 0.3 },
   flash: { durationMs: 900 },
   export: { chartCell: [16, 24], previewCell: [4, 12], margin: { chart: 40, preview: 16 }, keyColumnWidth: 420, text: "#111", subText: "#555" },
 };

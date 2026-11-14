@@ -63,7 +63,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "file.open", run: (ed) => ed.openDialog({ type: "open" }) },
   { id: "file.openSaved", run: (ed, id) => openFromLibrary(ed, id as string), destructive: "open" },
   { id: "file.save", run: (ed) => saveToLibrary(ed) },
-  { id: "file.saveToFile", run: (ed) => ed.openDialog({ type: "saveToFile" }) },
+  { id: "file.versions", run: (ed) => ed.openDialog({ type: "versions" }) },
   { id: "file.export", run: (ed, f) => exportAs(ed, f as ExportFormat) },
   { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".json,.oxs,.xml,application/json,text/xml"); if (f) await ed.commands.run("file.load", f); } },
   { id: "file.load", run: (ed, f) => loadFile(ed, f as File), destructive: "import" },
@@ -114,16 +114,10 @@ export const COMMANDS: readonly Command[] = [
   { id: "underlay.toggleBehind", run: (ed) => ed.underlay.data && ed.underlay.setBehind(!ed.underlay.data.behind) },
   { id: "underlay.update", run: (ed, patch) => ed.underlay.update(patch as never) },
   { id: "underlay.nudge", run: (ed, d) => { const { dx, dy } = d as { dx: number; dy: number }; ed.underlay.nudge(dx, dy); } },
+  { id: "underlay.stretch", run: (ed, d) => { const { dw, dh } = d as { dw: number; dh: number }; ed.underlay.stretch(dw, dh); } },
   { id: "underlay.fit", run: (ed) => ed.underlay.fit() },
   { id: "underlay.resetCrop", run: (ed) => ed.underlay.resetCrop() },
   { id: "underlay.remove", run: (ed) => ed.underlay.remove() },
-  // checks
-  { id: "checks.toggle", run: (ed) => (ed.state.checksOpen ? ed.checks.close() : ed.checks.open()) },
-  { id: "checks.run", run: (ed) => ed.checks.run() },
-  { id: "checks.next", run: (ed) => ed.checks.next() },
-  { id: "checks.prev", run: (ed) => ed.checks.prev() },
-  { id: "checks.ignore", run: (ed) => ed.checks.ignore() },
-  { id: "checks.fix", run: (ed) => ed.checks.applySuggestion() },
   // snapshots
   { id: "snapshot.restore", run: (ed, time) => ed.snapshots.restore(time as number) },
 ];

@@ -103,7 +103,7 @@ stitchwork/
 │  │  │  └─ layout.module.css
 │  │  ├─ header/                     PatternName, PatternInfoButton, FileMenu, TransformMenu, ViewSwitch, ExportMenu
 │  │  ├─ stage/                      ChartCanvas, ZoomControls, MiniToolbar, DropZone, SelectionActions
-│  │  ├─ side/                       ToolBar, KeyPanel, KeyRow, FabricPanel (+ grid numbering), TotalsPanel, ChecksPanel
+│  │  ├─ side/                       ToolBar, KeyPanel, KeyRow, FabricPanel (+ grid numbering), TotalsPanel, UnderlayPanel
 │  │  ├─ status/                     StatusBar, AmbiguousStatus (only rendered when N > 0)
 │  │  ├─ dialogs/
 │  │  │  ├─ key-entry/               KeyEntryDialog, ThreadPicker, BeadPicker, BlendEditor, SymbolGrid
@@ -134,7 +134,6 @@ stitchwork/
 │  │  │  ├─ selection.ts             cell mask + bounds, add/replace, select all, select by key
 │  │  │  ├─ floating.ts              floating fragment: move, nudge, flip/rotate, commit, cancel
 │  │  │  └─ clipboard.ts             in-memory clipboard (survives project switch) + optional system clipboard
-│  │  ├─ checks/checksSession.ts     run checks, findings list, prev/next, session-only ignores (§14.4)
 │  │  ├─ snapshots/SnapshotService.ts  5-min timer + "before destructive command" hook (§14.7)
 │  │  ├─ commands/
 │  │  │  ├─ types.ts                 Command { id, labelKey, run, isEnabled? }
@@ -199,7 +198,7 @@ stitchwork/
 │  │  │  ├─ types.ts                 StitchType interface
 │  │  │  ├─ registry.ts              full, half, halfb
 │  │  │  └─ partialKinds.ts          quarter, three-quarter, petite: geometry, thread factor, OXS mapping (§14.8)
-│  │  ├─ checks/                     on-demand chart checks (§14.4)
+│  │  ├─ checks/                     (removed — to be redesigned, §14.4)
 │  │  │  ├─ types.ts  registry.ts
 │  │  │  └─ isolated.ts  nearSymmetry.ts  unusedEntries.ts  rareEntries.ts  duplicateEntries.ts
 │  │  ├─ snapshots/retention.ts      which snapshots to keep (pure function, §14.7)
@@ -825,6 +824,9 @@ The Save to file dialog should mention this during the transition.
 - **UI:** `header/TransformMenu`, `MirrorFromCentreDialog` (with confirm when the target isn't empty), `ExtendCanvasDialog`.
 
 ### 14.4 Error detectors (SPEC §15.4)
+
+> **Removed 2026-11-14, to be redesigned** (see §17). The design below describes the first version and is kept for
+> reference; the folders it names no longer exist.
 - **Core:** `core/checks/` is a registry of checks:
   ```ts
   interface ChartCheck {
@@ -1024,6 +1026,14 @@ Decisions taken while implementing this plan. Each one lives in the single place
   `KeyEntry.sym` as `line:<name>`; `nextSymbol`/`symbolsFor` pick by entry kind and `fixEntrySymbols` repairs
   older files. Drawing is `render/primitives/lineStyles.ts`; strand thickness is `strandFactor` with
   `theme.backstitch.strandFirst`/`strandStep`. Adding a style = one id in core + one drawing entry in render.
+- Chart checks (SPEC §15.4) were removed on 2026-11-14 for a redesign: no `core/checks`, `editor/checks` or panel.
+  The disabled **Check…** button in `ui/header/Header.tsx` is the placeholder. A new design should come back as a
+  core module (pure functions over a `Pattern`) + an editor session + a side-panel section, like before.
+- Menus: `Dropdown` in `ui/common/widgets.tsx` takes `MenuItem[]` (actions, `"-"` separators, nested `items` for
+  submenus, optional `hint` line). The File menu is defined in `ui/header/Header.tsx`.
+- Floating stage panels (collapsed toolbar, underlay alignment pad) use `ui/stage/FloatingPanel.tsx`: draggable
+  by a grip, position kept in `localStorage` (a per-browser convenience).
+- Underlay stretching keeps the screen centre fixed: `stretchUnderlay` in `core/underlay/`, `ViewportService.centre()`.
 - Small dialogs share `ui/dialogs/simpleDialogs.tsx`; the key-entry dialog has its own folder.
 - `window.__stitchwork` is the editor instance — a deliberate debugging / end-to-end test hook.
 - `cacheComponents` is off: the editor is client-only, so server caching adds nothing yet.

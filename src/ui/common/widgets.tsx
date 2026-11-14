@@ -104,14 +104,60 @@ export function Toasts() {
   );
 }
 
+/** A menu entry: an action, a submenu (`items`), or "-" for a separator. `hint` is a second, muted line. */
+export type MenuItem = { label: string; hint?: string; onClick?: () => void; disabled?: boolean; items?: MenuItem[] } | "-";
+
+type MenuPos = { top: number; left?: number; right?: number };
+
+function MenuList({ items, pos, onDone, testId }: { items: MenuItem[]; pos: MenuPos; onDone: () => void; testId?: string }) {
+  const [sub, setSub] = useState<{ index: number; pos: MenuPos } | null>(null);
+  const openSub = (index: number, el: HTMLElement) => {
+    const r = el.getBoundingClientRect();
+    // flyout to the right unless that would leave the screen
+    setSub({ index, pos: r.right + 240 < window.innerWidth ? { top: r.top - 5, left: r.right + 2 } : { top: r.top - 5, right: window.innerWidth - r.left + 2 } });
+  };
+  const subItems = sub && items[sub.index];
+  return (
+    <>
+      <div className={s.menu} role="menu" data-testid={testId} style={{ position: "fixed", top: pos.top, left: pos.left ?? "auto", right: pos.right ?? "auto" }}>
+        {items.map((i, n) =>
+          i === "-" ? (
+            <hr key={n} className={s.menuSep} />
+          ) : (
+            <button
+              key={i.label}
+              type="button"
+              role="menuitem"
+              aria-haspopup={i.items ? "menu" : undefined}
+              aria-expanded={i.items ? sub?.index === n : undefined}
+              disabled={i.disabled}
+              className={cx(i.items && s.hasSub, sub?.index === n && s.subOpen)}
+              onPointerEnter={(e) => (i.items ? openSub(n, e.currentTarget) : setSub(null))}
+              onClick={(e) => {
+                if (i.items) return openSub(n, e.currentTarget);
+                onDone();
+                i.onClick?.();
+              }}
+            >
+              <span>{i.label}</span>
+              {i.hint && <small>{i.hint}</small>}
+            </button>
+          ),
+        )}
+      </div>
+      {sub && subItems && subItems !== "-" && subItems.items && <MenuList items={subItems.items} pos={sub.pos} onDone={onDone} />}
+    </>
+  );
+}
+
 /**
- * Dropdown menu. The menu is rendered into <body> and positioned from the button, so scrolling or clipped
- * containers (like the header) can't hide it. Follows the button on scroll and resize; closes on outside click or Esc.
+ * Dropdown menu with optional submenus. Menus are rendered into <body> and positioned from the button, so
+ * scrolling or clipped containers (like the header) can't hide them. Follows the button on scroll and resize;
+ * closes on outside click or Esc.
  */
-export function Dropdown({ label, title, items, className }: { label: string; title?: string; className?: string; items: { label: string; onClick: () => void; disabled?: boolean }[] }) {
-  const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
+export function Dropdown({ label, title, items, className }: { label: string; title?: string; className?: string; items: MenuItem[] }) {
+  const [pos, setPos] = useState<MenuPos | null>(null);
   const button = useRef<HTMLButtonElement>(null);
-  const menu = useRef<HTMLDivElement>(null);
   const place = () => {
     const r = button.current!.getBoundingClientRect();
     // open towards the side with more room
@@ -121,7 +167,7 @@ export function Dropdown({ label, title, items, className }: { label: string; ti
   useEffect(() => {
     if (!open) return;
     const close = () => setPos(null);
-    const outside = (e: PointerEvent) => !menu.current?.contains(e.target as Node) && !button.current?.contains(e.target as Node) && close();
+    const outside = (e: PointerEvent) => !(e.target as Element).closest?.("[role=menu]") && !button.current?.contains(e.target as Node) && close();
     const esc = (e: KeyboardEvent) => e.key === "Escape" && close();
     document.addEventListener("pointerdown", outside);
     window.addEventListener("keydown", esc);
@@ -140,17 +186,7 @@ export function Dropdown({ label, title, items, className }: { label: string; ti
       <button ref={button} type="button" className={className ?? s.btn} title={title} aria-haspopup="menu" aria-expanded={!!pos} onClick={toggle}>
         {label}
       </button>
-      {pos &&
-        createPortal(
-          <div ref={menu} className={s.menu} role="menu" style={{ position: "fixed", top: pos.top, left: pos.left ?? "auto", right: pos.right ?? "auto" }}>
-            {items.map((i) => (
-              <button key={i.label} type="button" role="menuitem" disabled={i.disabled} onClick={() => { setPos(null); i.onClick(); }}>
-                {i.label}
-              </button>
-            ))}
-          </div>,
-          document.body,
-        )}
+      {pos && createPortal(<MenuList items={items} pos={pos} onDone={() => setPos(null)} />, document.body)}
     </>
   );
 }

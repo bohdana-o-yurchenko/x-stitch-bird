@@ -1,5 +1,5 @@
 import type { Point } from "@/core/pattern/types";
-import { dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, type Handle, type UnderlayData } from "@/core/underlay/underlay";
+import { dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, stretchUnderlay, type Handle, type UnderlayData } from "@/core/underlay/underlay";
 import { loadImage } from "@/platform/images";
 import type { Editor } from "../createEditor";
 
@@ -102,6 +102,12 @@ export class UnderlayService {
   nudge(dx: number, dy: number) {
     const u = this.data;
     if (u) this.update({ rect: { ...u.rect, x: u.rect.x + dx, y: u.rect.y + dy } });
+  }
+
+  /** Grow or shrink by (dw, dh) cells around the middle of the screen; works in both modes, at any zoom. */
+  stretch(dw: number, dh: number) {
+    const u = this.data;
+    if (u) this.update({ rect: stretchUnderlay(u.rect, this.ed.viewport.centre(), dw, dh) });
   }
 
   private grabTolerance() {

@@ -184,11 +184,26 @@ Brand mark · editable **pattern name** input (change → `P.name`, trimmed, def
 buttons **New**, **Open**, **Save**, **Save to file**, **Load file**, **Image → pattern**, **+ Reference** ·
 view segmented control **Colour / Both / Symbols** (default Both) · **Export ▾** menu.
 
+*New app (2026-11-14):* brand · pattern name (up to 380 px wide) · **File ▾** · **Save** · … · **Transform ▾** ·
+**Check…** (disabled placeholder, §15.4) · view switch · language. The File menu groups everything file-related;
+items carry a muted second line saying what they do, and `▸` items open a submenu on hover or click:
+- **New ▸** Blank pattern… · From a picture…
+- Open saved pattern… · Open file from computer… (.json/.oxs) · **Versions…** (automatic snapshots, §15.7 — no
+  longer inside the Open dialog)
+- Save (in this browser) · Download pattern file (.json)
+- **Export ▸** chart PNG (colour + symbols / symbols only / colour blocks) · Open Cross Stitch (.oxs) · shopping list (CSV)
+- **Reference pictures ▸** Photo in a floating window… (§11) · Image behind the chart… (§15.15)
+- Pattern info…
+
+The separate Export menu and the "Save to file" format dialog are gone (their items are in File ▸ Export).
+
 ### 4.2 Stage
 - Full-size `<canvas>` with rulers (§5).
 - Zoom control (bottom-right): `−`, percentage label (`round(zoom/12*100)%`), `+`, fit `⤢`.
 - **Mini toolbar** (only when side panel collapsed): expand button, active-key icon (click = expand),
-  pencil, eraser, picker, pan, override, undo, redo.
+  pencil, eraser, picker, pan, override, undo, redo. *New app:* it appears at the **top right**, where the panel was,
+  and can be dragged anywhere on the stage by its dotted grip; the position is remembered in this browser (double-click
+  the grip to put it back).
 
 ### 4.3 Status bar
 `Column X · Row Y` (1-based) of hovered cell, labels of what's in that cell (stitch and bead
@@ -197,6 +212,8 @@ grid size `W×H`, save status (`Patterns save in this browser` / `…to your acc
 
 ### 4.4 Side panel
 1. **Tool row**: pencil, line, rect, filled rect, fill, eraser, picker, pan | brush size select (1×1…5×5) | override toggle, mirror toggle | undo, redo | collapse.
+   *New app:* two rows — drawing tools + collapse; then select, magic wand | brush size as one-click buttons
+   **1 2 3 4 5** (with the Partial tool: one-click quarter / three-quarter / petite buttons) override, mirror | undo, redo.
 2. **Key header**: "Key", count text (`N entries` / `1 entry`), **+ Add to key** button.
 3. **Key list** (§7).
 4. Collapsible **Fabric & size**: fabric count select (11/14/16/18 ct Aida, 28 ct over 2, 32 ct over 2),
@@ -732,7 +749,7 @@ Effort is relative: **S** small · **M** medium · **L** large.
 | 1  | Pattern metadata (§15.1) — **priority one**          | S           | optional fields in JSON v4         | —          |
 | 2  | Grid numbering + Go to cell (§15.2)                  | S           | one small field                    | —          |
 | 3  | Whole-chart transforms & mirror modes (§15.3)        | S–M         | none                               | —          |
-| 4  | Error detectors: isolated stitches, near symmetry (§15.4) | M      | none                               | —          |
+| 4  | Error detectors (§15.4) — **removed, to be redesigned** | M      | none                               | —          |
 | 5  | Mark cell as ambiguous (§15.5)                       | S–M         | sparse list in JSON v4             | —          |
 | 6  | Selection, copy/paste, move, flip/rotate (§15.6)     | M–L         | none (in-memory clipboard)         | reuses #3's transform code |
 | 7  | Automatic snapshots / minimal versioning (§15.7)     | M           | new IndexedDB store                | —          |
@@ -806,6 +823,11 @@ Rules:
   direction (rule above; quirk §14.12 is the intended behaviour).
 
 ### 15.4 Error detectors
+
+> **Removed 2026-11-14 — to be redesigned from scratch.** The first implementation (below) was taken out of the
+> new app. Only a disabled **Check…** button in the header remains as the placeholder. The text below is kept as
+> history, not as the plan.
+
 A **Check chart…** panel that runs on demand, never continuously. Findings appear in a list. Prev/Next steps
 through them; the canvas centres on the finding and draws a ring around it. **Ignore** hides a finding for the
 session; ignores are not persisted.
@@ -1101,11 +1123,22 @@ over it. One underlay per pattern.
 - **Fit to chart**: scale the visible part to fit the chart, keep aspect, centre it.
 - **Reset crop**: show the whole image again at the current scale.
 
-**Side panel section "Underlay"** (only when one exists): Behind stitches toggle, Show/hide, opacity slider
+**Alignment pad** (always available while the image is shown, in both modes, at any zoom): a small floating panel
+on the stage (bottom-left, draggable by its grip, can be folded to its title). Buttons, each one click:
+- **Move** ← ↑ ↓ → by the step.
+- **Width − +**, **Height − +**: change that side by the step; **Both − +**: change the width by the step and the
+  height in proportion (aspect kept).
+- **Step**: 0.1 · 0.5 · 2 cells (default 0.5; remembered in this browser).
+- Resizing keeps the **middle of the screen** fixed (the grid point at the centre of the visible chart area), so the
+  area being aligned stays put while the far parts move. Typical use with a scan that is slightly off: zoom into a
+  10×10 block, click Width/Height until it lines up, scroll to the next block — no mode switching or zooming out.
+- **Edit / Done** button in the pad's title switches between edit and behind mode (same as `U`).
+
+**Side panel section "Image behind the chart"** (only when one exists): Behind stitches toggle, Show/hide, opacity slider
 (10–100 %, default 50 %), Move & resize / Crop (edit mode only), X / Y / W / H fields, Fit to chart, Reset crop,
 Replace image…, Remove.
 
-**Adding**: File menu → **Reference on canvas…**, or drop a picture and choose **Put behind the chart**. The image is
+**Adding**: File ▸ Reference pictures ▸ **Image behind the chart…**, or drop a picture and choose **Put behind the chart**. The image is
 downscaled to at most 3000 px on its longest side (JPEG, quality 0.9) and fitted to the chart. Replacing keeps the
 placement (rect) and resets the crop to the whole new image.
 

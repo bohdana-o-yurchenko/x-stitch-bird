@@ -29,16 +29,16 @@ export async function cellPoint(page: Page, x: number, y: number) {
 export const editorState = <T>(page: Page, fn: string): Promise<T> =>
   page.evaluate(`(() => { const ed = window.__stitchwork; return (${fn})(ed); })()`) as Promise<T>;
 
-/** Click a header file action, inline or inside the File menu depending on the screen width. */
-export async function fileAction(page: Page, name: string) {
-  const inline = page.getByRole("button", { name, exact: true });
-  if (await inline.isVisible()) return inline.click();
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Click through the File menu: `fileAction(page, "Export", "Shopping list (CSV)")`. Items match by label start. */
+export async function fileAction(page: Page, ...path: string[]) {
   await page.getByRole("button", { name: "File ▾" }).click();
-  await page.getByRole("menuitem", { name, exact: true }).click();
+  for (const name of path) await page.getByRole("menuitem", { name: new RegExp(`^${escape(name)}`) }).click();
 }
 
 export async function loadFixture(page: Page, name: string) {
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Load file");
+  await fileAction(page, "Open file from computer…");
   await (await chooser).setFiles(fixture(name));
 }

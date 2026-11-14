@@ -6,22 +6,49 @@
   padding: 8px;
   border-bottom: 1px solid var(--line);
 }
+.tools > button {
+  width: 32px;
+  height: 32px;
+}
+.break {
+  flex-basis: 100%;
+  height: 0;
+}
 .sep {
   width: 1px;
   height: 22px;
   background: var(--line2);
-  margin: 0 4px;
+  margin: 0 3px;
 }
 .spacer {
   flex: 1;
 }
-.select {
-  font-size: 12px;
+.sizes {
+  display: flex;
   border: 1px solid var(--line2);
   border-radius: 7px;
-  padding: 4px 2px;
-  background: #fff;
+  overflow: hidden;
   height: 30px;
+  background: #fff;
+}
+.sizes button {
+  min-width: 22px;
+  border: 0;
+  border-right: 1px solid var(--line2);
+  background: transparent;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  padding: 0 4px;
+}
+.sizes button:last-child {
+  border-right: 0;
+}
+.sizes button:hover {
+  background: var(--sel);
+}
+.sizes button.on {
+  background: var(--ink);
+  color: #fff;
 }
 .keyHead {
   display: flex;
@@ -144,14 +171,4 @@
 .buyHead {
   font-weight: 600;
   margin: 6px 0 0;
-}
-.finding {
-  font-size: 13px;
-  padding: 8px;
-  background: var(--sel);
-  border-radius: 8px;
-}
-.checksScroll {
-  max-height: 40vh;
-  overflow-y: auto;
 }

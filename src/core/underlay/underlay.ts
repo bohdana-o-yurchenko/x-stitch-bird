@@ -84,6 +84,15 @@ export function dragUnderlay(u: UnderlayData, handle: Handle, dx: number, dy: nu
   return { crop: c, rect: { x: west ? r.x + r.w - w : r.x, y: north ? r.y + r.h - h : r.y, w, h } };
 }
 
+/**
+ * Width and height grown by (dw, dh) grid units with `anchor` (a grid point, usually the middle of the screen)
+ * staying put, so the part being aligned doesn't drift while the far parts move.
+ */
+export function stretchUnderlay(r: Rect, anchor: Point, dw: number, dh: number): Rect {
+  const w = Math.max(MIN, r.w + dw), h = Math.max(MIN, r.h + dh);
+  return { x: anchor.x - ((anchor.x - r.x) * w) / r.w, y: anchor.y - ((anchor.y - r.y) * h) / r.h, w, h };
+}
+
 /** Show the whole image again; the part that was visible stays exactly where it was. */
 export function resetCrop(u: UnderlayData): Pick<UnderlayData, "crop" | "rect"> {
   const sx = u.rect.w / u.crop.w, sy = u.rect.h / u.crop.h;

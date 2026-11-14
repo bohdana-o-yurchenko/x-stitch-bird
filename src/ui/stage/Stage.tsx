@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { MINI_TOOLS, toolById } from "@/editor/tools/registry";
 import { Icon } from "../common/Icon";
 import { KeyIcon, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { ChartCanvas } from "./ChartCanvas";
+import { FloatingPanel } from "./FloatingPanel";
 import s from "./stage.module.css";
 
 function ZoomControls() {
@@ -22,7 +24,7 @@ function ZoomControls() {
   );
 }
 
-/** Shown while the side panel is hidden (SPEC §4.2). */
+/** Shown while the side panel is hidden (SPEC §4.2): a movable toolbar, on the right where the panel was. */
 function MiniToolbar() {
   const t = useTranslations("tools");
   const run = useCommand();
@@ -34,20 +36,100 @@ function MiniToolbar() {
   const slot = useEditorState((st) => st.palette[st.activeEntry]);
   const ed = useEditor();
   return (
-    <div className={s.mini}>
-      <button type="button" className={ui.tool} title={t("expand")} aria-label={t("expand")} onClick={() => run("panel.toggle")}><Icon name="expand" size={18} /></button>
-      <button type="button" className={s.miniKey} title={active ? t("activeEntry", { label: ed.entryLabel(active) }) : t("noActiveEntry")} onClick={() => run("panel.toggle")}>
-        {slot && <KeyIcon slot={slot} size={34} />}
-      </button>
-      {MINI_TOOLS.map((id) => (
-        <button key={id} type="button" className={cx(ui.tool, tool === id && ui.on)} title={t(id)} aria-label={t(id)} onClick={() => run("tool.select", id)}>
-          <Icon name={toolById(id).icon} size={18} />
+    <FloatingPanel id="miniToolbar" corner="topRight" testId="mini-toolbar">
+      <div className={s.mini}>
+        <button type="button" className={ui.tool} title={t("expand")} aria-label={t("expand")} onClick={() => run("panel.toggle")}><Icon name="expand" size={18} /></button>
+        <button type="button" className={s.miniKey} title={active ? t("activeEntry", { label: ed.entryLabel(active) }) : t("noActiveEntry")} onClick={() => run("panel.toggle")}>
+          {slot && <KeyIcon slot={slot} size={34} />}
         </button>
-      ))}
-      <button type="button" className={cx(ui.tool, override && ui.on)} title={t("override")} onClick={() => run("draw.toggleOverride")}><Icon name="override" size={18} /></button>
-      <button type="button" className={ui.tool} title={t("undo")} disabled={!canUndo} onClick={() => run("history.undo")}><Icon name="undo" size={18} /></button>
-      <button type="button" className={ui.tool} title={t("redo")} disabled={!canRedo} onClick={() => run("history.redo")}><Icon name="redo" size={18} /></button>
+        {MINI_TOOLS.map((id) => (
+          <button key={id} type="button" className={cx(ui.tool, tool === id && ui.on)} title={t(id)} aria-label={t(id)} onClick={() => run("tool.select", id)}>
+            <Icon name={toolById(id).icon} size={18} />
+          </button>
+        ))}
+        <button type="button" className={cx(ui.tool, override && ui.on)} title={t("override")} onClick={() => run("draw.toggleOverride")}><Icon name="override" size={18} /></button>
+        <button type="button" className={ui.tool} title={t("undo")} disabled={!canUndo} onClick={() => run("history.undo")}><Icon name="undo" size={18} /></button>
+        <button type="button" className={ui.tool} title={t("redo")} disabled={!canRedo} onClick={() => run("history.redo")}><Icon name="redo" size={18} /></button>
+      </div>
+    </FloatingPanel>
+  );
+}
+
+const STEPS = [0.1, 0.5, 2] as const;
+
+function useStored<T>(key: string, fallback: T, valid: (v: unknown) => boolean): [T, (v: T) => void] {
+  const [v, setV] = useState<T>(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(key) ?? "null") as unknown;
+      return valid(raw) ? (raw as T) : fallback;
+    } catch {
+      return fallback;
+    }
+  });
+  const set = (next: T) => {
+    setV(next);
+    try {
+      localStorage.setItem(key, JSON.stringify(next));
+    } catch {
+      // a convenience only
+    }
+  };
+  return [v, set];
+}
+
+/**
+ * Always-available underlay alignment (SPEC §15.15): move and stretch by fixed steps at any zoom, in either mode.
+ * Stretching keeps the middle of the screen in place, so zoom into the area being aligned and click.
+ */
+function UnderlayPad() {
+  const t = useTranslations("underlay");
+  const run = useCommand();
+  const behind = useEditorState((st) => st.underlay?.behind ?? true);
+  const rect = useEditorState((st) => st.underlay?.rect);
+  const [step, setStep] = useStored<number>("stitchwork.underlayStep", 0.5, (v) => STEPS.includes(v as never));
+  const [open, setOpen] = useStored<boolean>("stitchwork.underlayPadOpen", true, (v) => typeof v === "boolean");
+  if (!rect) return null;
+  const nudge = (dx: number, dy: number) => () => run("underlay.nudge", { dx: dx * step, dy: dy * step });
+  const stretch = (dw: number, dh: number) => () => run("underlay.stretch", { dw: dw * step, dh: dh * step });
+  const both = (sign: number) => () => run("underlay.stretch", { dw: sign * step, dh: (sign * step * rect.h) / rect.w });
+  const pair = (onMinus: () => void, onPlus: () => void, what: string) => (
+    <div className={s.padBtns}>
+      <button type="button" title={t("shrink", { what })} aria-label={t("shrink", { what })} onClick={onMinus}>−</button>
+      <button type="button" title={t("grow", { what })} aria-label={t("grow", { what })} onClick={onPlus}>+</button>
     </div>
+  );
+  return (
+    <FloatingPanel id="underlayPad" corner="bottomLeft" className={s.pad} testId="underlay-pad">
+      <div className={s.padHead}>
+        <b>{t("padTitle")}</b>
+        <button type="button" className={cx(s.padMode, !behind && s.on)} title={behind ? t("adjustWithMouseTitle") : t("doneTitle")} onClick={() => run("underlay.toggleBehind")}>{behind ? t("adjustWithMouse") : t("done")}</button>
+        <button type="button" className={s.padToggle} aria-label={open ? t("collapsePad") : t("expandPad")} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "–" : "+"}</button>
+      </div>
+      {open && (
+        <div className={s.padBody}>
+          <span>{t("nudge")}</span>
+          <div className={s.padBtns}>
+            <button type="button" aria-label={t("moveLeft")} onClick={nudge(-1, 0)}>←</button>
+            <button type="button" aria-label={t("moveUp")} onClick={nudge(0, -1)}>↑</button>
+            <button type="button" aria-label={t("moveDown")} onClick={nudge(0, 1)}>↓</button>
+            <button type="button" aria-label={t("moveRight")} onClick={nudge(1, 0)}>→</button>
+          </div>
+          <span>{t("width")}</span>
+          {pair(stretch(-1, 0), stretch(1, 0), t("width"))}
+          <span>{t("height")}</span>
+          {pair(stretch(0, -1), stretch(0, 1), t("height"))}
+          <span>{t("size")}</span>
+          {pair(both(-1), both(1), t("size"))}
+          <span>{t("step")}</span>
+          <div className={s.padBtns}>
+            {STEPS.map((v) => (
+              <button key={v} type="button" className={cx(step === v && s.on)} aria-pressed={step === v} title={t("stepTitle", { n: v })} onClick={() => setStep(v)}>{v}</button>
+            ))}
+          </div>
+          <p className={s.padHint}>{t("padHint")}</p>
+        </div>
+      )}
+    </FloatingPanel>
   );
 }
 
@@ -80,11 +162,13 @@ function SelectionActions() {
 export function Stage() {
   const collapsed = useEditorState((st) => st.panelCollapsed);
   const hasSelection = useEditorState((st) => !!st.selection || !!st.floating);
+  const hasUnderlay = useEditorState((st) => !!st.underlay?.visible && !!st.underlayImage);
   return (
     <>
       <ChartCanvas />
       {collapsed && <MiniToolbar />}
       {hasSelection && <SelectionActions />}
+      {hasUnderlay && <UnderlayPad />}
       <ZoomControls />
     </>
   );

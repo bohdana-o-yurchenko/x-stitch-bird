@@ -1,5 +1,4 @@
 import { createStore } from "zustand/vanilla";
-import type { Finding } from "@/core/checks/types";
 import type { Fragment } from "@/core/pattern/fragment";
 import type { Palette } from "@/core/pattern/palette";
 import { createPattern } from "@/core/pattern/createPattern";
@@ -25,7 +24,7 @@ export type DialogRequest =
   | { type: "newPattern" }
   | { type: "open" }
   | { type: "resize" }
-  | { type: "saveToFile" }
+  | { type: "versions" }
   | { type: "imageImport"; image: HTMLImageElement }
   | { type: "patternInfo" }
   | { type: "goToCell" }
@@ -54,14 +53,6 @@ export interface FloatingContent {
   preview: { pattern: Pattern; palette: Palette };
 }
 
-export interface ChecksState {
-  findings: Finding[];
-  index: number;
-  ignored: Set<string>;
-  enabled: Record<string, boolean>;
-  options: Record<string, Record<string, number | boolean>>;
-}
-
 export interface EditorState {
   doc: Pattern;
   docRevision: number;
@@ -86,8 +77,6 @@ export interface EditorState {
   hoverCell: Point | null;
   selection: { mask: Uint8Array; bounds: Rect } | null;
   floating: FloatingContent | null;
-  checks: ChecksState | null;
-  checksOpen: boolean;
   flash: { cell: number; until: number } | null;
 
   canUndo: boolean;
@@ -125,8 +114,6 @@ export const createEditorStore = () =>
     hoverCell: null,
     selection: null,
     floating: null,
-    checks: null,
-    checksOpen: false,
     flash: null,
     canUndo: false,
     canRedo: false,

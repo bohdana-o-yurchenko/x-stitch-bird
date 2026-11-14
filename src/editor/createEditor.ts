@@ -12,7 +12,6 @@ import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { createFromImage } from "./actions/importExport";
 import { demoPattern, loadPattern } from "./actions/pattern";
 import { Autosave } from "./autosave";
-import { ChecksSession } from "./checks/checksSession";
 import { CommandRegistry } from "./commands/registry";
 import { History } from "./history/history";
 import { ReferenceService } from "./references/references";
@@ -42,7 +41,6 @@ export class Editor {
   readonly references: ReferenceService;
   readonly underlay: UnderlayService;
   readonly snapshots: SnapshotService;
-  readonly checks: ChecksSession;
   readonly autosave: Autosave;
   theme: CanvasTheme = defaultCanvasTheme;
   /** Translation for exported texts and labels built here; set by the UI for the current locale. */
@@ -66,7 +64,6 @@ export class Editor {
     this.references = new ReferenceService(this);
     this.underlay = new UnderlayService(this);
     this.snapshots = new SnapshotService(this);
-    this.checks = new ChecksSession(this);
     this.autosave = new Autosave(persistence.draft, () => this.doc);
   }
 

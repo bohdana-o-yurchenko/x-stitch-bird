@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop } from "./underlay";
+import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, stretchUnderlay } from "./underlay";
 
 // image 200×100 px placed over a 40×40 chart
 const base = () => ({ ...newUnderlay("data:image/jpeg;base64,x", 200, 100, { w: 40, h: 40 }) });
@@ -32,6 +32,12 @@ describe("chart underlay geometry (SPEC §15.15)", () => {
     expect(dragUnderlay(u, "e", 30, 0, false).rect.w).toBe(40);
     expect(dragUnderlay({ ...u, ...left }, "w", -50, 0, false).crop.x).toBe(0);
     expect(resetCrop({ ...u, ...left })).toEqual({ crop: { x: 0, y: 0, w: 200, h: 100 }, rect: { x: 0, y: 10, w: 40, h: 20 } });
+  });
+
+  it("stretches around an anchor point, which stays on the same image spot", () => {
+    const r = stretchUnderlay({ x: 0, y: 0, w: 100, h: 50 }, { x: 25, y: 10 }, 2, 1);
+    expect([r.x, r.y, r.w, r.h].map((v) => +v.toFixed(6))).toEqual([-0.5, -0.2, 102, 51]);
+    expect((25 - r.x) / r.w).toBeCloseTo(0.25);
   });
 
   it("keeps at least one cell when shrinking", () => {

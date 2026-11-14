@@ -5,48 +5,22 @@
     "brand": "Stitchwork",
     "loading": "Loading the editor…",
     "language": "Language",
-    "chart": "Cross stitch chart"
+    "chart": "Cross stitch chart",
+    "dragToMove": "Drag to move · double-click to put back"
   },
   "header": {
     "patternName": "Pattern name",
-    "info": "Info",
-    "infoTitle": "Pattern info (designer, source, copyright…)",
-    "new": "New",
-    "newTitle": "New pattern",
-    "open": "Open",
-    "openTitle": "Open saved pattern",
     "save": "Save",
     "saveTitle": "Save pattern (Ctrl/⌘+S)",
-    "saveToFile": "Save to file",
-    "saveToFileTitle": "Download the pattern as a file you can keep anywhere (.json or .oxs)",
-    "loadFile": "Load file",
-    "loadFileTitle": "Load a .json or .oxs pattern file",
-    "image": "Image → pattern",
-    "imageTitle": "Convert a picture into a pattern",
-    "reference": "+ Reference",
-    "referenceTitle": "Open a reference photo in a floating window (you can open several)",
     "transform": "Transform ▾",
     "check": "Check…",
-    "checkTitle": "Check the chart for likely mistakes",
-    "export": "Export ▾",
-    "file": "File ▾",
-    "underlay": "Reference on canvas…",
-    "underlayTitle": "Put a picture of the paper chart behind your stitches, aligned to the grid"
+    "checkSoon": "Chart checks are being redesigned — coming back soon"
   },
   "view": {
     "label": "Chart view",
     "color": "Colour",
     "both": "Both",
     "symbols": "Symbols"
-  },
-  "exportMenu": {
-    "pngBoth": "Chart image — colour + symbols (PNG)",
-    "pngSymbols": "Chart image — symbols only, for printing (PNG)",
-    "pngColor": "Preview image — colour blocks (PNG)",
-    "csv": "Shopping list (CSV)",
-    "oxs": "OXS — Open Cross Stitch (Pattern Keeper, WinStitch, MacStitch…)",
-    "json": "Stitchwork pattern file (JSON)",
-    "load": "Load a .json or .oxs file…"
   },
   "transformMenu": {
     "flipH": "Flip horizontal",
@@ -91,7 +65,8 @@
     },
     "fit": "Fit to screen (0)",
     "zoomIn": "Zoom in (+)",
-    "zoomOut": "Zoom out (−)"
+    "zoomOut": "Zoom out (−)",
+    "brushSizeN": "Brush {n}×{n}"
   },
   "status": {
     "position": "Column <b>{col}</b> · Row <b>{row}</b>",
@@ -102,7 +77,7 @@
     "ambiguousNext": "Next mark (Shift+A)",
     "ambiguousClear": "Clear all marks",
     "markedAmbiguous": "marked ambiguous",
-    "underlayHint": "Editing the underlay · drag to move · corners resize (Shift = free) · arrows nudge · Esc or U = put behind stitches"
+    "underlayHint": "Editing the image behind the chart · drag to move · corners resize (Shift = free) · arrows nudge · Esc or U = done"
   },
   "key": {
     "heading": "Key",
@@ -261,15 +236,9 @@
     "loading": "Loading…",
     "noPatterns": "No saved patterns yet. Use Save to keep your work.",
     "thisBrowser": " · this browser",
-    "history": "History of this pattern",
     "noHistory": "No snapshots yet.",
     "restore": "Restore",
     "saveToFileTitle": "Save to file",
-    "saveToFileHint": "Keep this file anywhere (computer, cloud drive, email) and open it again with “Load file”.",
-    "jsonTitle": "Stitchwork file (.json)",
-    "jsonBody": "Everything: your key (including unused entries), blends, floss + bead, backstitch, partial stitches, knots, symbols, custom colours, pattern info and reference photo windows with their marks. Best for saving progress.",
-    "oxsTitle": "Open Cross Stitch (.oxs)",
-    "oxsBody": "Opens in Pattern Keeper, WinStitch/MacStitch, FlossCross and others. Floss + bead is saved as one blend item (e.g. “00557 + 310”). Can also be loaded back here.",
     "imageTitle": "Turn a picture into a pattern",
     "maxColours": "Max colours",
     "use": "Use",
@@ -283,7 +252,7 @@
     "imageInfo": "{w} × {h} stitches · {count} colours",
     "createPattern": "Create pattern",
     "dropChoiceTitle": "What should this picture be?",
-    "openAsReference": "Open as reference",
+    "openAsReference": "Floating photo window",
     "turnIntoPattern": "Turn into pattern",
     "infoTitle": "Pattern info",
     "gotoTitle": "Go to cell",
@@ -317,7 +286,9 @@
     "closeRefBody": "Its marks will be deleted too.",
     "closeWindow": "Close window",
     "drop": "Drop a .json or .oxs pattern, or a picture",
-    "putBehind": "Put behind the chart"
+    "putBehind": "Image behind the chart",
+    "versionsTitle": "Versions of this pattern",
+    "versionsHint": "Saved automatically before big changes and every few minutes while you work."
   },
   "meta": {
     "designer": "Designer",
@@ -350,47 +321,6 @@
     "clear": "Clear all marks",
     "resize": "Drag to resize",
     "position": "Column {col} · Row {row}"
-  },
-  "checks": {
-    "title": "Check chart",
-    "run": "Run checks",
-    "none": "No findings.",
-    "prev": "Previous",
-    "next": "Next",
-    "ignore": "Ignore",
-    "fix": "Apply suggestion",
-    "position": "{index} of {count}",
-    "names": {
-      "isolated": "Isolated stitches",
-      "nearSymmetry": "Near symmetry",
-      "unusedEntries": "Unused key entries",
-      "rareEntries": "Rarely used entries",
-      "duplicateEntries": "Duplicate key entries"
-    },
-    "options": {
-      "clusterSize": "Cluster size up to",
-      "sameColour": "Same colour, other strands/stitch counts as a neighbour",
-      "includeBeads": "Include beads",
-      "includeHalf": "Include half crosses",
-      "threshold": "Report from % symmetric",
-      "maxUses": "Used at most"
-    },
-    "isolated": {
-      "finding": "{count, plural, one {Single stitch} other {Group of # stitches}} with no same-coloured neighbour"
-    },
-    "nearSymmetry": {
-      "vertical": "Breaks left–right symmetry ({percent}% symmetric)",
-      "horizontal": "Breaks top–bottom symmetry ({percent}% symmetric)"
-    },
-    "unusedEntries": {
-      "finding": "{sym} is never used on the chart"
-    },
-    "rareEntries": {
-      "finding": "{sym} is used only {count, plural, one {once} other {# times}}"
-    },
-    "duplicateEntries": {
-      "finding": "{sym} duplicates {other}"
-    }
   },
   "selection": {
     "flipH": "Flip horizontal",
@@ -473,10 +403,10 @@
     "restored": "Snapshot restored",
     "partialKind": "Partial stitch: {kind}",
     "partialNeedsCross": "Partial stitches use a cross-stitch entry — pick one in the key",
-    "underlayAdded": "Underlay added — move and resize it, then tick “Behind stitches”"
+    "underlayAdded": "Image added — line it up with the grid, then press Done (or U)"
   },
   "underlay": {
-    "heading": "Underlay (reference on the chart)",
+    "heading": "Image behind the chart",
     "behind": "Behind stitches",
     "behindHint": "The image sits under your stitches; all tools work. Turn off (or press U) to move, resize or crop it.",
     "editHint": "Edit mode: drag to move, corners resize (Shift = free), Crop trims edges. Tick “Behind stitches” or press Esc when done.",
@@ -491,6 +421,58 @@
     "fit": "Fit to chart",
     "resetCrop": "Reset crop",
     "replace": "Replace image…",
-    "remove": "Remove"
+    "remove": "Remove",
+    "padTitle": "Image behind the chart",
+    "adjustWithMouse": "Edit",
+    "adjustWithMouseTitle": "Edit with the mouse: drag, resize corners, crop (U)",
+    "done": "Done",
+    "doneTitle": "Back to stitching (Esc)",
+    "collapsePad": "Hide alignment controls",
+    "expandPad": "Show alignment controls",
+    "moveLeft": "Move left",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "moveRight": "Move right",
+    "width": "Width",
+    "height": "Height",
+    "size": "Both",
+    "step": "Step",
+    "stepTitle": "{n} cell per click",
+    "shrink": "{what} smaller",
+    "grow": "{what} larger",
+    "padHint": "Resizing keeps the middle of the screen in place — zoom into the area you are aligning and click.",
+    "nudge": "Move"
+  },
+  "fileMenu": {
+    "label": "File ▾",
+    "new": "New",
+    "newBlank": "Blank pattern…",
+    "newBlankHint": "Pick a size and fabric",
+    "newFromImage": "From a picture…",
+    "newFromImageHint": "Convert a photo or drawing into stitches",
+    "open": "Open saved pattern…",
+    "openHint": "Patterns saved in this browser",
+    "loadFile": "Open file from computer…",
+    "loadFileHint": "A .json or .oxs pattern file",
+    "versions": "Versions…",
+    "versionsHint": "Automatic backups of this pattern — restore an earlier state",
+    "save": "Save",
+    "saveHint": "Save in this browser (Ctrl/⌘+S)",
+    "download": "Download pattern file (.json)",
+    "downloadHint": "Keep a copy anywhere; open it again with “Open file from computer”",
+    "export": "Export",
+    "pngBoth": "Chart image — colour + symbols (PNG)",
+    "pngSymbols": "Chart image — symbols only, for printing (PNG)",
+    "pngColor": "Preview image — colour blocks (PNG)",
+    "oxs": "Open Cross Stitch file (.oxs)",
+    "oxsHint": "For Pattern Keeper, WinStitch, MacStitch…",
+    "csv": "Shopping list (CSV)",
+    "references": "Reference pictures",
+    "refWindow": "Photo in a floating window…",
+    "refWindowHint": "A movable window next to the chart, with progress marks",
+    "refUnderlay": "Image behind the chart…",
+    "refUnderlayHint": "Lies under your stitches, aligned to the grid, to trace over",
+    "info": "Pattern info…",
+    "infoHint": "Designer, source, copyright, notes"
   }
 }

@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import type { ChartView } from "@/render/chart";
-import { Dropdown, cx, ui } from "../common/widgets";
+import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
 import { Icon } from "../common/Icon";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import s from "./header.module.css";
@@ -58,23 +58,44 @@ function LanguageSwitch() {
   );
 }
 
-/** Shown as buttons on wide screens and as a "File" menu on narrower ones (header.module.css). */
-const FILE_ACTIONS = [
-  ["info", "pattern.editInfo"],
-  ["new", "file.new"],
-  ["open", "file.open"],
-  ["saveToFile", "file.saveToFile"],
-  ["loadFile", "file.pickToLoad"],
-  ["image", "image.pick"],
-  ["reference", "reference.pick"],
-  ["underlay", "underlay.pick"],
-] as const;
+function FileMenu() {
+  const t = useTranslations("fileMenu");
+  const run = useCommand();
+  const go = (command: string, args?: unknown) => () => void run(command, args);
+  const items: MenuItem[] = [
+    { label: t("new"), items: [
+      { label: t("newBlank"), hint: t("newBlankHint"), onClick: go("file.new") },
+      { label: t("newFromImage"), hint: t("newFromImageHint"), onClick: go("image.pick") },
+    ] },
+    { label: t("open"), hint: t("openHint"), onClick: go("file.open") },
+    { label: t("loadFile"), hint: t("loadFileHint"), onClick: go("file.pickToLoad") },
+    { label: t("versions"), hint: t("versionsHint"), onClick: go("file.versions") },
+    "-",
+    { label: t("save"), hint: t("saveHint"), onClick: go("file.save") },
+    { label: t("download"), hint: t("downloadHint"), onClick: go("file.export", "json") },
+    { label: t("export"), items: [
+      { label: t("pngBoth"), onClick: go("file.export", "png-both") },
+      { label: t("pngSymbols"), onClick: go("file.export", "png-symbols") },
+      { label: t("pngColor"), onClick: go("file.export", "png-color") },
+      "-",
+      { label: t("oxs"), hint: t("oxsHint"), onClick: go("file.export", "oxs") },
+      { label: t("csv"), onClick: go("file.export", "csv") },
+    ] },
+    "-",
+    { label: t("references"), items: [
+      { label: t("refWindow"), hint: t("refWindowHint"), onClick: go("reference.pick") },
+      { label: t("refUnderlay"), hint: t("refUnderlayHint"), onClick: go("underlay.pick") },
+    ] },
+    "-",
+    { label: t("info"), hint: t("infoHint"), onClick: go("pattern.editInfo") },
+  ];
+  return <Dropdown className={cx(ui.btn, ui.ghost)} label={t("label")} items={items} />;
+}
 
 export function Header() {
   const t = useTranslations();
   const run = useCommand();
   const btn = cx(ui.btn, ui.ghost);
-  const checksOpen = useEditorState((st) => st.checksOpen);
   return (
     <header className={s.bar}>
       <div className={s.brand}>
@@ -82,14 +103,7 @@ export function Header() {
         <span className={s.brandText}>{t("app.brand")}</span>
       </div>
       <PatternName />
-      <div className={s.inlineFiles}>
-        {FILE_ACTIONS.map(([key, command]) => (
-          <button key={key} type="button" className={btn} title={t(`header.${key}Title`)} onClick={() => run(command)}>{t(`header.${key}`)}</button>
-        ))}
-      </div>
-      <div className={s.fileMenu}>
-        <Dropdown className={btn} label={t("header.file")} items={FILE_ACTIONS.map(([key, command]) => ({ label: t(`header.${key}`), onClick: () => run(command) }))} />
-      </div>
+      <FileMenu />
       <button type="button" className={btn} title={t("header.saveTitle")} onClick={() => run("file.save")}>{t("header.save")}</button>
       <div className={s.spacer} />
       <Dropdown
@@ -97,26 +111,17 @@ export function Header() {
         label={t("header.transform")}
         items={[
           ...(["flipH", "flipV", "rot90cw", "rot90ccw", "rot180"] as const).map((id) => ({ label: t(`transformMenu.${id}`), onClick: () => run("transform.apply", id) })),
+          "-",
           { label: t("transformMenu.mirrorFromCentre"), onClick: () => run("transform.requestMirror") },
+          "-",
           { label: t("transformMenu.cropToContent"), onClick: () => run("transform.crop") },
           { label: t("transformMenu.extendCanvas"), onClick: () => run("transform.requestExtend") },
           { label: t("transformMenu.resize"), onClick: () => run("pattern.requestResize") },
         ]}
       />
-      <button type="button" className={cx(btn, checksOpen && ui.on)} title={t("header.checkTitle")} onClick={() => run("checks.toggle")}>{t("header.check")}</button>
+      {/* Chart checks are being redesigned (SPEC §15.4); the button stays as the placeholder */}
+      <button type="button" className={btn} disabled title={t("header.checkSoon")}>{t("header.check")}</button>
       <ViewSwitch />
-      <Dropdown
-        label={t("header.export")}
-        items={[
-          { label: t("exportMenu.pngBoth"), onClick: () => run("file.export", "png-both") },
-          { label: t("exportMenu.pngSymbols"), onClick: () => run("file.export", "png-symbols") },
-          { label: t("exportMenu.pngColor"), onClick: () => run("file.export", "png-color") },
-          { label: t("exportMenu.csv"), onClick: () => run("file.export", "csv") },
-          { label: t("exportMenu.oxs"), onClick: () => run("file.export", "oxs") },
-          { label: t("exportMenu.json"), onClick: () => run("file.export", "json") },
-          { label: t("exportMenu.load"), onClick: () => run("file.pickToLoad") },
-        ]}
-      />
       <LanguageSwitch />
     </header>
   );

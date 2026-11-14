@@ -3,10 +3,10 @@
 import { useEditor, useEditorState } from "../hooks/editor";
 import { ImageImportDialog } from "./ImageImportDialog";
 import { KeyEntryDialog } from "./key-entry/KeyEntryDialog";
-import { OpenPatternDialog } from "./OpenPatternDialog";
+import { OpenPatternDialog, VersionsDialog } from "./OpenPatternDialog";
 import {
   DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, MirrorFromCentreDialog, NewPatternDialog,
-  PatternInfoDialog, ReplaceKeyDialog, ResizeDialog, SaveToFileDialog, TextFallbackDialog,
+  PatternInfoDialog, ReplaceKeyDialog, ResizeDialog, TextFallbackDialog,
 } from "./simpleDialogs";
 
 /** Renders whichever dialog the editor asked for. */
@@ -21,7 +21,7 @@ export function DialogHost() {
     case "newPattern": return <NewPatternDialog onClose={close} />;
     case "open": return <OpenPatternDialog onClose={close} />;
     case "resize": return <ResizeDialog onClose={close} />;
-    case "saveToFile": return <SaveToFileDialog onClose={close} />;
+    case "versions": return <VersionsDialog onClose={close} />;
     case "imageImport": return <ImageImportDialog image={d.image} onClose={close} />;
     case "patternInfo": return <PatternInfoDialog onClose={close} />;
     case "goToCell": return <GoToCellDialog onClose={close} />;

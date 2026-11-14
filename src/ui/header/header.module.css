@@ -21,14 +21,13 @@
   white-space: nowrap;
 }
 .name {
-  flex: none;
-  width: 180px;
+  flex: 0 1 380px;
+  width: 380px;
   border: 1px solid transparent;
   background: transparent;
   border-radius: 6px;
   padding: 4px 8px;
-  min-width: 80px;
-  max-width: 220px;
+  min-width: 140px;
   font-weight: 500;
 }
 .name:hover,
@@ -47,22 +46,8 @@
   padding: 4px;
   background: #fff;
 }
-@media (max-width: 1320px) {
+@media (max-width: 900px) {
   .brandText {
     display: none;
-  }
-}
-.inlineFiles {
-  display: contents;
-}
-.fileMenu {
-  display: none;
-}
-@media (max-width: 1720px) {
-  .inlineFiles {
-    display: none;
-  }
-  .fileMenu {
-    display: block;
   }
 }

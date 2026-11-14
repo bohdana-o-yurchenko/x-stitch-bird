@@ -72,24 +72,6 @@ export function ResizeDialog({ onClose }: Close) {
   );
 }
 
-export function SaveToFileDialog({ onClose }: Close) {
-  const t = useTranslations("dialogs");
-  const run = useCommand();
-  const choice = (fmt: "json" | "oxs", colour: string, title: string, body: string) => (
-    <button type="button" className={ui.option} onClick={() => { onClose(); run("file.export", fmt); }}>
-      <span className={ui.swatch} style={{ background: colour, display: "grid", placeItems: "center", color: "#fff", fontSize: 10 }}>{fmt.toUpperCase()}</span>
-      <span><b>{title}</b><span className={ui.hint} style={{ display: "block" }}>{body}</span></span>
-    </button>
-  );
-  return (
-    <Modal title={t("saveToFileTitle")} onClose={onClose} buttons={[{ label: t("cancel") }]}>
-      <p className={ui.hint}>{t("saveToFileHint")}</p>
-      {choice("json", "#2F5D62", t("jsonTitle"), t("jsonBody"))}
-      {choice("oxs", "#B5452F", t("oxsTitle"), t("oxsBody"))}
-    </Modal>
-  );
-}
-
 export function PatternInfoDialog({ onClose }: Close) {
   const t = useTranslations();
   const run = useCommand();

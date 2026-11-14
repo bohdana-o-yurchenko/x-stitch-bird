@@ -5,6 +5,8 @@ import { ALL_SYMBOLS } from "../symbols/symbols";
 import { createPattern } from "./createPattern";
 import { addEntry, findSameKey, fixEntrySymbols } from "./keyEntries";
 import { LINE_STYLES } from "../symbols/lineStyles";
+import { formatLabel, keyLabelData } from "../labels/keyLabel";
+import { translateEn } from "../../../tests/support/fixtures";
 import { canPlacePartial, clearForPartial, isOccupied } from "./occupancy";
 import { partialsLayer } from "../layers/partials";
 import { libraryColor, matchesQuery } from "../catalog/catalog";
@@ -55,8 +57,18 @@ describe("entry symbols", () => {
     const cross = addEntry(p, { t: "thread", src: "dmc:310", n: 2, st: "full" }, ALL_SYMBOLS);
     expect([p.key[back]!.sym, p.key[cross]!.sym]).toEqual([LINE_STYLES[0], ALL_SYMBOLS[0]]);
     p.key.push({ t: "back", src: "dmc:321", n: 2, sym: "■" });
+    p.key.push({ t: "bead", src: "bead:00557", sym: LINE_STYLES[5]! });
     fixEntrySymbols(p, ALL_SYMBOLS);
     expect(p.key[3]!.sym).toBe(LINE_STYLES[1]);
+    expect(p.key[4]!.sym).toBe(ALL_SYMBOLS[1]);
+  });
+
+  it("labels knots with their wraps and blended backstitch without strands (SPEC §3.4)", () => {
+    const p = createPattern(2, 2);
+    p.blends["blend:x"] = { parts: [{ id: "dmc:310", n: 1 }, { id: "dmc:White", n: 1 }] };
+    const label = (e: Parameters<typeof keyLabelData>[1]) => formatLabel(keyLabelData(p, e), translateEn).sub;
+    expect(label({ t: "knot", src: "dmc:310", n: 2, wraps: 3, sym: "a" })).toBe("Black · 2 strands · French knot, 3 wraps");
+    expect(label({ t: "back", src: "blend:x", n: null, sym: "b" })).not.toMatch(/strand/);
   });
 });
 

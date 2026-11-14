@@ -30,7 +30,6 @@ export interface ChartScene {
   floating: { pattern: Pattern; palette: Palette; at: Point } | null;
   marquee: Rect | null;
   eraseHighlight: Segment[] | null;
-  finding: { cells: number[] } | null;
   flash: { cell: number; until: number } | null;
   /** Behind: drawn under the stitches. Editing: drawn on top with handles. */
   underlay: (UnderlayView & { editing: boolean }) | null;
@@ -206,18 +205,6 @@ export class ChartRenderer {
       g.strokeStyle = t.selection.ants[0];
       g.strokeRect(ox + s.marquee.x * z + 0.5, oy + s.marquee.y * z + 0.5, s.marquee.w * z, s.marquee.h * z);
       g.restore();
-    }
-    if (s.finding) {
-      g.strokeStyle = t.accent;
-      g.lineWidth = t.findings.ring;
-      for (const i of s.finding.cells) {
-        const [px, py] = cellRect(i), r = Math.max(12, z / 2 + z * t.findings.padding);
-        g.beginPath();
-        g.arc(px + z / 2, py + z / 2, r, 0, Math.PI * 2);
-        g.fillStyle = "rgba(181,69,47,.12)";
-        g.fill();
-        g.stroke();
-      }
     }
     if (s.flash && s.flash.until > Date.now()) {
       const [px, py] = cellRect(s.flash.cell), a = (s.flash.until - Date.now()) / t.flash.durationMs;

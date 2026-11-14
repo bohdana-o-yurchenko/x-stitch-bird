@@ -41,8 +41,7 @@ test("holding Alt picks an entry from the chart and returns to the previous tool
 
 test("downloads a JSON file that loads back", async ({ page }) => {
   const download = page.waitForEvent("download");
-  await fileAction(page, "Save to file");
-  await page.getByText("Stitchwork file (.json)").click();
+  await fileAction(page, "Download pattern file (.json)");
   const file = await (await download).path();
   const doc = JSON.parse(readFileSync(file, "utf8"));
   expect(doc).toMatchObject({ app: "stitchwork", v: 4, w: 60, h: 60 });
@@ -82,36 +81,52 @@ test("flips the chart and undoes it in one step", async ({ page }) => {
   await expect.poll(() => editorState<number>(page, "(ed) => ed.doc.layers.stitches.indexOf(1)")).toBe(before);
 });
 
-test("runs chart checks", async ({ page }) => {
-  await page.getByRole("button", { name: "Check…" }).click();
-  await page.getByRole("button", { name: "Run checks" }).click();
-  await expect(page.getByTestId("checks")).toContainText("of");
-});
-
 test("switches to Ukrainian", async ({ page }) => {
   await page.getByLabel("Language").selectOption("uk");
   await expect(page).toHaveURL(/\/uk$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "uk");
 });
 
-test("the File menu on narrow screens opens above the chart and works", async ({ page }) => {
-  await page.setViewportSize({ width: 1400, height: 900 });
-  await page.getByRole("button", { name: "File ▾" }).click();
+test("the File menu opens above the chart, with submenus", async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 800 });
   const chooser = page.waitForEvent("filechooser");
-  await page.getByRole("menuitem", { name: "Load file" }).click();
+  await fileAction(page, "Open file from computer…");
   await (await chooser).setFiles("tests/fixtures/1.oxs");
   await expect(page.locator("[data-entry]")).toHaveCount(12);
-  await page.getByRole("button", { name: "Export ▾" }).click();
+  await page.getByRole("button", { name: "File ▾" }).click();
+  await page.getByRole("menuitem", { name: /^Export/ }).hover();
   await expect(page.getByRole("menuitem", { name: "Shopping list (CSV)" })).toBeInViewport();
+});
+
+test("brush size takes one click", async ({ page }) => {
+  await page.getByRole("button", { name: "Brush 3×3" }).click();
+  expect(await editorState<number>(page, "(ed) => ed.state.brush")).toBe(3);
+});
+
+test("the collapsed toolbar sits on the right and can be dragged", async ({ page }) => {
+  await page.keyboard.press("k");
+  const bar = page.getByTestId("mini-toolbar");
+  const box = (await bar.boundingBox())!;
+  expect(box.x).toBeGreaterThan(1000);
+  await page.mouse.move(box.x + box.width / 2, box.y + 6);
+  await page.mouse.down();
+  await page.mouse.move(box.x - 400, box.y + 200, { steps: 4 });
+  await page.mouse.up();
+  const moved = (await bar.boundingBox())!;
+  expect(moved.x).toBeLessThan(box.x - 300);
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await page.keyboard.press("k");
+  expect((await page.getByTestId("mini-toolbar").boundingBox())!.x).toBeCloseTo(moved.x, 0);
 });
 
 test("puts a reference image behind the chart and keeps it after a reload", async ({ page }) => {
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Reference on canvas…");
+  await fileAction(page, "Reference pictures", "Image behind the chart…");
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   const panel = page.getByTestId("underlay-panel");
   await expect(panel).toBeVisible();
-  await expect(page.getByText(/Editing the underlay/)).toBeVisible();
+  await expect(page.getByText(/Editing the image behind the chart/)).toBeVisible();
   const a = await cellPoint(page, 30, 30), b = await cellPoint(page, 33, 30);
   const before = await editorState<number>(page, "(ed) => ed.state.underlay.rect.x");
   await page.mouse.move(a.x, a.y);
@@ -124,8 +139,12 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   await page.reload();
   await expect(page.getByTestId("underlay-panel").getByLabel("Behind stitches")).toBeChecked();
   const download = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Export ▾" }).click();
-  await page.getByRole("menuitem", { name: "Stitchwork pattern file (JSON)" }).click();
+  await fileAction(page, "Download pattern file (.json)");
   const doc = JSON.parse(readFileSync(await (await download).path(), "utf8"));
   expect(doc.underlay).toMatchObject({ behind: true, imageW: 40, imageH: 20 });
+  // the alignment pad works while the image is behind the stitches
+  const pad = page.getByTestId("underlay-pad");
+  const w = doc.underlay.rect.w as number;
+  await pad.getByRole("button", { name: "Width larger" }).click();
+  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeCloseTo(w + 0.5, 5);
 });
