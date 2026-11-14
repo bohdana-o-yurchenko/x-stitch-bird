@@ -93,3 +93,14 @@ test("switches to Ukrainian", async ({ page }) => {
   await expect(page).toHaveURL(/\/uk$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "uk");
 });
+
+test("the File menu on narrow screens opens above the chart and works", async ({ page }) => {
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await page.getByRole("button", { name: "File ▾" }).click();
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("menuitem", { name: "Load file" }).click();
+  await (await chooser).setFiles("tests/fixtures/1.oxs");
+  await expect(page.locator("[data-entry]")).toHaveCount(12);
+  await page.getByRole("button", { name: "Export ▾" }).click();
+  await expect(page.getByRole("menuitem", { name: "Shopping list (CSV)" })).toBeInViewport();
+});

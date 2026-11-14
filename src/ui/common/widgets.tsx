@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import type { ColorEntry } from "@/core/color/colorEntry";
 import type { PaletteSlot } from "@/core/pattern/palette";
@@ -103,31 +104,53 @@ export function Toasts() {
   );
 }
 
-/** Dropdown anchored to its button; closes on outside click. */
+/**
+ * Dropdown menu. The menu is rendered into <body> and positioned from the button, so scrolling or clipped
+ * containers (like the header) can't hide it. Closes on outside click, Esc, resize or scroll.
+ */
 export function Dropdown({ label, title, items, className }: { label: string; title?: string; className?: string; items: { label: string; onClick: () => void; disabled?: boolean }[] }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!open) return;
-    const close = (e: PointerEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
-    document.addEventListener("pointerdown", close);
-    return () => document.removeEventListener("pointerdown", close);
-  }, [open]);
+    if (!pos) return;
+    const close = () => setPos(null);
+    const outside = (e: PointerEvent) => !menu.current?.contains(e.target as Node) && !button.current?.contains(e.target as Node) && close();
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && close();
+    document.addEventListener("pointerdown", outside);
+    window.addEventListener("keydown", esc);
+    window.addEventListener("resize", close);
+    window.addEventListener("scroll", close, true);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      window.removeEventListener("keydown", esc);
+      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", close, true);
+    };
+  }, [pos]);
+  const toggle = () => {
+    if (pos) return setPos(null);
+    const r = button.current!.getBoundingClientRect();
+    // open towards the side with more room
+    setPos(r.left < window.innerWidth / 2 ? { top: r.bottom + 6, left: r.left } : { top: r.bottom + 6, right: window.innerWidth - r.right });
+  };
   return (
-    <div ref={ref} style={{ position: "relative" }}>
-      <button type="button" className={className ?? s.btn} title={title} aria-expanded={open} onClick={() => setOpen(!open)}>
+    <>
+      <button ref={button} type="button" className={className ?? s.btn} title={title} aria-haspopup="menu" aria-expanded={!!pos} onClick={toggle}>
         {label}
       </button>
-      {open && (
-        <div className={s.menu} role="menu">
-          {items.map((i) => (
-            <button key={i.label} type="button" role="menuitem" disabled={i.disabled} onClick={() => { setOpen(false); i.onClick(); }}>
-              {i.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+      {pos &&
+        createPortal(
+          <div ref={menu} className={s.menu} role="menu" style={{ position: "fixed", top: pos.top, left: pos.left ?? "auto", right: pos.right ?? "auto" }}>
+            {items.map((i) => (
+              <button key={i.label} type="button" role="menuitem" disabled={i.disabled} onClick={() => { setPos(null); i.onClick(); }}>
+                {i.label}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
 
