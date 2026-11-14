@@ -18,8 +18,8 @@ export interface Finding {
   related?: number[];
   messageKey: string;
   params?: Record<string, string | number>;
-  /** Near symmetry: copy `from` onto `to`, mirrored when `swap`. */
-  suggestion?: { to: number; from: number; swap: boolean }[];
+  /** Near symmetry: copy the entry at `from` onto `to`. */
+  suggestion?: { to: number; from: number }[];
 }
 
 /** An on-demand chart check (ARCHITECTURE §14.4). */

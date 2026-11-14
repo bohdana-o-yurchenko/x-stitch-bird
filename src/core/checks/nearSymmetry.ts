@@ -1,4 +1,3 @@
-import { mirroredStitchType } from "../stitches/registry";
 import type { KeyEntry, Pattern } from "../pattern/types";
 import type { ChartCheck, Finding } from "./types";
 
@@ -16,10 +15,10 @@ function support(p: Pattern, i: number): number {
   return n;
 }
 
-/** Do two cells hold the same thing, with `b` seen in a mirror (╱ ↔ ╲)? */
+/** Do two cells hold the same thing? Mirrored half crosses keep their direction (SPEC §15.3). */
 function mirrorEqual(a: KeyEntry | null | undefined, b: KeyEntry | null | undefined): boolean {
   if (!a || !b) return a === b;
-  return a.t === b.t && a.src === b.src && (a.n ?? null) === (b.n ?? null) && (a.st ?? null) === (b.st ? mirroredStitchType(b.st) : null);
+  return a.t === b.t && a.src === b.src && (a.n ?? null) === (b.n ?? null) && (a.st ?? null) === (b.st ?? null);
 }
 
 /**
@@ -67,7 +66,7 @@ export const nearSymmetryCheck: ChartCheck = {
           related: [ia, ib],
           messageKey: `checks.nearSymmetry.${axis}`,
           params: { percent: Math.round(best.ratio * 1000) / 10 },
-          suggestion: [{ to: fromA ? ib : ia, from: fromA ? ia : ib, swap: true }],
+          suggestion: [{ to: fromA ? ib : ia, from: fromA ? ia : ib }],
         });
       }
     }

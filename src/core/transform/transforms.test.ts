@@ -42,14 +42,16 @@ describe("whole-chart transforms", () => {
     expect(p.layers.partials.get(1)).toEqual([{ kind: "quarter", corner: 1, k: 1 }]);
   });
 
-  it("mirrors the left half onto the right, keeping the odd centre column", () => {
+  it("mirrors the left half onto the right, keeping the odd centre column and half-cross direction", () => {
     const p = createPattern(5, 1);
     const k = addEntry(p, { t: "thread", src: "dmc:310", n: 2, st: "full" }, ALL_SYMBOLS);
-    p.layers.stitches.set([k, 0, k, 0, 0]);
+    const half = addEntry(p, { t: "thread", src: "dmc:321", n: 2, st: "half" }, ALL_SYMBOLS);
+    p.layers.stitches.set([k, half, k, 0, 0]);
     p.layers.segments.push({ x1: 1, y1: 0, x2: 1, y2: 1, k });
     expect(mirrorTargetHasContent(p, "leftToRight")).toBe(false);
-    mirrorFromCentre(p, "leftToRight", ALL_SYMBOLS);
-    expect([...p.layers.stitches]).toEqual([k, 0, k, 0, k]);
+    mirrorFromCentre(p, "leftToRight");
+    expect([...p.layers.stitches]).toEqual([k, half, k, half, k]);
+    expect(p.key).toHaveLength(3);
     expect(p.layers.segments).toHaveLength(2);
   });
 
@@ -65,13 +67,8 @@ describe("whole-chart transforms", () => {
     expect(p.layers.stitches[4]).toBe(1);
   });
 
-  it("mirror drawing: a quad copy across both axes keeps the diagonal", () => {
-    expect(mirrorCells(0, 0, "quad", { w: 4, h: 4 })).toEqual([
-      { x: 0, y: 0, swap: false },
-      { x: 3, y: 0, swap: true },
-      { x: 0, y: 3, swap: true },
-      { x: 3, y: 3, swap: false },
-    ]);
+  it("mirror drawing: quad mode copies into all four quarters", () => {
+    expect(mirrorCells(0, 0, "quad", { w: 4, h: 4 })).toEqual([{ x: 0, y: 0 }, { x: 3, y: 0 }, { x: 0, y: 3 }, { x: 3, y: 3 }]);
   });
 });
 

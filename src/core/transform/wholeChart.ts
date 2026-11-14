@@ -111,10 +111,13 @@ export function mirrorTargetHasContent(p: Pattern, dir: MirrorFromCentre): boole
   return LAYERS.some((l) => l.exported && !l.isEmpty(l.extract(l.get(p.layers), target, size, all)));
 }
 
-/** Copy one half (or the top-left quarter) onto the others, mirrored (SPEC §15.3). */
-export function mirrorFromCentre(p: Pattern, dir: MirrorFromCentre, symbols: readonly string[]): TransformReport {
+/**
+ * Copy one half (or the top-left quarter) onto the others, mirrored (SPEC §15.3). Positions are mirrored but
+ * entries are kept: a half cross keeps its direction and no new key entries are made.
+ */
+export function mirrorFromCentre(p: Pattern, dir: MirrorFromCentre): TransformReport {
   const report = { newTwins: 0 };
-  const ctx = twinContext(p, symbols, report);
+  const ctx: TransformContext = { repoint: (k) => k };
   const size = { w: p.w, h: p.h };
   const all = { x: 0, y: 0, ...size };
   const { source, target } = mirrorHalves(dir, size);

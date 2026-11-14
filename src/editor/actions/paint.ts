@@ -1,7 +1,6 @@
 import { brushCells, floodRegion, snapHalf } from "@/core/geometry/geometry";
 import { LAYERS, PICK_ORDER } from "@/core/layers/registry";
 import { segmentDistance } from "@/core/layers/maskGeometry";
-import { findOrCreateTwin } from "@/core/pattern/keyEntries";
 import { clearPartialsUnder, canPlacePartial, clearForPartial, isOccupied } from "@/core/pattern/occupancy";
 import type { Corner, KeyEntry, KeyIndex, Point, Segment } from "@/core/pattern/types";
 import { mirrorCells, mirrorPoints, mirrorTransforms } from "@/core/transform/mirror";
@@ -16,24 +15,16 @@ export function requireEntry(ed: Editor): { k: KeyIndex; e: KeyEntry } | null {
   return null;
 }
 
-/** Twin entries for mirrored half crosses are created on the fly; reported once per stroke. */
-function twinFor(ed: Editor, k: KeyIndex, created: { count: number }) {
-  return findOrCreateTwin(ed.doc, k, ed.state.symbols, created);
-}
-
-function reportTwins(ed: Editor, created: { count: number }) {
-  if (created.count) {
-    ed.changed({ keys: true });
-    ed.toast("toasts.newTwins", { count: created.count });
-  }
-}
-
-/** Paint cells with entry `k`, honouring mirror mode, override and what may share a cell (SPEC §6.2). */
+/**
+ * Paint cells with entry `k`, honouring mirror mode, override and what may share a cell (SPEC §6.2).
+ * Mirrored copies use the same entry — a half cross keeps its direction (SPEC §15.3).
+ */
 export function paintCells(ed: Editor, cells: Point[], k: KeyIndex): void {
-  const p = ed.doc, { mirror, override } = ed.state, size = { w: p.w, h: p.h }, created = { count: 0 };
+  const p = ed.doc, { mirror, override } = ed.state, size = { w: p.w, h: p.h }, e = p.key[k];
+  if (!e) return;
   for (const c of cells)
     for (const m of mirrorCells(c.x, c.y, mirror, size)) {
-      const key = m.swap ? twinFor(ed, k, created) : k, e = p.key[key];
+      const key = k;
       const i = m.y * p.w + m.x;
       if (!e || (!override && isOccupied(p, i, e))) continue;
       if (e.t === "bead") p.layers.beads[i] = key;
@@ -43,7 +34,6 @@ export function paintCells(ed: Editor, cells: Point[], k: KeyIndex): void {
         clearPartialsUnder(p, i, e);
       }
     }
-  reportTwins(ed, created);
 }
 
 export function brushAt(ed: Editor, at: Point): Point[] {

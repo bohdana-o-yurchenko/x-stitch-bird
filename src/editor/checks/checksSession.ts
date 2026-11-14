@@ -1,6 +1,5 @@
 import { CHECKS } from "@/core/checks/registry";
 import { optionDefaults, type Finding } from "@/core/checks/types";
-import { findOrCreateTwin } from "@/core/pattern/keyEntries";
 import type { Editor } from "../createEditor";
 import type { ChecksState } from "../store/editorStore";
 
@@ -87,8 +86,7 @@ export class ChecksSession {
     const p = this.ed.doc, S = p.layers.stitches;
     this.ed.history.transaction("checkFix", () => {
       for (const s of f.suggestion!) {
-        const k = S[s.from] ?? 0;
-        S[s.to] = k && s.swap ? findOrCreateTwin(p, k, this.ed.state.symbols) : k;
+        S[s.to] = S[s.from] ?? 0;
       }
     });
     this.ed.changed({ keys: true });

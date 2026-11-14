@@ -60,6 +60,18 @@ describe("drawing and history", () => {
     expect(snaps.map((s) => s.reason)).toEqual(["resize", "deleteKey"]);
   });
 
+  it("mirror drawing reuses the entry: a half cross keeps its direction, no new entries", () => {
+    const half = addEntry(ed.doc, { t: "thread", src: "dmc:321", n: 2, st: "half" }, ALL_SYMBOLS);
+    ed.changed({ keys: true });
+    ed.setActiveEntry(half);
+    ed.store.setState({ mirror: "quad" });
+    const entries = ed.doc.key.length;
+    ed.tools.down(at(1, 1));
+    ed.tools.up(at(1, 1));
+    expect([11, 18, 81, 88].map((i) => ed.doc.layers.stitches[i])).toEqual([half, half, half, half]);
+    expect(ed.doc.key).toHaveLength(entries);
+  });
+
   it("uses the backstitch behaviour for backstitch entries", () => {
     const back = addEntry(ed.doc, { t: "back", src: "dmc:310", n: 1 }, ALL_SYMBOLS);
     ed.changed({ keys: true });

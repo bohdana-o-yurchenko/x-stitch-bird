@@ -691,7 +691,7 @@ All toasts/modals listed in the sections above should be kept verbatim; they are
 10. Image import always starts a new project (no "import into current").
 11. Symbol availability depends on the device's fonts (probe at start-up) — a file may show symbols another device lacks.
 12. Mirror drawing paints the **same key index** on the mirrored side (`index.html:1582`), so a ╱ half cross is
-    mirrored as ╱ instead of ╲. A true mirror swaps the direction (see §15.3).
+    mirrored as ╱. **Intended** (decided 2026-11-14): mirroring reuses the existing entry and symbol (see §15.3).
 
 ---
 
@@ -773,15 +773,18 @@ A **Transform ▾** menu (or a section in Fabric & size) with:
 - Each operation is **one undo step** and doesn't clear history.
 
 Rules:
-- **Half-cross direction.** Direction is stored on the key entry (`st`), not on the cell. A flip or a 90° rotation
-  turns ╱ into ╲, so the cell must be re-pointed to a key entry with the same colour and strands and the opposite
-  direction (`sameKey`). If none exists, one is created with the next free symbol, and a toast reports
-  "N new key entries for mirrored half crosses". 180° keeps the direction.
+- **Half-cross direction — flips and rotations.** Direction is stored on the key entry (`st`), not on the cell. A
+  **Flip** or a 90° **Rotate** turns ╱ into ╲, so the cell is re-pointed to a key entry with the same colour and
+  strands and the opposite direction (`sameKey`). If none exists, one is created with the next free symbol, and a
+  toast reports "N new key entries for mirrored half crosses". 180° keeps the direction.
+- **Half-cross direction — mirroring.** **Mirror from centre** and **mirror drawing** do *not* change direction:
+  the mirrored cell gets the **same key entry** (same direction, same symbol), and no key entries are created.
+  Only positions are mirrored (cells, backstitch and knot points, partial-stitch corners).
 - **Backstitch.** Coordinates are transformed (e.g. `x → w − x`). Beads and ambiguous marks (§15.5) move with
   their cells.
 - **Mirror drawing mode.** The mirror button cycles: off → ↔ (vertical axis, current behaviour) → ↕ (horizontal
-  axis) → 4-way. The guides are drawn for each active axis. Mirrored half crosses follow the direction rule
-  above, which also fixes quirk §14.12.
+  axis) → 4-way. The guides are drawn for each active axis. Mirrored half crosses keep the same entry and
+  direction (rule above; quirk §14.12 is the intended behaviour).
 
 ### 15.4 Error detectors
 A **Check chart…** panel that runs on demand, never continuously. Findings appear in a list. Prev/Next steps
@@ -795,8 +798,9 @@ session; ignores are not persisted.
   - include beads (off — beads are often single on purpose)
   - include half crosses (on)
 - **Near symmetry**: test vertical and horizontal axes at whole and half-cell positions near the centre (±5 cells).
-  For each axis, compare mirrored cell pairs where at least one side has a stitch (using the direction rule from
-  §15.3). If the match ratio is ≥ 90 % but below 100 %, report the axis and list the mismatched pairs. Show the
+  For each axis, compare mirrored cell pairs where at least one side has a stitch (a pair matches when both cells
+  hold the same entry — half crosses keep their direction when mirrored, §15.3). If the match ratio is ≥ 90 % but
+  below 100 %, report the axis and list the mismatched pairs. Show the
   value from the majority-consistent side as the suggested fix. Beads and backstitch are optional. Clearly
   asymmetric designs report nothing.
 - **Cheap extras**: unused key entries; entries used ≤ 3 times; duplicate keys (§3.2 `sameKey`).

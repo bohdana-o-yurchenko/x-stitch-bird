@@ -13,12 +13,12 @@ export function mirrorTransforms(mode: MirrorMode): CellTransform[] {
   return [];
 }
 
-/** Original cell plus its mirror images, each with whether the copy swaps ╱ / ╲. */
-export function mirrorCells(x: number, y: number, mode: MirrorMode, size: Size): { x: number; y: number; swap: boolean }[] {
-  const out = [{ x, y, swap: false }];
+/** Original cell plus its mirror images. */
+export function mirrorCells(x: number, y: number, mode: MirrorMode, size: Size): { x: number; y: number }[] {
+  const out = [{ x, y }];
   for (const t of mirrorTransforms(mode)) {
     const [mx, my] = t.cell(x, y, size);
-    if (!out.some((o) => o.x === mx && o.y === my)) out.push({ x: mx, y: my, swap: t.swapsDiagonal });
+    if (!out.some((o) => o.x === mx && o.y === my)) out.push({ x: mx, y: my });
   }
   return out;
 }

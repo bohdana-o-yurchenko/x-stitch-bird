@@ -16,7 +16,7 @@ export function transformChart(ed: Editor, id: TransformId) {
 }
 
 export function mirrorChart(ed: Editor, dir: MirrorFromCentre) {
-  finish(ed, ed.history.transaction("mirror", () => mirrorFromCentre(ed.doc, dir, ed.state.symbols)));
+  finish(ed, ed.history.transaction("mirror", () => mirrorFromCentre(ed.doc, dir)));
 }
 
 export function cropChart(ed: Editor, margin = 2) {

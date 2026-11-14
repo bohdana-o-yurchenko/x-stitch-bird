@@ -27,8 +27,8 @@ describe("chart checks", () => {
 
   it("reports broken mirror pairs, fixing from the better-supported side", () => {
     const fixes = run("nearSymmetry", p).map((f) => f.suggestion?.[0]);
-    expect(fixes).toContainEqual({ to: 29, from: 20, swap: true });
-    expect(fixes).toContainEqual({ to: 35, from: 34, swap: true });
+    expect(fixes).toContainEqual({ to: 29, from: 20 });
+    expect(fixes).toContainEqual({ to: 35, from: 34 });
   });
 
   it("flags unused, rare and duplicate entries", () => {

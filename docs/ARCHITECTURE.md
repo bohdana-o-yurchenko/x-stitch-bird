@@ -821,7 +821,7 @@ The Save to file dialog should mention this during the transition.
   = extract the source half (`fragment.ts`) + transform + insert. Crop and extend = `layerHandler.resize` with an offset.
 - **Mirror drawing modes:** `ui.mirror` cycles off → vertical → horizontal → quad (command `draw.cycleMirror`).
   `core/geometry/mirrorPoints(cell | point, mode, size)` returns the mirrored copies. Painting actions apply the
-  direction rule to them through the same `repoint`, which fixes SPEC quirk §14.12. Guides: `overlays.ts`.
+  same entry to them (half crosses keep their direction, SPEC §15.3 as revised 2026-11-14). Guides: `overlays.ts`.
 - **UI:** `header/TransformMenu`, `MirrorFromCentreDialog` (with confirm when the target isn't empty), `ExtendCanvasDialog`.
 
 ### 14.4 Error detectors (SPEC §15.4)
@@ -1018,6 +1018,8 @@ Decisions taken while implementing this plan. Each one lives in the single place
 **Code-level notes**
 - v1 → v4 migration lives in `core/formats/json/parse.ts` (only v1 needs real migration) instead of a separate
   `migrations.ts`.
+- Mirror drawing and Mirror from centre reuse the same key entry (half crosses keep their direction, no new
+  entries); only Flip and Rotate re-point half crosses to opposite-direction entries.
 - Small dialogs share `ui/dialogs/simpleDialogs.tsx`; the key-entry dialog has its own folder.
 - `window.__stitchwork` is the editor instance — a deliberate debugging / end-to-end test hook.
 - `cacheComponents` is off: the editor is client-only, so server caching adds nothing yet.
