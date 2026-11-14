@@ -53,6 +53,8 @@ export class ReferenceService {
       ...d,
     };
     this.setList([...this.list, ref]);
+    // a new photo is always shown, even if the windows were hidden
+    this.ed.store.setState({ referencesHidden: false });
     this.save();
   }
 

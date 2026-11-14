@@ -104,8 +104,11 @@ export function Toasts() {
   );
 }
 
-/** A menu entry: an action, a submenu (`items`), or "-" for a separator. `hint` is a second, muted line. */
-export type MenuItem = { label: string; hint?: string; onClick?: () => void; disabled?: boolean; items?: MenuItem[] } | "-";
+/**
+ * A menu entry: an action, a submenu (`items`), or "-" for a separator. `hint` is a second, muted line;
+ * `checked` makes it an on/off item with a tick.
+ */
+export type MenuItem = { label: string; hint?: string; onClick?: () => void; disabled?: boolean; items?: MenuItem[]; checked?: boolean } | "-";
 
 type MenuPos = { top: number; left?: number; right?: number };
 
@@ -127,11 +130,12 @@ function MenuList({ items, pos, onDone, testId }: { items: MenuItem[]; pos: Menu
             <button
               key={i.label}
               type="button"
-              role="menuitem"
+              role={i.checked === undefined ? "menuitem" : "menuitemcheckbox"}
+              aria-checked={i.checked}
               aria-haspopup={i.items ? "menu" : undefined}
               aria-expanded={i.items ? sub?.index === n : undefined}
               disabled={i.disabled}
-              className={cx(i.items && s.hasSub, sub?.index === n && s.subOpen)}
+              className={cx(i.items && s.hasSub, sub?.index === n && s.subOpen, i.checked !== undefined && s.checkItem)}
               onPointerEnter={(e) => (i.items ? openSub(n, e.currentTarget) : setSub(null))}
               onClick={(e) => {
                 if (i.items) return openSub(n, e.currentTarget);
@@ -139,6 +143,7 @@ function MenuList({ items, pos, onDone, testId }: { items: MenuItem[]; pos: Menu
                 i.onClick?.();
               }}
             >
+              {i.checked !== undefined && <span className={s.tick} aria-hidden>{i.checked ? "✓" : ""}</span>}
               <span>{i.label}</span>
               {i.hint && <small>{i.hint}</small>}
             </button>

@@ -88,6 +88,8 @@ export interface EditorState {
   references: RefWindowData[];
   underlay: UnderlayData | null;
   underlayImage: HTMLImageElement | null;
+  /** Floating reference photo windows hidden (kept, not closed) — SPEC §11. */
+  referencesHidden: boolean;
   /** Fade every key entry except the active one (SPEC §15.16). */
   highlight: boolean;
   hasClipboard: boolean;
@@ -127,6 +129,7 @@ export const createEditorStore = () =>
     underlay: null,
     underlayImage: null,
     highlight: false,
+    referencesHidden: false,
     hasClipboard: false,
   }));
 
