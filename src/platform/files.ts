@@ -1,4 +1,4 @@
-const MIME: Record<string, string> = { json: "application/json", oxs: "application/xml", csv: "text/csv;charset=utf-8", png: "image/png" };
+const MIME: Record<string, string> = { xbird: "text/plain;charset=utf-8", json: "application/json", oxs: "application/xml", csv: "text/csv;charset=utf-8", png: "image/png" };
 
 /** Save `data` as a file through a normal browser download. CSV gets a BOM so Excel reads UTF-8 symbols. */
 export function downloadFile(filename: string, data: string | Blob): void {
@@ -29,7 +29,7 @@ export function pickFile(accept: string): Promise<File | null> {
 
 export const readText = async (f: File) => (await f.text()).replace(/^﻿/, "").trim();
 
-export const isPatternFile = (f: File) => /\.(json|oxs|xml)$/i.test(f.name) || /json|xml/.test(f.type);
+export const isPatternFile = (f: File) => /\.(xbird|json|oxs|xml)$/i.test(f.name) || /json|xml/.test(f.type);
 export const isImageFile = (f: File) => f.type.startsWith("image/");
 
 export async function copyText(text: string): Promise<boolean> {

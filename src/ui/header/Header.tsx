@@ -38,7 +38,7 @@ function FileMenu() {
     { label: t("versions"), hint: t("versionsHint"), onClick: go("file.versions") },
     "-",
     { label: t("save"), hint: t("saveHint"), onClick: go("file.save") },
-    { label: t("download"), hint: t("downloadHint"), onClick: go("file.export", "json") },
+    { label: t("download"), hint: t("downloadHint"), onClick: go("file.export", "pattern") },
     { label: t("export"), items: [
       { label: t("pngBoth"), onClick: go("file.export", "png-both") },
       { label: t("pngSymbols"), onClick: go("file.export", "png-symbols") },

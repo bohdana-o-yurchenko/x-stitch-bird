@@ -39,9 +39,10 @@ test("holding Alt picks an entry from the chart and returns to the previous tool
   expect(await editorState<string>(page, "(ed) => ed.state.tool")).toBe("pencil");
 });
 
-test("downloads a JSON file that loads back", async ({ page }) => {
+test("downloads a .xbird pattern file that loads back", async ({ page }) => {
   const download = page.waitForEvent("download");
-  await fileAction(page, "Download pattern file (.json)");
+  await fileAction(page, "Download pattern file (.xbird)");
+  expect((await download).suggestedFilename()).toMatch(/\.xbird$/);
   const file = await (await download).path();
   const doc = JSON.parse(readFileSync(file, "utf8"));
   expect(doc).toMatchObject({ app: "stitchwork", v: 4, w: 60, h: 60 });
@@ -249,7 +250,7 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   await page.reload();
   await expect(page.getByTestId("underlay-panel").getByLabel("Behind stitches")).toBeChecked();
   const download = page.waitForEvent("download");
-  await fileAction(page, "Download pattern file (.json)");
+  await fileAction(page, "Download pattern file (.xbird)");
   const doc = JSON.parse(readFileSync(await (await download).path(), "utf8"));
   expect(doc.underlay).toMatchObject({ behind: true, imageW: 40, imageH: 20 });
   // the alignment pad works while the image is behind the stitches

@@ -19,7 +19,11 @@ import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import type { Editor } from "../createEditor";
 import { loadPattern } from "./pattern";
 
-export type ExportFormat = "png-both" | "png-symbols" | "png-color" | "csv" | "oxs" | "json";
+/** "pattern": our own file — the pattern, key, reference windows and underlay, as text in a `.xbird` file. */
+export type ExportFormat = "png-both" | "png-symbols" | "png-color" | "csv" | "oxs" | "pattern";
+
+/** Extension of our own pattern files. Older files ended in `.json`; they hold the same text and still open. */
+export const PATTERN_EXT = "xbird";
 
 const safeName = (p: Pattern) => (p.name || "pattern").replace(/[^\p{L}\p{N}\- ]+/gu, "").trim().replace(/\s+/g, "-") || "pattern";
 
@@ -46,9 +50,9 @@ export const shoppingList = (p: Pattern) => calculator().calculate({ pattern: p,
 
 export async function exportAs(ed: Editor, format: ExportFormat) {
   const p = ed.doc, base = safeName(p);
-  if (format === "json") {
+  if (format === "pattern") {
     const underlay = ed.underlay.data ? await ed.images.underlayToFile(ed.underlay.data) : undefined;
-    return offer(ed, `${base}.json`, JSON.stringify({ ...serializePattern(p), refs: await ed.references.exportFile(), underlay }), "json");
+    return offer(ed, `${base}.${PATTERN_EXT}`, JSON.stringify({ ...serializePattern(p), refs: await ed.references.exportFile(), underlay }), PATTERN_EXT);
   }
   if (format === "oxs") return offer(ed, `${base}.oxs`, exportOxs(p), "oxs");
   if (format === "csv") return offer(ed, `${base}-shopping-list.csv`, exportCsv(p, shoppingList(p), ed.t), "csv");
@@ -58,7 +62,7 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
   offer(ed, `${base}${view === "color" ? "-preview" : "-chart"}.png`, await canvasToBlob(canvas), "png");
 }
 
-/** Read a .json or .oxs file into a pattern; throws on anything else. */
+/** Read a .xbird (or older .json) or .oxs file into a pattern — told apart by content; throws on anything else. */
 export async function readPatternFile(ed: Editor, file: File): Promise<{ pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; simplified: number }> {
   const text = await readText(file);
   if (text.startsWith("<")) {

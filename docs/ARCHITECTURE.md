@@ -1038,6 +1038,8 @@ Decisions taken while implementing this plan. Each one lives in the single place
   (`markSaved` after opening from the library or a manual save).
 - Stitch highlighting: `highlight` in the store, `ChartScene.highlight`; `ChartRenderer.draw` paints the other
   entries at `theme.highlight.dimAlpha`, then the highlighted one.
+- Pattern file extension: `PATTERN_EXT` (`xbird`) in `editor/actions/importExport.ts`; export format id `"pattern"`.
+  Reading tells OXS from our format by content, so `.json` files from earlier versions still open.
 - Side panel width: `ui/layout/EditorLayout.tsx` (`--side-w`, drag handle, `localStorage`).
 - Shortcut help: `ui/header/ShortcutsInfo.tsx` builds its list from `KEYMAP` via `shortcutLabels`/`formatKeys`, so
   a new binding only needs a row there.

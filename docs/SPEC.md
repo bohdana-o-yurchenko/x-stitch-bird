@@ -197,9 +197,9 @@ its own centred row under the app bar. **Ukrainian is the default language**: `/
 is not used; `/en` is English. The File menu groups everything file-related;
 items carry a muted second line saying what they do, and `▸` items open a submenu on hover or click:
 - **New ▸** Blank pattern… · From a picture…
-- Open saved pattern… · Open file from computer… (.json/.oxs) · **Versions…** (automatic snapshots, §15.7 — no
+- Open saved pattern… · Open file from computer… (.xbird/.oxs; older .json still opens) · **Versions…** (automatic snapshots, §15.7 — no
   longer inside the Open dialog)
-- Save (in this browser) · Download pattern file (.json)
+- Save (in this browser) · Download pattern file (.xbird, §9.7)
 - **Export ▸** chart PNG (colour + symbols / symbols only / colour blocks) · Open Cross Stitch (.oxs — opens in
   Хрестики and Ruta Stitch) · shopping list (CSV)
 - **Reference pictures ▸** Photo in a floating window… (§11) · Image behind the chart… (§15.15)
@@ -555,8 +555,15 @@ every window move or marker stroke rewrote megabytes, and photos were re-compres
   except ones saved within the last hour (their record may not be written yet).
 - **Migration:** records written by earlier versions (data URLs in `src` / `marks`, also the old localStorage
   `stitchwork.refs.<id>` copy) are moved into the image store the first time they are read, and rewritten.
-- `.json` files are unchanged: pictures still travel inline as data URLs (`refs[].src`, `refs[].marks`,
+- Pattern files (`.xbird`, §9.7) are unchanged inside: pictures still travel inline as data URLs (`refs[].src`, `refs[].marks`,
   `underlay.src`, `underlay.straighten.src`) and are stored as Blobs when the file is opened.
+
+### 9.7 Pattern files: `.xbird` (new app, 2026-11-14)
+Our own file is downloaded as **`<pattern name>.xbird`** (`text/plain`). The contents are the same native text format
+as before (v4, §9.3, plus `refs` and `underlay`) — only the extension and type changed, so the file reads as "a
+пташечка pattern" rather than a generic data file. The interface never says "JSON".
+- Opening (file chooser, drag and drop) accepts `.xbird`, `.oxs`, and older `.json` / `.xml`; files are told apart
+  by content (XML → OXS), not by extension, so a renamed file still opens.
 
 ### 9.5 Optional Claude-runtime capabilities (`index.html:1930`)
 If `window.claude.use` exists, the app requests `db`, `user` and `downloads`:
@@ -1222,7 +1229,7 @@ behind, visible, tool, straighten?: { source, sourceW, sourceH, corners: 4×{x, 
 at: {x, y} } }`. `image` and `straighten.source` are ids in the image store (below).
 - Saved per pattern in the browser like reference windows (IndexedDB, own store), debounced, flushed on page hide.
   The record is small; the pictures live in the **image store** (§9.6), so nudging never rewrites a picture.
-- Included in `.json` files as `underlay`, next to `refs`, with the pictures inline as data URLs: `src` (the shown
+- Included in pattern files (`.xbird`) as `underlay`, next to `refs`, with the pictures inline as data URLs: `src` (the shown
   picture) and `straighten.src` (the original photo). Files from before straightening (only `src`) still load.
 - Not in the draft (`stitchwork.current`) or the library — they stay small.
 

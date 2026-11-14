@@ -66,7 +66,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "file.save", run: (ed) => saveToLibrary(ed) },
   { id: "file.versions", run: (ed) => ed.openDialog({ type: "versions" }) },
   { id: "file.export", run: (ed, f) => exportAs(ed, f as ExportFormat) },
-  { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".json,.oxs,.xml,application/json,text/xml"); if (f) await ed.commands.run("file.load", f); } },
+  { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird,.oxs,.json,.xml"); if (f) await ed.commands.run("file.load", f); } },
   { id: "file.load", run: (ed, f) => loadFile(ed, f as File), destructive: "import" },
   { id: "file.drop", run: (ed, files) => handleDrop(ed, files as File[]) },
   { id: "image.pick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await openImageDialog(ed, f); } },
