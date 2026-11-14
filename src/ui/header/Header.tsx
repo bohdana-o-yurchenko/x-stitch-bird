@@ -100,8 +100,8 @@ export function Header() {
   return (
     <header ref={bar} className={cx(s.bar, stacked && s.stacked)}>
       <div className={s.brand}>
-        {/* app/icon.png, served by Next as the favicon too */}
-        <Image src="/icon.png" alt="" width={28} height={28} unoptimized priority />
+        {/* src/app/icon.svg — Next.js serves it at /icon.svg and uses it as the favicon too */}
+        <Image src="/icon.svg" alt="" width={30} height={30} unoptimized priority />
         <span className={s.brandText}>{t("app.brand")}</span>
       </div>
       <PatternName />

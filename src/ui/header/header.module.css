@@ -182,3 +182,9 @@
   padding: 4px;
   background: #fff;
 }
+.sizes.idle {
+  opacity: 0.45;
+}
+.sizes.idle:hover {
+  opacity: 0.8;
+}

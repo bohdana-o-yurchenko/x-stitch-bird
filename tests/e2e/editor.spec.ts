@@ -93,7 +93,7 @@ test("the File menu opens above the chart, with submenus", async ({ page }) => {
   await fileAction(page, "Open file from computer…");
   await (await chooser).setFiles("tests/fixtures/1.oxs");
   await expect(page.locator("[data-entry]")).toHaveCount(12);
-  await page.getByRole("button", { name: "File ▾" }).click();
+  await page.getByRole("button", { name: "Menu ▾" }).click();
   await page.getByRole("menuitem", { name: /^Export/ }).hover();
   await expect(page.getByRole("menuitem", { name: "Shopping list (CSV)" })).toBeInViewport();
 });

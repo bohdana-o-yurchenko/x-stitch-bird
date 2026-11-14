@@ -184,11 +184,14 @@ Brand mark · editable **pattern name** input (change → `P.name`, trimmed, def
 buttons **New**, **Open**, **Save**, **Save to file**, **Load file**, **Image → pattern**, **+ Reference** ·
 view segmented control **Colour / Both / Symbols** (default Both) · **Export ▾** menu.
 
-*New app (2026-11-14):* app name **бджілка** with the bee icon (`src/app/icon.png`, also the favicon) · pattern name
-(`clamp(140px, 13vw, 260px)` wide) · **File ▾** · **main toolbar** (all tools, brush size 1–5, override, mirror,
-undo, redo, **Transform ▾**) · **i** (hover or click: every keyboard shortcut, grouped, generated from the keymap) ·
-language (UK/EN) · **side panel** toggle (K). No Save button (saving is
-automatic, §9.2; ⌘/Ctrl+S and File ▸ Save still save at once) and no Check button (§15.4). The view switch moved to
+*New app (2026-11-14):* app name **бджілка** with the bee-heart icon (`src/app/icon.svg`, also the favicon) · pattern
+name (`clamp(140px, 13vw, 260px)` wide) · **Menu ▾** (the former File menu) · **main toolbar**, in groups:
+undo · redo | override · mirror | draw · eraser · brush size 1–5 | line · rectangle · filled rectangle · fill |
+partial · ¼ ¾ ½ | picker · move view | select · magic wand | **Transform ▾** · then, on the right, **i** (hover or
+click: every keyboard shortcut, grouped, generated from the keymap) · language (UK/EN) · **side panel** toggle (K).
+Brush sizes and partial kinds always stay in place; they are dimmed while the active tool doesn't use them, and
+clicking one switches to Draw (sizes) or Partial (kinds). No Save button (saving is automatic, §9.2; ⌘/Ctrl+S and
+Menu ▸ Save still save at once) and no Check button (§15.4). The view switch moved to
 the zoom control (§4.2). When one row doesn't fit (measured, so it works for every language), the toolbar moves to
 its own centred row under the app bar. **Ukrainian is the default language**: `/` opens `/uk`; the browser language
 is not used; `/en` is English. The File menu groups everything file-related;

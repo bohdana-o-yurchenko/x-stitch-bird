@@ -12,15 +12,15 @@ import { entryKind } from "@/core/entryKinds/registry";
 import type { EditorState, ToolId } from "../store/editorStore";
 import type { Tool } from "./types";
 
-/** Toolbar order. The toolbar, mini toolbar and tooltips are generated from this list. */
+/** All tools in toolbar order (the shortcut help follows it; the toolbar itself groups them, ui/header/ToolBar). */
 export const TOOLS: readonly Tool[] = [
   pencilTool,
+  eraserTool,
   lineTool,
   rectTool,
   filledRectTool,
   fillTool,
   partialTool,
-  eraserTool,
   pickerTool,
   panTool,
   selectTool,

@@ -1016,7 +1016,7 @@ Decisions taken while implementing this plan. Each one lives in the single place
 - No 240 000-character limit on library saves; a full browser storage shows a toast instead (quirk §14.6).
 - New shortcuts: `M` cycles mirror drawing, `Q` cycles the partial-stitch kind.
 - File names keep non-Latin letters (e.g. Ukrainian pattern names).
-- Below 1560 px wide, the header's file buttons collapse into a **File ▾** menu.
+- The header's file actions live in one **Menu ▾** (formerly File ▾).
 
 **Code-level notes**
 - v1 → v4 migration lives in `core/formats/json/parse.ts` (only v1 needs real migration) instead of a separate
@@ -1033,7 +1033,7 @@ Decisions taken while implementing this plan. Each one lives in the single place
 - The main toolbar is `ui/header/ToolBar.tsx`; the header measures whether everything fits on one row and otherwise
   gives the toolbar its own row (`useStacked`). `ui/side/CurrentTool.tsx` is the "Drawing with" card; it and the
   canvas share `resolveTool` (`editor/tools/registry.ts`), and shortcut labels come from `shortcutLabel` (keymap).
-- App name and icon: `app.brand` / `app.title` messages and `src/app/icon.png` (Next's icon file convention).
+- App name and icon: `app.brand` / `app.title` messages and `src/app/icon.svg` (Next's icon file convention; the header shows it from `/icon.svg`).
 - Saving: `editor/autosave.ts` writes the draft after each change and the library once a minute when changed
   (`markSaved` after opening from the library or a manual save).
 - Side panel width: `ui/layout/EditorLayout.tsx` (`--side-w`, drag handle, `localStorage`).

@@ -443,7 +443,7 @@
     "nudge": "Move"
   },
   "fileMenu": {
-    "label": "File ▾",
+    "label": "Menu ▾",
     "new": "New",
     "newBlank": "Blank pattern…",
     "newBlankHint": "Pick a size and fabric",
