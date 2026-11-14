@@ -992,3 +992,35 @@ Until phase 4 is finished, `index.html` stays the working product.
 | Snapshot retention | `core/snapshots/retention.ts` |
 | Fractional stitch kinds | `core/stitches/partialKinds.ts` + `render/primitives/partials.ts` |
 | What may share a cell | `core/pattern/occupancy.ts` |
+
+---
+
+## 17. Implementation notes (first build, 2026-11-14)
+
+Decisions taken while implementing this plan. Each one lives in the single place named here.
+
+**Draft features (SPEC §15.13–15.14) follow the spec's proposals; revisit when the open questions are answered**
+- Fractional stitches: kind stored per cell, pointing at the colour's cross-stitch entry (Q1). Kinds: quarter,
+  three-quarter, petite (Q2). Placement: Partial tool, nearest corner, `Q` cycles the kind (Q3). Sharing rules
+  (Q4) use an 8-slot cell model — `core/stitches/partialKinds.ts`, `core/pattern/occupancy.ts`.
+- OXS: three-quarters ↔ `<partstitch>` (direction 2 = split along ╱, 1 = along ╲); quarters, petites and knots are
+  `<object>`s with Stitchwork-specific types. **Unverified against real files** — `core/formats/oxs/`.
+- Knots: half-grid points, optional symbol, wraps 1–3; thread = `knotAllowance` (1.5 stitch-strand units) ×
+  strands — `core/calculator/classicSkeins.ts`.
+
+**Small departures from the single-file app**
+- Key-entry edits and deletions, resize and transforms are undoable (SPEC quirk §14.4).
+- No 240 000-character limit on library saves; a full browser storage shows a toast instead (quirk §14.6).
+- New shortcuts: `M` cycles mirror drawing, `Q` cycles the partial-stitch kind.
+- File names keep non-Latin letters (e.g. Ukrainian pattern names).
+- Below 1560 px wide, the header's file buttons collapse into a **File ▾** menu.
+
+**Code-level notes**
+- v1 → v4 migration lives in `core/formats/json/parse.ts` (only v1 needs real migration) instead of a separate
+  `migrations.ts`.
+- Small dialogs share `ui/dialogs/simpleDialogs.tsx`; the key-entry dialog has its own folder.
+- `window.__stitchwork` is the editor instance — a deliberate debugging / end-to-end test hook.
+- `cacheComponents` is off: the editor is client-only, so server caching adds nothing yet.
+- Golden outputs of the single-file app live in `tests/fixtures/legacy/` (recorded from `index.html` at commit
+  `2d15ee4`); `src/core/formats/legacyParity.test.ts` compares against them.
+- SPEC §2.2 says 11 bead series; the data has **12** (it lists 12 by name).

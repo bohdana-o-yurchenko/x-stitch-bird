@@ -4,7 +4,8 @@
     "description": "Design cross stitch and bead patterns: key, chart, totals, OXS and JSON files.",
     "brand": "Stitchwork",
     "loading": "Loading the editor…",
-    "language": "Language"
+    "language": "Language",
+    "chart": "Cross stitch chart"
   },
   "header": {
     "patternName": "Pattern name",
@@ -27,7 +28,8 @@
     "transform": "Transform ▾",
     "check": "Check…",
     "checkTitle": "Check the chart for likely mistakes",
-    "export": "Export ▾"
+    "export": "Export ▾",
+    "file": "File ▾"
   },
   "view": {
     "label": "Chart view",
@@ -69,7 +71,7 @@
     "partial": "Partial stitches (Q cycles quarter / three-quarter / petite)",
     "brushSize": "Brush size",
     "override": "Override (O): when on, drawing replaces stitches already on the chart. Off = only empty squares are filled.",
-    "mirror": "Mirror drawing: off → left–right → top–bottom → 4-way",
+    "mirror": "Mirror drawing (M): off → left–right → top–bottom → 4-way",
     "mirrorOff": "Mirror drawing off",
     "mirrorVertical": "Mirror left–right",
     "mirrorHorizontal": "Mirror top–bottom",
@@ -341,7 +343,6 @@
     "fit": "Fit photo to window",
     "clear": "Clear all marks",
     "resize": "Drag to resize",
-    "loading": "Loading…",
     "position": "Column {col} · Row {row}"
   },
   "checks": {
@@ -438,7 +439,6 @@
     "picked": "Picked {label}",
     "overrideOn": "Override on — drawing replaces existing stitches",
     "overrideOff": "Override off — only empty squares are filled",
-    "mirrorOn": "{mode}",
     "entryDeleted": "Entry deleted",
     "entryUpdated": "Entry updated — the chart follows",
     "entryAdded": "Added — draw with it now",
@@ -466,7 +466,6 @@
     "clipboardEmpty": "Nothing to paste",
     "restored": "Snapshot restored",
     "partialKind": "Partial stitch: {kind}",
-    "partialNeedsCross": "Partial stitches use a cross-stitch entry — pick one in the key",
-    "symbolSwapped": "Symbol swapped with {other}"
+    "partialNeedsCross": "Partial stitches use a cross-stitch entry — pick one in the key"
   }
 }

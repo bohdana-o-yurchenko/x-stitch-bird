@@ -58,6 +58,17 @@ function LanguageSwitch() {
   );
 }
 
+/** Shown as buttons on wide screens and as a "File" menu on narrower ones (header.module.css). */
+const FILE_ACTIONS = [
+  ["info", "pattern.editInfo"],
+  ["new", "file.new"],
+  ["open", "file.open"],
+  ["saveToFile", "file.saveToFile"],
+  ["loadFile", "file.pickToLoad"],
+  ["image", "image.pick"],
+  ["reference", "reference.pick"],
+] as const;
+
 export function Header() {
   const t = useTranslations();
   const run = useCommand();
@@ -70,14 +81,15 @@ export function Header() {
         <span className={s.brandText}>{t("app.brand")}</span>
       </div>
       <PatternName />
-      <button type="button" className={btn} title={t("header.infoTitle")} onClick={() => run("pattern.editInfo")}>{t("header.info")}</button>
-      <button type="button" className={btn} title={t("header.newTitle")} onClick={() => run("file.new")}>{t("header.new")}</button>
-      <button type="button" className={btn} title={t("header.openTitle")} onClick={() => run("file.open")}>{t("header.open")}</button>
+      <div className={s.inlineFiles}>
+        {FILE_ACTIONS.map(([key, command]) => (
+          <button key={key} type="button" className={btn} title={t(`header.${key}Title`)} onClick={() => run(command)}>{t(`header.${key}`)}</button>
+        ))}
+      </div>
+      <div className={s.fileMenu}>
+        <Dropdown className={btn} label={t("header.file")} items={FILE_ACTIONS.map(([key, command]) => ({ label: t(`header.${key}`), onClick: () => run(command) }))} />
+      </div>
       <button type="button" className={btn} title={t("header.saveTitle")} onClick={() => run("file.save")}>{t("header.save")}</button>
-      <button type="button" className={btn} title={t("header.saveToFileTitle")} onClick={() => run("file.saveToFile")}>{t("header.saveToFile")}</button>
-      <button type="button" className={btn} title={t("header.loadFileTitle")} onClick={() => run("file.pickToLoad")}>{t("header.loadFile")}</button>
-      <button type="button" className={btn} title={t("header.imageTitle")} onClick={() => run("image.pick")}>{t("header.image")}</button>
-      <button type="button" className={btn} title={t("header.referenceTitle")} onClick={() => run("reference.pick")}>{t("header.reference")}</button>
       <div className={s.spacer} />
       <Dropdown
         className={btn}

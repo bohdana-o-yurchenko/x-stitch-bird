@@ -35,12 +35,12 @@ function MiniToolbar() {
   const ed = useEditor();
   return (
     <div className={s.mini}>
-      <button type="button" className={ui.tool} title={t("expand")} onClick={() => run("panel.toggle")}><Icon name="expand" size={18} /></button>
+      <button type="button" className={ui.tool} title={t("expand")} aria-label={t("expand")} onClick={() => run("panel.toggle")}><Icon name="expand" size={18} /></button>
       <button type="button" className={s.miniKey} title={active ? t("activeEntry", { label: ed.entryLabel(active) }) : t("noActiveEntry")} onClick={() => run("panel.toggle")}>
         {slot && <KeyIcon slot={slot} size={34} />}
       </button>
       {MINI_TOOLS.map((id) => (
-        <button key={id} type="button" className={cx(ui.tool, tool === id && ui.on)} title={t(id)} onClick={() => run("tool.select", id)}>
+        <button key={id} type="button" className={cx(ui.tool, tool === id && ui.on)} title={t(id)} aria-label={t(id)} onClick={() => run("tool.select", id)}>
           <Icon name={toolById(id).icon} size={18} />
         </button>
       ))}

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { ChartRenderer, type ChartScene } from "@/render/ChartRenderer";
 import type { Editor } from "@/editor/createEditor";
 import type { ToolPointer } from "@/editor/tools/types";
+import { useTranslations } from "next-intl";
 import { useEditor } from "../hooks/editor";
 import s from "./stage.module.css";
 
@@ -36,6 +37,7 @@ function scene(ed: Editor): ChartScene {
 export function ChartCanvas() {
   const ed = useEditor();
   const ref = useRef<HTMLCanvasElement>(null);
+  const t = useTranslations("app");
 
   useEffect(() => {
     const canvas = ref.current!;
@@ -103,5 +105,5 @@ export function ChartCanvas() {
     };
   }, [ed]);
 
-  return <canvas ref={ref} className={s.canvas} data-testid="chart" />;
+  return <canvas ref={ref} className={s.canvas} data-testid="chart" role="img" aria-label={t("chart")} />;
 }

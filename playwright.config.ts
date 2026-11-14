@@ -10,7 +10,7 @@ export default defineConfig({
     baseURL: `http://localhost:${port}`,
     // uses the locally installed Chrome, so no browser download is needed
     channel: "chrome",
-    viewport: { width: 1400, height: 900 },
+    viewport: { width: 1600, height: 900 },
     acceptDownloads: true,
   },
   webServer: {

@@ -194,9 +194,11 @@ export class ChartRenderer {
       g.strokeStyle = t.accent;
       g.lineWidth = t.findings.ring;
       for (const i of s.finding.cells) {
-        const [px, py] = cellRect(i), pad = z * t.findings.padding;
+        const [px, py] = cellRect(i), r = Math.max(12, z / 2 + z * t.findings.padding);
         g.beginPath();
-        g.arc(px + z / 2, py + z / 2, z / 2 + pad, 0, Math.PI * 2);
+        g.arc(px + z / 2, py + z / 2, r, 0, Math.PI * 2);
+        g.fillStyle = "rgba(181,69,47,.12)";
+        g.fill();
         g.stroke();
       }
     }
