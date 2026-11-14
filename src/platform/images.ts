@@ -13,8 +13,8 @@ export function loadImage(src: string | Blob): Promise<HTMLImageElement> {
   });
 }
 
-/** JPEG data URL with the longest side at most `max` px, on white (reference photos, SPEC §11.1). */
-export function downscaleToDataUrl(img: HTMLImageElement, max = 1600): string {
+/** JPEG with the longest side at most `max` px, on white (reference photos, SPEC §11.1). */
+export function downscaleToBlob(img: HTMLImageElement, max = 1600, quality = 0.86): Promise<Blob> {
   const k = Math.min(1, max / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
   const c = document.createElement("canvas");
   c.width = Math.max(1, Math.round((img.naturalWidth || img.width) * k));
@@ -23,7 +23,7 @@ export function downscaleToDataUrl(img: HTMLImageElement, max = 1600): string {
   g.fillStyle = "#fff";
   g.fillRect(0, 0, c.width, c.height);
   g.drawImage(img, 0, 0, c.width, c.height);
-  return c.toDataURL("image/jpeg", 0.86);
+  return new Promise((resolve, reject) => c.toBlob((b) => (b ? resolve(b) : reject(new Error("jpeg"))), "image/jpeg", quality));
 }
 
 /** The image scaled to `w` stitches wide (height keeps the aspect ratio), as raw RGBA pixels. */

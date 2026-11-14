@@ -1,10 +1,12 @@
 import type { Point } from "@/core/pattern/types";
-import { alignUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, stretchUnderlay, type Handle, type UnderlayData } from "@/core/underlay/underlay";
-import { loadImage } from "@/platform/images";
+import { defaultCorners, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, straightenedSize, stretchUnderlay, type Handle, type Straighten, type UnderlayData } from "@/core/underlay/underlay";
+import { downscaleToBlob, loadImage } from "@/platform/images";
+import { runStraighten } from "../heavy";
 import type { Editor } from "../createEditor";
 
 const SAVE_DELAY = 700;
-const MAX_SIDE = 3000;
+/** Photos larger than this (longer side, px) are scaled down once when added; others are stored untouched. */
+const MAX_SIDE = 6000;
 /** Grab distance for handles, in screen pixels. */
 const GRAB_PX = 8;
 
@@ -41,40 +43,40 @@ export class UnderlayService {
   private async show(u: UnderlayData | null) {
     this.ed.store.setState({ underlay: u, underlayImage: null });
     if (!u) return;
-    const img = await loadImage(u.src).catch(() => null);
-    if (this.data?.src === u.src) this.ed.store.setState({ underlayImage: img });
+    const img = await this.ed.images.load(u.image).catch(() => null);
+    if (this.data?.image === u.image) this.ed.store.setState({ underlayImage: img });
   }
 
+  /** `incoming`: the underlay from a loaded .json file (pictures as data URLs). */
   async switchTo(patternId: string, incoming: UnderlayData | null) {
     if (this.dirty) this.saveNow();
     this.patternId = patternId;
     this.ready = false;
     void this.show(null);
-    const u = incoming ?? (await this.ed.persistence.underlays.load(patternId));
+    const u = incoming ? await this.ed.images.underlayFromFile(incoming) : await this.ed.persistence.underlays.load(patternId);
     if (this.patternId !== patternId) return;
     this.ready = true;
     await this.show(u);
     if (incoming) this.save();
   }
 
-  /** Downscaled JPEG of the picture, fitted to the chart; starts in edit mode. */
+  /**
+   * Stores the photo as it is (only very large ones are scaled down), fits it to the chart in edit mode and opens
+   * the straighten dialog. `keepPlacement`: replacing keeps where the old one was.
+   */
   async addFromFile(f: File, keepPlacement = false) {
     const img = await loadImage(f).catch(() => null);
     if (!img) return this.ed.toast("toasts.badImage");
-    const k = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
-    const c = document.createElement("canvas");
-    c.width = Math.max(1, Math.round(img.naturalWidth * k));
-    c.height = Math.max(1, Math.round(img.naturalHeight * k));
-    const g = c.getContext("2d")!;
-    g.fillStyle = "#fff";
-    g.fillRect(0, 0, c.width, c.height);
-    g.drawImage(img, 0, 0, c.width, c.height);
-    const fresh = newUnderlay(c.toDataURL("image/jpeg", 0.9), c.width, c.height, this.ed.doc);
+    const big = Math.max(img.naturalWidth, img.naturalHeight) > MAX_SIDE;
+    const blob = big ? await downscaleToBlob(img, MAX_SIDE, 0.92) : f;
+    const k = big ? MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight) : 1;
+    const w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
+    const fresh = newUnderlay(await this.ed.images.put(blob), w, h, this.ed.doc);
     const old = this.data;
-    const u = keepPlacement && old ? { ...fresh, rect: { ...old.rect, h: (old.rect.w * c.height) / c.width }, opacity: old.opacity } : fresh;
+    const u = keepPlacement && old ? { ...fresh, rect: { ...old.rect, h: (old.rect.w * h) / w }, opacity: old.opacity } : fresh;
     await this.show(u);
     this.save();
-    this.ed.toast("toasts.underlayAdded");
+    this.ed.openDialog({ type: "straighten" });
   }
 
   update(patch: Partial<UnderlayData>) {
@@ -104,41 +106,31 @@ export class UnderlayService {
     if (u) this.update({ rect: { ...u.rect, x: u.rect.x + dx, y: u.rect.y + dy } });
   }
 
-  /** 3-point alignment is collecting clicks (it takes the pointer, like edit mode). */
-  get aligning(): boolean {
-    const pts = this.ed.state.underlayAlign;
-    return !!pts && pts.length < 3;
+  /** What the straighten dialog starts from: the original photo and the previous corners and sizes. */
+  straightenStart(): (Pick<Straighten, "source" | "sourceW" | "sourceH" | "corners" | "cols" | "rows" | "at">) | null {
+    const u = this.data;
+    if (!u) return null;
+    if (u.straighten) return u.straighten;
+    return { source: u.image, sourceW: u.imageW, sourceH: u.imageH, corners: defaultCorners(u.imageW, u.imageH), cols: this.ed.doc.w, rows: this.ed.doc.h, at: { x: 0, y: 0 } };
   }
 
-  startAlign() {
-    if (!this.data) return;
-    this.ed.tools.cancel();
-    this.ed.store.setState({ underlayAlign: [], underlay: { ...this.data, visible: true } });
-  }
-
-  alignClick(p: Point) {
-    const pts = this.ed.state.underlayAlign;
-    if (pts && pts.length < 3) this.ed.store.setState({ underlayAlign: [...pts, p] });
-  }
-
-  alignBack() {
-    const pts = this.ed.state.underlayAlign;
-    if (pts?.length) this.ed.store.setState({ underlayAlign: pts.slice(0, -1) });
-  }
-
-  cancelAlign() {
-    this.ed.store.setState({ underlayAlign: null });
-  }
-
-  /** Places the image so the clicked square is exactly `n`×`n` cells on the chart grid. */
-  applyAlign(n: number) {
-    const pts = this.ed.state.underlayAlign, u = this.data;
-    if (!u || pts?.length !== 3) return;
-    const rect = alignUnderlay(u.rect, pts[0]!, pts[1]!, pts[2]!, n);
-    if (!rect) return this.ed.toast("toasts.alignFailed");
-    this.ed.store.setState({ underlayAlign: null });
-    this.update({ rect });
-    this.ed.toast("toasts.aligned");
+  /**
+   * Straightens the marked area of the original photo (4 corners) into a flat picture exactly `cols`×`rows` cells,
+   * placed with its top-left at grid point `at`. The original and the corners are kept, so it can be redone.
+   */
+  async straighten(o: Pick<Straighten, "corners" | "cols" | "rows" | "at">) {
+    const start = this.straightenStart(), u = this.data;
+    if (!start || !u) return;
+    const blob = await this.ed.images.blob(start.source);
+    if (!blob) return this.ed.toast("toasts.badImage");
+    const size = straightenedSize(o);
+    const out = await runStraighten({ blob, corners: o.corners, w: size.w, h: size.h });
+    const image = await this.ed.images.put(out);
+    const straighten: Straighten = { source: start.source, sourceW: start.sourceW, sourceH: start.sourceH, ...o };
+    const next: UnderlayData = { ...u, image, imageW: size.w, imageH: size.h, crop: { x: 0, y: 0, w: size.w, h: size.h }, rect: { x: o.at.x, y: o.at.y, w: o.cols, h: o.rows }, straighten, visible: true, tool: "move" };
+    await this.show(next);
+    this.save();
+    this.ed.toast("toasts.straightened");
   }
 
   /** Grow or shrink by (dw, dh) cells around the middle of the screen; works in both modes, at any zoom. */

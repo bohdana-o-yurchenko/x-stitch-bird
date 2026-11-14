@@ -3,9 +3,10 @@ import { imageToPattern, type ImageToPatternInput } from "@/core/imageToPattern/
 import { findBlends } from "@/core/imageToPattern/findBlends";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
 import type { ColorEntry } from "@/core/color/colorEntry";
+import { straightenImage, type StraightenJob } from "@/workers/straightenImage";
 
 /** Runs `job` in a Web Worker; falls back to the main thread if workers are unavailable. */
-function inWorker<I, O>(make: () => Worker, input: I, fallback: (i: I) => O): Promise<O> {
+function inWorker<I, O>(make: () => Worker, input: I, fallback: (i: I) => O | Promise<O>): Promise<O> {
   return new Promise((resolve) => {
     let w: Worker;
     try {
@@ -42,3 +43,7 @@ export async function runFindBlends(hex: string): Promise<BlendSuggestionView[]>
   );
   return raw.map((s) => ({ a: libraryColor(s.a)!, b: libraryColor(s.b)!, deltaE: s.deltaE }));
 }
+
+/** Perspective-straightens part of a photo (SPEC §15.15) off the main thread. */
+export const runStraighten = (job: StraightenJob): Promise<Blob> =>
+  inWorker(() => new Worker(new URL("../workers/straighten.worker.ts", import.meta.url), { type: "module" }), job, straightenImage);

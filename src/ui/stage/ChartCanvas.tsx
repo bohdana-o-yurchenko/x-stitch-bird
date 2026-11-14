@@ -28,9 +28,8 @@ function scene(ed: Editor): ChartScene {
     eraseHighlight: (st.momentaryTool ?? st.tool) === "eraser" ? st.overlay.eraseHighlight : null,
     flash: st.flash,
     underlay: st.underlay && st.underlay.visible && st.underlayImage
-      ? { image: st.underlayImage, crop: st.underlay.crop, rect: st.underlay.rect, opacity: st.underlayAlign ? Math.max(0.85, st.underlay.opacity) : st.underlay.opacity, editing: !st.underlay.behind || !!st.underlayAlign, handles: !st.underlayAlign }
+      ? { image: st.underlayImage, crop: st.underlay.crop, rect: st.underlay.rect, opacity: st.underlay.opacity, editing: !st.underlay.behind }
       : null,
-    alignPoints: st.underlayAlign,
     highlight: st.highlight && st.activeEntry ? st.activeEntry : null,
   };
 }

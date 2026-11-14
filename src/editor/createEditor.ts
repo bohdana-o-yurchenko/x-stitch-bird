@@ -7,13 +7,14 @@ import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import { RULER_SIZE } from "@/render/ChartRenderer";
 import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
 import { createPersistence, type Persistence } from "@/persistence";
-import { downscaleToDataUrl, loadImage } from "@/platform/images";
+import { downscaleToBlob, loadImage } from "@/platform/images";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { createFromImage, saveToLibrary } from "./actions/importExport";
 import { demoPattern, loadPattern } from "./actions/pattern";
 import { Autosave } from "./autosave";
 import { CommandRegistry } from "./commands/registry";
 import { History } from "./history/history";
+import { ImageService } from "./images/ImageService";
 import { ReferenceService } from "./references/references";
 import { SelectionService } from "./selection/selection";
 import { ShortcutManager } from "./shortcuts/ShortcutManager";
@@ -42,6 +43,7 @@ export class Editor {
   readonly underlay: UnderlayService;
   readonly snapshots: SnapshotService;
   readonly autosave: Autosave;
+  readonly images: ImageService;
   theme: CanvasTheme = defaultCanvasTheme;
   /** Translation for exported texts and labels built here; set by the UI for the current locale. */
   t: Translate = (key) => key;
@@ -55,6 +57,7 @@ export class Editor {
 
   constructor(persistence = createPersistence(), readonly isMac = false) {
     this.persistence = persistence;
+    this.images = new ImageService(persistence.images);
     this.history = new History(() => this.doc, (info) => this.changed({ keys: info.keys, structural: info.structural }));
     this.viewport = new ViewportService(this.store, RULER_SIZE);
     this.tools = new ToolManager(this);
@@ -99,6 +102,8 @@ export class Editor {
     // a restored draft is saved to the library once it's edited; the demo only then too
     this.autosave.markSaved();
     this.store.setState({ ready: true });
+    // pictures no record uses any more (closed windows, replaced underlays, old marks)
+    setTimeout(() => void this.persistence.images.collectGarbage().catch(() => {}), 10_000);
   }
 
   /** Call after every document change. `keys`: key entries changed; `structural`: size changed. */
@@ -192,7 +197,8 @@ export class Editor {
   async addReferenceFromFile(f: File) {
     try {
       const img = await loadImage(f);
-      this.references.add({ src: downscaleToDataUrl(img), name: f.name.replace(/\.[^.]+$/, "") });
+      const image = await this.images.put(await downscaleToBlob(img));
+      this.references.add({ image, name: f.name.replace(/\.[^.]+$/, "") });
     } catch {
       this.toast("toasts.badImage");
     }

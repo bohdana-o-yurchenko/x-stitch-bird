@@ -544,6 +544,20 @@ File ▸ Save) still saves at once, with a toast.
   Warning "Unsaved changes to the current pattern will be lost — save first if you want to keep it."
   New project gets a new id; `strands` carried over.
 
+### 9.6 Image store (new app, 2026-11-14)
+The single-file app kept pictures as base64 data URLs inside its records (reference windows: photo and marks), so
+every window move or marker stroke rewrote megabytes, and photos were re-compressed when added. The new app:
+- IndexedDB store **`images`** (database version 4): `id → { blob, created }`. The id is a content hash
+  (`img:` + the first 16 bytes of SHA-256, hex), so the same picture is stored once.
+- Records refer to pictures by id: reference windows `{ image, marks, … }`, the underlay `{ image, straighten.source }`.
+  Marks are stored as a PNG when they change (end of a stroke, undo, clear) — not on window moves.
+- Pictures nobody refers to any more (closed windows, replaced underlays, old marks) are deleted 10 s after start-up,
+  except ones saved within the last hour (their record may not be written yet).
+- **Migration:** records written by earlier versions (data URLs in `src` / `marks`, also the old localStorage
+  `stitchwork.refs.<id>` copy) are moved into the image store the first time they are read, and rewritten.
+- `.json` files are unchanged: pictures still travel inline as data URLs (`refs[].src`, `refs[].marks`,
+  `underlay.src`, `underlay.straighten.src`) and are stored as Blobs when the file is opened.
+
 ### 9.5 Optional Claude-runtime capabilities (`index.html:1930`)
 If `window.claude.use` exists, the app requests `db`, `user` and `downloads`:
 - `cloud = db.collection('data/users/' + userId)`, documents keyed by project id, same body as the local library.
@@ -789,7 +803,7 @@ Effort is relative: **S** small · **M** medium · **L** large.
 | 10 | PDF chart export, Pattern Keeper–compatible (§15.10) | L           | none                               | #1, #2     |
 | 11 | Symbol matching — semi-automatic mapping (§15.11)    | L           | templates stored with ref windows  | #9         |
 | —  | Chart underlay behind the stitches (§15.15) — **done** | M         | new IndexedDB store, `underlay` in .json | —   |
-| —  | 3-point grid alignment for the underlay (§15.15) — **done** | S     | none                               | §15.15     |
+| —  | Straighten the underlay by 4 corners (§15.15) — **done** | M      | original kept in the image store   | §15.15, §9.6 |
 | —  | Stitch highlighting (§15.16) — **done**              | S           | none                               | —          |
 
 **High priority — the design must be agreed before implementation** (paper charts use these all the time, and a
@@ -1167,38 +1181,49 @@ on the stage (bottom-left, draggable by its grip, can be folded to its title). B
   10×10 block, click Width/Height until it lines up, scroll to the next block — no mode switching or zooming out.
 - **Edit / Done** button in the pad's title switches between edit and behind mode (same as `U`).
 
-**3-point grid alignment** (idea from Pattern Maker v4's "Tracing an Existing Chart"). Button **Align to grid
-(3 points)…** in the pad and the side panel; works in either mode.
-1. The pad switches to three numbered steps; the image is drawn on top of the stitches (at least 85 % opacity, no
-   handles) and the pointer is a crosshair. Every chart tool is paused; zoom and pan (wheel, Space, middle/right
-   drag) still work.
-2. Click the **top-left**, **top-right** and **bottom-right** corners of one square on the scanned chart's grid
-   (best: a big square on the bold 10-lines). Each click shows a numbered crosshair, joined by a dashed line.
-   **Back** / Backspace removes the last point; **Cancel** / Esc leaves without changes.
-3. After the third click the pad asks **Square size (cells)**, prefilled with the size the square has on the chart
-   right now (rounded). **Align** places the image so that point 1 sits on the nearest chart grid intersection and
-   the square is exactly that many cells wide and tall (width from points 1→2/3, height from 1/2→3 — the two
-   clicks on a shared line are averaged). Clicks not going right-then-down are refused with a toast.
-- Rotation is not corrected (the image stays axis-aligned); Pattern Maker's version also straightens a slightly
-  rotated scan. Fine-tuning afterwards is the pad's job.
+**Straighten (4 corners)** — for photos and scans that aren't a perfect rectangle (taken at an angle, tilted,
+slightly trapezoid), like a phone document scanner. Opens automatically after adding an image, and from
+**Straighten (4 corners)…** in the pad and the side panel. (Replaced the 3-point alignment of the first version,
+which could only move and stretch.)
+1. A full-screen editor shows the **original photo** with 4 round corner handles (top-left, top-right,
+   bottom-right, bottom-left) joined by an outline; outside the outline is dimmed.
+2. Drag each handle onto a corner of the chart's grid on the photo (best: the outer border, or a big block of
+   10-lines). Grab radius 24 px. While dragging, a **loupe** (4× magnified, with a crosshair) appears in the corner
+   of the view away from the handle. Arrow keys nudge the last-touched corner by 1 photo pixel (Shift: 10).
+3. Below the photo: **Marked area** `columns × rows` (default: the previous values, else the pattern's size) and
+   **Its top-left corner is at column / row** (1-based, default 1/1). The predicted grid is drawn over the photo
+   through the perspective transform — every cell line when cells are over 6 px apart, plus bold 10-lines — so a
+   wrong count or corner is visible before applying.
+4. **Straighten** (disabled while the outline crosses itself) warps the marked area into a flat picture, off the main
+   thread: output size ≈ the photo's own resolution per cell (≥ 4 px per cell), at most 4096 px on the longer side,
+   JPEG 0.92, bilinear sampling, white outside the photo. The underlay becomes that picture, uncropped, placed
+   exactly on `columns × rows` cells at the given column/row. **Use as it is** closes without changes; **Reset
+   corners** puts the handles back near the photo's edges.
+- The original photo, the corners, the size and the position are kept, so reopening the editor continues from the
+  previous corners, and straightening is always redone from the original (never from an already-warped picture).
+- Afterwards the pad still fine-tunes; a page that is bent (book spine) isn't fixed by 4 corners.
 
 **Side panel section "Image behind the chart"** (only when one exists): Behind stitches toggle, Show/hide, opacity slider
 (10–100 %, default 50 %), Move & resize / Crop (edit mode only), X / Y / W / H fields, Fit to chart, Reset crop,
 Replace image…, Remove.
 
-**Adding**: File ▸ Reference pictures ▸ **Image behind the chart…**, or drop a picture and choose **Put behind the chart**. The image is
-downscaled to at most 3000 px on its longest side (JPEG, quality 0.9) and fitted to the chart. Replacing keeps the
-placement (rect) and resets the crop to the whole new image.
+**Adding**: File ▸ Reference pictures ▸ **Image behind the chart…**, or drop a picture and choose **Put behind the chart**. The file
+is stored **as it is** (no re-compression); only photos over 6000 px on the longer side are scaled down once (JPEG
+0.92). It is fitted to the chart and the straighten editor opens. Replacing keeps the placement (rect) and resets the
+crop to the whole new image.
 
 **Not part of the chart**
 - Never exported to PNG, PDF, OXS or CSV; never counted; not part of undo/redo or snapshots.
 - Not affected by resize or transforms (it is reference material; re-fit it if needed).
 - Shown in all three chart views.
 
-**Data**: `{ src, crop: {x, y, w, h} (image px), rect: {x, y, w, h} (grid units), opacity, behind, visible,
-tool }`.
+**Data**: `{ image, imageW, imageH, crop: {x, y, w, h} (image px), rect: {x, y, w, h} (grid units), opacity,
+behind, visible, tool, straighten?: { source, sourceW, sourceH, corners: 4×{x, y} (source px), cols, rows,
+at: {x, y} } }`. `image` and `straighten.source` are ids in the image store (below).
 - Saved per pattern in the browser like reference windows (IndexedDB, own store), debounced, flushed on page hide.
-- Included in Stitchwork `.json` files as `underlay` (with `src`), next to `refs`.
+  The record is small; the pictures live in the **image store** (§9.6), so nudging never rewrites a picture.
+- Included in `.json` files as `underlay`, next to `refs`, with the pictures inline as data URLs: `src` (the shown
+  picture) and `straighten.src` (the original photo). Files from before straightening (only `src`) still load.
 - Not in the draft (`stitchwork.current`) or the library — they stay small.
 
 ---

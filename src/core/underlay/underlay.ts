@@ -1,8 +1,28 @@
 import type { Point, Rect, Size } from "../pattern/types";
 
-/** A reference image placed on the chart (SPEC §15.15). `crop` is in image pixels, `rect` in grid units. */
+/** Four corners of an area on a photo, in photo pixels: top-left, top-right, bottom-right, bottom-left. */
+export type Quad = [Point, Point, Point, Point];
+
+/**
+ * How a straightened underlay was made (SPEC §15.15): the original photo, where the user put the 4 corners on it
+ * and what they stand for — `cols`×`rows` cells whose top-left corner is chart grid point `at`.
+ */
+export interface Straighten {
+  source: string;
+  sourceW: number;
+  sourceH: number;
+  corners: Quad;
+  cols: number;
+  rows: number;
+  at: Point;
+}
+
+/**
+ * A reference image placed on the chart (SPEC §15.15). `crop` is in image pixels, `rect` in grid units.
+ * `image` (and `straighten.source`) refer to stored pictures — ids in the browser, data URLs inside a .json file.
+ */
 export interface UnderlayData {
-  src: string;
+  image: string;
   imageW: number;
   imageH: number;
   crop: Rect;
@@ -12,6 +32,7 @@ export interface UnderlayData {
   behind: boolean;
   visible: boolean;
   tool: "move" | "crop";
+  straighten?: Straighten;
 }
 
 export type Handle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "inside";
@@ -25,9 +46,23 @@ export function fitToChart(crop: Rect, chart: Size): Rect {
   return { x: (chart.w - w) / 2, y: (chart.h - h) / 2, w, h };
 }
 
-export function newUnderlay(src: string, imageW: number, imageH: number, chart: Size): UnderlayData {
+export function newUnderlay(image: string, imageW: number, imageH: number, chart: Size): UnderlayData {
   const crop = { x: 0, y: 0, w: imageW, h: imageH };
-  return { src, imageW, imageH, crop, rect: fitToChart(crop, chart), opacity: 0.5, behind: false, visible: true, tool: "move" };
+  return { image, imageW, imageH, crop, rect: fitToChart(crop, chart), opacity: 0.5, behind: false, visible: true, tool: "move" };
+}
+
+/** Starting corners for the straighten editor: the previous ones, or a slightly inset rectangle. */
+export const defaultCorners = (w: number, h: number): Quad => {
+  const dx = w * 0.08, dy = h * 0.08;
+  return [{ x: dx, y: dy }, { x: w - dx, y: dy }, { x: w - dx, y: h - dy }, { x: dx, y: h - dy }];
+};
+
+/** Output size of a straightened image: about as sharp as the photo, at most `max` px on the longer side. */
+export function straightenedSize(s: Pick<Straighten, "corners" | "cols" | "rows">, max = 4096): { w: number; h: number } {
+  const [a, b, c, d] = s.corners, len = (p: Point, q: Point) => Math.hypot(q.x - p.x, q.y - p.y);
+  const perCell = Math.max((len(a, b) + len(d, c)) / 2 / s.cols, (len(a, d) + len(b, c)) / 2 / s.rows);
+  const k = Math.min(Math.max(perCell, 4), max / Math.max(s.cols, s.rows));
+  return { w: Math.max(1, Math.round(s.cols * k)), h: Math.max(1, Math.round(s.rows * k)) };
 }
 
 /** Which handle (or the inside) is under a point; `tol` is the grab distance in grid units. */
@@ -93,25 +128,6 @@ export function stretchUnderlay(r: Rect, anchor: Point, dw: number, dh: number):
   return { x: anchor.x - ((anchor.x - r.x) * w) / r.w, y: anchor.y - ((anchor.y - r.y) * h) / r.h, w, h };
 }
 
-/**
- * 3-point grid alignment (SPEC §15.15). `a`, `b`, `c` are where the user clicked the top-left, top-right and
- * bottom-right corners of an `n`×`n` square of the scanned chart's grid (grid units, with the image at `r`).
- * Returns the placement that puts `a` on the nearest chart grid intersection and makes the square exactly `n`
- * cells wide and tall; null when the points aren't right-then-down.
- */
-export function alignUnderlay(r: Rect, a: Point, b: Point, c: Point, n: number): Rect | null {
-  const u = (p: Point) => (p.x - r.x) / r.w, v = (p: Point) => (p.y - r.y) / r.h;
-  // average the two clicks that share a grid line
-  const left = u(a), right = (u(b) + u(c)) / 2, top = (v(a) + v(b)) / 2, bottom = v(c);
-  if (!(n > 0) || right - left <= 0 || bottom - top <= 0) return null;
-  const w = n / (right - left), h = n / (bottom - top);
-  const ax = Math.round(a.x), ay = Math.round(a.y);
-  return { x: ax - left * w, y: ay - top * h, w, h };
-}
-
-/** Size of the clicked square in cells as currently placed — the starting guess for `alignUnderlay`'s `n`. */
-export const guessSquareSize = (a: Point, b: Point, c: Point) => Math.max(1, Math.round((Math.abs(b.x - a.x) + Math.abs(c.y - b.y)) / 2));
-
 /** Show the whole image again; the part that was visible stays exactly where it was. */
 export function resetCrop(u: UnderlayData): Pick<UnderlayData, "crop" | "rect"> {
   const sx = u.rect.w / u.crop.w, sy = u.rect.h / u.crop.h;
@@ -121,13 +137,26 @@ export function resetCrop(u: UnderlayData): Pick<UnderlayData, "crop" | "rect"> 
   };
 }
 
-/** Validates an underlay read from a file or storage. */
+const isPoint = (v: unknown): v is Point => !!v && Number.isFinite((v as Point).x) && Number.isFinite((v as Point).y);
+const isRect = (v: unknown): v is Rect => !!v && ["x", "y", "w", "h"].every((k) => Number.isFinite((v as Record<string, number>)[k]));
+
+function cleanStraighten(raw: unknown): Straighten | undefined {
+  const s = raw as (Partial<Straighten> & { src?: string }) | null;
+  const source = s?.source ?? s?.src;
+  if (!s || typeof source !== "string" || !source || !Array.isArray(s.corners) || s.corners.length !== 4 || !s.corners.every(isPoint)) return undefined;
+  if (!(Number(s.cols) >= 1) || !(Number(s.rows) >= 1) || !(Number(s.sourceW) > 0) || !(Number(s.sourceH) > 0) || !isPoint(s.at)) return undefined;
+  return { source, sourceW: Number(s.sourceW), sourceH: Number(s.sourceH), corners: s.corners as Quad, cols: Math.round(Number(s.cols)), rows: Math.round(Number(s.rows)), at: s.at };
+}
+
+/** Validates an underlay read from a file or storage. Files (and older storage) name the picture `src`. */
 export function cleanUnderlay(raw: unknown): UnderlayData | null {
-  const u = raw as Partial<UnderlayData> | null;
-  const rect = (v: unknown): v is Rect => !!v && ["x", "y", "w", "h"].every((k) => Number.isFinite((v as Record<string, number>)[k]));
-  if (!u || typeof u.src !== "string" || !u.src.startsWith("data:image/") || !rect(u.rect) || !rect(u.crop) || !(Number(u.imageW) > 0) || !(Number(u.imageH) > 0)) return null;
+  const u = raw as (Partial<UnderlayData> & { src?: string }) | null;
+  const image = u?.image ?? u?.src;
+  if (!u || typeof image !== "string" || !image || !isRect(u.rect) || !isRect(u.crop) || !(Number(u.imageW) > 0) || !(Number(u.imageH) > 0)) return null;
+  const straighten = cleanStraighten(u.straighten);
   return {
-    src: u.src, imageW: Number(u.imageW), imageH: Number(u.imageH), crop: u.crop, rect: u.rect,
+    image, imageW: Number(u.imageW), imageH: Number(u.imageH), crop: u.crop, rect: u.rect,
     opacity: clamp(Number(u.opacity) || 0.5, 0.1, 1), behind: !!u.behind, visible: u.visible !== false, tool: u.tool === "crop" ? "crop" : "move",
+    ...(straighten && { straighten }),
   };
 }

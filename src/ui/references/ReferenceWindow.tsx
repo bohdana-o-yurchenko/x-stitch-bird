@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { RefWindowData } from "@/editor/types";
 import { drawReference, type RefView } from "@/render/referenceRenderer";
-import { loadImage } from "@/platform/images";
 import { Icon } from "../common/Icon";
 import { Modal, cx, ui } from "../common/widgets";
 import { useEditor, useEditorState } from "../hooks/editor";
@@ -43,7 +42,6 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
   const body = useRef<HTMLDivElement>(null);
   const image = useRef<HTMLImageElement | null>(null);
   const marks = useRef<HTMLCanvasElement | null>(null);
-  const marksReady = useRef(!data.marks);
   const hasMarks = useRef(!!data.marks);
   const undo = useRef<ImageData[]>([]);
   const view = useRef<RefView | null>(data.view);
@@ -69,35 +67,27 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
     drawReference(g, b.width, b.height, { image: image.current, marks: marks.current, view: view.current!, pattern: ed.doc, grid: data.grid, showStitched: data.showSt, hoverCell: hover }, ed.theme);
   };
 
-  // load the photo and saved marks; until marks are drawn back, saving keeps the stored copy
+  // load the photo and the saved marks (marks are stored again only when they change)
   useEffect(() => {
     let alive = true;
-    void loadImage(data.src).then(async (img) => {
+    void ed.images.load(data.image).then(async (img) => {
       if (!alive) return;
       image.current = img;
       const m = document.createElement("canvas");
       m.width = img.width;
       m.height = img.height;
       if (data.marks) {
-        const saved = await loadImage(data.marks).catch(() => null);
+        const saved = await ed.images.load(data.marks).catch(() => null);
         if (saved) m.getContext("2d")!.drawImage(saved, 0, 0);
-        marksReady.current = !!saved;
       }
       marks.current = m;
       setLoaded((n) => n + 1);
     });
     return () => void (alive = false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.src]);
+  }, [data.image]);
 
-  useEffect(
-    () =>
-      ed.references.registerMarks(data.id, () => {
-        if (!marksReady.current || !marks.current) return data.marks;
-        return hasMarks.current ? marks.current.toDataURL("image/png") : null;
-      }),
-    [ed, data.id, data.marks],
-  );
+  const saveMarks = () => void ed.references.setMarks(data.id, hasMarks.current ? marks.current : null);
 
   useEffect(redraw);
   useEffect(() => {
@@ -195,7 +185,7 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
     const a = act.current;
     act.current = null;
     if (a?.pan) update({ view: view.current });
-    else if (a) ed.references.save();
+    else if (a) saveMarks();
   };
   const wheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
     if (!view.current) return;
@@ -211,7 +201,7 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
     if (!u || !marks.current) return;
     marks.current.getContext("2d")!.putImageData(u, 0, 0);
     redraw();
-    ed.references.save();
+    saveMarks();
   };
   const fitPhoto = () => {
     fit();
@@ -232,7 +222,7 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
     m.getContext("2d")!.clearRect(0, 0, m.width, m.height);
     hasMarks.current = false;
     redraw();
-    ed.references.save();
+    saveMarks();
   };
 
   useEffect(() => {

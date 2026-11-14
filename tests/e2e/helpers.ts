@@ -4,6 +4,7 @@ import { expect, type Page } from "@playwright/test";
 
 export const fixture = (name: string) => resolve(process.cwd(), "tests/fixtures", name);
 export const fixtureText = (name: string) => readFileSync(fixture(name), "utf8");
+export const fixtureDataUrl = (name: string) => `data:image/png;base64,${readFileSync(fixture(name)).toString("base64")}`;
 
 /** Fresh browser storage, editor loaded with the demo pattern. */
 export async function openEditor(page: Page, locale = "en") {

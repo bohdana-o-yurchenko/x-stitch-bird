@@ -1036,8 +1036,6 @@ Decisions taken while implementing this plan. Each one lives in the single place
 - App name and icon: `app.brand` / `app.title` messages and `src/app/icon.svg` (Next's icon file convention; the header shows it from `/icon.svg`).
 - Saving: `editor/autosave.ts` writes the draft after each change and the library once a minute when changed
   (`markSaved` after opening from the library or a manual save).
-- Underlay 3-point alignment: `alignUnderlay` / `guessSquareSize` in `core/underlay/`; `UnderlayService`
-  (`startAlign`, `alignClick`, `applyAlign`) with `underlayAlign` in the store; `ToolManager` routes clicks to it.
 - Stitch highlighting: `highlight` in the store, `ChartScene.highlight`; `ChartRenderer.draw` paints the other
   entries at `theme.highlight.dimAlpha`, then the highlighted one.
 - Side panel width: `ui/layout/EditorLayout.tsx` (`--side-w`, drag handle, `localStorage`).
@@ -1056,6 +1054,13 @@ Decisions taken while implementing this plan. Each one lives in the single place
 - Golden outputs of the single-file app live in `tests/fixtures/legacy/` (recorded from `index.html` at commit
   `2d15ee4`); `src/core/formats/legacyParity.test.ts` compares against them.
 - SPEC §2.2 says 11 bead series; the data has **12** (it lists 12 by name).
+- Pictures (SPEC §9.6): `ImageRepository` port (`persistence/local/indexedDbImages.ts`, store `images`, database
+  version 4) holds Blobs by content id; `editor/images/ImageService.ts` loads and caches decoded images and converts
+  ids ↔ data URLs for .json files (`refsToFile`/`refsFromFile`, `underlayToFile`/`underlayFromFile`); old inline
+  data URLs are migrated in the local repositories on read. `persistence/blobs.ts` has the conversions.
+- Straightening (SPEC §15.15): `core/geometry/homography.ts` (`homography`, `project`, `warpQuad`),
+  `workers/straightenImage.ts` (decode → warp → JPEG, also the main-thread fallback) run via `runStraighten` in
+  `editor/heavy.ts`; `UnderlayService.straighten`; the editor UI is `ui/dialogs/StraightenDialog.tsx`.
 - Chart underlay (SPEC §15.15): geometry in `core/underlay/`, `UnderlayService` in `editor/underlay/`, its own
   `UnderlayRepository` port and IndexedDB store (database version 3). In edit mode `ToolManager` routes the
   pointer to the service; middle/right-drag and Space still pan. It is reference material, so it is outside the

@@ -2,13 +2,26 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPattern } from "@/core/pattern/createPattern";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
-import type { Persistence, Snapshot } from "@/persistence/ports";
+import type { ImageRepository, Persistence, Snapshot } from "@/persistence/ports";
 import { loadPattern } from "./actions/pattern";
 import { LIBRARY_EVERY } from "./autosave";
 import { Editor } from "./createEditor";
 import { shortcutLabel, shortcutLabels } from "./shortcuts/keymap";
 import { resolveTool } from "./tools/registry";
 import type { ToolPointer } from "./tools/types";
+
+function memoryImages(): ImageRepository {
+  const blobs = new Map<string, Blob>();
+  return {
+    put: async (b) => {
+      const id = `img:${blobs.size + 1}`;
+      blobs.set(id, b);
+      return id;
+    },
+    get: async (id) => blobs.get(id) ?? null,
+    collectGarbage: async () => {},
+  };
+}
 
 function memoryPersistence(snaps: Snapshot[]): Persistence {
   return {
@@ -17,6 +30,7 @@ function memoryPersistence(snaps: Snapshot[]): Persistence {
     underlays: { load: async () => null, save: async () => ({ ok: true }) },
     draft: { load: () => null, save: () => {} },
     snapshots: { add: async (s) => void snaps.push(s), list: async () => [], get: async () => null, removeMany: async () => {} },
+    images: memoryImages(),
   };
 }
 
@@ -135,7 +149,7 @@ describe("eraser on a backstitch line (SPEC §6.2)", () => {
 describe("chart underlay (SPEC §15.15)", () => {
   beforeEach(() => {
     ed.store.setState({
-      underlay: { src: "data:image/png;base64,x", imageW: 100, imageH: 100, crop: { x: 0, y: 0, w: 100, h: 100 }, rect: { x: 2, y: 2, w: 5, h: 5 }, opacity: 0.5, behind: false, visible: true, tool: "move" },
+      underlay: { image: "img:1", imageW: 100, imageH: 100, crop: { x: 0, y: 0, w: 100, h: 100 }, rect: { x: 2, y: 2, w: 5, h: 5 }, opacity: 0.5, behind: false, visible: true, tool: "move" },
       viewport: { zoom: 20, offX: 0, offY: 0 },
     });
   });
@@ -159,23 +173,16 @@ describe("chart underlay (SPEC §15.15)", () => {
     ed.shortcuts.keyDown(key("u"));
     expect(ed.underlay.editing).toBe(true);
   });
-  it("3-point alignment takes the clicks (even in behind mode), Backspace drops one, then snaps the image", () => {
-    ed.store.setState({ underlay: { ...ed.state.underlay!, behind: true } });
-    ed.underlay.startAlign();
-    const pt = (x: number, y: number): ToolPointer => ({ ...at(0, 0), grid: { x, y } });
-    ed.tools.down(pt(2.2, 2.4));
-    ed.tools.down(pt(9, 9));
-    ed.shortcuts.keyDown(key("Backspace"));
-    ed.tools.down(pt(4.7, 2.4));
-    ed.tools.down(pt(4.7, 4.9));
-    expect(ed.doc.layers.stitches.some(Boolean)).toBe(false);
-    ed.underlay.applyAlign(5);
-    // the 2.5-cell square becomes 5 cells: the image doubles in size, its top-left corner lands on (2, 2)
-    expect(ed.state.underlay!.rect.w).toBeCloseTo(10);
-    expect(ed.state.underlay!.rect.h).toBeCloseTo(10);
-    expect(ed.state.underlay!.rect.x + 0.04 * 10).toBeCloseTo(2);
-    expect(ed.state.underlayAlign).toBeNull();
+  it("pictures go to the image store and travel in .json files as data URLs", async () => {
+    const png = "data:image/png;base64,iVBORw0KGgo=";
+    const [ref] = await ed.images.refsFromFile([{ id: "r1", name: "Photo", src: png, marks: null, x: 0, y: 0, w: 300, h: 200, min: false, op: 1, view: null, tool: "pan", color: "#000", size: 4, grid: false, showSt: false }]);
+    expect(ref!.image).toMatch(/^img:/);
+    expect((await ed.images.refsToFile([ref!]))[0]).toMatchObject({ src: png, marks: null });
+    const u = (await ed.images.underlayFromFile({ ...ed.state.underlay!, image: png, straighten: { source: png, sourceW: 4, sourceH: 4, corners: [{ x: 0, y: 0 }, { x: 4, y: 0 }, { x: 4, y: 4 }, { x: 0, y: 4 }], cols: 2, rows: 2, at: { x: 0, y: 0 } } }))!;
+    expect([u.image, u.straighten!.source].every((id) => id.startsWith("img:"))).toBe(true);
+    expect(await ed.images.underlayToFile(u)).toMatchObject({ src: png, straighten: { src: png, cols: 2 } });
   });
+
 });
 
 describe("viewport", () => {

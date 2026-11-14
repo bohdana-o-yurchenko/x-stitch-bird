@@ -24,11 +24,11 @@ export interface PatternRepository {
   remove(id: string): Promise<void>;
 }
 
-/** Serialized reference window (SPEC §11.1); `src` and `marks` are data URLs. */
+/** A reference window (SPEC §11.1). `image` and `marks` are ids in the image store. */
 export interface RefWindowData {
   id: string;
   name: string;
-  src: string;
+  image: string;
   x: number;
   y: number;
   w: number;
@@ -42,6 +42,20 @@ export interface RefWindowData {
   grid: boolean;
   showSt: boolean;
   marks: string | null;
+}
+
+/** A reference window inside a .json file: the pictures travel along as data URLs. */
+export type RefWindowFile = Omit<RefWindowData, "image" | "marks"> & { src: string; marks: string | null };
+
+/**
+ * Pictures (photos, marks, chart underlays), stored once as binary and referred to by id from the small records
+ * above — so moving a window or nudging an underlay never rewrites the picture itself.
+ */
+export interface ImageRepository {
+  put(blob: Blob): Promise<string>;
+  get(id: string): Promise<Blob | null>;
+  /** Removes pictures nothing refers to any more (keeps very recent ones that may not be saved yet). */
+  collectGarbage(): Promise<void>;
 }
 
 export interface ReferenceRepository {
@@ -85,4 +99,5 @@ export interface Persistence {
   underlays: UnderlayRepository;
   draft: DraftStore;
   snapshots: SnapshotRepository;
+  images: ImageRepository;
 }

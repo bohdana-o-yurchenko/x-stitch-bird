@@ -31,10 +31,8 @@ export interface ChartScene {
   marquee: Rect | null;
   eraseHighlight: Segment[] | null;
   flash: { cell: number; until: number } | null;
-  /** Behind: drawn under the stitches. Editing: drawn on top with handles (no handles while aligning). */
-  underlay: (UnderlayView & { editing: boolean; handles: boolean }) | null;
-  /** 3-point grid alignment: the points clicked so far. */
-  alignPoints: Point[] | null;
+  /** Behind: drawn under the stitches. Editing: drawn on top with handles. */
+  underlay: (UnderlayView & { editing: boolean }) | null;
   /** Only this entry at full strength, the rest faded (stitch highlighting). */
   highlight: KeyIndex | null;
 }
@@ -129,8 +127,7 @@ export class ChartRenderer {
       drawLines(g, p, others, f, style, t.highlight.dimAlpha);
       drawLines(g, p, only!, f, style);
     } else drawLines(g, p, s.palette, f, style);
-    if (s.underlay?.editing) this.drawUnderlayEditor(s.underlay, p, f, s.underlay.handles);
-    if (s.alignPoints) this.drawAlignPoints(s.alignPoints, f);
+    if (s.underlay?.editing) this.drawUnderlayEditor(s.underlay, p, f);
     this.drawOverlays(s, f);
     this.drawRulers(s, f);
     const flashing = !!s.flash && s.flash.until > Date.now();
@@ -239,43 +236,9 @@ export class ChartRenderer {
   }
 
   /** Edit mode: the image above the stitches, its outline and 8 handles. */
-  /** Numbered crosshairs on the clicked points, joined in click order. */
-  private drawAlignPoints(pts: Point[], f: ChartFrame) {
-    const g = this.g, t = this.theme, { z, ox, oy } = f, r = t.align.marker;
-    const at = pts.map((p) => [ox + p.x * z, oy + p.y * z] as const);
-    g.save();
-    g.strokeStyle = t.accent;
-    g.lineWidth = 1.5;
-    g.setLineDash([5, 4]);
-    g.beginPath();
-    at.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
-    g.stroke();
-    g.setLineDash([]);
-    g.font = font(t, 700, 12);
-    g.textAlign = "left";
-    g.textBaseline = "bottom";
-    at.forEach(([x, y], i) => {
-      g.lineWidth = 3;
-      g.strokeStyle = "#fff";
-      g.beginPath();
-      g.moveTo(x - r, y); g.lineTo(x + r, y); g.moveTo(x, y - r); g.lineTo(x, y + r);
-      g.stroke();
-      g.lineWidth = 1.5;
-      g.strokeStyle = t.accent;
-      g.stroke();
-      g.beginPath();
-      g.arc(x, y, r * 0.45, 0, Math.PI * 2);
-      g.stroke();
-      g.fillStyle = t.accent;
-      g.fillText(String(i + 1), x + 5, y - 4);
-    });
-    g.restore();
-  }
-
-  private drawUnderlayEditor(u: UnderlayView, p: Pattern, f: ChartFrame, handles: boolean) {
+  private drawUnderlayEditor(u: UnderlayView, p: Pattern, f: ChartFrame) {
     const g = this.g, t = this.theme, { z, ox, oy } = f;
     drawUnderlay(g, p, u, f, false);
-    if (!handles) return;
     const x = ox + u.rect.x * z, y = oy + u.rect.y * z, w = u.rect.w * z, h = u.rect.h * z;
     g.save();
     g.setLineDash(t.selection.dash);

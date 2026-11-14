@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
-import { cellPoint, editorState, fileAction, loadFixture, openEditor } from "./helpers";
+import { cellPoint, editorState, fileAction, fixtureDataUrl, loadFixture, openEditor } from "./helpers";
 
 test.beforeEach(async ({ page }) => openEditor(page));
 
@@ -127,28 +127,48 @@ test("the side panel scrolls when its sections don't fit", async ({ page }) => {
   await expect(page.getByText("toward each thread")).toBeInViewport();
 });
 
-test("aligns the image behind the chart by clicking 3 grid corners", async ({ page }) => {
+test("straightens a photo by its 4 corners and keeps it after a reload", async ({ page }) => {
   const chooser = page.waitForEvent("filechooser");
   await fileAction(page, "Reference pictures", "Image behind the chart…");
   await (await chooser).setFiles("tests/fixtures/underlay.png");
-  const stitches = () => editorState<number>(page, "(ed) => ed.doc.layers.stitches.filter(Boolean).length");
-  const count = await stitches();
-  await page.getByTestId("underlay-pad").getByRole("button", { name: "Align to grid (3 points)…" }).click();
-  await expect(page.getByTestId("align-steps")).toBeVisible();
-  const gridPoint = (x: number, y: number) => editorState<{ x: number; y: number }>(page, `(ed) => {
-    const r = document.querySelector("[data-testid=chart]").getBoundingClientRect(), v = ed.state.viewport;
-    return { x: r.left + 26 + v.offX + ${x} * v.zoom, y: r.top + 26 + v.offY + ${y} * v.zoom };
-  }`);
-  for (const [x, y] of [[10.3, 20.2], [30.3, 20.2], [30.3, 40.2]]) {
-    const p = await gridPoint(x!, y!);
-    await page.mouse.click(p.x, p.y);
-  }
-  await page.getByLabel("Square size (cells)").fill("10");
-  await page.getByTestId("align-steps").getByRole("button", { name: "Align", exact: true }).click();
-  await expect(page.getByTestId("align-steps")).toHaveCount(0);
-  const before = await editorState<{ w: number }>(page, "(ed) => ed.state.underlay.rect");
-  expect(before.w).toBeCloseTo(30, 0);
-  expect(await stitches()).toBe(count);
+  const dialog = page.getByTestId("straighten");
+  await expect(dialog).toBeVisible();
+  // drag the top-left corner a little; the predicted grid follows
+  const box = (await page.getByTestId("straighten-canvas").boundingBox())!;
+  await dialog.getByLabel("columns").fill("20");
+  await dialog.getByLabel("rows").fill("10");
+  await dialog.getByLabel("column", { exact: true }).fill("5");
+  await dialog.getByLabel("row", { exact: true }).fill("3");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await dialog.getByRole("button", { name: "Straighten" }).click();
+  await expect(dialog).toHaveCount(0);
+  const u = await editorState<{ rect: object; image: string; straighten: { cols: number; source: string } }>(page, "(ed) => ed.state.underlay");
+  expect(u.rect).toEqual({ x: 4, y: 2, w: 20, h: 10 });
+  expect(u.image).toMatch(/^img:/);
+  expect(u.straighten.source).not.toBe(u.image);
+  await page.waitForTimeout(1000);
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await expect.poll(() => editorState<boolean>(page, "(ed) => !!ed.state.underlayImage")).toBe(true);
+  expect(await editorState<object>(page, "(ed) => ed.state.underlay.rect")).toEqual({ x: 4, y: 2, w: 20, h: 10 });
+});
+
+test("moves pictures stored the old way (inline data URLs) into the image store", async ({ page }) => {
+  const id = await editorState<string>(page, "(ed) => ed.doc.id");
+  const png = fixtureDataUrl("underlay.png");
+  await page.evaluate(async ([pid, src]) => {
+    const db = await new Promise<IDBDatabase>((ok, ko) => { const r = indexedDB.open("stitchwork"); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); });
+    await new Promise((ok) => {
+      const tx = db.transaction("underlays", "readwrite");
+      tx.objectStore("underlays").put({ src, imageW: 40, imageH: 20, crop: { x: 0, y: 0, w: 40, h: 20 }, rect: { x: 1, y: 1, w: 40, h: 20 }, opacity: 0.5, behind: true, visible: true, tool: "move" }, pid);
+      tx.oncomplete = ok;
+    });
+    db.close();
+  }, [id, png] as const);
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await expect.poll(() => editorState<boolean>(page, "(ed) => !!ed.state.underlayImage")).toBe(true);
+  expect(await editorState<string>(page, "(ed) => ed.state.underlay.image")).toMatch(/^img:/);
 });
 
 test("highlighting fades every entry except the selected one", async ({ page }) => {
@@ -213,6 +233,7 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   const chooser = page.waitForEvent("filechooser");
   await fileAction(page, "Reference pictures", "Image behind the chart…");
   await (await chooser).setFiles("tests/fixtures/underlay.png");
+  await page.getByTestId("straighten").getByRole("button", { name: "Use as it is" }).click();
   const panel = page.getByTestId("underlay-panel");
   await expect(panel).toBeVisible();
   await expect(page.getByText(/Editing the image behind the chart/)).toBeVisible();

@@ -403,9 +403,7 @@
     "restored": "Snapshot restored",
     "partialKind": "Partial stitch: {kind}",
     "partialNeedsCross": "Partial stitches use a cross-stitch entry — pick one in the key",
-    "underlayAdded": "Image added — line it up with the grid, then press Done (or U)",
-    "aligned": "Image aligned to the grid",
-    "alignFailed": "Couldn’t align — click the corners in order: top-left, top-right, bottom-right"
+    "straightened": "Photo straightened to the chart grid"
   },
   "underlay": {
     "heading": "Image behind the chart",
@@ -444,16 +442,8 @@
     "grow": "{what} larger",
     "padHint": "Resizing keeps the middle of the screen in place — zoom into the area you are aligning and click.",
     "nudge": "Move",
-    "align": "Align to grid (3 points)…",
-    "alignTitle": "Click 3 corners of a square on the scanned chart; the image snaps to the grid",
-    "alignStep1": "Click the top-left corner of a square on the scanned grid",
-    "alignStep2": "Click the top-right corner of the same square",
-    "alignStep3": "Click its bottom-right corner",
-    "alignHint": "Choose a big square along the bold 10-lines (e.g. 30×30) and zoom in to click exactly. Esc cancels.",
-    "alignSize": "Square size (cells)",
-    "alignBack": "Back",
-    "alignCancel": "Cancel",
-    "alignApply": "Align"
+    "straighten": "Straighten (4 corners)…",
+    "straightenTitle": "Drag the photo’s corners onto the chart grid; the picture is flattened to fit it exactly"
   },
   "fileMenu": {
     "label": "Menu ▾",
@@ -545,7 +535,22 @@
     "panel": "Show/hide side panel",
     "save": "Save now (also automatic)",
     "underlayEdit": "Edit / done",
-    "highlight": "Highlight selected entry",
-    "alignBack": "Align: undo last point"
+    "highlight": "Highlight selected entry"
+  },
+  "straighten": {
+    "title": "Straighten the chart photo",
+    "hint": "Drag the 4 corners onto corners of the chart’s grid on the photo — the outer border works best. The blue lines show where the grid will fall; arrow keys nudge the last corner by 1 px (Shift: 10).",
+    "loading": "Loading the photo…",
+    "area": "Marked area",
+    "cols": "columns",
+    "rows": "rows",
+    "topLeft": "Its top-left corner is at",
+    "column": "column",
+    "row": "row",
+    "crossed": "Corners are crossed — put them in order: top-left, top-right, bottom-right, bottom-left",
+    "reset": "Reset corners",
+    "cancel": "Use as it is",
+    "apply": "Straighten",
+    "working": "Straightening…"
   }
 }

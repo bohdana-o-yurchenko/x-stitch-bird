@@ -1,7 +1,10 @@
-/** The "stitchwork" IndexedDB database: v1 had "refs"; v2 adds "snaps" (SPEC §15.7); v3 adds "underlays" (§15.15). */
+/**
+ * The "stitchwork" IndexedDB database: v1 had "refs"; v2 adds "snaps" (SPEC §15.7); v3 adds "underlays" (§15.15);
+ * v4 adds "images" (pictures as Blobs, referred to by id).
+ */
 export const DB_NAME = "stitchwork";
-const DB_VERSION = 3;
-const STORES = ["refs", "snaps", "underlays"] as const;
+const DB_VERSION = 4;
+const STORES = ["refs", "snaps", "underlays", "images"] as const;
 export type StoreName = (typeof STORES)[number];
 
 let opening: Promise<IDBDatabase> | null = null;

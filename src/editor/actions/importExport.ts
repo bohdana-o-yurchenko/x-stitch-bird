@@ -15,7 +15,7 @@ import type { UnderlayData } from "@/core/underlay/underlay";
 import { renderChartImage, type KeyLine } from "@/render/exportChart";
 import type { ChartView } from "@/render/chart";
 import { downloadFile, isImageFile, isPatternFile, readText } from "@/platform/files";
-import { canvasToBlob, downscaleToDataUrl, loadImage } from "@/platform/images";
+import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import type { Editor } from "../createEditor";
 import { loadPattern } from "./pattern";
 
@@ -46,7 +46,10 @@ export const shoppingList = (p: Pattern) => calculator().calculate({ pattern: p,
 
 export async function exportAs(ed: Editor, format: ExportFormat) {
   const p = ed.doc, base = safeName(p);
-  if (format === "json") return offer(ed, `${base}.json`, JSON.stringify({ ...serializePattern(p), refs: ed.references.exportAll(), underlay: ed.underlay.data ?? undefined }), "json");
+  if (format === "json") {
+    const underlay = ed.underlay.data ? await ed.images.underlayToFile(ed.underlay.data) : undefined;
+    return offer(ed, `${base}.json`, JSON.stringify({ ...serializePattern(p), refs: await ed.references.exportFile(), underlay }), "json");
+  }
   if (format === "oxs") return offer(ed, `${base}.oxs`, exportOxs(p), "oxs");
   if (format === "csv") return offer(ed, `${base}-shopping-list.csv`, exportCsv(p, shoppingList(p), ed.t), "csv");
   const view: ChartView = format === "png-color" ? "color" : format === "png-symbols" ? "symbols" : "both";
@@ -108,7 +111,10 @@ export function createFromImage(ed: Editor, r: QuantizeResult, image: HTMLImageE
   });
   loadPattern(ed, p, []);
   ed.toast("toasts.imageCreated", { count: keys.size });
-  if (keepReference) ed.references.add({ src: downscaleToDataUrl(image), name: ed.t("references.photo"), grid: true });
+  if (keepReference)
+    void downscaleToBlob(image)
+      .then((b) => ed.images.put(b))
+      .then((id) => ed.references.add({ image: id, name: ed.t("references.photo"), grid: true }));
 }
 
 /** Into the saved-patterns library. `quiet`: the minute autosave — no toast unless it fails. */

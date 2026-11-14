@@ -1,19 +1,45 @@
 import type { ReferenceRepository, RefWindowData, Snapshot, SnapshotRepository, SnapshotSummary, UnderlayRepository } from "../ports";
-import { cleanUnderlay, type UnderlayData } from "@/core/underlay/underlay";
+import { cleanUnderlay } from "@/core/underlay/underlay";
+import { isDataUrl } from "../blobs";
 import { run } from "./indexedDb";
+import { storeIfDataUrl } from "./indexedDbImages";
 
 const legacyRefsKey = (patternId: string) => `stitchwork.refs.${patternId}`;
+
+type StoredRef = RefWindowData & { src?: string };
+
+/** Older records kept the photo and marks inline as data URLs (`src`); they move into the image store once. */
+async function upgradeRefs(list: StoredRef[]): Promise<{ refs: RefWindowData[]; changed: boolean }> {
+  let changed = false;
+  const refs: RefWindowData[] = [];
+  for (const r of list) {
+    if (!r) continue;
+    const old = isDataUrl(r.src) || isDataUrl(r.marks);
+    const image = await storeIfDataUrl(r.image ?? r.src);
+    if (!image) continue;
+    const ref = { ...r };
+    delete ref.src;
+    refs.push({ ...ref, image, marks: await storeIfDataUrl(r.marks) });
+    changed ||= old;
+  }
+  return { refs, changed };
+}
 
 /** Reference windows per pattern. Reads (and then removes) the old localStorage copy once (SPEC §11.4). */
 export const indexedDbReferenceRepository: ReferenceRepository = {
   async load(patternId) {
-    const stored = await run<RefWindowData[]>("refs", "readonly", (s) => s.get(patternId)).catch(() => undefined);
-    if (stored) return stored;
-    try {
-      return JSON.parse(localStorage.getItem(legacyRefsKey(patternId)) || "[]");
-    } catch {
-      return [];
-    }
+    let stored = await run<StoredRef[]>("refs", "readonly", (s) => s.get(patternId)).catch(() => undefined);
+    let fromLegacy = false;
+    if (!stored)
+      try {
+        stored = JSON.parse(localStorage.getItem(legacyRefsKey(patternId)) || "[]") as StoredRef[];
+        fromLegacy = stored.length > 0;
+      } catch {
+        stored = [];
+      }
+    const { refs, changed } = await upgradeRefs(stored);
+    if (changed || fromLegacy) await this.save(patternId, refs);
+    return refs;
   },
   async save(patternId, refs) {
     try {
@@ -52,8 +78,13 @@ export const indexedDbSnapshotRepository: SnapshotRepository = {
 
 export const indexedDbUnderlayRepository: UnderlayRepository = {
   async load(patternId) {
-    const raw = await run<UnderlayData>("underlays", "readonly", (s) => s.get(patternId)).catch(() => undefined);
-    return cleanUnderlay(raw);
+    const u = cleanUnderlay(await run<unknown>("underlays", "readonly", (s) => s.get(patternId)).catch(() => undefined));
+    if (!u || (!isDataUrl(u.image) && !isDataUrl(u.straighten?.source))) return u;
+    // older records kept the picture inline as a data URL
+    const image = (await storeIfDataUrl(u.image))!;
+    const upgraded = { ...u, image, ...(u.straighten && { straighten: { ...u.straighten, source: (await storeIfDataUrl(u.straighten.source))! } }) };
+    await this.save(patternId, upgraded);
+    return upgraded;
   },
   async save(patternId, underlay) {
     try {

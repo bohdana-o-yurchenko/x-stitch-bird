@@ -64,7 +64,6 @@ function useGroups(): { title: string; rows: Row[] }[] {
       title: t("underlay"),
       rows: [
         row(t("underlayEdit"), keys("underlay.toggleBehind")),
-        row(t("alignBack"), keys("underlay.alignBack")),
         row(t("nudge"), ["← → ↑ ↓", t("shiftOne", { shift: mac ? "⇧" : "Shift" })]),
       ],
     },

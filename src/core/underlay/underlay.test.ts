@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, stretchUnderlay, alignUnderlay, guessSquareSize } from "./underlay";
+import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, straightenedSize, stretchUnderlay } from "./underlay";
 
 // image 200×100 px placed over a 40×40 chart
 const base = () => ({ ...newUnderlay("data:image/jpeg;base64,x", 200, 100, { w: 40, h: 40 }) });
@@ -40,15 +40,10 @@ describe("chart underlay geometry (SPEC §15.15)", () => {
     expect((25 - r.x) / r.w).toBeCloseTo(0.25);
   });
 
-  it("aligns a clicked n×n square of the scan to the chart grid", () => {
-    // the scan is drawn 10% too big and shifted: its 10×10 square spans 11 cells starting at (3.3, 4.6)
-    const r = { x: 0, y: 0, w: 110, h: 55 };
-    const a = { x: 3.3, y: 4.6 }, b = { x: 14.3, y: 4.6 }, c = { x: 14.3, y: 15.6 };
-    expect(guessSquareSize(a, b, c)).toBe(11);
-    const out = alignUnderlay(r, a, b, c, 10)!;
-    const at = (p: { x: number; y: number }) => ({ x: out.x + ((p.x - r.x) / r.w) * out.w, y: out.y + ((p.y - r.y) / r.h) * out.h });
-    expect([at(a), at(b), at(c)].map((p) => [+p.x.toFixed(6), +p.y.toFixed(6)])).toEqual([[3, 5], [13, 5], [13, 15]]);
-    expect(alignUnderlay(r, b, a, c, 10)).toBeNull();
+  it("sizes a straightened picture like the photo, within the limit", () => {
+    const corners = [{ x: 0, y: 0 }, { x: 800, y: 0 }, { x: 800, y: 600 }, { x: 0, y: 600 }] as const;
+    expect(straightenedSize({ corners: [...corners] as never, cols: 80, rows: 60 })).toEqual({ w: 800, h: 600 });
+    expect(straightenedSize({ corners: [...corners] as never, cols: 80, rows: 60 }, 400)).toEqual({ w: 400, h: 300 });
   });
 
   it("keeps at least one cell when shrinking", () => {
@@ -57,6 +52,10 @@ describe("chart underlay geometry (SPEC §15.15)", () => {
 
   it("rejects malformed stored underlays", () => {
     expect(cleanUnderlay({ src: "http://x" })).toBeNull();
+    // files and older storage call the picture `src`; a broken straighten record is dropped, the rest kept
+    const legacy = cleanUnderlay({ ...base(), image: undefined, src: "data:image/jpeg;base64,x", straighten: { corners: [1, 2] } });
+    expect(legacy).toMatchObject({ image: "data:image/jpeg;base64,x" });
+    expect(legacy!.straighten).toBeUndefined();
     expect(cleanUnderlay(base())).toMatchObject({ opacity: 0.5, behind: false, tool: "move" });
   });
 });

@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ChartView } from "@/render/chart";
-import type { Point } from "@/core/pattern/types";
-import { guessSquareSize } from "@/core/underlay/underlay";
 import { Icon } from "../common/Icon";
 import { cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
@@ -67,37 +65,6 @@ function useStored<T>(key: string, fallback: T, valid: (v: unknown) => boolean):
   return [v, set];
 }
 
-/** 3-point grid alignment, step by step (SPEC §15.15). Remounted per click so the size guess starts fresh. */
-function AlignSteps({ points }: { points: Point[] }) {
-  const t = useTranslations("underlay");
-  const run = useCommand();
-  const done = points.length === 3;
-  const [n, setN] = useState(() => (done ? guessSquareSize(points[0]!, points[1]!, points[2]!) : 10));
-  const steps = [t("alignStep1"), t("alignStep2"), t("alignStep3")];
-  return (
-    <div className={s.alignBody} data-testid="align-steps">
-      <ol className={s.alignSteps}>
-        {steps.map((label, i) => (
-          <li key={i} className={cx(i < points.length && s.stepDone, i === points.length && s.stepNow)}>{label}</li>
-        ))}
-      </ol>
-      {done ? (
-        <label className={s.alignSize}>
-          {t("alignSize")}
-          <input type="number" min={1} max={500} value={n} onChange={(e) => setN(Math.max(1, Math.round(e.target.valueAsNumber) || 1))} aria-label={t("alignSize")} />
-        </label>
-      ) : (
-        <p className={s.padHint}>{t("alignHint")}</p>
-      )}
-      <div className={s.padBtns}>
-        <button type="button" disabled={!points.length} onClick={() => run("underlay.alignBack")}>{t("alignBack")}</button>
-        <button type="button" onClick={() => run("underlay.cancelAlign")}>{t("alignCancel")}</button>
-        {done && <button type="button" className={s.on} onClick={() => run("underlay.applyAlign", n)}>{t("alignApply")}</button>}
-      </div>
-    </div>
-  );
-}
-
 /**
  * Always-available underlay alignment (SPEC §15.15): move and stretch by fixed steps at any zoom, in either mode.
  * Stretching keeps the middle of the screen in place, so zoom into the area being aligned and click.
@@ -107,7 +74,6 @@ function UnderlayPad() {
   const run = useCommand();
   const behind = useEditorState((st) => st.underlay?.behind ?? true);
   const rect = useEditorState((st) => st.underlay?.rect);
-  const align = useEditorState((st) => st.underlayAlign);
   const [step, setStep] = useStored<number>("stitchwork.underlayStep", 0.5, (v) => STEPS.includes(v as never));
   const [open, setOpen] = useStored<boolean>("stitchwork.underlayPadOpen", true, (v) => typeof v === "boolean");
   if (!rect) return null;
@@ -127,10 +93,9 @@ function UnderlayPad() {
         <button type="button" className={cx(s.padMode, !behind && s.on)} title={behind ? t("adjustWithMouseTitle") : t("doneTitle")} onClick={() => run("underlay.toggleBehind")}>{behind ? t("adjustWithMouse") : t("done")}</button>
         <button type="button" className={s.padToggle} aria-label={open ? t("collapsePad") : t("expandPad")} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "–" : "+"}</button>
       </div>
-      {align && <AlignSteps key={align.length} points={align} />}
-      {open && !align && (
+      {open && (
         <div className={s.padBody}>
-          <button type="button" className={s.alignStart} title={t("alignTitle")} onClick={() => run("underlay.startAlign")}>{t("align")}</button>
+          <button type="button" className={s.alignStart} title={t("straightenTitle")} onClick={() => run("underlay.openStraighten")}>{t("straighten")}</button>
           <span>{t("nudge")}</span>
           <div className={s.padBtns}>
             <button type="button" aria-label={t("moveLeft")} onClick={nudge(-1, 0)}>←</button>

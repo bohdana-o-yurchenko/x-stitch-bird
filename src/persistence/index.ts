@@ -1,4 +1,5 @@
 import { indexedDbReferenceRepository, indexedDbSnapshotRepository, indexedDbUnderlayRepository } from "./local/indexedDbRepositories";
+import { indexedDbImageRepository } from "./local/indexedDbImages";
 import { localDraftStore, localPatternRepository } from "./local/localStorageRepositories";
 import type { Persistence } from "./ports";
 
@@ -10,6 +11,7 @@ export function createPersistence(): Persistence {
     underlays: indexedDbUnderlayRepository,
     draft: localDraftStore,
     snapshots: indexedDbSnapshotRepository,
+    images: indexedDbImageRepository,
   };
 }
 
