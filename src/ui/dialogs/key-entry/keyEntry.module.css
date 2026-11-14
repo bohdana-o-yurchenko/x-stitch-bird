@@ -97,6 +97,17 @@
   background: #fff;
   font-size: 16px;
 }
+.symbtn.wide {
+  width: 72px;
+}
+.symgrid.lines {
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+}
+.symgrid.lines button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .symgrid button.used {
   opacity: 0.3;
 }
@@ -104,6 +115,10 @@
   background: var(--ink);
   color: #fff;
   opacity: 1;
+}
+.symgrid.lines button.cur {
+  background: #fff;
+  outline: 2px solid var(--ink);
 }
 .preview {
   display: flex;

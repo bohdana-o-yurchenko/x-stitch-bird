@@ -1,5 +1,6 @@
 import { computeUsage, entryCount, partialCount } from "../calculator/usage";
 import { findSameKey } from "../pattern/keyEntries";
+import { symbolText } from "../symbols/lineStyles";
 import type { ChartCheck } from "./types";
 
 const usedAmount = (p: Parameters<ChartCheck["run"]>[0]) => {
@@ -12,7 +13,7 @@ export const unusedEntriesCheck: ChartCheck = {
   options: [],
   run(p) {
     const used = usedAmount(p);
-    return p.key.flatMap((e, k) => (e && k && !used(k) ? [{ id: `unused:${k}`, checkId: "unusedEntries", entry: k, messageKey: "checks.unusedEntries.finding", params: { sym: e.sym } }] : []));
+    return p.key.flatMap((e, k) => (e && k && !used(k) ? [{ id: `unused:${k}`, checkId: "unusedEntries", entry: k, messageKey: "checks.unusedEntries.finding", params: { sym: symbolText(e.sym) } }] : []));
   },
 };
 
@@ -23,7 +24,7 @@ export const rareEntriesCheck: ChartCheck = {
     const used = usedAmount(p);
     return p.key.flatMap((e, k) => {
       const n = e && k ? used(k) : 0;
-      return n && n <= Number(opts.maxUses) ? [{ id: `rare:${k}`, checkId: "rareEntries", entry: k, messageKey: "checks.rareEntries.finding", params: { sym: e!.sym, count: n } }] : [];
+      return n && n <= Number(opts.maxUses) ? [{ id: `rare:${k}`, checkId: "rareEntries", entry: k, messageKey: "checks.rareEntries.finding", params: { sym: symbolText(e!.sym), count: n } }] : [];
     });
   },
 };
@@ -34,7 +35,7 @@ export const duplicateEntriesCheck: ChartCheck = {
   run(p) {
     return p.key.flatMap((e, k) => {
       const first = e && k ? findSameKey(p, e) : 0;
-      return first && first < k ? [{ id: `dup:${k}`, checkId: "duplicateEntries", entry: k, messageKey: "checks.duplicateEntries.finding", params: { sym: e!.sym, other: p.key[first]!.sym } }] : [];
+      return first && first < k ? [{ id: `dup:${k}`, checkId: "duplicateEntries", entry: k, messageKey: "checks.duplicateEntries.finding", params: { sym: symbolText(e!.sym), other: symbolText(p.key[first]!.sym) } }] : [];
     });
   },
 };

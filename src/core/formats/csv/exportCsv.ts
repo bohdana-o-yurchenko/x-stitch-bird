@@ -4,6 +4,7 @@ import type { ShoppingList } from "../../calculator/types";
 import { formatLabel, keyLabelData, type Translate } from "../../labels/keyLabel";
 import { META_FIELDS } from "../../pattern/meta";
 import type { Pattern } from "../../pattern/types";
+import { symbolText } from "../../symbols/lineStyles";
 
 const q = (v: unknown) => `"${String(v).replace(/"/g, '""')}"`;
 
@@ -15,7 +16,7 @@ export function exportCsv(p: Pattern, shopping: ShoppingList, t: Translate): str
     const n = entryCount(usage.get(i)) + partialCount(usage.get(i));
     if (!e || !i || !n) return;
     const { title, sub } = formatLabel(keyLabelData(p, e), t);
-    lines.push([e.sym, title, sub, n].map(q).join(","));
+    lines.push([symbolText(e.sym), title, sub, n].map(q).join(","));
   });
   lines.push("", q(t("csv.toBuy")));
   for (const l of shopping.lines)

@@ -1020,6 +1020,10 @@ Decisions taken while implementing this plan. Each one lives in the single place
   `migrations.ts`.
 - Mirror drawing and Mirror from centre reuse the same key entry (half crosses keep their direction, no new
   entries); only Flip and Rotate re-point half crosses to opposite-direction entries.
+- Backstitch symbols are line styles (SPEC §2.5): the ids live in `core/symbols/lineStyles.ts` and are stored in
+  `KeyEntry.sym` as `line:<name>`; `nextSymbol`/`symbolsFor` pick by entry kind and `fixEntrySymbols` repairs
+  older files. Drawing is `render/primitives/lineStyles.ts`; strand thickness is `strandFactor` with
+  `theme.backstitch.strandStep`. Adding a style = one id in core + one drawing entry in render.
 - Small dialogs share `ui/dialogs/simpleDialogs.tsx`; the key-entry dialog has its own folder.
 - `window.__stitchwork` is the editor instance — a deliberate debugging / end-to-end test hook.
 - `cacheComponents` is off: the editor is client-only, so server caching adds nothing yet.

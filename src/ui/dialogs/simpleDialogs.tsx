@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { parseCellRef } from "@/core/grid/numbering";
 import { META_FIELDS } from "@/core/pattern/meta";
+import { symbolText } from "@/core/symbols/lineStyles";
 import type { PatternMeta } from "@/core/pattern/types";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { copyText } from "@/platform/files";
@@ -170,7 +171,7 @@ export function ReplaceKeyDialog({ onClose }: Close) {
   const entries = key.flatMap((e, i) => (e && i ? [i] : []));
   const [from, setFrom] = useState(active || entries[0] || 0);
   const [to, setTo] = useState(entries.find((i) => i !== from) ?? 0);
-  const option = (i: number) => <option key={i} value={i}>{`${key[i]!.sym}  ${label(i).title} — ${label(i).sub}`}</option>;
+  const option = (i: number) => <option key={i} value={i}>{`${symbolText(key[i]!.sym)}  ${label(i).title} — ${label(i).sub}`}</option>;
   return (
     <Modal title={t("replaceKeyTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("replace"), primary: true, disabled: !from || !to || from === to, onClick: () => run("selection.replaceKey", { from, to }) }]}>
       <label className={ui.field}>{t("replaceFrom")}<select value={from} onChange={(e) => setFrom(Number(e.target.value))}>{entries.map(option)}</select></label>

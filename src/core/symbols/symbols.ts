@@ -10,7 +10,7 @@ export const ALL_SYMBOLS: readonly string[] = allSymbols as string[];
 export const normalizeSymbol = (s: string, symbols: readonly string[]): string =>
   s && [...s].length === 1 && symbols.includes(s + TEXT_STYLE) ? s + TEXT_STYLE : s;
 
-export function firstFreeSymbol(used: Iterable<string>, symbols: readonly string[]): string {
+export function firstFreeSymbol(used: Iterable<string>, symbols: readonly string[], fallback = "?"): string {
   const taken = new Set(used);
-  return symbols.find((s) => !taken.has(s)) ?? "?";
+  return symbols.find((s) => !taken.has(s)) ?? fallback;
 }

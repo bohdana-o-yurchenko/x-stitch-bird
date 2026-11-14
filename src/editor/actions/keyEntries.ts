@@ -5,6 +5,7 @@ import { LAYERS } from "@/core/layers/registry";
 import { addEntry, cleanEntry, entryLayer, findSameKey, nextSymbol } from "@/core/pattern/keyEntries";
 import { makeBlendColor, makeComboColor, resolveColor, invalidateColors } from "@/core/pattern/resolve";
 import { shortId } from "@/core/pattern/createPattern";
+import { isLineStyle } from "@/core/symbols/lineStyles";
 import type { BlendPart, CustomColor, EntryKindId, KeyEntry, KeyIndex, StitchTypeId } from "@/core/pattern/types";
 import type { Editor } from "../createEditor";
 
@@ -19,6 +20,11 @@ export interface KeyDraft {
   st: StitchTypeId;
   sym: string;
   wraps: number;
+}
+
+/** A symbol of the right family after the draft's kind changes: line styles for backstitch, characters otherwise. */
+export function draftSymbol(ed: Editor, d: KeyDraft, t: EntryKindId, edit?: KeyIndex): string {
+  return isLineStyle(d.sym) === (t === "back") ? d.sym : nextSymbol(ed.doc, ed.state.symbols, edit, t);
 }
 
 export function draftFor(ed: Editor, edit?: KeyIndex): KeyDraft {
@@ -109,7 +115,7 @@ export function commitEntry(ed: Editor, d: KeyDraft, edit?: KeyIndex): KeyIndex 
     const entry = draftEntry(d, src);
     const other = p.key.findIndex((e, i) => e && i !== edit && e.sym === d.sym);
     if (before && edit) {
-      if (other > 0) p.key[other] = { ...p.key[other]!, sym: before.sym };
+      if (other > 0) p.key[other] = { ...p.key[other]!, sym: isLineStyle(before.sym) === isLineStyle(d.sym) ? before.sym : nextSymbol(p, ed.state.symbols, other, p.key[other]!.t) };
       p.key[edit] = cleanEntry(entry, d.sym);
       if (entry.t === "combo") p.layers.stitches.forEach((k, i) => k === edit && (p.layers.beads[i] = 0));
       ed.changed({ keys: true });
@@ -117,7 +123,7 @@ export function commitEntry(ed: Editor, d: KeyDraft, edit?: KeyIndex): KeyIndex 
       ed.toast("toasts.entryUpdated");
       return edit;
     }
-    if (other > 0) p.key[other] = { ...p.key[other]!, sym: nextSymbol(p, ed.state.symbols) };
+    if (other > 0) p.key[other] = { ...p.key[other]!, sym: nextSymbol(p, ed.state.symbols, undefined, p.key[other]!.t) };
     if ((entry.t === "thread" || entry.t === "combo") && entry.n) p.strands = entry.n;
     const i = addEntry(p, { ...entry, sym: d.sym }, ed.state.symbols);
     ed.changed({ keys: true });

@@ -199,6 +199,8 @@
     "wraps": "Wraps",
     "symbol": "Symbol",
     "symbolHint": "click to choose",
+    "lineStyle": "Line",
+    "lineStyleHint": "click to choose the line used in the Symbols view",
     "symbolUsed": "Already used — picking it swaps",
     "chooseFlossBead": "Choose a floss and a bead.",
     "chooseBlend": "Choose two different threads for the blend.",

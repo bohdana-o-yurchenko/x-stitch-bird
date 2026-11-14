@@ -1,15 +1,28 @@
 import { entryKind } from "../entryKinds/registry";
 import { mirroredStitchType } from "../stitches/registry";
+import { isLineStyle, LINE_STYLES } from "../symbols/lineStyles";
 import { firstFreeSymbol } from "../symbols/symbols";
-import type { KeyEntry, KeyIndex, LayerId, Pattern } from "./types";
+import type { EntryKindId, KeyEntry, KeyIndex, LayerId, Pattern } from "./types";
 
 export const entryLayer = (e: KeyEntry): LayerId => entryKind(e.t).layer;
 
 export const usedSymbols = (p: Pattern, except?: KeyIndex): string[] =>
   p.key.flatMap((e, i) => (e && i !== except ? [e.sym] : []));
 
-export const nextSymbol = (p: Pattern, symbols: readonly string[], except?: KeyIndex): string =>
-  firstFreeSymbol(usedSymbols(p, except), symbols);
+/** Backstitch picks from the line styles, everything else from the chart symbols. */
+export const symbolsFor = (t: EntryKindId, symbols: readonly string[]): readonly string[] => (t === "back" ? LINE_STYLES : symbols);
+
+export function nextSymbol(p: Pattern, symbols: readonly string[], except?: KeyIndex, t: EntryKindId = "thread"): string {
+  const list = symbolsFor(t, symbols), used = usedSymbols(p, except);
+  return firstFreeSymbol(used, list, t === "back" ? LINE_STYLES[used.filter(isLineStyle).length % LINE_STYLES.length] : undefined);
+}
+
+/** Gives backstitch entries a line style and other entries a character (files from older versions). */
+export function fixEntrySymbols(p: Pattern, symbols: readonly string[]) {
+  p.key.forEach((e, i) => {
+    if (e && (e.t === "back") !== isLineStyle(e.sym)) p.key[i] = { ...e, sym: nextSymbol(p, symbols, i, e.t) };
+  });
+}
 
 /** Same colour, kind, stitch type and strands (beads compare colour only). SPEC §3.2. */
 export function sameKey(a: KeyEntry | null | undefined, b: Omit<KeyEntry, "sym">): boolean {
@@ -31,7 +44,7 @@ export function cleanEntry(k: Omit<KeyEntry, "sym"> & { sym?: string }, sym: str
 }
 
 export function addEntry(p: Pattern, k: Omit<KeyEntry, "sym"> & { sym?: string }, symbols: readonly string[]): KeyIndex {
-  p.key.push(cleanEntry(k, k.sym ?? nextSymbol(p, symbols)));
+  p.key.push(cleanEntry(k, k.sym ?? nextSymbol(p, symbols, undefined, k.t)));
   return p.key.length - 1;
 }
 

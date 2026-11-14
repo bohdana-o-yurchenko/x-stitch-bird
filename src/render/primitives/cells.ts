@@ -4,6 +4,7 @@ import type { PaletteSlot } from "@/core/pattern/palette";
 import type { PartialStitch } from "@/core/pattern/types";
 import { partialAnchor, partialKind } from "@/core/stitches/partialKinds";
 import { font, type CanvasTheme } from "../theme";
+import { strokeLineStyle } from "./lineStyles";
 
 export type Ctx = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
@@ -133,17 +134,17 @@ export function backstitchColour(hex: string, theme: CanvasTheme): string {
   return luma(hexToRgb(hex)) > theme.backstitch.lightThreshold ? shade(hex, theme.backstitch.darken) : hex;
 }
 
+/** 1 strand is 1×, each extra strand adds half of what the previous one did: 1.5×, 1.75×, 1.875× … */
+export const strandFactor = (n: number, step: number) => 1 + (step * (1 - step ** (Math.max(1, n) - 1))) / (1 - step);
+
+/** Colour view: solid line, thicker with more strands. Symbols view: the entry's line style. Both: styled, coloured and sized. */
 export function drawBackstitch(g: Ctx, x1: number, y1: number, x2: number, y2: number, z: number, s: PaletteSlot, style: CellStyle, alpha = 1) {
   const { theme } = style, b = theme.backstitch;
+  const w = Math.max(b.minWidth, z * b.width) * (style.showColour ? strandFactor(s.n, b.strandStep) : 1);
   g.save();
-  g.lineCap = "round";
   g.globalAlpha = alpha;
   g.strokeStyle = style.showColour ? backstitchColour(s.hex, theme) : b.symbolsColor;
-  g.lineWidth = Math.max(1.5, z * (b.baseWidth + b.perStrand * Math.min(b.maxStrands, s.n || 1)));
-  g.beginPath();
-  g.moveTo(x1, y1);
-  g.lineTo(x2, y2);
-  g.stroke();
+  strokeLineStyle(g, x1, y1, x2, y2, w, Math.max(2, z * b.patternUnit), style.showSymbol ? s.sym : "line:solid");
   g.restore();
 }
 

@@ -96,6 +96,18 @@ Colour maths (must be reproduced exactly; used by blending, image import, blend 
   pixels (emoji), or matches the "tofu" signature of U+10FFFD / U+FFFF / empty string.
 - `symNorm(s)`: when loading, a bare single char whose `char+U+FE0E` exists in the list is upgraded.
 
+**Backstitch line styles (new app, 2026-11-14).** A backstitch is a line, so its "symbol" is a **line style**,
+not a character. The `sym` of a `back` entry holds `line:<name>`, picked from 20 styles in this order (the first
+unused one is auto-assigned; once all 20 are taken they repeat):
+solid · dashed · long dash · dotted · dash-dot · dash-dot-dot · long-short · sparse dots · short dash ·
+dash-dash-dot · double · thick-thin · ticks · wave · zigzag · scallop · circles · squares · chevrons · crosses.
+- The key dialog shows a grid of line samples instead of characters for backstitch ("Line"). Switching the
+  entry type between backstitch and anything else swaps the symbol to the other family.
+- Files from older versions (and the single-file app) are fixed on load: backstitch entries with a character
+  get the next free line style; other entries with a line style get the next free character.
+- Places that can only show text (Replace-key list, CSV, check messages) show a short sketch such as `–·–`.
+- Patterns repeat per segment and scale with zoom, so a one-cell segment shows at least one repeat.
+
 ---
 
 ## 3. Data model
@@ -224,7 +236,12 @@ Order of drawing:
 6. **Preview** of line/rect shapes at 55 % alpha.
 7. **Grid** (if `z ≥ 5`): thin lines (skipping every 10th); then bold 10-line major grid and outer border (always).
 8. **Backstitch** segments on top of grid. Colour = entry hex, darkened 45 % if luma > 215 (so white is visible);
-   symbols view → `#1d1a16`. Width `max(1.5, z*(0.07 + 0.035*min(4, strands)))`, round caps.
+   symbols view → `#1d1a16`. Round caps. *(New app, 2026-11-14:)* one-strand width `w1 = max(1.5, 0.105·z)`.
+   - **Colour** view: solid line in the entry colour, width `w1 × f(strands)` with
+     `f(n) = 1 + ½ + ¼ + …` (n−1 terms): 1 → 1×, 2 → 1.5×, 3 → 1.75×, 4 → 1.875× — each extra strand adds half
+     of what the previous one did, so 1 vs 2 strands is clearly visible without heavy lines.
+   - **Symbols** view: the entry's line style (§2.5) in `#1d1a16`, width `w1` (strands are not shown).
+   - **Both**: the line style in the entry colour, width by strands.
 9. Backstitch drawing affordances (active entry is backstitch and tool is a draw tool): rubber-band line
    from chain end to hover point (55 %), hover-point dot, ring at chain end. Accent colour `#B5452F`.
 10. **Mirror** guide: dashed vertical line at centre.
@@ -314,6 +331,8 @@ re-render key panel and autosave.
 ### 7.1 Key list (`renderKey`, `index.html:1730`)
 One row per non-null `P.pal` entry in index order:
 - Key icon (canvas, 30 px) rendered in the current view mode: a stitch/bead/backstitch sample with symbol.
+  *(New app:)* the backstitch icon is a diagonal line drawn exactly like on the chart (§5 step 8): solid and
+  strand-sized in Colour view, the line style in Symbols view, no character.
 - Title (with shortcut badge `1`…`9` for the first nine rows) and subtitle (§3.4).
 - Usage count (`—` if 0) with unit `stitch`/`stitches`, `beads`, or `lines` (backstitch segments).
 - Edit ✎ and delete ✕ buttons.

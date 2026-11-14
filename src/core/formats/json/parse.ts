@@ -1,6 +1,6 @@
 import { libraryColor } from "../../catalog/catalog";
 import { LAYERS } from "../../layers/registry";
-import { cleanEntry } from "../../pattern/keyEntries";
+import { cleanEntry, fixEntrySymbols } from "../../pattern/keyEntries";
 import { cleanMeta } from "../../pattern/meta";
 import { createPattern, DEFAULT_FABRIC, DEFAULT_GRID } from "../../pattern/createPattern";
 import type { CustomColor, GridNumbering, KeyEntry, Pattern } from "../../pattern/types";
@@ -51,6 +51,7 @@ export function parsePattern(raw: unknown, symbols: readonly string[]): { patter
     return cleanEntry(entry, normalizeSymbol(entry.sym, symbols));
   });
   p.key = [null, ...pal];
+  fixEntrySymbols(p, symbols);
   const size = { w: p.w, h: p.h };
   for (const l of LAYERS) l.set(p.layers, l.parse((d as Record<string, unknown>)[LAYER_FIELD[l.id]!], size));
   return { pattern: p, refs: Array.isArray(d.refs) ? d.refs : null, underlay: cleanUnderlay(d.underlay) };

@@ -3,7 +3,8 @@ import { floodRegion, halfPointsBetween, lineCells, snapHalf } from "../geometry
 import { cellLabel, isMajorLine, majorOffset, parseCellRef, rulerLabels } from "../grid/numbering";
 import { ALL_SYMBOLS } from "../symbols/symbols";
 import { createPattern } from "./createPattern";
-import { addEntry, findSameKey } from "./keyEntries";
+import { addEntry, findSameKey, fixEntrySymbols } from "./keyEntries";
+import { LINE_STYLES } from "../symbols/lineStyles";
 import { canPlacePartial, clearForPartial, isOccupied } from "./occupancy";
 import { partialsLayer } from "../layers/partials";
 import { libraryColor, matchesQuery } from "../catalog/catalog";
@@ -44,6 +45,18 @@ describe("occupancy (override off)", () => {
   it("treats entries as duplicates only with the same colour, strands and stitch", () => {
     expect(findSameKey(p, { t: "thread", src: "dmc:310", n: 2, st: "half" })).toBe(half);
     expect(findSameKey(p, { t: "thread", src: "dmc:310", n: 3, st: "half" })).toBe(0);
+  });
+});
+
+describe("entry symbols", () => {
+  it("gives backstitch line styles and other entries characters, fixing older files", () => {
+    const p = createPattern(2, 2);
+    const back = addEntry(p, { t: "back", src: "dmc:310", n: 1 }, ALL_SYMBOLS);
+    const cross = addEntry(p, { t: "thread", src: "dmc:310", n: 2, st: "full" }, ALL_SYMBOLS);
+    expect([p.key[back]!.sym, p.key[cross]!.sym]).toEqual([LINE_STYLES[0], ALL_SYMBOLS[0]]);
+    p.key.push({ t: "back", src: "dmc:321", n: 2, sym: "■" });
+    fixEntrySymbols(p, ALL_SYMBOLS);
+    expect(p.key[3]!.sym).toBe(LINE_STYLES[1]);
   });
 });
 

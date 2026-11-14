@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { beadShape } from "@/core/catalog/beadShapes";
 import { ENTRY_KINDS, entryKind } from "@/core/entryKinds/registry";
@@ -9,7 +9,10 @@ import type { PaletteSlot } from "@/core/pattern/palette";
 import { blendStrands } from "@/core/pattern/resolve";
 import type { KeyIndex } from "@/core/pattern/types";
 import { STITCH_TYPES } from "@/core/stitches/registry";
-import { commitEntry, draftColour, draftEntry, draftFor, duplicateOf, resolveDraftSource, usageCount, type KeyDraft } from "@/editor/actions/keyEntries";
+import { isLineStyle, symbolText } from "@/core/symbols/lineStyles";
+import { symbolsFor } from "@/core/pattern/keyEntries";
+import { drawLineStyleSample } from "@/render/keyIcon";
+import { commitEntry, draftColour, draftEntry, draftFor, draftSymbol, duplicateOf, resolveDraftSource, usageCount, type KeyDraft } from "@/editor/actions/keyEntries";
 import { KeyIcon, Modal, cx, ui } from "../../common/widgets";
 import { useEditor, useEditorState } from "../../hooks/editor";
 import { useTranslate } from "../../i18n/labels";
@@ -17,20 +20,39 @@ import { BlendEditor } from "./BlendEditor";
 import { ColourPicker } from "./ColourPicker";
 import s from "./keyEntry.module.css";
 
-function SymbolPicker({ value, used, symbols, onPick }: { value: string; used: Set<string>; symbols: string[]; onPick: (s: string) => void }) {
+function LineSample({ sym, w, h }: { sym: string; w: number; h: number }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const ed = useEditor();
+  useLayoutEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    const dpr = window.devicePixelRatio || 1;
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    const g = c.getContext("2d")!;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawLineStyleSample(g, sym, w, h, ed.theme);
+  }, [sym, w, h, ed.theme]);
+  return <canvas ref={ref} style={{ width: w, height: h, display: "block" }} />;
+}
+
+/** Characters for stitches, beads and knots; line styles for backstitch. */
+function SymbolPicker({ value, used, symbols, onPick }: { value: string; used: Set<string>; symbols: readonly string[]; onPick: (s: string) => void }) {
   const t = useTranslations("keyDialog");
   const [open, setOpen] = useState(false);
+  const lines = isLineStyle(value);
+  const face = (sym: string, big: boolean) => (lines ? <LineSample sym={sym} w={big ? 60 : 52} h={big ? 22 : 20} /> : sym);
   return (
     <>
       <div className={s.row2}>
-        <span className={s.label}>{t("symbol")}</span>
-        <button type="button" className={s.symbtn} onClick={() => setOpen(!open)}>{value}</button>
-        <span className={ui.hint}>{t("symbolHint")}</span>
+        <span className={s.label}>{lines ? t("lineStyle") : t("symbol")}</span>
+        <button type="button" className={cx(s.symbtn, lines && s.wide)} data-testid="symbol-button" onClick={() => setOpen(!open)}>{face(value, true)}</button>
+        <span className={ui.hint}>{lines ? t("lineStyleHint") : t("symbolHint")}</span>
       </div>
       {open && (
-        <div className={s.symgrid}>
+        <div className={cx(s.symgrid, lines && s.lines)}>
           {symbols.map((sym) => (
-            <button key={sym} type="button" className={cx(sym === value && s.cur, used.has(sym) && s.used)} title={used.has(sym) ? t("symbolUsed") : ""} onClick={() => onPick(sym)}>{sym}</button>
+            <button key={sym} type="button" data-sym={sym} className={cx(sym === value && s.cur, used.has(sym) && s.used)} title={used.has(sym) ? t("symbolUsed") : ""} onClick={() => onPick(sym)}>{face(sym, false)}</button>
           ))}
         </div>
       )}
@@ -57,7 +79,7 @@ export function KeyEntryDialog({ edit, onClose }: { edit?: KeyIndex; onClose: ()
   const setType = (t2: KeyDraft["t"]) => {
     if (before && usedOnChart && entryKind(t2).group !== entryKind(before.t).group) return ed.toast("keyDialog.typeLocked");
     const n = !before && entryKind(t2).defaultStrands ? (t2 === "back" ? 1 : d.n === 1 && d.t === "back" ? ed.doc.strands || 2 : d.n) : d.n;
-    update({ t: t2, n });
+    update({ t: t2, n, sym: draftSymbol(ed, d, t2, edit) });
   };
 
   const src = resolveDraftSource(ed, d, false);
@@ -140,7 +162,7 @@ export function KeyEntryDialog({ edit, onClose }: { edit?: KeyIndex; onClose: ()
             </select>
           </div>
         )}
-        <SymbolPicker value={d.sym} used={used} symbols={symbols} onPick={(sym) => update({ sym })} />
+        <SymbolPicker value={d.sym} used={used} symbols={symbolsFor(d.t, symbols)} onPick={(sym) => update({ sym })} />
       </div>
 
       <div className={s.preview} data-testid="key-preview">
@@ -153,7 +175,7 @@ export function KeyEntryDialog({ edit, onClose }: { edit?: KeyIndex; onClose: ()
           <span className={ui.hint}>{d.t === "combo" ? t("chooseFlossBead") : t("chooseBlend")}</span>
         )}
       </div>
-      {dup > 0 && <div className={ui.warn}>{t.rich("duplicate", { entry: `${ed.doc.key[dup]!.sym} ${dupLabel}`, b: (c) => <b>{c}</b> })}</div>}
+      {dup > 0 && <div className={ui.warn}>{t.rich("duplicate", { entry: `${symbolText(ed.doc.key[dup]!.sym)} ${dupLabel}`, b: (c) => <b>{c}</b> })}</div>}
     </Modal>
   );
 }

@@ -1,20 +1,17 @@
 import type { PaletteSlot } from "@/core/pattern/palette";
 import { viewStyle, type ChartView } from "./chart";
 import { drawBackstitch, drawBeadCell, drawKnot, drawStitchCell, drawSymbol, type Ctx } from "./primitives/cells";
+import { strokeLineStyle } from "./primitives/lineStyles";
 import type { CanvasTheme } from "./theme";
 
-/** Small sample of a key entry: a stitch, bead, backstitch line or knot with its symbol. */
+/** Small sample of a key entry: a stitch, bead, backstitch line (in its line style) or knot with its symbol. */
 export function drawKeyIcon(g: Ctx, slot: PaletteSlot, size: number, view: ChartView, theme: CanvasTheme, fabric: string) {
   const style = viewStyle(view === "color" ? "both" : view, theme);
   g.fillStyle = style.showColour ? fabric : "#fff";
   g.fillRect(0, 0, size, size);
   if (slot.t === "bead") drawBeadCell(g, 0, 0, size, slot, style);
-  else if (slot.t === "back") {
-    drawBackstitch(g, size * 0.15, size * 0.85, size * 0.85, size * 0.15, size * 0.9, slot, style);
-    g.globalAlpha = 0.9;
-    drawSymbol(g, size * 0.75, size * 0.25, size * 0.5, slot.sym, theme.symbols.darkInk, 0.7, theme, true);
-    g.globalAlpha = 1;
-  } else if (slot.t === "knot") {
+  else if (slot.t === "back") drawBackstitch(g, size * 0.12, size * 0.88, size * 0.88, size * 0.12, size * 0.8, slot, viewStyle(view, theme));
+  else if (slot.t === "knot") {
     drawKnot(g, size * 0.5, size * 0.5, size * 1.4, slot, { ...style, showSymbol: false });
     if (slot.sym) drawSymbol(g, size * 0.78, size * 0.22, size * 0.5, slot.sym, theme.symbols.darkInk, 0.7, theme, true);
   } else if (slot.t === "combo" && slot.bead && view === "color") {
@@ -32,4 +29,11 @@ export function keyIconCanvas(slot: PaletteSlot, size: number, view: ChartView, 
   g.scale(dpr, dpr);
   drawKeyIcon(g, slot, size, view, theme, fabric);
   return c;
+}
+
+/** A line style on its own, for the backstitch style picker. */
+export function drawLineStyleSample(g: Ctx, sym: string, w: number, h: number, theme: CanvasTheme) {
+  g.clearRect(0, 0, w, h);
+  g.strokeStyle = theme.backstitch.symbolsColor;
+  strokeLineStyle(g, h * 0.3, h / 2, w - h * 0.3, h / 2, Math.max(1.5, h * 0.09), Math.max(2, h * 0.075), sym);
 }
