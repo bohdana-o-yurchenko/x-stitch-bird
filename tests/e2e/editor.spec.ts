@@ -180,6 +180,20 @@ test("highlighting fades every entry except the selected one", async ({ page }) 
   expect(await editorState<boolean>(page, "(ed) => ed.state.highlight")).toBe(false);
 });
 
+test("deleting a saved pattern asks first", async ({ page }) => {
+  await page.keyboard.press("ControlOrMeta+s");
+  await fileAction(page, "Open saved pattern…");
+  const trash = page.getByRole("button", { name: /^Delete “/ });
+  await trash.click();
+  const confirm = page.getByTestId("confirm-delete");
+  await expect(confirm).toContainText("can’t be undone");
+  await confirm.getByRole("button", { name: "Cancel" }).click();
+  await expect(trash).toBeVisible();
+  await trash.click();
+  await page.getByTestId("confirm-delete").getByRole("button", { name: "Delete" }).click();
+  await expect(page.getByText("No saved patterns", { exact: false })).toBeVisible();
+});
+
 test("brush size takes one click", async ({ page }) => {
   await page.getByRole("button", { name: "Brush 3×3" }).click();
   expect(await editorState<number>(page, "(ed) => ed.state.brush")).toBe(3);

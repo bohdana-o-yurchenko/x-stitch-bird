@@ -197,7 +197,9 @@ its own centred row under the app bar. **Ukrainian is the default language**: `/
 is not used; `/en` is English. The File menu groups everything file-related;
 items carry a muted second line saying what they do, and `▸` items open a submenu on hover or click:
 - **New ▸** Blank pattern… · From a picture…
-- Open saved pattern… · Open file from computer… (.xbird/.oxs; older .json still opens) · **Versions…** (automatic snapshots, §15.7 — no
+- Open saved pattern… · Open file from computer… (.xbird/.oxs; older .json still opens)
+  (deleting a saved pattern in that list asks first: the row turns into "Delete *name* from this browser? This can't
+  be undone…" with Cancel / Delete) · **Versions…** (automatic snapshots, §15.7 — no
   longer inside the Open dialog)
 - Save (in this browser) · Download pattern file (.xbird, §9.7)
 - **Export ▸** chart PNG (colour + symbols / symbols only / colour blocks) · Open Cross Stitch (.oxs — opens in

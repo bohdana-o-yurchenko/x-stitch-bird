@@ -234,7 +234,7 @@
     "create": "Create",
     "openTitle": "Open a pattern",
     "loading": "Loading…",
-    "noPatterns": "No saved patterns yet. Use Save to keep your work.",
+    "noPatterns": "No saved patterns yet. Patterns are saved here automatically while you work.",
     "thisBrowser": " · this browser",
     "noHistory": "No snapshots yet.",
     "restore": "Restore",
@@ -288,7 +288,10 @@
     "drop": "Drop a .xbird or .oxs pattern, or a picture",
     "putBehind": "Image behind the chart",
     "versionsTitle": "Versions of this pattern",
-    "versionsHint": "Saved automatically before big changes and every few minutes while you work."
+    "versionsHint": "Saved automatically before big changes and every few minutes while you work.",
+    "deleteSavedTitle": "Delete “{name}”",
+    "deleteSavedBody": "Delete <b>{name}</b> from this browser? This can’t be undone. Downloaded .xbird files are not affected.",
+    "deleteSaved": "Delete"
   },
   "meta": {
     "designer": "Designer",
