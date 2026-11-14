@@ -3,6 +3,7 @@ import { createPattern, shortId } from "../../pattern/createPattern";
 import { keyFor } from "../../pattern/keyEntries";
 import type { Corner, CustomColor, KeyEntry, KeyIndex, Pattern, StitchTypeId } from "../../pattern/types";
 import { snapHalf } from "../../geometry/geometry";
+import { cornerAt } from "./partials";
 import { parseXml, type XmlElement } from "./xml";
 
 export class OxsFormatError extends Error {}
@@ -144,8 +145,13 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
     } else if (t === "tent") {
       const v = key(o.attrs.palindex, o.attrs.direction === "1" ? "halfb" : "half");
       if (v) stitches[i] = v;
-    } else if ((t === "quarter" || t === "petite") && /^[0-3]$/.test(o.attrs.corner ?? "")) {
-      addPartial(i, t, Number(o.attrs.corner) as Corner, key(o.attrs.palindex, "full"));
+    } else if (t === "quarter" || t === "petite") {
+      // Older Stitchwork files: whole-cell x1/y1 plus our own corner attribute. Everyone else (and newer files): the
+      // half-grid point says which quarter; Ursa's "quarter" is a miniature cross unless XSPro's petit="false".
+      const old = /^[0-3]$/.test(o.attrs.corner ?? "");
+      const corner = old ? (Number(o.attrs.corner) as Corner) : cornerAt(fx, fy);
+      const kind = t === "petite" || (!old && o.attrs.petit !== "false") ? "petite" : "quarter";
+      addPartial(i, kind, corner, key(o.attrs.palindex, "full"));
     } else simplified++;
   }
   for (const b of pick("backstitch", "backstitches")) {

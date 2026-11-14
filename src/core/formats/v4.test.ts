@@ -67,6 +67,27 @@ describe("OXS with fractional stitches, knots and pattern info", () => {
     expect(Object.values(back.customs).map((c) => c.code)).toEqual(["403"]);
   });
 
+  it("places quarters and petites on the half grid, so four in one cell stay in their corners", () => {
+    const p = createPattern(2, 1);
+    const k = addEntry(p, { t: "thread", src: "dmc:310", n: 2, st: "full" }, ALL_SYMBOLS);
+    p.layers.partials.set(1, ([0, 1, 2, 3] as const).map((corner) => ({ kind: "quarter" as const, corner, k })));
+    const xml = exportOxs(p);
+    const at = [...xml.matchAll(/<object x1="([\d.]+)" y1="([\d.]+)"[^>]*objecttype="quarter" petit="false"/g)].map((m) => `${m[1]},${m[2]}`);
+    expect(at).toEqual(["1,0", "1.5,0", "1.5,0.5", "1,0.5"]);
+    const back = importOxs(xml, ALL_SYMBOLS).pattern.layers.partials.get(1)!;
+    expect(back.map((s) => `${s.kind}@${s.corner}`)).toEqual(["quarter@0", "quarter@1", "quarter@2", "quarter@3"]);
+  });
+
+  it("reads other programs' quarters (Ursa: a miniature cross) and our older corner attribute", () => {
+    const xml = exportOxs(createPattern(2, 2))
+      .replace("<ornaments_inc_knots_and_beads>", '<ornaments_inc_knots_and_beads><object x1="0.5" y1="1.5" palindex="1" objecttype="quarter"/><object x1="1" y1="0" palindex="1" objecttype="quarter" corner="2"/>')
+      .replace('palettecount="0"', 'palettecount="1"')
+      .replace("</palette>", '<palette_item index="1" number="310" name="Black" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="2" symbol="1" dashpattern="" bsstrands="1" bscolor="000000"/></palette>');
+    const parts = importOxs(xml, ALL_SYMBOLS).pattern.layers.partials;
+    expect(parts.get(2)?.map((s) => `${s.kind}@${s.corner}`)).toEqual(["petite@2"]);
+    expect(parts.get(1)?.map((s) => `${s.kind}@${s.corner}`)).toEqual(["quarter@2"]);
+  });
+
   it("simplifies stitches it cannot represent and reads bead, tent and blend items", () => {
     const xml = `<chart><properties chartwidth="3" chartheight="1" stitchesperinch="16"/>
       <palette><palette_item index="0" number="cloth" color="EEEEEE"/>

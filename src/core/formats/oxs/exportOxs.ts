@@ -3,12 +3,13 @@ import type { ColorEntry } from "../../color/colorEntry";
 import { resolveColor } from "../../pattern/resolve";
 import type { Corner, KeyIndex, Pattern } from "../../pattern/types";
 import { stitchType } from "../../stitches/registry";
+import { cornerOffset } from "./partials";
 
 /*
  * Open Cross Stitch export (SPEC §10.3). Each used key entry becomes its own palette item; beads are
- * de-duplicated by colour. Fractional stitches and knots (SPEC §15.13–15.14) use Stitchwork's mapping:
- * three-quarters as <partstitch> (direction 2 = split along ╱, 1 = along ╲), quarters/petites/knots as
- * <object>s. Other programs may ignore those; unverified against real files (SPEC §15.13 Q9).
+ * de-duplicated by colour. Fractional stitches and knots (SPEC §15.13–15.14): three-quarters as <partstitch>
+ * (direction 2 = split along ╱, 1 = along ╲); quarters and petites as <object>s placed on the half grid — x1/y1 is
+ * the top-left of the quarter of the cell they cover (Ursa / XSPro convention), quarters marked petit="false".
  */
 
 export const OXS_BEAD_TYPE: Record<string, string> = { "Petite Glass": "bead2mm", "Size 8": "bead3mm", "Size 6": "bead5mm", Pebble: "bead6mm" };
@@ -108,8 +109,10 @@ export function exportOxs(p: Pattern): string {
       if (pa || pb) L.push(`<partstitch x="${x}" y="${y}" palindex1="${pa}" palindex2="${pb}" direction="${dir}"/>`);
     }
     for (const s of list)
-      if (s.kind !== "threeQuarter" && keyItem.has(s.k))
-        objects.push(`<object x1="${x}" y1="${y}" palindex="${keyItem.get(s.k)}" objecttype="${s.kind}" corner="${s.corner}"/>`);
+      if (s.kind !== "threeQuarter" && keyItem.has(s.k)) {
+        const { dx, dy } = cornerOffset(s.corner);
+        objects.push(`<object x1="${x + dx}" y1="${y + dy}" palindex="${keyItem.get(s.k)}" objecttype="${s.kind}"${s.kind === "quarter" ? ' petit="false"' : ""}/>`);
+      }
   }
   L.push("</partstitches>", "<backstitches>");
   segments.forEach((s, q) => {

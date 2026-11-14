@@ -1131,6 +1131,13 @@ Combinations that must fit into one cell:
      cells.
    - Import maps them back. Today they are "simplified" (§12.2), which fixes part of quirk §14.8.
    - Petite has no clear OXS form; this needs checking against real files.
+   - *Implemented (fixed 2026-11-14 after testing in Хрестики / Ruta Stitch):* three-quarters as `<partstitch>`
+     (direction 2 = split along ╱, 1 = along ╲). Quarters and petites as `<object>`s **on the half grid**: x1/y1 is the
+     top-left of the quarter of the cell they cover (top-left quarter of cell (x, y) → (x, y), bottom-right →
+     (x + 0.5, y + 0.5)); quarters `objecttype="quarter" petit="false"` (Cross Stitch Pro's mark for a diagonal
+     quarter), petites `objecttype="petite"`. The first version wrote whole-cell x1/y1 plus a private `corner`
+     attribute, so readers drew 4 quarters (or petites) of one cell on top of each other in the top-left corner.
+   - Import reads both, plus Ursa's plain `objecttype="quarter"` (a miniature cross → petite) by its half-grid point.
 
 ### 15.14 French knots (DRAFT — to be discussed)
 - **Key type** `'knot'`: `src` (thread or blend), `n` strands, `sym`. An optional `wraps` value (1–3) is shown in
