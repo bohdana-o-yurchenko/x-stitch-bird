@@ -1,0 +1,1015 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chart>
+<format comments01="Designed to allow interchange of basic pattern data between any cross stitch style software" comments02="the 'properties' section establishes size, copyright, authorship and software used" comments03="The features of each software package varies, but using XML each can pick out the things it can deal with, while ignoring others" comments04="The basic items are :" comments05="'palette'..a set of colors used in the design: palettecount excludes cloth color, which is item 0" comments06="'fullstitches'.. simple crosses" comments07="'backstitches'.. lines/objects with a start and end point" comments08="(There is a wide variety of ways of treating part stitches, knots, beads and so on.)" comments09="Colors are expressed in hex RGB format." comments10="Decimal numbers use US/UK format where '.' is the indicator - eg 0.5 is 'half'" comments11="For readability, please use words not enumerations" comments12="The properties, fullstitches, and backstitches elements should be considered mandatory, even if empty" comments13="Exported by Stitchwork"/>
+<properties oxsversion="1.0" software="Stitchwork" software_version="1.3" chartheight="72" chartwidth="72" charttitle="Untitled pattern" author="" copyright="" instructions="" stitchesperinch="14" stitchesperinch_y="14" palettecount="13"/>
+<palette>
+<palette_item index="0" number="cloth" name="cloth" color="F7F4EC" printcolor="F7F4EC" blendcolor="nil" comments="aida" strands="2" symbol="0" dashpattern="" bsstrands="1" bscolor="000000"/>
+<palette_item index="1" number="310" name="Black" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="2" symbol="1" dashpattern="" bsstrands="2" bscolor="000000"/>
+<palette_item index="2" number="718" name="Plum" color="9C2462" printcolor="9C2462" blendcolor="nil" comments="" strands="2" symbol="2" dashpattern="" bsstrands="2" bscolor="9C2462"/>
+<palette_item index="3" number="725" name="Topaz Medium Light" color="FFC840" printcolor="FFC840" blendcolor="nil" comments="" strands="2" symbol="3" dashpattern="" bsstrands="2" bscolor="FFC840"/>
+<palette_item index="4" number="726" name="Topaz Light" color="FDD755" printcolor="FDD755" blendcolor="nil" comments="" strands="2" symbol="4" dashpattern="" bsstrands="2" bscolor="FDD755"/>
+<palette_item index="5" number="783" name="Topaz Medium" color="CE9124" printcolor="CE9124" blendcolor="nil" comments="" strands="2" symbol="5" dashpattern="" bsstrands="2" bscolor="CE9124"/>
+<palette_item index="6" number="3766" name="Peacock Blue Light" color="99CFD9" printcolor="99CFD9" blendcolor="nil" comments="" strands="2" symbol="6" dashpattern="" bsstrands="2" bscolor="99CFD9"/>
+<palette_item index="7" number="3811" name="Turquoise Very Light" color="BCE3E6" printcolor="BCE3E6" blendcolor="nil" comments="" strands="2" symbol="7" dashpattern="" bsstrands="2" bscolor="BCE3E6"/>
+<palette_item index="8" number="3820" name="Straw Dark" color="DFB65F" printcolor="DFB65F" blendcolor="nil" comments="" strands="2" symbol="8" dashpattern="" bsstrands="2" bscolor="DFB65F"/>
+<palette_item index="9" number="3854" name="Autumn Gold Medium" color="F2AF68" printcolor="F2AF68" blendcolor="nil" comments="" strands="2" symbol="9" dashpattern="" bsstrands="2" bscolor="F2AF68"/>
+<palette_item index="10" number="B5200" name="Snow White" color="FFFFFF" printcolor="FFFFFF" blendcolor="nil" comments="" strands="2" symbol="10" dashpattern="" bsstrands="2" bscolor="FFFFFF"/>
+<palette_item index="11" number="310" name="Black (backstitch)" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="2" symbol="11" dashpattern="" bsstrands="2" bscolor="000000"/>
+<palette_item index="12" number="02077+718" name="02077 + 718" color="9C2462" printcolor="9C2462" blendcolor="820043" comments="blend" strands="2" symbol="12" dashpattern="" bsstrands="2" bscolor="9C2462">
+  <blend number="02077" name="Brilliant Magenta" color="820043" strands="1"/>
+  <blend number="718" name="Plum" color="9C2462" strands="2"/>
+</palette_item>
+<palette_item index="13" number="40123+B5200" name="40123 + B5200" color="FFFFFF" printcolor="FFFFFF" blendcolor="F0EADA" comments="blend" strands="2" symbol="13" dashpattern="" bsstrands="2" bscolor="FFFFFF">
+  <blend number="40123" name="Cream" color="F0EADA" strands="1"/>
+  <blend number="B5200" name="Snow White" color="FFFFFF" strands="2"/>
+</palette_item>
+</palette>
+<fullstitches>
+<stitch x="2" y="1" palindex="2"/>
+<stitch x="4" y="1" palindex="2"/>
+<stitch x="6" y="1" palindex="2"/>
+<stitch x="8" y="1" palindex="2"/>
+<stitch x="10" y="1" palindex="2"/>
+<stitch x="12" y="1" palindex="2"/>
+<stitch x="14" y="1" palindex="2"/>
+<stitch x="16" y="1" palindex="2"/>
+<stitch x="18" y="1" palindex="2"/>
+<stitch x="20" y="1" palindex="2"/>
+<stitch x="22" y="1" palindex="2"/>
+<stitch x="24" y="1" palindex="2"/>
+<stitch x="26" y="1" palindex="2"/>
+<stitch x="28" y="1" palindex="2"/>
+<stitch x="30" y="1" palindex="2"/>
+<stitch x="32" y="1" palindex="2"/>
+<stitch x="34" y="1" palindex="2"/>
+<stitch x="36" y="1" palindex="2"/>
+<stitch x="38" y="1" palindex="2"/>
+<stitch x="40" y="1" palindex="2"/>
+<stitch x="42" y="1" palindex="2"/>
+<stitch x="44" y="1" palindex="2"/>
+<stitch x="46" y="1" palindex="2"/>
+<stitch x="48" y="1" palindex="2"/>
+<stitch x="50" y="1" palindex="2"/>
+<stitch x="52" y="1" palindex="2"/>
+<stitch x="54" y="1" palindex="2"/>
+<stitch x="56" y="1" palindex="2"/>
+<stitch x="58" y="1" palindex="2"/>
+<stitch x="60" y="1" palindex="2"/>
+<stitch x="62" y="1" palindex="2"/>
+<stitch x="64" y="1" palindex="2"/>
+<stitch x="66" y="1" palindex="2"/>
+<stitch x="68" y="1" palindex="2"/>
+<stitch x="70" y="1" palindex="2"/>
+<stitch x="1" y="2" palindex="2"/>
+<stitch x="70" y="3" palindex="2"/>
+<stitch x="1" y="4" palindex="2"/>
+<stitch x="70" y="5" palindex="2"/>
+<stitch x="1" y="6" palindex="2"/>
+<stitch x="70" y="7" palindex="2"/>
+<stitch x="1" y="8" palindex="2"/>
+<stitch x="70" y="9" palindex="2"/>
+<stitch x="1" y="10" palindex="2"/>
+<stitch x="70" y="11" palindex="2"/>
+<stitch x="1" y="12" palindex="2"/>
+<stitch x="70" y="13" palindex="2"/>
+<stitch x="1" y="14" palindex="2"/>
+<stitch x="70" y="15" palindex="2"/>
+<stitch x="1" y="16" palindex="2"/>
+<stitch x="70" y="17" palindex="2"/>
+<stitch x="1" y="18" palindex="2"/>
+<stitch x="70" y="19" palindex="2"/>
+<stitch x="1" y="20" palindex="2"/>
+<stitch x="70" y="21" palindex="2"/>
+<stitch x="1" y="22" palindex="2"/>
+<stitch x="70" y="23" palindex="2"/>
+<stitch x="1" y="24" palindex="2"/>
+<stitch x="70" y="25" palindex="2"/>
+<stitch x="1" y="26" palindex="2"/>
+<stitch x="70" y="27" palindex="2"/>
+<stitch x="1" y="28" palindex="2"/>
+<stitch x="70" y="29" palindex="2"/>
+<stitch x="1" y="30" palindex="2"/>
+<stitch x="70" y="31" palindex="2"/>
+<stitch x="1" y="32" palindex="2"/>
+<stitch x="70" y="33" palindex="2"/>
+<stitch x="1" y="34" palindex="2"/>
+<stitch x="70" y="35" palindex="2"/>
+<stitch x="1" y="36" palindex="2"/>
+<stitch x="70" y="37" palindex="2"/>
+<stitch x="1" y="38" palindex="2"/>
+<stitch x="70" y="39" palindex="2"/>
+<stitch x="1" y="40" palindex="2"/>
+<stitch x="70" y="41" palindex="2"/>
+<stitch x="1" y="42" palindex="2"/>
+<stitch x="70" y="43" palindex="2"/>
+<stitch x="1" y="44" palindex="2"/>
+<stitch x="70" y="45" palindex="2"/>
+<stitch x="1" y="46" palindex="2"/>
+<stitch x="70" y="47" palindex="2"/>
+<stitch x="1" y="48" palindex="2"/>
+<stitch x="15" y="48" palindex="4"/>
+<stitch x="16" y="48" palindex="4"/>
+<stitch x="17" y="48" palindex="8"/>
+<stitch x="18" y="48" palindex="8"/>
+<stitch x="19" y="48" palindex="8"/>
+<stitch x="20" y="48" palindex="8"/>
+<stitch x="21" y="48" palindex="4"/>
+<stitch x="22" y="48" palindex="4"/>
+<stitch x="23" y="48" palindex="4"/>
+<stitch x="24" y="48" palindex="8"/>
+<stitch x="25" y="48" palindex="8"/>
+<stitch x="26" y="48" palindex="9"/>
+<stitch x="27" y="48" palindex="8"/>
+<stitch x="2" y="49" palindex="8"/>
+<stitch x="3" y="49" palindex="8"/>
+<stitch x="14" y="49" palindex="4"/>
+<stitch x="15" y="49" palindex="10"/>
+<stitch x="16" y="49" palindex="13"/>
+<stitch x="17" y="49" palindex="4"/>
+<stitch x="18" y="49" palindex="8"/>
+<stitch x="19" y="49" palindex="8"/>
+<stitch x="20" y="49" palindex="4"/>
+<stitch x="21" y="49" palindex="4"/>
+<stitch x="22" y="49" palindex="13"/>
+<stitch x="23" y="49" palindex="10"/>
+<stitch x="24" y="49" palindex="4"/>
+<stitch x="25" y="49" palindex="8"/>
+<stitch x="26" y="49" palindex="9"/>
+<stitch x="27" y="49" palindex="9"/>
+<stitch x="28" y="49" palindex="8"/>
+<stitch x="70" y="49" palindex="2"/>
+<stitch x="1" y="50" palindex="2"/>
+<stitch x="2" y="50" palindex="8"/>
+<stitch x="3" y="50" palindex="8"/>
+<stitch x="4" y="50" palindex="9"/>
+<stitch x="5" y="50" palindex="9"/>
+<stitch x="6" y="50" palindex="9"/>
+<stitch x="7" y="50" palindex="9"/>
+<stitch x="8" y="50" palindex="9"/>
+<stitch x="9" y="50" palindex="9"/>
+<stitch x="10" y="50" palindex="8"/>
+<stitch x="11" y="50" palindex="8"/>
+<stitch x="12" y="50" palindex="8"/>
+<stitch x="13" y="50" palindex="8"/>
+<stitch x="14" y="50" palindex="4"/>
+<stitch x="15" y="50" palindex="13"/>
+<stitch x="16" y="50" palindex="10"/>
+<stitch x="17" y="50" palindex="4"/>
+<stitch x="18" y="50" palindex="8"/>
+<stitch x="19" y="50" palindex="8"/>
+<stitch x="20" y="50" palindex="4"/>
+<stitch x="21" y="50" palindex="4"/>
+<stitch x="22" y="50" palindex="10"/>
+<stitch x="23" y="50" palindex="13"/>
+<stitch x="24" y="50" palindex="4"/>
+<stitch x="25" y="50" palindex="8"/>
+<stitch x="26" y="50" palindex="9"/>
+<stitch x="27" y="50" palindex="9"/>
+<stitch x="28" y="50" palindex="9"/>
+<stitch x="29" y="50" palindex="8"/>
+<stitch x="30" y="50" palindex="8"/>
+<stitch x="31" y="50" palindex="8"/>
+<stitch x="32" y="50" palindex="8"/>
+<stitch x="33" y="50" palindex="8"/>
+<stitch x="34" y="50" palindex="8"/>
+<stitch x="2" y="51" palindex="9"/>
+<stitch x="3" y="51" palindex="9"/>
+<stitch x="4" y="51" palindex="1"/>
+<stitch x="5" y="51" palindex="1"/>
+<stitch x="6" y="51" palindex="1"/>
+<stitch x="7" y="51" palindex="1"/>
+<stitch x="8" y="51" palindex="1"/>
+<stitch x="9" y="51" palindex="1"/>
+<stitch x="10" y="51" palindex="9"/>
+<stitch x="11" y="51" palindex="9"/>
+<stitch x="12" y="51" palindex="8"/>
+<stitch x="13" y="51" palindex="8"/>
+<stitch x="14" y="51" palindex="8"/>
+<stitch x="15" y="51" palindex="4"/>
+<stitch x="16" y="51" palindex="4"/>
+<stitch x="17" y="51" palindex="8"/>
+<stitch x="18" y="51" palindex="8"/>
+<stitch x="19" y="51" palindex="5"/>
+<stitch x="20" y="51" palindex="8"/>
+<stitch x="21" y="51" palindex="4"/>
+<stitch x="22" y="51" palindex="4"/>
+<stitch x="23" y="51" palindex="4"/>
+<stitch x="24" y="51" palindex="8"/>
+<stitch x="25" y="51" palindex="8"/>
+<stitch x="26" y="51" palindex="9"/>
+<stitch x="27" y="51" palindex="9"/>
+<stitch x="28" y="51" palindex="8"/>
+<stitch x="29" y="51" palindex="8"/>
+<stitch x="30" y="51" palindex="8"/>
+<stitch x="31" y="51" palindex="8"/>
+<stitch x="32" y="51" palindex="8"/>
+<stitch x="33" y="51" palindex="8"/>
+<stitch x="34" y="51" palindex="8"/>
+<stitch x="70" y="51" palindex="2"/>
+<stitch x="1" y="52" palindex="2"/>
+<stitch x="2" y="52" palindex="1"/>
+<stitch x="3" y="52" palindex="1"/>
+<stitch x="4" y="52" palindex="1"/>
+<stitch x="5" y="52" palindex="1"/>
+<stitch x="6" y="52" palindex="1"/>
+<stitch x="7" y="52" palindex="1"/>
+<stitch x="8" y="52" palindex="1"/>
+<stitch x="9" y="52" palindex="1"/>
+<stitch x="10" y="52" palindex="1"/>
+<stitch x="11" y="52" palindex="1"/>
+<stitch x="12" y="52" palindex="9"/>
+<stitch x="13" y="52" palindex="8"/>
+<stitch x="14" y="52" palindex="8"/>
+<stitch x="15" y="52" palindex="9"/>
+<stitch x="16" y="52" palindex="9"/>
+<stitch x="17" y="52" palindex="8"/>
+<stitch x="18" y="52" palindex="8"/>
+<stitch x="19" y="52" palindex="8"/>
+<stitch x="20" y="52" palindex="5"/>
+<stitch x="21" y="52" palindex="8"/>
+<stitch x="22" y="52" palindex="8"/>
+<stitch x="23" y="52" palindex="8"/>
+<stitch x="24" y="52" palindex="8"/>
+<stitch x="25" y="52" palindex="9"/>
+<stitch x="26" y="52" palindex="9"/>
+<stitch x="27" y="52" palindex="8"/>
+<stitch x="28" y="52" palindex="8"/>
+<stitch x="29" y="52" palindex="4"/>
+<stitch x="30" y="52" palindex="4"/>
+<stitch x="31" y="52" palindex="8"/>
+<stitch x="32" y="52" palindex="8"/>
+<stitch x="33" y="52" palindex="8"/>
+<stitch x="34" y="52" palindex="9"/>
+<stitch x="2" y="53" palindex="1"/>
+<stitch x="3" y="53" palindex="1"/>
+<stitch x="4" y="53" palindex="1"/>
+<stitch x="5" y="53" palindex="1"/>
+<stitch x="6" y="53" palindex="1"/>
+<stitch x="7" y="53" palindex="1"/>
+<stitch x="8" y="53" palindex="1"/>
+<stitch x="9" y="53" palindex="1"/>
+<stitch x="10" y="53" palindex="1"/>
+<stitch x="11" y="53" palindex="1"/>
+<stitch x="12" y="53" palindex="1"/>
+<stitch x="13" y="53" palindex="9"/>
+<stitch x="14" y="53" palindex="8"/>
+<stitch x="15" y="53" palindex="8"/>
+<stitch x="16" y="53" palindex="9"/>
+<stitch x="17" y="53" palindex="9"/>
+<stitch x="18" y="53" palindex="8"/>
+<stitch x="19" y="53" palindex="9"/>
+<stitch x="20" y="53" palindex="8"/>
+<stitch x="21" y="53" palindex="8"/>
+<stitch x="22" y="53" palindex="5"/>
+<stitch x="23" y="53" palindex="8"/>
+<stitch x="24" y="53" palindex="8"/>
+<stitch x="25" y="53" palindex="9"/>
+<stitch x="26" y="53" palindex="8"/>
+<stitch x="27" y="53" palindex="4"/>
+<stitch x="28" y="53" palindex="4"/>
+<stitch x="29" y="53" palindex="10"/>
+<stitch x="30" y="53" palindex="13"/>
+<stitch x="31" y="53" palindex="4"/>
+<stitch x="32" y="53" palindex="8"/>
+<stitch x="33" y="53" palindex="9"/>
+<stitch x="34" y="53" palindex="9"/>
+<stitch x="70" y="53" palindex="2"/>
+<stitch x="1" y="54" palindex="2"/>
+<stitch x="2" y="54" palindex="1"/>
+<stitch x="3" y="54" palindex="1"/>
+<stitch x="4" y="54" palindex="8"/>
+<stitch x="5" y="54" palindex="8"/>
+<stitch x="6" y="54" palindex="8"/>
+<stitch x="7" y="54" palindex="1"/>
+<stitch x="8" y="54" palindex="1"/>
+<stitch x="9" y="54" palindex="1"/>
+<stitch x="10" y="54" palindex="1"/>
+<stitch x="11" y="54" palindex="1"/>
+<stitch x="12" y="54" palindex="1"/>
+<stitch x="13" y="54" palindex="1"/>
+<stitch x="14" y="54" palindex="9"/>
+<stitch x="15" y="54" palindex="8"/>
+<stitch x="16" y="54" palindex="8"/>
+<stitch x="17" y="54" palindex="8"/>
+<stitch x="18" y="54" palindex="9"/>
+<stitch x="19" y="54" palindex="5"/>
+<stitch x="20" y="54" palindex="8"/>
+<stitch x="21" y="54" palindex="5"/>
+<stitch x="22" y="54" palindex="8"/>
+<stitch x="23" y="54" palindex="8"/>
+<stitch x="24" y="54" palindex="8"/>
+<stitch x="25" y="54" palindex="8"/>
+<stitch x="26" y="54" palindex="8"/>
+<stitch x="27" y="54" palindex="4"/>
+<stitch x="28" y="54" palindex="10"/>
+<stitch x="29" y="54" palindex="13"/>
+<stitch x="30" y="54" palindex="10"/>
+<stitch x="31" y="54" palindex="4"/>
+<stitch x="32" y="54" palindex="8"/>
+<stitch x="33" y="54" palindex="9"/>
+<stitch x="34" y="54" palindex="9"/>
+<stitch x="2" y="55" palindex="8"/>
+<stitch x="3" y="55" palindex="8"/>
+<stitch x="4" y="55" palindex="8"/>
+<stitch x="5" y="55" palindex="8"/>
+<stitch x="6" y="55" palindex="8"/>
+<stitch x="7" y="55" palindex="8"/>
+<stitch x="8" y="55" palindex="8"/>
+<stitch x="9" y="55" palindex="1"/>
+<stitch x="10" y="55" palindex="1"/>
+<stitch x="11" y="55" palindex="1"/>
+<stitch x="12" y="55" palindex="1"/>
+<stitch x="13" y="55" palindex="1"/>
+<stitch x="14" y="55" palindex="1"/>
+<stitch x="15" y="55" palindex="9"/>
+<stitch x="16" y="55" palindex="8"/>
+<stitch x="17" y="55" palindex="8"/>
+<stitch x="18" y="55" palindex="5"/>
+<stitch x="19" y="55" palindex="5"/>
+<stitch x="20" y="55" palindex="8"/>
+<stitch x="21" y="55" palindex="8"/>
+<stitch x="22" y="55" palindex="8"/>
+<stitch x="23" y="55" palindex="8"/>
+<stitch x="24" y="55" palindex="8"/>
+<stitch x="25" y="55" palindex="8"/>
+<stitch x="26" y="55" palindex="8"/>
+<stitch x="27" y="55" palindex="4"/>
+<stitch x="28" y="55" palindex="4"/>
+<stitch x="29" y="55" palindex="10"/>
+<stitch x="30" y="55" palindex="3"/>
+<stitch x="31" y="55" palindex="3"/>
+<stitch x="32" y="55" palindex="9"/>
+<stitch x="33" y="55" palindex="9"/>
+<stitch x="34" y="55" palindex="6"/>
+<stitch x="70" y="55" palindex="2"/>
+<stitch x="1" y="56" palindex="2"/>
+<stitch x="2" y="56" palindex="8"/>
+<stitch x="3" y="56" palindex="9"/>
+<stitch x="4" y="56" palindex="9"/>
+<stitch x="5" y="56" palindex="8"/>
+<stitch x="6" y="56" palindex="9"/>
+<stitch x="7" y="56" palindex="9"/>
+<stitch x="8" y="56" palindex="9"/>
+<stitch x="9" y="56" palindex="8"/>
+<stitch x="10" y="56" palindex="1"/>
+<stitch x="11" y="56" palindex="1"/>
+<stitch x="12" y="56" palindex="1"/>
+<stitch x="13" y="56" palindex="1"/>
+<stitch x="14" y="56" palindex="1"/>
+<stitch x="15" y="56" palindex="4"/>
+<stitch x="16" y="56" palindex="4"/>
+<stitch x="17" y="56" palindex="8"/>
+<stitch x="18" y="56" palindex="8"/>
+<stitch x="19" y="56" palindex="5"/>
+<stitch x="20" y="56" palindex="8"/>
+<stitch x="21" y="56" palindex="8"/>
+<stitch x="22" y="56" palindex="4"/>
+<stitch x="23" y="56" palindex="4"/>
+<stitch x="24" y="56" palindex="4"/>
+<stitch x="25" y="56" palindex="8"/>
+<stitch x="26" y="56" palindex="8"/>
+<stitch x="27" y="56" palindex="8"/>
+<stitch x="28" y="56" palindex="4"/>
+<stitch x="29" y="56" palindex="3"/>
+<stitch x="30" y="56" palindex="3"/>
+<stitch x="31" y="56" palindex="6"/>
+<stitch x="32" y="56" palindex="6"/>
+<stitch x="33" y="56" palindex="6"/>
+<stitch x="34" y="56" palindex="7"/>
+<stitch x="2" y="57" palindex="8"/>
+<stitch x="3" y="57" palindex="9"/>
+<stitch x="4" y="57" palindex="8"/>
+<stitch x="5" y="57" palindex="8"/>
+<stitch x="6" y="57" palindex="8"/>
+<stitch x="7" y="57" palindex="9"/>
+<stitch x="8" y="57" palindex="9"/>
+<stitch x="9" y="57" palindex="9"/>
+<stitch x="10" y="57" palindex="8"/>
+<stitch x="11" y="57" palindex="1"/>
+<stitch x="12" y="57" palindex="1"/>
+<stitch x="13" y="57" palindex="1"/>
+<stitch x="14" y="57" palindex="1"/>
+<stitch x="15" y="57" palindex="1"/>
+<stitch x="16" y="57" palindex="4"/>
+<stitch x="17" y="57" palindex="4"/>
+<stitch x="18" y="57" palindex="8"/>
+<stitch x="19" y="57" palindex="5"/>
+<stitch x="20" y="57" palindex="8"/>
+<stitch x="21" y="57" palindex="4"/>
+<stitch x="22" y="57" palindex="13"/>
+<stitch x="23" y="57" palindex="10"/>
+<stitch x="24" y="57" palindex="4"/>
+<stitch x="25" y="57" palindex="4"/>
+<stitch x="26" y="57" palindex="8"/>
+<stitch x="27" y="57" palindex="8"/>
+<stitch x="28" y="57" palindex="8"/>
+<stitch x="29" y="57" palindex="6"/>
+<stitch x="30" y="57" palindex="6"/>
+<stitch x="31" y="57" palindex="7"/>
+<stitch x="32" y="57" palindex="7"/>
+<stitch x="33" y="57" palindex="13"/>
+<stitch x="34" y="57" palindex="6"/>
+<stitch x="70" y="57" palindex="2"/>
+<stitch x="1" y="58" palindex="2"/>
+<stitch x="2" y="58" palindex="8"/>
+<stitch x="3" y="58" palindex="8"/>
+<stitch x="4" y="58" palindex="4"/>
+<stitch x="5" y="58" palindex="4"/>
+<stitch x="6" y="58" palindex="8"/>
+<stitch x="7" y="58" palindex="8"/>
+<stitch x="8" y="58" palindex="9"/>
+<stitch x="9" y="58" palindex="9"/>
+<stitch x="10" y="58" palindex="8"/>
+<stitch x="11" y="58" palindex="1"/>
+<stitch x="12" y="58" palindex="1"/>
+<stitch x="13" y="58" palindex="1"/>
+<stitch x="14" y="58" palindex="1"/>
+<stitch x="15" y="58" palindex="1"/>
+<stitch x="16" y="58" palindex="4"/>
+<stitch x="17" y="58" palindex="4"/>
+<stitch x="18" y="58" palindex="8"/>
+<stitch x="19" y="58" palindex="5"/>
+<stitch x="20" y="58" palindex="8"/>
+<stitch x="21" y="58" palindex="4"/>
+<stitch x="22" y="58" palindex="10"/>
+<stitch x="23" y="58" palindex="13"/>
+<stitch x="24" y="58" palindex="10"/>
+<stitch x="25" y="58" palindex="4"/>
+<stitch x="26" y="58" palindex="8"/>
+<stitch x="27" y="58" palindex="8"/>
+<stitch x="28" y="58" palindex="7"/>
+<stitch x="29" y="58" palindex="7"/>
+<stitch x="30" y="58" palindex="7"/>
+<stitch x="31" y="58" palindex="7"/>
+<stitch x="32" y="58" palindex="6"/>
+<stitch x="33" y="58" palindex="7"/>
+<stitch x="34" y="58" palindex="7"/>
+<stitch x="2" y="59" palindex="8"/>
+<stitch x="3" y="59" palindex="4"/>
+<stitch x="4" y="59" palindex="10"/>
+<stitch x="5" y="59" palindex="13"/>
+<stitch x="6" y="59" palindex="4"/>
+<stitch x="7" y="59" palindex="8"/>
+<stitch x="8" y="59" palindex="8"/>
+<stitch x="9" y="59" palindex="9"/>
+<stitch x="10" y="59" palindex="8"/>
+<stitch x="11" y="59" palindex="5"/>
+<stitch x="12" y="59" palindex="1"/>
+<stitch x="13" y="59" palindex="1"/>
+<stitch x="14" y="59" palindex="1"/>
+<stitch x="15" y="59" palindex="1"/>
+<stitch x="16" y="59" palindex="1"/>
+<stitch x="17" y="59" palindex="8"/>
+<stitch x="18" y="59" palindex="5"/>
+<stitch x="19" y="59" palindex="8"/>
+<stitch x="20" y="59" palindex="8"/>
+<stitch x="21" y="59" palindex="4"/>
+<stitch x="22" y="59" palindex="4"/>
+<stitch x="23" y="59" palindex="10"/>
+<stitch x="24" y="59" palindex="4"/>
+<stitch x="25" y="59" palindex="3"/>
+<stitch x="26" y="59" palindex="8"/>
+<stitch x="27" y="59" palindex="7"/>
+<stitch x="28" y="59" palindex="7"/>
+<stitch x="29" y="59" palindex="7"/>
+<stitch x="30" y="59" palindex="7"/>
+<stitch x="31" y="59" palindex="13"/>
+<stitch x="32" y="59" palindex="7"/>
+<stitch x="33" y="59" palindex="7"/>
+<stitch x="34" y="59" palindex="7"/>
+<stitch x="70" y="59" palindex="2"/>
+<stitch x="1" y="60" palindex="2"/>
+<stitch x="2" y="60" palindex="5"/>
+<stitch x="3" y="60" palindex="4"/>
+<stitch x="4" y="60" palindex="13"/>
+<stitch x="5" y="60" palindex="10"/>
+<stitch x="6" y="60" palindex="4"/>
+<stitch x="7" y="60" palindex="8"/>
+<stitch x="8" y="60" palindex="8"/>
+<stitch x="9" y="60" palindex="9"/>
+<stitch x="10" y="60" palindex="8"/>
+<stitch x="11" y="60" palindex="5"/>
+<stitch x="12" y="60" palindex="1"/>
+<stitch x="13" y="60" palindex="1"/>
+<stitch x="14" y="60" palindex="1"/>
+<stitch x="15" y="60" palindex="1"/>
+<stitch x="16" y="60" palindex="1"/>
+<stitch x="17" y="60" palindex="8"/>
+<stitch x="18" y="60" palindex="5"/>
+<stitch x="19" y="60" palindex="8"/>
+<stitch x="20" y="60" palindex="9"/>
+<stitch x="21" y="60" palindex="8"/>
+<stitch x="22" y="60" palindex="4"/>
+<stitch x="23" y="60" palindex="4"/>
+<stitch x="24" y="60" palindex="3"/>
+<stitch x="25" y="60" palindex="8"/>
+<stitch x="26" y="60" palindex="7"/>
+<stitch x="27" y="60" palindex="7"/>
+<stitch x="28" y="60" palindex="7"/>
+<stitch x="29" y="60" palindex="13"/>
+<stitch x="30" y="60" palindex="7"/>
+<stitch x="31" y="60" palindex="7"/>
+<stitch x="32" y="60" palindex="7"/>
+<stitch x="33" y="60" palindex="8"/>
+<stitch x="34" y="60" palindex="8"/>
+<stitch x="2" y="61" palindex="5"/>
+<stitch x="3" y="61" palindex="5"/>
+<stitch x="4" y="61" palindex="4"/>
+<stitch x="5" y="61" palindex="4"/>
+<stitch x="6" y="61" palindex="8"/>
+<stitch x="7" y="61" palindex="8"/>
+<stitch x="8" y="61" palindex="8"/>
+<stitch x="9" y="61" palindex="9"/>
+<stitch x="10" y="61" palindex="8"/>
+<stitch x="11" y="61" palindex="5"/>
+<stitch x="12" y="61" palindex="1"/>
+<stitch x="13" y="61" palindex="1"/>
+<stitch x="14" y="61" palindex="1"/>
+<stitch x="15" y="61" palindex="1"/>
+<stitch x="16" y="61" palindex="1"/>
+<stitch x="17" y="61" palindex="5"/>
+<stitch x="18" y="61" palindex="5"/>
+<stitch x="19" y="61" palindex="8"/>
+<stitch x="20" y="61" palindex="9"/>
+<stitch x="21" y="61" palindex="9"/>
+<stitch x="22" y="61" palindex="8"/>
+<stitch x="23" y="61" palindex="8"/>
+<stitch x="24" y="61" palindex="8"/>
+<stitch x="25" y="61" palindex="8"/>
+<stitch x="26" y="61" palindex="7"/>
+<stitch x="27" y="61" palindex="7"/>
+<stitch x="28" y="61" palindex="7"/>
+<stitch x="29" y="61" palindex="7"/>
+<stitch x="30" y="61" palindex="7"/>
+<stitch x="31" y="61" palindex="8"/>
+<stitch x="32" y="61" palindex="8"/>
+<stitch x="33" y="61" palindex="8"/>
+<stitch x="34" y="61" palindex="9"/>
+<stitch x="70" y="61" palindex="2"/>
+<stitch x="1" y="62" palindex="2"/>
+<stitch x="2" y="62" palindex="9"/>
+<stitch x="3" y="62" palindex="5"/>
+<stitch x="4" y="62" palindex="5"/>
+<stitch x="5" y="62" palindex="8"/>
+<stitch x="6" y="62" palindex="8"/>
+<stitch x="7" y="62" palindex="8"/>
+<stitch x="8" y="62" palindex="9"/>
+<stitch x="9" y="62" palindex="8"/>
+<stitch x="10" y="62" palindex="8"/>
+<stitch x="11" y="62" palindex="5"/>
+<stitch x="12" y="62" palindex="1"/>
+<stitch x="13" y="62" palindex="1"/>
+<stitch x="14" y="62" palindex="1"/>
+<stitch x="15" y="62" palindex="1"/>
+<stitch x="16" y="62" palindex="1"/>
+<stitch x="17" y="62" palindex="5"/>
+<stitch x="18" y="62" palindex="8"/>
+<stitch x="19" y="62" palindex="8"/>
+<stitch x="20" y="62" palindex="8"/>
+<stitch x="21" y="62" palindex="9"/>
+<stitch x="22" y="62" palindex="9"/>
+<stitch x="23" y="62" palindex="8"/>
+<stitch x="24" y="62" palindex="8"/>
+<stitch x="25" y="62" palindex="7"/>
+<stitch x="26" y="62" palindex="7"/>
+<stitch x="27" y="62" palindex="13"/>
+<stitch x="28" y="62" palindex="7"/>
+<stitch x="29" y="62" palindex="7"/>
+<stitch x="30" y="62" palindex="8"/>
+<stitch x="31" y="62" palindex="8"/>
+<stitch x="32" y="62" palindex="8"/>
+<stitch x="33" y="62" palindex="8"/>
+<stitch x="34" y="62" palindex="9"/>
+<stitch x="2" y="63" palindex="9"/>
+<stitch x="3" y="63" palindex="8"/>
+<stitch x="4" y="63" palindex="9"/>
+<stitch x="5" y="63" palindex="8"/>
+<stitch x="6" y="63" palindex="8"/>
+<stitch x="7" y="63" palindex="8"/>
+<stitch x="8" y="63" palindex="8"/>
+<stitch x="9" y="63" palindex="8"/>
+<stitch x="10" y="63" palindex="8"/>
+<stitch x="11" y="63" palindex="5"/>
+<stitch x="12" y="63" palindex="1"/>
+<stitch x="13" y="63" palindex="1"/>
+<stitch x="14" y="63" palindex="1"/>
+<stitch x="15" y="63" palindex="1"/>
+<stitch x="16" y="63" palindex="1"/>
+<stitch x="17" y="63" palindex="5"/>
+<stitch x="18" y="63" palindex="8"/>
+<stitch x="19" y="63" palindex="8"/>
+<stitch x="20" y="63" palindex="8"/>
+<stitch x="21" y="63" palindex="8"/>
+<stitch x="22" y="63" palindex="9"/>
+<stitch x="23" y="63" palindex="8"/>
+<stitch x="24" y="63" palindex="7"/>
+<stitch x="25" y="63" palindex="7"/>
+<stitch x="26" y="63" palindex="7"/>
+<stitch x="27" y="63" palindex="7"/>
+<stitch x="28" y="63" palindex="7"/>
+<stitch x="29" y="63" palindex="8"/>
+<stitch x="30" y="63" palindex="8"/>
+<stitch x="31" y="63" palindex="8"/>
+<stitch x="32" y="63" palindex="8"/>
+<stitch x="33" y="63" palindex="9"/>
+<stitch x="34" y="63" palindex="9"/>
+<stitch x="70" y="63" palindex="2"/>
+<stitch x="1" y="64" palindex="2"/>
+<stitch x="2" y="64" palindex="9"/>
+<stitch x="3" y="64" palindex="9"/>
+<stitch x="4" y="64" palindex="8"/>
+<stitch x="5" y="64" palindex="8"/>
+<stitch x="6" y="64" palindex="8"/>
+<stitch x="7" y="64" palindex="8"/>
+<stitch x="8" y="64" palindex="13"/>
+<stitch x="9" y="64" palindex="10"/>
+<stitch x="10" y="64" palindex="3"/>
+<stitch x="11" y="64" palindex="5"/>
+<stitch x="12" y="64" palindex="1"/>
+<stitch x="13" y="64" palindex="1"/>
+<stitch x="14" y="64" palindex="1"/>
+<stitch x="15" y="64" palindex="1"/>
+<stitch x="16" y="64" palindex="1"/>
+<stitch x="17" y="64" palindex="5"/>
+<stitch x="18" y="64" palindex="3"/>
+<stitch x="19" y="64" palindex="3"/>
+<stitch x="20" y="64" palindex="9"/>
+<stitch x="21" y="64" palindex="8"/>
+<stitch x="22" y="64" palindex="9"/>
+<stitch x="23" y="64" palindex="8"/>
+<stitch x="24" y="64" palindex="7"/>
+<stitch x="25" y="64" palindex="13"/>
+<stitch x="26" y="64" palindex="7"/>
+<stitch x="27" y="64" palindex="7"/>
+<stitch x="28" y="64" palindex="8"/>
+<stitch x="29" y="64" palindex="8"/>
+<stitch x="30" y="64" palindex="8"/>
+<stitch x="31" y="64" palindex="8"/>
+<stitch x="32" y="64" palindex="8"/>
+<stitch x="33" y="64" palindex="9"/>
+<stitch x="34" y="64" palindex="9"/>
+<stitch x="2" y="65" palindex="9"/>
+<stitch x="3" y="65" palindex="9"/>
+<stitch x="4" y="65" palindex="1"/>
+<stitch x="5" y="65" palindex="1"/>
+<stitch x="6" y="65" palindex="5"/>
+<stitch x="7" y="65" palindex="8"/>
+<stitch x="8" y="65" palindex="10"/>
+<stitch x="9" y="65" palindex="13"/>
+<stitch x="10" y="65" palindex="3"/>
+<stitch x="11" y="65" palindex="5"/>
+<stitch x="12" y="65" palindex="1"/>
+<stitch x="13" y="65" palindex="1"/>
+<stitch x="14" y="65" palindex="1"/>
+<stitch x="15" y="65" palindex="1"/>
+<stitch x="16" y="65" palindex="1"/>
+<stitch x="17" y="65" palindex="5"/>
+<stitch x="18" y="65" palindex="10"/>
+<stitch x="19" y="65" palindex="13"/>
+<stitch x="20" y="65" palindex="3"/>
+<stitch x="21" y="65" palindex="8"/>
+<stitch x="22" y="65" palindex="8"/>
+<stitch x="23" y="65" palindex="7"/>
+<stitch x="24" y="65" palindex="7"/>
+<stitch x="25" y="65" palindex="7"/>
+<stitch x="26" y="65" palindex="7"/>
+<stitch x="27" y="65" palindex="7"/>
+<stitch x="28" y="65" palindex="8"/>
+<stitch x="29" y="65" palindex="8"/>
+<stitch x="30" y="65" palindex="8"/>
+<stitch x="31" y="65" palindex="8"/>
+<stitch x="32" y="65" palindex="8"/>
+<stitch x="33" y="65" palindex="9"/>
+<stitch x="34" y="65" palindex="8"/>
+<stitch x="70" y="65" palindex="2"/>
+<stitch x="1" y="66" palindex="2"/>
+<stitch x="2" y="66" palindex="9"/>
+<stitch x="3" y="66" palindex="1"/>
+<stitch x="4" y="66" palindex="1"/>
+<stitch x="5" y="66" palindex="1"/>
+<stitch x="6" y="66" palindex="5"/>
+<stitch x="7" y="66" palindex="8"/>
+<stitch x="8" y="66" palindex="3"/>
+<stitch x="9" y="66" palindex="3"/>
+<stitch x="10" y="66" palindex="5"/>
+<stitch x="11" y="66" palindex="1"/>
+<stitch x="12" y="66" palindex="1"/>
+<stitch x="13" y="66" palindex="1"/>
+<stitch x="14" y="66" palindex="1"/>
+<stitch x="15" y="66" palindex="1"/>
+<stitch x="16" y="66" palindex="1"/>
+<stitch x="17" y="66" palindex="3"/>
+<stitch x="18" y="66" palindex="13"/>
+<stitch x="19" y="66" palindex="10"/>
+<stitch x="20" y="66" palindex="3"/>
+<stitch x="21" y="66" palindex="8"/>
+<stitch x="22" y="66" palindex="8"/>
+<stitch x="23" y="66" palindex="7"/>
+<stitch x="24" y="66" palindex="7"/>
+<stitch x="25" y="66" palindex="7"/>
+<stitch x="26" y="66" palindex="7"/>
+<stitch x="27" y="66" palindex="7"/>
+<stitch x="28" y="66" palindex="8"/>
+<stitch x="29" y="66" palindex="8"/>
+<stitch x="30" y="66" palindex="4"/>
+<stitch x="31" y="66" palindex="4"/>
+<stitch x="32" y="66" palindex="8"/>
+<stitch x="33" y="66" palindex="9"/>
+<stitch x="34" y="66" palindex="8"/>
+<stitch x="2" y="67" palindex="1"/>
+<stitch x="3" y="67" palindex="1"/>
+<stitch x="4" y="67" palindex="1"/>
+<stitch x="5" y="67" palindex="5"/>
+<stitch x="6" y="67" palindex="8"/>
+<stitch x="7" y="67" palindex="8"/>
+<stitch x="8" y="67" palindex="8"/>
+<stitch x="9" y="67" palindex="5"/>
+<stitch x="10" y="67" palindex="5"/>
+<stitch x="11" y="67" palindex="1"/>
+<stitch x="12" y="67" palindex="1"/>
+<stitch x="13" y="67" palindex="1"/>
+<stitch x="14" y="67" palindex="1"/>
+<stitch x="15" y="67" palindex="1"/>
+<stitch x="16" y="67" palindex="1"/>
+<stitch x="17" y="67" palindex="3"/>
+<stitch x="18" y="67" palindex="3"/>
+<stitch x="19" y="67" palindex="8"/>
+<stitch x="20" y="67" palindex="8"/>
+<stitch x="21" y="67" palindex="3"/>
+<stitch x="22" y="67" palindex="4"/>
+<stitch x="23" y="67" palindex="7"/>
+<stitch x="24" y="67" palindex="7"/>
+<stitch x="25" y="67" palindex="7"/>
+<stitch x="26" y="67" palindex="7"/>
+<stitch x="27" y="67" palindex="8"/>
+<stitch x="28" y="67" palindex="8"/>
+<stitch x="29" y="67" palindex="4"/>
+<stitch x="30" y="67" palindex="13"/>
+<stitch x="31" y="67" palindex="10"/>
+<stitch x="32" y="67" palindex="4"/>
+<stitch x="33" y="67" palindex="8"/>
+<stitch x="70" y="67" palindex="2"/>
+<stitch x="1" y="68" palindex="2"/>
+<stitch x="2" y="68" palindex="1"/>
+<stitch x="3" y="68" palindex="1"/>
+<stitch x="4" y="68" palindex="5"/>
+<stitch x="5" y="68" palindex="5"/>
+<stitch x="6" y="68" palindex="5"/>
+<stitch x="7" y="68" palindex="3"/>
+<stitch x="8" y="68" palindex="3"/>
+<stitch x="9" y="68" palindex="5"/>
+<stitch x="10" y="68" palindex="5"/>
+<stitch x="11" y="68" palindex="1"/>
+<stitch x="12" y="68" palindex="1"/>
+<stitch x="13" y="68" palindex="1"/>
+<stitch x="14" y="68" palindex="1"/>
+<stitch x="15" y="68" palindex="1"/>
+<stitch x="16" y="68" palindex="5"/>
+<stitch x="17" y="68" palindex="5"/>
+<stitch x="18" y="68" palindex="8"/>
+<stitch x="19" y="68" palindex="8"/>
+<stitch x="20" y="68" palindex="8"/>
+<stitch x="21" y="68" palindex="4"/>
+<stitch x="22" y="68" palindex="4"/>
+<stitch x="23" y="68" palindex="7"/>
+<stitch x="24" y="68" palindex="7"/>
+<stitch x="25" y="68" palindex="13"/>
+<stitch x="26" y="68" palindex="7"/>
+<stitch x="27" y="68" palindex="8"/>
+<stitch x="28" y="68" palindex="8"/>
+<stitch x="29" y="68" palindex="4"/>
+<stitch x="30" y="68" palindex="10"/>
+<stitch x="31" y="68" palindex="13"/>
+<stitch x="32" y="68" palindex="4"/>
+<stitch x="33" y="68" palindex="8"/>
+<stitch x="34" y="68" palindex="8"/>
+<stitch x="2" y="69" palindex="1"/>
+<stitch x="3" y="69" palindex="5"/>
+<stitch x="4" y="69" palindex="5"/>
+<stitch x="5" y="69" palindex="5"/>
+<stitch x="6" y="69" palindex="10"/>
+<stitch x="7" y="69" palindex="13"/>
+<stitch x="8" y="69" palindex="3"/>
+<stitch x="9" y="69" palindex="5"/>
+<stitch x="10" y="69" palindex="5"/>
+<stitch x="11" y="69" palindex="1"/>
+<stitch x="12" y="69" palindex="1"/>
+<stitch x="13" y="69" palindex="1"/>
+<stitch x="14" y="69" palindex="1"/>
+<stitch x="15" y="69" palindex="1"/>
+<stitch x="16" y="69" palindex="5"/>
+<stitch x="17" y="69" palindex="8"/>
+<stitch x="18" y="69" palindex="8"/>
+<stitch x="19" y="69" palindex="8"/>
+<stitch x="20" y="69" palindex="8"/>
+<stitch x="21" y="69" palindex="8"/>
+<stitch x="22" y="69" palindex="4"/>
+<stitch x="23" y="69" palindex="7"/>
+<stitch x="24" y="69" palindex="7"/>
+<stitch x="25" y="69" palindex="7"/>
+<stitch x="26" y="69" palindex="7"/>
+<stitch x="27" y="69" palindex="8"/>
+<stitch x="28" y="69" palindex="8"/>
+<stitch x="29" y="69" palindex="8"/>
+<stitch x="30" y="69" palindex="4"/>
+<stitch x="31" y="69" palindex="4"/>
+<stitch x="32" y="69" palindex="8"/>
+<stitch x="33" y="69" palindex="8"/>
+<stitch x="34" y="69" palindex="8"/>
+<stitch x="70" y="69" palindex="2"/>
+<stitch x="1" y="70" palindex="2"/>
+<stitch x="3" y="70" palindex="2"/>
+<stitch x="5" y="70" palindex="2"/>
+<stitch x="7" y="70" palindex="2"/>
+<stitch x="9" y="70" palindex="2"/>
+<stitch x="11" y="70" palindex="2"/>
+<stitch x="13" y="70" palindex="2"/>
+<stitch x="15" y="70" palindex="2"/>
+<stitch x="17" y="70" palindex="2"/>
+<stitch x="19" y="70" palindex="2"/>
+<stitch x="21" y="70" palindex="2"/>
+<stitch x="23" y="70" palindex="2"/>
+<stitch x="25" y="70" palindex="2"/>
+<stitch x="27" y="70" palindex="2"/>
+<stitch x="29" y="70" palindex="2"/>
+<stitch x="31" y="70" palindex="2"/>
+<stitch x="33" y="70" palindex="2"/>
+<stitch x="35" y="70" palindex="2"/>
+<stitch x="37" y="70" palindex="2"/>
+<stitch x="39" y="70" palindex="2"/>
+<stitch x="41" y="70" palindex="2"/>
+<stitch x="43" y="70" palindex="2"/>
+<stitch x="45" y="70" palindex="2"/>
+<stitch x="47" y="70" palindex="2"/>
+<stitch x="49" y="70" palindex="2"/>
+<stitch x="51" y="70" palindex="2"/>
+<stitch x="53" y="70" palindex="2"/>
+<stitch x="55" y="70" palindex="2"/>
+<stitch x="57" y="70" palindex="2"/>
+<stitch x="59" y="70" palindex="2"/>
+<stitch x="61" y="70" palindex="2"/>
+<stitch x="63" y="70" palindex="2"/>
+<stitch x="65" y="70" palindex="2"/>
+<stitch x="67" y="70" palindex="2"/>
+<stitch x="69" y="70" palindex="2"/>
+</fullstitches>
+<partstitches>
+</partstitches>
+<backstitches>
+<backstitch x1="35" y1="70" x2="35" y2="68" palindex="11" objecttype="backstitch" sequence="0"/>
+<backstitch x1="35" y1="67" x2="35" y2="60" palindex="11" objecttype="backstitch" sequence="1"/>
+<backstitch x1="23" y1="70" x2="23" y2="67" palindex="11" objecttype="backstitch" sequence="2"/>
+<backstitch x1="23" y1="67" x2="24" y2="64" palindex="11" objecttype="backstitch" sequence="3"/>
+<backstitch x1="24" y1="64" x2="26" y2="61" palindex="11" objecttype="backstitch" sequence="4"/>
+<backstitch x1="26" y1="61" x2="30" y2="57" palindex="11" objecttype="backstitch" sequence="5"/>
+<backstitch x1="27" y1="70" x2="27" y2="68" palindex="11" objecttype="backstitch" sequence="6"/>
+<backstitch x1="27" y1="68" x2="28" y2="65" palindex="11" objecttype="backstitch" sequence="7"/>
+<backstitch x1="28" y1="65" x2="30" y2="62" palindex="11" objecttype="backstitch" sequence="8"/>
+<backstitch x1="30" y1="62" x2="32" y2="61" palindex="11" objecttype="backstitch" sequence="9"/>
+<backstitch x1="32" y1="61" x2="35" y2="60" palindex="11" objecttype="backstitch" sequence="10"/>
+<backstitch x1="30" y1="57" x2="32" y2="56" palindex="11" objecttype="backstitch" sequence="11"/>
+<backstitch x1="32" y1="56" x2="35" y2="55" palindex="11" objecttype="backstitch" sequence="12"/>
+</backstitches>
+<ornaments_inc_knots_and_beads>
+<object x1="1" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="3" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="5" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="7" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="9" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="11" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="13" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="15" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="17" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="19" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="21" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="23" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="25" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="27" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="29" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="31" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="33" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="35" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="37" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="39" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="41" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="43" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="45" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="47" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="49" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="51" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="53" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="55" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="57" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="59" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="61" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="63" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="65" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="67" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="69" y1="1" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="2" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="3" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="4" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="5" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="6" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="7" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="8" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="9" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="10" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="11" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="12" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="13" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="14" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="15" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="16" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="17" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="18" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="19" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="20" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="21" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="22" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="23" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="24" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="25" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="26" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="27" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="28" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="29" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="30" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="31" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="32" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="33" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="34" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="35" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="36" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="37" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="38" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="39" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="40" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="41" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="42" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="43" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="44" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="45" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="46" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="47" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="48" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="49" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="50" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="51" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="52" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="53" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="54" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="55" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="56" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="57" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="58" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="59" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="60" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="61" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="62" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="63" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="64" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="65" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="66" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="67" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="68" palindex="12" objecttype="tent" direction="2"/>
+<object x1="1" y1="69" palindex="12" objecttype="tent" direction="2"/>
+<object x1="2" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="4" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="6" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="8" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="10" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="12" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="14" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="16" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="18" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="20" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="22" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="24" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="26" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="28" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="30" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="32" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="34" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="36" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="38" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="40" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="42" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="44" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="46" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="48" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="50" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="52" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="54" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="56" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="58" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="60" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="62" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="64" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="66" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="68" y1="70" palindex="12" objecttype="tent" direction="2"/>
+<object x1="70" y1="70" palindex="12" objecttype="tent" direction="2"/>
+</ornaments_inc_knots_and_beads>
+<commentboxes>
+</commentboxes>
+</chart>
