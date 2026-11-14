@@ -7,7 +7,7 @@ export interface CanvasTheme {
   symbols: { minZoom: number; scale: { full: number; half: number; bead: number; combo: number; partial: number }; darkInk: string; halo: string };
   halfStitch: { colorWidth: number; symbolWidth: number; symbolColor: string };
   bead: { outline: string; highlight: string; shade: number; comboScale: number; hole: string; holeSymbols: string };
-  backstitch: { width: number; minWidth: number; strandStep: number; patternUnit: number; lightThreshold: number; darken: number; symbolsColor: string };
+  backstitch: { width: number; minWidth: number; strandFirst: number; strandStep: number; patternUnit: number; lightThreshold: number; darken: number; symbolsColor: string };
   rulers: { size: number; background: string; text: string; line: string };
   preview: { alpha: number };
   partials: { splitLine: string; symbolsFill: string };
@@ -28,7 +28,7 @@ export const defaultCanvasTheme: CanvasTheme = {
   symbols: { minZoom: 9, scale: { full: 0.68, half: 0.56, bead: 0.5, combo: 0.5, partial: 0.45 }, darkInk: "#1d1a16", halo: "rgba(255,255,255,.9)" },
   halfStitch: { colorWidth: 0.34, symbolWidth: 0.07, symbolColor: "rgba(0,0,0,.38)" },
   bead: { outline: "rgba(0,0,0,.55)", highlight: "rgba(255,255,255,.85)", shade: -0.35, comboScale: 0.8, hole: "rgba(0,0,0,.22)", holeSymbols: "rgba(0,0,0,.08)" },
-  backstitch: { width: 0.105, minWidth: 1.5, strandStep: 0.5, patternUnit: 0.085, lightThreshold: 215, darken: -0.45, symbolsColor: "#1d1a16" },
+  backstitch: { width: 0.105, minWidth: 1.5, strandFirst: 1, strandStep: 0.5, patternUnit: 0.085, lightThreshold: 215, darken: -0.45, symbolsColor: "#1d1a16" },
   rulers: { size: 26, background: "#F4EFE6", text: "#7A7064", line: "#E2D9CA" },
   preview: { alpha: 0.55 },
   partials: { splitLine: "rgba(0,0,0,.45)", symbolsFill: "rgba(0,0,0,.06)" },

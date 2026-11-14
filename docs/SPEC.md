@@ -238,8 +238,8 @@ Order of drawing:
 8. **Backstitch** segments on top of grid. Colour = entry hex, darkened 45 % if luma > 215 (so white is visible);
    symbols view → `#1d1a16`. Round caps. *(New app, 2026-11-14:)* one-strand width `w1 = max(1.5, 0.105·z)`.
    - **Colour** view: solid line in the entry colour, width `w1 × f(strands)` with
-     `f(n) = 1 + ½ + ¼ + …` (n−1 terms): 1 → 1×, 2 → 1.5×, 3 → 1.75×, 4 → 1.875× — each extra strand adds half
-     of what the previous one did, so 1 vs 2 strands is clearly visible without heavy lines.
+     `f(n) = 1 + 1 + ½ + ¼ + …` (n terms): 1 → 1×, 2 → 2×, 3 → 2.5×, 4 → 2.75×, 5 → 2.875× — the second strand
+     doubles the width so 1 vs 2 is obvious; each further strand adds half of what the previous one did.
    - **Symbols** view: the entry's line style (§2.5) in `#1d1a16`, width `w1` (strands are not shown).
    - **Both**: the line style in the entry colour, width by strands.
 9. Backstitch drawing affordances (active entry is backstitch and tool is a draw tool): rubber-band line

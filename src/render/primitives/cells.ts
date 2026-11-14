@@ -134,13 +134,13 @@ export function backstitchColour(hex: string, theme: CanvasTheme): string {
   return luma(hexToRgb(hex)) > theme.backstitch.lightThreshold ? shade(hex, theme.backstitch.darken) : hex;
 }
 
-/** 1 strand is 1×, each extra strand adds half of what the previous one did: 1.5×, 1.75×, 1.875× … */
-export const strandFactor = (n: number, step: number) => 1 + (step * (1 - step ** (Math.max(1, n) - 1))) / (1 - step);
+/** 1 strand is 1×, 2 strands add `first`, each further strand adds `step` of the previous addition: 2×, 2.5×, 2.75× … */
+export const strandFactor = (n: number, first: number, step: number) => 1 + (first * (1 - step ** (Math.max(1, n) - 1))) / (1 - step);
 
 /** Colour view: solid line, thicker with more strands. Symbols view: the entry's line style. Both: styled, coloured and sized. */
 export function drawBackstitch(g: Ctx, x1: number, y1: number, x2: number, y2: number, z: number, s: PaletteSlot, style: CellStyle, alpha = 1) {
   const { theme } = style, b = theme.backstitch;
-  const w = Math.max(b.minWidth, z * b.width) * (style.showColour ? strandFactor(s.n, b.strandStep) : 1);
+  const w = Math.max(b.minWidth, z * b.width) * (style.showColour ? strandFactor(s.n, b.strandFirst, b.strandStep) : 1);
   g.save();
   g.globalAlpha = alpha;
   g.strokeStyle = style.showColour ? backstitchColour(s.hex, theme) : b.symbolsColor;
