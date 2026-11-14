@@ -1,8 +1,8 @@
 {
   "app": {
-    "title": "бджілка — cross stitch & bead pattern designer",
+    "title": "пташечка — cross stitch & bead pattern designer",
     "description": "Design cross stitch and bead patterns: key, chart, totals, OXS and JSON files.",
-    "brand": "бджілка",
+    "brand": "пташечка",
     "loading": "Loading the editor…",
     "language": "Language",
     "chart": "Cross stitch chart",
@@ -90,7 +90,8 @@
       "segment": "lines",
       "knot": "knots"
     },
-    "partials": "+ {count} partial"
+    "partials": "+ {count} partial",
+    "highlight": "Highlight the selected entry — everything else fades (V)"
   },
   "fabric": {
     "heading": "Fabric & size",
@@ -402,7 +403,9 @@
     "restored": "Snapshot restored",
     "partialKind": "Partial stitch: {kind}",
     "partialNeedsCross": "Partial stitches use a cross-stitch entry — pick one in the key",
-    "underlayAdded": "Image added — line it up with the grid, then press Done (or U)"
+    "underlayAdded": "Image added — line it up with the grid, then press Done (or U)",
+    "aligned": "Image aligned to the grid",
+    "alignFailed": "Couldn’t align — click the corners in order: top-left, top-right, bottom-right"
   },
   "underlay": {
     "heading": "Image behind the chart",
@@ -440,7 +443,17 @@
     "shrink": "{what} smaller",
     "grow": "{what} larger",
     "padHint": "Resizing keeps the middle of the screen in place — zoom into the area you are aligning and click.",
-    "nudge": "Move"
+    "nudge": "Move",
+    "align": "Align to grid (3 points)…",
+    "alignTitle": "Click 3 corners of a square on the scanned chart; the image snaps to the grid",
+    "alignStep1": "Click the top-left corner of a square on the scanned grid",
+    "alignStep2": "Click the top-right corner of the same square",
+    "alignStep3": "Click its bottom-right corner",
+    "alignHint": "Choose a big square along the bold 10-lines (e.g. 30×30) and zoom in to click exactly. Esc cancels.",
+    "alignSize": "Square size (cells)",
+    "alignBack": "Back",
+    "alignCancel": "Cancel",
+    "alignApply": "Align"
   },
   "fileMenu": {
     "label": "Menu ▾",
@@ -531,6 +544,8 @@
     "goToCell": "Go to cell",
     "panel": "Show/hide side panel",
     "save": "Save now (also automatic)",
-    "underlayEdit": "Edit / done"
+    "underlayEdit": "Edit / done",
+    "highlight": "Highlight selected entry",
+    "alignBack": "Align: undo last point"
   }
 }
