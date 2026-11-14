@@ -33,6 +33,11 @@
    which only *adds* optional fields, so the old app can still open it (golden tests). OXS round-trips as today.
 9. **Everything is undoable.** Whole-chart operations (resize, transforms, key deletion) record structural patches
    instead of wiping history (SPEC §15 groundwork).
+10. **Code explains itself; comments are rare.** Short comments only on core public APIs and on non-obvious rules
+    (§12.1). We don't maintain a heavily commented codebase.
+11. **Tests where they pay off.** Unit tests cover domain logic and regressions, not everything. Coverage minimums
+    apply only where tests matter (core 85% lines / 75% branches, key editor services 60%). The UI and wiring are
+    excluded from measurement (§12.2).
 
 ---
 
@@ -625,6 +630,100 @@ export interface ShoppingList {
 | UI end-to-end | Playwright | Draw, undo, key dialog, save/open, import/export download, Alt-pick, reference persistence across reload |
 | Level boundaries | `eslint-plugin-boundaries` | Fails the build if e.g. `core` imports `react` or `ui` imports `persistence/local/*` |
 | Types | TypeScript `strict`, `noUncheckedIndexedAccess` | Typed arrays and key indices are where bugs hide |
+
+All rows above follow the scope limits in §12.2: each row names *what* is worth testing, not a promise to test
+everything in that area.
+
+### 12.1 Comments — minimal
+
+- **Where comments go:** a one- or two-line comment on the **public API of core modules and services**: exported
+  functions, interfaces and registries in `core/`, `persistence/ports.ts`, and editor services (`history`,
+  `ToolManager`, `ShortcutManager`, `SnapshotService`). Say what it does and anything surprising, such as units,
+  coordinate systems (cells vs half-grid points) or invariants (key index 0 is always empty).
+- **Also allowed:** a short *why* comment where the code can't speak for itself. For example, a domain rule
+  ("a bead may sit on a plain stitch, floss + bead needs an empty cell"), a compatibility hack (`14.01` = "28 ct
+  over 2"), or a link to the SPEC section (`// SPEC §15.3 direction rule`).
+- **Not wanted:**
+  - comments that repeat the code (`// increment i`, `// set the name`)
+  - JSDoc on every function, parameter and React component
+  - comments on UI components, hooks, CSS, or private helpers
+  - commented-out code
+  - change logs in comments (git has the history)
+- **Prefer instead:** clear names, small functions and precise types (`HalfGridPoint`, `KeyIndex`). A type often
+  replaces a comment.
+- Rough guide: comments well under 10% of lines. If a file needs many comments to be understood, simplify the
+  code instead.
+- Folder `README.md` files stay limited to the few folders named in §3, a few lines each.
+
+### 12.2 Unit tests — minimal and useful
+
+**Guardrail: coverage minimums per area, measured only where unit tests make sense.** One global number would mix
+domain logic with UI code nobody should unit-test, so it's not used as a rule.
+
+| Area | Measured | Enforced minimum (CI fails below) |
+|---|---|---|
+| `core/**` (formats, geometry, transforms, layers, calculator, checks, retention) | yes | **85% lines, 75% branches** |
+| Editor services: `editor/history`, `editor/tools/ToolManager.ts`, `editor/shortcuts/ShortcutManager.ts`, `editor/selection`, `editor/snapshots` | yes | **60% lines** |
+| `persistence/local/**` | yes | none (thin adapters, covered by e2e) |
+| `ui/`, `render/`, `app/`, `i18n/`, `platform/`, `workers/`, data JSON, messages | **excluded** | — |
+
+- **Minimums, not targets.** Nobody chases 100%. The last 10–15% of a module is usually trivial branches, and
+  testing those is exactly the kind of test we don't want. Raise a minimum only when the team decides to, never
+  automatically.
+- **Excluded code isn't measured**, so there's no reason to write tests for panels, translations or the theme just
+  to move a number. Rendering is checked by the e2e screenshot comparison (§15 phase 2), not by unit tests.
+- **Whole-project coverage is reported, not enforced.** With this split it should land around 40–50%. That's a
+  result, not a rule.
+- **Branch coverage in `core`** matters most: occupancy/override, ╱↔╲ direction, OXS mapping and migrations are
+  full of cases.
+- A new module in `core/` is covered by the rule automatically. A new editor service is added to the list only if
+  it holds real logic.
+- Phases 0–3 (§15): the `core` minimum applies as soon as a module lands. Editor minimums apply from phase 3.
+
+Vitest config (sketch):
+```ts
+coverage: {
+  provider: 'v8',
+  include: ['src/core/**', 'src/editor/**', 'src/persistence/**'],
+  exclude: ['**/*.test.ts', 'src/core/catalog/data/**', 'src/editor/store/**', 'src/editor/createEditor.ts'],
+  thresholds: {
+    'src/core/**': { lines: 85, branches: 75 },
+    'src/editor/history/**': { lines: 60 },
+    'src/editor/tools/ToolManager.ts': { lines: 60 },
+    'src/editor/shortcuts/ShortcutManager.ts': { lines: 60 },
+    'src/editor/selection/**': { lines: 60 },
+    'src/editor/snapshots/**': { lines: 60 },
+  },
+},
+```
+
+**Test these** (high value: logic that's easy to break and hard to see broken):
+- file formats and compatibility: JSON v1–v4, OXS import/export, CSV (golden files)
+- geometry and rules: flood fill, Bresenham, occupancy/override, mirror points, ╱↔╲ re-pointing, corner remap
+- the layer contract suite (one parameterised suite for all layers, not one file per layer)
+- calculator results on fixtures (one snapshot per calculator, not per formula)
+- chart checks, using fixtures with planted errors
+- history: transactions, empty-transaction drop, structural patches
+- snapshot retention (pure function with fake clocks)
+- every bug fix gets one regression test
+
+**Don't test these:**
+- translations / message files, labels and texts
+- React components that only display data, layout, CSS, icons
+- the theme object, registries that are plain lists, constants, the DMC/bead data tables
+- type definitions, simple getters/setters, thin wrappers around browser or library APIs
+  (`downloadFile`, the Zustand store setup, next-intl config)
+- framework behaviour (Next.js routing, React rendering)
+- the same behaviour at several levels: if core tests cover a rule, editor tests don't repeat it
+
+**Keep tests small:**
+- one behaviour per test, named after it (`flips a ╱ half cross into a ╲ entry`)
+- use real fixtures instead of large hand-built mocks
+- prefer a table of cases (`it.each`) over many near-identical tests
+- no tests written only to raise coverage
+
+**End-to-end (Playwright)** stays a short list of critical user journeys (§12 table, about 10–15 specs). It isn't
+counted toward the unit-test target.
 
 ---
 
