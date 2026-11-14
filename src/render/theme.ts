@@ -10,6 +10,8 @@ export interface CanvasTheme {
   backstitch: { width: number; minWidth: number; strandFirst: number; strandStep: number; patternUnit: number; lightThreshold: number; darken: number; symbolsColor: string };
   rulers: { size: number; background: string; text: string; line: string };
   preview: { alpha: number };
+  highlight: { dimAlpha: number };
+  align: { marker: number };
   partials: { splitLine: string; symbolsFill: string };
   knots: { radius: number; outline: string; symbolsDot: string };
   ambiguous: { corner: number; minZoom: number };
@@ -30,6 +32,8 @@ export const defaultCanvasTheme: CanvasTheme = {
   backstitch: { width: 0.105, minWidth: 1.5, strandFirst: 1, strandStep: 0.5, patternUnit: 0.085, lightThreshold: 215, darken: -0.45, symbolsColor: "#1d1a16" },
   rulers: { size: 26, background: "#F4EFE6", text: "#7A7064", line: "#E2D9CA" },
   preview: { alpha: 0.55 },
+  highlight: { dimAlpha: 0.15 },
+  align: { marker: 11 },
   partials: { splitLine: "rgba(0,0,0,.45)", symbolsFill: "rgba(0,0,0,.06)" },
   knots: { radius: 0.2, outline: "rgba(0,0,0,.6)", symbolsDot: "#1d1a16" },
   ambiguous: { corner: 0.28, minZoom: 6 },

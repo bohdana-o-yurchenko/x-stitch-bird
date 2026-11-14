@@ -19,6 +19,7 @@ const ICONS: Record<string, ReactNode> = {
   mirror: <g {...S}><path d="M12 3v18" strokeDasharray="2 2" /><path d="M9 7L4 17h5zM15 7l5 10h-5z" /></g>,
   undo: <g {...S}><path d="M9 14L4 9l5-5" /><path d="M4 9h10a6 6 0 010 12h-3" /></g>,
   redo: <g {...S}><path d="M15 14l5-5-5-5" /><path d="M20 9H10a6 6 0 000 12h3" /></g>,
+  highlight: <g {...S}><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" fill="currentColor" /></g>,
   panel: <g {...S}><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><path d="M14.5 4.5v15" /><path d="M16.8 8.5h1.5M16.8 11.5h1.5M16.8 14.5h1.5" /></g>,
   collapse: <g {...S}><path d="M10 6l6 6-6 6" /><path d="M4 4v16" /></g>,
   expand: <g {...S}><path d="M14 6l-6 6 6 6" /><path d="M20 4v16" /></g>,

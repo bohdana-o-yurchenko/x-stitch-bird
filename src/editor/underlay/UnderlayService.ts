@@ -1,5 +1,5 @@
 import type { Point } from "@/core/pattern/types";
-import { dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, stretchUnderlay, type Handle, type UnderlayData } from "@/core/underlay/underlay";
+import { alignUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, stretchUnderlay, type Handle, type UnderlayData } from "@/core/underlay/underlay";
 import { loadImage } from "@/platform/images";
 import type { Editor } from "../createEditor";
 
@@ -102,6 +102,43 @@ export class UnderlayService {
   nudge(dx: number, dy: number) {
     const u = this.data;
     if (u) this.update({ rect: { ...u.rect, x: u.rect.x + dx, y: u.rect.y + dy } });
+  }
+
+  /** 3-point alignment is collecting clicks (it takes the pointer, like edit mode). */
+  get aligning(): boolean {
+    const pts = this.ed.state.underlayAlign;
+    return !!pts && pts.length < 3;
+  }
+
+  startAlign() {
+    if (!this.data) return;
+    this.ed.tools.cancel();
+    this.ed.store.setState({ underlayAlign: [], underlay: { ...this.data, visible: true } });
+  }
+
+  alignClick(p: Point) {
+    const pts = this.ed.state.underlayAlign;
+    if (pts && pts.length < 3) this.ed.store.setState({ underlayAlign: [...pts, p] });
+  }
+
+  alignBack() {
+    const pts = this.ed.state.underlayAlign;
+    if (pts?.length) this.ed.store.setState({ underlayAlign: pts.slice(0, -1) });
+  }
+
+  cancelAlign() {
+    this.ed.store.setState({ underlayAlign: null });
+  }
+
+  /** Places the image so the clicked square is exactly `n`×`n` cells on the chart grid. */
+  applyAlign(n: number) {
+    const pts = this.ed.state.underlayAlign, u = this.data;
+    if (!u || pts?.length !== 3) return;
+    const rect = alignUnderlay(u.rect, pts[0]!, pts[1]!, pts[2]!, n);
+    if (!rect) return this.ed.toast("toasts.alignFailed");
+    this.ed.store.setState({ underlayAlign: null });
+    this.update({ rect });
+    this.ed.toast("toasts.aligned");
   }
 
   /** Grow or shrink by (dw, dh) cells around the middle of the screen; works in both modes, at any zoom. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, stretchUnderlay } from "./underlay";
+import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, stretchUnderlay, alignUnderlay, guessSquareSize } from "./underlay";
 
 // image 200×100 px placed over a 40×40 chart
 const base = () => ({ ...newUnderlay("data:image/jpeg;base64,x", 200, 100, { w: 40, h: 40 }) });
@@ -38,6 +38,17 @@ describe("chart underlay geometry (SPEC §15.15)", () => {
     const r = stretchUnderlay({ x: 0, y: 0, w: 100, h: 50 }, { x: 25, y: 10 }, 2, 1);
     expect([r.x, r.y, r.w, r.h].map((v) => +v.toFixed(6))).toEqual([-0.5, -0.2, 102, 51]);
     expect((25 - r.x) / r.w).toBeCloseTo(0.25);
+  });
+
+  it("aligns a clicked n×n square of the scan to the chart grid", () => {
+    // the scan is drawn 10% too big and shifted: its 10×10 square spans 11 cells starting at (3.3, 4.6)
+    const r = { x: 0, y: 0, w: 110, h: 55 };
+    const a = { x: 3.3, y: 4.6 }, b = { x: 14.3, y: 4.6 }, c = { x: 14.3, y: 15.6 };
+    expect(guessSquareSize(a, b, c)).toBe(11);
+    const out = alignUnderlay(r, a, b, c, 10)!;
+    const at = (p: { x: number; y: number }) => ({ x: out.x + ((p.x - r.x) / r.w) * out.w, y: out.y + ((p.y - r.y) / r.h) * out.h });
+    expect([at(a), at(b), at(c)].map((p) => [+p.x.toFixed(6), +p.y.toFixed(6)])).toEqual([[3, 5], [13, 5], [13, 15]]);
+    expect(alignUnderlay(r, b, a, c, 10)).toBeNull();
   });
 
   it("keeps at least one cell when shrinking", () => {

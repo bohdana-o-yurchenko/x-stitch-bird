@@ -49,6 +49,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "view.zoomOut", run: (ed) => ed.viewport.zoomAt(0.8) },
   { id: "view.fit", run: (ed) => ed.viewport.fit() },
   { id: "view.goToCell", run: (ed) => ed.openDialog({ type: "goToCell" }) },
+  { id: "view.toggleHighlight", run: (ed) => ed.store.setState({ highlight: !ed.state.highlight }) },
   { id: "panel.toggle", run: (ed) => ed.store.setState({ panelCollapsed: !ed.state.panelCollapsed }) },
   // key
   { id: "key.selectNth", run: (ed, n) => { const list = ed.doc.key.flatMap((e, i) => (e && i ? [i] : [])); const k = list[Number(n) - 1]; if (k) ed.setActiveEntry(k); } },
@@ -115,6 +116,10 @@ export const COMMANDS: readonly Command[] = [
   { id: "underlay.update", run: (ed, patch) => ed.underlay.update(patch as never) },
   { id: "underlay.nudge", run: (ed, d) => { const { dx, dy } = d as { dx: number; dy: number }; ed.underlay.nudge(dx, dy); } },
   { id: "underlay.stretch", run: (ed, d) => { const { dw, dh } = d as { dw: number; dh: number }; ed.underlay.stretch(dw, dh); } },
+  { id: "underlay.startAlign", run: (ed) => ed.underlay.startAlign() },
+  { id: "underlay.alignBack", run: (ed) => ed.underlay.alignBack() },
+  { id: "underlay.cancelAlign", run: (ed) => ed.underlay.cancelAlign() },
+  { id: "underlay.applyAlign", run: (ed, n) => ed.underlay.applyAlign(Number(n)) },
   { id: "underlay.fit", run: (ed) => ed.underlay.fit() },
   { id: "underlay.resetCrop", run: (ed) => ed.underlay.resetCrop() },
   { id: "underlay.remove", run: (ed) => ed.underlay.remove() },

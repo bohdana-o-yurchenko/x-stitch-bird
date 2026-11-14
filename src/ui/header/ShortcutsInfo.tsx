@@ -55,6 +55,7 @@ function useGroups(): { title: string; rows: Row[] }[] {
         row(t("zoom"), [...keys("view.zoomIn"), ...keys("view.zoomOut")]),
         row(t("fit"), keys("view.fit")),
         row(t("goToCell"), keys("view.goToCell")),
+        row(t("highlight"), keys("view.toggleHighlight")),
         row(t("panel"), keys("panel.toggle")),
         row(t("save"), keys("file.save")),
       ],
@@ -63,6 +64,7 @@ function useGroups(): { title: string; rows: Row[] }[] {
       title: t("underlay"),
       rows: [
         row(t("underlayEdit"), keys("underlay.toggleBehind")),
+        row(t("alignBack"), keys("underlay.alignBack")),
         row(t("nudge"), ["← → ↑ ↓", t("shiftOne", { shift: mac ? "⇧" : "Shift" })]),
       ],
     },

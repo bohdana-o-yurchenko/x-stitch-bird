@@ -159,6 +159,23 @@ describe("chart underlay (SPEC §15.15)", () => {
     ed.shortcuts.keyDown(key("u"));
     expect(ed.underlay.editing).toBe(true);
   });
+  it("3-point alignment takes the clicks (even in behind mode), Backspace drops one, then snaps the image", () => {
+    ed.store.setState({ underlay: { ...ed.state.underlay!, behind: true } });
+    ed.underlay.startAlign();
+    const pt = (x: number, y: number): ToolPointer => ({ ...at(0, 0), grid: { x, y } });
+    ed.tools.down(pt(2.2, 2.4));
+    ed.tools.down(pt(9, 9));
+    ed.shortcuts.keyDown(key("Backspace"));
+    ed.tools.down(pt(4.7, 2.4));
+    ed.tools.down(pt(4.7, 4.9));
+    expect(ed.doc.layers.stitches.some(Boolean)).toBe(false);
+    ed.underlay.applyAlign(5);
+    // the 2.5-cell square becomes 5 cells: the image doubles in size, its top-left corner lands on (2, 2)
+    expect(ed.state.underlay!.rect.w).toBeCloseTo(10);
+    expect(ed.state.underlay!.rect.h).toBeCloseTo(10);
+    expect(ed.state.underlay!.rect.x + 0.04 * 10).toBeCloseTo(2);
+    expect(ed.state.underlayAlign).toBeNull();
+  });
 });
 
 describe("viewport", () => {

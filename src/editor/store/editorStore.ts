@@ -87,6 +87,10 @@ export interface EditorState {
   references: RefWindowData[];
   underlay: UnderlayData | null;
   underlayImage: HTMLImageElement | null;
+  /** 3-point grid alignment in progress: the points clicked so far (grid units). */
+  underlayAlign: Point[] | null;
+  /** Fade every key entry except the active one (SPEC §15.16). */
+  highlight: boolean;
   hasClipboard: boolean;
 }
 
@@ -123,6 +127,8 @@ export const createEditorStore = () =>
     references: [],
     underlay: null,
     underlayImage: null,
+    underlayAlign: null,
+    highlight: false,
     hasClipboard: false,
   }));
 

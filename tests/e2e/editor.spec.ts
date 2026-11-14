@@ -127,6 +127,38 @@ test("the side panel scrolls when its sections don't fit", async ({ page }) => {
   await expect(page.getByText("toward each thread")).toBeInViewport();
 });
 
+test("aligns the image behind the chart by clicking 3 grid corners", async ({ page }) => {
+  const chooser = page.waitForEvent("filechooser");
+  await fileAction(page, "Reference pictures", "Image behind the chart…");
+  await (await chooser).setFiles("tests/fixtures/underlay.png");
+  const stitches = () => editorState<number>(page, "(ed) => ed.doc.layers.stitches.filter(Boolean).length");
+  const count = await stitches();
+  await page.getByTestId("underlay-pad").getByRole("button", { name: "Align to grid (3 points)…" }).click();
+  await expect(page.getByTestId("align-steps")).toBeVisible();
+  const gridPoint = (x: number, y: number) => editorState<{ x: number; y: number }>(page, `(ed) => {
+    const r = document.querySelector("[data-testid=chart]").getBoundingClientRect(), v = ed.state.viewport;
+    return { x: r.left + 26 + v.offX + ${x} * v.zoom, y: r.top + 26 + v.offY + ${y} * v.zoom };
+  }`);
+  for (const [x, y] of [[10.3, 20.2], [30.3, 20.2], [30.3, 40.2]]) {
+    const p = await gridPoint(x!, y!);
+    await page.mouse.click(p.x, p.y);
+  }
+  await page.getByLabel("Square size (cells)").fill("10");
+  await page.getByTestId("align-steps").getByRole("button", { name: "Align", exact: true }).click();
+  await expect(page.getByTestId("align-steps")).toHaveCount(0);
+  const before = await editorState<{ w: number }>(page, "(ed) => ed.state.underlay.rect");
+  expect(before.w).toBeCloseTo(30, 0);
+  expect(await stitches()).toBe(count);
+});
+
+test("highlighting fades every entry except the selected one", async ({ page }) => {
+  const toggle = page.getByTestId("highlight-toggle");
+  await page.keyboard.press("v");
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await toggle.click();
+  expect(await editorState<boolean>(page, "(ed) => ed.state.highlight")).toBe(false);
+});
+
 test("brush size takes one click", async ({ page }) => {
   await page.getByRole("button", { name: "Brush 3×3" }).click();
   expect(await editorState<number>(page, "(ed) => ed.state.brush")).toBe(3);

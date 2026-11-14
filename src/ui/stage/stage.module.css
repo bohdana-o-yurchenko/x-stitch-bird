@@ -182,3 +182,54 @@
   font-size: 11.5px;
   line-height: 1.35;
 }
+.alignStart {
+  grid-column: 1 / -1;
+  height: 30px;
+  border: 1px solid var(--ink);
+  border-radius: 7px;
+  background: #fff;
+  font-weight: 600;
+}
+.alignStart:hover {
+  background: var(--sel);
+}
+.alignBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px 10px;
+  border-top: 1px solid var(--line);
+}
+.alignSteps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+.alignSteps .stepNow {
+  color: var(--ink);
+  font-weight: 600;
+}
+.alignSteps .stepDone {
+  text-decoration: line-through;
+}
+.alignSize {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 600;
+}
+.alignSize input {
+  width: 70px;
+  height: 28px;
+  border: 1px solid var(--line2);
+  border-radius: 7px;
+  padding: 0 6px;
+}
+.padBtns button:disabled {
+  opacity: 0.4;
+}

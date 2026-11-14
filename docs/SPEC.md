@@ -184,7 +184,7 @@ Brand mark · editable **pattern name** input (change → `P.name`, trimmed, def
 buttons **New**, **Open**, **Save**, **Save to file**, **Load file**, **Image → pattern**, **+ Reference** ·
 view segmented control **Colour / Both / Symbols** (default Both) · **Export ▾** menu.
 
-*New app (2026-11-14):* app name **бджілка** with the bee-heart icon (`src/app/icon.svg`, also the favicon) · pattern
+*New app (2026-11-14):* app name **пташечка** with its icon (`src/app/icon.svg`, also the favicon) · pattern
 name (`clamp(140px, 13vw, 260px)` wide) · **Menu ▾** (the former File menu) · **main toolbar**, in groups:
 undo · redo | override · mirror | draw · eraser · brush size 1–5 | line · rectangle · filled rectangle · fill |
 partial · ¼ ¾ ½ | picker · move view | select · magic wand | **Transform ▾** · then, on the right, **i** (hover or
@@ -789,6 +789,8 @@ Effort is relative: **S** small · **M** medium · **L** large.
 | 10 | PDF chart export, Pattern Keeper–compatible (§15.10) | L           | none                               | #1, #2     |
 | 11 | Symbol matching — semi-automatic mapping (§15.11)    | L           | templates stored with ref windows  | #9         |
 | —  | Chart underlay behind the stitches (§15.15) — **done** | M         | new IndexedDB store, `underlay` in .json | —   |
+| —  | 3-point grid alignment for the underlay (§15.15) — **done** | S     | none                               | §15.15     |
+| —  | Stitch highlighting (§15.16) — **done**              | S           | none                               | —          |
 
 **High priority — the design must be agreed before implementation** (paper charts use these all the time, and a
 faithful copy is impossible without them):
@@ -1165,6 +1167,21 @@ on the stage (bottom-left, draggable by its grip, can be folded to its title). B
   10×10 block, click Width/Height until it lines up, scroll to the next block — no mode switching or zooming out.
 - **Edit / Done** button in the pad's title switches between edit and behind mode (same as `U`).
 
+**3-point grid alignment** (idea from Pattern Maker v4's "Tracing an Existing Chart"). Button **Align to grid
+(3 points)…** in the pad and the side panel; works in either mode.
+1. The pad switches to three numbered steps; the image is drawn on top of the stitches (at least 85 % opacity, no
+   handles) and the pointer is a crosshair. Every chart tool is paused; zoom and pan (wheel, Space, middle/right
+   drag) still work.
+2. Click the **top-left**, **top-right** and **bottom-right** corners of one square on the scanned chart's grid
+   (best: a big square on the bold 10-lines). Each click shows a numbered crosshair, joined by a dashed line.
+   **Back** / Backspace removes the last point; **Cancel** / Esc leaves without changes.
+3. After the third click the pad asks **Square size (cells)**, prefilled with the size the square has on the chart
+   right now (rounded). **Align** places the image so that point 1 sits on the nearest chart grid intersection and
+   the square is exactly that many cells wide and tall (width from points 1→2/3, height from 1/2→3 — the two
+   clicks on a shared line are averaged). Clicks not going right-then-down are refused with a toast.
+- Rotation is not corrected (the image stays axis-aligned); Pattern Maker's version also straightens a slightly
+  rotated scan. Fine-tuning afterwards is the pad's job.
+
 **Side panel section "Image behind the chart"** (only when one exists): Behind stitches toggle, Show/hide, opacity slider
 (10–100 %, default 50 %), Move & resize / Crop (edit mode only), X / Y / W / H fields, Fit to chart, Reset crop,
 Replace image…, Remove.
@@ -1185,6 +1202,13 @@ tool }`.
 - Not in the draft (`stitchwork.current`) or the library — they stay small.
 
 ---
+
+### 15.16 Stitch highlighting (implemented 2026-11-14)
+Idea from Pattern Maker v4 (Professional). Toggle with the eye button in the key panel's header or **V**.
+- While on, the **active key entry** is drawn at full strength and everything else (crosses, partial stitches,
+  beads, backstitch, knots) at 15 % opacity; fabric, grid, underlay and overlays are unchanged. Picking another
+  entry moves the highlight. With no active entry, nothing is faded.
+- View-only: not saved, not in exports or undo.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

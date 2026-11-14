@@ -23,6 +23,7 @@ export class ToolManager {
 
   cursor(): string {
     if (this.panning) return "grabbing";
+    if (this.ed.underlay.aligning && !this.ed.state.momentaryTool) return "crosshair";
     if (this.ed.underlay.editing && !this.ed.state.momentaryTool) return this.ed.underlay.cursorAt(this.lastGrid);
     if (this.ed.state.floating) return "move";
     return this.resolve().cursor;
@@ -43,6 +44,7 @@ export class ToolManager {
       return;
     }
     if (p.button !== 0) return;
+    if (ed.underlay.aligning) return ed.underlay.alignClick(p.grid);
     if (ed.underlay.editing) {
       ed.underlay.pointerDown(p.grid);
       this.underlayDrag = true;
@@ -60,7 +62,7 @@ export class ToolManager {
   move(p: ToolPointer) {
     this.lastGrid = p.grid;
     if (this.underlayDrag) return this.ed.underlay.pointerMove(p.grid, p.shift);
-    if (this.ed.underlay.editing && !this.active) return this.ed.setHover(p.cell, 1, false);
+    if ((this.ed.underlay.editing || this.ed.underlay.aligning) && !this.active) return this.ed.setHover(p.cell, 1, false);
     const ed = this.ed, size = this.active?.usesBrush || (!this.active && this.resolve().usesBrush) ? ed.state.brush : 1;
     if (!this.active && !ed.state.floating) this.resolve().hover?.(ed, p);
     ed.setHover(p.cell, size, this.showsHoverSquare());

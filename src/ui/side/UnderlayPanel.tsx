@@ -55,6 +55,7 @@ export function UnderlayPanel() {
           {num("h", t("h"))}
         </div>
         <div className={ui.row}>
+          <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.startAlign")}>{t("align")}</button>
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.fit")}>{t("fit")}</button>
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.resetCrop")}>{t("resetCrop")}</button>
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.replacePick")}>{t("replace")}</button>

@@ -93,6 +93,25 @@ export function stretchUnderlay(r: Rect, anchor: Point, dw: number, dh: number):
   return { x: anchor.x - ((anchor.x - r.x) * w) / r.w, y: anchor.y - ((anchor.y - r.y) * h) / r.h, w, h };
 }
 
+/**
+ * 3-point grid alignment (SPEC §15.15). `a`, `b`, `c` are where the user clicked the top-left, top-right and
+ * bottom-right corners of an `n`×`n` square of the scanned chart's grid (grid units, with the image at `r`).
+ * Returns the placement that puts `a` on the nearest chart grid intersection and makes the square exactly `n`
+ * cells wide and tall; null when the points aren't right-then-down.
+ */
+export function alignUnderlay(r: Rect, a: Point, b: Point, c: Point, n: number): Rect | null {
+  const u = (p: Point) => (p.x - r.x) / r.w, v = (p: Point) => (p.y - r.y) / r.h;
+  // average the two clicks that share a grid line
+  const left = u(a), right = (u(b) + u(c)) / 2, top = (v(a) + v(b)) / 2, bottom = v(c);
+  if (!(n > 0) || right - left <= 0 || bottom - top <= 0) return null;
+  const w = n / (right - left), h = n / (bottom - top);
+  const ax = Math.round(a.x), ay = Math.round(a.y);
+  return { x: ax - left * w, y: ay - top * h, w, h };
+}
+
+/** Size of the clicked square in cells as currently placed — the starting guess for `alignUnderlay`'s `n`. */
+export const guessSquareSize = (a: Point, b: Point, c: Point) => Math.max(1, Math.round((Math.abs(b.x - a.x) + Math.abs(c.y - b.y)) / 2));
+
 /** Show the whole image again; the part that was visible stays exactly where it was. */
 export function resetCrop(u: UnderlayData): Pick<UnderlayData, "crop" | "rect"> {
   const sx = u.rect.w / u.crop.w, sy = u.rect.h / u.crop.h;

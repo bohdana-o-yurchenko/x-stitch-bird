@@ -12,7 +12,7 @@ export interface HoldBinding {
   tool: "pan" | "picker";
 }
 
-export type Context = "hasSelection" | "floating" | "chain" | "underlayEditing" | "hasUnderlay";
+export type Context = "hasSelection" | "floating" | "chain" | "underlayEditing" | "hasUnderlay" | "underlayAligning";
 
 export const HOLD_BINDINGS: readonly HoldBinding[] = [
   { hold: "Space", tool: "pan" },
@@ -52,6 +52,8 @@ export const KEYMAP: readonly KeyBinding[] = [
   { keys: "mod+x", command: "clipboard.cut", when: "hasSelection" },
   { keys: "mod+v", command: "clipboard.paste" },
   { keys: "mod+d", command: "selection.none", when: "hasSelection" },
+  { keys: "escape", command: "underlay.cancelAlign", when: "underlayAligning" },
+  { keys: "backspace", command: "underlay.alignBack", when: "underlayAligning" },
   { keys: "u", command: "underlay.toggleBehind", when: "hasUnderlay" },
   { keys: "escape", command: "underlay.toggleBehind", when: "underlayEditing" },
   ...([["arrowleft", -1, 0], ["arrowright", 1, 0], ["arrowup", 0, -1], ["arrowdown", 0, 1]] as const).flatMap(([k, dx, dy]) => [
@@ -87,6 +89,7 @@ export const KEYMAP: readonly KeyBinding[] = [
   { keys: "o", command: "draw.toggleOverride" },
   { keys: "m", command: "draw.cycleMirror" },
   { keys: "k", command: "panel.toggle" },
+  { keys: "v", command: "view.toggleHighlight" },
   { keys: "a", command: "ambiguous.toggleAtHover" },
   { keys: "shift+a", command: "ambiguous.next" },
   ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({ keys: String(n), command: "key.selectNth", args: n })),

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { entryCount, partialCount } from "@/core/calculator/usage";
+import { Icon } from "../common/Icon";
 import { KeyIcon, cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
@@ -17,6 +18,7 @@ export function KeyPanel() {
   useEditorState((st) => st.keyRevision);
   const palette = useEditorState((st) => st.palette);
   const active = useEditorState((st) => st.activeEntry);
+  const highlight = useEditorState((st) => st.highlight);
   const label = useEntryLabel();
   const { usage } = useUsage();
   const rows = key.flatMap((e, i) => (e && i ? [{ i, e }] : []));
@@ -26,6 +28,7 @@ export function KeyPanel() {
         <h3>{t("heading")}</h3>
         <span className={s.count}>{rows.length ? t("count", { count: rows.length }) : ""}</span>
         <span className={s.spacer} />
+        <button type="button" className={cx(ui.tool, highlight && ui.on)} title={t("highlight")} aria-label={t("highlight")} aria-pressed={highlight} data-testid="highlight-toggle" onClick={() => run("view.toggleHighlight")}><Icon name="highlight" size={18} /></button>
         <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} onClick={() => run("key.add")}>{t("add")}</button>
       </div>
       <div className={s.keyList} data-shrink>
