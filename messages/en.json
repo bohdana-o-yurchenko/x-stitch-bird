@@ -84,7 +84,10 @@
       "quarter": "Quarter",
       "threeQuarter": "Three-quarter",
       "petite": "Petite"
-    }
+    },
+    "fit": "Fit to screen (0)",
+    "zoomIn": "Zoom in (+)",
+    "zoomOut": "Zoom out (−)"
   },
   "status": {
     "position": "Column <b>{col}</b> · Row <b>{row}</b>",
@@ -365,14 +368,22 @@
       "threshold": "Report from % symmetric",
       "maxUses": "Used at most"
     },
-    "isolated": { "finding": "{count, plural, one {Single stitch} other {Group of # stitches}} with no same-coloured neighbour" },
+    "isolated": {
+      "finding": "{count, plural, one {Single stitch} other {Group of # stitches}} with no same-coloured neighbour"
+    },
     "nearSymmetry": {
       "vertical": "Breaks left–right symmetry ({percent}% symmetric)",
       "horizontal": "Breaks top–bottom symmetry ({percent}% symmetric)"
     },
-    "unusedEntries": { "finding": "{sym} is never used on the chart" },
-    "rareEntries": { "finding": "{sym} is used only {count, plural, one {once} other {# times}}" },
-    "duplicateEntries": { "finding": "{sym} duplicates {other}" }
+    "unusedEntries": {
+      "finding": "{sym} is never used on the chart"
+    },
+    "rareEntries": {
+      "finding": "{sym} is used only {count, plural, one {once} other {# times}}"
+    },
+    "duplicateEntries": {
+      "finding": "{sym} duplicates {other}"
+    }
   },
   "selection": {
     "flipH": "Flip horizontal",

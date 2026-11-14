@@ -5,6 +5,11 @@ import { ALL_SYMBOLS } from "../symbols/symbols";
 import { createPattern } from "./createPattern";
 import { addEntry, findSameKey } from "./keyEntries";
 import { canPlacePartial, clearForPartial, isOccupied } from "./occupancy";
+import { partialsLayer } from "../layers/partials";
+import { libraryColor, matchesQuery } from "../catalog/catalog";
+import { nearestCorner } from "../stitches/partialKinds";
+import { mirrorPoints } from "../transform/mirror";
+import { mirrorHalves } from "../transform/wholeChart";
 
 describe("occupancy (override off)", () => {
   const p = createPattern(3, 1);
@@ -42,6 +47,20 @@ describe("occupancy (override off)", () => {
   });
 });
 
+describe("partial stitches on the chart", () => {
+  const p = createPattern(2, 1);
+  p.layers.partials.set(0, [{ kind: "quarter", corner: 0, k: 1 }, { kind: "quarter", corner: 2, k: 2 }]);
+  const layer = partialsLayer;
+
+  it("picks and erases by the corner under the pointer", () => {
+    expect(layer.pickAt(p.layers.partials, { x: 0.9, y: 0.9 }, p)).toBe(2);
+    expect(layer.erase(p.layers.partials, { cells: [0], point: { x: 0.1, y: 0.1 }, radius: 0.3, precise: true }, p)).toBe(true);
+    expect(p.layers.partials.get(0)).toEqual([{ kind: "quarter", corner: 2, k: 2 }]);
+    expect(layer.erase(p.layers.partials, { cells: [0], point: { x: 0.1, y: 0.1 }, radius: 0.3, precise: false }, p)).toBe(true);
+    expect(p.layers.partials.size).toBe(0);
+  });
+});
+
 describe("geometry", () => {
   it("draws gap-free lines", () => expect(lineCells({ x: 0, y: 0 }, { x: 3, y: 1 })).toHaveLength(4));
   it("snaps to the half grid inside the chart", () => expect(snapHalf({ x: 2.3, y: -1 }, { w: 2, h: 2 })).toEqual({ x: 2, y: 0 }));
@@ -72,5 +91,40 @@ describe("grid numbering", () => {
     expect(cellLabel(g, "x", 15, size)).toBe(0);
     expect(parseCellRef("-15 0", g, size)).toEqual({ x: 0, y: 10 });
     expect(parseCellRef("99, 1", g, size)).toBeNull();
+  });
+});
+
+describe("picker search (SPEC §8.1)", () => {
+  it.each([
+    ["310", "dmc:310", true],
+    ["blac", "dmc:310", true],
+    ["10", "dmc:310", false],
+    ["dmc 676", "bead:00557", true],
+    ["size 8", "bead:00557", false],
+    ["glass seed", "bead:00557", true],
+  ])("%s matches %s: %s", (q, id, expected) => {
+    expect(matchesQuery(libraryColor(id)!, q)).toBe(expected);
+  });
+});
+
+describe("mirror helpers", () => {
+  const size = { w: 5, h: 4 };
+  it.each([
+    ["rightToLeft", [0, 1], [3, 4]],
+    ["topToBottom", [0, 5], [10, 15]],
+    ["quad", [0, 1], [3, 4, 15]],
+  ] as const)("%s halves", (dir, inSource, inTarget) => {
+    const { source, target } = mirrorHalves(dir, size);
+    const pick = (m: Uint8Array) => [...m.keys()].filter((i) => m[i]);
+    expect(dir === "rightToLeft" ? pick(target) : pick(source)).toEqual(expect.arrayContaining([...inSource]));
+    expect(dir === "rightToLeft" ? pick(source) : pick(target)).toEqual(expect.arrayContaining([...inTarget]));
+  });
+
+  it("mirrors drawing points across the horizontal axis", () => {
+    expect(mirrorPoints(1, 0.5, "horizontal", size).map((p) => [p.x, p.y])).toEqual([[1, 0.5], [1, 3.5]]);
+  });
+
+  it.each([[0.2, 0.2, 0], [0.8, 0.1, 1], [0.9, 0.9, 2], [0.1, 0.7, 3]] as const)("pointer at (%s, %s) chooses corner %s", (x, y, c) => {
+    expect(nearestCorner(x, y)).toBe(c);
   });
 });

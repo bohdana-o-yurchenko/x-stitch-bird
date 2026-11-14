@@ -1,0 +1,157 @@
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.sep {
+  width: 1px;
+  height: 22px;
+  background: var(--line2);
+  margin: 0 4px;
+}
+.spacer {
+  flex: 1;
+}
+.select {
+  font-size: 12px;
+  border: 1px solid var(--line2);
+  border-radius: 7px;
+  padding: 4px 2px;
+  background: #fff;
+  height: 30px;
+}
+.keyHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 8px;
+}
+.keyHead h3,
+.section h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 16px;
+  margin: 0;
+}
+.count {
+  font-size: 12px;
+  color: var(--muted);
+}
+.keyList {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 120px;
+  border-top: 1px solid var(--line);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 10px;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  border-bottom: 1px solid #eee6d8;
+  width: 100%;
+  background: transparent;
+  text-align: left;
+}
+.row:hover {
+  background: #f5eee3;
+}
+.row.on {
+  background: var(--sel);
+  border-left-color: var(--accent);
+}
+.text {
+  flex: 1;
+  min-width: 0;
+}
+.title {
+  font-weight: 600;
+  font-size: 13.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sub {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  min-width: 44px;
+}
+.actions {
+  display: flex;
+  opacity: 0.45;
+}
+.row:hover .actions,
+.row.on .actions {
+  opacity: 1;
+}
+.shortcut {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  border: 1px solid var(--line2);
+  border-radius: 4px;
+  padding: 0 4px;
+  margin-left: 6px;
+  vertical-align: 1px;
+}
+.empty {
+  padding: 24px 16px;
+  text-align: center;
+}
+.empty p {
+  margin: 0 0 8px;
+}
+.details {
+  border-top: 1px solid var(--line);
+}
+.details summary {
+  padding: 10px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13.5px;
+}
+.section {
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.totals {
+  display: flex;
+  gap: 4px 16px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.totals b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.buyHead {
+  font-weight: 600;
+  margin: 6px 0 0;
+}
+.finding {
+  font-size: 13px;
+  padding: 8px;
+  background: var(--sel);
+  border-radius: 8px;
+}
+.checksScroll {
+  max-height: 40vh;
+  overflow-y: auto;
+}

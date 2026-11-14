@@ -1,0 +1,92 @@
+import type { Palette, PaletteSlot } from "@/core/pattern/palette";
+import type { Pattern } from "@/core/pattern/types";
+import { rulerLabels } from "@/core/grid/numbering";
+import { drawCells, drawGrid, drawLines, fullFrame, viewStyle, type ChartView } from "./chart";
+import { drawKeyIcon } from "./keyIcon";
+import { font, type CanvasTheme } from "./theme";
+
+export interface KeyLine {
+  slot: PaletteSlot;
+  title: string;
+  sub: string;
+  count: number;
+}
+
+export interface ChartExportText {
+  heading: string;
+  /** Second heading line from pattern info, e.g. "Designer · ©" (SPEC §15.1). */
+  byline?: string;
+  key: KeyLine[];
+}
+
+/**
+ * PNG chart (SPEC §10.1). `view` "color" gives the small preview without grid numbers or key;
+ * "both" / "symbols" give a printable chart with the key underneath.
+ */
+export function renderChartImage(p: Pattern, palette: Palette, view: ChartView, theme: CanvasTheme, text: ChartExportText, cellSize?: number): HTMLCanvasElement {
+  const preview = view === "color", ex = theme.export;
+  const biggest = Math.max(p.w, p.h);
+  const z = cellSize ?? (preview ? Math.max(ex.previewCell[0], Math.min(ex.previewCell[1], Math.floor(2400 / biggest))) : Math.max(ex.chartCell[0], Math.min(ex.chartCell[1], Math.floor(4800 / biggest))));
+  const M = cellSize ? 0 : preview ? ex.margin.preview : ex.margin.chart;
+  const colW = ex.keyColumnWidth;
+  const keyCols = Math.max(1, Math.floor((p.w * z + M * 2 - 40) / colW));
+  const headerH = text.byline ? 22 : 0;
+  const keyH = preview || cellSize ? 0 : 60 + headerH + Math.ceil(text.key.length / keyCols) * 34 + 40;
+  const W = Math.max(p.w * z + M * 2, preview || cellSize ? 0 : colW + M * 2), H = p.h * z + M * 2 + keyH;
+  const c = document.createElement("canvas");
+  c.width = W;
+  c.height = H;
+  const g = c.getContext("2d")!;
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, W, H);
+  const f = fullFrame(p, z, M, M), style = viewStyle(view, theme);
+  drawCells(g, p, palette, f, style);
+  if (!preview) drawGrid(g, p, f, theme, view === "symbols", "rgba(0,0,0,.3)");
+  drawLines(g, p, palette, f, style);
+  if (preview || cellSize) return c;
+
+  g.fillStyle = ex.subText;
+  g.font = font(theme, 500, 13);
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  const size = { w: p.w, h: p.h };
+  for (const l of rulerLabels(p.grid, "x", size, 10)) g.fillText(String(l.text), M + l.at * z, M / 2);
+  for (const l of rulerLabels(p.grid, "y", size, 10)) g.fillText(String(l.text), M / 2, M + l.at * z);
+  g.fillStyle = theme.accent;
+  const cx = M + (p.w * z) / 2, cy = M + (p.h * z) / 2;
+  g.beginPath(); g.moveTo(cx - 7, M - 12); g.lineTo(cx + 7, M - 12); g.lineTo(cx, M - 2); g.fill();
+  g.beginPath(); g.moveTo(M - 12, cy - 7); g.lineTo(M - 12, cy + 7); g.lineTo(M - 2, cy); g.fill();
+
+  let ky = M + p.h * z + 40;
+  g.textAlign = "left";
+  g.fillStyle = ex.text;
+  g.font = `600 20px Fraunces, serif`;
+  g.fillText(text.heading, M, ky);
+  if (text.byline) {
+    ky += 22;
+    g.font = font(theme, 400, 13);
+    g.fillStyle = ex.subText;
+    g.fillText(text.byline, M, ky);
+  }
+  ky += 36;
+  text.key.forEach((r, k) => {
+    const kx = M + (k % keyCols) * colW, yy = ky + Math.floor(k / keyCols) * 34;
+    g.save();
+    g.translate(kx, yy - 13);
+    drawKeyIcon(g, r.slot, 26, view, theme, p.fabric);
+    g.restore();
+    g.strokeStyle = "#333";
+    g.lineWidth = 1;
+    g.strokeRect(kx + 0.5, yy - 12.5, 26, 26);
+    g.textAlign = "left";
+    g.textBaseline = "middle";
+    g.fillStyle = ex.text;
+    g.font = font(theme, 600, 13.5);
+    g.fillText(r.title, kx + 34, yy - 6);
+    g.font = font(theme, 400, 12);
+    g.fillStyle = ex.subText;
+    const sub = `${r.sub}  (${r.count})`;
+    g.fillText(sub.length > 58 ? sub.slice(0, 57) + "…" : sub, kx + 34, yy + 9);
+  });
+  return c;
+}

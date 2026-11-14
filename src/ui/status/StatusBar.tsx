@@ -1,0 +1,62 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { cellLabel } from "@/core/grid/numbering";
+import { cx, ui } from "../common/widgets";
+import { useCommand, useEditorState } from "../hooks/editor";
+import { useEntryLabel } from "../i18n/labels";
+import s from "./status.module.css";
+
+/** Appears only when marks exist (SPEC §15.5: no footprint when unused). */
+function AmbiguousStatus() {
+  const t = useTranslations("status");
+  const run = useCommand();
+  useEditorState((st) => st.docRevision);
+  const count = useEditorState((st) => st.doc.layers.ambiguous.size);
+  const [open, setOpen] = useState(false);
+  if (!count) return null;
+  return (
+    <span className={s.amb}>
+      <button type="button" className={s.link} title={t("ambiguousNext")} onClick={() => run("ambiguous.next")}>{t("ambiguous", { count })}</button>
+      <button type="button" className={s.link} aria-label={t("ambiguousClear")} onClick={() => setOpen(!open)}>▾</button>
+      {open && (
+        <span className={s.pop}>
+          <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => { setOpen(false); run("ambiguous.clearAll"); }}>{t("ambiguousClear")}</button>
+        </span>
+      )}
+    </span>
+  );
+}
+
+export function StatusBar() {
+  const t = useTranslations("status");
+  const tt = useTranslations("tools");
+  const hover = useEditorState((st) => st.hoverCell);
+  useEditorState((st) => st.docRevision);
+  const p = useEditorState((st) => st.doc);
+  const savedAt = useEditorState((st) => st.savedAt);
+  const label = useEntryLabel();
+  const inside = hover && hover.x >= 0 && hover.y >= 0 && hover.x < p.w && hover.y < p.h;
+  const i = inside ? hover.y * p.w + hover.x : -1;
+  const parts: string[] = [];
+  if (inside) {
+    const k = p.layers.stitches[i] ?? 0, b = p.layers.beads[i] ?? 0;
+    if (k && p.key[k]) parts.push(`${label(k).title} — ${label(k).sub}`);
+    for (const ps of p.layers.partials.get(i) ?? []) if (p.key[ps.k]) parts.push(`${label(ps.k).title} (${tt(`partialKind.${ps.kind}`)})`);
+    if (b && p.key[b]) parts.push(`${label(b).title} — ${label(b).sub}`);
+    if (p.layers.ambiguous.has(i)) parts.push(t("markedAmbiguous"));
+  }
+  const size = { w: p.w, h: p.h };
+  return (
+    <div className={s.bar}>
+      <span>{inside ? t.rich("position", { col: cellLabel(p.grid, "x", hover.x, size), row: cellLabel(p.grid, "y", hover.y, size), b: (c) => <b>{c}</b> }) : "—"}</span>
+      <span className={s.cell}>{parts.join("  ·  ")}</span>
+      <span className={s.spacer} />
+      <AmbiguousStatus />
+      <span className={s.hint}>{t("hint")}</span>
+      <span>{`${p.w}×${p.h}`}</span>
+      <span>{savedAt ? t("savedAt", { time: new Date(savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }) : t("savesLocal")}</span>
+    </div>
+  );
+}

@@ -1,0 +1,51 @@
+.bar {
+  height: 100%;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.bar b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.spacer {
+  flex: 1;
+}
+.hint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.amb {
+  position: relative;
+  color: var(--accent);
+  font-weight: 600;
+}
+.link {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0 2px;
+}
+.pop {
+  position: fixed;
+  bottom: 34px;
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: var(--shadow);
+  z-index: 30;
+}
