@@ -91,10 +91,10 @@ export function drawStitchCell(g: Ctx, px: number, py: number, z: number, s: Pal
     g.restore();
   }
   const symOk = showSymbol && z >= theme.symbols.minZoom;
-  if (s.t === "combo" && s.bead) {
+  // floss + bead: the bead is drawn only when no symbol is shown; with a symbol it looks like a plain cross stitch
+  if (s.t === "combo" && s.bead && !symOk) {
     const sh = s.bead.shape;
     drawBeadShape(g, px, py, z, s.bead.hex, sh.bugle ? sh : { ...sh, r: (sh.r ?? 0.4) * theme.bead.comboScale }, style);
-    if (symOk) drawSymbol(g, px + z / 2, py + z / 2, z, s.sym, showColour ? s.bead.ink : theme.symbols.darkInk, theme.symbols.scale.combo, theme);
     return;
   }
   if (!symOk) return;

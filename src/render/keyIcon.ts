@@ -17,6 +17,10 @@ export function drawKeyIcon(g: Ctx, slot: PaletteSlot, size: number, view: Chart
   } else if (slot.t === "knot") {
     drawKnot(g, size * 0.5, size * 0.5, size * 1.4, slot, { ...style, showSymbol: false });
     if (slot.sym) drawSymbol(g, size * 0.78, size * 0.22, size * 0.5, slot.sym, theme.symbols.darkInk, 0.7, theme, true);
+  } else if (slot.t === "combo" && slot.bead && view === "color") {
+    // Colour view draws floss + bead as a bead, so the key adds the symbol to tell entries apart
+    drawStitchCell(g, 0, 0, size, slot, { ...style, showSymbol: false });
+    drawSymbol(g, size / 2, size / 2, size, slot.sym, slot.bead.ink, theme.symbols.scale.combo, theme);
   } else drawStitchCell(g, 0, 0, size, slot, style);
 }
 
