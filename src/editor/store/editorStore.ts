@@ -88,6 +88,8 @@ export interface EditorState {
   references: RefWindowData[];
   underlay: UnderlayData | null;
   underlayImage: HTMLImageElement | null;
+  /** The floating alignment pad for the underlay is shown (opt-in, SPEC §15.15). */
+  underlayPad: boolean;
   /** Fade every key entry except the active one (SPEC §15.16). */
   highlight: boolean;
   hasClipboard: boolean;
@@ -127,6 +129,7 @@ export const createEditorStore = () =>
     underlay: null,
     underlayImage: null,
     highlight: false,
+    underlayPad: false,
     hasClipboard: false,
   }));
 

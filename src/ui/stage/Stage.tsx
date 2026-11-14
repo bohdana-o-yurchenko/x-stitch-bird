@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ChartView } from "@/render/chart";
 import { Icon } from "../common/Icon";
 import { cx, ui } from "../common/widgets";
-import { useCommand, useEditorState } from "../hooks/editor";
+import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { ChartCanvas } from "./ChartCanvas";
 import { FloatingPanel } from "./FloatingPanel";
 import s from "./stage.module.css";
@@ -92,6 +92,7 @@ function UnderlayPad() {
         <b>{t("padTitle")}</b>
         <button type="button" className={cx(s.padMode, !behind && s.on)} title={behind ? t("adjustWithMouseTitle") : t("doneTitle")} onClick={() => run("underlay.toggleBehind")}>{behind ? t("adjustWithMouse") : t("done")}</button>
         <button type="button" className={s.padToggle} aria-label={open ? t("collapsePad") : t("expandPad")} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "–" : "+"}</button>
+        <button type="button" className={s.padToggle} title={t("closePad")} aria-label={t("closePad")} onClick={() => run("underlay.togglePad")}>×</button>
       </div>
       {open && (
         <div className={s.padBody}>
@@ -148,14 +149,38 @@ function SelectionActions() {
   );
 }
 
+const PAD_KEY = "stitchwork.underlayPad";
+
+/** The pad is opt-in (side panel); the choice is remembered in this browser. */
+function useRememberedPad() {
+  const ed = useEditor();
+  const on = useEditorState((st) => st.underlayPad);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(PAD_KEY) === "1") ed.store.setState({ underlayPad: true });
+    } catch {
+      // a convenience only
+    }
+  }, [ed]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(PAD_KEY, on ? "1" : "0");
+    } catch {
+      // a convenience only
+    }
+  }, [on]);
+  return on;
+}
+
 export function Stage() {
   const hasSelection = useEditorState((st) => !!st.selection || !!st.floating);
   const hasUnderlay = useEditorState((st) => !!st.underlay?.visible && !!st.underlayImage);
+  const padOn = useRememberedPad();
   return (
     <>
       <ChartCanvas />
       {hasSelection && <SelectionActions />}
-      {hasUnderlay && <UnderlayPad />}
+      {hasUnderlay && padOn && <UnderlayPad />}
       <ZoomControls />
     </>
   );

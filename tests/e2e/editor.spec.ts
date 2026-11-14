@@ -267,9 +267,14 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   await fileAction(page, "Download pattern file (.xbird)");
   const doc = JSON.parse(readFileSync(await (await download).path(), "utf8"));
   expect(doc.underlay).toMatchObject({ behind: true, imageW: 40, imageH: 20 });
-  // the alignment pad works while the image is behind the stitches
+  // the alignment pad is opt-in; it works while the image is behind the stitches; × hides it again
   const pad = page.getByTestId("underlay-pad");
+  await expect(pad).toHaveCount(0);
+  await page.getByTestId("pad-toggle").check();
   const w = doc.underlay.rect.w as number;
   await pad.getByRole("button", { name: "Width larger" }).click();
   expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeCloseTo(w + 0.5, 5);
+  await pad.getByRole("button", { name: /^Hide this panel/ }).click();
+  await expect(pad).toHaveCount(0);
+  await expect(page.getByTestId("pad-toggle")).not.toBeChecked();
 });

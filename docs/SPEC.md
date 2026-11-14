@@ -1186,8 +1186,10 @@ over it. One underlay per pattern.
 - **Fit to chart**: scale the visible part to fit the chart, keep aspect, centre it.
 - **Reset crop**: show the whole image again at the current scale.
 
-**Alignment pad** (always available while the image is shown, in both modes, at any zoom): a small floating panel
-on the stage (bottom-left, draggable by its grip, can be folded to its title). Buttons, each one click:
+**Alignment pad** (opt-in: off by default, switched on with **Quick move & resize panel on the chart** in the side
+panel section, or off with its **×**; remembered in this browser). While on and the image is shown it works in both
+modes, at any zoom: a small floating panel on the stage (bottom-left, draggable by its grip, can be folded to its
+title). Buttons, each one click:
 - **Move** ← ↑ ↓ → by the step.
 - **Width − +**, **Height − +**: change that side by the step; **Both − +**: change the width by the step and the
   height in proportion (aspect kept).

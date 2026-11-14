@@ -118,6 +118,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "underlay.stretch", run: (ed, d) => { const { dw, dh } = d as { dw: number; dh: number }; ed.underlay.stretch(dw, dh); } },
   { id: "underlay.openStraighten", run: (ed) => ed.underlay.data && ed.openDialog({ type: "straighten" }) },
   { id: "underlay.straighten", run: (ed, o) => ed.underlay.straighten(o as never) },
+  { id: "underlay.togglePad", run: (ed) => ed.store.setState({ underlayPad: !ed.state.underlayPad }) },
   { id: "underlay.fit", run: (ed) => ed.underlay.fit() },
   { id: "underlay.resetCrop", run: (ed) => ed.underlay.resetCrop() },
   { id: "underlay.remove", run: (ed) => ed.underlay.remove() },

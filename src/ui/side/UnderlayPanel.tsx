@@ -13,6 +13,7 @@ export function UnderlayPanel() {
   const t = useTranslations("underlay");
   const run = useCommand();
   const u = useEditorState((st) => st.underlay);
+  const padOn = useEditorState((st) => st.underlayPad);
   if (!u) return null;
   const editing = !u.behind;
   const setRect = (patch: Partial<Rect>) => run("underlay.update", { rect: { ...u.rect, ...patch } });
@@ -42,6 +43,10 @@ export function UnderlayPanel() {
             <input type="range" min={10} max={100} value={Math.round(u.opacity * 100)} style={{ flex: 1, accentColor: "var(--accent)" }} onChange={(e) => run("underlay.update", { opacity: Number(e.target.value) / 100 })} />
           </label>
         </div>
+        <label className={ui.chk} title={t("padToggleHint")}>
+          <input type="checkbox" checked={padOn} onChange={() => run("underlay.togglePad")} data-testid="pad-toggle" />
+          {t("padToggle")}
+        </label>
         {editing && (
           <div className={ui.seg}>
             <button type="button" className={cx(u.tool === "move" && ui.on)} onClick={() => run("underlay.update", { tool: "move" })}>{t("move")}</button>

@@ -446,7 +446,10 @@
     "padHint": "Resizing keeps the middle of the screen in place — zoom into the area you are aligning and click.",
     "nudge": "Move",
     "straighten": "Straighten (4 corners)…",
-    "straightenTitle": "Drag the photo’s corners onto the chart grid; the picture is flattened to fit it exactly"
+    "straightenTitle": "Drag the photo’s corners onto the chart grid; the picture is flattened to fit it exactly",
+    "padToggle": "Quick move & resize panel on the chart",
+    "padToggleHint": "A small floating panel to nudge and stretch the image at any zoom",
+    "closePad": "Hide this panel (turn it on again in the side panel)"
   },
   "fileMenu": {
     "label": "Menu ▾",
