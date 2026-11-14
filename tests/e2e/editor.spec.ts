@@ -109,6 +109,24 @@ test("shows what you are drawing with, including held tools", async ({ page }) =
   await expect(name).toContainText("Eraser");
 });
 
+test("tooltips appear quickly and the native one is suppressed", async ({ page }) => {
+  const draw = page.getByRole("button", { name: "Draw (P)" });
+  await draw.hover();
+  await expect(page.getByTestId("tooltip")).toHaveText("Draw (P)", { timeout: 900 });
+  await page.mouse.move(5, 500);
+  await expect(page.getByTestId("tooltip")).toHaveCount(0);
+  await expect(draw).toHaveAttribute("title", "Draw (P)");
+});
+
+test("the side panel scrolls when its sections don't fit", async ({ page }) => {
+  await page.setViewportSize({ width: 1300, height: 640 });
+  await page.getByText("Fabric & size").click();
+  const side = page.locator("aside");
+  expect(await side.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
+  await page.getByText("toward each thread").scrollIntoViewIfNeeded();
+  await expect(page.getByText("toward each thread")).toBeInViewport();
+});
+
 test("brush size takes one click", async ({ page }) => {
   await page.getByRole("button", { name: "Brush 3×3" }).click();
   expect(await editorState<number>(page, "(ed) => ed.state.brush")).toBe(3);

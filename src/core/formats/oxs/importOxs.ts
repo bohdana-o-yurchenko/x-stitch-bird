@@ -54,7 +54,7 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
   if (!(w > 0 && h > 0)) throw new OxsFormatError("no size");
   const p = createPattern(w, h, pr.attrs.charttitle || "Imported pattern");
   const spi = Number(pr.attrs.stitchesperinch);
-  p.count = [11, 14, 16, 18].includes(spi) ? spi : 14;
+  p.count = [11, 14, 16, 18, 20, 24, 31].includes(spi) ? spi : 14;
   if (pr.attrs.author) p.meta.designer = pr.attrs.author;
   if (pr.attrs.copyright) p.meta.copyright = pr.attrs.copyright;
   if (pr.attrs.instructions) p.meta.instructions = pr.attrs.instructions;

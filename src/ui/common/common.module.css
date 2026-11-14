@@ -296,3 +296,18 @@
 .option:hover {
   background: var(--sel);
 }
+.tooltip {
+  position: fixed;
+  z-index: 90;
+  visibility: hidden;
+  max-width: 320px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.35;
+  pointer-events: none;
+  white-space: pre-line;
+  box-shadow: var(--shadow);
+}

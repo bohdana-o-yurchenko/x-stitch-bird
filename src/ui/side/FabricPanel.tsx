@@ -5,7 +5,9 @@ import { cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
 import s from "./side.module.css";
 
-const COUNTS = [["11", "ct11"], ["14", "ct14"], ["16", "ct16"], ["18", "ct18"], ["14.01", "ct28o2"], ["16.01", "ct32o2"]] as const;
+const COUNTS = [["11", "ct11"], ["14", "ct14"], ["16", "ct16"], ["18", "ct18"], ["20", "ct20"], ["24", "ct24"], ["31", "ct31"]] as const;
+/** No longer offered, but older patterns may still use them (SPEC §3.1). */
+const LEGACY_COUNTS = [["14.01", "ct28o2"], ["16.01", "ct32o2"]] as const;
 
 export function FabricPanel() {
   const t = useTranslations("fabric");
@@ -23,7 +25,7 @@ export function FabricPanel() {
           <label className={ui.field}>
             {t("count")}
             <select value={String(p.count)} onChange={(e) => run("pattern.setFabric", { count: Number(e.target.value) })}>
-              {COUNTS.map(([v, k]) => <option key={v} value={v}>{t(k)}</option>)}
+              {[...COUNTS, ...LEGACY_COUNTS.filter(([v]) => Number(v) === p.count)].map(([v, k]) => <option key={v} value={v}>{t(k)}</option>)}
             </select>
           </label>
           <label className={ui.field}>

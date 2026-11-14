@@ -1033,6 +1033,8 @@ Decisions taken while implementing this plan. Each one lives in the single place
   gives the toolbar its own row (`useStacked`). `ui/side/CurrentTool.tsx` is the "Drawing with" card; it and the
   canvas share `resolveTool` (`editor/tools/registry.ts`), and shortcut labels come from `shortcutLabel` (keymap).
 - App name and icon: `app.brand` / `app.title` messages and `src/app/icon.png` (Next's icon file convention).
+- Tooltips: elements keep plain `title` attributes; `ui/common/Tooltips.tsx` (mounted once) shows them after
+  600 ms instead of the browser's own delay.
 - Menus: `Dropdown` in `ui/common/widgets.tsx` takes `MenuItem[]` (actions, `"-"` separators, nested `items` for
   submenus, optional `hint` line). The File menu is defined in `ui/header/Header.tsx`.
 - Floating stage panels (collapsed toolbar, underlay alignment pad) use `ui/stage/FloatingPanel.tsx`: draggable

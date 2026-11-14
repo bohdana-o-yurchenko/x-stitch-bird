@@ -10,6 +10,7 @@ import { EditorContext, useEditor, useEditorState } from "./hooks/editor";
 import { useTranslate } from "./i18n/labels";
 import { DropZoneOverlay, EditorLayout } from "./layout/EditorLayout";
 import { ReferenceLayer } from "./references/ReferenceLayer";
+import { Tooltips } from "./common/Tooltips";
 import { SidePanel } from "./side/SidePanel";
 import { Stage } from "./stage/Stage";
 import { StatusBar } from "./status/StatusBar";
@@ -61,6 +62,7 @@ function Shell() {
           <ReferenceLayer />
           <DialogHost />
           <Toasts />
+          <Tooltips />
           {dragging && <DropZoneOverlay text={t("drop")} />}
         </>
       }

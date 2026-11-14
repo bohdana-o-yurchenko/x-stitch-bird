@@ -26,10 +26,18 @@
   grid-area: side;
   min-width: 0;
   min-height: 0;
+  overflow-y: auto;
   border-left: 1px solid var(--line);
   background: var(--panel);
   display: flex;
   flex-direction: column;
+}
+/* sections keep their full height; only the key list shrinks, then the whole panel scrolls */
+.side > * {
+  flex-shrink: 0;
+}
+.side > [data-shrink] {
+  flex-shrink: 1;
 }
 .status {
   grid-area: status;

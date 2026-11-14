@@ -227,6 +227,9 @@ grid size `W×H`, save status (`Patterns save in this browser` / `…to your acc
 2. **Key header**: "Key", count text (`N entries` / `1 entry`), **+ Add to key** button.
 3. **Key list** (§7).
 4. Collapsible **Fabric & size**: fabric count select (11/14/16/18 ct Aida, 28 ct over 2, 32 ct over 2),
+   *new app:* 11/14/16/18 ct Aida and 20/24/31 ct over 1; "28/32 ct over 2" are no longer offered but still shown
+   (and kept) for a pattern that already uses them. The same list is in the New dialog and accepted from OXS.
+   The side panel scrolls as a whole when its sections don't fit; the key list shrinks first (to 180 px).
    fabric colour picker, **Resize…** button, size info (§7.3).
 5. Collapsible (open by default) **Totals & shopping list** (§7.2).
 

@@ -37,7 +37,7 @@ export function NewPatternDialog({ onClose }: Close) {
         <label className={ui.field}>
           {t("fabric")}
           <select value={o.count} onChange={(e) => set({ ...o, count: Number(e.target.value) })}>
-            {[11, 14, 16, 18].map((c) => <option key={c} value={c}>{tf(`ct${c}`)}</option>)}
+            {[11, 14, 16, 18, 20, 24, 31].map((c) => <option key={c} value={c}>{tf(`ct${c}`)}</option>)}
           </select>
         </label>
         <label className={ui.field}>{t("width")}<input type="number" min={5} max={500} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} /></label>

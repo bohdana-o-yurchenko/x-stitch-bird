@@ -28,7 +28,7 @@ export function KeyPanel() {
         <span className={s.spacer} />
         <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} onClick={() => run("key.add")}>{t("add")}</button>
       </div>
-      <div className={s.keyList}>
+      <div className={s.keyList} data-shrink>
         {!rows.length && (
           <div className={s.empty}>
             <p>{t("empty")}</p>

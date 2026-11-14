@@ -116,7 +116,10 @@
     "firstColumn": "First column",
     "firstRow": "First row",
     "labelEvery": "Label every",
-    "fromCentre": "Number from centre"
+    "fromCentre": "Number from centre",
+    "ct20": "20 ct over 1",
+    "ct24": "24 ct over 1",
+    "ct31": "31 ct over 1"
   },
   "totals": {
     "heading": "Totals & shopping list",
