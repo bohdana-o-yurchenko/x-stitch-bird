@@ -567,49 +567,84 @@
     "skip": "Skip the guide",
     "back": "Back",
     "next": "Next",
-    "finish": {
-      "title": "8. Finish and export",
-      "body": "Fill in the pattern info — title, designer, copyright — then export an <b>.oxs</b> file: it opens in Хрестики and Ruta Stitch for stitching."
-    },
     "welcome": {
-      "title": "Make an e-copy of a paper chart",
-      "body": "This short tour shows the quickest way to turn a paper chart into a digital one you can stitch from. It takes a couple of minutes, and you can open it again any time from <b>Menu ▸ Quick start guide</b>."
+      "title": "E-copy of a paper chart",
+      "points": {
+        "1": "The quickest way from a paper chart to a digital one.",
+        "2": "8 short steps — a couple of minutes.",
+        "3": "Come back any time: <hl>Menu ▸ Quick start guide</hl>."
+      }
     },
     "create": {
-      "title": "1. Create a new pattern",
-      "body": "Start a blank pattern with the chart’s size in stitches — columns × rows, usually printed on the chart or its cover — and pick the fabric."
+      "title": "1. New pattern",
+      "points": {
+        "1": "Open <hl>Menu ▸ New ▸ Blank pattern</hl>.",
+        "2": "Enter the size in stitches — as on the paper chart.",
+        "3": "Pick the fabric."
+      }
     },
     "key": {
-      "title": "2. Fill in the key",
-      "body": "Add every line of the paper key with <b>+ Add to key</b>: a floss by its DMC number, a Mill Hill bead, a blend of two flosses, or floss and bead together. Strands and the stitch type are set in the same window.",
-      "tip": "Keep the paper key in view: open a photo of it in a floating window (the path above). Use its <b>marker</b> to tick off each key line once it’s added — nothing gets missed or added twice."
+      "title": "2. The key",
+      "points": {
+        "1": "Every line of the paper key: <hl>+ Add to key</hl>.",
+        "2": "Floss, beads, blends, floss + bead."
+      },
+      "tip": "Keep the key in view: <hl>Photo in a floating window</hl>. Tick off added lines with its <hl>marker</hl>."
     },
     "trace": {
-      "title": "3. Put the chart behind your stitches and trace",
-      "body": "Add a photo or scan of the chart page. In the window that opens, drag the 4 corners onto the corners of the chart’s grid and enter its size — the photo snaps flat onto the grid. Then draw over the symbols with the matching key entries.",
-      "tip": "Photo not perfect? In the side panel’s <b>Image behind the chart</b> section, turn on the <b>quick move & resize panel</b> and nudge the image block by block (say, every 10×10) while you trace."
+      "title": "3. Chart behind the stitches",
+      "points": {
+        "1": "Add the chart photo: <hl>Image behind the chart</hl>.",
+        "2": "Drag the <hl>4 corners</hl> onto the grid corners — the photo lies flat.",
+        "3": "Trace the symbols with the key entries."
+      },
+      "tip": "Photo not perfect? Turn on <hl>Quick move & resize panel on the chart</hl> (side panel, <hl>Image behind the chart</hl>) and adjust it block by block, 10×10."
     },
     "views": {
-      "title": "4. Switch views",
-      "body": "<b>Colour</b>, <b>Both</b> or <b>Symbols</b>: compare the symbols with the paper chart, or check the colours at a glance."
+      "title": "4. Views",
+      "points": {
+        "1": "<hl>Colour</hl> — check the colours.",
+        "2": "<hl>Symbols</hl> — compare with the paper chart.",
+        "3": "<hl>Both</hl> — everything at once."
+      }
     },
     "tools": {
-      "title": "5. Work fast, without mistakes",
-      "body": "<b>Ctrl/⌘+Z</b> undoes. <b>Hold Alt/⌥</b> and click to pick a colour from the chart. <b>Select</b> (S) an area to copy, paste and move it. Override is off by default: drawing only fills empty squares, so you can’t overwrite stitches by accident.",
-      "tip": "Every shortcut is listed behind the <b>i</b> button."
+      "title": "5. Fast, without mistakes",
+      "points": {
+        "1": "<hl>Ctrl/⌘ + Z</hl> — undo.",
+        "2": "Hold <hl>Alt/⌥</hl> — pick a colour from the chart.",
+        "3": "<hl>S</hl> — select, copy, paste, move.",
+        "4": "Drawing never overwrites filled squares."
+      },
+      "tip": "Every shortcut: the <hl>i</hl> button."
     },
     "save": {
-      "title": "6. Keep a copy on your device",
-      "body": "Your work saves itself in this browser as you go. But browser storage can be cleared — download the pattern file to your device regularly so valuable work is never lost."
+      "title": "6. Keep a copy",
+      "points": {
+        "1": "Your work saves itself in the browser.",
+        "2": "But browsers can wipe it — regularly use <hl>Download pattern file (.xbird)</hl>."
+      }
     },
     "versions": {
-      "title": "7. Go back in time",
-      "body": "Made a mess? <b>Versions</b> keeps automatic snapshots, so you can return to an earlier state."
+      "title": "7. Versions",
+      "points": {
+        "1": "Made a mess? <hl>Versions</hl> bring back an earlier state."
+      }
+    },
+    "finish": {
+      "title": "8. Export",
+      "points": {
+        "1": "Fill in <hl>Pattern info</hl>.",
+        "2": "Export an <hl>Open Cross Stitch file (.oxs)</hl> — for Хрестики and Ruta Stitch."
+      }
     },
     "done": {
       "title": "Voilà!",
-      "body": "Your e-copy is ready. Open this guide again any time from <b>Menu ▸ Quick start guide</b>.",
-      "button": "Start stitching"
+      "button": "Start stitching",
+      "points": {
+        "1": "Your e-copy is ready.",
+        "2": "The guide is always here: <hl>Menu ▸ Quick start guide</hl>."
+      }
     }
   }
 }

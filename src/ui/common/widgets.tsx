@@ -104,22 +104,35 @@ export function Toasts() {
   );
 }
 
-/** A menu entry: an action, a submenu (`items`), or "-" for a separator. `hint` is a second, muted line. */
-export type MenuItem = { label: string; hint?: string; onClick?: () => void; disabled?: boolean; items?: MenuItem[] } | "-";
+/**
+ * A menu entry: an action, a submenu (`items`), or "-" for a separator. `hint` is a second, muted line; `id`
+ * names it for the quick-start guide (`data-guide="menu:<id>"`), which can open the menu on it.
+ */
+export type MenuItem = { label: string; hint?: string; onClick?: () => void; disabled?: boolean; items?: MenuItem[]; id?: string } | "-";
 
 type MenuPos = { top: number; left?: number; right?: number };
 
-function MenuList({ items, pos, onDone, testId }: { items: MenuItem[]; pos: MenuPos; onDone: () => void; testId?: string }) {
+/** `reveal`: ids of submenus to open, outermost first (the guide pointing at an option deep in the menu). */
+function MenuList({ items, pos, onDone, testId, reveal }: { items: MenuItem[]; pos: MenuPos; onDone: () => void; testId?: string; reveal?: string[] }) {
   const [sub, setSub] = useState<{ index: number; pos: MenuPos } | null>(null);
+  const list = useRef<HTMLDivElement>(null);
+  const revealKey = reveal?.join("/");
   const openSub = (index: number, el: HTMLElement) => {
     const r = el.getBoundingClientRect();
     // flyout to the right unless that would leave the screen
     setSub({ index, pos: r.right + 240 < window.innerWidth ? { top: r.top - 5, left: r.right + 2 } : { top: r.top - 5, right: window.innerWidth - r.left + 2 } });
   };
   const subItems = sub && items[sub.index];
+  useLayoutEffect(() => {
+    const id = reveal?.[0];
+    const n = items.findIndex((i) => i !== "-" && i.id === id && i.items);
+    const el = n >= 0 ? list.current?.querySelector<HTMLElement>(`[data-guide="menu:${id}"]`) : null;
+    if (el) openSub(n, el);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealKey]);
   return (
     <>
-      <div className={s.menu} role="menu" data-testid={testId} style={{ position: "fixed", top: pos.top, left: pos.left ?? "auto", right: pos.right ?? "auto" }}>
+      <div ref={list} className={s.menu} role="menu" data-testid={testId} style={{ position: "fixed", top: pos.top, left: pos.left ?? "auto", right: pos.right ?? "auto" }}>
         {items.map((i, n) =>
           i === "-" ? (
             <hr key={n} className={s.menuSep} />
@@ -131,6 +144,7 @@ function MenuList({ items, pos, onDone, testId }: { items: MenuItem[]; pos: Menu
               aria-haspopup={i.items ? "menu" : undefined}
               aria-expanded={i.items ? sub?.index === n : undefined}
               disabled={i.disabled}
+              data-guide={i.id && `menu:${i.id}`}
               className={cx(i.items && s.hasSub, sub?.index === n && s.subOpen)}
               onPointerEnter={(e) => (i.items ? openSub(n, e.currentTarget) : setSub(null))}
               onClick={(e) => {
@@ -145,7 +159,7 @@ function MenuList({ items, pos, onDone, testId }: { items: MenuItem[]; pos: Menu
           ),
         )}
       </div>
-      {sub && subItems && subItems !== "-" && subItems.items && <MenuList items={subItems.items} pos={sub.pos} onDone={onDone} />}
+      {sub && subItems && subItems !== "-" && subItems.items && <MenuList items={subItems.items} pos={sub.pos} onDone={onDone} reveal={reveal?.slice(1)} />}
     </>
   );
 }
@@ -155,19 +169,23 @@ function MenuList({ items, pos, onDone, testId }: { items: MenuItem[]; pos: Menu
  * scrolling or clipped containers (like the header) can't hide them. Follows the button on scroll and resize;
  * closes on outside click or Esc.
  */
-export function Dropdown({ label, title, items, className }: { label: string; title?: string; className?: string; items: MenuItem[] }) {
+export function Dropdown({ label, title, items, className, reveal }: { label: string; title?: string; className?: string; items: MenuItem[]; reveal?: string[] | null }) {
   const [pos, setPos] = useState<MenuPos | null>(null);
+  /** Opened by the user; the guide can also hold it open (`reveal`), and then outside clicks don't close it. */
+  const [manual, setManual] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
+  const revealKey = reveal ? reveal.join("/") : null;
+  const held = useRef(false);
+  const open = !!pos && (manual || revealKey !== null);
   const place = () => {
     const r = button.current!.getBoundingClientRect();
     // open towards the side with more room
     setPos(r.left < window.innerWidth / 2 ? { top: r.bottom + 6, left: r.left } : { top: r.bottom + 6, right: window.innerWidth - r.right });
   };
-  const open = !!pos;
   useEffect(() => {
     if (!open) return;
-    const close = () => setPos(null);
-    const outside = (e: PointerEvent) => !(e.target as Element).closest?.("[role=menu]") && !button.current?.contains(e.target as Node) && close();
+    const close = () => setManual(false);
+    const outside = (e: PointerEvent) => !held.current && !(e.target as Element).closest?.("[role=menu]") && !button.current?.contains(e.target as Node) && close();
     const esc = (e: KeyboardEvent) => e.key === "Escape" && close();
     document.addEventListener("pointerdown", outside);
     window.addEventListener("keydown", esc);
@@ -180,13 +198,21 @@ export function Dropdown({ label, title, items, className }: { label: string; ti
       window.removeEventListener("scroll", place, true);
     };
   }, [open]);
-  const toggle = () => (pos ? setPos(null) : place());
+  useLayoutEffect(() => {
+    held.current = revealKey !== null;
+    if (revealKey !== null) place();
+  }, [revealKey]);
+  const toggle = () => {
+    if (open) return setManual(false);
+    place();
+    setManual(true);
+  };
   return (
     <>
-      <button ref={button} type="button" className={className ?? s.btn} title={title} aria-haspopup="menu" aria-expanded={!!pos} onClick={toggle}>
+      <button ref={button} type="button" className={className ?? s.btn} title={title} aria-haspopup="menu" aria-expanded={open} onClick={toggle}>
         {label}
       </button>
-      {pos && createPortal(<MenuList items={items} pos={pos} onDone={() => setPos(null)} />, document.body)}
+      {open && pos && createPortal(<MenuList key={revealKey ?? ""} items={items} pos={pos} onDone={() => setManual(false)} reveal={reveal ?? undefined} />, document.body)}
     </>
   );
 }

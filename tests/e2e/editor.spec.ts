@@ -199,12 +199,15 @@ test("the quick-start guide opens on the first visit only, highlights what it ex
   const guide = page.getByTestId("guide");
   await expect(guide).toContainText("перенабір");
   await guide.getByRole("button", { name: "Далі" }).click();
-  await expect(guide).toContainText("Створіть нову схему");
-  await expect(guide).toContainText("Порожня схема");
+  await expect(guide).toContainText("1. Нова схема");
+  // the step opens the menu on the option it talks about
+  await expect(page.getByRole("menuitem", { name: /^Порожня схема/ })).toBeVisible();
   await page.keyboard.press("ArrowRight");
-  await expect(guide).toContainText("Заповніть ключ");
+  await expect(guide).toContainText("2. Ключ");
+  await expect(page.getByRole("menuitem", { name: /^Фото в плаваючому вікні/ })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(guide).toHaveCount(0);
+  await expect(page.getByRole("menuitem")).toHaveCount(0);
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
   await expect(guide).toHaveCount(0);

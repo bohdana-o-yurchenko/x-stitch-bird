@@ -88,6 +88,8 @@ export interface EditorState {
   references: RefWindowData[];
   underlay: UnderlayData | null;
   underlayImage: HTMLImageElement | null;
+  /** The guide holds the main menu open on these item ids (submenus first); null = not held. */
+  menuReveal: string[] | null;
   /** The quick-start guide is open (shown once on the first visit, then from the menu). */
   guideOpen: boolean;
   /** The floating alignment pad for the underlay is shown (opt-in, SPEC §15.15). */
@@ -133,6 +135,7 @@ export const createEditorStore = () =>
     highlight: false,
     underlayPad: false,
     guideOpen: false,
+    menuReveal: null,
     hasClipboard: false,
   }));
 

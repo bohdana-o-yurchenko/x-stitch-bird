@@ -184,8 +184,8 @@ Brand mark · editable **pattern name** input (change → `P.name`, trimmed, def
 buttons **New**, **Open**, **Save**, **Save to file**, **Load file**, **Image → pattern**, **+ Reference** ·
 view segmented control **Colour / Both / Symbols** (default Both) · **Export ▾** menu.
 
-*New app (2026-11-14):* app name **пташечка** with its icon (`src/app/icon.svg`, also the favicon) · pattern
-name (`clamp(140px, 13vw, 260px)` wide) · **Menu ▾** (the former File menu) · **main toolbar**, in groups:
+*New app (2026-11-14):* app name **пташечка** with its icon (`src/app/icon.svg`, also the favicon) · **Menu ▾**
+(the former File menu) · pattern name (`clamp(140px, 13vw, 260px)` wide) · **main toolbar**, in groups:
 undo · redo | override · mirror | draw · eraser · brush size 1–5 | line · rectangle · filled rectangle · fill |
 partial · ¼ ¾ ½ | picker · move view | select · magic wand | **Transform ▾** · then, on the right, **i** (hover or
 click: every keyboard shortcut, grouped, generated from the keymap) · language (UK/EN) · **side panel** toggle (K).
@@ -550,9 +550,11 @@ File ▸ Save) still saves at once, with a toast.
 A guided tour for making a **перенабір** (an e-copy of a paper chart). It opens by itself on the **first visit only**
 (flag `stitchwork.guideSeen` in localStorage, set as soon as it opens, so a reload never shows it again) and any time
 from **Menu ▸ Quick start guide** (uk: "Як зробити перенабір").
-- The screen is dimmed except for the elements the step talks about (pulsing outline); a card beside them has the
-  step counter, title, text, the menu path as chips (e.g. Меню ▸ Нова ▸ Порожня схема…), sometimes a tip, and
-  Skip / Back / Next. Keys: → or Enter next, ← back, Esc closes.
+- The screen is dimmed except for the elements the step talks about (pulsing outline). When a step is about a menu
+  option, the guide **opens the menu (and its submenu) itself** and outlines that option; open menus stay undimmed.
+  The card (460 px, roomy) sits beside the highlights — right, left, below or above, never on top of them — with the
+  step counter, a title, **2–4 short bullet points**, sometimes a tip, and Skip / Back / Next. Names of buttons and
+  options are **highlighted** in the text. Keys: → or Enter next, ← back, Esc closes (and closes the menu).
 - Steps: welcome · 1 create a pattern with the chart's size · 2 fill in the key (floss, bead, blends, floss + bead;
   the paper key in a floating photo window, ticking lines off with its marker) · 3 image behind the chart,
   straighten by 4 corners, trace (tip: the quick move & resize panel, block by block) · 4 Colour / Both / Symbols ·
