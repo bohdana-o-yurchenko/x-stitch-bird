@@ -251,7 +251,7 @@ canvas.prev{max-width:100%;image-rendering:pixelated;border:1px solid var(--line
       <button class="tool" data-t="rect" title="Rectangle outline (R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4.5" y="6.5" width="15" height="11" rx="1"/></svg></button>
       <button class="tool" data-t="frect" title="Filled rectangle (Shift+R)"><svg viewBox="0 0 24 24"><rect x="4.5" y="6.5" width="15" height="11" rx="1" fill="currentColor"/></svg></button>
       <button class="tool" data-t="fill" title="Fill area (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 12l7-7 8 8-7 7z"/><path d="M19 15c1 1.6 1.5 2.6 1.5 3.3a1.5 1.5 0 01-3 0c0-.7.5-1.7 1.5-3.3z" fill="currentColor"/></svg></button>
-      <button class="tool" data-t="eraser" title="Eraser (E) — erases crosses, beads and backstitch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 20h12M4.5 14.5l9-9 6 6-8.5 8.5H9z"/></svg></button>
+      <button class="tool" data-t="eraser" title="Eraser (E) — erases crosses, beads and backstitch. Point at a backstitch line to delete only that line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 20h12M4.5 14.5l9-9 6 6-8.5 8.5H9z"/></svg></button>
       <button class="tool" data-t="picker" title="Pick a key entry from the chart (I, or hold Alt/⌥)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5a2.1 2.1 0 013 3l-1.5 1.5-3-3z"/><path d="M13.5 6l4.5 4.5M15 9l-8.5 8.5L4 20l2.5-2.5"/></svg></button>
       <button class="tool" data-t="pan" title="Move (H, or hold Space)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg></button>
       <span class="psep"></span>
@@ -1401,7 +1401,7 @@ let pal={};
 let tool='pencil',activeK=0,view='both',mirror=false,brush=1;
 let zoom=12,offX=40,offY=40;const RULER=26;
 let undoStack=[],redoStack=[];let dirty=false;
-let chain=null,hoverPt=null,override=false;
+let chain=null,hoverPt=null,override=false,hoverSegs=[]; // hoverSegs: backstitch segments the eraser would delete on click
 
 function newProject(w=80,h=80,name='Untitled pattern'){
   return{name,w,h,count:14,strands:2,fabric:'#F7F4EC',stitches:new Uint16Array(w*h),beads:new Uint16Array(w*h),back:[],pal:[null],blends:{},combos:{},customs:{},id:'p'+Date.now().toString(36)}}
@@ -1540,8 +1540,10 @@ function draw(){
     if(chain&&hoverPt)drawBackLine(ctx,ox+chain.last.x*z,oy+chain.last.y*z,ox+hoverPt.x*z,oy+hoverPt.y*z,activeK,z,true,.55);
     if(hoverPt){ctx.fillStyle='#B5452F';ctx.beginPath();ctx.arc(ox+hoverPt.x*z,oy+hoverPt.y*z,Math.max(3,z*.12),0,Math.PI*2);ctx.fill()}
     if(chain){ctx.strokeStyle='#B5452F';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(ox+chain.last.x*z,oy+chain.last.y*z,Math.max(4,z*.18),0,Math.PI*2);ctx.stroke()}}
+  if(tool==='eraser'&&hoverSegs.length){ctx.save();ctx.lineCap='round';ctx.strokeStyle='rgba(181,69,47,.5)';ctx.lineWidth=Math.max(7,z*.32);ctx.beginPath();
+    hoverSegs.forEach(s=>{ctx.moveTo(ox+s[0]*z,oy+s[1]*z);ctx.lineTo(ox+s[2]*z,oy+s[3]*z)});ctx.stroke();ctx.restore()}
   if(mirror){ctx.save();ctx.setLineDash([6,4]);ctx.strokeStyle='#B5452F';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(ox+P.w*z/2,oy);ctx.lineTo(ox+P.w*z/2,oy+P.h*z);ctx.stroke();ctx.restore()}
-  if(hover&&hover.x>=0&&hover.y>=0&&hover.x<P.w&&hover.y<P.h&&tool!=='pan'&&!(ak&&ak.t==='back'&&tool!=='eraser'&&tool!=='picker')){ctx.strokeStyle='#B5452F';ctx.lineWidth=2;const bs=(tool==='pencil'||tool==='eraser')?brush:1,o=Math.floor((bs-1)/2);ctx.strokeRect(ox+(hover.x-o)*z+1,oy+(hover.y-o)*z+1,bs*z-2,bs*z-2)}
+  if(hover&&hover.x>=0&&hover.y>=0&&hover.x<P.w&&hover.y<P.h&&tool!=='pan'&&!(ak&&ak.t==='back'&&tool!=='eraser'&&tool!=='picker')&&!(tool==='eraser'&&hoverSegs.length)){ctx.strokeStyle='#B5452F';ctx.lineWidth=2;const bs=(tool==='pencil'||tool==='eraser')?brush:1,o=Math.floor((bs-1)/2);ctx.strokeRect(ox+(hover.x-o)*z+1,oy+(hover.y-o)*z+1,bs*z-2,bs*z-2)}
   // rulers
   ctx.fillStyle='#F4EFE6';ctx.fillRect(0,0,CW,RULER);ctx.fillRect(0,0,RULER,CH);
   ctx.fillStyle='#7A7064';ctx.font='500 10.5px "DM Sans",sans-serif';ctx.textBaseline='middle';ctx.textAlign='center';
@@ -1591,6 +1593,9 @@ function paintCells(cells,erase){
   if(p.t==='bead')cells.forEach(i=>P.beads[i]=activeK);
   else cells.forEach(i=>{P.stitches[i]=activeK;if(p.t==='combo')P.beads[i]=0})}
 function segDist(px,py,s){const ax=s[0],ay=s[1],bx=s[2],by=s[3],dx=bx-ax,dy=by-ay,L=dx*dx+dy*dy;let t=L?((px-ax)*dx+(py-ay)*dy)/L:0;t=Math.max(0,Math.min(1,t));return Math.hypot(px-(ax+t*dx),py-(ay+t*dy))}
+// eraser hit radius for backstitch, in grid units: ~6 screen px, at least 0.2 and at most 0.45 of a cell (so a cell centre still erases the cell)
+const backR=()=>Math.min(.45,Math.max(.2,6/zoom));
+function backAt(g){const r=backR();return P.back.filter(s=>segDist(g.x,g.y,s)<=r||(mirror&&segDist(P.w-g.x,g.y,s)<=r))}
 function eraseBackNear(g,r){const before=P.back.length;P.back=P.back.filter(s=>segDist(g.x,g.y,s)>r&&(!mirror||segDist(P.w-g.x,g.y,s)>r));return P.back.length!==before}
 function addSeg(a,b){if(a.x===b.x&&a.y===b.y)return;snapshot();P.back.push([a.x,a.y,b.x,b.y,activeK]);
   if(mirror)P.back.push([P.w-a.x,a.y,P.w-b.x,b.y,activeK]);changed()}
@@ -1625,6 +1630,8 @@ cv.addEventListener('pointerdown',e=>{
   if(e.button!==0)return;
   const c=toCell(sx,sy);const inside=c.x>=0&&c.y>=0&&c.x<P.w&&c.y<P.h;
   if(tool==='picker'||e.altKey){pickAt(sx,sy);if(altPrev)altPicked=true;return}
+  if(tool==='eraser'&&backAt(toGrid(sx,sy)).length){ // pointer on a backstitch line → delete backstitch only, keep crosses & beads
+    snapshot();stroke={snap:true,erase:true,backOnly:true};eraseBackNear(toGrid(sx,sy),backR());hoverSegs=[];render();return}
   if(tool==='eraser'){snapshot();stroke={last:c,snap:true,erase:true};paintCells(cellsFor(c.x,c.y,brush),true);eraseBackNear(toGrid(sx,sy),.3*Math.max(1,brush/2));render();return}
   const p=needKey();if(!p)return;
   if(isBackDraw()){const pt=snapPt(toGrid(sx,sy));
@@ -1640,10 +1647,14 @@ cv.addEventListener('pointermove',e=>{
   if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,{x:sx,y:sy});
   const c=toCell(sx,sy);
   if(isBackDraw()){const pt=snapPt(toGrid(sx,sy));if(!hoverPt||hoverPt.x!==pt.x||hoverPt.y!==pt.y){hoverPt=pt;render()}}else if(hoverPt){hoverPt=null;render()}
+  if(tool==='eraser'&&!spaceDown&&!panning&&!(stroke&&!stroke.backOnly)){const hs=backAt(toGrid(sx,sy));
+    if(hs.length!==hoverSegs.length||hs.some((s,j)=>s!==hoverSegs[j])){hoverSegs=hs;render()}}
+  else if(hoverSegs.length){hoverSegs=[];render()}
   if(!hover||hover.x!==c.x||hover.y!==c.y){hover=c;updStatus();render();refsHover()}
   if(panning){offX=panning.ox+sx-panning.sx;offY=panning.oy+sy-panning.sy;render();return}
   if(!stroke)return;
   if(stroke.back)return;
+  if(stroke.backOnly){eraseBackNear(toGrid(sx,sy),backR());hoverSegs=[];render();return}
   if(stroke.erase){lineCells(stroke.last,c).forEach(p=>paintCells(cellsFor(p.x,p.y,brush),true));eraseBackNear(toGrid(sx,sy),.3*Math.max(1,brush/2));stroke.last=c;render();return}
   if(tool==='pencil'){lineCells(stroke.last,c).forEach(p=>paintCells(cellsFor(p.x,p.y,brush),false));stroke.last=c;render()}
   else{stroke.cur=c;updPreview()}
@@ -1661,7 +1672,7 @@ function endPtr(e){ptrs.delete(e.pointerId);
 function same(a,b){if(a.length!==b.length)return false;for(let i=0;i<a.length;i++)if(a[i]!==b[i])return false;return true}
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
 cv.addEventListener('dblclick',()=>endChain());
-cv.addEventListener('pointerleave',()=>{hover=null;hoverPt=null;updStatus();render();refsHover()});
+cv.addEventListener('pointerleave',()=>{hover=null;hoverPt=null;hoverSegs=[];updStatus();render();refsHover()});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 function updPreview(){const p=P.pal[activeK];const cells=p?paintable(shapeCells(stroke.start,stroke.cur,tool),p):[];preview={cells,v:activeK};render()}
 function updStatus(){
