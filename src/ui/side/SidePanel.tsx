@@ -2,14 +2,14 @@
 
 import { FabricPanel } from "./FabricPanel";
 import { KeyPanel } from "./KeyPanel";
-import { ToolBar } from "./ToolBar";
+import { CurrentTool } from "./CurrentTool";
 import { TotalsPanel } from "./TotalsPanel";
 import { UnderlayPanel } from "./UnderlayPanel";
 
 export function SidePanel() {
   return (
     <>
-      <ToolBar />
+      <CurrentTool />
       <KeyPanel />
       <UnderlayPanel />
       <FabricPanel />

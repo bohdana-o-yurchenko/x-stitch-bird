@@ -6,13 +6,11 @@ import { TOOLS } from "@/editor/tools/registry";
 import { Icon } from "../common/Icon";
 import { cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
-import s from "./side.module.css";
-
-/** Second toolbar row, with the drawing options. */
-const SELECT_TOOLS = new Set(["select", "magicWand"]);
+import s from "./header.module.css";
 
 const MIRROR_LABEL = { off: "mirrorOff", vertical: "mirrorVertical", horizontal: "mirrorHorizontal", quad: "mirrorQuad" } as const;
 
+/** The main drawing toolbar, in the header (SPEC §4.1). */
 export function ToolBar() {
   const t = useTranslations("tools");
   const run = useCommand();
@@ -29,12 +27,8 @@ export function ToolBar() {
     </button>
   );
   return (
-    <div className={s.tools}>
-      {TOOLS.filter((tl) => !SELECT_TOOLS.has(tl.id)).map(toolButton)}
-      <span className={s.spacer} />
-      <button type="button" className={ui.tool} title={t("collapse")} onClick={() => run("panel.toggle")}><Icon name="collapse" size={18} /></button>
-      <span className={s.break} />
-      {TOOLS.filter((tl) => SELECT_TOOLS.has(tl.id)).map(toolButton)}
+    <div className={s.tools} role="toolbar" aria-label={t("toolbar")}>
+      {TOOLS.map(toolButton)}
       <span className={s.sep} />
       {tool === "partial" ? (
         <div className={s.sizes} role="group" aria-label={t("partial")}>
@@ -49,6 +43,7 @@ export function ToolBar() {
           ))}
         </div>
       )}
+      <span className={s.sep} />
       <button type="button" className={cx(ui.tool, override && ui.on)} title={t("override")} aria-pressed={override} onClick={() => run("draw.toggleOverride")}><Icon name="override" size={18} /></button>
       <button type="button" className={cx(ui.tool, mirror !== "off" && ui.on)} title={`${t("mirror")} — ${t(MIRROR_LABEL[mirror])}`} onClick={() => run("draw.cycleMirror")}><Icon name="mirror" size={18} /></button>
       <span className={s.sep} />

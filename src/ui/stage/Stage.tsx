@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { MINI_TOOLS, toolById } from "@/editor/tools/registry";
 import { Icon } from "../common/Icon";
 import { KeyIcon, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
+import { useCurrentTool } from "../side/CurrentTool";
 import { ChartCanvas } from "./ChartCanvas";
 import { FloatingPanel } from "./FloatingPanel";
 import s from "./stage.module.css";
@@ -24,32 +24,21 @@ function ZoomControls() {
   );
 }
 
-/** Shown while the side panel is hidden (SPEC §4.2): a movable toolbar, on the right where the panel was. */
+/** Shown while the side panel is hidden (SPEC §4.2): what you are drawing with, movable, on the right. */
 function MiniToolbar() {
   const t = useTranslations("tools");
+  const tn = useTranslations("toolNames");
   const run = useCommand();
-  const tool = useEditorState((st) => st.tool);
-  const override = useEditorState((st) => st.override);
-  const canUndo = useEditorState((st) => st.canUndo);
-  const canRedo = useEditorState((st) => st.canRedo);
-  const active = useEditorState((st) => st.activeEntry);
-  const slot = useEditorState((st) => st.palette[st.activeEntry]);
   const ed = useEditor();
+  const { effective, active, slot } = useCurrentTool();
   return (
     <FloatingPanel id="miniToolbar" corner="topRight" testId="mini-toolbar">
       <div className={s.mini}>
         <button type="button" className={ui.tool} title={t("expand")} aria-label={t("expand")} onClick={() => run("panel.toggle")}><Icon name="expand" size={18} /></button>
+        <span className={s.miniTool} title={tn(effective.id)} aria-label={tn(effective.id)}><Icon name={effective.icon} size={18} /></span>
         <button type="button" className={s.miniKey} title={active ? t("activeEntry", { label: ed.entryLabel(active) }) : t("noActiveEntry")} onClick={() => run("panel.toggle")}>
           {slot && <KeyIcon slot={slot} size={34} />}
         </button>
-        {MINI_TOOLS.map((id) => (
-          <button key={id} type="button" className={cx(ui.tool, tool === id && ui.on)} title={t(id)} aria-label={t(id)} onClick={() => run("tool.select", id)}>
-            <Icon name={toolById(id).icon} size={18} />
-          </button>
-        ))}
-        <button type="button" className={cx(ui.tool, override && ui.on)} title={t("override")} onClick={() => run("draw.toggleOverride")}><Icon name="override" size={18} /></button>
-        <button type="button" className={ui.tool} title={t("undo")} disabled={!canUndo} onClick={() => run("history.undo")}><Icon name="undo" size={18} /></button>
-        <button type="button" className={ui.tool} title={t("redo")} disabled={!canRedo} onClick={() => run("history.redo")}><Icon name="redo" size={18} /></button>
       </div>
     </FloatingPanel>
   );

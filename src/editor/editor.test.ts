@@ -5,6 +5,8 @@ import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import type { Persistence, Snapshot } from "@/persistence/ports";
 import { loadPattern } from "./actions/pattern";
 import { Editor } from "./createEditor";
+import { shortcutLabel } from "./shortcuts/keymap";
+import { resolveTool } from "./tools/registry";
 import type { ToolPointer } from "./tools/types";
 
 function memoryPersistence(snaps: Snapshot[]): Persistence {
@@ -159,6 +161,19 @@ describe("chart underlay (SPEC §15.15)", () => {
 });
 
 describe("shortcuts", () => {
+  it("labels tool shortcuts for display", () => {
+    expect([shortcutLabel("tool.select", "pencil"), shortcutLabel("tool.select", "filledRect"), shortcutLabel("nope")]).toEqual(["P", "⇧R", null]);
+  });
+
+  it("reports the tool that will act: held tools win, and drawing with a backstitch entry draws lines", () => {
+    ed.setTool("rect");
+    const back = addEntry(ed.doc, { t: "back", src: "dmc:310", n: 1 }, ALL_SYMBOLS);
+    ed.store.setState({ activeEntry: back });
+    expect(resolveTool(ed.state).id).toBe("backstitch");
+    ed.store.setState({ momentaryTool: "pan" });
+    expect(resolveTool(ed.state).id).toBe("pan");
+  });
+
   it("tells R from Shift+R and ignores keys while typing", () => {
     ed.shortcuts.keyDown(key("R", { shift: true }));
     expect(ed.state.tool).toBe("filledRect");

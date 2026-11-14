@@ -2,7 +2,7 @@
   display: grid;
   height: 100vh;
   grid-template-columns: 1fr 360px;
-  grid-template-rows: 54px 1fr 30px;
+  grid-template-rows: auto 1fr 30px;
   grid-template-areas: "header header" "stage side" "status side";
 }
 .app.collapsed {

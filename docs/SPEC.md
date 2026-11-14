@@ -184,14 +184,18 @@ Brand mark · editable **pattern name** input (change → `P.name`, trimmed, def
 buttons **New**, **Open**, **Save**, **Save to file**, **Load file**, **Image → pattern**, **+ Reference** ·
 view segmented control **Colour / Both / Symbols** (default Both) · **Export ▾** menu.
 
-*New app (2026-11-14):* brand · pattern name (up to 380 px wide) · **File ▾** · **Save** · … · **Transform ▾** ·
-**Check…** (disabled placeholder, §15.4) · view switch · language. The File menu groups everything file-related;
+*New app (2026-11-14):* app name **бджілка** with the bee icon (`src/app/icon.png`, also the favicon) · pattern name
+(`clamp(140px, 13vw, 260px)` wide) · **File ▾** · **Save** · **main toolbar** (all tools, brush size 1–5, override,
+mirror, undo, redo — moved here from the side panel) · **Transform ▾** · **Check…** (disabled placeholder, §15.4) ·
+view switch. When one row doesn't fit (measured, so it works for every language), the toolbar moves to its own
+centred row under the app bar. The language picker moved to the right end of the status bar. The File menu groups everything file-related;
 items carry a muted second line saying what they do, and `▸` items open a submenu on hover or click:
 - **New ▸** Blank pattern… · From a picture…
 - Open saved pattern… · Open file from computer… (.json/.oxs) · **Versions…** (automatic snapshots, §15.7 — no
   longer inside the Open dialog)
 - Save (in this browser) · Download pattern file (.json)
-- **Export ▸** chart PNG (colour + symbols / symbols only / colour blocks) · Open Cross Stitch (.oxs) · shopping list (CSV)
+- **Export ▸** chart PNG (colour + symbols / symbols only / colour blocks) · Open Cross Stitch (.oxs — opens in
+  Хрестики and Ruta Stitch) · shopping list (CSV)
 - **Reference pictures ▸** Photo in a floating window… (§11) · Image behind the chart… (§15.15)
 - Pattern info…
 
@@ -201,7 +205,8 @@ The separate Export menu and the "Save to file" format dialog are gone (their it
 - Full-size `<canvas>` with rulers (§5).
 - Zoom control (bottom-right): `−`, percentage label (`round(zoom/12*100)%`), `+`, fit `⤢`.
 - **Mini toolbar** (only when side panel collapsed): expand button, active-key icon (click = expand),
-  pencil, eraser, picker, pan, override, undo, redo. *New app:* it appears at the **top right**, where the panel was,
+  pencil, eraser, picker, pan, override, undo, redo. *New app:* the tools live in the header, so it shows only the
+  expand button, the current tool's icon and the active entry; it appears at the **top right**, where the panel was,
   and can be dragged anywhere on the stage by its dotted grip; the position is remembered in this browser (double-click
   the grip to put it back).
 
@@ -212,8 +217,13 @@ grid size `W×H`, save status (`Patterns save in this browser` / `…to your acc
 
 ### 4.4 Side panel
 1. **Tool row**: pencil, line, rect, filled rect, fill, eraser, picker, pan | brush size select (1×1…5×5) | override toggle, mirror toggle | undo, redo | collapse.
-   *New app:* two rows — drawing tools + collapse; then select, magic wand | brush size as one-click buttons
-   **1 2 3 4 5** (with the Partial tool: one-click quarter / three-quarter / petite buttons) override, mirror | undo, redo.
+   *New app:* the tool row moved to the header (§4.1); brush size is one-click buttons **1 2 3 4 5** (with the
+   Partial tool: one-click quarter / three-quarter / petite buttons). The side panel now starts with a
+   **Drawing with** card: the tool that will act (icon, name, shortcut key — a held tool such as Alt = picker or
+   Space = move shows in accent colour with "while … is held"; drawing tools with a backstitch or knot entry say so),
+   its options (brush size, partial kind, override, mirror), and the active key entry (icon, code, details, Edit).
+   The entry is dimmed when the tool doesn't use it (picker, eraser, move, select). The panel's collapse button is in
+   the card's corner.
 2. **Key header**: "Key", count text (`N entries` / `1 entry`), **+ Add to key** button.
 3. **Key list** (§7).
 4. Collapsible **Fabric & size**: fabric count select (11/14/16/18 ct Aida, 28 ct over 2, 32 ct over 2),

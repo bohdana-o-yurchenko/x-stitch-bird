@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
 import type { ChartView } from "@/render/chart";
 import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
-import { Icon } from "../common/Icon";
-import { useCommand, useEditor, useEditorState } from "../hooks/editor";
+import { ToolBar } from "./ToolBar";
+import { useCommand, useEditorState } from "../hooks/editor";
 import s from "./header.module.css";
 
 function PatternName() {
@@ -34,27 +33,6 @@ function ViewSwitch() {
         </button>
       ))}
     </div>
-  );
-}
-
-function LanguageSwitch() {
-  const t = useTranslations("app");
-  const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
-  const ed = useEditor();
-  const change = (next: string) => {
-    ed.flush();
-    router.replace(pathname, { locale: next });
-  };
-  return (
-    <select className={s.lang} aria-label={t("language")} value={locale} onChange={(e) => change(e.target.value)}>
-      {routing.locales.map((l) => (
-        <option key={l} value={l}>
-          {l.toUpperCase()}
-        </option>
-      ))}
-    </select>
   );
 }
 
@@ -92,20 +70,48 @@ function FileMenu() {
   return <Dropdown className={cx(ui.btn, ui.ghost)} label={t("label")} items={items} />;
 }
 
+/** True when the header's items don't fit on one row; the toolbar then gets a row of its own. */
+function useStacked(bar: RefObject<HTMLElement | null>) {
+  const [stacked, setStacked] = useState(false);
+  useLayoutEffect(() => {
+    const el = bar.current!;
+    const measure = () => {
+      const items = [...el.children] as HTMLElement[];
+      // the toolbar's own width, not its (full-width) slot
+      const widths = items.map((c) => (c.dataset.slot === "tools" ? (c.firstElementChild as HTMLElement).offsetWidth : c.dataset.slot === "spacer" ? 0 : c.offsetWidth));
+      const style = getComputedStyle(el);
+      const room = el.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      setStacked(widths.reduce((a, b) => a + b, 0) + parseFloat(style.columnGap) * (items.length - 1) > room);
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    for (const c of el.children) ro.observe(c);
+    return () => ro.disconnect();
+  }, [bar]);
+  return stacked;
+}
+
 export function Header() {
   const t = useTranslations();
   const run = useCommand();
   const btn = cx(ui.btn, ui.ghost);
+  const bar = useRef<HTMLElement>(null);
+  const stacked = useStacked(bar);
   return (
-    <header className={s.bar}>
+    <header ref={bar} className={cx(s.bar, stacked && s.stacked)}>
       <div className={s.brand}>
-        <Icon name="brand" size={24} />
+        {/* app/icon.png, served by Next as the favicon too */}
+        <Image src="/icon.png" alt="" width={28} height={28} unoptimized priority />
         <span className={s.brandText}>{t("app.brand")}</span>
       </div>
       <PatternName />
       <FileMenu />
       <button type="button" className={btn} title={t("header.saveTitle")} onClick={() => run("file.save")}>{t("header.save")}</button>
-      <div className={s.spacer} />
+      <div className={s.spacer} data-slot="spacer" />
+      <div className={s.toolSlot} data-slot="tools">
+        <ToolBar />
+      </div>
+      <div className={s.spacer} data-slot="spacer" />
       <Dropdown
         className={btn}
         label={t("header.transform")}
@@ -122,7 +128,6 @@ export function Header() {
       {/* Chart checks are being redesigned (SPEC §15.4); the button stays as the placeholder */}
       <button type="button" className={btn} disabled title={t("header.checkSoon")}>{t("header.check")}</button>
       <ViewSwitch />
-      <LanguageSwitch />
     </header>
   );
 }

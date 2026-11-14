@@ -1,11 +1,7 @@
-import { entryKind } from "@/core/entryKinds/registry";
 import type { Editor } from "../createEditor";
-import type { ToolId } from "../store/editorStore";
 import { panTool } from "./pan";
-import { PLACEMENT_TOOLS, toolById } from "./registry";
+import { PLACEMENT_TOOLS, resolveTool, toolById } from "./registry";
 import type { Tool, ToolPointer } from "./types";
-
-const DRAW_TOOLS: readonly ToolId[] = ["pencil", "line", "rect", "filledRect"];
 
 /**
  * Routes canvas pointer events to the right tool. Priority: floating content, panning (middle/right button,
@@ -22,12 +18,7 @@ export class ToolManager {
 
   /** The tool that handles the next pointer event. */
   resolve(): Tool {
-    const s = this.ed.state, id = s.momentaryTool ?? s.tool, e = s.doc.key[s.activeEntry];
-    if (e && DRAW_TOOLS.includes(id)) {
-      const placement = entryKind(e.t).placement;
-      if (placement !== "cell") return PLACEMENT_TOOLS[placement];
-    }
-    return toolById(id);
+    return resolveTool(this.ed.state);
   }
 
   cursor(): string {

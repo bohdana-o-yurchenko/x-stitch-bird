@@ -1,8 +1,8 @@
 {
   "app": {
-    "title": "Stitchwork — Cross Stitch & Bead Pattern Designer",
+    "title": "бджілка — cross stitch & bead pattern designer",
     "description": "Design cross stitch and bead patterns: key, chart, totals, OXS and JSON files.",
-    "brand": "Stitchwork",
+    "brand": "бджілка",
     "loading": "Loading the editor…",
     "language": "Language",
     "chart": "Cross stitch chart",
@@ -66,7 +66,8 @@
     "fit": "Fit to screen (0)",
     "zoomIn": "Zoom in (+)",
     "zoomOut": "Zoom out (−)",
-    "brushSizeN": "Brush {n}×{n}"
+    "brushSizeN": "Brush {n}×{n}",
+    "toolbar": "Drawing tools"
   },
   "status": {
     "position": "Column <b>{col}</b> · Row <b>{row}</b>",
@@ -388,7 +389,7 @@
     "downloaded": "Downloaded {name}",
     "loaded": "Loaded {name}",
     "loadedReport": "Loaded {name} — {count} quarter stitches or ornaments simplified or skipped",
-    "badFile": "Couldn’t read that file — it should be a Stitchwork .json or an .oxs",
+    "badFile": "Couldn’t read that file — it should be a pattern .json or an .oxs",
     "badImage": "Couldn’t read that image",
     "dropHint": "Drop a .json or .oxs pattern, or a picture",
     "imageCreated": "Pattern created — {count} colours",
@@ -465,7 +466,7 @@
     "pngSymbols": "Chart image — symbols only, for printing (PNG)",
     "pngColor": "Preview image — colour blocks (PNG)",
     "oxs": "Open Cross Stitch file (.oxs)",
-    "oxsHint": "For Pattern Keeper, WinStitch, MacStitch…",
+    "oxsHint": "Opens in Хрестики and Ruta Stitch",
     "csv": "Shopping list (CSV)",
     "references": "Reference pictures",
     "refWindow": "Photo in a floating window…",
@@ -474,5 +475,32 @@
     "refUnderlayHint": "Lies under your stitches, aligned to the grid, to trace over",
     "info": "Pattern info…",
     "infoHint": "Designer, source, copyright, notes"
+  },
+  "toolNames": {
+    "pencil": "Draw",
+    "line": "Line",
+    "rect": "Rectangle outline",
+    "filledRect": "Filled rectangle",
+    "fill": "Fill area",
+    "partial": "Partial stitches",
+    "eraser": "Eraser",
+    "picker": "Picker",
+    "pan": "Move the view",
+    "select": "Select",
+    "magicWand": "Magic wand",
+    "backstitch": "Backstitch line",
+    "knot": "French knot"
+  },
+  "current": {
+    "title": "Drawing with",
+    "held": "while {key} is held",
+    "space": "Space",
+    "placesBackstitch": "{tool} with a backstitch entry",
+    "placesKnots": "{tool} with a French knot entry",
+    "brush": "brush {n}×{n}",
+    "override": "override on",
+    "noEntry": "No key entry chosen",
+    "noEntryHint": "Pick one in the key below",
+    "edit": "Edit"
   }
 }

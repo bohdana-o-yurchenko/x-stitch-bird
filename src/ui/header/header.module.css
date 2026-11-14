@@ -1,19 +1,18 @@
 .bar {
-  height: 100%;
+  min-height: 54px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  padding: 0 12px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
-  overflow-x: auto;
-  overflow-y: visible;
 }
 .brand {
-  font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 19px;
-  letter-spacing: -0.01em;
+  font-family: var(--font-brand), var(--font-heading);
+  font-weight: 800;
+  font-size: 21px;
+  letter-spacing: 0;
   margin-right: 6px;
   display: flex;
   align-items: center;
@@ -21,13 +20,12 @@
   white-space: nowrap;
 }
 .name {
-  flex: 0 1 380px;
-  width: 380px;
+  flex: none;
+  width: clamp(140px, 13vw, 260px);
   border: 1px solid transparent;
   background: transparent;
   border-radius: 6px;
   padding: 4px 8px;
-  min-width: 140px;
   font-weight: 500;
 }
 .name:hover,
@@ -39,15 +37,62 @@
 .spacer {
   flex: 1;
 }
-.lang {
-  font-size: 12px;
-  border: 1px solid var(--line2);
-  border-radius: 7px;
-  padding: 4px;
-  background: #fff;
+.toolSlot {
+  display: flex;
+  justify-content: center;
 }
-@media (max-width: 900px) {
+/* Not enough room for one row (measured in Header.tsx): the toolbar gets its own row under the app bar */
+.stacked .toolSlot {
+  order: 10;
+  flex-basis: 100%;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 760px) {
   .brandText {
     display: none;
   }
+}
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+}
+.tools > button {
+  width: 32px;
+  height: 32px;
+}
+.sep {
+  width: 1px;
+  height: 22px;
+  background: var(--line2);
+  margin: 0 3px;
+}
+.sizes {
+  display: flex;
+  border: 1px solid var(--line2);
+  border-radius: 7px;
+  overflow: hidden;
+  height: 30px;
+  background: #fff;
+}
+.sizes button {
+  min-width: 22px;
+  border: 0;
+  border-right: 1px solid var(--line2);
+  background: transparent;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  padding: 0 4px;
+}
+.sizes button:last-child {
+  border-right: 0;
+}
+.sizes button:hover {
+  background: var(--sel);
+}
+.sizes button.on {
+  background: var(--ink);
+  color: #fff;
 }

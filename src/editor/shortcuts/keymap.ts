@@ -19,6 +19,12 @@ export const HOLD_BINDINGS: readonly HoldBinding[] = [
   { hold: "Alt", tool: "picker" },
 ];
 
+/** Display form of the first binding for a command (and args), e.g. "P" or "⇧R"; null when unbound. */
+export function shortcutLabel(command: string, args?: unknown): string | null {
+  const b = KEYMAP.find((k) => k.command === command && k.args === args && !k.when);
+  return b ? b.keys.split("+").map((p) => (p === "shift" ? "⇧" : p === "mod" ? "Ctrl/⌘" : p.length === 1 ? p.toUpperCase() : p)).join("") : null;
+}
+
 /** `mod` = ⌘ on macOS, Ctrl elsewhere. Letters respect Shift; symbols and digits ignore it. */
 export const KEYMAP: readonly KeyBinding[] = [
   { keys: "mod+z", command: "history.undo" },

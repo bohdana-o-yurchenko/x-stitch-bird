@@ -98,6 +98,17 @@ test("the File menu opens above the chart, with submenus", async ({ page }) => {
   await expect(page.getByRole("menuitem", { name: "Shopping list (CSV)" })).toBeInViewport();
 });
 
+test("shows what you are drawing with, including held tools", async ({ page }) => {
+  const name = page.getByTestId("current-tool-name");
+  await expect(name).toContainText("Draw");
+  await page.keyboard.press("e");
+  await expect(name).toContainText("Eraser");
+  await page.keyboard.down("Alt");
+  await expect(name).toContainText("Picker");
+  await page.keyboard.up("Alt");
+  await expect(name).toContainText("Eraser");
+});
+
 test("brush size takes one click", async ({ page }) => {
   await page.getByRole("button", { name: "Brush 3×3" }).click();
   expect(await editorState<number>(page, "(ed) => ed.state.brush")).toBe(3);

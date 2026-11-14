@@ -1029,6 +1029,10 @@ Decisions taken while implementing this plan. Each one lives in the single place
 - Chart checks (SPEC §15.4) were removed on 2026-11-14 for a redesign: no `core/checks`, `editor/checks` or panel.
   The disabled **Check…** button in `ui/header/Header.tsx` is the placeholder. A new design should come back as a
   core module (pure functions over a `Pattern`) + an editor session + a side-panel section, like before.
+- The main toolbar is `ui/header/ToolBar.tsx`; the header measures whether everything fits on one row and otherwise
+  gives the toolbar its own row (`useStacked`). `ui/side/CurrentTool.tsx` is the "Drawing with" card; it and the
+  canvas share `resolveTool` (`editor/tools/registry.ts`), and shortcut labels come from `shortcutLabel` (keymap).
+- App name and icon: `app.brand` / `app.title` messages and `src/app/icon.png` (Next's icon file convention).
 - Menus: `Dropdown` in `ui/common/widgets.tsx` takes `MenuItem[]` (actions, `"-"` separators, nested `items` for
   submenus, optional `hint` line). The File menu is defined in `ui/header/Header.tsx`.
 - Floating stage panels (collapsed toolbar, underlay alignment pad) use `ui/stage/FloatingPanel.tsx`: draggable

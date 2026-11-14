@@ -71,6 +71,15 @@
   gap: 3px;
   padding: 2px 5px 5px;
 }
+.miniTool {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--ink);
+  color: #fff;
+}
 .miniKey {
   border: 0;
   background: transparent;

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import { cellLabel } from "@/core/grid/numbering";
 import { cx, ui } from "../common/widgets";
-import { useCommand, useEditorState } from "../hooks/editor";
+import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
 import s from "./status.module.css";
 
@@ -26,6 +28,27 @@ function AmbiguousStatus() {
         </span>
       )}
     </span>
+  );
+}
+
+function LanguageSwitch() {
+  const t = useTranslations("app");
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const ed = useEditor();
+  const change = (next: string) => {
+    ed.flush();
+    router.replace(pathname, { locale: next });
+  };
+  return (
+    <select className={s.lang} aria-label={t("language")} value={locale} onChange={(e) => change(e.target.value)}>
+      {routing.locales.map((l) => (
+        <option key={l} value={l}>
+          {l.toUpperCase()}
+        </option>
+      ))}
+    </select>
   );
 }
 
@@ -58,6 +81,7 @@ export function StatusBar() {
       <span className={s.hint}>{underlayEditing ? t("underlayHint") : t("hint")}</span>
       <span>{`${p.w}×${p.h}`}</span>
       <span>{savedAt ? t("savedAt", { time: new Date(savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }) : t("savesLocal")}</span>
+      <LanguageSwitch />
     </div>
   );
 }
