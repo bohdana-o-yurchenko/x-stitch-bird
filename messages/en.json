@@ -478,9 +478,7 @@
     "refUnderlay": "Image behind the chart…",
     "refUnderlayHint": "Lies under your stitches, aligned to the grid, to trace over",
     "info": "Pattern info…",
-    "infoHint": "Designer, source, copyright, notes",
-    "refWindowsShow": "Show photo windows ({count})",
-    "refWindowsShowHint": "Hide them without closing — photos and marks are kept"
+    "infoHint": "Designer, source, copyright, notes"
   },
   "toolNames": {
     "pencil": "Draw",

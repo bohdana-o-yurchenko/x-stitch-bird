@@ -194,24 +194,6 @@ test("deleting a saved pattern asks first", async ({ page }) => {
   await expect(page.getByText("No saved patterns", { exact: false })).toBeVisible();
 });
 
-test("photo windows can be hidden from the menu and stay hidden after a reload", async ({ page }) => {
-  await loadFixture(page, "1.json");
-  const windows = page.getByTestId("reference-window");
-  await expect(windows).toHaveCount(1);
-  await fileAction(page, "Reference pictures", "Show photo windows (1)");
-  await expect(windows).toHaveCount(0);
-  await page.waitForTimeout(1200);
-  await page.reload();
-  await expect(page.locator("[data-entry]")).toHaveCount(23);
-  await expect(windows).toHaveCount(0);
-  await page.getByRole("button", { name: "Menu ▾" }).click();
-  await page.getByRole("menuitem", { name: /^Reference pictures/ }).click();
-  const toggle = page.getByRole("menuitemcheckbox", { name: /Show photo windows/ });
-  await expect(toggle).toHaveAttribute("aria-checked", "false");
-  await toggle.click();
-  await expect(windows).toHaveCount(1);
-});
-
 test("brush size takes one click", async ({ page }) => {
   await page.getByRole("button", { name: "Brush 3×3" }).click();
   expect(await editorState<number>(page, "(ed) => ed.state.brush")).toBe(3);

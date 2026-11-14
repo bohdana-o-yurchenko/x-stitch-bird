@@ -73,7 +73,6 @@ export const COMMANDS: readonly Command[] = [
   { id: "image.open", run: (ed, f) => openImageDialog(ed, f as File) },
   { id: "image.create", run: (ed, a) => { const { result, image, keepReference } = a as never; ed.createFromImage(result, image, keepReference); }, destructive: "image" },
   { id: "reference.pick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await ed.addReferenceFromFile(f); } },
-  { id: "reference.toggleVisible", run: (ed) => ed.store.setState({ referencesHidden: !ed.state.referencesHidden }) },
   { id: "reference.open", run: (ed, f) => ed.addReferenceFromFile(f as File) },
   { id: "pattern.editInfo", run: (ed) => ed.openDialog({ type: "patternInfo" }) },
   { id: "pattern.setInfo", run: (ed, meta) => setPatternSettings(ed, { meta: meta as PatternMeta }) },

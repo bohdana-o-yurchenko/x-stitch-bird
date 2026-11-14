@@ -204,9 +204,7 @@ items carry a muted second line saying what they do, and `▸` items open a subm
 - Save (in this browser) · Download pattern file (.xbird, §9.7)
 - **Export ▸** chart PNG (colour + symbols / symbols only / colour blocks) · Open Cross Stitch (.oxs — opens in
   Хрестики and Ruta Stitch) · shopping list (CSV)
-- **Reference pictures ▸** Photo in a floating window… (§11) · Image behind the chart… (§15.15) · **Show photo windows (N)**
-  — a tick item that hides or shows all floating photo windows without closing them (photos, marks and positions
-  are kept; disabled when there are none). Remembered in this browser; adding a new photo window shows them again.
+- **Reference pictures ▸** Photo in a floating window… (§11) · Image behind the chart… (§15.15)
 - Pattern info…
 
 The separate Export menu and the "Save to file" format dialog are gone (their items are in File ▸ Export).

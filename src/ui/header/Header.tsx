@@ -27,8 +27,6 @@ function PatternNameInput({ name }: { name: string }) {
 function FileMenu() {
   const t = useTranslations("fileMenu");
   const run = useCommand();
-  const refCount = useEditorState((st) => st.references.length);
-  const refsHidden = useEditorState((st) => st.referencesHidden);
   const go = (command: string, args?: unknown) => () => void run(command, args);
   const items: MenuItem[] = [
     { label: t("new"), items: [
@@ -53,8 +51,6 @@ function FileMenu() {
     { label: t("references"), items: [
       { label: t("refWindow"), hint: t("refWindowHint"), onClick: go("reference.pick") },
       { label: t("refUnderlay"), hint: t("refUnderlayHint"), onClick: go("underlay.pick") },
-      "-",
-      { label: t("refWindowsShow", { count: refCount }), hint: t("refWindowsShowHint"), checked: !refsHidden && refCount > 0, disabled: !refCount, onClick: go("reference.toggleVisible") },
     ] },
     "-",
     { label: t("info"), hint: t("infoHint"), onClick: go("pattern.editInfo") },

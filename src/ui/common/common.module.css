@@ -311,13 +311,3 @@
   white-space: pre-line;
   box-shadow: var(--shadow);
 }
-.menu button.checkItem {
-  position: relative;
-  padding-left: 30px;
-}
-.tick {
-  position: absolute;
-  left: 10px;
-  top: 8px;
-  font-weight: 700;
-}

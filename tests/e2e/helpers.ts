@@ -35,10 +35,7 @@ const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 /** Click through the File menu: `fileAction(page, "Export", "Shopping list (CSV)")`. Items match by label start. */
 export async function fileAction(page: Page, ...path: string[]) {
   await page.getByRole("button", { name: "Menu ▾" }).click();
-  for (const label of path) {
-    const name = new RegExp(`^${escape(label)}`);
-    await page.getByRole("menuitem", { name }).or(page.getByRole("menuitemcheckbox", { name })).click();
-  }
+  for (const name of path) await page.getByRole("menuitem", { name: new RegExp(`^${escape(name)}`) }).click();
 }
 
 export async function loadFixture(page: Page, name: string) {
