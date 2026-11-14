@@ -311,3 +311,8 @@
   white-space: pre-line;
   box-shadow: var(--shadow);
 }
+.sectionTitle {
+  margin: 0 0 2px;
+  font-size: 13.5px;
+  font-weight: 700;
+}

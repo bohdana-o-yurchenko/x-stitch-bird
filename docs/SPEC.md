@@ -850,6 +850,13 @@ faithful copy is impossible without them):
   the size can be undone instead of wiping history.
 
 ### 15.1 Pattern metadata — priority one
+
+> *Checked against the OXS spec (2026-11-14):* OXS `<properties>` has only `charttitle`, `author`, `copyright` and
+> `instructions` for text info (plus size, stitches per inch, palette count, software). We write the pattern name,
+> the designer (as author), copyright and instructions; Хрестики shows the name and author. The **Pattern info**
+> dialog therefore shows those four first ("Goes into the .oxs file", with the pattern name editable there too)
+> and folds the rest — publisher, source, year, issue/page, digitised by/on, notes — under "More — kept only in your
+> .xbird file". The "Designer" field is labelled "Author (designer)".
 - `P.meta` holds optional strings: `designer`, `publisher`, `source` (book / magazine / leaflet title),
   `sourceYear`, `sourceRef` (issue, page, chart number), `copyright`, `notes` (e.g. "mapped with permission"),
   `instructions` (multi-line), `mappedBy`, `mappedDate`.

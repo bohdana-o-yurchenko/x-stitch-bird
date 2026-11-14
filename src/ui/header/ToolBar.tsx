@@ -43,7 +43,7 @@ export function ToolBar() {
       <button type="button" className={ui.tool} title={t("undo")} disabled={!canUndo} onClick={() => run("history.undo")}><Icon name="undo" size={18} /></button>
       <button type="button" className={ui.tool} title={t("redo")} disabled={!canRedo} onClick={() => run("history.redo")}><Icon name="redo" size={18} /></button>
       <span className={s.sep} />
-      <button type="button" className={cx(ui.tool, override && ui.on)} title={t("override")} aria-pressed={override} onClick={() => run("draw.toggleOverride")}><Icon name="override" size={18} /></button>
+      <button type="button" className={cx(ui.tool, override && ui.on)} title={t("override")} aria-pressed={override} data-guide="override" onClick={() => run("draw.toggleOverride")}><Icon name="override" size={18} /></button>
       <button type="button" className={cx(ui.tool, mirror !== "off" && ui.on)} title={`${t("mirror")} — ${t(MIRROR_LABEL[mirror])}`} onClick={() => run("draw.cycleMirror")}><Icon name="mirror" size={18} /></button>
       <span className={s.sep} />
       {toolButton("pencil")}

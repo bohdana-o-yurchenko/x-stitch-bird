@@ -291,10 +291,14 @@
     "versionsHint": "Saved automatically before big changes and every few minutes while you work.",
     "deleteSavedTitle": "Delete “{name}”",
     "deleteSavedBody": "Delete <b>{name}</b> from this browser? This can’t be undone. Downloaded .xbird files are not affected.",
-    "deleteSaved": "Delete"
+    "deleteSaved": "Delete",
+    "infoOxs": "Goes into the .oxs file",
+    "infoOxsHint": "The only info the OXS format has. Хрестики show the name and the author.",
+    "infoOwn": "More — kept only in your .xbird file",
+    "infoOwnHint": "Other apps don’t read these; they stay with your pattern file."
   },
   "meta": {
-    "designer": "Designer",
+    "designer": "Author (designer)",
     "publisher": "Publisher",
     "source": "Source (book, magazine, leaflet)",
     "sourceYear": "Year",
@@ -614,7 +618,7 @@
         "1": "<hl>Ctrl/⌘ + Z</hl> — undo.",
         "2": "Hold <hl>Alt/⌥</hl> — pick a colour from the chart.",
         "3": "<hl>S</hl> — select, copy, paste, move.",
-        "4": "Drawing never overwrites filled squares."
+        "4": "By default drawing never overwrites filled squares. Need to? Turn on <hl>Override</hl> (O)."
       },
       "tip": "Every shortcut: the <hl>i</hl> button."
     },
@@ -634,7 +638,7 @@
     "finish": {
       "title": "8. Export",
       "points": {
-        "1": "Fill in <hl>Pattern info</hl>.",
+        "1": "In <hl>Pattern info</hl> fill in the <hl>name</hl> and <hl>author</hl> — Хрестики show them.",
         "2": "Export an <hl>Open Cross Stitch file (.oxs)</hl> — for Хрестики and Ruta Stitch."
       }
     },

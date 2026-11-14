@@ -20,7 +20,7 @@ const STEPS: { id: string; targets: string[]; reveal?: string[]; tip?: boolean }
   { id: "key", targets: ["add-key", "menu:refWindow"], reveal: ["references"], tip: true },
   { id: "trace", targets: ["menu:refUnderlay"], reveal: ["references"], tip: true },
   { id: "views", targets: ["views"] },
-  { id: "tools", targets: ["toolbar", "shortcuts"], tip: true },
+  { id: "tools", targets: ["toolbar", "override", "shortcuts"], tip: true },
   { id: "save", targets: ["saved", "menu:download"], reveal: [] },
   { id: "versions", targets: ["menu:versions"], reveal: [] },
   { id: "finish", targets: ["menu:info", "menu:oxs"], reveal: ["export"] },
