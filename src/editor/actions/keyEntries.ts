@@ -45,7 +45,8 @@ export function draftFor(ed: Editor, edit?: KeyIndex): KeyDraft {
   return d;
 }
 
-const usesBlend = (d: KeyDraft) => d.mode === "blend" && (d.t === "thread" || d.t === "back" || d.t === "knot");
+/** The draft is a blend of 2–3 threads (single-thread kinds only). */
+export const usesBlend = (d: KeyDraft) => d.mode === "blend" && (d.t === "thread" || d.t === "back" || d.t === "knot");
 
 /** Existing blend/combo id for the draft, a placeholder if it would be new, or null when incomplete. */
 export function resolveDraftSource(ed: Editor, d: KeyDraft, create: boolean): string | null {

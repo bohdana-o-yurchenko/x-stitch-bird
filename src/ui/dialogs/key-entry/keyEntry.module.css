@@ -48,31 +48,12 @@
   color: var(--muted);
   white-space: nowrap;
 }
-.row2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
 .label {
   font-size: 12px;
   color: var(--muted);
-  min-width: 56px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-.two {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.options {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 4px;
-  border-top: 1px solid var(--line);
 }
 .symbtn {
   width: 38px;
@@ -128,8 +109,132 @@
   background: #f3ece0;
   border-radius: 10px;
 }
-@media (max-width: 700px) {
-  .two {
-    grid-template-columns: 1fr;
-  }
+
+/* the form docked in the side panel (SPEC §8): header, scrolling body, buttons always in view */
+.form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+.formHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 12px 8px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.formHead h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 17px;
+  margin: 0;
+  flex: 1;
+}
+.formBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.formFoot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.spacer {
+  flex: 1;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chips button {
+  border: 1px solid var(--line2);
+  background: #fff;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 13px;
+}
+.chips button:hover {
+  background: var(--sel);
+}
+.chips button.chipOn {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+/* colour lines: a single floss, each floss of a blend, a combo's floss and bead — same look, own strands */
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+.line.lineOn {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.line select {
+  flex: none;
+}
+.lineText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.lineLabel {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.lineValue {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  min-width: 0;
+  font-size: 14px;
+}
+.lineName {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.finder summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 2px 0 6px;
 }

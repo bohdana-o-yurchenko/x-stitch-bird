@@ -73,7 +73,10 @@
     "ambiguousClear": "Clear all marks",
     "markedAmbiguous": "marked ambiguous",
     "underlayHint": "Editing the image behind the chart · drag to move · corners resize (Shift = free) · arrows nudge · Esc or U = done",
-    "noEntry": "No key entry chosen"
+    "noEntry": "No key entry chosen",
+    "ambiguousClearTitle": "Clear all {count, plural, one {# “?” mark} other {# “?” marks}}?",
+    "ambiguousClearConfirm": "Clear marks",
+    "ambiguousClearBody": "Only the marks go; the stitches under them stay. You can undo this."
   },
   "key": {
     "heading": "Key",
@@ -186,12 +189,14 @@
     "saveAnyway": "Save anyway",
     "typeLocked": "This entry is already on the chart — only cross stitch ↔ floss + bead can be swapped",
     "layerLocked": "Can’t move an entry that’s on the chart to a different layer",
-    "typeThreadPlaceholder": "Type a DMC number…",
-    "strandsShort": "{n} str",
-    "thirdColour": "+ Third colour",
     "findBlend": "Find a blend for a colour:",
     "find": "Find",
-    "finding": "Searching…"
+    "finding": "Searching…",
+    "beadLine": "Bead",
+    "flossN": "Floss {n}",
+    "addFloss": "+ Add a third floss",
+    "removeFloss": "Remove this floss",
+    "pickFromList": "pick from the list below"
   },
   "picker": {
     "searchThread": "Search DMC number or name",
@@ -216,8 +221,7 @@
     "close": "Close",
     "ok": "OK",
     "delete": "Delete",
-    "deleteEntryTitle": "Delete {title}?",
-    "deleteEntryBody": "It’s used {count, plural, one {# time} other {# times}} on the chart. Deleting the entry removes those stitches too.",
+    "deleteEntryTitle": "Delete {title} from the key?",
     "resizeTitle": "Resize grid",
     "width": "Width (stitches)",
     "height": "Height (stitches)",
@@ -279,12 +283,12 @@
     "replace": "Replace",
     "copy": "Copy",
     "copyFallback": "Downloads aren’t available here. Copy this text into a file ending in .{ext}.",
-    "clearMarksTitle": "Clear marks?",
-    "clearMarksBody": "This removes everything you’ve marked on “{name}”.",
+    "clearMarksTitle": "Clear the marks on “{name}”?",
+    "clearMarksBody": "Everything drawn on this picture is deleted; the picture stays. The window’s undo brings the marks back.",
     "clear": "Clear",
-    "closeRefTitle": "Close “{name}”?",
-    "closeRefBody": "Its marks will be deleted too.",
-    "closeWindow": "Close window",
+    "closeRefTitle": "Delete the picture “{name}”?",
+    "closeRefBody": "The window closes and the picture leaves this pattern, with everything marked on it. This can’t be undone.",
+    "closeWindow": "Delete picture",
     "drop": "Drop a .xbird or .oxs pattern, or a picture",
     "putBehind": "Image behind the chart",
     "versionsTitle": "Versions of this pattern",
@@ -295,7 +299,9 @@
     "infoOxs": "Goes into the .oxs file",
     "infoOxsHint": "The only info the OXS format has. Хрестики show the name and the author.",
     "infoOwn": "More — kept only in your .xbird file",
-    "infoOwnHint": "Other apps don’t read these; they stay with your pattern file."
+    "infoOwnHint": "Other apps don’t read these; they stay with your pattern file.",
+    "deleteEntryUsed": "It’s on the chart {count, plural, one {# time} other {# times}} — those stitches are deleted too. You can undo this.",
+    "deleteEntryUnused": "It isn’t used on the chart. You can undo this."
   },
   "meta": {
     "designer": "Author (designer)",
@@ -315,7 +321,7 @@
     "rename": "Double-click to rename",
     "opacity": "Window see-through",
     "minimise": "Minimise",
-    "close": "Close",
+    "close": "Close and delete this picture",
     "pan": "Move / zoom the photo (or right-drag; wheel zooms)",
     "marker": "Marker — paint over what you’ve done",
     "eraser": "Erase marker",
@@ -453,7 +459,10 @@
     "straightenTitle": "Drag the photo’s corners onto the chart grid; the picture is flattened to fit it exactly",
     "padToggle": "Quick move & resize panel on the chart",
     "padToggleHint": "A small floating panel to nudge and stretch the image at any zoom",
-    "closePad": "Hide this panel (turn it on again in the side panel)"
+    "closePad": "Hide this panel (turn it on again in the side panel)",
+    "removeTitle": "Remove the picture behind the chart?",
+    "removeConfirm": "Remove picture",
+    "removeBody": "The photo behind the chart leaves this pattern, with its straightening and position. Your stitches stay. This can’t be undone."
   },
   "fileMenu": {
     "label": "Menu ▾",

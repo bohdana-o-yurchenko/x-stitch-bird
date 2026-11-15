@@ -2,7 +2,6 @@
 
 import { useEditor, useEditorState } from "../hooks/editor";
 import { ImageImportDialog } from "./ImageImportDialog";
-import { KeyEntryDialog } from "./key-entry/KeyEntryDialog";
 import { OpenPatternDialog, VersionsDialog } from "./OpenPatternDialog";
 import { StraightenDialog } from "./StraightenDialog";
 import {
@@ -17,7 +16,6 @@ export function DialogHost() {
   if (!d) return null;
   const close = () => ed.closeDialog();
   switch (d.type) {
-    case "keyEntry": return <KeyEntryDialog key={d.edit ?? "new"} edit={d.edit} onClose={close} />;
     case "deleteEntry": return <DeleteEntryDialog index={d.index} count={d.count} onClose={close} />;
     case "newPattern": return <NewPatternDialog onClose={close} />;
     case "open": return <OpenPatternDialog onClose={close} />;

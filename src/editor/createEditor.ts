@@ -144,6 +144,17 @@ export class Editor {
     this.store.setState({ dialog: null });
   }
 
+  /** Opens the key entry form in the side panel (showing the panel if it was hidden). */
+  openKeyForm(edit?: KeyIndex) {
+    this.tools.cancel();
+    this.shortcuts.releaseAll();
+    this.store.setState({ keyForm: { edit, seq: (this.state.keyForm?.seq ?? 0) + 1 }, panelCollapsed: false });
+  }
+
+  closeKeyForm() {
+    this.store.setState({ keyForm: null });
+  }
+
   setOverlay(patch: Partial<Overlay>) {
     this.store.setState({ overlay: { ...this.state.overlay, ...patch } });
   }

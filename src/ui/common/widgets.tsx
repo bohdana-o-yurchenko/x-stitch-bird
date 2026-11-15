@@ -8,6 +8,7 @@ import type { PaletteSlot } from "@/core/pattern/palette";
 import type { ChartView } from "@/render/chart";
 import { drawKeyIcon } from "@/render/keyIcon";
 import { useEditor, useEditorState } from "../hooks/editor";
+import { Icon } from "./Icon";
 import s from "./common.module.css";
 
 export const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
@@ -15,6 +16,8 @@ export const cx = (...c: (string | false | null | undefined)[]) => c.filter(Bool
 export interface ModalButton {
   label: string;
   primary?: boolean;
+  /** The confirming button of a delete. */
+  danger?: boolean;
   disabled?: boolean;
   /** Return false to keep the dialog open. */
   onClick?: () => unknown;
@@ -36,7 +39,8 @@ export function Modal({ title, wide, children, buttons, onClose }: { title: stri
             <button
               key={b.label}
               type="button"
-              className={cx(s.btn, b.primary && s.primary)}
+              className={cx(s.btn, b.primary && s.primary, b.danger && s.dangerBtn)}
+              autoFocus={b.danger}
               disabled={b.disabled}
               onClick={async () => {
                 if ((await b.onClick?.()) !== false) onClose();
@@ -48,6 +52,25 @@ export function Modal({ title, wide, children, buttons, onClose }: { title: stri
         </div>
       </div>
     </div>
+  );
+}
+
+/** The one delete button everywhere: a red bin. `label` says what it deletes (tooltip and screen readers). */
+export function DeleteButton({ label, onClick, size = 17, testId }: { label: string; onClick: () => void; size?: number; testId?: string }) {
+  return (
+    <button type="button" className={cx(s.iconbtn, s.deleteBtn)} title={label} aria-label={label} data-testid={testId} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      <Icon name="trash" size={size} />
+    </button>
+  );
+}
+
+/** Asks before deleting: the title names what goes, the body says what else happens. */
+export function ConfirmDelete({ title, confirm, onConfirm, onClose, children }: { title: string; confirm: string; onConfirm: () => unknown; onClose: () => void; children: ReactNode }) {
+  const t = useTranslations("dialogs");
+  return (
+    <Modal title={title} onClose={onClose} buttons={[{ label: t("cancel") }, { label: confirm, danger: true, onClick: onConfirm }]}>
+      <div data-testid="confirm-delete" style={{ display: "contents" }}>{children}</div>
+    </Modal>
   );
 }
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { cellLabel } from "@/core/grid/numbering";
-import { KeyIcon, cx, ui } from "../common/widgets";
+import { ConfirmDelete, KeyIcon, cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
 import s from "./status.module.css";
@@ -15,6 +15,7 @@ function AmbiguousStatus() {
   useEditorState((st) => st.docRevision);
   const count = useEditorState((st) => st.doc.layers.ambiguous.size);
   const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState(false);
   if (!count) return null;
   return (
     <span className={s.amb}>
@@ -22,8 +23,13 @@ function AmbiguousStatus() {
       <button type="button" className={s.link} aria-label={t("ambiguousClear")} onClick={() => setOpen(!open)}>▾</button>
       {open && (
         <span className={s.pop}>
-          <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => { setOpen(false); run("ambiguous.clearAll"); }}>{t("ambiguousClear")}</button>
+          <button type="button" className={cx(ui.btn, ui.sm, ui.deleteText)} onClick={() => { setOpen(false); setConfirm(true); }}>{t("ambiguousClear")}</button>
         </span>
+      )}
+      {confirm && (
+        <ConfirmDelete title={t("ambiguousClearTitle", { count })} confirm={t("ambiguousClearConfirm")} onConfirm={() => run("ambiguous.clearAll")} onClose={() => setConfirm(false)}>
+          <p className={ui.hint}>{t("ambiguousClearBody")}</p>
+        </ConfirmDelete>
       )}
     </span>
   );

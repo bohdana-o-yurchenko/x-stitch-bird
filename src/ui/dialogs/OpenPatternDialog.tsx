@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { PatternSummary, SnapshotSummary } from "@/editor/types";
 import { TimeSpent } from "../common/TimeSpent";
-import { Modal, cx, ui } from "../common/widgets";
+import { DeleteButton, Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor } from "../hooks/editor";
 
 export function OpenPatternDialog({ onClose }: { onClose: () => void }) {
@@ -33,7 +33,7 @@ export function OpenPatternDialog({ onClose }: { onClose: () => void }) {
             <p style={{ margin: "0 0 8px" }}>{t.rich("dialogs.deleteSavedBody", { name: it.name, b: (c) => <b>{c}</b> })}</p>
             <div className={ui.row}>
               <button type="button" className={cx(ui.btn, ui.sm)} autoFocus onClick={() => setConfirming(null)}>{t("dialogs.cancel")}</button>
-              <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} onClick={() => void remove(it.id)}>{t("dialogs.deleteSaved")}</button>
+              <button type="button" className={cx(ui.btn, ui.sm, ui.dangerBtn)} onClick={() => void remove(it.id)}>{t("dialogs.deleteSaved")}</button>
             </div>
           </div>
         ) : (
@@ -49,7 +49,7 @@ export function OpenPatternDialog({ onClose }: { onClose: () => void }) {
               </span>
             </span>
           </button>
-          <button type="button" className={ui.iconbtn} aria-label={t("dialogs.deleteSavedTitle", { name: it.name })} title={t("dialogs.deleteSavedTitle", { name: it.name })} onClick={() => setConfirming(it.id)}>🗑</button>
+          <DeleteButton label={t("dialogs.deleteSavedTitle", { name: it.name })} onClick={() => setConfirming(it.id)} />
         </div>
         ),
       )}

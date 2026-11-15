@@ -89,6 +89,32 @@
   background: var(--sel2);
   color: var(--ink);
 }
+.iconbtn.deleteBtn {
+  color: var(--danger);
+  display: inline-grid;
+  place-items: center;
+}
+.iconbtn.deleteBtn:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+/* a text button that deletes: red text and bin, red tint on hover */
+.btn.deleteText {
+  color: var(--danger);
+  gap: 5px;
+}
+.btn.deleteText:hover {
+  background: var(--danger-bg);
+}
+.dangerBtn,
+.dangerBtn:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+.dangerBtn:hover {
+  filter: brightness(1.08);
+}
 
 .field {
   display: flex;

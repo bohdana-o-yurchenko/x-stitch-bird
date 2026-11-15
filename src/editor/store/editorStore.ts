@@ -19,7 +19,6 @@ export interface Toast {
 
 /** Dialogs the UI should show; the editor asks, the UI renders (ARCHITECTURE §5). */
 export type DialogRequest =
-  | { type: "keyEntry"; edit?: KeyIndex }
   | { type: "deleteEntry"; index: KeyIndex; count: number }
   | { type: "newPattern" }
   | { type: "open" }
@@ -84,6 +83,8 @@ export interface EditorState {
   canRedo: boolean;
   savedAt: number | null;
   dialog: DialogRequest | null;
+  /** The add/edit key entry form, docked in the side panel so the chart and references stay visible. */
+  keyForm: { edit?: KeyIndex; seq: number } | null;
   toasts: Toast[];
   references: RefWindowData[];
   underlay: UnderlayData | null;
@@ -128,6 +129,7 @@ export const createEditorStore = () =>
     canRedo: false,
     savedAt: null,
     dialog: null,
+    keyForm: null,
     toasts: [],
     references: [],
     underlay: null,

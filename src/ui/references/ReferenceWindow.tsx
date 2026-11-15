@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import type { RefWindowData } from "@/editor/types";
 import { drawReference, type RefView } from "@/render/referenceRenderer";
 import { Icon } from "../common/Icon";
-import { Modal, cx, ui } from "../common/widgets";
+import { ConfirmDelete, cx, ui } from "../common/widgets";
 import { useEditor, useEditorState } from "../hooks/editor";
 import s from "./references.module.css";
 
@@ -211,10 +211,7 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
   const askClear = () => {
     if (hasMarks.current) setConfirm("clear");
   };
-  const closeWindow = () => {
-    if (hasMarks.current) setConfirm("close");
-    else ed.references.remove(data.id);
-  };
+  const closeWindow = () => setConfirm("close");
   const confirmed = () => {
     if (confirm === "close") return ed.references.remove(data.id);
     const m = marks.current!;
@@ -243,7 +240,7 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
         )}
         <input type="range" min={30} max={100} className={s.opacity} title={t("references.opacity")} value={Math.round(data.op * 100)} onChange={(e) => update({ op: Number(e.target.value) / 100 })} />
         <button type="button" className={s.hbtn} title={t("references.minimise")} onClick={() => update({ min: !data.min })}>—</button>
-        <button type="button" className={s.hbtn} title={t("references.close")} onClick={closeWindow}>✕</button>
+        <button type="button" className={s.hbtn} title={t("references.close")} aria-label={t("references.close")} onClick={closeWindow}>✕</button>
       </div>
       {!data.min && (
         <>
@@ -270,20 +267,14 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
         </>
       )}
       {confirm && (
-        <Modal
-          title={confirm === "close" ? t("dialogs.closeRefTitle", { name: data.name }) : t("dialogs.clearMarksTitle")}
+        <ConfirmDelete
+          title={confirm === "close" ? t("dialogs.closeRefTitle", { name: data.name }) : t("dialogs.clearMarksTitle", { name: data.name })}
+          confirm={confirm === "close" ? t("dialogs.closeWindow") : t("dialogs.clear")}
+          onConfirm={confirmed}
           onClose={() => setConfirm(null)}
-          buttons={[
-            { label: t("dialogs.cancel") },
-            {
-              label: confirm === "close" ? t("dialogs.closeWindow") : t("dialogs.clear"),
-              primary: true,
-              onClick: confirmed,
-            },
-          ]}
         >
           <p className={ui.hint}>{confirm === "close" ? t("dialogs.closeRefBody") : t("dialogs.clearMarksBody", { name: data.name })}</p>
-        </Modal>
+        </ConfirmDelete>
       )}
     </div>
   );

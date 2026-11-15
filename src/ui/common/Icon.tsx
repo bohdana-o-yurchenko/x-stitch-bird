@@ -27,7 +27,7 @@ const ICONS: Record<string, ReactNode> = {
   grid: <g {...S} strokeWidth={1.8}><rect x="4" y="4" width="16" height="16" /><path d="M9.3 4v16M14.7 4v16M4 9.3h16M4 14.7h16" /></g>,
   done: <g {...S}><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M8 12l3 3 5-6" /></g>,
   fit: <g {...S}><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></g>,
-  trash: <g {...S}><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></g>,
+  trash: <g {...S}><path d="M3.5 6.5h17" /><path d="M9 6.5V4.6c0-.6.5-1.1 1.1-1.1h3.8c.6 0 1.1.5 1.1 1.1v1.9" /><path d="M5.6 6.5l.9 12.6c.1 1 .9 1.9 2 1.9h7c1.1 0 1.9-.9 2-1.9l.9-12.6z" fill="currentColor" fillOpacity=".14" /><path d="M10 10.5v6.5M14 10.5v6.5" /></g>,
   flipH: <g {...S}><path d="M12 3v18" strokeDasharray="2 2" /><path d="M9 7L4 12l5 5M15 7l5 5-5 5" /></g>,
   flipV: <g {...S}><path d="M3 12h18" strokeDasharray="2 2" /><path d="M7 9l5-5 5 5M7 15l5 5 5-5" /></g>,
   rotate: <g {...S}><path d="M20 12a8 8 0 11-3-6.2" /><path d="M20 4v5h-5" /></g>,

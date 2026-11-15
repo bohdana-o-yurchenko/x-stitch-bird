@@ -55,9 +55,9 @@ export const COMMANDS: readonly Command[] = [
   // key
   { id: "key.selectNth", run: (ed, n) => { const list = ed.doc.key.flatMap((e, i) => (e && i ? [i] : [])); const k = list[Number(n) - 1]; if (k) ed.setActiveEntry(k); } },
   { id: "key.select", run: (ed, i) => ed.setActiveEntry(i as KeyIndex) },
-  { id: "key.add", run: (ed) => ed.openDialog({ type: "keyEntry" }) },
-  { id: "key.edit", run: (ed, i) => ed.openDialog({ type: "keyEntry", edit: i as KeyIndex }) },
-  { id: "key.requestDelete", run: (ed, i) => { const count = usageCount(ed, i as KeyIndex); if (count) ed.openDialog({ type: "deleteEntry", index: i as KeyIndex, count }); else deleteEntry(ed, i as KeyIndex); } },
+  { id: "key.add", run: (ed) => ed.openKeyForm() },
+  { id: "key.edit", run: (ed, i) => ed.openKeyForm(i as KeyIndex) },
+  { id: "key.requestDelete", run: (ed, i) => ed.doc.key[i as KeyIndex] && ed.openDialog({ type: "deleteEntry", index: i as KeyIndex, count: usageCount(ed, i as KeyIndex) }) },
   { id: "key.delete", run: (ed, i) => deleteEntry(ed, i as KeyIndex), destructive: "deleteKey" },
   // pattern & files
   { id: "file.new", run: (ed) => ed.openDialog({ type: "newPattern" }) },

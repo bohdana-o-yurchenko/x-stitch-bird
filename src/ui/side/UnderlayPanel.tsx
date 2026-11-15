@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { Rect } from "@/core/pattern/types";
-import { cx, ui } from "../common/widgets";
+import { Icon } from "../common/Icon";
+import { ConfirmDelete, cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
 import s from "./side.module.css";
 
@@ -14,6 +16,7 @@ export function UnderlayPanel() {
   const run = useCommand();
   const u = useEditorState((st) => st.underlay);
   const padOn = useEditorState((st) => st.underlayPad);
+  const [confirm, setConfirm] = useState(false);
   if (!u) return null;
   const editing = !u.behind;
   const setRect = (patch: Partial<Rect>) => run("underlay.update", { rect: { ...u.rect, ...patch } });
@@ -64,9 +67,14 @@ export function UnderlayPanel() {
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.fit")}>{t("fit")}</button>
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.resetCrop")}>{t("resetCrop")}</button>
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.replacePick")}>{t("replace")}</button>
-          <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.remove")}>{t("remove")}</button>
+          <button type="button" className={cx(ui.btn, ui.sm, ui.deleteText)} onClick={() => setConfirm(true)}><Icon name="trash" size={15} />{t("remove")}</button>
         </div>
       </div>
+      {confirm && (
+        <ConfirmDelete title={t("removeTitle")} confirm={t("removeConfirm")} onConfirm={() => run("underlay.remove")} onClose={() => setConfirm(false)}>
+          <p className={ui.hint}>{t("removeBody")}</p>
+        </ConfirmDelete>
+      )}
     </details>
   );
 }

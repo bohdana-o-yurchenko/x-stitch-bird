@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { entryCount, partialCount } from "@/core/calculator/usage";
 import { Icon } from "../common/Icon";
-import { KeyIcon, cx, ui } from "../common/widgets";
+import { DeleteButton, KeyIcon, cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
 import s from "./side.module.css";
@@ -59,8 +59,8 @@ export function KeyPanel() {
                 <div className={s.sub}>{t(`unit.${UNIT[e.t]}`, { count: n })}</div>
               </div>
               <div className={s.actions}>
-                <button type="button" className={ui.iconbtn} title={t("edit")} onClick={(ev) => { ev.stopPropagation(); run("key.edit", i); }}>✎</button>
-                <button type="button" className={ui.iconbtn} title={t("delete")} onClick={(ev) => { ev.stopPropagation(); run("key.requestDelete", i); }}>✕</button>
+                <button type="button" className={ui.iconbtn} title={t("edit")} aria-label={t("edit")} onClick={(ev) => { ev.stopPropagation(); run("key.edit", i); }}><Icon name="pencil" size={16} /></button>
+                <DeleteButton label={t("delete")} onClick={() => run("key.requestDelete", i)} />
               </div>
             </div>
           );

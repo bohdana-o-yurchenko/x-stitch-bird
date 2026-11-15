@@ -16,7 +16,8 @@ import { SidePanel } from "./side/SidePanel";
 import { Stage } from "./stage/Stage";
 import { StatusBar } from "./status/StatusBar";
 
-const inField = (t: EventTarget | null) => t instanceof HTMLElement && (t.matches("input, select, textarea") || t.isContentEditable);
+/** Typing in a field, or anywhere in a panel that owns the keyboard (the key entry form): no shortcuts. */
+const inField = (t: EventTarget | null) => t instanceof HTMLElement && (t.matches("input, select, textarea") || t.isContentEditable || !!t.closest("[data-no-shortcuts]"));
 
 /** Global keyboard, work-time tracking, page-leave flush and drag & drop, all routed to the editor. */
 function useGlobalEvents(ed: Editor, setDragging: (on: boolean) => void) {

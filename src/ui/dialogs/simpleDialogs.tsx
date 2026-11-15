@@ -9,20 +9,27 @@ import type { PatternMeta } from "@/core/pattern/types";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { copyText } from "@/platform/files";
 import { TimeSpent } from "../common/TimeSpent";
-import { Modal, cx, ui } from "../common/widgets";
+import { ConfirmDelete, KeyIcon, Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
 
 type Close = { onClose: () => void };
 
+/** Deleting a key entry, used or not, names it and says what happens to its stitches. */
 export function DeleteEntryDialog({ index, count, onClose }: Close & { index: number; count: number }) {
   const t = useTranslations("dialogs");
   const run = useCommand();
   const label = useEntryLabel();
+  const slot = useEditorState((st) => st.palette[index]);
+  const { title, sub } = label(index);
   return (
-    <Modal title={t("deleteEntryTitle", { title: label(index).title })} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("delete"), primary: true, onClick: () => run("key.delete", index) }]}>
-      <p className={ui.hint}>{t("deleteEntryBody", { count })}</p>
-    </Modal>
+    <ConfirmDelete title={t("deleteEntryTitle", { title })} confirm={t("delete")} onConfirm={() => run("key.delete", index)} onClose={onClose}>
+      <div className={ui.row} style={{ flexWrap: "nowrap", gap: 12 }}>
+        {slot && <KeyIcon slot={slot} size={36} />}
+        <div><b>{title}</b><div className={ui.hint}>{sub}</div></div>
+      </div>
+      <p className={ui.hint}>{count ? t("deleteEntryUsed", { count }) : t("deleteEntryUnused")}</p>
+    </ConfirmDelete>
   );
 }
 

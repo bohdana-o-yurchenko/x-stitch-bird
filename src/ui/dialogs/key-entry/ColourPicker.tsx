@@ -9,8 +9,8 @@ import { Swatch, cx, ui } from "../../common/widgets";
 import { useEditor } from "../../hooks/editor";
 import s from "./keyEntry.module.css";
 
-/** Searchable list of threads or beads, with custom colours (SPEC §8.1). */
-export function ColourPicker({ kind, selected, onPick, height = 240 }: { kind: "thread" | "bead"; selected: string; onPick: (id: string) => void; height?: number }) {
+/** Searchable list of threads or beads, with custom colours (SPEC §8.1). Enter in the search picks the top match. */
+export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }: { kind: "thread" | "bead"; selected: string; onPick: (id: string) => void; height?: number; autoFocus?: boolean }) {
   const t = useTranslations("picker");
   const ed = useEditor();
   const [query, setQuery] = useState("");
@@ -43,7 +43,14 @@ export function ColourPicker({ kind, selected, onPick, height = 240 }: { kind: "
   return (
     <div className={s.picker}>
       <div className={ui.row}>
-        <input className={cx(ui.input, s.search)} placeholder={kind === "bead" ? t("searchBead") : t("searchThread")} value={query} onChange={(e) => setQuery(e.target.value)} />
+        <input className={cx(ui.input, s.search)} autoFocus={autoFocus} placeholder={kind === "bead" ? t("searchBead") : t("searchThread")} value={query} onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            const q = query.trim().toLowerCase(), top = items.find((i) => i.code.toLowerCase() === q) ?? items[0];
+            if (e.key !== "Enter" || !q || !top) return;
+            e.preventDefault();
+            onPick(top.id);
+            setQuery("");
+          }} />
         {kind === "bead" ? (
           <select className={ui.input} value={series} onChange={(e) => setSeries(e.target.value)} style={{ maxWidth: 160 }}>
             <option value="all">{t("allSeries")}</option>

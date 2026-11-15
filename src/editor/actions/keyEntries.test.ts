@@ -92,6 +92,16 @@ describe("editing an entry", () => {
 });
 
 describe("deleting an entry", () => {
+  it("always asks first, used on the chart or not, and says how often it's used", async () => {
+    await ed.commands.run("key.requestDelete", red);
+    expect(ed.state.dialog).toEqual({ type: "deleteEntry", index: red, count: 0 });
+    ed.closeDialog();
+    ed.doc.layers.stitches[0] = ed.doc.layers.stitches[1] = red;
+    await ed.commands.run("key.requestDelete", red);
+    expect(ed.state.dialog).toEqual({ type: "deleteEntry", index: red, count: 2 });
+    expect(ed.doc.key[red]).not.toBeNull();
+  });
+
   it("removes everything drawn with it in one undo step", () => {
     ed.doc.layers.stitches[3] = red;
     ed.setActiveEntry(red);

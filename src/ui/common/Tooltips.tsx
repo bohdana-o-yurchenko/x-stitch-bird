@@ -25,8 +25,9 @@ export function Tooltips() {
       setTip(null);
     };
     const over = (e: PointerEvent) => {
-      if (current?.el.contains(e.target as Node)) return;
+      // the element with the closest title wins: a button inside a row with its own title shows the button's
       const el = (e.target as Element | null)?.closest?.("[title]") ?? null;
+      if (current?.el.contains(e.target as Node) && (!el || !current.el.contains(el))) return;
       hide();
       const title = el?.getAttribute("title");
       if (!el || !title) return;

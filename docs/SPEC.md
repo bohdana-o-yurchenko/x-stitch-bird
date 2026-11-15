@@ -415,6 +415,11 @@ clears undo history, deselects if active, toast "Entry deleted".
 
 ## 8. Add / edit key entry dialog (`keyDialog`, `index.html:1796`)
 
+> **New app (2026-11-15):** a form docked in the side panel instead of a modal, so the chart and reference
+> windows stay visible and usable. Colours are "lines" — one for a single floss, 2–3 for a blend, floss + bead for
+> a combo — each with its own strands; one searchable list fills the highlighted line (type a number, Enter).
+> Deleting an entry always asks, used on the chart or not, and names it.
+
 Wide modal titled **Add to key** / **Edit key entry**.
 
 **Type** segmented control: *Cross stitch*, *Backstitch*, *Bead*, *Floss + bead*.

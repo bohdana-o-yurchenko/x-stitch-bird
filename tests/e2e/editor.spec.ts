@@ -20,13 +20,69 @@ test("draws with the pencil and undoes with Ctrl/⌘+Z", async ({ page }) => {
   await expect.poll(() => editorState<number>(page, "(ed) => ed.doc.layers.stitches.slice(122, 127).filter(Boolean).length")).toBe(0);
 });
 
-test("adds a key entry through the dialog", async ({ page }) => {
+test("adds a key entry through the form in the side panel", async ({ page }) => {
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   await page.getByPlaceholder("Search DMC number or name").fill("666");
   await page.locator("[data-id='dmc:666']").click();
   await expect(page.getByTestId("key-preview")).toContainText("DMC 666");
   await page.getByRole("button", { name: "Add to key", exact: true }).click();
+  await expect(page.getByTestId("key-form")).toHaveCount(0);
   await expect(page.locator("[data-entry]")).toHaveCount(9);
+});
+
+test("the key form leaves the chart free: no modal, typed numbers fill the floss lines, no shortcuts fire", async ({ page }) => {
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form");
+  await expect(page.locator("[aria-modal=true]")).toHaveCount(0);
+  await form.getByRole("button", { name: "Blend" }).click();
+  // typed into the search; Enter fills the highlighted line and moves on to the next
+  for (const code of ["3865", "ecru"]) {
+    await page.keyboard.type(code);
+    await page.keyboard.press("Enter");
+  }
+  await expect(form.getByTestId("colour-line")).toHaveText([/3865/, /Ecru/]);
+  expect(await editorState<string>(page, "(ed) => ed.state.tool")).toBe("pencil");
+  await form.getByRole("button", { name: "Add to key", exact: true }).click();
+  await expect(page.locator("[data-entry]")).toHaveCount(9);
+  await expect(page.locator("[data-entry]").last()).toContainText("3865");
+});
+
+test("deleting a key entry always asks and names it, used on the chart or not", async ({ page }) => {
+  const unused = page.locator("[data-entry]").last();
+  await unused.hover();
+  await unused.getByRole("button", { name: "Delete entry" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText("Delete DMC 3865 from the key?");
+  await expect(dialog).toContainText("isn’t used on the chart");
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.locator("[data-entry]")).toHaveCount(8);
+  const used = page.locator("[data-entry]").first();
+  await used.hover();
+  await used.getByRole("button", { name: "Delete entry" }).click();
+  await expect(dialog).toContainText("on the chart 43 times");
+  await dialog.getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(page.locator("[data-entry]")).toHaveCount(7);
+});
+
+test("the edit and delete buttons of a key entry show their own names", async ({ page }) => {
+  const row = page.locator("[data-entry]").first();
+  await row.hover();
+  await row.getByRole("button", { name: "Edit entry" }).hover();
+  await expect(page.getByTestId("tooltip")).toHaveText("Edit entry");
+  await row.getByRole("button", { name: "Delete entry" }).hover();
+  await expect(page.getByTestId("tooltip")).toHaveText("Delete entry");
+});
+
+test("shows the time spent on the pattern, read-only, in Pattern info and Versions", async ({ page }) => {
+  await page.evaluate(() => void ((window as unknown as { __stitchwork: { doc: { spent: number } } }).__stitchwork.doc.spent = (2 * 60 + 5) * 60_000));
+  await fileAction(page, "Pattern info");
+  const time = page.getByTestId("time-spent");
+  await expect(time).toContainText("Total time spent on this pattern");
+  await expect(time).toContainText("2 h 5 min");
+  await expect(time.locator("input")).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await fileAction(page, "Versions");
+  await expect(page.getByTestId("time-spent")).toContainText("2 h 5 min");
 });
 
 test("holding Alt picks an entry from the chart and returns to the previous tool", async ({ page }) => {

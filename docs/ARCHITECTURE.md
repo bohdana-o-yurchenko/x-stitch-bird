@@ -1052,7 +1052,26 @@ Decisions taken while implementing this plan. Each one lives in the single place
 - Floating stage panels (the underlay alignment pad) use `ui/stage/FloatingPanel.tsx`: draggable
   by a grip, position kept in `localStorage` (a per-browser convenience).
 - Underlay stretching keeps the screen centre fixed: `stretchUnderlay` in `core/underlay/`, `ViewportService.centre()`.
-- Small dialogs share `ui/dialogs/simpleDialogs.tsx`; the key-entry dialog has its own folder.
+- Small dialogs share `ui/dialogs/simpleDialogs.tsx`; the key-entry form has its own folder.
+- Key-entry form (2026-11-15): not a modal — `keyForm` in the store (`Editor.openKeyForm`/`closeKeyForm`, commands
+  `key.add`/`key.edit`), rendered by `ui/side/SidePanel.tsx` in place of the panel's sections, so the chart and
+  reference windows stay usable. `ui/dialogs/key-entry/KeyEntryForm.tsx`: every colour (single floss, each floss of
+  a blend, a combo's floss and bead) is one "colour line" with its own strands; the one `ColourPicker` below fills
+  the highlighted line (Enter in its search picks the exact code or top match, then moves to the next line).
+  `BlendFinder.tsx` is the folded blend suggester. `data-no-shortcuts` on the form keeps app shortcuts off while
+  focus is inside it (`inField` in `ui/EditorApp.tsx`).
+- Deleting (2026-11-15): one look everywhere — `DeleteButton` (red bin icon, `label` names what it deletes) and
+  `ConfirmDelete` (red confirming button) in `ui/common/widgets.tsx`. Every delete asks first and names what goes:
+  key entries (used or not, `key.requestDelete` → `DeleteEntryDialog`), saved patterns (inline confirm), reference
+  windows (closing deletes the picture) and their marks, the underlay, all "?" marks. Erasing and deleting a
+  selection stay unconfirmed: they are drawing edits and undo with Ctrl/⌘+Z.
+- Tooltips: the element with the closest `title` wins, so buttons inside a titled row show their own names.
+- Work time (SPEC §15.17): `core/time/workTime.ts` (`workGap`, `splitDuration`), `editor/timer/WorkTimer.ts`
+  (fed by capture-phase pointer/key/wheel listeners in `ui/EditorApp.tsx`), `Pattern.spent`, shown by
+  `ui/common/TimeSpent.tsx`.
+- Versions in .xbird (SPEC §15.7): `patternFile()` in `editor/actions/importExport.ts` builds the whole file;
+  `SnapshotService.exportFile`/`importFile`; `cleanVersions` in `core/formats/json/parse.ts`. Version times are
+  kept unique per session (they are the storage key).
 - `window.__stitchwork` is the editor instance — a deliberate debugging / end-to-end test hook.
 - `cacheComponents` is off: the editor is client-only, so server caching adds nothing yet.
 - Golden outputs of the single-file app live in `tests/fixtures/legacy/` (recorded from `index.html` at commit
