@@ -13,6 +13,8 @@ const EVERY = 5 * 60_000;
 /** Automatic snapshots (SPEC §15.7): every 5 minutes while editing, and before destructive commands. */
 export class SnapshotService {
   private lastRevision = -1;
+  /** Versions are stored by time, so two taken in the same millisecond mustn't share one. */
+  private lastTime = 0;
   private timer: ReturnType<typeof setInterval> | null = null;
 
   constructor(private ed: Editor) {}
@@ -38,7 +40,8 @@ export class SnapshotService {
     const p = this.ed.doc;
     this.lastRevision = this.ed.state.docRevision;
     const data = JSON.stringify(serializePattern(p));
-    const snap = { projectId: p.id, time: Date.now(), reason, w: p.w, h: p.h, data, thumb: this.thumb(p, this.ed.state.palette) };
+    const time = (this.lastTime = Math.max(Date.now(), this.lastTime + 1));
+    const snap = { projectId: p.id, time, reason, w: p.w, h: p.h, data, thumb: this.thumb(p, this.ed.state.palette) };
     const repo = this.ed.persistence.snapshots;
     try {
       await repo.add(snap);

@@ -33,7 +33,6 @@ describe("versions", () => {
 
   it("restoring keeps the pattern id and first saves the current state as a version", async () => {
     await ed.snapshots.take("timer");
-    snaps[0]!.time -= 60_000;
     const [first] = await ed.snapshots.list();
     const id = ed.doc.id;
     ed.doc.layers.stitches[0] = red;
@@ -57,7 +56,6 @@ describe("versions in .xbird files", () => {
   it("travel with the pattern and join another browser's versions without duplicates", async () => {
     ed.doc.layers.stitches[0] = red;
     await ed.snapshots.take("resize");
-    snaps[0]!.time -= 60_000;
     await ed.snapshots.take("timer");
     const file = JSON.parse(JSON.stringify(await patternFile(ed)));
     expect(file.versions.map((v: { reason: string }) => v.reason)).toEqual(["resize", "timer"]);
