@@ -4,7 +4,7 @@ export interface CanvasTheme {
   stageBackground: string;
   accent: string;
   grid: { minor: string; minorSymbols: string; major: string; border: string; minMinorZoom: number };
-  symbols: { minZoom: number; scale: { full: number; half: number; bead: number; combo: number; partial: number }; darkInk: string; halo: string };
+  symbols: { minZoom: number; scale: { full: number; half: number; bead: number; combo: number; partial: number }; darkInk: string; halo: string; shapeSize: number };
   halfStitch: { colorWidth: number; symbolWidth: number; symbolColor: string };
   bead: { outline: string; highlight: string; shade: number; comboScale: number; hole: string; holeSymbols: string };
   backstitch: { width: number; minWidth: number; strandFirst: number; strandStep: number; patternUnit: number; lightThreshold: number; darken: number; symbolsColor: string };
@@ -26,7 +26,7 @@ export const defaultCanvasTheme: CanvasTheme = {
   stageBackground: "#E9E2D5",
   accent: "#B5452F",
   grid: { minor: "rgba(60,45,30,.22)", minorSymbols: "rgba(0,0,0,.28)", major: "rgba(30,20,10,.65)", border: "rgba(30,20,10,.8)", minMinorZoom: 5 },
-  symbols: { minZoom: 9, scale: { full: 0.68, half: 0.56, bead: 0.5, combo: 0.5, partial: 0.45 }, darkInk: "#1d1a16", halo: "rgba(255,255,255,.9)" },
+  symbols: { minZoom: 9, scale: { full: 0.68, half: 0.56, bead: 0.5, combo: 0.5, partial: 0.45 }, darkInk: "#1d1a16", halo: "rgba(255,255,255,.9)", shapeSize: 0.82 },
   halfStitch: { colorWidth: 0.34, symbolWidth: 0.07, symbolColor: "rgba(0,0,0,.38)" },
   bead: { outline: "rgba(0,0,0,.55)", highlight: "rgba(255,255,255,.85)", shade: -0.35, comboScale: 0.8, hole: "rgba(0,0,0,.22)", holeSymbols: "rgba(0,0,0,.08)" },
   backstitch: { width: 0.105, minWidth: 1.5, strandFirst: 1, strandStep: 0.5, patternUnit: 0.085, lightThreshold: 215, darken: -0.45, symbolsColor: "#1d1a16" },

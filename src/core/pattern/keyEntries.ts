@@ -17,10 +17,18 @@ export function nextSymbol(p: Pattern, symbols: readonly string[], except?: KeyI
   return firstFreeSymbol(used, list, t === "back" ? LINE_STYLES[used.filter(isLineStyle).length % LINE_STYLES.length] : undefined);
 }
 
-/** Gives backstitch entries a line style and other entries a character (files from older versions). */
+/**
+ * Makes every entry's symbol usable (files and storage from older versions): backstitch gets a line style; other
+ * entries a symbol from `symbols` that no earlier entry uses — old characters without a matching shape, and
+ * duplicates left by the old-symbol upgrade, get the next free one.
+ */
 export function fixEntrySymbols(p: Pattern, symbols: readonly string[]) {
+  const seen = new Set<string>();
   p.key.forEach((e, i) => {
-    if (e && (e.t === "back") !== isLineStyle(e.sym)) p.key[i] = { ...e, sym: nextSymbol(p, symbols, i, e.t) };
+    if (!e) return;
+    const ok = e.t === "back" ? isLineStyle(e.sym) : !isLineStyle(e.sym) && symbols.includes(e.sym) && !seen.has(e.sym);
+    if (!ok) p.key[i] = { ...e, sym: nextSymbol(p, symbols, i, e.t) };
+    seen.add(p.key[i]!.sym);
   });
 }
 

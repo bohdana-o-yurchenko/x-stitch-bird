@@ -15,6 +15,8 @@ import { symbolsFor } from "@/core/pattern/keyEntries";
 import { drawLineStyleSample } from "@/render/keyIcon";
 import { commitEntry, draftColour, draftEntry, draftFor, draftSymbol, duplicateOf, resolveDraftSource, usageCount, usesBlend, type KeyDraft } from "@/editor/actions/keyEntries";
 import { KeyIcon, Swatch, cx, ui } from "../../common/widgets";
+import { SymbolGlyph } from "../../common/SymbolGlyph";
+import { isShapeSymbol } from "@/core/symbols/symbols";
 import { useEditor, useEditorState } from "../../hooks/editor";
 import { useTranslate } from "../../i18n/labels";
 import { BlendFinder } from "./BlendFinder";
@@ -42,7 +44,15 @@ function SymbolPicker({ value, used, symbols, onPick }: { value: string; used: S
   const t = useTranslations("keyDialog");
   const [open, setOpen] = useState(false);
   const lines = isLineStyle(value);
-  const face = (sym: string, big: boolean) => (lines ? <LineSample sym={sym} w={big ? 60 : 52} h={big ? 22 : 20} /> : sym);
+  const face = (sym: string, big: boolean) => (lines ? <LineSample sym={sym} w={big ? 60 : 52} h={big ? 22 : 20} /> : <SymbolGlyph sym={sym} size={big ? 22 : 17} />);
+  // shapes, then digits and letters, then arithmetic signs (line styles: one group)
+  const groups = lines
+    ? [{ key: "lines", items: symbols }]
+    : [
+        { key: "groupShapes", items: symbols.filter(isShapeSymbol) },
+        { key: "groupLetters", items: symbols.filter((x) => !isShapeSymbol(x) && /[0-9A-Za-z]/.test(x)) },
+        { key: "groupSigns", items: symbols.filter((x) => !isShapeSymbol(x) && !/[0-9A-Za-z]/.test(x)) },
+      ].filter((gr) => gr.items.length);
   return (
     <div className={s.group}>
       <span className={s.label}>{lines ? t("lineStyle") : t("symbol")}</span>
@@ -51,9 +61,16 @@ function SymbolPicker({ value, used, symbols, onPick }: { value: string; used: S
         <span className={ui.hint}>{lines ? t("lineStyleHint") : t("symbolHint")}</span>
       </div>
       {open && (
-        <div className={cx(s.symgrid, lines && s.lines)}>
-          {symbols.map((sym) => (
-            <button key={sym} type="button" data-sym={sym} className={cx(sym === value && s.cur, used.has(sym) && s.used)} title={used.has(sym) ? t("symbolUsed") : ""} onClick={() => onPick(sym)}>{face(sym, false)}</button>
+        <div className={s.symgroups}>
+          {groups.map((gr) => (
+            <div key={gr.key}>
+              {!lines && <div className={s.symgroupTitle}>{t(gr.key)}</div>}
+              <div className={cx(s.symgrid, lines && s.lines)}>
+                {gr.items.map((sym) => (
+                  <button key={sym} type="button" data-sym={sym} className={cx(sym === value && s.cur, used.has(sym) && s.used)} title={used.has(sym) ? t("symbolUsed") : ""} onClick={() => onPick(sym)}>{face(sym, false)}</button>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}

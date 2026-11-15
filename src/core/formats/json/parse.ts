@@ -4,7 +4,7 @@ import { cleanEntry, fixEntrySymbols } from "../../pattern/keyEntries";
 import { cleanMeta } from "../../pattern/meta";
 import { createPattern, DEFAULT_FABRIC, DEFAULT_GRID } from "../../pattern/createPattern";
 import type { CustomColor, GridNumbering, KeyEntry, Pattern } from "../../pattern/types";
-import { normalizeSymbol } from "../../symbols/symbols";
+import { upgradeSymbol } from "../../symbols/symbols";
 import { cleanUnderlay, type UnderlayData } from "../../underlay/underlay";
 import { OPTIONAL_LAYER_FIELDS, XBIRD_VERSION, type FileVersion, type PatternFile } from "./serialize";
 
@@ -78,7 +78,7 @@ export function parsePattern(raw: unknown, symbols: readonly string[]): { patter
   const pal = (d.pal ?? []).map((e) => {
     if (!e) return null;
     const entry = v < 2 ? migrateV1Key(e as unknown as { id: string; sym: string }, d.strands || 2) : (e as KeyEntry);
-    return cleanEntry(entry, normalizeSymbol(entry.sym, symbols));
+    return cleanEntry(entry, upgradeSymbol(entry.sym));
   });
   p.key = [null, ...pal];
   fixEntrySymbols(p, symbols);

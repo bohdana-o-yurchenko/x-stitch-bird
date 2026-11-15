@@ -199,7 +199,10 @@
     "flossN": "Floss {n}",
     "addFloss": "+ Add a third floss",
     "removeFloss": "Remove this floss",
-    "pickFromList": "pick from the list below"
+    "pickFromList": "pick from the list below",
+    "groupShapes": "Shapes",
+    "groupLetters": "Digits & letters",
+    "groupSigns": "Signs"
   },
   "picker": {
     "searchThread": "Search DMC number or name",

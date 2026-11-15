@@ -96,6 +96,20 @@ Colour maths (must be reproduced exactly; used by blending, image import, blend 
   pixels (emoji), or matches the "tofu" signature of U+10FFFD / U+FFFF / empty string.
 - `symNorm(s)`: when loading, a bare single char whose `char+U+FE0E` exists in the list is upgraded.
 
+**Vector symbols (new app, 2026-11-15)** — replaces the ~300 font characters above. Two kinds, in this order:
+- **Shapes**, drawn from vector paths (the same paths on the canvas, in the interface and, later, in PDF export), so
+  they look the same on every device. Stored as `sym:<name>`. 11 bases (circle, square, triangle, diamond, star,
+  heart, hexagon, triangle down, pentagon, triangle right/left), each filled · outline · with a dot · half filled
+  left · half filled top, plus 18 marks (⊕ ⊗ ⊞ ⊠, ring, asterisk, 4 arrows, bars, chevrons, slashes, moon, cross).
+  Order: filled, outline, dotted, marks, half-filled — most distinct first.
+- **Characters** drawn with the bundled DM Sans: digits `1–9`, capitals without `I O`, arithmetic signs
+  `+ − × ÷ = < > % #`, some lower case, then `0 Q`. Still probed at start-up; shapes are not.
+- Loading: old characters become their closest shape or sign (`●` → filled circle, `✖` → `×`, …); characters
+  that are no longer in the list get the next free symbol, so every entry keeps a distinct one. This changes the
+  look of old files (allowed, 2026-11-15); the file format stays version 1.
+- The key dialog groups the grid: Shapes · Digits & letters · Signs. CSV and text lists show each shape as its
+  nearest Unicode character.
+
 **Backstitch line styles (new app, 2026-11-14).** A backstitch is a line, so its "symbol" is a **line style**,
 not a character. The `sym` of a `back` entry holds `line:<name>`, picked from 20 styles in this order (the first
 unused one is auto-assigned; once all 20 are taken they repeat):
@@ -818,6 +832,7 @@ All toasts/modals listed in the sections above should be kept verbatim; they are
 9. Unused code: `.tools` CSS, `#beadOptions` datalist, unused locals in `keyPartsFor`.
 10. Image import always starts a new project (no "import into current").
 11. Symbol availability depends on the device's fonts (probe at start-up) — a file may show symbols another device lacks.
+    *New app:* fixed — shapes are vector paths and characters come from the bundled DM Sans (§2.5).
 12. Mirror drawing paints the **same key index** on the mirrored side (`index.html:1582`), so a ╱ half cross is
     mirrored as ╱. **Intended** (decided 2026-11-14): mirroring reuses the existing entry and symbol (see §15.3).
 
@@ -1069,9 +1084,8 @@ native `.xsd` (§15.12).
 **Open decisions — this is the hard part**
 - Write a minimal PDF generator (objects, content streams, TrueType embedding with subsetting), or vendor a
   library such as jsPDF. A library would be the app's first runtime dependency.
-- A single known font must contain every chart symbol. Today's symbols come from DM Sans plus whatever fonts the
-  device has (§2.5, quirk §14.11). PDF export probably needs a bundled symbol font, with PDF symbols limited to
-  its glyphs.
+- Chart symbols are vector paths plus DM Sans characters (§2.5): shapes can be written straight into PDF content
+  streams; characters need DM Sans embedded. A Pattern Keeper–compatible PDF is a wish for later.
 
 ### 15.11 Symbol matching — semi-automatic mapping (JS only, no AI)
 Feasible with classic **template matching**: plain pixel arithmetic in a Web Worker, no models.

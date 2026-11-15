@@ -64,7 +64,7 @@ describe("JSON v4", () => {
   it("migrates v1 key entries", () => {
     const v1 = { app: "stitchwork", w: 2, h: 1, pal: [{ id: "dmc:310", sym: "●" }, { id: "bead:00557", sym: "■" }], s: "1,0", b: "0,2", strands: 3 };
     const { pattern } = parsePattern(v1, ALL_SYMBOLS);
-    expect(pattern.key.slice(1)).toEqual([{ t: "thread", src: "dmc:310", n: 3, st: "full", sym: "●" }, { t: "bead", src: "bead:00557", sym: "■" }]);
+    expect(pattern.key.slice(1)).toEqual([{ t: "thread", src: "dmc:310", n: 3, st: "full", sym: "sym:circle" }, { t: "bead", src: "bead:00557", sym: "sym:square" }]);
   });
 
   it("rejects files that are not Stitchwork patterns", () => {

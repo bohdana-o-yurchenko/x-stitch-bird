@@ -3,7 +3,7 @@ import type { QuantizeResult } from "@/core/imageToPattern/quantize";
 import { formatLabel, keyLabelData, type Translate } from "@/core/labels/keyLabel";
 import { buildPalette } from "@/core/pattern/palette";
 import type { KeyIndex, Pattern, Point } from "@/core/pattern/types";
-import { ALL_SYMBOLS } from "@/core/symbols/symbols";
+import { ALL_SYMBOLS, isShapeSymbol } from "@/core/symbols/symbols";
 import { RULER_SIZE } from "@/render/ChartRenderer";
 import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
 import { createPersistence, type Persistence } from "@/persistence";
@@ -91,7 +91,9 @@ export class Editor {
     await document.fonts?.ready;
     const family = bodyFontFamily();
     this.theme = { ...defaultCanvasTheme, fontFamily: family };
-    const symbols = usableSymbols(ALL_SYMBOLS, family);
+    // vector shapes always draw; only the letters, digits and signs depend on the font
+    const drawable = new Set(usableSymbols(ALL_SYMBOLS.filter((s) => !isShapeSymbol(s)), family));
+    const symbols = ALL_SYMBOLS.filter((s) => isShapeSymbol(s) || drawable.has(s));
     this.store.setState({ symbols });
     let pattern: Pattern | null = null;
     const draft = this.persistence.draft.load();

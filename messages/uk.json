@@ -199,7 +199,10 @@
     "flossN": "Нитка {n}",
     "addFloss": "+ Додати третю нитку",
     "removeFloss": "Прибрати цю нитку",
-    "pickFromList": "виберіть зі списку нижче"
+    "pickFromList": "виберіть зі списку нижче",
+    "groupShapes": "Фігури",
+    "groupLetters": "Цифри й літери",
+    "groupSigns": "Знаки"
   },
   "picker": {
     "searchThread": "Пошук за номером DMC або назвою",

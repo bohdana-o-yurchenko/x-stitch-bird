@@ -174,7 +174,8 @@ stitchwork/
 │  │  │  ├─ data/millhill.json       527 beads with series
 │  │  │  ├─ catalog.ts               lookup by id, search(query), sort(by number | colour)
 │  │  │  └─ beadShapes.ts
-│  │  ├─ symbols/symbols.ts          ordered symbol list, firstFreeSymbol, normalise (U+FE0E)
+│  │  ├─ symbols/symbols.ts          ordered symbol list, firstFreeSymbol, upgradeSymbol (old characters)
+│  │  ├─ symbols/shapes.ts           vector symbol shapes (24×24 SVG paths), text characters
 │  │  ├─ pattern/
 │  │  │  ├─ types.ts                 Pattern, KeyEntry, Segment, Knot, Partial, Blend, Combo, CustomColor
 │  │  │  ├─ meta.ts                  PatternMeta fields + defaults (§14.1)
@@ -1027,6 +1028,11 @@ Decisions taken while implementing this plan. Each one lives in the single place
   `KeyEntry.sym` as `line:<name>`; `nextSymbol`/`symbolsFor` pick by entry kind and `fixEntrySymbols` repairs
   older files. Drawing is `render/primitives/lineStyles.ts`; strand thickness is `strandFactor` with
   `theme.backstitch.strandFirst`/`strandStep`. Adding a style = one id in core + one drawing entry in render.
+- Chart symbols (SPEC §2.5, 2026-11-15): shapes are `sym:<name>` in `KeyEntry.sym`, defined once as 24×24 SVG path
+  data in `core/symbols/shapes.ts` (`fill`/`stroke` parts, optional half clip, a Unicode `text` for CSV). The canvas
+  draws them with `render/primitives/symbolArt.ts` (`Path2D`, cached, white halo like text symbols), the interface
+  with `ui/common/SymbolGlyph.tsx`. Adding a shape = one entry in `shapes.ts`. Old characters are mapped by
+  `upgradeSymbol` on parse; `fixEntrySymbols` gives unknown or duplicate ones the next free symbol.
 - Chart checks (SPEC §15.4) were removed on 2026-11-14 for a redesign: no `core/checks`, `editor/checks` or panel.
   Nothing is left in the UI. A new design should come back as a
   core module (pure functions over a `Pattern`) + an editor session + a side-panel section, like before.

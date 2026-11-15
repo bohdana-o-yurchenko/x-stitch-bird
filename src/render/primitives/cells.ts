@@ -3,7 +3,9 @@ import type { BeadShape } from "@/core/catalog/beadShapes";
 import type { PaletteSlot } from "@/core/pattern/palette";
 import type { PartialStitch } from "@/core/pattern/types";
 import { partialAnchor, partialKind } from "@/core/stitches/partialKinds";
+import { shapeSymbol } from "@/core/symbols/shapes";
 import { font, type CanvasTheme } from "../theme";
+import { drawShape } from "./symbolArt";
 import { strokeLineStyle } from "./lineStyles";
 
 export type Ctx = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
@@ -14,7 +16,13 @@ export interface CellStyle {
   showSymbol: boolean;
 }
 
+/** A chart symbol: a vector shape (`sym:…`) or a character in the app's font, about `z * scale` px tall. */
 export function drawSymbol(g: Ctx, cx: number, cy: number, z: number, ch: string, color: string, scale: number, theme: CanvasTheme, halo = false) {
+  const shape = shapeSymbol(ch);
+  if (shape) {
+    const size = Math.max(6, z * scale) * theme.symbols.shapeSize;
+    return drawShape(g, shape, cx, cy, size, color, halo ? { color: theme.symbols.halo, width: Math.max(1, z * 0.06) } : null);
+  }
   g.font = font(theme, 600, Math.max(6, Math.floor(z * scale)));
   g.textAlign = "center";
   g.textBaseline = "middle";
