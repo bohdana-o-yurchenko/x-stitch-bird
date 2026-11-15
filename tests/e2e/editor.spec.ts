@@ -524,8 +524,8 @@ test("exports a PDF for Pattern Keeper after explaining what it can't track", as
   const pdf = readFileSync((await file.path())!).toString("latin1");
   expect(pdf.startsWith("%PDF-1.7")).toBe(true);
   expect(pdf.trimEnd().endsWith("%%EOF")).toBe(true);
-  // chart + key for Pattern Keeper, then the full chart + its key
-  expect(pdf.match(/\/Type \/Page /g)).toHaveLength(4);
+  // chart + thread list + notes for Pattern Keeper, then the full chart + its key
+  expect(pdf.match(/\/Type \/Page /g)).toHaveLength(5);
   if (process.env.PK_PDF_OUT) await file.saveAs(process.env.PK_PDF_OUT);
 });
 

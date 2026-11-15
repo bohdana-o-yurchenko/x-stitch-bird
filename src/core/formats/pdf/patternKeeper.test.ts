@@ -61,13 +61,13 @@ describe("Pattern Keeper PDF", () => {
     const s = text(pdf);
     expect(s.startsWith("%PDF-1.7")).toBe(true);
     expect(checkXref(pdf)).toBeGreaterThan(10);
-    // 72×72 cells: 2 chart pages + key, then 2 full pages + full key
-    expect(s.match(/\/Type \/Page /g)).toHaveLength(6);
+    // 72×72 cells: 2 chart pages + thread list + notes, then 2 full pages + full key
+    expect(s.match(/\/Type \/Page /g)).toHaveLength(7);
     expect(s).toContain("/Subtype /Type0");
     expect(s).toContain("/FontFile2");
     // without the full-chart callback only the Pattern Keeper part is written
     const short = await patternKeeperPdf(pattern, report, { font });
-    expect(text(short).match(/\/Type \/Page /g)).toHaveLength(3);
+    expect(text(short).match(/\/Type \/Page /g)).toHaveLength(4);
   });
 
   it("keeps text Latin: Cyrillic is transliterated", () => {

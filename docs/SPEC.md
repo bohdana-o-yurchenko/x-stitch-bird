@@ -1092,8 +1092,12 @@ quarter / three-quarter / petite stitches, other blends, floss + bead, beads, ba
 1. *Chart for Pattern Keeper* — symbols only (never colour), only trackable stitches; up to 60 columns per page,
    rows in multiples of 10, no overlap, column and row numbers in the margins, thin cell lines and heavy lines
    every 10 following the chart's numbering (§15.2).
-2. *Key for Pattern Keeper* — Symbol · Number ("DMC 310", blends "DMC 310 + DMC 321") · Name · Strands ("2",
-   blends "1+1") · Stitches. Below it: what was left out, with counts.
+2. *Thread list for Pattern Keeper* — headers exactly **Number · Name · Strands** and nothing else: Pattern
+   Keeper's own guide for WinStitch says "It is important to use these header names" (Number, Name; Strands
+   optional), and the first version — headers Symbol · Number · Name · Strands · Stitches — imported with no
+   thread numbers read (tested 2026-11-15). Each row: symbol, colour sample, "DMC 310" (blends "DMC 310 + DMC
+   321"), name, strands ("2", blends "1+1"), all on one text baseline.
+   Then *About this chart*: stitches per thread and what was left out, as plain lines on their own page.
 3. Only when something was left out: the *Full chart (not for Pattern Keeper)* — the same pages as pictures of the
    Symbols view with everything on it — and a *Full key* with each entry's icon.
 
@@ -1103,8 +1107,8 @@ charts ("import only the first pages"). With nothing trackable at all, a toast s
 **Text is Latin only** (built-in Helvetica, English wording whatever the interface language); Cyrillic pattern
 names are transliterated.
 
-**To verify by importing into Pattern Keeper:** that the grid and symbols are detected; how a two-floss key row
-is read; whether the picture pages of the full chart get in the way (fallback: a separate file); whether page
+**Verified in Pattern Keeper (2026-11-15):** the grid and the symbols are detected.
+**Still to verify:** that thread numbers are now read from the thread list; how a two-floss row is read; whether the picture pages of the full chart get in the way (fallback: a separate file); whether page
 joins without overlap work.
 
 **Later:** cover page with metadata (§15.1) and preview, page map, Letter size, overlap rows, a vector full chart.
