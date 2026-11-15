@@ -4,6 +4,7 @@ import { KeyEntryForm } from "../dialogs/key-entry/KeyEntryForm";
 import { useEditorState } from "../hooks/editor";
 import { FabricPanel } from "./FabricPanel";
 import { KeyPanel } from "./KeyPanel";
+import { ChecksPanel } from "./ChecksPanel";
 import { CurrentTool } from "./CurrentTool";
 import { TotalsPanel } from "./TotalsPanel";
 import { UnderlayPanel } from "./UnderlayPanel";
@@ -17,6 +18,7 @@ export function SidePanel() {
       <CurrentTool />
       <KeyPanel />
       <UnderlayPanel />
+      <ChecksPanel />
       <FabricPanel />
       <TotalsPanel />
     </>

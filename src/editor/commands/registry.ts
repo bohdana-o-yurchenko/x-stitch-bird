@@ -1,4 +1,6 @@
 import { PARTIAL_KINDS } from "@/core/stitches/partialKinds";
+import type { CheckOptions } from "@/core/checks/checks";
+import { closeChecks, goToFinding, ignoreFinding, runChartChecks, stepFinding } from "../checks/checks";
 import type { TransformId } from "@/core/transform/cellTransform";
 import { MIRROR_MODES } from "@/core/transform/mirror";
 import type { Margins, MirrorFromCentre } from "@/core/transform/wholeChart";
@@ -127,6 +129,13 @@ export const COMMANDS: readonly Command[] = [
   { id: "underlay.fit", run: (ed) => ed.underlay.fit() },
   { id: "underlay.resetCrop", run: (ed) => ed.underlay.resetCrop() },
   { id: "underlay.remove", run: (ed) => ed.underlay.remove() },
+  // chart checks (SPEC §15.4)
+  { id: "checks.run", run: (ed, o) => runChartChecks(ed, o as CheckOptions) },
+  { id: "checks.go", run: (ed, i) => goToFinding(ed, Number(i)) },
+  { id: "checks.next", run: (ed) => stepFinding(ed, 1) },
+  { id: "checks.prev", run: (ed) => stepFinding(ed, -1) },
+  { id: "checks.ignore", run: (ed, id) => ignoreFinding(ed, String(id)) },
+  { id: "checks.close", run: (ed) => closeChecks(ed) },
   // snapshots
   { id: "snapshot.restore", run: (ed, time) => ed.snapshots.restore(time as number) },
 ];

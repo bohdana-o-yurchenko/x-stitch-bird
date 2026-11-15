@@ -9,6 +9,7 @@ import type { ChartView } from "@/render/chart";
 import type { Viewport } from "@/render/ChartRenderer";
 import type { RefWindowData } from "@/persistence/ports";
 import type { Handle, UnderlayData } from "@/core/underlay/underlay";
+import type { ChecksState } from "../checks/checks";
 
 export type ToolId = "pencil" | "line" | "rect" | "filledRect" | "fill" | "eraser" | "picker" | "pan" | "select" | "magicWand" | "partial";
 
@@ -105,6 +106,8 @@ export interface EditorState {
   /** Fade every key entry except the active one (SPEC §15.16). */
   highlight: boolean;
   hasClipboard: boolean;
+  /** The last run of the chart checks (SPEC §15.4); null = not run or closed. */
+  checks: ChecksState | null;
 }
 
 export const emptyOverlay: Overlay = { hover: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null };
@@ -148,6 +151,7 @@ export const createEditorStore = () =>
     pendingTip: null,
     menuReveal: null,
     hasClipboard: false,
+    checks: null,
   }));
 
 export type EditorStore = ReturnType<typeof createEditorStore>;

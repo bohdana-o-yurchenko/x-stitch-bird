@@ -41,6 +41,8 @@ export interface ChartScene {
   underlayButtons: { x: number; y: number; dir: -1 | 1 }[];
   /** Only this entry at full strength, the rest faded (stitch highlighting). */
   highlight: KeyIndex | null;
+  /** Chart checks: every finding's cells (thin outline), the current one's cells (a ring). */
+  checks: { all: number[][]; current: number[] | null } | null;
 }
 
 export const RULER_SIZE = 26;
@@ -230,6 +232,7 @@ export class ChartRenderer {
       g.strokeRect(ox + s.marquee.x * z + 0.5, oy + s.marquee.y * z + 0.5, s.marquee.w * z, s.marquee.h * z);
       g.restore();
     }
+    if (s.checks) this.drawFindings(s.checks, p, f);
     if (s.flash && s.flash.until > Date.now()) {
       const [px, py] = cellRect(s.flash.cell), a = (s.flash.until - Date.now()) / t.flash.durationMs;
       g.fillStyle = `rgba(181,69,47,${0.55 * Math.max(0, Math.min(1, a))})`;
@@ -241,6 +244,37 @@ export class ChartRenderer {
       g.lineWidth = 2;
       g.strokeRect(ox + (s.hover.x - o) * z + 1, oy + (s.hover.y - o) * z + 1, s.hover.size * z - 2, s.hover.size * z - 2);
     }
+  }
+
+  /** Chart checks: a thin box around every finding, and a ring around the one being looked at. */
+  private drawFindings(c: NonNullable<ChartScene["checks"]>, p: Pattern, f: ChartFrame) {
+    const g = this.g, t = this.theme, { z, ox, oy } = f;
+    const box = (cells: number[]) => {
+      const xs = cells.map((i) => i % p.w), ys = cells.map((i) => (i / p.w) | 0);
+      const x0 = Math.min(...xs), y0 = Math.min(...ys);
+      return { x: ox + x0 * z, y: oy + y0 * z, w: (Math.max(...xs) - x0 + 1) * z, h: (Math.max(...ys) - y0 + 1) * z };
+    };
+    g.save();
+    g.strokeStyle = t.accent;
+    g.lineWidth = Math.max(1, Math.min(2, z / 8));
+    g.globalAlpha = 0.75;
+    for (const cells of c.all) for (const i of cells) {
+      const b = box([i]);
+      g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
+    }
+    if (c.current) {
+      g.globalAlpha = 1;
+      const b = box(c.current), r = Math.max(b.w, b.h) / 2 + Math.max(6, z * 0.6);
+      g.lineWidth = 3;
+      g.strokeStyle = "rgba(255,255,255,0.9)";
+      g.beginPath();
+      g.arc(b.x + b.w / 2, b.y + b.h / 2, r, 0, Math.PI * 2);
+      g.stroke();
+      g.lineWidth = 2;
+      g.strokeStyle = t.accent;
+      g.stroke();
+    }
+    g.restore();
   }
 
   /** Edit mode: the image above the stitches, its outline and 8 handles. */

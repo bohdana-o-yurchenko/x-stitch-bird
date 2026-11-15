@@ -889,13 +889,13 @@ gone, and 12 is a decision recorded in §15.3. Numbers are kept, as other sectio
 
 | Feature | Effort | Persistence impact | Status |
 |---|---|---|---|
-| Chart checks (§15.4): empty cells, lone stitches, near symmetry | M | none (session only) | designed 2026-11-16, being built |
+| More chart checks (§15.4): backstitch, knots, beads | S–M | none | ideas |
 | Symbol matching in one 10 × 10 block (§15.11) | L | none at first (samples in memory) | designed 2026-11-16, for review |
 | More thread brands (§15.8) | M code, L data | new `src` id namespaces | not started |
 | Not yet discussed (§15.12): keyboard entry, specialty stitches, beads on intersections, proofread tracking, second-screen window | — | — | ideas |
 | Stash management (§16) | XL | needs a server | future phase |
 
-Implemented: §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.5 ambiguous
+Implemented: §15.4 chart checks (empty cells, lone stitches, near symmetry), §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.5 ambiguous
 marks, §15.6 selection, §15.7 snapshots, §15.10 / §15.10b PDFs, §15.13 fractional stitches, §15.14 French knots,
 §15.15 underlay, §15.16 highlighting, §15.17 work time, §15.18 themes, and the drawn symbols of §2.5.
 
@@ -953,30 +953,41 @@ Rules:
   axis) → 4-way. The guides are drawn for each active axis. Mirrored half crosses keep the same entry and
   direction (rule above; quirk §14.12 is the intended behaviour).
 
-### 15.4 Error detectors
+### 15.4 Chart checks (implemented 2026-11-16)
+A **Chart checks** section in the side panel (collapsible like the others, closed at first) that looks for likely
+mistakes in a copied chart. It runs on demand, never by itself, and never changes the chart.
 
-> **Removed 2026-11-14 — to be redesigned from scratch.** The first implementation (below) was taken out of the
-> new app, including its header button. The text below is kept as
-> history, not as the plan.
+**Choosing checks** — every check is **opt-in** (all off at first); the choice and options are remembered in the
+browser (`stitchwork.checks`):
+- **Empty cells** — holes in the stitching: a group of **1 to N** empty cells (N = 1–3, default 3) that touches no
+  other empty cell, and not the chart's edge. "Empty" means no cross, half cross, partial stitch or bead; the
+  groups are 8-connected (cells touching at a corner belong together), so a gap in a diagonal line of empty cells
+  is not reported. Typical cause: a cell skipped while copying.
+- **Lone stitches** — a group of **1 to N** stitches (N = 1–2, default 1) of one colour with no other stitch of that
+  colour around it (8 neighbours). Same colour = same thread or blend, whatever the stitch type or strands. Options:
+  *also when it stands alone on empty fabric* (off: by default only stitches inside other stitches are reported,
+  where a stray cell is most likely a typo). Beads are not checked.
+- **Near symmetry** — for designs that are symmetric left–right or top–bottom: the app looks for the mirror axis
+  near the middle (within 5 cells, on a grid line or through a cell's middle) where most mirrored pairs of cells
+  match. If 90–99.9% match, the pairs that don't are reported (both cells); a half cross matches its mirror image
+  (╱ ↔ ╲), as in §15.3. Designs that are clearly not symmetric (below 90%) report nothing.
 
-A **Check chart…** panel that runs on demand, never continuously. Findings appear in a list. Prev/Next steps
-through them; the canvas centres on the finding and draws a ring around it. **Ignore** hides a finding for the
-session; ignores are not persisted.
+**Run checks** (disabled until a check is chosen) lists what was found.
 
-- **Isolated stitches** (typos): a stitch-layer cell whose 8 neighbours contain no cell with the same key
-  index. Options:
-  - cluster size threshold (default 1, allow ≤ 2)
-  - count "same colour, other strands/stitch" as a neighbour (on)
-  - include beads (off — beads are often single on purpose)
-  - include half crosses (on)
-- **Near symmetry**: test vertical and horizontal axes at whole and half-cell positions near the centre (±5 cells).
-  For each axis, compare mirrored cell pairs where at least one side has a stitch (a pair matches when both cells
-  hold the same entry — half crosses keep their direction when mirrored, §15.3). If the match ratio is ≥ 90 % but
-  below 100 %, report the axis and list the mismatched pairs. Show the
-  value from the majority-consistent side as the suggested fix. Beads and backstitch are optional. Clearly
-  asymmetric designs report nothing.
-- **Cheap extras**: unused key entries; entries used ≤ 3 times; duplicate keys (§3.2 `sameKey`).
-- Cost: linear in cells × candidate axes, so instant even at 500×500.
+**Results**
+- **Grouped by check**: "Empty cells · 4", "Lone stitches · 12", "Near symmetry (left–right) · 3"; each group can
+  be folded. Each finding is one line in the chart's own numbering ("Column 12, row 40", "2 cells", for symmetry
+  "Column 12, row 40 ↔ column 49, row 40").
+- **Stepping through**: ‹ and › step through all findings in order, with "3 / 19" between them; clicking a line
+  jumps to it. The chart centres on the finding (zooming in if needed, as Go to cell) and draws a ring around it;
+  all other findings show a thin outline, so clusters are visible at a glance.
+- **Ignore** (✕ on a line) hides a finding for this session.
+- After the chart changes, the results stay but a note says "The chart has changed — run again"; nothing is
+  re-run behind your back.
+- Nothing is stored in the pattern or its file.
+
+**Not checked (yet)**: backstitch, knots, beads; unused or rarely used key entries (the key's counts already show
+them).
 
 ### 15.5 Mark cell as ambiguous (implemented)
 Hard requirement: **no footprint when unused**. There is no toolbar button, no panel, no prompt, and no change to

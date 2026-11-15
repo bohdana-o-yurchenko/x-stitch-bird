@@ -1,5 +1,6 @@
 "use client";
 
+import { visibleFindings, type ChecksState } from "@/editor/checks/checks";
 import { useEffect, useRef } from "react";
 import { ChartRenderer, type ChartScene } from "@/render/ChartRenderer";
 import type { Editor } from "@/editor/createEditor";
@@ -33,8 +34,15 @@ function scene(ed: Editor): ChartScene {
     highlight: st.highlight && st.activeEntry ? st.activeEntry : null,
     underlayFrame: ed.underlay.frame(),
     underlayHot: st.underlayHot,
+    checks: checksScene(st.checks),
     underlayButtons: ed.underlay.rotateButtons(),
   };
+}
+
+/** What the canvas shows of the chart checks: all findings outlined, the current one ringed. */
+function checksScene(c: ChecksState | null) {
+  const list = visibleFindings(c);
+  return c && list.length ? { all: list.map((f) => f.cells), current: list[c.current]?.cells ?? null } : null;
 }
 
 /** The chart: draws through ChartRenderer and turns pointer/wheel events into editor calls. */

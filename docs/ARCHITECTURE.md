@@ -200,7 +200,7 @@ stitchwork/
 │  │  │  ├─ types.ts                 StitchType interface
 │  │  │  ├─ registry.ts              full, half, halfb
 │  │  │  └─ partialKinds.ts          quarter, three-quarter, petite: geometry, thread factor, OXS mapping (§14.8)
-│  │  ├─ checks/                     (removed — to be redesigned, §14.4)
+│  │  ├─ checks/checks.ts            chart checks: holes, lone stitches, near symmetry (§14.4)
 │  │  │  ├─ types.ts  registry.ts
 │  │  │  └─ isolated.ts  nearSymmetry.ts  unusedEntries.ts  rareEntries.ts  duplicateEntries.ts
 │  │  ├─ snapshots/retention.ts      which snapshots to keep (pure function, §14.7)
@@ -286,7 +286,7 @@ interface EditorState {
     panelCollapsed: boolean;
   };
   selection: { mask: Uint8Array | null; bounds: Rect | null; floating: Fragment | null };   // §14.6
-  checks: { findings: Finding[]; index: number; ignored: Set<string> } | null;               // §14.4, session only
+  checks: { findings: Finding[]; ignored: string[]; current: number; revision: number } | null;  // §14.4, session only
   flash: { cell: number; until: number } | null;                                             // Go to cell, findings
   status: { hoverCell: Cell | null; saveState: SaveState };
 }
@@ -832,33 +832,15 @@ The Save to file dialog should mention this during the transition.
   same entry to them (half crosses keep their direction, SPEC §15.3 as revised 2026-11-14). Guides: `overlays.ts`.
 - **UI:** `header/TransformMenu`, `MirrorFromCentreDialog` (with confirm when the target isn't empty), `ExtendCanvasDialog`.
 
-### 14.4 Error detectors (SPEC §15.4)
-
-> **Removed 2026-11-14, to be redesigned** (see §17). The design below describes the first version and is kept for
-> reference; the folders it names no longer exist.
-- **Core:** `core/checks/` is a registry of checks:
-  ```ts
-  interface ChartCheck {
-    id: 'isolated' | 'nearSymmetry' | 'unusedEntries' | 'rareEntries' | 'duplicateEntries' | string;
-    labelKey: MessageKey;
-    options: OptionSpec[];                        // e.g. cluster size, include beads — with defaults
-    run(p: Pattern, opts: Record<string, unknown>): Finding[];
-  }
-  interface Finding {
-    id: string;                                   // stable, so "Ignore" can hide it for the session
-    checkId: string; at: CellRef | PointRef; related?: CellRef[];
-    messageKey: MessageKey; params?: Record<string, unknown>;
-    suggestion?: { cells: Array<{ i: number; key: number }> };   // near symmetry: the majority side's value
-  }
-  ```
-  `nearSymmetry.ts` uses `core/transform` (including the direction rule) to compare mirrored pairs. All checks are
-  linear in the number of cells. If big charts ever feel slow, they can move to a worker without API changes.
-- **Editor:** `checks/checksSession.ts` runs checks on demand, keeps the findings, the current index and the
-  session-only ignores. Commands: `checks.open`, `checks.run`, `checks.next`, `checks.prev`, `checks.ignore`,
-  `checks.applySuggestion` (one undo step).
-- **UI:** `side/ChecksPanel` (options form generated from `options`, findings list). The canvas centres on the
-  finding and draws a ring (`overlays.ts`).
-- **Adding a check later** = one file in `core/checks/` + registry line + messages.
+### 14.4 Chart checks (SPEC §15.4, implemented 2026-11-16)
+- **Core:** `core/checks/checks.ts` — `findHoles`, `findLoneStitches`, `findNearSymmetry`, `runChecks(pattern,
+  options)` → `Finding { id, check, cells, axis? }`. Pure, linear in cells (symmetry × 21 candidate axes).
+- **Editor:** `editor/checks/checks.ts` keeps `state.checks` (findings, ignored ids, current index, the
+  `docRevision` of the run — a different revision means "the chart changed"). Commands `checks.run / go / next /
+  prev / ignore / close`; going to a finding uses `viewport.centreOn` (centre + flash).
+- **Render:** `ChartScene.checks` — thin accent boxes on every finding's cells, a ring around the current one.
+- **UI:** `ui/side/ChecksPanel.tsx`, a remembered `Section`; options in `localStorage` `stitchwork.checks`.
+- **Adding a check** = a function in `core/checks/checks.ts`, an option, a group name in `checks.group.*`.
 
 ### 14.5 Mark cell as ambiguous (SPEC §15.5)
 - **Data:** layer `ambiguous` (a `Set<number>`; JSON v4 `amb` as a sorted array). Its handler has `exported: false`

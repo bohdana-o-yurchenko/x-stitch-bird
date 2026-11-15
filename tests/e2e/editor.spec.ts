@@ -683,3 +683,30 @@ test("which side-panel sections are open is remembered after a reload", async ({
   await expect(section("totals")).not.toHaveAttribute("open", "");
   await expect(section("fabric")).toHaveAttribute("open", "");
 });
+
+test("chart checks are opt-in, run on demand, and their findings can be stepped through and ignored", async ({ page }) => {
+  await page.evaluate(() => {
+    const ed = (window as unknown as { __stitchwork: { doc: { w: number; layers: { stitches: Uint16Array } }; changed(): void } }).__stitchwork;
+    ed.doc.layers.stitches[25 * ed.doc.w + 27] = 0; // a hole inside the heart
+    ed.changed();
+  });
+  const panel = page.getByTestId("checks-panel");
+  await panel.locator("summary").click();
+  await expect(page.getByTestId("checks-run")).toBeDisabled();
+  await panel.getByRole("checkbox", { name: "Empty cells" }).check();
+  await page.getByTestId("checks-run").click();
+  const results = page.getByTestId("checks-results");
+  await expect(results.locator("[data-check-group=holes] li > button:first-child")).toHaveText(["Column 28, row 26"]);
+  await page.getByRole("button", { name: "Next finding" }).click();
+  await expect(page.getByTestId("checks-position")).toHaveText("1 / 1");
+  // the choice is remembered; the results say when the chart changed
+  await page.keyboard.press("p");
+  const box = (await page.getByTestId("chart").boundingBox())!;
+  await page.mouse.click(box.x + 60, box.y + 60);
+  await expect(results.getByText("The chart has changed")).toBeVisible();
+  await results.getByRole("button", { name: "Ignore for now" }).click();
+  await expect(results.getByText("Nothing found.")).toBeVisible();
+  // the section stays open and the chosen check stays chosen after a reload
+  await page.reload();
+  await expect(page.getByTestId("checks-panel").getByRole("checkbox", { name: "Empty cells" })).toBeChecked();
+});
