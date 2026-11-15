@@ -200,7 +200,8 @@
     "addFloss": "+ Add a third floss",
     "removeFloss": "Remove this floss",
     "pickFromList": "pick from the list below",
-    "groupShapes": "Shapes",
+    "groupBasic": "Basic shapes",
+    "groupDecorative": "Decorative",
     "groupLetters": "Digits & letters",
     "groupSigns": "Signs"
   },

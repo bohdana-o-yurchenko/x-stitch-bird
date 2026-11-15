@@ -200,7 +200,8 @@
     "addFloss": "+ Додати третю нитку",
     "removeFloss": "Прибрати цю нитку",
     "pickFromList": "виберіть зі списку нижче",
-    "groupShapes": "Фігури",
+    "groupBasic": "Прості фігури",
+    "groupDecorative": "Декоративні",
     "groupLetters": "Цифри й літери",
     "groupSigns": "Знаки"
   },

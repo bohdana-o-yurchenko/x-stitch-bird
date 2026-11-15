@@ -17,6 +17,7 @@ import { commitEntry, draftColour, draftEntry, draftFor, draftSymbol, duplicateO
 import { KeyIcon, Swatch, cx, ui } from "../../common/widgets";
 import { SymbolGlyph } from "../../common/SymbolGlyph";
 import { isShapeSymbol } from "@/core/symbols/symbols";
+import { shapeSymbol } from "@/core/symbols/shapes";
 import { useEditor, useEditorState } from "../../hooks/editor";
 import { useTranslate } from "../../i18n/labels";
 import { BlendFinder } from "./BlendFinder";
@@ -49,7 +50,8 @@ function SymbolPicker({ value, used, symbols, onPick }: { value: string; used: S
   const groups = lines
     ? [{ key: "lines", items: symbols }]
     : [
-        { key: "groupShapes", items: symbols.filter(isShapeSymbol) },
+        { key: "groupBasic", items: symbols.filter((x) => shapeSymbol(x)?.group === "basic") },
+        { key: "groupDecorative", items: symbols.filter((x) => shapeSymbol(x)?.group === "decorative") },
         { key: "groupLetters", items: symbols.filter((x) => !isShapeSymbol(x) && /[0-9A-Za-z]/.test(x)) },
         { key: "groupSigns", items: symbols.filter((x) => !isShapeSymbol(x) && !/[0-9A-Za-z]/.test(x)) },
       ].filter((gr) => gr.items.length);

@@ -102,12 +102,16 @@ Colour maths (must be reproduced exactly; used by blending, image import, blend 
   heart, hexagon, triangle down, pentagon, triangle right/left), each filled · outline · with a dot · half filled
   left · half filled top, plus 18 marks (⊕ ⊗ ⊞ ⊠, ring, asterisk, 4 arrows, bars, chevrons, slashes, moon, cross).
   Order: filled, outline, dotted, marks, half-filled — most distinct first.
+  Added the same day from a hand-drawn sheet (`scripts/symbol-sheet.txt`, 157 non-letter icons minus those
+  already present as a shape or a character): 75 more **basic** shapes (dots, bars, corners, chevrons, arrowheads,
+  notches, half and quarter fills, …) and 34 **decorative** ones (club, spade, tree, bell, leaves, flower, tulip,
+  eye, spiral, sparkles, …). Basic shapes come before decorative ones, so new entries get the plainest free one.
 - **Characters** drawn with the bundled DM Sans: digits `1–9`, capitals without `I O`, arithmetic signs
   `+ − × ÷ = < > % #`, some lower case, then `0 Q`. Still probed at start-up; shapes are not.
 - Loading: old characters become their closest shape or sign (`●` → filled circle, `✖` → `×`, …); characters
   that are no longer in the list get the next free symbol, so every entry keeps a distinct one. This changes the
   look of old files (allowed, 2026-11-15); the file format stays version 1.
-- The key dialog groups the grid: Shapes · Digits & letters · Signs. CSV and text lists show each shape as its
+- The key dialog groups the grid: Basic shapes · Decorative · Digits & letters · Signs. CSV and text lists show each shape as its
   nearest Unicode character.
 
 **Backstitch line styles (new app, 2026-11-14).** A backstitch is a line, so its "symbol" is a **line style**,

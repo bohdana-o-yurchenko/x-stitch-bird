@@ -1,19 +1,33 @@
 /*
  * Chart symbols drawn from vector paths (SPEC §2.5): the same on every device, in PNG and later in PDF. Each shape is
- * one or more parts in a 24×24 box centred on (12, 12). Stored in `KeyEntry.sym` as `sym:<name>`; letters, digits
- * and signs stay plain characters drawn with the app's bundled font. To add a shape: add it to SHAPES below.
+ * one or more parts in a square box (24×24 here, 100×100 in shapeLibrary.ts). Stored in `KeyEntry.sym` as
+ * `sym:<name>`; letters, digits and signs stay plain characters drawn with the app's bundled font. To add a shape:
+ * add it to the symbol sheet and re-run scripts/symbols-from-svg.py, or add it to BASES/MARKS below.
  */
+import { BASIC, DECORATIVE } from "./shapeLibrary";
 
 export interface SymbolPart {
-  /** SVG path data in the 24×24 box. */
+  /** SVG path data in the shape's box. */
   d: string;
   paint: "fill" | "stroke";
+  /** Stroke width in box units (default 2.2 in a 24 box). */
+  w?: number;
+  cap?: "butt" | "round" | "square";
+  join?: "miter" | "round" | "bevel";
+  /** Fill rule; "evenodd" for outlines stored as a filled ring. */
+  rule?: "evenodd";
   /** Only this half of the box is painted (half-filled variants). */
   clip?: "left" | "top";
 }
 
+/** Basic = simple geometric shapes and marks; decorative = pictures and intricate shapes. */
+export type ShapeGroup = "basic" | "decorative";
+
 export interface ShapeSymbol {
   id: string;
+  group: ShapeGroup;
+  /** Side of the square box the parts are drawn in (default 24). */
+  box?: number;
   parts: readonly SymbolPart[];
   /** The closest plain-text character, for places that can only show text (CSV, lists). */
   text: string;
@@ -50,17 +64,17 @@ const BASES: { name: string; d: string; text: [string, string] }[] = [
 const DOT = circle(2.6);
 
 const variants = (b: (typeof BASES)[number]): ShapeSymbol[] => [
-  { id: `${PREFIX}${b.name}`, parts: [{ d: b.d, paint: "fill" }], text: b.text[0] },
-  { id: `${PREFIX}${b.name}-o`, parts: [{ d: b.d, paint: "stroke" }], text: b.text[1] },
-  { id: `${PREFIX}${b.name}-dot`, parts: [{ d: b.d, paint: "stroke" }, { d: DOT, paint: "fill" }], text: b.text[1] },
-  { id: `${PREFIX}${b.name}-hl`, parts: [{ d: b.d, paint: "fill", clip: "left" }, { d: b.d, paint: "stroke" }], text: b.text[0] },
-  { id: `${PREFIX}${b.name}-ht`, parts: [{ d: b.d, paint: "fill", clip: "top" }, { d: b.d, paint: "stroke" }], text: b.text[0] },
+  { id: `${PREFIX}${b.name}`, group: "basic", parts: [{ d: b.d, paint: "fill" }], text: b.text[0] },
+  { id: `${PREFIX}${b.name}-o`, group: "basic", parts: [{ d: b.d, paint: "stroke" }], text: b.text[1] },
+  { id: `${PREFIX}${b.name}-dot`, group: "basic", parts: [{ d: b.d, paint: "stroke" }, { d: DOT, paint: "fill" }], text: b.text[1] },
+  { id: `${PREFIX}${b.name}-hl`, group: "basic", parts: [{ d: b.d, paint: "fill", clip: "left" }, { d: b.d, paint: "stroke" }], text: b.text[0] },
+  { id: `${PREFIX}${b.name}-ht`, group: "basic", parts: [{ d: b.d, paint: "fill", clip: "top" }, { d: b.d, paint: "stroke" }], text: b.text[0] },
 ];
 
 const stroke = (d: string) => ({ d, paint: "stroke" as const });
 
 /** Line symbols and marks in shapes. */
-const MARKS: ShapeSymbol[] = [
+const MARKS: ShapeSymbol[] = ([
   { id: `${PREFIX}circle-plus`, parts: [stroke(circle(9)), stroke("M12 6.5V17.5M6.5 12H17.5")], text: "⊕" },
   { id: `${PREFIX}circle-x`, parts: [stroke(circle(9)), stroke("M8.2 8.2L15.8 15.8M15.8 8.2L8.2 15.8")], text: "⊗" },
   { id: `${PREFIX}square-plus`, parts: [stroke("M3.5 3.5H20.5V20.5H3.5Z"), stroke("M12 6.5V17.5M6.5 12H17.5")], text: "⊞" },
@@ -79,12 +93,15 @@ const MARKS: ShapeSymbol[] = [
   { id: `${PREFIX}backslash`, parts: [stroke("M5 4L19 20")], text: "╲" },
   { id: `${PREFIX}moon`, parts: [{ d: "M15 3.2A9 9 0 1 0 15 20.8A7.2 7.2 0 1 1 15 3.2Z", paint: "fill" }], text: "☾" },
   { id: `${PREFIX}cross-filled`, parts: [{ d: "M9.5 3H14.5V9.5H21V14.5H14.5V21H9.5V14.5H3V9.5H9.5Z", paint: "fill" }], text: "✚" },
-];
+] as Omit<ShapeSymbol, "group">[]).map((m) => ({ ...m, group: "basic" }));
 
 const byVariant = (suffix: string) => BASES.map((b) => variants(b).find((v) => v.id === `${PREFIX}${b.name}${suffix}`)!);
 
-/** All shapes, most distinct first: filled, outline, dotted, marks, half-filled. */
-export const SHAPES: readonly ShapeSymbol[] = [...byVariant(""), ...byVariant("-o"), ...byVariant("-dot"), ...MARKS, ...byVariant("-hl"), ...byVariant("-ht")];
+/** All shapes, most distinct first: filled, outline, dotted, marks, half-filled, the rest of the basic ones, decorative. */
+export const SHAPES: readonly ShapeSymbol[] = [
+  ...byVariant(""), ...byVariant("-o"), ...byVariant("-dot"), ...MARKS, ...byVariant("-hl"), ...byVariant("-ht"),
+  ...BASIC, ...DECORATIVE,
+];
 
 const BY_ID = new Map(SHAPES.map((s) => [s.id, s]));
 export const shapeSymbol = (id: string): ShapeSymbol | undefined => BY_ID.get(id);
