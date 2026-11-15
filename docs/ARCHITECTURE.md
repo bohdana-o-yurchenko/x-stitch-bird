@@ -666,8 +666,14 @@ domain logic with UI code nobody should unit-test, so it's not used as a rule.
 |---|---|---|
 | `core/**` (formats, geometry, transforms, layers, calculator, checks, retention) | yes | **85% lines, 75% branches** |
 | Editor services: `editor/history`, `editor/tools/ToolManager.ts`, `editor/shortcuts/ShortcutManager.ts`, `editor/selection`, `editor/snapshots` | yes | **60% lines** |
-| `persistence/local/**` | yes | none (thin adapters, covered by e2e) |
-| `ui/`, `render/`, `app/`, `i18n/`, `platform/`, `workers/`, data JSON, messages | **excluded** | — |
+| After release 1 (2026-11-15): `editor/tools/**`, `editor/references/**` (**75%**), `editor/viewport/**`, `editor/actions/transforms.ts` (**90%**), `editor/actions/paint.ts` (**80%**) | yes | as listed, lines |
+| `render/primitives/**` (stitches, symbols, line styles — against a recording fake canvas) | yes | **60% lines** |
+| Rest of `render/**`, `persistence/local/**` | yes | none (canvas/browser adapters, covered by e2e) |
+| `ui/`, `app/`, `i18n/`, `platform/`, `workers/`, data JSON, messages | **excluded** | — |
+
+Test helpers live in `tests/support/`: `editorHarness.ts` (`testEditor()` — an editor on in-memory storage with a
+one-entry pattern, plus `at`/`point` pointer events and `drag`), `fakeCanvas.ts` (a context that records calls
+instead of drawing), `memoryPersistence.ts`, `fixtures.ts`.
 
 - **Minimums, not targets.** Nobody chases 100%. The last 10–15% of a module is usually trivial branches, and
   testing those is exactly the kind of test we don't want. Raise a minimum only when the team decides to, never
