@@ -1138,8 +1138,9 @@ quarter / three-quarter / petite stitches, other blends, floss + bead, beads, ba
    Two earlier layouts imported without thread numbers: plain rows with headers Symbol · Number · Name · Strands ·
    Stitches in built-in Helvetica, then the same without the Symbol and Stitches headers.
    When something was left out, a page *About this chart* lists it.
-3. Only when something was left out: the *Full chart (not for Pattern Keeper)* — the same pages as pictures of the
-   Symbols view with everything on it — and a *Full key* with each entry's icon.
+3. Nothing else (since 2026-11-16): the chart with everything on it is the separate *PDF chart to print*
+   (§15.10b) — the picture pages that used to follow here meant nothing to other apps (Хрестики, Ruta Stitch
+   read no symbols from them).
 
 **Before exporting**, when something is left out, a dialog lists it by kind with counts and explains the two
 charts ("import only the first pages"). With nothing trackable at all, a toast says so and nothing is exported.
@@ -1152,6 +1153,28 @@ names are transliterated.
 joins without overlap work.
 
 **Later:** cover page with metadata (§15.1) and preview, page map, Letter size, overlap rows, a vector full chart.
+
+### 15.10b PDF chart to print (implemented 2026-11-16)
+**Menu ▸ Export ▸ PDF chart to print** — the chart for people to read and stitch from, separate from the Pattern
+Keeper PDF. All vector (symbols from the embedded symbol font, hand-drawn symbols as paths with their cut-outs,
+colours, lines), A4 portrait, text in English (Latin only).
+1. **Cover**: name, designer and copyright, size in stitches and on the pattern's fabric (cm and inches), the
+   contents with page numbers, and a **page map** — every chart page as a numbered box, the shared cells grey.
+2. **Symbol chart**: crosses, half crosses (a thin diagonal and a smaller symbol), quarter / three-quarter / petite
+   stitches (shaded corner and a small symbol), beads (a circle with the bead's symbol; a bead's symbol replaces the
+   stitch's under it), floss + bead (the stitch plus a small bead dot), blends.
+3. **Symbols on colour**: the same on the thread colours, over the fabric colour; symbols in each colour's own ink
+   (white on dark); a half cross's symbol sits on a small white disc in dark ink so it reads on floss and fabric.
+4. **Colour chart with backstitch**: as 3, plus backstitch lines (colour, thicker with more strands, very light
+   floss darkened) and French knots.
+5. **Key**: every used entry — an icon (colour block with the symbol, half-cross band, bead, line or knot), brand
+   and number, details (strands, stitch, bead), count with its unit.
+
+**Pages**: about **40 stitches across** (cells ≈ 4.6 mm; up to 6.4 mm for small charts), as many rows as fit.
+Neighbouring pages **share 2 rows or columns**: on both pages those cells are shaded grey (a grey background on
+the symbol chart, a see-through grey over the colours), so the pages can be laid over each other. Each page shows
+its column and row ranges, the chart's own numbering every 10, a small page map with this page filled, and
+centre marks below and right of the grid.
 
 ### 15.11 Symbol matching — semi-automatic mapping (JS only, no AI)
 Feasible with classic **template matching**: plain pixel arithmetic in a Web Worker, no models.

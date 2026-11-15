@@ -1,18 +1,16 @@
 import { brandCode } from "../../catalog/catalog";
 import { hexToRgb, luma } from "../../color/colorMath";
-import { computeUsage, entryCount, partialCount } from "../../calculator/usage";
-import { isMajorLine, majorOffset, rulerLabels } from "../../grid/numbering";
-import { labelData, type LabelData } from "../../labels/keyLabel";
 import { resolveColor } from "../../pattern/resolve";
-import type { KeyEntry, KeyIndex, Pattern, Rect } from "../../pattern/types";
+import type { KeyEntry, KeyIndex, Pattern } from "../../pattern/types";
 import { SYMBOL_FONT, SYMBOL_GLYPHS } from "../../symbols/symbolFont";
-import { PdfPage, PdfWriter, textWidth, type Raster } from "./pdfWriter";
+import { drawGrid, drawRulers, PAGE, type Tile } from "./pdfLayout";
+import { PdfPage, PdfWriter, textWidth } from "./pdfWriter";
 
 /*
  * A PDF chart that Pattern Keeper can import (SPEC §15.10). Pattern Keeper tracks full crosses only and reads
  * them as text: one glyph of an embedded font per cell, on a vector grid, with a ruled thread table. So the file holds
- *   1. the chart with only the stitches it can track, as symbols, their thread list, and a page of notes;
- *   2. when the pattern has anything else, the full chart as pictures, with its own key.
+ * only that: the chart with the stitches it can track, as symbols, their thread list, and a page of notes. The chart
+ * with everything on it is the separate PDF chart to print (chartPdf.ts).
  * The text is Latin only (an embedded cut of DM Sans): the wording here is English whatever the interface language.
  */
 
@@ -65,21 +63,6 @@ const ISSUE_TEXT: Record<PkIssueKind, string> = {
   knot: "French knots",
 };
 
-const STITCH_TEXT = { full: "full cross", half: "half cross /", halfb: "half cross \\" } as const;
-
-/** The key label in English (the interface's own labels may be Cyrillic). */
-function englishLabel(d: LabelData): { title: string; sub: string } {
-  const strands = d.strands ? `${d.strands} strand${d.strands === 1 ? "" : "s"}` : null;
-  const stitch = d.stitch ? STITCH_TEXT[d.stitch] : null;
-  const parts: (string | null)[] = [d.name];
-  if (d.kind === "bead") parts.push(d.series ? `bead (${d.series})` : "bead");
-  else if (d.kind === "combo") parts.splice(0, 1, strands, stitch, `with ${d.beadName ?? "?"} bead`);
-  else if (d.kind === "back") parts.push(d.blend ? null : strands, "backstitch");
-  else if (d.kind === "knot") parts.push(d.blend ? null : strands, d.wraps ? `French knot, ${d.wraps} wrap${d.wraps === 1 ? "" : "s"}` : "French knot");
-  else parts.push(d.blend ? null : strands, stitch);
-  return { title: d.blend ? `Blend ${d.title}` : d.title, sub: parts.filter(Boolean).join(" · ") };
-}
-
 /**
  * The font glyph for each entry of the Pattern Keeper chart. The chart must be text in the symbol font, so a
  * hand-drawn symbol (which has no glyph) is shown with a standard symbol no other entry of the chart uses.
@@ -99,22 +82,18 @@ function chartGlyphs(p: Pattern, report: PkReport): { glyphs: Map<KeyIndex, numb
   return { glyphs, replaced: without.length };
 }
 
+/** The font files: chart symbols (`SYMBOL_FONT.url`) and the text font (`TEXT_FONTS.*.url`). All are embedded. */
+export interface PdfFonts {
+  symbols: Uint8Array;
+  regular: Uint8Array;
+  bold: Uint8Array;
+}
+
 export interface PkPdfOptions {
-  /** The font files: chart symbols (`SYMBOL_FONT.url`) and the text font (`TEXT_FONTS.*.url`). All are embedded. */
-  fonts: { symbols: Uint8Array; regular: Uint8Array; bold: Uint8Array };
-  /** Picture of the full chart for these cells, symbols view with grid; needed when the report has issues. */
-  fullChart?: (cells: Rect) => Raster;
-  /** Picture of a key entry's icon, for the full chart's key. */
-  keyIcon?: (k: KeyIndex) => Raster | null;
+  fonts: PdfFonts;
 }
 
-// A4 portrait, in points
-const PAGE = { w: 595.28, h: 841.89, left: 42, right: 26, top: 58, bottom: 34 };
 const MAX_COLS = 60, MAX_CELL = 14;
-
-interface Tile extends Rect {
-  n: number;
-}
 
 /** Splits the chart into pages of whole cells; tall pages end on a multiple of 10 rows. */
 function tiles(p: Pattern): { cell: number; list: Tile[] } {
@@ -129,26 +108,12 @@ function tiles(p: Pattern): { cell: number; list: Tile[] } {
 
 /** Title, column and row numbers around one chart page; returns where the grid starts. */
 function frame(page: PdfPage, p: Pattern, t: Tile, cell: number, heading: string, count: number) {
-  const size = { w: p.w, h: p.h }, ox = PAGE.left, oy = PAGE.top;
+  const ox = PAGE.left, oy = PAGE.top;
   page.text("bold", 10, ox, 24, p.name || "Pattern");
   page.text("regular", 8, ox, 36, `${heading} · page ${t.n} of ${count} · columns ${t.x + 1}-${t.x + t.w}, rows ${t.y + 1}-${t.y + t.h} of ${p.w} x ${p.h}`, "left", 0.35);
-  for (const l of rulerLabels(p.grid, "x", size, 10)) if (l.at >= t.x && l.at <= t.x + t.w) page.text("regular", 7, ox + (l.at - t.x) * cell, oy - 4, String(l.text), "centre", 0.3);
-  for (const l of rulerLabels(p.grid, "y", size, 10)) if (l.at >= t.y && l.at <= t.y + t.h) page.text("regular", 7, ox - 4, oy + (l.at - t.y) * cell + 2.5, String(l.text), "right", 0.3);
+  drawRulers(page, p, t, cell, ox, oy);
   return { ox, oy };
 }
-
-function grid(page: PdfPage, p: Pattern, t: Tile, cell: number, ox: number, oy: number) {
-  const size = { w: p.w, h: p.h }, mx = majorOffset(p.grid, "x", size), my = majorOffset(p.grid, "y", size);
-  const minor: [number, number, number, number][] = [], major: [number, number, number, number][] = [];
-  const right = ox + t.w * cell, bottom = oy + t.h * cell;
-  for (let i = 0; i <= t.w; i++) (isMajorLine(t.x + i, mx) ? major : minor).push([ox + i * cell, oy, ox + i * cell, bottom]);
-  for (let j = 0; j <= t.h; j++) (isMajorLine(t.y + j, my) ? major : minor).push([ox, oy + j * cell, right, oy + j * cell]);
-  page.lines(minor, 0.3, 0.55);
-  page.lines(major, 0.9, 0);
-  page.rect(ox, oy, t.w * cell, t.h * cell, { stroke: 0, width: 1.1 });
-}
-
-const ROW = 19, KEY_TOP = 74, KEY_ROWS = Math.floor((PAGE.h - KEY_TOP - PAGE.bottom) / ROW);
 
 /** Builds the PDF. Check the pattern with `checkPatternKeeper` first and pass the report in. */
 export async function patternKeeperPdf(p: Pattern, report: PkReport, o: PkPdfOptions): Promise<Uint8Array> {
@@ -156,14 +121,13 @@ export async function patternKeeperPdf(p: Pattern, report: PkReport, o: PkPdfOpt
   await pdf.embedTextFonts(o.fonts);
   await pdf.embedSymbolFont(SYMBOL_FONT.name, o.fonts.symbols, Object.values(SYMBOL_GLYPHS));
   const { cell, list } = tiles(p);
-  const full = report.issues.length > 0 && !!o.fullChart;
   const { glyphs, replaced } = chartGlyphs(p, report);
 
   // 1. the chart Pattern Keeper reads
   for (const t of list) {
     const page = new PdfPage(PAGE.w, PAGE.h);
     const { ox, oy } = frame(page, p, t, cell, "Chart for Pattern Keeper", list.length);
-    grid(page, p, t, cell, ox, oy);
+    drawGrid(page, p, t, cell, ox, oy);
     const cells: { x: number; y: number; glyph: number }[] = [];
     for (let y = t.y; y < t.y + t.h; y++)
       for (let x = t.x; x < t.x + t.w; x++) {
@@ -252,42 +216,10 @@ export async function patternKeeperPdf(p: Pattern, report: PkReport, o: PkPdfOpt
     if (report.issues.length) {
       page.text("bold", 9, PAGE.left, (y += 14), "Not in the Pattern Keeper chart (it tracks full crosses only)");
       for (const issue of report.issues) page.text("regular", 9, PAGE.left, (y += 14), `${issue.count} ${ISSUE_TEXT[issue.kind]}`);
-      if (full) page.text("regular", 9, PAGE.left, y + 28, "They are on the full chart on the following pages. Import only the pages before this one into Pattern Keeper.");
+      page.text("regular", 9, PAGE.left, y + 28, "For a chart with everything on it, export the PDF chart to print (Export > PDF chart to print).");
     }
     await pdf.addPage(page);
   }
 
-  // 2. the full chart, as pictures
-  if (full) {
-    for (const t of list) {
-      const page = new PdfPage(PAGE.w, PAGE.h);
-      const { ox, oy } = frame(page, p, t, cell, "Full chart (not for Pattern Keeper)", list.length);
-      page.image(await pdf.image(o.fullChart!(t)), ox, oy, t.w * cell, t.h * cell);
-      page.rect(ox, oy, t.w * cell, t.h * cell, { stroke: 0, width: 1.1 });
-      await pdf.addPage(page);
-    }
-    const usage = computeUsage(p).perEntry;
-    const all = p.key.flatMap((e, k) => {
-      const count = entryCount(usage.get(k)) + partialCount(usage.get(k));
-      return e && k && count ? [{ k, count, ...englishLabel(labelData(e, resolveColor(p, e.src))) }] : [];
-    });
-    const pages = Math.max(1, Math.ceil(all.length / KEY_ROWS));
-    for (let n = 0; n < pages; n++) {
-      const page = new PdfPage(PAGE.w, PAGE.h);
-      page.text("bold", 10, PAGE.left, 24, p.name || "Pattern");
-      page.text("regular", 8, PAGE.left, 36, `Full key · page ${n + 1} of ${pages}`, "left", 0.35);
-      page.lines([[PAGE.left, 65, PAGE.w - PAGE.right, 65]], 0.6);
-      const part = all.slice(n * KEY_ROWS, (n + 1) * KEY_ROWS);
-      for (const [i, r] of part.entries()) {
-        const y = KEY_TOP + i * ROW, icon = o.keyIcon?.(r.k);
-        if (icon) page.image(await pdf.image(icon), PAGE.left, y, 14, 14);
-        page.rect(PAGE.left, y, 14, 14, { stroke: 0.4, width: 0.4 });
-        page.text("bold", 9.5, PAGE.left + 24, y + 10.5, r.title);
-        page.text("regular", 9.5, PAGE.left + 190, y + 10.5, r.sub.length > 64 ? `${r.sub.slice(0, 63)}…` : r.sub);
-        page.text("regular", 9.5, PAGE.w - PAGE.right, y + 10.5, String(r.count), "right");
-      }
-      await pdf.addPage(page);
-    }
-  }
   return pdf.build({ title: p.name || "Pattern", producer: "ptashechka" });
 }

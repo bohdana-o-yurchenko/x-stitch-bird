@@ -50,6 +50,7 @@ function FileMenu() {
       { id: "oxs", label: t("oxs"), hint: t("oxsHint"), onClick: go("file.export", "oxs") },
       { label: t("csv"), onClick: go("file.export", "csv") },
       "-",
+      { id: "pdfChart", label: t("pdfChart"), hint: t("pdfChartHint"), onClick: go("file.exportChartPdf") },
       { id: "pdfPk", label: t("pdfPk"), hint: t("pdfPkHint"), onClick: go("file.exportPatternKeeper") },
     ] },
     "-",

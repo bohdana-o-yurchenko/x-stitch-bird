@@ -4,7 +4,8 @@ import { exportCsv } from "@/core/formats/csv/exportCsv";
 import { NewerFileError, parsePattern } from "@/core/formats/json/parse";
 import { serializePattern, XBIRD_VERSION, type FileVersion, type PatternFile } from "@/core/formats/json/serialize";
 import { exportOxs } from "@/core/formats/oxs/exportOxs";
-import { checkPatternKeeper, patternKeeperPdf } from "@/core/formats/pdf/patternKeeper";
+import { chartPdf } from "@/core/formats/pdf/chartPdf";
+import { checkPatternKeeper, patternKeeperPdf, type PdfFonts } from "@/core/formats/pdf/patternKeeper";
 import { TEXT_FONTS } from "@/core/formats/pdf/textFonts";
 import { importOxs } from "@/core/formats/oxs/importOxs";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
@@ -16,11 +17,10 @@ import { SYMBOL_FONT } from "@/core/symbols/symbolFont";
 import type { Pattern } from "@/core/pattern/types";
 import type { UnderlayData } from "@/core/underlay/underlay";
 import { renderChartImage, type KeyLine } from "@/render/exportChart";
-import { drawKeyIcon } from "@/render/keyIcon";
 import { defaultCanvasTheme } from "@/render/theme";
 import type { ChartView } from "@/render/chart";
 import { downloadFile, isImageFile, isPatternFile, readText } from "@/platform/files";
-import { blankCanvas, canvasRgb, canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
+import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import type { Editor } from "../createEditor";
 import { loadPattern } from "./pattern";
 
@@ -66,37 +66,39 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
   offer(ed, `${base}${view === "color" ? "-preview" : "-chart"}.png`, await canvasToBlob(canvas), "png");
 }
 
+/** The fonts every PDF embeds: chart symbols and the text font (regular, bold). */
+async function pdfFonts(): Promise<PdfFonts> {
+  const load = async (url: string) => new Uint8Array(await (await fetch(url)).arrayBuffer());
+  const [symbols, regular, bold] = await Promise.all([load(SYMBOL_FONT.url), load(TEXT_FONTS.regular.url), load(TEXT_FONTS.bold.url)]);
+  return { symbols, regular, bold };
+}
+
+async function offerPdf(ed: Editor, filename: string, make: (fonts: PdfFonts) => Promise<Uint8Array>) {
+  try {
+    const pdf = await make(await pdfFonts());
+    offer(ed, filename, new Blob([pdf as BlobPart], { type: "application/pdf" }), "pdf");
+  } catch (e) {
+    console.error(e);
+    ed.toast("toasts.pdfFailed");
+  }
+}
+
 /**
- * PDF for Pattern Keeper (SPEC §15.10). When the pattern has things Pattern Keeper can't track, a dialog explains
- * first; `confirmed` skips it.
+ * PDF for Pattern Keeper (SPEC §15.10): only what it can track. When the pattern has more, a dialog explains first;
+ * `confirmed` skips it.
  */
 export async function exportPatternKeeper(ed: Editor, confirmed = false) {
   const p = ed.doc, report = checkPatternKeeper(p);
   if (!report.supported.size) return ed.toast("toasts.pkNothing");
   if (report.issues.length && !confirmed) return ed.openDialog({ type: "patternKeeper", issues: report.issues });
-  try {
-    const load = async (url: string) => new Uint8Array(await (await fetch(url)).arrayBuffer());
-    const [symbols, regular, bold] = await Promise.all([load(SYMBOL_FONT.url), load(TEXT_FONTS.regular.url), load(TEXT_FONTS.bold.url)]);
-    const theme = { ...ed.theme, accent: defaultCanvasTheme.accent }, palette = ed.state.palette;
-    // the full chart is drawn once, as on screen in Symbols view, and cut into pages
-    const px = Math.max(10, Math.min(24, Math.floor(4800 / Math.max(p.w, p.h))));
-    let chart: HTMLCanvasElement | null = null;
-    const pdf = await patternKeeperPdf(p, report, {
-      fonts: { symbols, regular, bold },
-      fullChart: (r) => canvasRgb((chart ??= renderChartImage(p, palette, "symbols", theme, { heading: "", key: [] }, px)), r.x * px, r.y * px, r.w * px, r.h * px),
-      keyIcon: (k) => {
-        const slot = palette[k];
-        if (!slot) return null;
-        const c = blankCanvas(56, 56);
-        drawKeyIcon(c.getContext("2d")!, slot, 56, "symbols", theme, p.fabric);
-        return canvasRgb(c);
-      },
-    });
-    offer(ed, `${safeName(p)}-pattern-keeper.pdf`, new Blob([pdf as BlobPart], { type: "application/pdf" }), "pdf");
-  } catch (e) {
-    console.error(e);
-    ed.toast("toasts.pdfFailed");
-  }
+  await offerPdf(ed, `${safeName(p)}-pattern-keeper.pdf`, (fonts) => patternKeeperPdf(p, report, { fonts }));
+}
+
+/** The PDF chart to print and read (SPEC §15.10b): symbols, symbols on colour, colour with backstitch, the key. */
+export async function exportChartPdf(ed: Editor) {
+  const p = ed.doc;
+  if (!p.key.some(Boolean)) return ed.toast("toasts.needKeyEmpty");
+  await offerPdf(ed, `${safeName(p)}-chart.pdf`, (fonts) => chartPdf(p, { fonts }));
 }
 
 /** Everything a .xbird file holds: the pattern, its reference windows, underlay and versions. */

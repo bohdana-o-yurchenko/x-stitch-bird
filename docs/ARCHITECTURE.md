@@ -1142,3 +1142,8 @@ Decisions taken while implementing this plan. Each one lives in the single place
   then `python3 scripts/build-symbol-font.py symbols.json DMSans.ttf` (fonttools + shapely; strokes are outlined,
   letters come from DM Sans, OFL). **Re-run both after changing the symbol list** — a unit test fails if a symbol
   has no glyph.
+- PDF chart to print (SPEC §15.10b): `core/formats/pdf/chartPdf.ts` (`chartLayout` — pages with shared strips,
+  `chartPdf` — cover, three views, key), shared page pieces in `pdfLayout.ts` (A4, grid, rulers, English labels),
+  `svgPath.ts` turns symbol path data (incl. arcs) into PDF path operators. `PdfPage` draws rectangles, polygons,
+  circles, paths, clipping and see-through fills (ExtGState). Editor: `exportChartPdf` / command
+  `file.exportChartPdf`; both PDFs load their fonts through `pdfFonts()`.

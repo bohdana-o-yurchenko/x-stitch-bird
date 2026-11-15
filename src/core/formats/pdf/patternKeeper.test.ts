@@ -49,28 +49,22 @@ describe("Pattern Keeper PDF", () => {
     expect(r.issues).toEqual([{ kind: "half", count: 3 }, { kind: "blend", count: 1 }, { kind: "back", count: 1 }]);
   });
 
-  it("writes a valid file: symbol chart, key, then the full chart when something is left out", async () => {
+  it("writes a valid file with only what Pattern Keeper reads: symbol chart, thread list, notes", async () => {
     const { pattern } = parsePattern(fixtureJson("1.json"), ALL_SYMBOLS);
     const report = checkPatternKeeper(pattern);
     expect(report.issues.map((i) => i.kind)).toEqual(["combo", "back"]);
-    const pdf = await patternKeeperPdf(pattern, report, {
-      fonts,
-      fullChart: (r) => ({ w: r.w, h: r.h, rgb: new Uint8Array(r.w * r.h * 3).fill(230) }),
-      keyIcon: () => ({ w: 1, h: 1, rgb: new Uint8Array(3) }),
-    });
+    const pdf = await patternKeeperPdf(pattern, report, { fonts });
     if (process.env.PK_PDF_OUT) writeFileSync(process.env.PK_PDF_OUT, pdf);
     const s = text(pdf);
     expect(s.startsWith("%PDF-1.7")).toBe(true);
     expect(checkXref(pdf)).toBeGreaterThan(10);
-    // 72×72 cells: 2 chart pages + thread list + notes, then 2 full pages + full key
-    expect(s.match(/\/Type \/Page /g)).toHaveLength(7);
+    // 72×72 cells: 2 chart pages + thread list + notes; no pictures of the full chart any more
+    expect(s.match(/\/Type \/Page /g)).toHaveLength(4);
+    expect(s).not.toContain("/Subtype /Image");
     // three embedded fonts (text regular and bold, symbols) and no built-in ones
     expect(s.match(/\/Subtype \/Type0/g)).toHaveLength(3);
     expect(s.match(/\/FontFile2/g)).toHaveLength(3);
     expect(s).not.toContain("/Subtype /Type1");
-    // without the full-chart callback only the Pattern Keeper part is written
-    const short = await patternKeeperPdf(pattern, report, { fonts });
-    expect(text(short).match(/\/Type \/Page /g)).toHaveLength(4);
   });
 
   it("shows a hand-drawn symbol with a spare standard glyph, since the chart must be text in the symbol font", async () => {

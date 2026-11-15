@@ -396,7 +396,7 @@
       "back": "Backstitch lines: {count}",
       "knot": "French knots: {count}"
     },
-    "pkTwoCharts": "The PDF will hold two charts: first the one for Pattern Keeper, with only the stitches it can track, then the full chart with everything. In Pattern Keeper, import only the first pages."
+    "pkTwoCharts": "The PDF holds only what Pattern Keeper can track. For a chart with everything on it, use Export ▸ PDF chart to print."
   },
   "meta": {
     "designer": "Author (designer)",
@@ -584,7 +584,9 @@
     "changelog": "What’s new",
     "changelogHint": "Version {version} — what changed",
     "pdfPk": "PDF for Pattern Keeper",
-    "pdfPkHint": "A symbol chart the app can import, plus the full chart"
+    "pdfPkHint": "A symbol chart and thread list the app can import",
+    "pdfChart": "PDF chart to print",
+    "pdfChartHint": "Symbols, symbols on colour, colour with backstitch, and the key"
   },
   "toolNames": {
     "pencil": "Draw",

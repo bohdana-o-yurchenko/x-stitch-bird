@@ -64,14 +64,94 @@ const hex4 = (n: number) => n.toString(16).padStart(4, "0");
 export type FontName = "regular" | "bold" | "symbols";
 const FONT_KEY: Record<FontName, string> = { regular: "F1", bold: "F2", symbols: "F3" };
 
+/** "r g b" for a "#RRGGBB" colour, as the rg / RG operators take it. */
+export function rgb(hex: string): string {
+  const h = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+  return [1, 3, 5].map((i) => num(parseInt(h.slice(i, i + 2), 16) / 255)).join(" ");
+}
+
+const CAPS = { butt: 0, round: 1, square: 2 } as const;
+const JOINS = { miter: 0, round: 1, bevel: 2 } as const;
+
+/** How a path or shape is painted: fill and/or stroke colours ("#RRGGBB"), line width, caps and joins, fill rule. */
+export interface Paint {
+  fill?: string;
+  stroke?: string;
+  width?: number;
+  cap?: keyof typeof CAPS;
+  join?: keyof typeof JOINS;
+  evenOdd?: boolean;
+}
+
 /** Drawing on one page, in points with the origin at the top-left corner (PDF's own origin is bottom-left). */
 export class PdfPage {
   readonly ops: string[] = [];
   readonly images: { name: string; ref: Ref }[] = [];
+  /** Fill opacities used on the page, in percent (each becomes an ExtGState). */
+  readonly alphas = new Set<number>();
   constructor(readonly width: number, readonly height: number) {}
 
   private y(v: number) {
     return num(this.height - v);
+  }
+
+  /** A point given from the top-left, in PDF coordinates. */
+  place = (x: number, y: number): [number, number] => [x, this.height - y];
+
+  /** Paints the current path with `o` (a path built from m / l / c / h operators). */
+  private paint(path: string, o: Paint) {
+    const set: string[] = [];
+    if (o.fill) set.push(`${rgb(o.fill)} rg`);
+    if (o.stroke) set.push(`${rgb(o.stroke)} RG ${num(o.width ?? 0.5)} w ${CAPS[o.cap ?? "butt"]} J ${JOINS[o.join ?? "miter"]} j`);
+    const op = o.fill && o.stroke ? (o.evenOdd ? "B*" : "B") : o.fill ? (o.evenOdd ? "f*" : "f") : "S";
+    this.ops.push(`${set.join(" ")} ${path} ${op}`);
+  }
+
+  /** SVG-like path data already turned into PDF operators (see svgPath.ts). */
+  path(pdfPath: string, o: Paint) {
+    if (pdfPath) this.paint(pdfPath, o);
+  }
+
+  polygon(points: readonly (readonly [number, number])[], o: Paint) {
+    if (points.length < 2) return;
+    this.paint(points.map(([x, y], i) => `${num(x)} ${this.y(y)} ${i ? "l" : "m"}`).join(" ") + " h", o);
+  }
+
+  circle(cx: number, cy: number, r: number, o: Paint) {
+    // four Bézier quarter arcs
+    const k = 0.5523 * r, Y = this.height - cy, p = (x: number, y: number) => `${num(x)} ${num(y)}`;
+    this.paint(`${p(cx + r, Y)} m ${p(cx + r, Y + k)} ${p(cx + k, Y + r)} ${p(cx, Y + r)} c ${p(cx - k, Y + r)} ${p(cx - r, Y + k)} ${p(cx - r, Y)} c ${p(cx - r, Y - k)} ${p(cx - k, Y - r)} ${p(cx, Y - r)} c ${p(cx + k, Y - r)} ${p(cx + r, Y - k)} ${p(cx + r, Y)} c h`, o);
+  }
+
+  /** Many rectangles of one colour in one go: [x, y, w, h] each, from the top-left. */
+  rects(boxes: readonly (readonly [number, number, number, number])[], fill: string) {
+    if (!boxes.length) return;
+    this.ops.push(`${rgb(fill)} rg ${boxes.map(([x, y, w, h]) => `${num(x)} ${this.y(y + h)} ${num(w)} ${num(h)} re`).join(" ")} f`);
+  }
+
+  /** Save / restore the graphics state (clipping, opacity). */
+  save() {
+    this.ops.push("q");
+  }
+  restore() {
+    this.ops.push("Q");
+  }
+
+  /** Clip what follows to a rectangle (from the top-left), until `restore`. */
+  clipRect(x: number, y: number, w: number, h: number) {
+    this.ops.push(`${num(x)} ${this.y(y + h)} ${num(w)} ${num(h)} re W n`);
+  }
+
+  /** Clip what follows to everything outside a path (a hole), until `restore`. */
+  clipOutside(pdfPath: string) {
+    this.ops.push(`-10000 -10000 30000 30000 re ${pdfPath} W* n`);
+  }
+
+  /** Fill opacity (0–1) for what follows, until `restore`. */
+  opacity(a: number) {
+    const pc = Math.round(a * 100);
+    this.alphas.add(pc);
+    this.ops.push(`/GA${pc} gs`);
   }
 
   /** `y` is the baseline. */
@@ -85,10 +165,10 @@ export class PdfPage {
    * Chart symbols: each glyph fills a `size` square whose top-left corner is given. One text object for them all;
    * `grey` 0 = black, 1 = white (for symbols on a dark colour).
    */
-  glyphs(size: number, cells: { x: number; y: number; glyph: number }[], grey = 0) {
+  glyphs(size: number, cells: { x: number; y: number; glyph: number }[], ink: number | string = 0) {
     if (!cells.length) return;
     const show = cells.map((c) => `1 0 0 1 ${num(c.x)} ${this.y(c.y + size)} Tm <${hex4(c.glyph)}> Tj`);
-    this.ops.push(`BT ${num(grey)} g /${FONT_KEY.symbols} ${num(size)} Tf`, ...show, "ET");
+    this.ops.push(`BT ${typeof ink === "string" ? `${rgb(ink)} rg` : `${num(ink)} g`} /${FONT_KEY.symbols} ${num(size)} Tf`, ...show, "ET");
   }
 
   lines(segments: [number, number, number, number][], width: number, grey = 0) {
@@ -98,10 +178,7 @@ export class PdfPage {
 
   rect(x: number, y: number, w: number, h: number, o: { fill?: string; stroke?: number; width?: number }) {
     const box = `${num(x)} ${this.y(y + h)} ${num(w)} ${num(h)} re`;
-    if (o.fill) {
-      const [r, g, b] = [1, 3, 5].map((i) => num(parseInt(o.fill!.slice(i, i + 2), 16) / 255));
-      this.ops.push(`${r} ${g} ${b} rg ${box} f`);
-    }
+    if (o.fill) this.ops.push(`${rgb(o.fill)} rg ${box} f`);
     if (o.stroke !== undefined) this.ops.push(`${num(o.stroke)} G ${num(o.width ?? 0.5)} w ${box} S`);
   }
 
@@ -184,7 +261,8 @@ export class PdfWriter {
     const contents = await this.stream("", ascii(page.ops.join("\n")));
     const fonts = Object.entries(this.fonts).map(([k, ref]) => `/${k} ${ref} 0 R`).join(" ");
     const images = page.images.length ? ` /XObject << ${page.images.map((i) => `/${i.name} ${i.ref} 0 R`).join(" ")} >>` : "";
-    this.pageRefs.push(this.add(`<< /Type /Page /Parent ${this.pagesRef} 0 R /MediaBox [0 0 ${num(page.width)} ${num(page.height)}] /Resources << /Font << ${fonts} >>${images} >> /Contents ${contents} 0 R >>`));
+    const states = page.alphas.size ? ` /ExtGState << ${[...page.alphas].map((a) => `/GA${a} << /ca ${num(a / 100)} /CA ${num(a / 100)} >>`).join(" ")} >>` : "";
+    this.pageRefs.push(this.add(`<< /Type /Page /Parent ${this.pagesRef} 0 R /MediaBox [0 0 ${num(page.width)} ${num(page.height)}] /Resources << /Font << ${fonts} >>${images}${states} >> /Contents ${contents} 0 R >>`));
   }
 
   get pageCount() {

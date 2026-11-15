@@ -524,9 +524,23 @@ test("exports a PDF for Pattern Keeper after explaining what it can't track", as
   const pdf = readFileSync((await file.path())!).toString("latin1");
   expect(pdf.startsWith("%PDF-1.7")).toBe(true);
   expect(pdf.trimEnd().endsWith("%%EOF")).toBe(true);
-  // chart + thread list + notes for Pattern Keeper, then the full chart + its key
-  expect(pdf.match(/\/Type \/Page /g)).toHaveLength(5);
+  // only what Pattern Keeper reads: chart + thread list + notes
+  expect(pdf.match(/\/Type \/Page /g)).toHaveLength(3);
+  expect(pdf).not.toContain("/Subtype /Image");
   if (process.env.PK_PDF_OUT) await file.saveAs(process.env.PK_PDF_OUT);
+});
+
+test("exports a PDF chart to print: cover, symbols, symbols on colour, colour with backstitch, key", async ({ page }) => {
+  const download = page.waitForEvent("download");
+  await fileAction(page, "Export", "PDF chart to print");
+  const file = await download;
+  expect(file.suggestedFilename()).toBe("Untitled-pattern-chart.pdf");
+  const pdf = readFileSync((await file.path())!).toString("latin1");
+  expect(pdf.startsWith("%PDF-1.7")).toBe(true);
+  // the 60 × 60 demo is 2 × 2 pages per chart: cover + 3 × 4 + key
+  expect(pdf.match(/\/Type \/Page /g)).toHaveLength(14);
+  expect(pdf).not.toContain("/Subtype /Image");
+  if (process.env.CHART_PDF_OUT) await file.saveAs(process.env.CHART_PDF_OUT);
 });
 
 test("the selection bar can deselect without changing anything, and clears cells by name", async ({ page }) => {
