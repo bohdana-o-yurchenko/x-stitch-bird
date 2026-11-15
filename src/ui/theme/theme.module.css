@@ -12,8 +12,8 @@
 .row button.dot {
   display: block;
   flex: none;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   padding: 0;
   border-radius: 50%;
   border: 2px solid var(--panel);
@@ -24,8 +24,4 @@
 }
 .row button.dot.on {
   box-shadow: 0 0 0 2px var(--ink);
-}
-/* the dark dot shows a crescent of the dark theme's accent */
-.dark {
-  background-image: radial-gradient(circle at 68% 34%, #bd93f9 0 27%, transparent 29%) !important;
 }

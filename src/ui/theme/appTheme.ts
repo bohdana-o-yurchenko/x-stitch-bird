@@ -1,10 +1,11 @@
 /** Colour themes (Menu ▸ Theme): four light accents and one dark. Only the interface changes — never chart data. */
 export const THEMES = [
-  { id: "terracotta", swatch: "#b5452f" },
-  { id: "olive", swatch: "#56682a" },
-  { id: "royal", swatch: "#2a4c9c" },
-  { id: "rose", swatch: "#b03a6c" },
-  { id: "dark", swatch: "#282a36" },
+  // swatch = accent, shade = the theme's background (the dot shows both)
+  { id: "terracotta", swatch: "#b5452f", shade: "#efe5d6" },
+  { id: "olive", swatch: "#56682a", shade: "#e2e6d3" },
+  { id: "royal", swatch: "#2a4c9c", shade: "#dfe4ee" },
+  { id: "rose", swatch: "#b03a6c", shade: "#ecdfe5" },
+  { id: "dark", swatch: "#bd93f9", shade: "#282a36" },
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number]["id"];

@@ -14,12 +14,13 @@ export interface EntryKind {
   group: LayerId;
 }
 
+/** In the order the key form offers them: cross, backstitch, knot, floss + bead, bead. */
 export const ENTRY_KINDS: readonly EntryKind[] = [
   { id: "thread", layer: "stitches", placement: "cell", fields: ["colour", "blend", "stitchType", "strands"], defaultStrands: 2, group: "stitches" },
   { id: "back", layer: "segments", placement: "segment", fields: ["colour", "blend", "strands"], defaultStrands: 1, group: "segments" },
-  { id: "bead", layer: "beads", placement: "cell", fields: ["bead"], defaultStrands: null, group: "beads" },
-  { id: "combo", layer: "stitches", placement: "cell", fields: ["colour", "bead", "stitchType", "strands"], defaultStrands: 2, group: "stitches" },
   { id: "knot", layer: "knots", placement: "point", fields: ["colour", "blend", "strands", "wraps"], defaultStrands: 2, group: "knots" },
+  { id: "combo", layer: "stitches", placement: "cell", fields: ["colour", "bead", "stitchType", "strands"], defaultStrands: 2, group: "stitches" },
+  { id: "bead", layer: "beads", placement: "cell", fields: ["bead"], defaultStrands: null, group: "beads" },
 ];
 
 const BY_ID = new Map(ENTRY_KINDS.map((k) => [k.id, k]));

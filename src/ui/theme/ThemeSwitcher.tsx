@@ -29,8 +29,8 @@ export function ThemeSwitcher() {
           aria-label={t(th.id)}
           title={t(th.id)}
           data-theme-id={th.id}
-          className={cx(s.dot, current === th.id && s.on, th.id === "dark" && s.dark)}
-          style={{ background: th.swatch }}
+          className={cx(s.dot, current === th.id && s.on)}
+          style={{ background: `radial-gradient(circle, ${th.swatch} 0 44%, ${th.shade} 48%)` }}
           onClick={() => pick(th.id)}
         />
       ))}

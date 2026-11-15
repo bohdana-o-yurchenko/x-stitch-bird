@@ -1109,8 +1109,8 @@ Decisions taken while implementing this plan. Each one lives in the single place
   `UnderlayRepository` port and IndexedDB store (database version 3). In edit mode `ToolManager` routes the
   pointer to the service; middle/right-drag and Space still pan. It is reference material, so it is outside the
   layer registry, undo and exports.
-- Themes (SPEC §15.18): tokens in `src/app/globals.css` (`:root` + `[data-theme=…]` blocks; light themes override
-  only `--accent`, tints derive from it with `color-mix`). Components use tokens only — `--surface`/`--surface2` for
+- Themes (SPEC §15.18): tokens in `src/app/globals.css` (`:root` + `[data-theme=…]` blocks; each light theme sets its
+  own neutrals and `--accent`, selection tints derive from the accent with `color-mix`). Components use tokens only — `--surface`/`--surface2` for
   fills, `--strong`/`--on-strong` for "on" toggles, toasts and tooltips, `--on-accent` on accent fills. `ui/theme/`
   holds the list, `applyTheme` and the pre-paint script (inlined in the layout head); `ThemeSwitcher` is a `node`
   row in the menu (`MenuItem` can be `{ node, id }`). The canvas reads stage/ruler/accent colours from the tokens

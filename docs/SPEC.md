@@ -461,8 +461,8 @@ Wide modal titled **Add to key** / **Edit key entry**.
 - Strands (not for bead, not for blends): 1–6.
 - Symbol: button showing the current symbol; toggles a grid of all usable symbols. Symbols used by other
   entries are dimmed with tooltip "Already used — picking it swaps". Default = first free symbol.
-  *New app (2026-11-15), compact form:* entry type is one pill switch with short names (Cross · Back · Bead ·
-  Floss+bead · Knot; full names on hover); stitch is a row of icon buttons with the chosen name beside it; the colour list is shorter and denser, with "+" for a custom
+  *New app (2026-11-15), compact form:* entry type is one pill switch with short names (Cross · Back · Knot ·
+  Floss+bead · Bead; full names on hover); stitch is a row of icon buttons with the chosen name beside it; the colour list is shorter and denser, with "+" for a custom
   colour on the search row. Symbol is one row — the current symbol and the next five free ones (two line styles)
   — plus **All…**, a popover with tabs Basic · Decorative · 123 ABC · + − × (used ones dimmed; picking closes it).
 
@@ -1349,8 +1349,10 @@ Idea from Pattern Maker v4 (Professional). Toggle with the eye button in the key
 
 ### 15.18 Colour themes (implemented 2026-11-15)
 
-- **Menu ▸ Theme**: a row of five dots — Terracotta (default), Olive, Royal blue, Rose (light, only the accent
-  changes) and Dark (bluish, after the Dracula colour scheme). Picking one applies at once and keeps the menu open.
+- **Menu ▸ Theme**: a row of five two-tone dots (accent on the theme's shade) — Terracotta (default, warm beige),
+  Olive (sage), Royal blue (cool grey-blue), Rose (blush) — all light, each with its own tinted background, panels,
+  lines and stage — and Dark (bluish, after the Dracula colour scheme). Picking one applies at once and keeps the
+  menu open.
 - Remembered per browser (`localStorage` `stitchwork.theme`), applied before the first paint so nothing flashes.
 - Only the interface is themed: panels, menus, buttons, the stage around the fabric and the rulers. The chart itself
   — fabric colour, floss and bead colours, symbols, grid — stays exactly the same, so what you see is what you stitch.
