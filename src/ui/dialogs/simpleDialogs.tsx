@@ -1,5 +1,6 @@
 "use client";
 
+import type { PkReport } from "@/core/formats/pdf/patternKeeper";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { parseCellRef } from "@/core/grid/numbering";
@@ -208,6 +209,21 @@ export function TextFallbackDialog({ ext, text, onClose }: Close & { ext: string
     <Modal title={t("dialogs.saveToFileTitle")} onClose={onClose} buttons={[{ label: t("dialogs.copy"), primary: true, onClick: async () => { ed.toast((await copyText(text)) ? "toasts.copied" : "toasts.pressCopy"); return false; } }, { label: t("dialogs.close") }]}>
       <p className={ui.hint}>{t("dialogs.copyFallback", { ext })}</p>
       <textarea readOnly className={cx(ui.input)} style={{ width: "100%", height: 200, font: "12px monospace" }} value={text} />
+    </Modal>
+  );
+}
+
+/** Before a Pattern Keeper PDF: what the app can't track in this pattern, and what the file will hold instead. */
+export function PatternKeeperDialog({ issues, onClose }: Close & { issues: PkReport["issues"] }) {
+  const t = useTranslations("dialogs");
+  const run = useCommand();
+  return (
+    <Modal title={t("pkTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("pkExport"), primary: true, onClick: () => run("file.exportPatternKeeper", true) }]}>
+      <p>{t("pkIntro")}</p>
+      <ul data-testid="pk-issues" style={{ margin: "0 0 4px", paddingLeft: 20, lineHeight: 1.6 }}>
+        {issues.map((i) => <li key={i.kind}>{t(`pkIssue.${i.kind}`, { count: i.count })}</li>)}
+      </ul>
+      <p className={ui.hint}>{t("pkTwoCharts")}</p>
     </Modal>
   );
 }

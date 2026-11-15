@@ -1,4 +1,4 @@
-const MIME: Record<string, string> = { xbird: "text/plain;charset=utf-8", json: "application/json", oxs: "application/xml", csv: "text/csv;charset=utf-8", png: "image/png" };
+const MIME: Record<string, string> = { xbird: "text/plain;charset=utf-8", json: "application/json", oxs: "application/xml", csv: "text/csv;charset=utf-8", png: "image/png", pdf: "application/pdf" };
 
 /** Save `data` as a file through a normal browser download. CSV gets a BOM so Excel reads UTF-8 symbols. */
 export function downloadFile(filename: string, data: string | Blob): void {

@@ -1,4 +1,5 @@
 import { createStore } from "zustand/vanilla";
+import type { PkReport } from "@/core/formats/pdf/patternKeeper";
 import type { Fragment } from "@/core/pattern/fragment";
 import type { Palette } from "@/core/pattern/palette";
 import { createPattern } from "@/core/pattern/createPattern";
@@ -33,6 +34,7 @@ export type DialogRequest =
   | { type: "extendCanvas" }
   | { type: "replaceKey" }
   | { type: "dropChoice"; file: File }
+  | { type: "patternKeeper"; issues: PkReport["issues"] }
   | { type: "textFallback"; ext: string; text: string };
 
 export interface Overlay {

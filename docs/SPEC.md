@@ -1069,31 +1069,39 @@ rejected (§15.12).
 - Optional proofing aid: **Overlay my symbols** draws the chart's symbols at 50 % over the calibrated scan, inside
   the reference window only.
 
-### 15.10 PDF chart export — Pattern Keeper–compatible
-Target: a multi-page PDF chart like the ones made by desktop charting software (Pattern Maker, WinStitch /
-MacStitch), which stitchers import into **Pattern Keeper** or **Markup R-XP**. This is *not* Pattern Maker's
-native `.xsd` (§15.12).
+### 15.10 PDF chart export — Pattern Keeper–compatible (first version 2026-11-15, **not yet tested in Pattern Keeper**)
+**Menu ▸ Export ▸ PDF for Pattern Keeper.** A multi-page A4 PDF that the Android app **Pattern Keeper** can import
+to track stitching. This is *not* Pattern Maker's native `.xsd` (§15.12).
 
-**Contents**
-- **Cover**: name, metadata (§15.1), colour preview, finished size, fabric.
-- **Key page(s)**: symbol, brand + code, name, strands, stitch type, count, skeins.
-- **Page map**: an overview with the page rectangles labelled.
-- **Chart pages**: symbols (optionally colour + symbols), backstitch as vector lines, grid numbering (§15.2),
-  centre arrows, and 0–3 shaded overlap rows/columns shared with neighbouring pages.
+**What Pattern Keeper needs** (no public spec — its designer page says to test in the app; these come from
+third-party guides): chart symbols are real text from an embedded font, one glyph per cell, with ordinary (not
+private-use) character codes; the grid is vector lines; the key is text (symbol, brand + number, name); pages are
+portrait with about 60 stitches across. It tracks **full crosses only**.
 
-**Settings**: A4 / Letter, orientation, cell size (which sets cells per page), colour or black and white, overlap.
+**What counts as trackable** (decided 2026-11-15): a full cross in one floss (any number of strands), or in a blend
+of exactly two flosses with one strand each. Everything else is left out of the Pattern Keeper chart: half crosses,
+quarter / three-quarter / petite stitches, other blends, floss + bead, beads, backstitch, French knots.
 
-**Pattern Keeper rules** (not publicly specified — **verify by importing test files into Pattern Keeper**):
-- Chart symbols are real text from an embedded font: one glyph per cell, not images or outlines.
-- The key uses the same glyphs.
-- Grid lines are vector lines.
-- Each page has one chart region.
+**The file**
+1. *Chart for Pattern Keeper* — symbols only (never colour), only trackable stitches; up to 60 columns per page,
+   rows in multiples of 10, no overlap, column and row numbers in the margins, thin cell lines and heavy lines
+   every 10 following the chart's numbering (§15.2).
+2. *Key for Pattern Keeper* — Symbol · Number ("DMC 310", blends "DMC 310 + DMC 321") · Name · Strands ("2",
+   blends "1+1") · Stitches. Below it: what was left out, with counts.
+3. Only when something was left out: the *Full chart (not for Pattern Keeper)* — the same pages as pictures of the
+   Symbols view with everything on it — and a *Full key* with each entry's icon.
 
-**Open decisions — this is the hard part**
-- Write a minimal PDF generator (objects, content streams, TrueType embedding with subsetting), or vendor a
-  library such as jsPDF. A library would be the app's first runtime dependency.
-- Chart symbols are vector paths plus DM Sans characters (§2.5): shapes can be written straight into PDF content
-  streams; characters need DM Sans embedded. A Pattern Keeper–compatible PDF is a wish for later.
+**Before exporting**, when something is left out, a dialog lists it by kind with counts and explains the two
+charts ("import only the first pages"). With nothing trackable at all, a toast says so and nothing is exported.
+
+**Text is Latin only** (built-in Helvetica, English wording whatever the interface language); Cyrillic pattern
+names are transliterated.
+
+**To verify by importing into Pattern Keeper:** that the grid and symbols are detected; how a two-floss key row
+is read; whether the picture pages of the full chart get in the way (fallback: a separate file); whether page
+joins without overlap work.
+
+**Later:** cover page with metadata (§15.1) and preview, page map, Letter size, overlap rows, a vector full chart.
 
 ### 15.11 Symbol matching — semi-automatic mapping (JS only, no AI)
 Feasible with classic **template matching**: plain pixel arithmetic in a Web Worker, no models.

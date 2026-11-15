@@ -465,3 +465,19 @@ test("the key form picks a symbol from the quick row or from All…, by group", 
   await expect(form.getByTestId("symbol-quick").locator("[data-sym='sym:club']")).toHaveAttribute("aria-pressed", "true");
   await expect(form.getByTestId("entry-type").getByRole("radio", { name: "Cross stitch" })).toHaveAttribute("aria-checked", "true");
 });
+
+test("exports a PDF for Pattern Keeper after explaining what it can't track", async ({ page }) => {
+  await fileAction(page, "Export", "PDF for Pattern Keeper");
+  // the demo has half crosses, a floss + bead entry, beads, backstitch
+  await expect(page.getByTestId("pk-issues").locator("li")).toHaveText([/Half crosses: \d+/, /Floss \+ bead stitches: \d+/, /Beads: \d+/, /Backstitch lines: \d+/]);
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export PDF" }).click();
+  const file = await download;
+  expect(file.suggestedFilename()).toBe("Untitled-pattern-pattern-keeper.pdf");
+  const pdf = readFileSync((await file.path())!).toString("latin1");
+  expect(pdf.startsWith("%PDF-1.7")).toBe(true);
+  expect(pdf.trimEnd().endsWith("%%EOF")).toBe(true);
+  // chart + key for Pattern Keeper, then the full chart + its key
+  expect(pdf.match(/\/Type \/Page /g)).toHaveLength(4);
+  if (process.env.PK_PDF_OUT) await file.saveAs(process.env.PK_PDF_OUT);
+});

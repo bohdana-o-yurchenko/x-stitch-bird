@@ -6,7 +6,7 @@ import type { GridNumbering, KeyIndex, PatternMeta } from "@/core/pattern/types"
 import type { ChartView } from "@/render/chart";
 import { pickFile } from "@/platform/files";
 import { clearAmbiguous, nextAmbiguous, toggleAmbiguous } from "../actions/ambiguous";
-import { exportAs, handleDrop, loadFile, openFromLibrary, openImageDialog, saveToLibrary, type ExportFormat } from "../actions/importExport";
+import { exportAs, exportPatternKeeper, handleDrop, loadFile, openFromLibrary, openImageDialog, saveToLibrary, type ExportFormat } from "../actions/importExport";
 import { deleteEntry, usageCount } from "../actions/keyEntries";
 import { newPattern, resize, setPatternSettings } from "../actions/pattern";
 import { cropChart, extendChart, mirrorChart, transformChart } from "../actions/transforms";
@@ -68,6 +68,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "file.save", run: (ed) => saveToLibrary(ed) },
   { id: "file.versions", run: (ed) => ed.openDialog({ type: "versions" }) },
   { id: "file.export", run: (ed, f) => exportAs(ed, f as ExportFormat) },
+  { id: "file.exportPatternKeeper", run: (ed, confirmed) => exportPatternKeeper(ed, confirmed === true) },
   { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird,.oxs,.json,.xml"); if (f) await ed.commands.run("file.load", f); } },
   { id: "file.load", run: (ed, f) => loadFile(ed, f as File), destructive: "import" },
   { id: "file.drop", run: (ed, files) => handleDrop(ed, files as File[]) },

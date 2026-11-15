@@ -1,3 +1,4 @@
+import type { Raster } from "@/core/formats/pdf/pdfWriter";
 import type { Pixels } from "@/core/imageToPattern/quantize";
 
 export function loadImage(src: string | Blob): Promise<HTMLImageElement> {
@@ -41,3 +42,21 @@ export function scaledPixels(img: HTMLImageElement, w: number): Pixels {
 
 export const canvasToBlob = (c: HTMLCanvasElement): Promise<Blob> =>
   new Promise((resolve, reject) => c.toBlob((b) => (b ? resolve(b) : reject(new Error("png"))), "image/png"));
+
+export function blankCanvas(w: number, h: number): HTMLCanvasElement {
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  return c;
+}
+
+/** Part of a canvas as plain RGB pixels (for PDF export). */
+export function canvasRgb(c: HTMLCanvasElement, x = 0, y = 0, w = c.width, h = c.height): Raster {
+  const rgba = c.getContext("2d")!.getImageData(x, y, w, h).data, rgb = new Uint8Array(w * h * 3);
+  for (let i = 0, j = 0; i < rgba.length; i += 4, j += 3) {
+    rgb[j] = rgba[i]!;
+    rgb[j + 1] = rgba[i + 1]!;
+    rgb[j + 2] = rgba[i + 2]!;
+  }
+  return { w, h, rgb };
+}

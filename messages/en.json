@@ -320,7 +320,20 @@
     "infoOwn": "More — kept only in your .xbird file",
     "infoOwnHint": "Other apps don’t read these; they stay with your pattern file.",
     "deleteEntryUsed": "It’s on the chart {count, plural, one {# time} other {# times}} — those stitches are deleted too. You can undo this.",
-    "deleteEntryUnused": "It isn’t used on the chart. You can undo this."
+    "deleteEntryUnused": "It isn’t used on the chart. You can undo this.",
+    "pkTitle": "PDF for Pattern Keeper",
+    "pkExport": "Export PDF",
+    "pkIntro": "Pattern Keeper tracks only full crosses — in one floss, or in a blend of two flosses with one strand each. This pattern also has:",
+    "pkIssue": {
+      "half": "Half crosses: {count}",
+      "partial": "Quarter, three-quarter and petite stitches: {count}",
+      "blend": "Crosses in other blends: {count}",
+      "combo": "Floss + bead stitches: {count}",
+      "bead": "Beads: {count}",
+      "back": "Backstitch lines: {count}",
+      "knot": "French knots: {count}"
+    },
+    "pkTwoCharts": "The PDF will hold two charts: first the one for Pattern Keeper, with only the stitches it can track, then the full chart with everything. In Pattern Keeper, import only the first pages."
   },
   "meta": {
     "designer": "Author (designer)",
@@ -436,7 +449,9 @@
     "partialKind": "Partial stitch: {kind}",
     "partialNeedsCross": "Partial stitches use a cross-stitch entry — pick one in the key",
     "straightened": "Photo straightened to the chart grid",
-    "newerFile": "This file was made by a newer version of пташечка — reload the page to update, then open it again."
+    "newerFile": "This file was made by a newer version of пташечка — reload the page to update, then open it again.",
+    "pkNothing": "Nothing here for Pattern Keeper yet — it tracks full crosses only",
+    "pdfFailed": "Couldn’t make the PDF"
   },
   "underlay": {
     "heading": "Image behind the chart",
@@ -501,7 +516,9 @@
     "guide": "Quick start guide",
     "guideHint": "Step by step: an e-copy of a paper chart",
     "changelog": "What’s new",
-    "changelogHint": "Version {version} — what changed"
+    "changelogHint": "Version {version} — what changed",
+    "pdfPk": "PDF for Pattern Keeper",
+    "pdfPkHint": "A symbol chart the app can import, plus the full chart"
   },
   "toolNames": {
     "pencil": "Draw",

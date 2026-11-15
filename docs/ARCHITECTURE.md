@@ -1117,3 +1117,12 @@ Decisions taken while implementing this plan. Each one lives in the single place
   (`platform/themeColours.ts`, `Editor.refreshChrome`); PNG export keeps the default accent.
   Switching the language is a client-side navigation (no reload), but React resets unknown attributes on <html>
   when the root layout re-renders; `ui/theme/ThemeSync.tsx` (in the layout) re-applies `data-theme` in a layout effect.
+- Pattern Keeper PDF (SPEC §15.10): `core/formats/pdf/pdfWriter.ts` is a minimal PDF writer (no library: objects,
+  Flate streams via `CompressionStream`, built-in Helvetica, one embedded TrueType font as Type0/Identity-H with a
+  ToUnicode map, RGB images). `core/formats/pdf/patternKeeper.ts` has `checkPatternKeeper` (what is trackable, what
+  is left out) and `patternKeeperPdf` (layout); the editor action `exportPatternKeeper` supplies the font file and
+  the pictures (full chart from `renderChartImage`, key icons). The symbol font `public/fonts/ptashechka-symbols.ttf`
+  and its glyph table `core/symbols/symbolFont.ts` are generated: `node scripts/dump-symbols.mjs > symbols.json`,
+  then `python3 scripts/build-symbol-font.py symbols.json DMSans.ttf` (fonttools + shapely; strokes are outlined,
+  letters come from DM Sans, OFL). **Re-run both after changing the symbol list** — a unit test fails if a symbol
+  has no glyph.

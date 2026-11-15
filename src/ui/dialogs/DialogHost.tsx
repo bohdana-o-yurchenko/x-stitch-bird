@@ -7,7 +7,7 @@ import { ChangelogDialog } from "./ChangelogDialog";
 import { StraightenDialog } from "./StraightenDialog";
 import {
   DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, MirrorFromCentreDialog, NewPatternDialog,
-  PatternInfoDialog, ReplaceKeyDialog, ResizeDialog, TextFallbackDialog,
+  PatternInfoDialog, PatternKeeperDialog, ReplaceKeyDialog, ResizeDialog, TextFallbackDialog,
 } from "./simpleDialogs";
 
 /** Renders whichever dialog the editor asked for. */
@@ -31,6 +31,7 @@ export function DialogHost() {
     case "extendCanvas": return <ExtendCanvasDialog onClose={close} />;
     case "replaceKey": return <ReplaceKeyDialog onClose={close} />;
     case "dropChoice": return <DropChoiceDialog file={d.file} onClose={close} />;
+    case "patternKeeper": return <PatternKeeperDialog issues={d.issues} onClose={close} />;
     case "textFallback": return <TextFallbackDialog ext={d.ext} text={d.text} onClose={close} />;
   }
 }

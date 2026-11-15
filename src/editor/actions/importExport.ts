@@ -4,19 +4,22 @@ import { exportCsv } from "@/core/formats/csv/exportCsv";
 import { NewerFileError, parsePattern } from "@/core/formats/json/parse";
 import { serializePattern, XBIRD_VERSION, type FileVersion, type PatternFile } from "@/core/formats/json/serialize";
 import { exportOxs } from "@/core/formats/oxs/exportOxs";
+import { checkPatternKeeper, patternKeeperPdf } from "@/core/formats/pdf/patternKeeper";
 import { importOxs } from "@/core/formats/oxs/importOxs";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
 import { formatLabel, keyLabelData } from "@/core/labels/keyLabel";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { createPattern } from "@/core/pattern/createPattern";
 import { buildPalette } from "@/core/pattern/palette";
+import { SYMBOL_FONT } from "@/core/symbols/symbolFont";
 import type { Pattern } from "@/core/pattern/types";
 import type { UnderlayData } from "@/core/underlay/underlay";
 import { renderChartImage, type KeyLine } from "@/render/exportChart";
+import { drawKeyIcon } from "@/render/keyIcon";
 import { defaultCanvasTheme } from "@/render/theme";
 import type { ChartView } from "@/render/chart";
 import { downloadFile, isImageFile, isPatternFile, readText } from "@/platform/files";
-import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
+import { blankCanvas, canvasRgb, canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import type { Editor } from "../createEditor";
 import { loadPattern } from "./pattern";
 
@@ -60,6 +63,38 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
   const byline = [p.meta.designer, p.meta.copyright && `© ${p.meta.copyright}`].filter(Boolean).join(" · ") || undefined;
   const canvas = renderChartImage(p, ed.state.palette, view, { ...ed.theme, accent: defaultCanvasTheme.accent }, { heading: ed.t("png.keyHeading", { name: p.name }), byline, key: keyLines(ed) });
   offer(ed, `${base}${view === "color" ? "-preview" : "-chart"}.png`, await canvasToBlob(canvas), "png");
+}
+
+/**
+ * PDF for Pattern Keeper (SPEC §15.10). When the pattern has things Pattern Keeper can't track, a dialog explains
+ * first; `confirmed` skips it.
+ */
+export async function exportPatternKeeper(ed: Editor, confirmed = false) {
+  const p = ed.doc, report = checkPatternKeeper(p);
+  if (!report.supported.size) return ed.toast("toasts.pkNothing");
+  if (report.issues.length && !confirmed) return ed.openDialog({ type: "patternKeeper", issues: report.issues });
+  try {
+    const font = new Uint8Array(await (await fetch(SYMBOL_FONT.url)).arrayBuffer());
+    const theme = { ...ed.theme, accent: defaultCanvasTheme.accent }, palette = ed.state.palette;
+    // the full chart is drawn once, as on screen in Symbols view, and cut into pages
+    const px = Math.max(10, Math.min(24, Math.floor(4800 / Math.max(p.w, p.h))));
+    let chart: HTMLCanvasElement | null = null;
+    const pdf = await patternKeeperPdf(p, report, {
+      font,
+      fullChart: (r) => canvasRgb((chart ??= renderChartImage(p, palette, "symbols", theme, { heading: "", key: [] }, px)), r.x * px, r.y * px, r.w * px, r.h * px),
+      keyIcon: (k) => {
+        const slot = palette[k];
+        if (!slot) return null;
+        const c = blankCanvas(56, 56);
+        drawKeyIcon(c.getContext("2d")!, slot, 56, "symbols", theme, p.fabric);
+        return canvasRgb(c);
+      },
+    });
+    offer(ed, `${safeName(p)}-pattern-keeper.pdf`, new Blob([pdf as BlobPart], { type: "application/pdf" }), "pdf");
+  } catch (e) {
+    console.error(e);
+    ed.toast("toasts.pdfFailed");
+  }
 }
 
 /** Everything a .xbird file holds: the pattern, its reference windows, underlay and versions. */
