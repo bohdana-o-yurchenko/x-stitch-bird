@@ -2,37 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPattern } from "@/core/pattern/createPattern";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
-import type { ImageRepository, Persistence, Snapshot } from "@/persistence/ports";
+import type { Snapshot } from "@/persistence/ports";
+import { memoryPersistence } from "../../tests/support/memoryPersistence";
 import { loadPattern } from "./actions/pattern";
 import { LIBRARY_EVERY } from "./autosave";
 import { Editor } from "./createEditor";
 import { shortcutLabel, shortcutLabels } from "./shortcuts/keymap";
 import { resolveTool } from "./tools/registry";
 import type { ToolPointer } from "./tools/types";
-
-function memoryImages(): ImageRepository {
-  const blobs = new Map<string, Blob>();
-  return {
-    put: async (b) => {
-      const id = `img:${blobs.size + 1}`;
-      blobs.set(id, b);
-      return id;
-    },
-    get: async (id) => blobs.get(id) ?? null,
-    collectGarbage: async () => {},
-  };
-}
-
-function memoryPersistence(snaps: Snapshot[]): Persistence {
-  return {
-    patterns: { list: async () => [], load: async () => null, save: async () => ({ ok: true }), remove: async () => {} },
-    references: { load: async () => [], save: async () => ({ ok: true }) },
-    underlays: { load: async () => null, save: async () => ({ ok: true }) },
-    draft: { load: () => null, save: () => {} },
-    snapshots: { add: async (s) => void snaps.push(s), list: async () => [], get: async () => null, removeMany: async () => {} },
-    images: memoryImages(),
-  };
-}
 
 const at = (x: number, y: number, o: Partial<ToolPointer> = {}): ToolPointer => ({ sx: 0, sy: 0, grid: { x: x + 0.5, y: y + 0.5 }, cell: { x, y }, button: 0, shift: false, alt: false, ...o });
 const key = (k: string, o: Partial<{ shift: boolean; ctrl: boolean; repeat: boolean; inField: boolean }> = {}) => ({
