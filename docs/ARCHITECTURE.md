@@ -1035,7 +1035,8 @@ Decisions taken while implementing this plan. Each one lives in the single place
   `KeyEntry.sym` as `line:<name>`; `nextSymbol`/`symbolsFor` pick by entry kind and `fixEntrySymbols` repairs
   older files. Drawing is `render/primitives/lineStyles.ts`; strand thickness is `strandFactor` with
   `theme.backstitch.strandFirst`/`strandStep`. Adding a style = one id in core + one drawing entry in render.
-- Hand-drawn symbols: `core/symbols/customSymbol.ts` (encode / decode / `customShape`); `shapeSymbol()` returns
+- Hand-drawn symbols: `core/symbols/customSymbol.ts` (encode / decode / `customShape`; a cut-out becomes `holes` on
+  the parts drawn before it — the canvas clips them out, `SymbolGlyph` uses nested SVG clip paths); `shapeSymbol()` returns
   them like built-in shapes, so the canvas, `SymbolGlyph` and exports need no special case; `fixEntrySymbols`
   accepts the ones that parse. UI: `ui/dialogs/key-entry/SymbolDrawer.tsx`. Key list view: `core/pattern/keyView.ts`
   (search, sort, group — pure) used by `ui/side/KeyPanel.tsx`.

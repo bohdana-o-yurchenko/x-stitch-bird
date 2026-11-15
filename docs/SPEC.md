@@ -112,22 +112,32 @@ Colour maths (must be reproduced exactly; used by blending, image import, blend 
   that are no longer in the list get the next free symbol, so every entry keeps a distinct one. This changes the
   look of old files (allowed, 2026-11-15); the file format stays version 1.
 - **Hand-drawn symbols (2026-11-15)** — to match a paper chart's icon exactly without an endless ready-made list.
-  The pencil button beside **All…** opens *Draw a symbol*: pick a shape — circle, rectangle or triangle (outline or
-  filled; triangles point up / right / down / left), a **star** (outline or filled), a **line** 1 or 2 cells thick
-  (horizontal, vertical or diagonal, any length — the drag snaps to whichever it is closest to; flat ends) or an
-  arrow (drag from tail to head, any direction) — and drag on a 12 × 12 grid. *Remove last*, *Clear*, and a preview at chart sizes. Opening it on an entry that already has a
-  drawn symbol edits that drawing.
-  - **Layers:** shapes are painted in the order drawn, and an **empty** shape (outline circle, rectangle, triangle or
-    star) **cuts a hole** in everything drawn before it — a filled rectangle with an empty circle inside is a
-    rectangle with a round hole (the hole is the inside of the circle's outline). Anything drawn *after* the empty
-    shape sits on top, so a ring with a dot in it still works: ring first, dot second.
+  The pencil button beside **All…** opens *Draw a symbol*. Two choices, then drag on a 12 × 12 grid:
+  - **Shape**: circle, rectangle, triangle (points up / right / down / left), star, line 1 cell thick, line 2 cells
+    thick (horizontal, vertical or diagonal, any length — the drag snaps to whichever it is closest to; flat ends),
+    arrow (drag from tail to head, any direction).
+  - **Paint**: **Filled** (solid ink), **Outline**, or **Cut out** — a negative that removes what lies under it,
+    like an eraser. Lines can be filled or cut out, an arrow only filled. (So "filled / outline / negative" for
+    every shape, lines included, without twenty buttons.)
+  - Shapes are painted in the order drawn; a cut-out removes everything drawn *before* it, and shapes drawn after it
+    sit on top again — so a ring with a dot works (ring, then a filled dot) and so does a circle with a star cut out
+    (filled circle, then a cut-out star). A cut-out is outlined on the grid with a dashed accent line so it can be
+    seen even over empty space; a drawing with only cut-outs is not a symbol yet ("needs something to cut").
+  - **Teaching**: a tip in the dialog spells out the circle-with-a-star recipe, and four examples — ring with a dot,
+    circle with a star cut out, square with a round hole, circle with a cross cut out — load a ready drawing to look
+    at and change. *Remove last*, *Clear*, and a preview at chart sizes. Opening the dialog on an entry that already
+    has a drawn symbol edits that drawing.
   - **Guardrail:** at most **8 shapes**; a box shape is at least one grid cell each way, a line one cell long and
     straight or diagonal, an arrow at least two cells long; the tool can make nothing else.
   - **Storage:** the drawing *is* the symbol string in `KeyEntry.sym` — `draw:` + shapes separated by `;`, each a
-    letter (`o O` circle, `s S` rectangle, `p P` star, `t T` triangle, capitals filled; `l` line 1 cell thick, `L`
-    2 cells; `a` arrow), four grid coordinates in base 13 and, for triangles, the direction (`u r d l`) — e.g.
-    `draw:o11bb;T4488d;a2bab` (at most 53 characters). No new field in the file. A string that doesn't parse exactly is not a symbol and gets a standard
-    one on load, like any unknown symbol; an older app version does the same with every drawn symbol.
+    letter (`o O` circle, `s S` rectangle, `p P` star, `t T` triangle — lower case outline, capital filled; `l` line
+    1 cell thick, `L` 2 cells; `a` arrow), four grid coordinates in base 13 and, for triangles, the direction
+    (`u r d l`); a cut-out has `!` in front of its filled form — e.g. `draw:O00cc;!P22aa` is a circle with a star
+    cut out (at most 56 characters). No new field in the file. A string that doesn't parse exactly is not a symbol
+    and gets a standard one on load, like any unknown symbol; an older app version does the same with every drawn
+    symbol.
+    *Changed 2026-11-15:* before the "Cut out" paint existed, an outline drawn over a filled shape cut a hole; now
+    only a cut-out does, so such a symbol shows the outline over the filled shape instead.
   - Text lists and CSV show ✎. The Pattern Keeper chart must be text in the symbol font, so there a drawn symbol
     is shown with a spare standard symbol, and the PDF's *About this chart* page says so.
 - The key dialog groups the grid: Basic shapes · Decorative · Digits & letters · Signs. CSV and text lists show each shape as its

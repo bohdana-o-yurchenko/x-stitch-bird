@@ -309,7 +309,7 @@
 }
 /* drawing a symbol by hand */
 .drawer {
-  width: min(520px, 100%);
+  width: min(640px, 100%);
 }
 .drawTools {
   display: flex;
@@ -351,6 +351,7 @@
 }
 .drawSide {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
@@ -371,4 +372,88 @@
 }
 .drawWarn {
   color: var(--danger);
+}
+.drawControls {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 6px 10px;
+}
+.drawControlRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.iconSeg.paintSeg button {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  width: auto;
+  gap: 6px;
+  padding: 0 10px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.paintSeg button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.paintHint {
+  font-size: 12px;
+}
+.drawCuts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.drawCuts path {
+  fill: color-mix(in srgb, var(--accent) 14%, transparent);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  vector-effect: non-scaling-stroke;
+}
+.drawTip {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface2);
+}
+.drawExamples {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  gap: 6px;
+  margin-top: 4px;
+}
+.drawExampleRow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+.drawExample {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 4px;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 11.5px;
+  line-height: 1.2;
+  text-align: center;
+}
+.drawExample:hover {
+  border-color: var(--muted);
+}
+.drawExample svg {
+  width: 26px;
+  height: 26px;
+  color: #1d1a16;
+  background: #fff;
+  border-radius: 4px;
 }

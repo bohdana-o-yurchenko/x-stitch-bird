@@ -234,21 +234,17 @@
     },
     "drawSymbol": "Draw your own symbol…",
     "drawTitle": "Draw a symbol",
-    "drawHint": "Pick a shape and drag on the grid. An empty shape cuts a hole in what you drew before it. Keep it simple — up to {max} shapes — so it still reads at chart size.",
+    "drawHint": "Pick a shape and how to paint it, then drag on the grid. Shapes go one on top of another — up to {max} of them.",
     "drawShape": "Shape",
     "drawDirection": "Direction",
     "drawTool": {
-      "circle": "Circle",
-      "circleF": "Filled circle",
-      "rect": "Rectangle",
-      "rectF": "Filled rectangle",
-      "triangle": "Triangle",
-      "triangleF": "Filled triangle",
       "arrow": "Arrow — drag from its tail to its head",
-      "star": "Star",
-      "starF": "Filled star",
       "line1": "Line, 1 cell thick — drag along, up or across",
-      "line2": "Line, 2 cells thick — drag along, up or across"
+      "line2": "Line, 2 cells thick — drag along, up or across",
+      "circle": "Circle",
+      "rect": "Rectangle",
+      "triangle": "Triangle",
+      "star": "Star"
     },
     "drawDir": {
       "u": "Pointing up",
@@ -262,7 +258,27 @@
     "drawUndo": "Remove last",
     "drawClear": "Clear",
     "drawCancel": "Cancel",
-    "drawUse": "Use this symbol"
+    "drawUse": "Use this symbol",
+    "drawPaint": "Paint",
+    "drawPaintMode": {
+      "fill": "Filled",
+      "outline": "Outline",
+      "cut": "Cut out"
+    },
+    "drawPaintHint": {
+      "fill": "Solid ink",
+      "outline": "Just the outline",
+      "cut": "Removes what is under it, like an eraser"
+    },
+    "drawTip": "To make a circle with a star cut out of it: draw a Filled circle, then switch to Cut out and draw a star inside it. Anything drawn after a cut sits on top of it again.",
+    "drawExamples": "Or start from an example",
+    "drawExample": {
+      "ringDot": "Ring with a dot",
+      "starCut": "Circle with a star cut out",
+      "squareHole": "Square with a round hole",
+      "crossCut": "Circle with a cross cut out"
+    },
+    "drawNeedInk": "A cut-out needs something to cut: draw a filled shape first."
   },
   "picker": {
     "searchThread": "Search DMC number or name",

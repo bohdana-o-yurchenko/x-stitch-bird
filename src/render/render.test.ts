@@ -112,8 +112,8 @@ describe("stitches and symbols", () => {
 
   it("cut a hand-drawn symbol's empty shapes out of what was drawn before them, only for that part", () => {
     const c = fakeCanvas();
-    drawShape(c.g, shapeSymbol("draw:S00cc;o3399;P5577")!, 12, 12, 24, "#000", null);
-    // the rectangle is clipped once (by the circle); the circle and the later star are not clipped
+    drawShape(c.g, shapeSymbol("draw:S00cc;!O3399;P5577")!, 12, 12, 24, "#000", null);
+    // the rectangle is clipped once (by the cut circle); the star drawn after the cut is not
     expect(c.calls("clip").map((x) => x[1])).toEqual(["evenodd"]);
     const order = c.log.map((l) => l[0]).filter((n) => ["save", "clip", "fill", "stroke", "restore"].includes(n));
     expect(order.slice(order.indexOf("clip") - 1, order.indexOf("clip") + 3)).toEqual(["save", "clip", "fill", "restore"]);

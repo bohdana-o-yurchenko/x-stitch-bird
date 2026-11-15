@@ -568,6 +568,7 @@ test("a long key can be searched, sorted and grouped by type; a short one stays 
 });
 
 test("a symbol can be drawn by hand from a few shapes, is kept in the file, and can't get too complex", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.locator("[data-entry]").first().dblclick();
   await page.getByTestId("symbol-draw").click();
   const drawer = page.getByTestId("symbol-drawer"), use = drawer.getByRole("button", { name: "Use this symbol" });
@@ -579,14 +580,21 @@ test("a symbol can be drawn by hand from a few shapes, is kept in the file, and 
     await page.mouse.move(box.x + 24 + b[0] * 20, box.y + 24 + b[1] * 20, { steps: 3 });
     await page.mouse.up();
   };
+  const shape = (name: string | RegExp) => drawer.getByRole("radio", { name, exact: typeof name === "string" }).click();
+  const paint = (name: string) => drawer.getByRole("radiogroup", { name: "Paint" }).getByRole("radio", { name }).click();
+  await paint("Outline");
   await drag([1, 1], [11, 11]);
-  await drawer.getByRole("radio", { name: "Filled triangle" }).click();
+  await shape("Triangle");
+  await paint("Filled");
   await drawer.getByRole("radio", { name: "Pointing down" }).click();
   await drag([4, 4], [8, 8]);
-  await drawer.getByRole("radio", { name: /^Arrow/ }).click();
+  await shape(/^Arrow/);
   await drag([2, 11], [10, 11]);
   await drag([5, 5], [5, 5]); // a click draws nothing
   await expect(page.getByTestId("draw-count")).toHaveText("3 of 8 shapes");
+  // lines and arrows can't be outlines, an arrow can't be cut out
+  await expect(drawer.getByRole("radiogroup", { name: "Paint" }).getByRole("radio", { name: "Outline" })).toBeDisabled();
+  await expect(drawer.getByRole("radiogroup", { name: "Paint" }).getByRole("radio", { name: "Cut out" })).toBeDisabled();
   // the guardrail: after eight shapes the grid takes no more
   for (let n = 0; n < 5; n++) await drag([n, 0], [n + 3, 3]);
   await expect(page.getByTestId("draw-count")).toContainText("8 shapes is the most");
@@ -604,6 +612,47 @@ test("a symbol can be drawn by hand from a few shapes, is kept in the file, and 
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
   expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe(sym);
+});
+
+test("a cut-out removes what is under it: filled circle, then a star cut out of it; examples teach it", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.locator("[data-entry]").first().dblclick();
+  await page.getByTestId("symbol-draw").click();
+  const drawer = page.getByTestId("symbol-drawer");
+  await expect(page.getByTestId("draw-tip")).toContainText("draw a Filled circle, then switch to Cut out");
+  const box = (await page.getByTestId("draw-area").boundingBox())!;
+  const drag = async (a: [number, number], b: [number, number]) => {
+    await page.mouse.move(box.x + 24 + a[0] * 20, box.y + 24 + a[1] * 20);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 24 + b[0] * 20, box.y + 24 + b[1] * 20, { steps: 3 });
+    await page.mouse.up();
+  };
+  const paint = (name: string) => drawer.getByRole("radiogroup", { name: "Paint" }).getByRole("radio", { name }).click();
+  // a cut with nothing under it is outlined on the grid, but the symbol can't be used yet
+  await paint("Cut out");
+  await drawer.getByRole("radio", { name: "Star", exact: true }).click();
+  await drag([2, 2], [10, 10]);
+  await expect(page.getByTestId("draw-cuts")).toBeVisible();
+  await expect(page.getByTestId("draw-count")).toContainText("needs something to cut");
+  await expect(drawer.getByRole("button", { name: "Use this symbol" })).toBeDisabled();
+  await drawer.getByRole("button", { name: "Clear" }).click();
+  await paint("Filled");
+  await drawer.getByRole("radio", { name: "Circle", exact: true }).click();
+  await drag([0, 0], [12, 12]);
+  await paint("Cut out");
+  await drawer.getByRole("radio", { name: "Star", exact: true }).click();
+  await drag([2, 2], [10, 10]);
+  await drawer.getByRole("button", { name: "Use this symbol" }).click();
+  await page.getByRole("button", { name: "Save changes" }).click();
+  expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe("draw:O00cc;!P22aa");
+  // an example loads a ready drawing to look at and change
+  await page.locator("[data-entry]").first().dblclick();
+  await page.getByTestId("symbol-draw").click();
+  await page.locator("[data-example=squareHole]").click();
+  await expect(page.getByTestId("draw-count")).toHaveText("2 of 8 shapes");
+  await drawer.getByRole("button", { name: "Use this symbol" }).click();
+  await page.getByRole("button", { name: "Save changes" }).click();
+  expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe("draw:S00cc;!O3399");
 });
 
 test("which side-panel sections are open is remembered after a reload", async ({ page }) => {
