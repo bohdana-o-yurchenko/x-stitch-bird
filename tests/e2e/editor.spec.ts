@@ -537,8 +537,8 @@ test("exports a PDF chart to print: cover, symbols, symbols on colour, colour wi
   expect(file.suggestedFilename()).toBe("Untitled-pattern-chart.pdf");
   const pdf = readFileSync((await file.path())!).toString("latin1");
   expect(pdf.startsWith("%PDF-1.7")).toBe(true);
-  // the 60 × 60 demo is 2 × 2 pages per chart: cover + 3 × 4 + key
-  expect(pdf.match(/\/Type \/Page /g)).toHaveLength(14);
+  // the 60 × 60 demo is 2 × 2 pages per chart: cover + symbol chart 4 + its key + 2 × 4 + key
+  expect(pdf.match(/\/Type \/Page /g)).toHaveLength(15);
   expect(pdf).not.toContain("/Subtype /Image");
   if (process.env.CHART_PDF_OUT) await file.saveAs(process.env.CHART_PDF_OUT);
 });

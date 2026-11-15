@@ -6,7 +6,8 @@ import { createPattern } from "../../pattern/createPattern";
 import { addEntry } from "../../pattern/keyEntries";
 import { ALL_SYMBOLS } from "../../symbols/symbols";
 import { parsePattern } from "../json/parse";
-import { chartLayout, chartPdf, sharedStrips } from "./chartPdf";
+import { chartLayout, chartPdf, LINE_COLOURS, sharedStrips } from "./chartPdf";
+import { rgb } from "./pdfWriter";
 import { svgPathToPdf } from "./svgPath";
 import { TEXT_GLYPHS } from "./textFonts";
 
@@ -54,20 +55,22 @@ describe("PDF chart to print: pages", () => {
 });
 
 describe("PDF chart to print: the file", () => {
-  it("has a cover, the chart three times (symbols, on colour, with backstitch) and the key", async () => {
+  it("has a cover, the symbol chart and its key, the chart on colour and with backstitch, and the key", async () => {
     const { pattern } = parsePattern(fixtureJson("1.json"), ALL_SYMBOLS);
     const pdf = await chartPdf(pattern, { fonts });
     if (process.env.CHART_PDF_OUT) writeFileSync(process.env.CHART_PDF_OUT, pdf);
     const s = latin1(pdf), tiles = chartLayout(pattern).tiles.length;
     expect(s.startsWith("%PDF-1.7")).toBe(true);
-    expect(s.match(/\/Type \/Page /g)).toHaveLength(1 + 3 * tiles + 1);
+    expect(s.match(/\/Type \/Page /g)).toHaveLength(1 + tiles + 1 + 2 * tiles + 1);
     // all vector: no pictures
     expect(s).not.toContain("/Subtype /Image");
     // the shared cells are tinted with a see-through grey on the colour pages
     expect(s).toContain("/GA30 << /ca 0.3");
     // section titles, written in the text font's glyph ids
     const streams = contents(pdf).join("\n"), hex = (t: string) => [...t].map((ch) => TEXT_GLYPHS[ch.codePointAt(0)!]!.toString(16).padStart(4, "0")).join("");
-    for (const title of ["Symbol chart · page 1 of", "Symbols on colour · page 1 of", "Colour chart with backstitch · page 1 of", "Key · page 1 of"]) expect(streams, title).toContain(hex(title));
+    for (const title of ["Symbol chart · page 1 of", "Symbol chart key · page 1 of", "Symbols on colour · page 1 of", "Colour chart with backstitch · page 1 of", "Key · page 1 of"]) expect(streams, title).toContain(hex(title));
+    // backstitch is drawn bright and thick (from the line colours), not in its thread colour
+    expect(LINE_COLOURS.some((c) => streams.includes(`${rgb(c)} RG`))).toBe(true);
   });
 
   it("draws hand-drawn symbols as paths, with their cut-outs as clipping", async () => {
@@ -101,5 +104,42 @@ describe("SVG path to PDF", () => {
   it("stops at anything malformed instead of writing broken operators", () => {
     expect(svgPathToPdf("M0 0L5", flip)).toBe("0 100 m");
     expect(svgPathToPdf("X1 2", flip)).toBe("");
+  });
+});
+
+describe("canvas calls to PDF", () => {
+  it("writes the line-style drawing calls as PDF operators, in top-left coordinates", async () => {
+    const { PdfCanvas } = await import("./pdfCanvas");
+    const { PdfPage } = await import("./pdfWriter");
+    const page = new PdfPage(100, 200), g = new PdfCanvas(page);
+    g.save();
+    g.lineWidth = 2;
+    g.strokeStyle = "#ff0000";
+    g.setLineDash([3, 1.5]);
+    g.translate(10, 20);
+    g.rotate(Math.PI / 2);
+    g.beginPath();
+    g.moveTo(0, 0);
+    g.lineTo(5, 0);
+    g.stroke();
+    g.beginPath();
+    g.arc(0, 0, 2, 0, Math.PI * 2);
+    g.stroke();
+    g.fillStyle = g.strokeStyle;
+    g.fillRect(1, 1, 2, 2);
+    g.restore();
+    g.end();
+    const ops = page.ops.join("\n");
+    expect(ops.startsWith("q 1 0 0 -1 0 200 cm")).toBe(true); // y flipped once
+    expect(ops).toContain("1 0 0 RG");
+    expect(ops).toContain("[3 1.5] 0 d");
+    expect(ops).toContain("1 0 0 1 10 20 cm");
+    expect(ops).toContain("0 1 -1 0 0 0 cm");
+    expect(ops).toContain("0 0 m 5 0 l S");
+    expect(ops.match(/ c(?= |$)/gm)).toHaveLength(4); // a full circle: four quarter curves
+    expect(ops).toContain("1 0 0 rg");
+    expect(ops).toContain("1 1 2 2 re f");
+    expect(ops.trim().endsWith("Q")).toBe(true);
+    expect(g.strokeStyle).toBe("#000000"); // restore() brings back the colour from before save(), as on a canvas
   });
 });

@@ -1144,6 +1144,8 @@ Decisions taken while implementing this plan. Each one lives in the single place
   has no glyph.
 - PDF chart to print (SPEC §15.10b): `core/formats/pdf/chartPdf.ts` (`chartLayout` — pages with shared strips,
   `chartPdf` — cover, three views, key), shared page pieces in `pdfLayout.ts` (A4, grid, rulers, English labels),
-  `svgPath.ts` turns symbol path data (incl. arcs) into PDF path operators. `PdfPage` draws rectangles, polygons,
+  `svgPath.ts` turns symbol path data (incl. arcs) into PDF path operators. `symbolColours.ts` picks the symbol chart's red / green / blue
+  symbols; `pdfCanvas.ts` is a canvas-like adapter that writes PDF, so the editor can pass the screen's own
+  `strokeLineStyle` (render) in as `lineStyle` — core never imports render. `PdfPage` draws rectangles, polygons,
   circles, paths, clipping and see-through fills (ExtGState). Editor: `exportChartPdf` / command
   `file.exportChartPdf`; both PDFs load their fonts through `pdfFonts()`.

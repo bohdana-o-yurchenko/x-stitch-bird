@@ -18,6 +18,8 @@ import type { Pattern } from "@/core/pattern/types";
 import type { UnderlayData } from "@/core/underlay/underlay";
 import { renderChartImage, type KeyLine } from "@/render/exportChart";
 import { defaultCanvasTheme } from "@/render/theme";
+import type { Ctx } from "@/render/primitives/cells";
+import { strokeLineStyle } from "@/render/primitives/lineStyles";
 import type { ChartView } from "@/render/chart";
 import { downloadFile, isImageFile, isPatternFile, readText } from "@/platform/files";
 import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
@@ -98,7 +100,8 @@ export async function exportPatternKeeper(ed: Editor, confirmed = false) {
 export async function exportChartPdf(ed: Editor) {
   const p = ed.doc;
   if (!p.key.some(Boolean)) return ed.toast("toasts.needKeyEmpty");
-  await offerPdf(ed, `${safeName(p)}-chart.pdf`, (fonts) => chartPdf(p, { fonts }));
+  // backstitch in the screen's own line styles
+  await offerPdf(ed, `${safeName(p)}-chart.pdf`, (fonts) => chartPdf(p, { fonts, lineStyle: (g, x1, y1, x2, y2, w, u, sym) => strokeLineStyle(g as unknown as Ctx, x1, y1, x2, y2, w, u, sym) }));
 }
 
 /** Everything a .xbird file holds: the pattern, its reference windows, underlay and versions. */

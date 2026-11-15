@@ -1162,13 +1162,30 @@ colours, lines), A4 portrait, text in English (Latin only).
    contents with page numbers, and a **page map** — every chart page as a numbered box, the shared cells grey.
 2. **Symbol chart**: crosses, half crosses (a thin diagonal and a smaller symbol), quarter / three-quarter / petite
    stitches (shaded corner and a small symbol), beads (a circle with the bead's symbol; a bead's symbol replaces the
-   stitch's under it), floss + bead (the stitch plus a small bead dot), blends.
-3. **Symbols on colour**: the same on the thread colours, over the fabric colour; symbols in each colour's own ink
+   stitch's under it), floss + bead (the stitch plus a small bead dot), blends. Symbols are black, except where many
+   different symbols are mixed: there some are printed **red, green or blue** (at most these three) so neighbours
+   look different at a glance — see *Symbol colours* below.
+3. **Symbol chart key**, straight after it: the symbol chart's entries with their symbols in the inks the chart
+   uses.
+4. **Symbols on colour**: the same on the thread colours, over the fabric colour; symbols in each colour's own ink
    (white on dark); a half cross's symbol sits on a small white disc in dark ink so it reads on floss and fabric.
-4. **Colour chart with backstitch**: as 3, plus backstitch lines (colour, thicker with more strands, very light
-   floss darkened) and French knots.
-5. **Key**: every used entry — an icon (colour block with the symbol, half-cross band, bead, line or knot), brand
-   and number, details (strands, stitch, bead), count with its unit.
+5. **Colour chart with backstitch**: the cells **pale** (74% towards white, still their colour), symbols in grey,
+   so the **backstitch stands out**: each backstitch entry in its own bright colour (10 colours, in key order: red,
+   green, blue, orange, purple, teal, magenta, brown, sky, dark red), **thick** (from 0.21 of a cell for 1 strand,
+   +0.05 per strand up to 4 — thicker than 2 strands on screen) and in its **line style**, drawn by the same code as
+   on screen; the style's pattern grows with the line so dashes and ornaments stay readable. French knots: bright
+   dots (the next colours after the backstitch ones) with a dark outline.
+6. **Key**: every used entry — thread colours for stitches and beads; backstitch and knots in the bright colour
+   (and line style) they have on the colour chart — brand and number, details, count with its unit.
+
+**Symbol colours** (`symbolColours.ts`): every cell shows one symbol (its bead's, else its stitch's, else its first
+partial stitch's). For each pair of entries count how often their symbols touch (1 for a side, ½ for a corner).
+Choose black / red / green / blue per entry to keep low: *the touching between entries of the same colour* + *0.9 ×
+the cells of entries that are not black*. So an entry is coloured only when it touches other black symbols more
+than about once per cell — speckled, mixed, detailed areas — while a big area such as a background stays black
+(its border is short compared with its size); the most used entry is always black. Solved by local search: entries
+in order of how mixed they are each take their cheapest colour, repeated until nothing changes; ties go to the
+colour used least.
 
 **Pages**: about **40 stitches across** (cells ≈ 4.6 mm; up to 6.4 mm for small charts), as many rows as fit.
 Neighbouring pages **share 2 rows or columns**: on both pages those cells are shaded grey (a grey background on
