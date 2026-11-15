@@ -6,6 +6,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { THEME_BOOT_SCRIPT } from "@/ui/theme/appTheme";
+import { ThemeSync } from "@/ui/theme/ThemeSync";
 import "../globals.css";
 
 const dmSans = DM_Sans({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600"], variable: "--font-sans" });
@@ -33,6 +34,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body>
+        <ThemeSync />
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
         <SpeedInsights />
       </body>

@@ -436,3 +436,17 @@ test("the theme is picked in the menu, applies at once and stays after a reload"
   await page.getByRole("radio", { name: "Royal blue" }).click();
   await expect(html).toHaveAttribute("data-theme", "royal");
 });
+
+test("switching the language keeps the theme, without reloading the page", async ({ page }) => {
+  await page.getByRole("button", { name: /^Menu ▾$/ }).click();
+  await page.getByRole("radio", { name: "Dark" }).click();
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => ((window as unknown as { stillHere: boolean }).stillHere = true));
+  await page.getByRole("combobox", { name: "Language" }).selectOption("uk");
+  await expect(page).toHaveURL(/\/uk$/);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect.poll(() => editorState<string>(page, "(ed) => ed.theme.stageBackground")).toBe("#1a1b22");
+  expect(await page.evaluate(() => (window as unknown as { stillHere?: boolean }).stillHere)).toBe(true);
+  await page.getByRole("button", { name: /^Меню ▾$/ }).click();
+  await expect(page.getByRole("radio", { name: "Темна" })).toHaveAttribute("aria-checked", "true");
+});

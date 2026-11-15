@@ -1115,3 +1115,5 @@ Decisions taken while implementing this plan. Each one lives in the single place
   holds the list, `applyTheme` and the pre-paint script (inlined in the layout head); `ThemeSwitcher` is a `node`
   row in the menu (`MenuItem` can be `{ node, id }`). The canvas reads stage/ruler/accent colours from the tokens
   (`platform/themeColours.ts`, `Editor.refreshChrome`); PNG export keeps the default accent.
+  Switching the language is a client-side navigation (no reload), but React resets unknown attributes on <html>
+  when the root layout re-renders; `ui/theme/ThemeSync.tsx` (in the layout) re-applies `data-theme` in a layout effect.
