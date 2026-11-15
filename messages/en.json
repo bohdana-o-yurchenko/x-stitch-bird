@@ -416,7 +416,8 @@
     "restored": "Snapshot restored",
     "partialKind": "Partial stitch: {kind}",
     "partialNeedsCross": "Partial stitches use a cross-stitch entry — pick one in the key",
-    "straightened": "Photo straightened to the chart grid"
+    "straightened": "Photo straightened to the chart grid",
+    "newerFile": "This file was made by a newer version of пташечка — reload the page to update, then open it again."
   },
   "underlay": {
     "heading": "Image behind the chart",
@@ -479,7 +480,9 @@
     "info": "Pattern info…",
     "infoHint": "Designer, source, copyright, notes",
     "guide": "Quick start guide",
-    "guideHint": "Step by step: an e-copy of a paper chart"
+    "guideHint": "Step by step: an e-copy of a paper chart",
+    "changelog": "What’s new",
+    "changelogHint": "Version {version} — what changed"
   },
   "toolNames": {
     "pencil": "Draw",
@@ -643,6 +646,31 @@
         "1": "Your e-copy is ready.",
         "2": "The guide is always here: <hl>Menu ▸ Quick start guide</hl>."
       }
+    },
+    "tipLabel": "Tip",
+    "gotIt": "Got it",
+    "underlayTip": {
+      "title": "Quick image editing",
+      "points": {
+        "1": "The <hl>edit</hl> button by the zoom turns it on and off (or U).",
+        "2": "Zoom in and a <hl>frame</hl> appears in the middle: drag its side and the photo under it follows the cursor.",
+        "3": "<hl>↺ ↻</hl> above the frame turn the photo a little, <hl>Ctrl/⌘+Z</hl> undoes."
+      }
+    },
+    "referenceTip": {
+      "title": "A photo in its own window",
+      "points": {
+        "1": "Put the paper chart’s <hl>key</hl> here to keep it in view.",
+        "2": "Or the <hl>chart scan</hl> — if you’d rather not put it behind the stitches.",
+        "3": "Drag the window, resize it, change its opacity."
+      }
+    },
+    "referenceMarks": {
+      "title": "Mark what’s already done",
+      "points": {
+        "1": "<hl>Marker</hl> — paint over what you’ve already copied: key lines or parts of the chart.",
+        "2": "<hl>Shade stitched</hl> — the window shades the squares that are already on the chart (when the photo is the whole chart)."
+      }
     }
   },
   "work": {
@@ -652,5 +680,11 @@
     "none": "under a minute",
     "running": "counting now",
     "hint": "Counted automatically while you work on this pattern. Stops after 3 minutes without any action."
+  },
+  "changelog": {
+    "title": "What’s new in пташечка",
+    "current": "You have version {version}.",
+    "release": "Version {version}",
+    "close": "Got it"
   }
 }

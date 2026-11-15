@@ -6,15 +6,20 @@ export const fixture = (name: string) => resolve(process.cwd(), "tests/fixtures"
 export const fixtureText = (name: string) => readFileSync(fixture(name), "utf8");
 export const fixtureDataUrl = (name: string) => `data:image/png;base64,${readFileSync(fixture(name)).toString("base64")}`;
 
-/** Fresh browser storage, editor loaded with the demo pattern (guide already seen unless `firstVisit`). */
+/** Fresh browser storage, editor loaded with the demo pattern (guide and feature tips already seen unless `firstVisit`). */
+const APP_VERSION = (JSON.parse(readFileSync(resolve(process.cwd(), "package.json"), "utf8")) as { version: string }).version;
+
 export async function openEditor(page: Page, locale = "en", o: { firstVisit?: boolean } = {}) {
   await page.goto(`/${locale}`);
-  await page.evaluate(async (first) => {
+  await page.evaluate(async ([first, version]) => {
     localStorage.clear();
-    // the quick-start guide opens on a first visit; tests start past it unless they ask
-    if (!first) localStorage.setItem("stitchwork.guideSeen", "1");
+    // the quick-start guide, feature tips and "What's new" appear on their own; tests start past them unless they ask
+    if (!first) {
+      for (const tour of ["guideSeen", "tipSeen.underlay", "tipSeen.reference"]) localStorage.setItem(`stitchwork.${tour}`, "1");
+      localStorage.setItem("stitchwork.seenVersion", version);
+    }
     await new Promise((r) => { const q = indexedDB.deleteDatabase("stitchwork"); q.onsuccess = q.onerror = q.onblocked = r; });
-  }, !!o.firstVisit);
+  }, [!!o.firstVisit, APP_VERSION] as const);
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
 }

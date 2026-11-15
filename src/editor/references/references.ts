@@ -53,6 +53,7 @@ export class ReferenceService {
       ...d,
     };
     this.setList([...this.list, ref]);
+    this.ed.store.setState({ pendingTip: "reference" });
     this.save();
   }
 

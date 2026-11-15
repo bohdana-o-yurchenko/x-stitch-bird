@@ -273,6 +273,48 @@ test("the quick-start guide opens on the first visit only, highlights what it ex
   await expect(guide).toHaveCount(0);
 });
 
+test("feature tips: once after the first image behind the chart, and for the first photo window", async ({ page }) => {
+  await page.evaluate(() => ["underlay", "reference"].forEach((t) => localStorage.removeItem(`stitchwork.tipSeen.${t}`)));
+  const guide = page.getByTestId("guide");
+  let chooser = page.waitForEvent("filechooser");
+  await fileAction(page, "Reference pictures", "Image behind the chart…");
+  await (await chooser).setFiles("tests/fixtures/underlay.png");
+  await expect(guide).toHaveCount(0); // not over the straighten dialog
+  await page.getByTestId("straighten").getByRole("button", { name: "Use as it is" }).click();
+  await expect(guide).toContainText("Quick image editing");
+  await guide.getByRole("button", { name: "Got it" }).click();
+  chooser = page.waitForEvent("filechooser");
+  await fileAction(page, "Reference pictures", "Photo in a floating window…");
+  await (await chooser).setFiles("tests/fixtures/underlay.png");
+  await expect(guide).toContainText("A photo in its own window");
+  await guide.getByRole("button", { name: "Next" }).click();
+  await expect(guide).toContainText("Mark what’s already done");
+  await guide.getByRole("button", { name: "Got it" }).click();
+  chooser = page.waitForEvent("filechooser");
+  await fileAction(page, "Reference pictures", "Photo in a floating window…");
+  await (await chooser).setFiles("tests/fixtures/underlay.png");
+  await expect(page.getByTestId("reference-window")).toHaveCount(2);
+  await expect(guide).toHaveCount(0);
+});
+
+test("“What’s new” opens once after an update, never for a brand-new user", async ({ page }) => {
+  await page.evaluate(() => localStorage.setItem("stitchwork.seenVersion", "0.9.0"));
+  await page.reload();
+  const dialog = page.getByRole("dialog", { name: "What’s new in пташечка" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText("Version 1.0.0");
+  await dialog.getByRole("button", { name: "Got it" }).click();
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await expect(dialog).toHaveCount(0);
+  await openEditor(page, "en", { firstVisit: true });
+  await expect(page.getByTestId("guide")).toBeVisible();
+  await expect(dialog).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await fileAction(page, "What’s new");
+  await expect(dialog).toBeVisible();
+});
+
 test("brush size takes one click", async ({ page }) => {
   await page.getByRole("button", { name: "Brush 3×3" }).click();
   expect(await editorState<number>(page, "(ed) => ed.state.brush")).toBe(3);

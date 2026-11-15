@@ -6,26 +6,47 @@ import { cx, ui } from "../common/widgets";
 import { useEditor, useEditorState } from "../hooks/editor";
 import s from "./guide.module.css";
 
-/** Seen once: the guide opens by itself only on the very first visit (then from Menu ▸ Quick start guide). */
-const SEEN_KEY = "stitchwork.guideSeen";
+type Step = { id: string; targets: string[]; reveal?: string[]; tip?: boolean };
 
 /**
- * Quick-start steps for a перенабір (an e-copy of a paper chart). `targets` are `data-guide` names of the
- * elements to highlight (`menu:<id>` = a menu option); `reveal` holds the main menu open, with these submenus open,
- * so the option it talks about can be shown. Texts: `guide.<id>.title`, `.points.{1,2,…}`, optional `.tip`.
+ * Tours (SPEC §9.8). `intro` is the quick start for a перенабір; the others are feature tips shown once, right after
+ * the feature is first used (`pendingTip`). `targets` are `data-guide` names to highlight (`menu:<id>` = a menu
+ * option); `reveal` holds the main menu open on those submenus. Texts: `guide.<step id>.title`, `.points.{1,2,…}`,
+ * optional `.tip`.
  */
-const STEPS: { id: string; targets: string[]; reveal?: string[]; tip?: boolean }[] = [
-  { id: "welcome", targets: [] },
-  { id: "create", targets: ["menu", "menu:newBlank"], reveal: ["new"] },
-  { id: "key", targets: ["add-key", "menu:refWindow"], reveal: ["references"], tip: true },
-  { id: "trace", targets: ["menu:refUnderlay"], reveal: ["references"], tip: true },
-  { id: "views", targets: ["views"] },
-  { id: "tools", targets: ["toolbar", "override", "shortcuts"], tip: true },
-  { id: "save", targets: ["saved", "menu:download"], reveal: [] },
-  { id: "versions", targets: ["menu:versions"], reveal: [] },
-  { id: "finish", targets: ["menu:info", "menu:oxs"], reveal: ["export"] },
-  { id: "done", targets: [] },
-];
+export const TOURS: Record<string, Step[]> = {
+  intro: [
+    { id: "welcome", targets: [] },
+    { id: "create", targets: ["menu", "menu:newBlank"], reveal: ["new"] },
+    { id: "key", targets: ["add-key", "menu:refWindow"], reveal: ["references"], tip: true },
+    { id: "trace", targets: ["menu:refUnderlay"], reveal: ["references"], tip: true },
+    { id: "views", targets: ["views"] },
+    { id: "tools", targets: ["toolbar", "override", "shortcuts"], tip: true },
+    { id: "save", targets: ["saved", "menu:download"], reveal: [] },
+    { id: "versions", targets: ["menu:versions"], reveal: [] },
+    { id: "finish", targets: ["menu:info", "menu:oxs"], reveal: ["export"] },
+    { id: "done", targets: [] },
+  ],
+  underlay: [{ id: "underlayTip", targets: ["underlay-edit"] }],
+  reference: [
+    { id: "referenceTip", targets: ["ref-window"] },
+    { id: "referenceMarks", targets: ["ref-marker", "ref-done"] },
+  ],
+};
+
+/** The intro opens by itself on the very first visit; each tip once, the first time its feature is used. */
+const seenKey = (tour: string) => (tour === "intro" ? "stitchwork.guideSeen" : `stitchwork.tipSeen.${tour}`);
+
+/** Marks a tour as seen; false if it already was (or storage is unavailable — then tips stay quiet). */
+function firstTime(tour: string): boolean {
+  try {
+    if (localStorage.getItem(seenKey(tour))) return false;
+    localStorage.setItem(seenKey(tour), "1");
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const PAD = 6, GAP = 18, CARD_W = 460;
 
@@ -40,28 +61,29 @@ function boxesOf(selector: string, pad: number): Box[] {
 
 const measure = (names: string[]) => names.flatMap((n) => boxesOf(`[data-guide="${n}"]`, PAD));
 
-/** Opens itself on the first visit; otherwise shown when `guideOpen` is set (menu). */
+/** Hosts the tours: the intro on the first visit or from the menu, a feature tip once its feature is on screen. */
 export function Guide() {
   const ed = useEditor();
   const ready = useEditorState((st) => st.ready);
-  const open = useEditorState((st) => st.guideOpen);
+  const tour = useEditorState((st) => st.guide);
+  const pending = useEditorState((st) => st.pendingTip);
+  // a tip waits until nothing else is in the way: no dialog (e.g. straightening), no other tour, picture loaded
+  const blocked = useEditorState((st) => !!st.dialog || !!st.guide || (st.pendingTip === "underlay" && !st.underlayImage));
 
   useEffect(() => {
-    if (!ready) return;
-    try {
-      if (localStorage.getItem(SEEN_KEY)) return;
-      localStorage.setItem(SEEN_KEY, "1");
-    } catch {
-      return;
-    }
-    ed.store.setState({ guideOpen: true });
+    if (ready && firstTime("intro")) ed.store.setState({ guide: "intro" });
   }, [ed, ready]);
 
-  if (!open) return null;
-  return <GuideTour onClose={() => ed.store.setState({ guideOpen: false })} />;
+  useEffect(() => {
+    if (!pending || blocked) return;
+    ed.store.setState({ pendingTip: null, ...(firstTime(pending) && TOURS[pending] ? { guide: pending } : {}) });
+  }, [ed, pending, blocked]);
+
+  if (!tour || !TOURS[tour]) return null;
+  return <GuideTour key={tour} steps={TOURS[tour]} onClose={() => ed.store.setState({ guide: null })} />;
 }
 
-function GuideTour({ onClose }: { onClose: () => void }) {
+function GuideTour({ steps, onClose }: { steps: Step[]; onClose: () => void }) {
   const ed = useEditor();
   const g = useTranslations("guide");
   const [i, setI] = useState(0);
@@ -70,7 +92,7 @@ function GuideTour({ onClose }: { onClose: () => void }) {
   const [menus, setMenus] = useState<Box[]>([]);
   const [card, setCard] = useState<{ left: number; top: number } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const step = STEPS[i]!, last = i === STEPS.length - 1;
+  const step = steps[i]!, last = i === steps.length - 1, single = steps.length === 1;
 
   // hold the menu open where the step points; let go when the guide closes
   useEffect(() => {
@@ -140,7 +162,7 @@ function GuideTour({ onClose }: { onClose: () => void }) {
       </svg>
       {boxes.map((r, n) => <div key={n} className={s.ring} style={{ left: r.x, top: r.y, width: r.w, height: r.h }} />)}
       <div ref={cardRef} className={s.card} style={{ width: CARD_W, ...(card ? { left: card.left, top: card.top } : { visibility: "hidden" }) }}>
-        <div className={s.count}>{g("count", { n: i + 1, total: STEPS.length })}</div>
+        <div className={s.count}>{single ? g("tipLabel") : g("count", { n: i + 1, total: steps.length })}</div>
         <h3>{g(`${step.id}.title`)}</h3>
         <ul className={s.points}>
           {points.map((k) => <li key={k}>{g.rich(`${step.id}.points.${k}`, tags)}</li>)}
@@ -150,7 +172,7 @@ function GuideTour({ onClose }: { onClose: () => void }) {
           {!last && <button type="button" className={s.skip} onClick={onClose}>{g("skip")}</button>}
           <span className={s.spacer} />
           {i > 0 && <button type="button" className={ui.btn} onClick={() => setI(i - 1)}>{g("back")}</button>}
-          <button type="button" className={cx(ui.btn, ui.primary)} autoFocus onClick={() => (last ? onClose() : setI(i + 1))}>{last ? g("done.button") : g("next")}</button>
+          <button type="button" className={cx(ui.btn, ui.primary)} autoFocus onClick={() => (last ? onClose() : setI(i + 1))}>{!last ? g("next") : steps === TOURS.intro ? g("done.button") : g("gotIt")}</button>
         </div>
       </div>
     </div>

@@ -6,7 +6,10 @@ import type { CustomColor, KeyEntry, LayerId, Pattern } from "../../pattern/type
 /** Stitchwork JSON document. v4 only adds optional fields to v3 (SPEC §9.3, §15). */
 export interface PatternFile {
   app: "stitchwork";
+  /** Pattern-data schema shared with the single-file app (v1–v4). */
   v: number;
+  /** .xbird file format version (XBIRD_VERSION); files without it are version 1. */
+  xbird?: number;
   id: string;
   name: string;
   w: number;
@@ -42,6 +45,12 @@ export interface FileVersion {
 }
 
 export const FORMAT_VERSION = 4;
+
+/**
+ * The .xbird file format version (docs/RELEASING.md). Bump it only for a change older apps can't read correctly,
+ * and add the matching step to XBIRD_MIGRATIONS in parse.ts so older files keep opening. Files without it are 1.
+ */
+export const XBIRD_VERSION = 1;
 
 /** Optional v4 fields: JSON field name → layer. Written only when non-empty. */
 export const OPTIONAL_LAYER_FIELDS: readonly [keyof PatternFile, LayerId][] = [

@@ -6,6 +6,8 @@ import type { Snapshot } from "@/persistence/ports";
 import { memoryPersistence } from "../../tests/support/memoryPersistence";
 import { loadPattern } from "./actions/pattern";
 import { LIBRARY_EVERY } from "./autosave";
+import { patternFile } from "./actions/importExport";
+import { XBIRD_VERSION } from "@/core/formats/json/serialize";
 import { gridToImage } from "@/core/underlay/underlay";
 import { Editor } from "./createEditor";
 import { shortcutLabel, shortcutLabels } from "./shortcuts/keymap";
@@ -187,6 +189,10 @@ describe("chart underlay (SPEC §15.15)", () => {
     expect(Math.hypot(still.x - under.x, still.y - under.y)).toBeLessThan(1e-6);
     ed.shortcuts.keyDown(key("["));
     expect(ed.state.underlay!.rotation).toBe(0);
+  });
+
+  it("a downloaded .xbird says which file format version it is", async () => {
+    expect((await patternFile(ed)).xbird).toBe(XBIRD_VERSION);
   });
 
   it("pictures go to the image store and travel in .json files as data URLs", async () => {

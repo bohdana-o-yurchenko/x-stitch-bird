@@ -1042,6 +1042,12 @@ Decisions taken while implementing this plan. Each one lives in the single place
   Reading tells OXS from our format by content, so `.json` files from earlier versions still open.
 - Quick-start guide (SPEC §9.8): `ui/guide/Guide.tsx` — steps list (ids, `data-guide` targets, menu paths as message
   keys), texts in the `guide` namespace; `guideOpen` in the store, command `help.guide`.
+- Tours & tips: `TOURS` in `ui/guide/Guide.tsx` (intro + feature tips); store `guide` (tour on screen) and
+  `pendingTip` (set by `UnderlayService.addFromFile` / `ReferenceService.add`, shown once when unblocked).
+- Releases: `src/core/release/changelog.ts` (notes + `compareVersions`), `ui/dialogs/ChangelogDialog.tsx`
+  (`WhatsNewOnUpdate`), version via `NEXT_PUBLIC_APP_VERSION` from package.json (`next.config.ts`).
+  .xbird format: `XBIRD_VERSION` (serialize.ts), `upgradeFile` + `XBIRD_MIGRATIONS` (parse.ts), fixture guard
+  `tests/fixtures/xbird-v1.xbird`. Procedure and compatibility rules: `docs/RELEASING.md`.
 - Side panel width: `ui/layout/EditorLayout.tsx` (`--side-w`, drag handle, `localStorage`).
 - Shortcut help: `ui/header/ShortcutsInfo.tsx` builds its list from `KEYMAP` via `shortcutLabels`/`formatKeys`, so
   a new binding only needs a row there.

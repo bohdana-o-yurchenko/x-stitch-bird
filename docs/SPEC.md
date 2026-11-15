@@ -569,6 +569,21 @@ from **Menu ▸ Quick start guide** (uk: "Як зробити перенабір
 - Highlight targets are `data-guide` attributes (menu, add-key, views, toolbar, shortcuts, saved); a missing target
   (e.g. side panel hidden) just isn't highlighted.
 
+### 9.9 Feature tips, app versions, "What's new", .xbird format version (2026-11-15)
+- **Feature tips** — one-step or two-step tours (same look as the guide, labelled "Tip"), each shown **once**, right
+  after the feature is first used and only when nothing else is open (key `stitchwork.tipSeen.<tour>`):
+  - *Image behind the chart* — after the first one is added and the straighten dialog is closed: highlights the
+    edit toggle in the zoom box (frame, ↺ ↻, Ctrl/⌘+Z).
+  - *Photo window* — after the first window is opened: what to put there (the key, or the chart scan instead of the
+    canvas), then highlights the window's **Marker** and **Shade stitched** buttons.
+- **App version** = `package.json` `version` (semver). **Menu ▸ What's new** lists the user-facing release notes
+  (`src/core/release/changelog.ts`, uk + en). It opens by itself once after an update (`stitchwork.seenVersion` older
+  than the app's version); brand-new users don't get it (the intro guide instead). Release steps:
+  `docs/RELEASING.md`.
+- **.xbird format version** — every downloaded file has `"xbird": 1` (`XBIRD_VERSION`); files without it are 1. A file
+  with a higher number (from a newer app) is refused with "made by a newer version — reload the page". Breaking
+  changes need a version bump plus a migration step — see `docs/RELEASING.md` "Compatibility rules".
+
 ### 9.6 Image store (new app, 2026-11-14)
 The single-file app kept pictures as base64 data URLs inside its records (reference windows: photo and marks), so
 every window move or marker stroke rewrote megabytes, and photos were re-compressed when added. The new app:

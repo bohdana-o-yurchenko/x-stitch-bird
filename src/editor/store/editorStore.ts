@@ -25,6 +25,7 @@ export type DialogRequest =
   | { type: "resize" }
   | { type: "versions" }
   | { type: "straighten" }
+  | { type: "changelog"; since?: string | null }
   | { type: "imageImport"; image: HTMLImageElement }
   | { type: "patternInfo" }
   | { type: "goToCell" }
@@ -91,8 +92,10 @@ export interface EditorState {
   underlayImage: HTMLImageElement | null;
   /** The guide holds the main menu open on these item ids (submenus first); null = not held. */
   menuReveal: string[] | null;
-  /** The quick-start guide is open (shown once on the first visit, then from the menu). */
-  guideOpen: boolean;
+  /** The tour on screen (SPEC §9.8): "intro" or a feature tip; null = none. */
+  guide: string | null;
+  /** A feature tip to show once nothing else is in the way (each tip appears only the first time). */
+  pendingTip: string | null;
   /** The zoomed-in edit frame of the underlay, in canvas px, once the user has resized it (SPEC §15.15). */
   underlayFrame: Rect | null;
   /** Fade every key entry except the active one (SPEC §15.16). */
@@ -136,7 +139,8 @@ export const createEditorStore = () =>
     underlayImage: null,
     highlight: false,
     underlayFrame: null,
-    guideOpen: false,
+    guide: null,
+    pendingTip: null,
     menuReveal: null,
     hasClipboard: false,
   }));

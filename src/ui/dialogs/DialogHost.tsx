@@ -3,6 +3,7 @@
 import { useEditor, useEditorState } from "../hooks/editor";
 import { ImageImportDialog } from "./ImageImportDialog";
 import { OpenPatternDialog, VersionsDialog } from "./OpenPatternDialog";
+import { ChangelogDialog } from "./ChangelogDialog";
 import { StraightenDialog } from "./StraightenDialog";
 import {
   DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, MirrorFromCentreDialog, NewPatternDialog,
@@ -21,6 +22,7 @@ export function DialogHost() {
     case "open": return <OpenPatternDialog onClose={close} />;
     case "resize": return <ResizeDialog onClose={close} />;
     case "versions": return <VersionsDialog onClose={close} />;
+    case "changelog": return <ChangelogDialog since={d.since} onClose={close} />;
     case "straighten": return <StraightenDialog onClose={close} />;
     case "imageImport": return <ImageImportDialog image={d.image} onClose={close} />;
     case "patternInfo": return <PatternInfoDialog onClose={close} />;

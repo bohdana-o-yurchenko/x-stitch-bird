@@ -93,6 +93,8 @@ export class UnderlayService {
     await this.show(u);
     this.save();
     this.ed.openDialog({ type: "straighten" });
+    // the first time: once the straighten dialog is closed, point at the quick edit toggle
+    this.ed.store.setState({ pendingTip: "underlay" });
   }
 
   update(patch: Partial<UnderlayData>) {

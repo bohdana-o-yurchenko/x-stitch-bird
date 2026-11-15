@@ -20,9 +20,9 @@ const place = (r: RefWindowData) => {
 };
 
 /** A floating reference photo with a marker layer, stitch-grid overlay and "already stitched" shading (SPEC §11). */
-function Tb({ name, title, on, onClick }: { name: string; title: string; on: boolean; onClick: () => void }) {
+function Tb({ name, title, on, onClick, guide }: { name: string; title: string; on: boolean; onClick: () => void; guide?: string }) {
   return (
-    <button type="button" title={title} aria-label={title} className={cx(on && s.on)} onClick={onClick}>
+    <button type="button" title={title} aria-label={title} className={cx(on && s.on)} onClick={onClick} data-guide={guide}>
       <Icon name={name} size={16} />
     </button>
   );
@@ -230,7 +230,7 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
   }, []);
 
   return (
-    <div className={s.win} style={{ left: pos.x, top: pos.y, width: pos.w, height: data.min ? undefined : pos.h, zIndex: z, opacity: data.op }} onPointerDownCapture={front} data-testid="reference-window">
+    <div className={s.win} style={{ left: pos.x, top: pos.y, width: pos.w, height: data.min ? undefined : pos.h, zIndex: z, opacity: data.op }} onPointerDownCapture={front} data-testid="reference-window" data-guide="ref-window">
       <div className={s.head} onPointerDown={dragHead}>
         <span style={{ opacity: 0.5 }}>⠿</span>
         {renaming ? (
@@ -246,7 +246,7 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
         <>
           <div className={s.bar}>
             <Tb name="pan" title={t("references.pan")} on={data.tool === "pan"} onClick={() => update({ tool: "pan" })} />
-            <Tb name="marker" title={t("references.marker")} on={data.tool === "marker"} onClick={() => update({ tool: "marker" })} />
+            <Tb name="marker" guide="ref-marker" title={t("references.marker")} on={data.tool === "marker"} onClick={() => update({ tool: "marker" })} />
             <Tb name="eraser" title={t("references.eraser")} on={data.tool === "eraser"} onClick={() => update({ tool: "eraser" })} />
             <input type="color" className={s.colour} title={t("references.colour")} value={data.color} onChange={(e) => update({ color: e.target.value })} />
             <select className={s.size} title={t("references.size")} value={data.size} onChange={(e) => update({ size: Number(e.target.value) })}>
@@ -255,7 +255,7 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
             <Tb name="undo" title={t("references.undo")} on={false} onClick={undoMark} />
             <span className={s.sep} />
             <Tb name="grid" title={t("references.grid")} on={data.grid} onClick={() => update({ grid: !data.grid })} />
-            <Tb name="done" title={t("references.done")} on={data.showSt} onClick={() => update({ showSt: !data.showSt })} />
+            <Tb name="done" guide="ref-done" title={t("references.done")} on={data.showSt} onClick={() => update({ showSt: !data.showSt })} />
             <Tb name="fit" title={t("references.fit")} on={false} onClick={fitPhoto} />
             <Tb name="trash" title={t("references.clear")} on={false} onClick={askClear} />
           </div>

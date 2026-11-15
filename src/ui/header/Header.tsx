@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
 import { Icon } from "../common/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { APP_VERSION } from "../dialogs/ChangelogDialog";
 import { ShortcutsInfo } from "./ShortcutsInfo";
 import { ToolBar } from "./ToolBar";
 import { useCommand, useEditorState } from "../hooks/editor";
@@ -57,6 +58,7 @@ function FileMenu() {
     { id: "info", label: t("info"), hint: t("infoHint"), onClick: go("pattern.editInfo") },
     "-",
     { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
+    { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
   ];
   return (
     <span data-guide="menu">

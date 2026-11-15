@@ -6,9 +6,27 @@ import { createPattern, DEFAULT_FABRIC, DEFAULT_GRID } from "../../pattern/creat
 import type { CustomColor, GridNumbering, KeyEntry, Pattern } from "../../pattern/types";
 import { normalizeSymbol } from "../../symbols/symbols";
 import { cleanUnderlay, type UnderlayData } from "../../underlay/underlay";
-import { OPTIONAL_LAYER_FIELDS, type FileVersion, type PatternFile } from "./serialize";
+import { OPTIONAL_LAYER_FIELDS, XBIRD_VERSION, type FileVersion, type PatternFile } from "./serialize";
 
 export class PatternFormatError extends Error {}
+
+/** The file was written by a newer пташечка (a higher .xbird version than this app knows). */
+export class NewerFileError extends PatternFormatError {}
+
+/**
+ * Upgrades for older .xbird files: XBIRD_MIGRATIONS[n] turns a version-n file into version n + 1. Empty while the
+ * format is at version 1; every XBIRD_VERSION bump adds one step here (docs/RELEASING.md).
+ */
+const XBIRD_MIGRATIONS: Record<number, (d: PatternFile) => PatternFile> = {};
+
+/** Brings a file up to XBIRD_VERSION; refuses files from a newer app. */
+export function upgradeFile(d: PatternFile): PatternFile {
+  const from = Number.isInteger(d.xbird) && d.xbird! >= 1 ? d.xbird! : 1;
+  if (from > XBIRD_VERSION) throw new NewerFileError(`File format ${from} is newer than ${XBIRD_VERSION}`);
+  let out = d;
+  for (let n = from; n < XBIRD_VERSION; n++) out = XBIRD_MIGRATIONS[n]!(out);
+  return { ...out, xbird: XBIRD_VERSION };
+}
 
 const LAYER_FIELD: Record<string, string> = { stitches: "s", beads: "b", segments: "back", ...Object.fromEntries(OPTIONAL_LAYER_FIELDS.map(([f, id]) => [id, f])) };
 
@@ -43,8 +61,8 @@ export function cleanVersions(raw: unknown): FileVersion[] {
 
 /** Reads any Stitchwork JSON (v1–v4). `symbols` normalises chart symbols to this device's set. */
 export function parsePattern(raw: unknown, symbols: readonly string[]): { pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; versions: FileVersion[] } {
-  const d = raw as Partial<PatternFile> & { pal?: unknown[] };
-  if (!isDoc(d)) throw new PatternFormatError("Not a Stitchwork pattern file");
+  if (!isDoc(raw)) throw new PatternFormatError("Not a Stitchwork pattern file");
+  const d = upgradeFile(raw) as Partial<PatternFile> & PatternFile & { pal?: unknown[] };
   const p = createPattern(d.w, d.h, d.name || "Untitled pattern");
   if (d.id) p.id = d.id;
   p.count = d.count || 14;

@@ -1,8 +1,8 @@
 import { calculator } from "@/core/calculator/registry";
 import { computeUsage, entryCount, partialCount } from "@/core/calculator/usage";
 import { exportCsv } from "@/core/formats/csv/exportCsv";
-import { parsePattern } from "@/core/formats/json/parse";
-import { serializePattern, type FileVersion, type PatternFile } from "@/core/formats/json/serialize";
+import { NewerFileError, parsePattern } from "@/core/formats/json/parse";
+import { serializePattern, XBIRD_VERSION, type FileVersion, type PatternFile } from "@/core/formats/json/serialize";
 import { exportOxs } from "@/core/formats/oxs/exportOxs";
 import { importOxs } from "@/core/formats/oxs/importOxs";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
@@ -65,7 +65,7 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
 export async function patternFile(ed: Editor): Promise<PatternFile> {
   const underlay = ed.underlay.data ? await ed.images.underlayToFile(ed.underlay.data) : undefined;
   const versions = await ed.snapshots.exportFile();
-  return { ...serializePattern(ed.doc), refs: await ed.references.exportFile(), underlay, ...(versions.length ? { versions } : {}) };
+  return { ...serializePattern(ed.doc), xbird: XBIRD_VERSION, refs: await ed.references.exportFile(), underlay, ...(versions.length ? { versions } : {}) };
 }
 
 /** Read a .xbird (or older .json) or .oxs file into a pattern — told apart by content; throws on anything else. */
@@ -86,7 +86,7 @@ export async function loadFile(ed: Editor, file: File) {
     ed.toast(simplified ? "toasts.loadedReport" : "toasts.loaded", { name: file.name, count: simplified });
   } catch (e) {
     console.error(e);
-    ed.toast("toasts.badFile");
+    ed.toast(e instanceof NewerFileError ? "toasts.newerFile" : "toasts.badFile");
   }
 }
 
