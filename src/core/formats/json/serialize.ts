@@ -33,6 +33,8 @@ export interface PatternFile {
   underlay?: unknown;
   /** Active work time in whole seconds. */
   spent?: number;
+  /** Symbol matching: learned photo examples per key entry (SPEC §15.11). Optional; older apps ignore it. */
+  samples?: Record<string, string[]>;
   /** The pattern's versions (automatic snapshots), oldest first; only in .xbird files. */
   versions?: FileVersion[];
 }
@@ -96,6 +98,7 @@ export function serializePattern(p: Pattern): PatternFile {
   if (Object.keys(p.meta).length) doc.meta = p.meta;
   if (JSON.stringify(p.grid) !== JSON.stringify(DEFAULT_GRID)) doc.grid = p.grid;
   if (p.spent >= 1000) doc.spent = Math.round(p.spent / 1000);
+  if (p.samples && Object.keys(p.samples).length) doc.samples = p.samples;
   for (const [field, id] of OPTIONAL_LAYER_FIELDS) {
     const h = layerHandler(id);
     if (!h.isEmpty(h.get(p.layers))) (doc as unknown as Record<string, unknown>)[field] = layer(id);

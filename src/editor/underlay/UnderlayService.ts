@@ -111,7 +111,8 @@ export class UnderlayService {
   /** Behind = stitching; off = edit mode, which starts with a fresh edit frame and its own undo. */
   setBehind(behind: boolean) {
     this.update({ behind, visible: true });
-    this.ed.store.setState({ underlayFrame: null, underlayHot: null });
+    // symbol matching reads the photo where it is: moving it ends the mode
+    this.ed.store.setState({ underlayFrame: null, underlayHot: null, ...(behind ? {} : { match: null }) });
     if (behind) this.undoStack = [];
     this.ed.tools.leave();
   }
@@ -126,7 +127,7 @@ export class UnderlayService {
 
   remove() {
     this.set(null);
-    this.ed.store.setState({ underlayImage: null });
+    this.ed.store.setState({ underlayImage: null, match: null });
   }
 
   nudge(dx: number, dy: number) {

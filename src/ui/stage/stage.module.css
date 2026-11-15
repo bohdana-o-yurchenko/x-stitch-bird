@@ -112,3 +112,13 @@
   margin: 3px 2px;
   background: var(--line2);
 }
+.barText {
+  align-self: center;
+  padding: 0 6px;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.matchBar {
+  align-items: center;
+}

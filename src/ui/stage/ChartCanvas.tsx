@@ -1,6 +1,7 @@
 "use client";
 
 import { visibleFindings, type ChecksState } from "@/editor/checks/checks";
+import type { MatchState } from "@/editor/matching/matching";
 import { useEffect, useRef } from "react";
 import { ChartRenderer, type ChartScene } from "@/render/ChartRenderer";
 import type { Editor } from "@/editor/createEditor";
@@ -35,8 +36,16 @@ function scene(ed: Editor): ChartScene {
     underlayFrame: ed.underlay.frame(),
     underlayHot: st.underlayHot,
     checks: checksScene(st.checks),
+    match: matchScene(st.match),
     underlayButtons: ed.underlay.rotateButtons(),
   };
+}
+
+/** What the canvas shows of symbol matching: the block under the pointer, or the one read and its proposals. */
+function matchScene(m: MatchState | null): ChartScene["match"] {
+  if (!m) return null;
+  if (m.phase === "pick") return m.hover && { block: m.hover, chosen: false, ghosts: null };
+  return { block: m.block, chosen: true, ghosts: m.ghosts };
 }
 
 /** What the canvas shows of the chart checks: all findings outlined, the current one ringed. */

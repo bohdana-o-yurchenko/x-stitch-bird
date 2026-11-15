@@ -1,5 +1,6 @@
 import { PARTIAL_KINDS } from "@/core/stitches/partialKinds";
 import type { CheckOptions } from "@/core/checks/checks";
+import { acceptMatching, endMatching, toggleMatching } from "../matching/matching";
 import { closeChecks, goToFinding, ignoreFinding, runChartChecks, stepFinding } from "../checks/checks";
 import type { TransformId } from "@/core/transform/cellTransform";
 import { MIRROR_MODES } from "@/core/transform/mirror";
@@ -136,6 +137,10 @@ export const COMMANDS: readonly Command[] = [
   { id: "checks.prev", run: (ed) => stepFinding(ed, -1) },
   { id: "checks.ignore", run: (ed, id) => ignoreFinding(ed, String(id)) },
   { id: "checks.close", run: (ed) => closeChecks(ed) },
+  // symbol matching in a block (SPEC §15.11)
+  { id: "match.toggle", run: (ed) => toggleMatching(ed) },
+  { id: "match.accept", run: (ed) => acceptMatching(ed) },
+  { id: "match.decline", run: (ed) => endMatching(ed) },
   // snapshots
   { id: "snapshot.restore", run: (ed, time) => ed.snapshots.restore(time as number) },
 ];

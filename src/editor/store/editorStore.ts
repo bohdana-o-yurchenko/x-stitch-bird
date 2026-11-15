@@ -10,6 +10,7 @@ import type { Viewport } from "@/render/ChartRenderer";
 import type { RefWindowData } from "@/persistence/ports";
 import type { Handle, UnderlayData } from "@/core/underlay/underlay";
 import type { ChecksState } from "../checks/checks";
+import type { MatchState } from "../matching/matching";
 
 export type ToolId = "pencil" | "line" | "rect" | "filledRect" | "fill" | "eraser" | "picker" | "pan" | "select" | "magicWand" | "partial";
 
@@ -108,6 +109,8 @@ export interface EditorState {
   hasClipboard: boolean;
   /** The last run of the chart checks (SPEC §15.4); null = not run or closed. */
   checks: ChecksState | null;
+  /** Symbol matching (SPEC §15.11): picking a block or reviewing its proposals; null = off. */
+  match: MatchState | null;
 }
 
 export const emptyOverlay: Overlay = { hover: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null };
@@ -152,6 +155,7 @@ export const createEditorStore = () =>
     menuReveal: null,
     hasClipboard: false,
     checks: null,
+    match: null,
   }));
 
 export type EditorStore = ReturnType<typeof createEditorStore>;

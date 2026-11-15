@@ -890,12 +890,11 @@ gone, and 12 is a decision recorded in §15.3. Numbers are kept, as other sectio
 | Feature | Effort | Persistence impact | Status |
 |---|---|---|---|
 | More chart checks (§15.4): backstitch, knots, beads | S–M | none | ideas |
-| Symbol matching in one 10 × 10 block (§15.11) | L | none at first (samples in memory) | designed 2026-11-16 — for review |
 | More thread brands (§15.8) | M code, L data | new `src` id namespaces | not started |
 | Not yet discussed (§15.12): keyboard entry, specialty stitches, beads on intersections, proofread tracking, second-screen window | — | — | ideas |
 | Stash management (§16) | XL | needs a server | future phase |
 
-Implemented: §15.4 chart checks (empty cells, lone stitches, near symmetry), §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.5 ambiguous
+Implemented: §15.11 symbol matching in a block, §15.4 chart checks (empty cells, lone stitches, near symmetry), §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.5 ambiguous
 marks, §15.6 selection, §15.7 snapshots, §15.10 / §15.10b PDFs, §15.13 fractional stitches, §15.14 French knots,
 §15.15 underlay, §15.16 highlighting, §15.17 work time, §15.18 themes, and the drawn symbols of §2.5.
 
@@ -1152,56 +1151,44 @@ the symbol chart, a see-through grey over the colours), so the pages can be laid
 its column and row ranges, the chart's own numbering every 10, a small page map with this page filled, and
 centre marks below and right of the grid.
 
-### 15.11 Symbol matching in one 10 × 10 block (designed 2026-11-16 — for review)
+### 15.11 Symbol matching in one 10 × 10 block (implemented)
 **Why per block.** Even straightened, a photo of a paper chart is never exact: pages bend, print drifts. Mappers
 line the photo up **block by block** (the 10 × 10 squares between the heavy grid lines), with the underlay's edit
 frame (§15.15). So matching works the same way: only inside the block you have just lined up, never over the whole
 chart. Plain image arithmetic, no AI (§15.12).
 
 **Flow**
-1. Line the photo up on a block, as today. Stitch one cell of each symbol you see in the block that the app hasn't
-   seen yet (usually a few — see *Teaching*).
-2. **Find symbols** (button, or `F` with the pointer over the block). The block gets an outline; every empty cell of
-   the block gets a proposal, drawn as a ghost: the entry's symbol at half strength. Unsure ones have a dotted amber
-   outline; cells that look blank on the photo get nothing.
-3. **Fill** — writes the sure proposals into the empty cells, as one undo step; filled cells are never changed.
-   **Fill all** also writes the unsure ones and marks them ambiguous (§15.5), so *Next "?"* finds them later.
-   **Clear** drops the proposals. Clicking a ghost cell fills just that one; editing the block drops the proposals.
-4. **› Next block** moves to the next block in reading order (‹ back) and centres the chart on it; line the photo
-   up again and repeat.
+1. Line the photo up on a block, as today. Stitch one cell of each symbol in the block the app hasn't seen yet.
+2. **Shift+F** (or *Find symbols* in the image's panel) turns the mode on; the photo goes behind the chart. The
+   10 × 10 block under the pointer is outlined (dashed); a hint bar says to click the block.
+3. **Click the block** you lined up. Only the **sure** proposals appear, faintly (the entry at half strength), and
+   **Accept** / **Decline** show just above the block (below it at the top of the view), with the count
+   ("38 symbols found · 4 left empty"). While reviewing, the chart takes no drawing.
+4. **Accept** writes the proposals into cells still empty, as one undo step. **Decline** (or Esc) drops them.
+   Either one ends the mode. Unsure cells and cells that look blank stay empty. Enter = Accept.
+- The mode also ends when the image goes into edit mode or is removed, and when another pattern opens.
+- Toasts: no image under the chart; block not on the image; nothing learned yet; no empty cell in the block.
 
-**Teaching — no separate step.** The examples are the cells you have already stitched, read off the photo:
-- in **the current block**, at the current alignment — so it works from the first block;
-- plus a **session library**: when you fill a block, its cells' photo patches are kept (up to 8 per key entry, the
-  newest), so later blocks need little or no teaching. The library lives in memory for the session (stored with the
-  pattern later, if wanted).
-- An entry with no example can't be proposed; the panel lists the symbols of the block it couldn't match.
+**Teaching — no separate step.** The examples are the cells already stitched, read off the photo:
+- in **the clicked block**, at the current alignment — so it works from the first block;
+- plus the **learned library**: every click adds the block's stitched cells (a cross, combo or bead alone in its
+  cell), up to 8 per key entry, the newest. It is saved with the pattern (`samples` in the .xbird file, optional:
+  `"thread|dmc:310|full": [base64 20 × 20 grey patches]`) and not part of undo. It is keyed by what the entry is,
+  not its index, so it survives key edits; entries with no examples can't be proposed.
 
 **How a cell is matched**
-1. Through the underlay's placement (crop, rectangle, rotation — `gridToImage`), the inner 80% of each cell of the
-   block is cut out of the photo and scaled to a 16 × 16 grey patch (the grid lines left out).
-2. Each patch is normalised (minus its mean, divided by its spread), so faded or uneven print still matches.
-   A patch with almost no spread compared with the block's others is **blank** → no proposal.
+1. Through the underlay's placement (crop, rectangle, rotation — `gridToImage`), each cell of the block is cut out
+   of the photo as a 20 × 20 grey patch (each pixel averages 2 × 2 points). Cells partly off the photo are skipped.
+2. The middle 16 × 16 is compared (grid lines left out), normalised (minus its mean, divided by its spread), so
+   faded or uneven print still matches. A cell with less ink than 30% of the examples' typical ink is **blank**.
 3. Each patch is compared with every example by normalised cross-correlation, allowing a shift of up to 2 px each
-   way (the alignment is never perfect). Per entry the best example counts.
-4. **Sure** when the best score ≥ 0.6 **and** beats the next entry by ≥ 0.1; otherwise **unsure**, with the top 3
-   kept for the tooltip. (Thresholds to be tuned on real scans.)
-5. Cost for one block: 100 cells × ~40 entries × ~8 examples × 25 shifts × 256 ≈ 200 M simple operations at most —
-   a fraction of a second in a worker.
-
-**Where it lives** — a **Find symbols** panel next to the image-behind-the-chart section (only when the pattern has
-one): the current block ("Columns 11–20, rows 21–30"), ‹ ›, *Find symbols*, the counts ("38 sure · 4 unsure ·
-3 blank"), *Fill*, *Fill all*, *Clear*, and the symbols it couldn't match.
+   way. Per entry the best example counts.
+4. **Sure** when the best score ≥ 0.6 **and** beats the next entry by ≥ 0.1 (≥ 0.72 when only one entry has
+   examples); otherwise unsure → left empty.
 
 **Limits (v1)**: full and half crosses, floss + bead and beads (anything one per cell); not partial stitches,
 backstitch or knots. Works on printed symbol charts; weak on handwritten or blurred ones. Colour-block charts (no
 symbols) could use the patch's mean colour instead — later.
-
-**Open questions for review**
-1. Teaching from cells you've already stitched, with no separate step — is that how you'd want it?
-2. Unsure cells: *Fill all* = best guess + ambiguous mark, or rather leave them empty?
-3. Picking a block: ‹ › plus `F` over a block — enough, or also a click-a-block mode?
-4. Should the session library be saved with the pattern, so the next session starts taught?
 
 ### 15.12 Parked / rejected / not yet discussed
 - **Rejected**: AI / ML-based features.

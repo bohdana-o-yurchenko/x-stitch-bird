@@ -519,7 +519,11 @@
     "straightened": "Photo straightened to the chart grid",
     "newerFile": "This file was made by a newer version of пташечка — reload the page to update, then open it again.",
     "pkNothing": "Nothing here for Pattern Keeper yet — it tracks full crosses only",
-    "pdfFailed": "Couldn’t make the PDF"
+    "pdfFailed": "Couldn’t make the PDF",
+    "matchNeedsUnderlay": "Add an image under the chart first",
+    "matchOffPhoto": "This block isn't on the image",
+    "matchNoExamples": "Stitch a few cells first, so the app learns the symbols",
+    "matchNothingEmpty": "No empty cells in this block"
   },
   "underlay": {
     "heading": "Image behind the chart",
@@ -548,7 +552,9 @@
     "rotation": "Rotation (°)",
     "rotateLeft": "Turn left a little ([)",
     "rotateRight": "Turn right a little (])",
-    "rotationReset": "0°"
+    "rotationReset": "0°",
+    "match": "Find symbols",
+    "matchHint": "Read the symbols of one 10 × 10 block off the image (Shift+F)"
   },
   "fileMenu": {
     "label": "Menu ▾",
@@ -650,7 +656,8 @@
     "underlayEdit": "Edit / done",
     "highlight": "Highlight selected entry",
     "underlayUndo": "Undo the image’s last change (edit mode)",
-    "underlayRotate": "Turn the image a little ↺ ↻ (edit mode)"
+    "underlayRotate": "Turn the image a little ↺ ↻ (edit mode)",
+    "match": "Find symbols in a block"
   },
   "straighten": {
     "title": "Straighten the chart photo",
@@ -858,5 +865,13 @@
       "symmetry-vertical": "Near symmetry, left–right",
       "symmetry-horizontal": "Near symmetry, top–bottom"
     }
+  },
+  "match": {
+    "pick": "Click the 10 × 10 block you've lined up",
+    "cancel": "Cancel",
+    "found": "{n, plural, one {# symbol found} other {# symbols found}}",
+    "unsure": "{n} left empty",
+    "accept": "Accept",
+    "decline": "Decline"
   }
 }

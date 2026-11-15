@@ -106,6 +106,11 @@ export interface Pattern {
   layers: Layers;
   /** Active work time in ms (SPEC §15.17). Counted by the editor, never edited by hand, not part of undo. */
   spent: number;
+  /**
+   * Symbol matching (SPEC §15.11): photo examples learned per key entry, by `sampleKey` ("thread|dmc:310|full"),
+   * base64 grey patches. Optional; not part of undo.
+   */
+  samples?: Record<string, string[]>;
 }
 
 export interface Size {

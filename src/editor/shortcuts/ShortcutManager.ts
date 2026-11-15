@@ -44,6 +44,8 @@ export class ShortcutManager {
     if (c === "hasSelection") return !!s.selection || !!s.floating;
     if (c === "underlayEditing") return this.ed.underlay.editing;
     if (c === "hasUnderlay") return !!s.underlay;
+    if (c === "matching") return !!s.match;
+    if (c === "matchReview") return s.match?.phase === "review";
     return !!s.overlay.chain;
   }
 

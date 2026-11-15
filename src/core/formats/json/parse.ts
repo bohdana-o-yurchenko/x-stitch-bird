@@ -1,4 +1,5 @@
 import { libraryColor } from "../../catalog/catalog";
+import { cleanSamples } from "../../matching/match";
 import { LAYERS } from "../../layers/registry";
 import { cleanEntry, fixEntrySymbols } from "../../pattern/keyEntries";
 import { cleanMeta } from "../../pattern/meta";
@@ -74,6 +75,8 @@ export function parsePattern(raw: unknown, symbols: readonly string[]): { patter
   p.meta = cleanMeta(d.meta);
   p.grid = cleanGrid(d.grid);
   p.spent = Number.isFinite(d.spent) && d.spent! > 0 ? d.spent! * 1000 : 0;
+  const samples = cleanSamples(d.samples);
+  if (samples) p.samples = samples;
   const v = d.v ?? 1;
   const pal = (d.pal ?? []).map((e) => {
     if (!e) return null;

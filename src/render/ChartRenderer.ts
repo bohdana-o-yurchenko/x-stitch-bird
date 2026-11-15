@@ -43,6 +43,8 @@ export interface ChartScene {
   highlight: KeyIndex | null;
   /** Chart checks: every finding's cells (thin outline), the current one's cells (a ring). */
   checks: { all: number[][]; current: number[] | null } | null;
+  /** Symbol matching: the block (outlined; `chosen` once read) and its proposals, drawn faintly. */
+  match: { block: Rect; chosen: boolean; ghosts: Pattern | null } | null;
 }
 
 export const RULER_SIZE = 26;
@@ -233,6 +235,7 @@ export class ChartRenderer {
       g.restore();
     }
     if (s.checks) this.drawFindings(s.checks, p, f);
+    if (s.match) this.drawMatch(s.match, s, f);
     if (s.flash && s.flash.until > Date.now()) {
       const [px, py] = cellRect(s.flash.cell), a = (s.flash.until - Date.now()) / t.flash.durationMs;
       g.fillStyle = `rgba(181,69,47,${0.55 * Math.max(0, Math.min(1, a))})`;
@@ -244,6 +247,26 @@ export class ChartRenderer {
       g.lineWidth = 2;
       g.strokeRect(ox + (s.hover.x - o) * z + 1, oy + (s.hover.y - o) * z + 1, s.hover.size * z - 2, s.hover.size * z - 2);
     }
+  }
+
+  /** Symbol matching: the block between heavy lines, and the proposals at half strength. */
+  private drawMatch(m: NonNullable<ChartScene["match"]>, s: ChartScene, f: ChartFrame) {
+    const g = this.g, t = this.theme, { z, ox, oy } = f, b = m.block;
+    if (m.ghosts) {
+      const fo = { z, ox: ox + b.x * z, oy: oy + b.y * z, x0: 0, y0: 0, x1: b.w, y1: b.h };
+      g.globalAlpha = 0.5;
+      drawCells(g, m.ghosts, s.palette, fo, viewStyle(s.view, t), false);
+      g.globalAlpha = 1;
+    }
+    g.save();
+    if (!m.chosen) g.setLineDash([6, 4]);
+    g.lineWidth = 3;
+    g.strokeStyle = "rgba(255,255,255,0.9)";
+    g.strokeRect(ox + b.x * z, oy + b.y * z, b.w * z, b.h * z);
+    g.lineWidth = 2;
+    g.strokeStyle = t.accent;
+    g.strokeRect(ox + b.x * z, oy + b.y * z, b.w * z, b.h * z);
+    g.restore();
   }
 
   /** Chart checks: a thin box around every finding, and a ring around the one being looked at. */

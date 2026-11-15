@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import type { ChartView } from "@/render/chart";
 import { Icon } from "../common/Icon";
 import { cx, ui } from "../common/widgets";
-import { useCommand, useEditorState } from "../hooks/editor";
+import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { ChartCanvas } from "./ChartCanvas";
 import s from "./stage.module.css";
 
@@ -95,12 +95,43 @@ function SelectionActions() {
   );
 }
 
+/**
+ * Symbol matching (SPEC §15.11): a hint while picking a block; once read, Accept and Decline just above the
+ * block (below it when the block is at the top of the view).
+ */
+function MatchBar() {
+  const t = useTranslations("match");
+  const run = useCommand();
+  const ed = useEditor();
+  const m = useEditorState((st) => st.match);
+  useEditorState((st) => st.viewport);
+  if (!m) return null;
+  if (m.phase === "pick")
+    return (
+      <div className={s.selectionBar} data-testid="match-bar">
+        <span className={s.barText}>{t("pick")}</span>
+        <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("match.decline")}>{t("cancel")}</button>
+      </div>
+    );
+  const a = ed.viewport.toScreen({ x: m.block.x + m.block.w / 2, y: m.block.y }), below = ed.viewport.toScreen({ x: 0, y: m.block.y + m.block.h }).y;
+  const above = a.y > 70;
+  return (
+    <div className={cx(s.selectionBar, s.matchBar)} data-testid="match-bar" style={{ left: a.x, top: above ? a.y - 8 : below + 8, transform: `translate(-50%, ${above ? "-100%" : "0"})` }}>
+      <span className={s.barText} data-testid="match-count">{t("found", { n: m.proposals.length })}{m.unsure ? ` · ${t("unsure", { n: m.unsure })}` : ""}</span>
+      <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} disabled={!m.proposals.length} data-testid="match-accept" onClick={() => run("match.accept")}>{t("accept")}</button>
+      <button type="button" className={cx(ui.btn, ui.sm)} data-testid="match-decline" onClick={() => run("match.decline")}>{t("decline")}</button>
+    </div>
+  );
+}
+
 export function Stage() {
   const hasSelection = useEditorState((st) => !!st.selection || !!st.floating);
+  const matching = useEditorState((st) => !!st.match);
   return (
     <>
       <ChartCanvas />
-      {hasSelection && <SelectionActions />}
+      {hasSelection && !matching && <SelectionActions />}
+      <MatchBar />
       <ZoomControls />
     </>
   );

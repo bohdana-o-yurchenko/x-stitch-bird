@@ -710,3 +710,55 @@ test("chart checks are opt-in, run on demand, and their findings can be stepped 
   await page.reload();
   await expect(page.getByTestId("checks-panel").getByRole("checkbox", { name: "Empty cells" })).toBeChecked();
 });
+
+test("finds symbols in one 10 × 10 block of the photo behind the chart, and fills them on Accept", async ({ page }) => {
+  // a 10 × 10 block printed at 30 px a cell: crosses and rings in the top row, the first of each already stitched
+  const keys = await page.evaluate(async () => {
+    type Ed = {
+      commands: { run(id: string, a: unknown): Promise<void> };
+      doc: { key: ({ t: string } | null)[]; layers: { stitches: Uint16Array } };
+      underlay: { addFromFile(f: File): Promise<void>; update(patch: object): void; setBehind(b: boolean): void };
+      closeDialog(): void;
+      changed(): void;
+    };
+    const ed = (window as unknown as { __stitchwork: Ed }).__stitchwork;
+    await ed.commands.run("file.create", { name: "Match", w: 20, h: 20, count: 14, keepKey: true });
+    const [a = 0, b = 0] = ed.doc.key.flatMap((e, i) => (e?.t === "thread" ? [i] : []));
+    const c = document.createElement("canvas");
+    c.width = c.height = 300;
+    const g = c.getContext("2d")!;
+    g.fillStyle = "#f4f1ea";
+    g.fillRect(0, 0, 300, 300);
+    g.strokeStyle = "#222";
+    g.lineWidth = 3;
+    ["x", "o", "x", "o", "x", "", "o"].forEach((s, i) => {
+      const x = i * 30 + 15, y = 15;
+      g.beginPath();
+      if (s === "x") { g.moveTo(x - 9, y - 9); g.lineTo(x + 9, y + 9); g.moveTo(x + 9, y - 9); g.lineTo(x - 9, y + 9); }
+      if (s === "o") g.arc(x, y, 8, 0, Math.PI * 2);
+      g.stroke();
+    });
+    const blob = await new Promise<Blob>((ok) => c.toBlob((x) => ok(x!), "image/png"));
+    await ed.underlay.addFromFile(new File([blob], "chart.png", { type: "image/png" }));
+    ed.closeDialog();
+    ed.underlay.update({ rect: { x: 0, y: 0, w: 10, h: 10 } });
+    ed.underlay.setBehind(true);
+    ed.doc.layers.stitches[0] = a;
+    ed.doc.layers.stitches[1] = b;
+    ed.changed();
+    return [a, b];
+  });
+  await expect.poll(() => editorState<boolean>(page, "(ed) => !!ed.state.underlayImage")).toBe(true);
+  await page.keyboard.press("Shift+F");
+  await expect(page.getByTestId("match-bar")).toContainText("Click the 10 × 10 block");
+  const p = await cellPoint(page, 5, 5);
+  await page.mouse.move(p.x, p.y);
+  await page.mouse.click(p.x, p.y);
+  await expect(page.getByTestId("match-count")).toHaveText("4 symbols found");
+  await page.getByTestId("match-accept").click();
+  await expect(page.getByTestId("match-bar")).toHaveCount(0);
+  const [a, b] = keys;
+  expect(await editorState<number[]>(page, "(ed) => [...ed.doc.layers.stitches.slice(0, 8)]")).toEqual([a, b, a, b, a, 0, b, 0]);
+  // what it learned is saved with the pattern
+  expect(await editorState<number>(page, "(ed) => Object.keys(ed.doc.samples).length")).toBe(2);
+});

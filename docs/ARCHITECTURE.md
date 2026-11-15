@@ -201,6 +201,7 @@ stitchwork/
 │  │  │  ├─ registry.ts              full, half, halfb
 │  │  │  └─ partialKinds.ts          quarter, three-quarter, petite: geometry, thread factor, OXS mapping (§14.8)
 │  │  ├─ checks/checks.ts            chart checks: holes, lone stitches, near symmetry (§14.4)
+│  │  ├─ matching/match.ts           symbol matching in a 10 × 10 block: patches, correlation, learned samples (§14.4b)
 │  │  │  ├─ types.ts  registry.ts
 │  │  │  └─ isolated.ts  nearSymmetry.ts  unusedEntries.ts  rareEntries.ts  duplicateEntries.ts
 │  │  ├─ snapshots/retention.ts      which snapshots to keep (pure function, §14.7)
@@ -287,6 +288,7 @@ interface EditorState {
   };
   selection: { mask: Uint8Array | null; bounds: Rect | null; floating: Fragment | null };   // §14.6
   checks: { findings: Finding[]; ignored: string[]; current: number; revision: number } | null;  // §14.4, session only
+  match: { phase: 'pick'; hover: Rect | null } | { phase: 'review'; block; proposals; unsure; ghosts } | null; // §14.4b
   flash: { cell: number; until: number } | null;                                             // Go to cell, findings
   status: { hoverCell: Cell | null; saveState: SaveState };
 }
@@ -841,6 +843,20 @@ The Save to file dialog should mention this during the transition.
 - **Render:** `ChartScene.checks` — thin accent boxes on every finding's cells, a ring around the current one.
 - **UI:** `ui/side/ChecksPanel.tsx`, a remembered `Section`; options in `localStorage` `stitchwork.checks`.
 - **Adding a check** = a function in `core/checks/checks.ts`, an option, a group name in `checks.group.*`.
+
+### 14.4b Symbol matching in a block (SPEC §15.11, implemented 2026-11-16)
+- **Stored:** `Pattern.samples` — learned examples per entry identity (`sampleKey` = `t|src|st`), base64 20 × 20
+  grey patches, the newest 8 each. Optional in .xbird (no version bump), checked by `cleanSamples`; not in undo.
+- **Core:** `core/matching/match.ts` — `blockAt` (block between heavy lines, follows the numbering),
+  `blockImageRect` + `cellPatches` (cut cells out of the photo through `gridToImage`), `matchBlock` (normalised
+  cross-correlation, ±2 px shifts, sure/unsure/blank), `learn` / `libraryExamples`, `encodePatch` / `decodePatch`.
+- **Platform:** `greyRegion(img, rect)` in `platform/images.ts` — the only canvas read.
+- **Editor:** `editor/matching/matching.ts` keeps `state.match`. `ToolManager` routes clicks to `pickBlock` and
+  hover to `hoverMatching` while it is on (panning still works). `reviewBlock(ed, block, patches)` is the testable
+  part (learns, matches, builds the ghost pattern). Commands `match.toggle` (Shift+F) / `match.accept` (Enter) /
+  `match.decline` (Esc). Edit mode of the image, removing it, or loading a pattern ends the mode.
+- **Render:** `ChartScene.match` — the block outline (dashed while picking) and the ghosts drawn like floating
+  content at half alpha. **UI:** `MatchBar` in `ui/stage/Stage.tsx`, positioned with `viewport.toScreen`.
 
 ### 14.5 Mark cell as ambiguous (SPEC §15.5)
 - **Data:** layer `ambiguous` (a `Set<number>`; JSON v4 `amb` as a sorted array). Its handler has `exported: false`
