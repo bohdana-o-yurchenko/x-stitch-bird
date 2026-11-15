@@ -208,7 +208,14 @@
     "groupBasicTab": "Basic",
     "groupDecorativeTab": "Decorative",
     "groupLettersTab": "123 ABC",
-    "groupSignsTab": "+ − ×"
+    "groupSignsTab": "+ − ×",
+    "typesShort": {
+      "thread": "Cross",
+      "back": "Back",
+      "bead": "Bead",
+      "combo": "Floss+bead",
+      "knot": "Knot"
+    }
   },
   "picker": {
     "searchThread": "Search DMC number or name",

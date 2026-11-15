@@ -208,7 +208,14 @@
     "groupBasicTab": "Прості",
     "groupDecorativeTab": "Декоративні",
     "groupLettersTab": "123 ABC",
-    "groupSignsTab": "+ − ×"
+    "groupSignsTab": "+ − ×",
+    "typesShort": {
+      "thread": "Хрестик",
+      "back": "Бекстіч",
+      "bead": "Бісер",
+      "combo": "Нитка+бісер",
+      "knot": "Вузлик"
+    }
   },
   "picker": {
     "searchThread": "Пошук за номером DMC або назвою",

@@ -461,8 +461,8 @@ Wide modal titled **Add to key** / **Edit key entry**.
 - Strands (not for bead, not for blends): 1–6.
 - Symbol: button showing the current symbol; toggles a grid of all usable symbols. Symbols used by other
   entries are dimmed with tooltip "Already used — picking it swaps". Default = first free symbol.
-  *New app (2026-11-15), compact form:* entry type and stitch are each one row of icon buttons (drawn in the chosen
-  colour) with the chosen option's name beside them; the colour list is shorter and denser, with "+" for a custom
+  *New app (2026-11-15), compact form:* entry type is one pill switch with short names (Cross · Back · Bead ·
+  Floss+bead · Knot; full names on hover); stitch is a row of icon buttons with the chosen name beside it; the colour list is shorter and denser, with "+" for a custom
   colour on the search row. Symbol is one row — the current symbol and the next five free ones (two line styles)
   — plus **All…**, a popover with tabs Basic · Decorative · 123 ABC · + − × (used ones dimmed; picking closes it).
 

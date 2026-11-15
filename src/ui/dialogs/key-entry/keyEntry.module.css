@@ -267,17 +267,19 @@
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(40, 25, 10, 0.25);
 }
-.symTabs {
+/* a track with the chosen option as a raised pill: entry type, symbol groups; wraps on a narrow panel */
+.pillTabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 9px;
+  gap: 1px;
+  padding: 3px;
+  border-radius: 10px;
   background: var(--surface2);
+  border: 1px solid var(--line);
 }
-.symTabs button {
+.pillTabs button {
   flex: 1 1 auto;
-  padding: 4px 8px;
+  padding: 5px 5px;
   border: 0;
   border-radius: 7px;
   background: transparent;
@@ -285,7 +287,10 @@
   color: var(--muted);
   white-space: nowrap;
 }
-.symTabs button.tabOn {
+.pillTabs button:hover {
+  color: var(--ink);
+}
+.pillTabs button.tabOn {
   background: var(--surface);
   color: var(--ink);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);

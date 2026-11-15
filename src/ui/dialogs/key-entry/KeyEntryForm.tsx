@@ -95,7 +95,7 @@ function SymbolPicker({ value, used, symbols, onPick }: { value: string; used: S
       {pop && createPortal(
         <div className={s.symPop} style={{ top: pop.top, bottom: pop.bottom, right: pop.right }} data-symbol-pop data-no-shortcuts role="dialog" aria-label={lines ? t("lineStyle") : t("symbol")}>
           {groups.length > 1 && (
-            <div className={s.symTabs} role="tablist">
+            <div className={s.pillTabs} role="tablist">
               {groups.map((gr, i) => (
                 <button key={gr.key} type="button" role="tab" aria-selected={i === tab} className={cx(i === tab && s.tabOn)} title={t(gr.key)} onClick={() => setTab(i)}>{t(`${gr.key}Tab`)}</button>
               ))}
@@ -205,13 +205,7 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
     bead: d.t === "combo" && colour.bead ? { hex: colour.bead.hex, ink: colour.bead.ink, shape: beadShape(colour.bead.series) } : d.t === "bead" ? { hex: colour.hex, ink: colour.ink, shape: beadShape(colour.series) } : undefined,
   };
   // each stitch-type card shows that stitch in the chosen colour (grey until one is picked)
-  const sampleHex = colour?.thread?.hex ?? colour?.hex ?? "#8C8378";
-  const stitchSample = (st: StitchTypeId): PaletteSlot => ({ hex: sampleHex, ink: "#fff", sym: "", t: "thread", st, n: 2 });
-  // each entry type drawn as it looks in the key, in the chosen colour
-  const kindSample = (t2: KeyDraft["t"]): PaletteSlot => ({
-    hex: sampleHex, ink: "#fff", sym: "", t: t2, st: "full", n: 2,
-    bead: t2 === "bead" || t2 === "combo" ? { hex: t2 === "combo" ? "#C9A227" : sampleHex, ink: "#000", shape: beadShape(undefined) } : undefined,
-  });
+  const stitchSample = (st: StitchTypeId): PaletteSlot => ({ hex: colour?.thread?.hex ?? colour?.hex ?? "#8C8378", ink: "#fff", sym: "", t: "thread", st, n: 2 });
   const label = colour && src ? formatLabel(labelData({ ...draftEntry(d, src), sym: d.sym }, colour), tr) : null;
   const used = new Set(ed.doc.key.flatMap((e, i) => (e && i !== edit ? [e.sym] : [])));
   const dupLabel = dup ? formatLabel(keyLabelData(ed.doc, ed.doc.key[dup]!), tr).title : "";
@@ -242,8 +236,11 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
       </div>
 
       <div className={s.formBody}>
-        <IconChoice label={t("type")} testId="entry-type" value={d.t} onPick={setType}
-          options={ENTRY_KINDS.map((k) => ({ id: k.id, name: t(`types.${k.id}`), icon: <KeyIcon slot={kindSample(k.id)} size={24} view="color" /> }))} />
+        <div className={s.pillTabs} role="radiogroup" aria-label={t("type")} data-testid="entry-type">
+          {ENTRY_KINDS.map((k) => (
+            <button key={k.id} type="button" role="radio" aria-checked={d.t === k.id} aria-label={t(`types.${k.id}`)} title={t(`types.${k.id}`)} className={cx(d.t === k.id && s.tabOn)} onClick={() => setType(k.id)}>{t(`typesShort.${k.id}`)}</button>
+          ))}
+        </div>
 
         <div className={s.group}>
           <div className={s.inline}>
