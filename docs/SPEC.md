@@ -868,72 +868,38 @@ All toasts/modals listed in the sections above should be kept verbatim; they are
 
 ## 14. Known quirks / technical debt (do not necessarily preserve)
 
-1. ~~Exports don't download outside the Claude runtime~~ — fixed 2026-11-14 (§9.5).
-2. `dirty` flag is tracked but never used (no "unsaved changes" prompt anywhere).
-3. Library delete has no confirmation; "New" discards current work without saving.
-4. Deleting a key entry or resizing wipes the whole undo history.
-5. ~~Reference photos stored in localStorage (quota) and marks wiped on refresh~~ — fixed 2026-11-14: IndexedDB +
-   marks-overwrite guard (§11.4). Photos are still base64 data URLs; Blobs would be ~25 % smaller.
-6. Library save limited to 240 000 characters of JSON (designed for the cloud doc limit; applied to local too).
-7. `count` uses `14.01`/`16.01` to encode "over 2" fabrics; OXS import cannot restore them.
-8. OXS export: combo beads are only represented inside the blend palette item; quarter/three-quarter stitches
-   are not supported by the model at all.
-9. Unused code: `.tools` CSS, `#beadOptions` datalist, unused locals in `keyPartsFor`.
-10. Image import always starts a new project (no "import into current").
-11. Symbol availability depends on the device's fonts (probe at start-up) — a file may show symbols another device lacks.
-    *New app:* fixed — shapes are vector paths and characters come from the bundled DM Sans (§2.5).
-12. Mirror drawing paints the **same key index** on the mirrored side (`index.html:1582`), so a ╱ half cross is
-    mirrored as ╱. **Intended** (decided 2026-11-14): mirroring reuses the existing entry and symbol (see §15.3).
+Cleaned up 2026-11-16: the quirks of the single-file app that the new app fixed or no longer has (1–6, 9, 11) are
+gone, and 12 is a decision recorded in §15.3. Numbers are kept, as other sections refer to them.
+
+- **7.** `count` uses `14.01`/`16.01` to encode "over 2" fabrics; OXS import cannot restore them.
+- **8.** OXS export: floss + bead stitches are only represented inside the blend palette item (quarter,
+  three-quarter and petite stitches are exported since §15.13).
+- **10.** Image import always starts a new pattern (no "import into current").
 
 ---
 
-## 15. Feature backlog — candidates to pick from
+## 15. Features beyond the original app, and the backlog
 
 > Brainstormed 2026-11-14 with **e-pattern mappers** in mind: people who turn paper charts into faithful digital
-> copies. **Nothing in this section is implemented.** Each feature has a short behaviour sketch, its effect on
-> stored data, and what it depends on.
->
-> Constraints for everything below: plain JS in the browser, no server, **no AI / ML**.
+> copies. Constraints for all of it: plain JS in the browser, no server, **no AI / ML**.
+> The sections below keep their numbers (code and ARCHITECTURE refer to them). Sections marked *implemented*
+> describe how the app works; what is still open is listed in §15.0. Cleaned up 2026-11-16.
 
-### 15.0 Ranking
+### 15.0 Backlog — what is still open
 
-Ranked from easiest, no-persistence and most wanted (top) to hardest and needing persistence (bottom).
-Effort is relative: **S** small · **M** medium · **L** large.
+| Feature | Effort | Persistence impact | Status |
+|---|---|---|---|
+| Chart checks (§15.4): empty cells, lone stitches, near symmetry | M | none (session only) | designed 2026-11-16, being built |
+| Symbol matching in one 10 × 10 block (§15.11) | L | none at first (samples in memory) | designed 2026-11-16, for review |
+| More thread brands (§15.8) | M code, L data | new `src` id namespaces | not started |
+| Not yet discussed (§15.12): keyboard entry, specialty stitches, beads on intersections, proofread tracking, second-screen window | — | — | ideas |
+| Stash management (§16) | XL | needs a server | future phase |
 
-| #  | Feature                                              | Effort      | Persistence impact                 | Depends on |
-|----|------------------------------------------------------|-------------|------------------------------------|------------|
-| 1  | Pattern metadata (§15.1) — **priority one**          | S           | optional fields in JSON v4         | —          |
-| 2  | Grid numbering + Go to cell (§15.2)                  | S           | one small field                    | —          |
-| 3  | Whole-chart transforms & mirror modes (§15.3)        | S–M         | none                               | —          |
-| 4  | Error detectors (§15.4) — **removed, to be redesigned** | M      | none                               | —          |
-| 5  | Mark cell as ambiguous (§15.5)                       | S–M         | sparse list in JSON v4             | —          |
-| 6  | Selection, copy/paste, move, flip/rotate (§15.6)     | M–L         | none (in-memory clipboard)         | reuses #3's transform code |
-| 7  | Automatic snapshots / minimal versioning (§15.7)     | M           | new IndexedDB store                | —          |
-| 8  | Multi-brand threads (§15.8)                          | M code, L data | new `src` id namespaces         | —          |
-| 9  | Scan calibration in reference windows (§15.9)        | M–L         | `calib` field on reference windows | —          |
-| 10 | PDF chart export, Pattern Keeper–compatible (§15.10) | L           | none                               | #1, #2     |
-| 11 | Symbol matching — semi-automatic mapping (§15.11)    | L           | templates stored with ref windows  | #9         |
-| —  | Chart underlay behind the stitches (§15.15) — **done** | M         | new IndexedDB store, `underlay` in .json | —   |
-| —  | Straighten the underlay by 4 corners (§15.15) — **done** | M      | original kept in the image store   | §15.15, §9.6 |
-| —  | Stitch highlighting (§15.16) — **done**              | S           | none                               | —          |
+Implemented: §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.5 ambiguous
+marks, §15.6 selection, §15.7 snapshots, §15.10 / §15.10b PDFs, §15.13 fractional stitches, §15.14 French knots,
+§15.15 underlay, §15.16 highlighting, §15.17 work time, §15.18 themes, and the drawn symbols of §2.5.
 
-**High priority — the design must be agreed before implementation** (paper charts use these all the time, and a
-faithful copy is impossible without them):
-
-| Feature                                                    | Effort | Persistence impact               | Status |
-|------------------------------------------------------------|--------|----------------------------------|--------|
-| Fractional stitches: quarter, three-quarter, petite (§15.13) | M–L  | new sparse layer, JSON v4        | open questions |
-| French knots (§15.14)                                      | M      | new point list, new key type     | open questions |
-
-**Shared groundwork**
-- **Format v4.** #1, #2, #5 and #8 add optional fields or id namespaces. `load` keeps accepting v1–v3, missing
-  fields get defaults, and `serialize` always writes v4. Older app versions ignore unknown fields.
-- **Transform helpers.** #3, #6 and the near-symmetry check in #4 share the same code to remap cells, swap
-  half-cross direction and transform backstitch coordinates.
-- **Undo snapshots.** They must store `w`/`h` (and `amb`, §15.5) so that whole-chart operations that change
-  the size can be undone instead of wiping history.
-
-### 15.1 Pattern metadata — priority one
+### 15.1 Pattern metadata (implemented)
 
 > *Checked against the OXS spec (2026-11-14):* OXS `<properties>` has only `charttitle`, `author`, `copyright` and
 > `instructions` for text info (plus size, stitches per inch, palette count, software). We write the pattern name,
@@ -954,7 +920,7 @@ faithful copy is impossible without them):
   - PDF cover page (§15.10).
   - **Open** list: the designer is shown under the name.
 
-### 15.2 Grid numbering + Go to cell
+### 15.2 Grid numbering + Go to cell (implemented)
 - `P.grid = { x0: 1, y0: 1, label: 10 }` sets the number of the first column and row, and the ruler label
   interval (10 or 5). An option **Number from centre** labels the centre cell `0` and counts outwards, which some
   publishers do.
@@ -963,7 +929,7 @@ faithful copy is impossible without them):
 - **Go to cell** (Ctrl/⌘+G): type `col, row` in the paper's numbering. The chart centres on that cell and
   flashes it.
 
-### 15.3 Whole-chart transforms & mirror modes
+### 15.3 Whole-chart transforms & mirror modes (implemented)
 A **Transform ▾** menu (or a section in Fabric & size) with:
 - **Flip horizontal** and **Flip vertical**.
 - **Rotate** 90° clockwise, 90° counter-clockwise, 180°. A 90° rotation swaps `w`/`h`.
@@ -1012,7 +978,7 @@ session; ignores are not persisted.
 - **Cheap extras**: unused key entries; entries used ≤ 3 times; duplicate keys (§3.2 `sameKey`).
 - Cost: linear in cells × candidate axes, so instant even at 500×500.
 
-### 15.5 Mark cell as ambiguous
+### 15.5 Mark cell as ambiguous (implemented)
 Hard requirement: **no footprint when unused**. There is no toolbar button, no panel, no prompt, and no change to
 any existing behaviour.
 - `A` toggles the mark on the hovered cell. There is no free-text note in v1 — just the flag.
@@ -1025,7 +991,7 @@ any existing behaviour.
 - Data: `P.amb` = sorted array of cell indices. It is in JSON v4 and in undo snapshots, and is remapped by resize,
   transforms and selection moves. It is **never** exported to PNG, PDF, OXS or CSV.
 
-### 15.6 Selection, copy/paste, move, flip/rotate
+### 15.6 Selection, copy/paste, move, flip/rotate (implemented)
 **Making a selection**
 - **Select** tool (`S`): drag a marquee; Shift+drag adds to the selection.
 - **Magic wand** (`W`): click to select contiguous cells of the same key; Shift+click selects every cell of that
@@ -1053,7 +1019,7 @@ any existing behaviour.
   appends missing ones, including their blends, combos and customs.
 - Optional: also put a JSON copy on the system clipboard for pasting across tabs.
 
-### 15.7 Automatic snapshots — minimal versioning
+### 15.7 Automatic snapshots — minimal versioning (implemented)
 - Storage: IndexedDB `stitchwork` v2 gets a new store `snaps`, keyed `[projectId, time]`. The value is
   `{time, reason, w, h, data (serialize string, no refs), thumb (small PNG)}`.
 - **When**:
@@ -1089,30 +1055,7 @@ any existing behaviour.
 - **OXS**: export prefixes the name with the brand for non-DMC threads. Import (`oxsResolve`) learns the prefixes
   `Anchor`, `ANC`, `Cosmo`, `Madeira`.
 
-### 15.9 Scan calibration in reference windows
-Decision: calibration lives in the floating **reference windows**. A scan underlay inside the chart canvas is
-rejected (§15.12).
-- **Calibrate** button in the reference-window toolbar:
-  1. Click two printed grid corners on the scan, then type which chart cells they are (defaults: top-left of
-     col 1 / row 1 and bottom-right of the last cell). Add a 3rd and 4th corner for rotated or photographed pages.
-  2. Optional **snap to grid lines**: refine each click to the nearest grid-line crossing found from
-     dark-pixel row/column profiles (classic image processing, no ML).
-- **Model**: 2 points give scale + translate; 3 give affine (rotation and skew); 4 give a homography
-  (perspective, solved as a small 8×8 linear system). Stored on the window as
-  `calib: {pts: [{ix, iy, col, row}…], H: [9 numbers]}`.
-- **When a window is calibrated**:
-  - Grid overlay, Show stitched and the hover crosshair use this mapping and cover only the calibrated region
-    (that page), not the whole photo as today.
-  - Hovering the chart highlights the cell in every window that covers it. Hovering the scan highlights the chart
-    cell and shows `Column X · Row Y` in the paper's numbering (§15.2).
-  - Ctrl/⌘+click on the scan centres the chart on that cell.
-  - A **Follow** toggle pans the window so it shows the region the chart is showing.
-- **Multi-page paper charts**: one reference window per page, each calibrated to its own region (e.g. page 2 =
-  columns 61–120). Overlap rows simply appear in two windows.
-- Optional proofing aid: **Overlay my symbols** draws the chart's symbols at 50 % over the calibrated scan, inside
-  the reference window only.
-
-### 15.10 PDF chart export — Pattern Keeper–compatible (first version 2026-11-15, **not yet tested in Pattern Keeper**)
+### 15.10 PDF chart export — Pattern Keeper–compatible (implemented; works in Pattern Keeper since 2026-11-15)
 **Menu ▸ Export ▸ PDF for Pattern Keeper.** A multi-page A4 PDF that the Android app **Pattern Keeper** can import
 to track stitching. This is *not* Pattern Maker's native `.xsd` (§15.12).
 
@@ -1142,16 +1085,13 @@ quarter / three-quarter / petite stitches, other blends, floss + bead, beads, ba
    (§15.10b) — the picture pages that used to follow here meant nothing to other apps (Хрестики, Ruta Stitch
    read no symbols from them).
 
-**Before exporting**, when something is left out, a dialog lists it by kind with counts and explains the two
-charts ("import only the first pages"). With nothing trackable at all, a toast says so and nothing is exported.
+**Before exporting**, when something is left out, a dialog lists it by kind with counts and points to the PDF
+chart to print for the full chart. With nothing trackable at all, a toast says so and nothing is exported.
 
 **Text is English** (embedded DM Sans; Cyrillic letters, e.g. in pattern names, from embedded Onest).
 
-**Verified in Pattern Keeper (2026-11-15):** the grid and the symbols are detected.
-**Still to verify:** that thread numbers are now read from the thread list; how a two-floss row is read; whether the picture pages of the full chart get in the way (fallback: a separate file); whether page
-joins without overlap work.
-
-**Later:** cover page with metadata (§15.1) and preview, page map, Letter size, overlap rows, a vector full chart.
+**Verified in Pattern Keeper (2026-11-15):** the grid, the symbols and the thread numbers are read; nothing has to
+be typed in. **Not yet checked:** how a two-floss blend row is read.
 
 ### 15.10b PDF chart to print (implemented 2026-11-16)
 **Menu ▸ Export ▸ PDF chart to print** — the chart for people to read and stitch from, separate from the Pattern
@@ -1232,20 +1172,21 @@ Prerequisite: §15.9 calibration.
   symbol shape.
 
 ### 15.12 Parked / rejected / not yet discussed
-- ~~**Rejected**: a scan underlay inside the chart canvas (tried in another tool, poor UX).~~ **Reversed
-  2026-11-14** — specified and implemented as §15.15, with an explicit edit mode to address the UX problems.
-  Reference windows (§11, §15.9) stay.
 - **Rejected**: AI / ML-based features.
+- **Rejected 2026-11-16**: scan calibration in reference windows (the former §15.9) — not needed; the underlay with
+  its edit frame (§15.15) is how scans are lined up.
+- **Rejected 2026-11-16**: options for the print PDF (Letter paper, how many rows pages share).
 - **Parked**: exporting Pattern Maker `.xsd`. The format is proprietary, binary and undocumented.
-- **Not yet discussed** (from the first brainstorm):
+- *(A scan underlay inside the chart canvas was rejected at first, then specified and built as §15.15.)*
+- **Not yet discussed**:
   - keyboard data-entry mode (cursor + type a key, run-length entry)
-  - long stitches, lazy daisies and other specialty stitches. Quarter / three-quarter / petite stitches and
-    French knots have moved to §15.13–15.14.
-  - custom drawn or uploaded symbol glyphs to match the paper
+  - long stitches, lazy daisies and other specialty stitches
+  - beads placed on grid intersections (point-based, like knots)
+  - uploaded symbol images (drawn symbols exist, §2.5)
   - proofread tracking ("mark region as proofed")
   - two-screen pop-out window
 
-### 15.13 Fractional stitches — quarter, three-quarter, petite (DRAFT — to be discussed)
+### 15.13 Fractional stitches — quarter, three-quarter, petite (implemented)
 Goal: several partial stitches can share **one cell**, so a mapper can reproduce exactly what the paper chart
 shows. The commonest case is a cell split along its diagonal into two colours, which smooths curves and edges.
 
@@ -1263,7 +1204,7 @@ Combinations that must fit into one cell:
 - one three-quarter + one quarter in the free corner
 - a half cross + a quarter
 
-**Proposed data model (recommendation, open to change).** Store *stitches*, not areas:
+**Data model.** Store *stitches*, not areas:
 - A sparse layer `P.part`: `Map<cellIndex, [{kind:'q'|'t'|'p', c:0..3, k}]>`, where `c` is the corner
   (TL, TR, BR, BL) and `k` is the key index.
 - A three-quarter is identified by the corner of its short leg. Its long leg is the diagonal that does not touch
@@ -1273,7 +1214,7 @@ Combinations that must fit into one cell:
   4 triangles per cell can't represent both the diagonal split and corner quarters cleanly.
 - Sparse because fractional stitches are rare compared with full crosses. JSON v4 field: `part: [[i, kind, c, k], …]`.
 
-**Open questions**
+**Decisions (as built, 2026-11-14)** — the questions asked in the draft, with the answers the app implements:
 
 1. **Key entries.** Today, stitch type lives on the key entry (`st`), so a ╱ half cross of DMC 310 is a separate
    entry with its own symbol. Paper charts normally draw a three-quarter or quarter with **the same symbol as the
@@ -1314,7 +1255,7 @@ Combinations that must fit into one cell:
      attribute, so readers drew 4 quarters (or petites) of one cell on top of each other in the top-left corner.
    - Import reads both, plus Ursa's plain `objecttype="quarter"` (a miniature cross → petite) by its half-grid point.
 
-### 15.14 French knots (DRAFT — to be discussed)
+### 15.14 French knots (implemented)
 - **Key type** `'knot'`: `src` (thread or blend), `n` strands, `sym`. An optional `wraps` value (1–3) is shown in
   the subtitle, e.g. `DMC 310 / Black · 2 strands · French knot, 2 wraps`.
 - **Position**: points snapped to the **half grid**, exactly like backstitch endpoints. That gives cell corners,
@@ -1332,13 +1273,8 @@ Combinations that must fit into one cell:
   - OXS `<object objecttype="knot" x1 y1 palindex>`. Import maps knot objects, which today are "simplified".
   - PNG and PDF draw them; the key lists them.
 
-**Open questions**
-1. Charts often show knots as **plain coloured dots without symbols**. Should knot entries have symbols at all,
-   or should the key identify them by dot colour plus code?
-2. Is half-grid placement enough, or do you need free placement (any position)?
-3. Should beads get the same point-based placement option? Charts sometimes place beads on intersections.
-4. Should long stitches and lazy daisies be designed together with knots, since they are also point- or
-   segment-based "specialty" stitches?
+**Decisions (as built, 2026-11-14):** knot entries may have a symbol (shown in Symbols view; otherwise a dark dot);
+placement is on the half grid. Still open, moved to §15.12: beads on intersections; long stitches and lazy daisies.
 
 ### 15.15 Chart underlay — a reference image behind the stitches (implemented 2026-11-14)
 Goal: put a scan or photo of the paper chart **on the chart canvas itself**, line it up with the grid, then stitch

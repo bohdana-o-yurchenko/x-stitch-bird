@@ -775,7 +775,7 @@ Choices made now so that later step is easy:
 
 ---
 
-## 14. Planned features (SPEC §15) — where each one lives
+## 14. Features beyond the original app (SPEC §15) — where each one lives
 
 Each feature below lists its stored data, its modules by level, and its commands/shortcuts. Shared groundwork
 used by several of them:
@@ -911,7 +911,7 @@ The Save to file dialog should mention this during the transition.
   the current state first, then loads the chosen one with the same project id. Reasons are message keys, so the
   list is translated.
 
-### 14.8 Fractional stitches — quarter, three-quarter, petite (SPEC §15.13, **design gate**)
+### 14.8 Fractional stitches — quarter, three-quarter, petite (SPEC §15.13)
 SPEC §15.13 still has open questions. The architecture keeps the stored data independent of most answers:
 - **Data:** layer `partials`, sparse `Map<cellIndex, PartialStitch[]>` with `{ kind: 'quarter' | 'threeQuarter' |
   'petite', corner: 0..3 (TL, TR, BR, BL), key: number }`. JSON v4 `part: [[i, kind, c, k], …]`. This is the SPEC's
@@ -933,7 +933,7 @@ SPEC §15.13 still has open questions. The architecture keeps the stored data in
   | Q8 transforms | `core/transform/direction.ts` corner remap | already designed |
   | Q9 OXS | `formats/oxs`: `<partstitch>` with directions and `palindex1/2`. Replaces today's "simplified" path in import | local |
 
-### 14.9 French knots (SPEC §15.14, **design gate**)
+### 14.9 French knots (SPEC §15.14)
 - **Data:** layer `knots`, `Knot = { x, y, key }` with half-grid coordinates (JSON v4 `knots: [[x, y, k], …]`).
   New `EntryKind` `knot` with fields `colour | blend`, `strands`, `wraps` (1–3) and an optional `symbol`.
 - **Placement:** `placement: 'point'` → `tools/knot.ts` is used whenever the active entry is a knot (pencil places
