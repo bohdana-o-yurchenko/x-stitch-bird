@@ -406,7 +406,9 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   await page.mouse.down();
   await page.mouse.move(box.x + frame.x + frame.w + 40, box.y + frame.y + frame.h / 2, { steps: 4 });
   await page.mouse.up();
-  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeCloseTo(w0 * (frame.w + 40) / frame.w, 3);
+  // the photo's own west side stays put; its east side moves out
+  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.x")).toBeCloseTo(r.x, 6);
+  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeGreaterThan(w0);
   await page.keyboard.press("ControlOrMeta+z");
   expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeCloseTo(w0, 6);
   // a slight turn with ] and the side panel's angle field; 0° resets

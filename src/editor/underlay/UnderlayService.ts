@@ -1,5 +1,5 @@
 import type { Point, Rect } from "@/core/pattern/types";
-import { defaultCorners, dragUnderlay, fitToChart, frameHandleAt, frameNeeded, gridToImage, handleAt, imageToGrid, newUnderlay, pinImagePoint, resetCrop, resizeRect, rotateUnderlay, ROTATION_STEP, straightenedSize, toLocal, turnedBounds, type Handle, type Straighten, type UnderlayData } from "@/core/underlay/underlay";
+import { defaultCorners, dragUnderlay, fitToChart, frameHandleAt, frameNeeded, handleAt, imageToGrid, newUnderlay, resetCrop, resizeRect, rotateUnderlay, ROTATION_STEP, straightenedSize, toLocal, turnedBounds, type Handle, type Straighten, type UnderlayData } from "@/core/underlay/underlay";
 import { downscaleToBlob, loadImage } from "@/platform/images";
 import { RULER_SIZE } from "@/render/ChartRenderer";
 import { runStraighten } from "../heavy";
@@ -265,19 +265,25 @@ export class UnderlayService {
   }
 
   /**
-   * Edit frame: the dragged side follows the pointer and the opposite side stays pinned — on the frame and on the
-   * image under it (pin and stretch), so a grid line can be dragged onto the chart's grid line.
+   * Edit frame: works like pulling the photo's own side — the photo under the dragged side follows the pointer and
+   * the photo's opposite side (not the frame's) stays where it was, so a grid line can be dragged onto the chart's.
    */
   pointerMove(p: Point, s: Point, free: boolean) {
     const fd = this.frameDrag;
     if (fd) {
       const f0 = fd.frame, f1 = resizeRect(f0, fd.handle, s.x - fd.from.x, s.y - fd.from.y, free, FRAME_MIN);
       const h = fd.handle, east = h.includes("e"), west = h.includes("w"), south = h.startsWith("s"), north = h.startsWith("n");
-      const pin = this.ed.viewport.toGrid(west ? f0.x + f0.w : f0.x, north ? f0.y + f0.h : f0.y);
-      const sx = east || west ? f1.w / f0.w : 1, sy = north || south ? f1.h / f0.h : 1;
-      const u0 = fd.start, stretched = { ...u0, rect: { ...u0.rect, w: u0.rect.w * sx, h: u0.rect.h * sy } };
+      // the frame's dragged side or corner, before and after, in grid units
+      const grip = (f: Rect) => this.ed.viewport.toGrid(west ? f.x : east ? f.x + f.w : f.x + f.w / 2, north ? f.y : south ? f.y + f.h : f.y + f.h / 2);
+      const u0 = fd.start, g0 = grip(f0), g1 = grip(f1), r = u0.rect, a = ((u0.rotation ?? 0) * Math.PI) / 180;
+      // how far the photo under the grip moves, along the photo's own axes
+      const d = { x: (g1.x - g0.x) * Math.cos(a) + (g1.y - g0.y) * Math.sin(a), y: -(g1.x - g0.x) * Math.sin(a) + (g1.y - g0.y) * Math.cos(a) };
+      // the photo's own opposite side stays put, so its dragged edge moves (whole size ÷ distance from that side) times as far
+      const l = toLocal(u0, g0), dx = east ? l.x - r.x : r.x + r.w - l.x, dy = south ? l.y - r.y : r.y + r.h - l.y;
+      const ex = (d.x * r.w) / Math.max(dx, 1e-6), ey = (d.y * r.h) / Math.max(dy, 1e-6);
+      const grid = { x: ex * Math.cos(a) - ey * Math.sin(a), y: ex * Math.sin(a) + ey * Math.cos(a) };
       this.ed.store.setState({ underlayFrame: f1 });
-      this.set(pinImagePoint(stretched, gridToImage(u0, pin), pin), false);
+      this.set({ ...u0, ...dragUnderlay(u0, h, grid.x, grid.y, free) }, false);
       return;
     }
     const d = this.drag;

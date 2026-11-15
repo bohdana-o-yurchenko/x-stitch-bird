@@ -153,7 +153,7 @@ describe("chart underlay (SPEC §15.15)", () => {
     ed.shortcuts.keyDown(key("u"));
     expect(ed.underlay.editing).toBe(true);
   });
-  it("zoomed in, the edit frame pins one side and the photo under the dragged side follows the pointer; Ctrl+Z undoes", () => {
+  it("zoomed in, the edit frame stretches the photo from its own opposite side; the photo under the dragged side follows the pointer; Ctrl+Z undoes", () => {
     ed.viewport.setSize(826, 626);
     ed.store.setState({ underlay: { ...ed.state.underlay!, rect: { x: -50, y: -50, w: 200, h: 200 } }, viewport: { zoom: 20, offX: 0, offY: 0 } });
     const f = ed.underlay.frame()!;
@@ -163,11 +163,14 @@ describe("chart underlay (SPEC §15.15)", () => {
       const g = ed.viewport.toGrid(x, y), r = ed.state.underlay!.rect;
       return [+((g.x - r.x) / r.w).toFixed(6), +((g.y - r.y) / r.h).toFixed(6)];
     };
-    const pinned = imageAt(f.x, f.y + 50), grabbed = imageAt(f.x + f.w, f.y + 50);
+    const grabbed = imageAt(f.x + f.w, f.y + 50);
     ed.tools.down(sp(f.x + f.w, f.y + 50));
     ed.tools.move(sp(f.x + f.w + 30, f.y + 50));
     ed.tools.up(sp(f.x + f.w + 30, f.y + 50));
-    expect(imageAt(f.x, f.y + 50)).toEqual(pinned);
+    // the photo's west side, top and height stay; only its east side moves
+    const r = ed.state.underlay!.rect;
+    expect([r.x, r.y, r.h]).toEqual([-50, -50, 200]);
+    expect(r.w).toBeGreaterThan(200);
     expect(imageAt(f.x + f.w + 30, f.y + 50)).toEqual(grabbed);
     expect(ed.underlay.frame()!.w).toBe(350);
     ed.shortcuts.keyDown(key("z", { ctrl: true }));

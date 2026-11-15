@@ -1265,10 +1265,11 @@ checkbox. No setting to switch it on.
 least 3 of its 4 sides are outside the view (so its own handles can't be reached), a frame is drawn in the middle of
 the view: 320 × 220 screen px, dashed accent outline, 8 handles, transparent inside. It is a screen tool: panning
 slides the photo under it. Not shown when zoomed out (the image's own handles are visible) or in Crop.
-- **Pin and stretch**: drag a side (anywhere along it) or a corner; the frame follows the pointer and the photo
-  under the dragged side moves exactly with it, while the opposite side stays pinned — on the frame and on the photo
-  (the image is scaled around the pinned side's grid point). Corners scale both axes, aspect kept; Shift = free.
-  Smallest frame 40 px. Use: pin one grid line of the scan, drag another onto the chart's grid line.
+- **Stretch**: drag a side (anywhere along it) or a corner; the frame follows the pointer and the photo under the
+  dragged side moves exactly with it. It works like pulling the photo's own side: the **photo's** opposite side (or
+  corner) stays where it is, not the frame's (fixed 2026-11-15 — it used to scale around the frame's opposite side,
+  so the photo grew both ways). Corners scale both axes, aspect kept; Shift = free. Smallest frame 40 px. Use: drag a
+  grid line of the scan onto the chart's grid line.
 - The frame keeps its new size and place until edit mode is turned off; turning it on again starts a fresh frame.
 - Inside the frame (and anywhere on the image) dragging moves the image, as before.
 - **Rotation** (2026-11-15) for slightly tilted scans: `rotation` in degrees (clockwise, ±45°) around the middle of

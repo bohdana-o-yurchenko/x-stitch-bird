@@ -618,7 +618,7 @@
         "2": "Drag the <hl>4 corners</hl> onto the grid corners — the photo lies flat.",
         "3": "Trace the symbols with the key entries."
       },
-      "tip": "Photo not perfect? Zoom in and press the <hl>edit image</hl> button by the zoom (or U): a <hl>frame</hl> appears — drag its side and the photo under it follows, the other side stays pinned."
+      "tip": "Photo not perfect? Zoom in and press the <hl>edit image</hl> button by the zoom (or U): a <hl>frame</hl> appears — drag its side and the photo under it follows, the photo’s opposite side stays in place."
     },
     "views": {
       "title": "4. Views",
