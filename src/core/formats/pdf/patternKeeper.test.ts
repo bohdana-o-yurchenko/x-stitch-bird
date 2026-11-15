@@ -9,7 +9,8 @@ import { parsePattern } from "../json/parse";
 import { checkPatternKeeper, patternKeeperPdf } from "./patternKeeper";
 import { latin } from "./pdfWriter";
 
-const font = new Uint8Array(readFileSync(new URL("../../../../public/fonts/ptashechka-symbols.ttf", import.meta.url)));
+const file = (name: string) => new Uint8Array(readFileSync(new URL(`../../../../public/fonts/${name}.ttf`, import.meta.url)));
+const fonts = { symbols: file("ptashechka-symbols"), regular: file("ptashechka-text-regular"), bold: file("ptashechka-text-bold") };
 const text = (pdf: Uint8Array) => Buffer.from(pdf).toString("latin1");
 
 /** Every object offset in the cross-reference table points at that object. */
@@ -53,7 +54,7 @@ describe("Pattern Keeper PDF", () => {
     const report = checkPatternKeeper(pattern);
     expect(report.issues.map((i) => i.kind)).toEqual(["combo", "back"]);
     const pdf = await patternKeeperPdf(pattern, report, {
-      font,
+      fonts,
       fullChart: (r) => ({ w: r.w, h: r.h, rgb: new Uint8Array(r.w * r.h * 3).fill(230) }),
       keyIcon: () => ({ w: 1, h: 1, rgb: new Uint8Array(3) }),
     });
@@ -63,10 +64,12 @@ describe("Pattern Keeper PDF", () => {
     expect(checkXref(pdf)).toBeGreaterThan(10);
     // 72×72 cells: 2 chart pages + thread list + notes, then 2 full pages + full key
     expect(s.match(/\/Type \/Page /g)).toHaveLength(7);
-    expect(s).toContain("/Subtype /Type0");
-    expect(s).toContain("/FontFile2");
+    // three embedded fonts (text regular and bold, symbols) and no built-in ones
+    expect(s.match(/\/Subtype \/Type0/g)).toHaveLength(3);
+    expect(s.match(/\/FontFile2/g)).toHaveLength(3);
+    expect(s).not.toContain("/Subtype /Type1");
     // without the full-chart callback only the Pattern Keeper part is written
-    const short = await patternKeeperPdf(pattern, report, { font });
+    const short = await patternKeeperPdf(pattern, report, { fonts });
     expect(text(short).match(/\/Type \/Page /g)).toHaveLength(4);
   });
 

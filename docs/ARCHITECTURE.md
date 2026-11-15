@@ -1128,8 +1128,9 @@ Decisions taken while implementing this plan. Each one lives in the single place
   Switching the language is a client-side navigation (no reload), but React resets unknown attributes on <html>
   when the root layout re-renders; `ui/theme/ThemeSync.tsx` (in the layout) re-applies `data-theme` in a layout effect.
 - Pattern Keeper PDF (SPEC §15.10): `core/formats/pdf/pdfWriter.ts` is a minimal PDF writer (no library: objects,
-  Flate streams via `CompressionStream`, built-in Helvetica, one embedded TrueType font as Type0/Identity-H with a
-  ToUnicode map, RGB images). `core/formats/pdf/patternKeeper.ts` has `checkPatternKeeper` (what is trackable, what
+  Flate streams via `CompressionStream`, embedded TrueType fonts as Type0/Identity-H with ToUnicode maps — the
+  symbol font and a Latin cut of DM Sans for text (`textFonts.ts`, `public/fonts/ptashechka-text-*.ttf`, built by
+  the same script) — and RGB images). `core/formats/pdf/patternKeeper.ts` has `checkPatternKeeper` (what is trackable, what
   is left out) and `patternKeeperPdf` (layout); the editor action `exportPatternKeeper` supplies the font file and
   the pictures (full chart from `renderChartImage`, key icons). The symbol font `public/fonts/ptashechka-symbols.ttf`
   and its glyph table `core/symbols/symbolFont.ts` are generated: `node scripts/dump-symbols.mjs > symbols.json`,

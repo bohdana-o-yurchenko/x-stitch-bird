@@ -1092,19 +1092,22 @@ quarter / three-quarter / petite stitches, other blends, floss + bead, beads, ba
 1. *Chart for Pattern Keeper* — symbols only (never colour), only trackable stitches; up to 60 columns per page,
    rows in multiples of 10, no overlap, column and row numbers in the margins, thin cell lines and heavy lines
    every 10 following the chart's numbering (§15.2).
-2. *Thread list for Pattern Keeper* — headers exactly **Number · Name · Strands** and nothing else: Pattern
-   Keeper's own guide for WinStitch says "It is important to use these header names" (Number, Name; Strands
-   optional), and the first version — headers Symbol · Number · Name · Strands · Stitches — imported with no
-   thread numbers read (tested 2026-11-15). Each row: symbol, colour sample, "DMC 310" (blends "DMC 310 + DMC
-   321"), name, strands ("2", blends "1+1"), all on one text baseline.
-   Then *About this chart*: stitches per thread and what was left out, as plain lines on their own page.
+2. *Thread list for Pattern Keeper* — laid out like the key of a WinStitch PDF that Pattern Keeper imports with its
+   thread numbers (a sample chart, compared 2026-11-15): a **ruled table** (outline, a line under every row, lines
+   between columns) with bold headers **Number · Name · Strands · Stitches**; first column a block of the thread's
+   colour with the chart symbol on it (white on dark colours); brand and number as two separate words at a fixed
+   tab ("DMC", "310"; blends "DMC 310 + DMC 321"); strands and stitch counts right-aligned. All text is in
+   **embedded** fonts (a Latin cut of DM Sans, regular and bold), as in the sample — no built-in PDF fonts.
+   Two earlier layouts imported without thread numbers: plain rows with headers Symbol · Number · Name · Strands ·
+   Stitches in built-in Helvetica, then the same without the Symbol and Stitches headers.
+   When something was left out, a page *About this chart* lists it.
 3. Only when something was left out: the *Full chart (not for Pattern Keeper)* — the same pages as pictures of the
    Symbols view with everything on it — and a *Full key* with each entry's icon.
 
 **Before exporting**, when something is left out, a dialog lists it by kind with counts and explains the two
 charts ("import only the first pages"). With nothing trackable at all, a toast says so and nothing is exported.
 
-**Text is Latin only** (built-in Helvetica, English wording whatever the interface language); Cyrillic pattern
+**Text is Latin only** (embedded DM Sans, English wording whatever the interface language); Cyrillic pattern
 names are transliterated.
 
 **Verified in Pattern Keeper (2026-11-15):** the grid and the symbols are detected.

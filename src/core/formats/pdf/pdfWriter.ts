@@ -1,8 +1,9 @@
 /*
- * A minimal PDF writer (SPEC §15.10): objects, compressed streams, pages with text, lines and images, the built-in
- * Helvetica, and one embedded TrueType font addressed by glyph id. Just enough for chart export — no library, so
- * the file contains exactly what we put in it.
+ * A minimal PDF writer (SPEC §15.10): objects, compressed streams, pages with text, lines and images, and embedded
+ * TrueType fonts addressed by glyph id — the text font (regular and bold) and the chart-symbol font. Just enough
+ * for chart export — no library, so the file contains exactly what we put in it.
  */
+import { TEXT_FONTS, TEXT_GLYPHS } from "./textFonts";
 
 export type Ref = number;
 
@@ -33,13 +34,12 @@ async function deflate(data: Uint8Array): Promise<Uint8Array> {
 /** A number as PDF wants it: at most two decimals, no exponent. */
 export const num = (n: number): string => String(Math.round(n * 100) / 100);
 
-const WIN_ANSI: Record<string, number> = { "€": 0x80, "…": 0x85, "‘": 0x91, "’": 0x92, "“": 0x93, "”": 0x94, "•": 0x95, "–": 0x96, "—": 0x97, "−": 0x2d };
 const CYRILLIC: Record<string, string> = {
   а: "a", б: "b", в: "v", г: "h", ґ: "g", д: "d", е: "e", є: "ie", ж: "zh", з: "z", и: "y", і: "i", ї: "i", й: "i", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p",
   р: "r", с: "s", т: "t", у: "u", ф: "f", х: "kh", ц: "ts", ч: "ch", ш: "sh", щ: "shch", ь: "", ю: "iu", я: "ia", ы: "y", э: "e", ё: "e", ъ: "",
 };
 
-/** Text for the built-in fonts: Latin only. Cyrillic is transliterated; anything else unknown becomes "?". */
+/** Text for the PDF's text font: Latin only. Cyrillic is transliterated; other unknown characters become "?" when drawn. */
 export function latin(text: string): string {
   let out = "";
   for (const ch of text) {
@@ -50,23 +50,16 @@ export function latin(text: string): string {
   return out;
 }
 
-/** A PDF hex string in WinAnsi encoding. */
-function winAnsiHex(text: string): string {
-  let hex = "";
-  for (const ch of latin(text)) {
-    const c = ch.codePointAt(0)!;
-    const b = WIN_ANSI[ch] ?? (c < 0x80 || (c >= 0xa0 && c <= 0xff) ? c : 0x3f);
-    hex += b.toString(16).padStart(2, "0");
-  }
-  return `<${hex}>`;
+const QUESTION = TEXT_GLYPHS[0x3f]!;
+const glyphIds = (text: string): number[] => [...latin(text)].map((ch) => TEXT_GLYPHS[ch.codePointAt(0)!] ?? QUESTION);
+
+/** Width of `text` in points at `size`, in the regular or bold text font. */
+export function textWidth(text: string, size: number, font: "regular" | "bold" = "regular"): number {
+  const widths = TEXT_FONTS[font].widths;
+  return (glyphIds(text).reduce((w, g) => w + (widths[g] ?? 0), 0) * size) / 1000;
 }
 
-/** Helvetica advance widths that matter for aligning numbers; other characters are estimated. */
-export function helveticaWidth(text: string, size: number): number {
-  let w = 0;
-  for (const ch of latin(text)) w += /[0-9]/.test(ch) ? 556 : ch === "-" ? 333 : ch === " " || ch === "," || ch === "." ? 278 : /[A-Z]/.test(ch) ? 680 : 520;
-  return (w * size) / 1000;
-}
+const hex4 = (n: number) => n.toString(16).padStart(4, "0");
 
 export type FontName = "regular" | "bold" | "symbols";
 const FONT_KEY: Record<FontName, string> = { regular: "F1", bold: "F2", symbols: "F3" };
@@ -83,16 +76,19 @@ export class PdfPage {
 
   /** `y` is the baseline. */
   text(font: Exclude<FontName, "symbols">, size: number, x: number, y: number, text: string, align: "left" | "right" | "centre" = "left", grey = 0) {
-    const w = align === "left" ? 0 : helveticaWidth(text, size);
+    const w = align === "left" ? 0 : textWidth(text, size, font);
     const left = align === "right" ? x - w : align === "centre" ? x - w / 2 : x;
-    this.ops.push(`BT ${num(grey)} g /${FONT_KEY[font]} ${num(size)} Tf 1 0 0 1 ${num(left)} ${this.y(y)} Tm ${winAnsiHex(text)} Tj ET`);
+    this.ops.push(`BT ${num(grey)} g /${FONT_KEY[font]} ${num(size)} Tf 1 0 0 1 ${num(left)} ${this.y(y)} Tm <${glyphIds(text).map(hex4).join("")}> Tj ET`);
   }
 
-  /** Chart symbols: each glyph fills a `size` square whose top-left corner is given. One text object for them all. */
-  glyphs(size: number, cells: { x: number; y: number; glyph: number }[]) {
+  /**
+   * Chart symbols: each glyph fills a `size` square whose top-left corner is given. One text object for them all;
+   * `grey` 0 = black, 1 = white (for symbols on a dark colour).
+   */
+  glyphs(size: number, cells: { x: number; y: number; glyph: number }[], grey = 0) {
     if (!cells.length) return;
-    const show = cells.map((c) => `1 0 0 1 ${num(c.x)} ${this.y(c.y + size)} Tm <${c.glyph.toString(16).padStart(4, "0")}> Tj`);
-    this.ops.push(`BT 0 g /${FONT_KEY.symbols} ${num(size)} Tf`, ...show, "ET");
+    const show = cells.map((c) => `1 0 0 1 ${num(c.x)} ${this.y(c.y + size)} Tm <${hex4(c.glyph)}> Tj`);
+    this.ops.push(`BT ${num(grey)} g /${FONT_KEY.symbols} ${num(size)} Tf`, ...show, "ET");
   }
 
   lines(segments: [number, number, number, number][], width: number, grey = 0) {
@@ -120,10 +116,7 @@ export class PdfWriter {
   private readonly bodies: (Uint8Array | null)[] = [];
   private readonly pageRefs: Ref[] = [];
   private readonly pagesRef = this.reserve();
-  private readonly fonts: Record<string, Ref> = {
-    F1: this.add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>"),
-    F2: this.add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"),
-  };
+  private readonly fonts: Record<string, Ref> = {};
 
   private reserve(): Ref {
     this.bodies.push(null);
@@ -146,17 +139,17 @@ export class PdfWriter {
   }
 
   /**
-   * Embeds a TrueType font whole, addressed by glyph id (`PdfPage.glyphs`). `unicode` lists [glyph id, code point]
-   * so that viewers and chart trackers read each glyph as that character.
+   * Embeds a TrueType font, addressed by glyph id. `unicode` lists [glyph id, code point] so that viewers and chart
+   * trackers read each glyph as that character; `widths` are advances by glyph id (default: every glyph 1000).
    */
-  async embedSymbolFont(name: string, file: Uint8Array, unicode: readonly (readonly [number, number])[]) {
-    const fontFile = await this.stream(`/Length1 ${file.length}`, file);
-    const descriptor = this.add(`<< /Type /FontDescriptor /FontName /${name} /Flags 4 /FontBBox [0 0 1000 1000] /ItalicAngle 0 /Ascent 1000 /Descent 0 /CapHeight 1000 /StemV 80 /FontFile2 ${fontFile} 0 R >>`);
-    const cid = this.add(`<< /Type /Font /Subtype /CIDFontType2 /BaseFont /${name} /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor ${descriptor} 0 R /DW 1000 /CIDToGIDMap /Identity >>`);
-    const hex4 = (n: number) => n.toString(16).padStart(4, "0");
+  private async embedFont(key: string, o: { name: string; file: Uint8Array; unicode: readonly (readonly [number, number])[]; widths?: readonly number[]; symbolic: boolean; ascent: number; descent: number; capHeight: number; bbox: readonly number[] }) {
+    const fontFile = await this.stream(`/Length1 ${o.file.length}`, o.file);
+    const descriptor = this.add(`<< /Type /FontDescriptor /FontName /${o.name} /Flags ${o.symbolic ? 4 : 32} /FontBBox [${o.bbox.join(" ")}] /ItalicAngle 0 /Ascent ${o.ascent} /Descent ${o.descent} /CapHeight ${o.capHeight} /StemV 80 /FontFile2 ${fontFile} 0 R >>`);
+    const widths = o.widths ? ` /W [0 [${o.widths.join(" ")}]]` : "";
+    const cid = this.add(`<< /Type /Font /Subtype /CIDFontType2 /BaseFont /${o.name} /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor ${descriptor} 0 R /DW 1000${widths} /CIDToGIDMap /Identity >>`);
     const blocks: string[] = [];
-    for (let i = 0; i < unicode.length; i += 100) {
-      const part = unicode.slice(i, i + 100);
+    for (let i = 0; i < o.unicode.length; i += 100) {
+      const part = o.unicode.slice(i, i + 100);
       blocks.push(`${part.length} beginbfchar`, ...part.map(([gid, code]) => `<${hex4(gid)}> <${hex4(code)}>`), "endbfchar");
     }
     const cmap = [
@@ -166,7 +159,21 @@ export class PdfWriter {
       "endcmap", "CMapName currentdict /CMap defineresource pop", "end", "end",
     ].join("\n");
     const toUnicode = await this.stream("", ascii(cmap));
-    this.fonts.F3 = this.add(`<< /Type /Font /Subtype /Type0 /BaseFont /${name} /Encoding /Identity-H /DescendantFonts [${cid} 0 R] /ToUnicode ${toUnicode} 0 R >>`);
+    this.fonts[key] = this.add(`<< /Type /Font /Subtype /Type0 /BaseFont /${o.name} /Encoding /Identity-H /DescendantFonts [${cid} 0 R] /ToUnicode ${toUnicode} 0 R >>`);
+  }
+
+  /** The chart-symbol font (`PdfPage.glyphs`): every glyph one em wide; `unicode` as [glyph id, code point]. */
+  embedSymbolFont(name: string, file: Uint8Array, unicode: readonly (readonly [number, number])[]) {
+    return this.embedFont("F3", { name, file, unicode, symbolic: true, ascent: 1000, descent: 0, capHeight: 1000, bbox: [0, 0, 1000, 1000] });
+  }
+
+  /** The text fonts (`PdfPage.text`): the files named by `TEXT_FONTS`. */
+  async embedTextFonts(files: { regular: Uint8Array; bold: Uint8Array }) {
+    const unicode = Object.entries(TEXT_GLYPHS).map(([code, gid]) => [gid, Number(code)] as const);
+    for (const [key, id] of [["F1", "regular"], ["F2", "bold"]] as const) {
+      const f = TEXT_FONTS[id];
+      await this.embedFont(key, { name: f.name, file: files[id], unicode, widths: f.widths, symbolic: false, ascent: f.ascent, descent: f.descent, capHeight: f.capHeight, bbox: f.bbox });
+    }
   }
 
   image(r: Raster): Promise<Ref> {
@@ -187,7 +194,8 @@ export class PdfWriter {
   build(info: { title: string; producer: string }): Uint8Array {
     this.put(this.pagesRef, `<< /Type /Pages /Count ${this.pageRefs.length} /Kids [${this.pageRefs.map((r) => `${r} 0 R`).join(" ")}] >>`);
     const catalog = this.add(`<< /Type /Catalog /Pages ${this.pagesRef} 0 R >>`);
-    const infoRef = this.add(`<< /Title ${winAnsiHex(info.title)} /Producer ${winAnsiHex(info.producer)} >>`);
+    const plain = (t: string) => `(${latin(t).replace(/[^\x20-\x7e]/g, "?").replace(/[\\()]/g, "\\$&")})`;
+    const infoRef = this.add(`<< /Title ${plain(info.title)} /Producer ${plain(info.producer)} >>`);
     // the second line marks the file as binary
     const parts: Uint8Array[] = [ascii("%PDF-1.7\n%\xE2\xE3\xCF\xD3\n")];
     const offsets: number[] = [];

@@ -1,18 +1,19 @@
 import { brandCode } from "../../catalog/catalog";
+import { hexToRgb, luma } from "../../color/colorMath";
 import { computeUsage, entryCount, partialCount } from "../../calculator/usage";
 import { isMajorLine, majorOffset, rulerLabels } from "../../grid/numbering";
 import { labelData, type LabelData } from "../../labels/keyLabel";
 import { resolveColor } from "../../pattern/resolve";
 import type { KeyEntry, KeyIndex, Pattern, Rect } from "../../pattern/types";
 import { SYMBOL_FONT, SYMBOL_GLYPHS } from "../../symbols/symbolFont";
-import { PdfPage, PdfWriter, type Raster } from "./pdfWriter";
+import { PdfPage, PdfWriter, textWidth, type Raster } from "./pdfWriter";
 
 /*
  * A PDF chart that Pattern Keeper can import (SPEC §15.10). Pattern Keeper tracks full crosses only and reads
- * them as text: one glyph of an embedded font per cell, on a vector grid, with a text key. So the file holds
+ * them as text: one glyph of an embedded font per cell, on a vector grid, with a ruled thread table. So the file holds
  *   1. the chart with only the stitches it can track, as symbols, their thread list, and a page of notes;
  *   2. when the pattern has anything else, the full chart as pictures, with its own key.
- * The text is Latin only (built-in Helvetica): the wording here is English whatever the interface language.
+ * The text is Latin only (an embedded cut of DM Sans): the wording here is English whatever the interface language.
  */
 
 /** What Pattern Keeper can't track, by kind. */
@@ -80,8 +81,8 @@ function englishLabel(d: LabelData): { title: string; sub: string } {
 }
 
 export interface PkPdfOptions {
-  /** The symbol font file (public/fonts/ptashechka-symbols.ttf). */
-  font: Uint8Array;
+  /** The font files: chart symbols (`SYMBOL_FONT.url`) and the text font (`TEXT_FONTS.*.url`). All are embedded. */
+  fonts: { symbols: Uint8Array; regular: Uint8Array; bold: Uint8Array };
   /** Picture of the full chart for these cells, symbols view with grid; needed when the report has issues. */
   fullChart?: (cells: Rect) => Raster;
   /** Picture of a key entry's icon, for the full chart's key. */
@@ -133,7 +134,8 @@ const ROW = 19, KEY_TOP = 74, KEY_ROWS = Math.floor((PAGE.h - KEY_TOP - PAGE.bot
 /** Builds the PDF. Check the pattern with `checkPatternKeeper` first and pass the report in. */
 export async function patternKeeperPdf(p: Pattern, report: PkReport, o: PkPdfOptions): Promise<Uint8Array> {
   const pdf = new PdfWriter();
-  await pdf.embedSymbolFont(SYMBOL_FONT.name, o.font, Object.values(SYMBOL_GLYPHS));
+  await pdf.embedTextFonts(o.fonts);
+  await pdf.embedSymbolFont(SYMBOL_FONT.name, o.fonts.symbols, Object.values(SYMBOL_GLYPHS));
   const { cell, list } = tiles(p);
   const full = report.issues.length > 0 && !!o.fullChart;
 
@@ -154,58 +156,77 @@ export async function patternKeeperPdf(p: Pattern, report: PkReport, o: PkPdfOpt
   }
 
   /*
-   * Its key. Pattern Keeper finds the thread list by these exact header names — its own guide for WinStitch says
-   * "It is important to use these header names": Number, Name (and Strands) — so there are no other headers and
-   * no other columns (stitch counts are on the next page). Each row: the symbol (same font and glyph as on the
-   * chart), a colour sample, "DMC 310", the name, the strands, all on one baseline.
+   * Its thread list, laid out like the key of a chart that Pattern Keeper imports with thread numbers (a WinStitch
+   * PDF): a ruled table with the headers Number · Name · Strands · Stitches; in the first column a block of the
+   * thread's colour with the chart symbol on it; brand and number as two separate words ("DMC", "310").
    */
   const rows = [...report.supported].sort(([a], [b]) => a - b).map(([k, count]) => {
-    const e = p.key[k]!, c = resolveColor(p, e.src), parts = c?.parts;
+    const e = p.key[k]!, c = resolveColor(p, e.src), threads = c?.parts?.map((q) => q.entry) ?? (c ? [c] : []);
+    // "DMC" "310", and for a blend "DMC" "310" "+" "DMC" "321"
+    const words = threads.flatMap((t, i) => [...(i ? ["+"] : []), ...brandCode(t).split(" ")]);
     return {
       glyph: SYMBOL_GLYPHS[e.sym]?.[0],
       hex: c?.hex ?? "#cccccc",
-      number: parts ? parts.map((q) => brandCode(q.entry)).join(" + ") : brandCode(c),
-      name: parts ? parts.map((q) => q.entry.name).join(" + ") : (c?.name ?? "?"),
-      strands: parts ? parts.map((q) => q.n).join("+") : String(e.n ?? ""),
+      dark: !!c && luma(hexToRgb(c.hex)) < 140,
+      words,
+      name: threads.map((t) => t.name).join(" + ") || "?",
+      strands: c?.parts ? c.parts.map((q) => q.n).join("+") : String(e.n ?? ""),
       count,
     };
   });
-  const col = { sym: PAGE.left, swatch: PAGE.left + 22, number: PAGE.left + 46, name: PAGE.left + 200, strands: PAGE.w - PAGE.right - 60 };
-  const SYM = 12;
-  const keyPages = Math.max(1, Math.ceil(rows.length / KEY_ROWS));
+  const T = { size: 9, row: 16.9, pad: 4.5, base: 11.5, tab: 30.4, line: 0.75 };
+  /** Where each word of the Number cell starts: the number at a fixed tab after a short brand, like WinStitch. */
+  const wordsAt = (words: string[]) => {
+    let x = 0;
+    return words.map((w, i) => {
+      if (i === 1) x = Math.max(x, T.tab);
+      const at = x;
+      x += textWidth(w, T.size) + 4;
+      return { w, at, end: at + textWidth(w, T.size) };
+    });
+  };
+  const left = PAGE.left, right = PAGE.w - PAGE.right;
+  const numberW = Math.max(96, ...rows.map((r) => (wordsAt(r.words).pop()?.end ?? 0) + 2 * T.pad));
+  const col = { number: left + 90, name: left + 90 + numberW, strands: right - 112, stitches: right - 56 };
+  const KEY_Y = 60, perPage = Math.floor((PAGE.h - KEY_Y - PAGE.bottom) / T.row) - 1;
+  const keyPages = Math.max(1, Math.ceil(rows.length / perPage));
   for (let n = 0; n < keyPages; n++) {
     const page = new PdfPage(PAGE.w, PAGE.h);
     page.text("bold", 10, PAGE.left, 24, p.name || "Pattern");
     page.text("regular", 8, PAGE.left, 36, `Thread list for Pattern Keeper · page ${n + 1} of ${keyPages}`, "left", 0.35);
-    page.text("bold", 8, col.number, 60, "Number");
-    page.text("bold", 8, col.name, 60, "Name");
-    page.text("bold", 8, col.strands, 60, "Strands");
-    page.lines([[PAGE.left, 65, PAGE.w - PAGE.right, 65]], 0.6);
-    const part = rows.slice(n * KEY_ROWS, (n + 1) * KEY_ROWS);
+    const part = rows.slice(n * perPage, (n + 1) * perPage), bottom = KEY_Y + (part.length + 1) * T.row;
+    part.forEach((r, i) => page.rect(left + 0.5, KEY_Y + (i + 1) * T.row + 0.5, 90 - 1, T.row - 1, { fill: r.hex }));
+    // the table's rules: outline, a line under every row, a line between columns
+    page.rect(left, KEY_Y, right - left, bottom - KEY_Y, { stroke: 0, width: T.line });
+    page.lines(part.map((_, i) => [left, KEY_Y + (i + 1) * T.row, right, KEY_Y + (i + 1) * T.row]), T.line);
+    page.lines(Object.values(col).map((x) => [x, KEY_Y, x, bottom]), T.line);
+    page.text("bold", T.size, col.number + T.pad, KEY_Y + T.base, "Number");
+    page.text("bold", T.size, col.name + T.pad, KEY_Y + T.base, "Name");
+    page.text("bold", T.size, col.strands + T.pad, KEY_Y + T.base, "Strands");
+    page.text("bold", T.size, col.stitches + T.pad, KEY_Y + T.base, "Stitches");
     part.forEach((r, i) => {
-      const y = KEY_TOP + i * ROW, base = y + SYM;
-      page.rect(col.sym, y, SYM, SYM, { stroke: 0.4, width: 0.4 });
-      page.rect(col.swatch, y, SYM, SYM, { fill: r.hex, stroke: 0.4, width: 0.4 });
-      page.text("regular", 10, col.number, base, r.number);
-      page.text("regular", 10, col.name, base, r.name);
-      page.text("regular", 10, col.strands, base, r.strands);
+      const y = KEY_Y + (i + 1) * T.row, base = y + T.base;
+      for (const { w, at } of wordsAt(r.words)) page.text("regular", T.size, col.number + T.pad + at, base, w);
+      page.text("regular", T.size, col.name + T.pad, base, r.name);
+      page.text("regular", T.size, col.stitches - 1.5, base, r.strands, "right");
+      page.text("regular", T.size, right - 1.5, base, String(r.count), "right");
     });
-    page.glyphs(SYM, part.flatMap((r, i) => (r.glyph ? [{ x: col.sym, y: KEY_TOP + i * ROW, glyph: r.glyph }] : [])));
+    // the symbol in the middle of its colour block, white on dark colours
+    const SYM = 10, symbol = (r: (typeof rows)[number], i: number) => (r.glyph ? [{ x: left + 45 - SYM / 2, y: KEY_Y + (i + 1) * T.row + T.base + 1 - SYM, glyph: r.glyph }] : []);
+    page.glyphs(SYM, part.flatMap((r, i) => (r.dark ? [] : symbol(r, i))), 0);
+    page.glyphs(SYM, part.flatMap((r, i) => (r.dark ? symbol(r, i) : [])), 1);
     await pdf.addPage(page);
   }
 
-  // stitch counts and what the chart leaves out: plain lines on their own page, away from the thread list
-  const notes: { text: string; bold?: boolean }[] = [{ text: "Stitches per thread", bold: true }, ...rows.map((r) => ({ text: `${r.number}   ${r.name}: ${r.count}` }))];
+  // what the chart leaves out: plain lines on their own page, away from the thread list
   if (report.issues.length) {
-    notes.push({ text: "" }, { text: "Not in the Pattern Keeper chart (it tracks full crosses only)", bold: true }, ...report.issues.map((issue) => ({ text: `${issue.count} ${ISSUE_TEXT[issue.kind]}` })));
-    if (full) notes.push({ text: "" }, { text: "They are on the full chart on the following pages. Import only the pages before this one into Pattern Keeper." });
-  }
-  const NOTE_ROWS = Math.floor((PAGE.h - 60 - PAGE.bottom) / 14);
-  for (let n = 0; n * NOTE_ROWS < notes.length; n++) {
     const page = new PdfPage(PAGE.w, PAGE.h);
     page.text("bold", 10, PAGE.left, 24, p.name || "Pattern");
     page.text("regular", 8, PAGE.left, 36, "About this chart", "left", 0.35);
-    notes.slice(n * NOTE_ROWS, (n + 1) * NOTE_ROWS).forEach((line, i) => page.text(line.bold ? "bold" : "regular", 9, PAGE.left, 62 + i * 14, line.text));
+    let y = 62;
+    page.text("bold", 9, PAGE.left, y, "Not in the Pattern Keeper chart (it tracks full crosses only)");
+    for (const issue of report.issues) page.text("regular", 9, PAGE.left, (y += 14), `${issue.count} ${ISSUE_TEXT[issue.kind]}`);
+    if (full) page.text("regular", 9, PAGE.left, y + 28, "They are on the full chart on the following pages. Import only the pages before this one into Pattern Keeper.");
     await pdf.addPage(page);
   }
 

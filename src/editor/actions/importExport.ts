@@ -5,6 +5,7 @@ import { NewerFileError, parsePattern } from "@/core/formats/json/parse";
 import { serializePattern, XBIRD_VERSION, type FileVersion, type PatternFile } from "@/core/formats/json/serialize";
 import { exportOxs } from "@/core/formats/oxs/exportOxs";
 import { checkPatternKeeper, patternKeeperPdf } from "@/core/formats/pdf/patternKeeper";
+import { TEXT_FONTS } from "@/core/formats/pdf/textFonts";
 import { importOxs } from "@/core/formats/oxs/importOxs";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
 import { formatLabel, keyLabelData } from "@/core/labels/keyLabel";
@@ -74,13 +75,14 @@ export async function exportPatternKeeper(ed: Editor, confirmed = false) {
   if (!report.supported.size) return ed.toast("toasts.pkNothing");
   if (report.issues.length && !confirmed) return ed.openDialog({ type: "patternKeeper", issues: report.issues });
   try {
-    const font = new Uint8Array(await (await fetch(SYMBOL_FONT.url)).arrayBuffer());
+    const load = async (url: string) => new Uint8Array(await (await fetch(url)).arrayBuffer());
+    const [symbols, regular, bold] = await Promise.all([load(SYMBOL_FONT.url), load(TEXT_FONTS.regular.url), load(TEXT_FONTS.bold.url)]);
     const theme = { ...ed.theme, accent: defaultCanvasTheme.accent }, palette = ed.state.palette;
     // the full chart is drawn once, as on screen in Symbols view, and cut into pages
     const px = Math.max(10, Math.min(24, Math.floor(4800 / Math.max(p.w, p.h))));
     let chart: HTMLCanvasElement | null = null;
     const pdf = await patternKeeperPdf(p, report, {
-      font,
+      fonts: { symbols, regular, bold },
       fullChart: (r) => canvasRgb((chart ??= renderChartImage(p, palette, "symbols", theme, { heading: "", key: [] }, px)), r.x * px, r.y * px, r.w * px, r.h * px),
       keyIcon: (k) => {
         const slot = palette[k];
