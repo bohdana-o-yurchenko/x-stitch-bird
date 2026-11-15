@@ -12,6 +12,30 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "1.1.0",
+    date: "2026-11-16",
+    uk: [
+      "PDF для Pattern Keeper: застосунок сам зчитує схему і номери ниток — нічого не треба вводити вручну.",
+      "PDF-схема для друку: обкладинка з картою сторінок, символьна схема з власним ключем, символи на кольорі, кольорова схема з яскравим бекстічем і вузликами, повний ключ. Сусідні сторінки мають спільні сірі рядки, щоб їх легко скласти. Українською чи англійською.",
+      "Свій символ: намалюйте його з кіл, прямокутників, трикутників, зірок, ліній і стрілок — суцільних, контурних чи вирізаних, як на паперовій схемі.",
+      "Довгий ключ: пошук за номером чи назвою, сортування та групи за типом стібка.",
+      "Кнопка «Зняти виділення», а «Видалити» тепер називається «Очистити клітинки».",
+      "Рамку фото під схемою легше вхопити за край, а перемикач редагування фото відсунуто від кнопки «вмістити».",
+      "Значки дуже світлих і дуже темних ниток добре видно в будь-якій темі, зокрема в темній.",
+      "Бічна панель пам’ятає, які розділи згорнуто.",
+    ],
+    en: [
+      "PDF for Pattern Keeper: the app reads the chart and the thread numbers by itself — nothing to type in.",
+      "PDF chart to print: a cover with a page map, the symbol chart with its own key, symbols on colour, a colour chart with bright backstitch and knots, and the full key. Neighbouring pages share grey rows so they are easy to join. In Ukrainian or English.",
+      "Your own symbol: draw it from circles, rectangles, triangles, stars, lines and arrows — filled, outlined or cut out, to match the paper chart.",
+      "Long keys: search by number or name, sort, and group by stitch type.",
+      "A “Deselect” button, and “Delete” is now called “Clear cells”.",
+      "The frame of the photo behind the chart is easier to grab by its edge, and the photo edit toggle has moved away from “fit”.",
+      "Icons of very light and very dark threads stay visible in every theme, including the dark one.",
+      "The side panel remembers which sections you folded.",
+    ],
+  },
+  {
     version: "1.0.0",
     date: "2026-11-15",
     uk: [
