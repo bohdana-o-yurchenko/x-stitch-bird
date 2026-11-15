@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { DM_Sans, Fraunces, Nunito } from "next/font/google";
 import { notFound } from "next/navigation";
@@ -29,6 +30,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
     <html lang={locale} className={`${dmSans.variable} ${fraunces.variable} ${nunito.variable}`}>
       <body>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
