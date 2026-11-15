@@ -42,6 +42,8 @@ export function shortcutLabel(command: string, args?: unknown): string | null {
 
 /** `mod` = ⌘ on macOS, Ctrl elsewhere. Letters respect Shift; symbols and digits ignore it. */
 export const KEYMAP: readonly KeyBinding[] = [
+  // in the underlay's edit mode Ctrl/⌘+Z undoes the image's last change (SPEC §15.15)
+  { keys: "mod+z", command: "underlay.undo", when: "underlayEditing" },
   { keys: "mod+z", command: "history.undo" },
   { keys: "mod+shift+z", command: "history.redo" },
   { keys: "mod+y", command: "history.redo" },

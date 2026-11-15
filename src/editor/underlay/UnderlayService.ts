@@ -1,5 +1,5 @@
-import type { Point } from "@/core/pattern/types";
-import { defaultCorners, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, straightenedSize, stretchUnderlay, type Handle, type Straighten, type UnderlayData } from "@/core/underlay/underlay";
+import type { Point, Rect } from "@/core/pattern/types";
+import { defaultCorners, dragUnderlay, fitToChart, frameHandleAt, frameNeeded, handleAt, newUnderlay, resetCrop, resizeRect, scaleAround, straightenedSize, type Handle, type Straighten, type UnderlayData } from "@/core/underlay/underlay";
 import { downscaleToBlob, loadImage } from "@/platform/images";
 import { runStraighten } from "../heavy";
 import type { Editor } from "../createEditor";
@@ -9,6 +9,9 @@ const SAVE_DELAY = 700;
 const MAX_SIDE = 6000;
 /** Grab distance for handles, in screen pixels. */
 const GRAB_PX = 8;
+/** The zoomed-in edit frame: starting size and smallest size, in screen pixels. */
+const FRAME = { w: 240, h: 160 }, FRAME_MIN = 40;
+const UNDO_LIMIT = 50;
 
 const CURSORS: Record<Handle, string> = { nw: "nwse-resize", se: "nwse-resize", ne: "nesw-resize", sw: "nesw-resize", n: "ns-resize", s: "ns-resize", e: "ew-resize", w: "ew-resize", inside: "move" };
 
@@ -22,6 +25,8 @@ export class UnderlayService {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private dirty = false;
   private drag: { handle: Handle; from: Point; start: UnderlayData } | null = null;
+  private frameDrag: { handle: Exclude<Handle, "inside">; from: Point; frame: Rect; start: UnderlayData } | null = null;
+  private undoStack: UnderlayData[] = [];
 
   constructor(private ed: Editor) {}
 
@@ -80,11 +85,16 @@ export class UnderlayService {
   }
 
   update(patch: Partial<UnderlayData>) {
-    if (this.data) this.set({ ...this.data, ...patch });
+    if (!this.data) return;
+    if (patch.rect || patch.crop) this.remember();
+    this.set({ ...this.data, ...patch });
   }
 
+  /** Behind = stitching; off = edit mode, which starts with a fresh edit frame and its own undo. */
   setBehind(behind: boolean) {
     this.update({ behind, visible: true });
+    this.ed.store.setState({ underlayFrame: null });
+    if (behind) this.undoStack = [];
     this.ed.tools.leave();
   }
 
@@ -133,39 +143,90 @@ export class UnderlayService {
     this.ed.toast("toasts.straightened");
   }
 
-  /** Grow or shrink by (dw, dh) cells around the middle of the screen; works in both modes, at any zoom. */
-  stretch(dw: number, dh: number) {
+  /** The zoomed-in edit frame (SPEC §15.15), in canvas pixels; null when the image's own handles are reachable. */
+  frame(): Rect | null {
     const u = this.data;
-    if (u) this.update({ rect: stretchUnderlay(u.rect, this.ed.viewport.centre(), dw, dh) });
+    if (!u || !this.editing || u.tool !== "move" || !frameNeeded(u.rect, this.ed.viewport.visibleGrid())) return null;
+    if (this.ed.state.underlayFrame) return this.ed.state.underlayFrame;
+    const c = this.ed.viewport.centreOnScreen();
+    return { x: c.x - FRAME.w / 2, y: c.y - FRAME.h / 2, ...FRAME };
+  }
+
+  /** Undo inside edit mode: the image's placement before the last change. */
+  undo() {
+    const prev = this.undoStack.pop();
+    if (prev) this.set(prev);
+  }
+
+  private remember() {
+    const u = this.data, last = this.undoStack[this.undoStack.length - 1];
+    if (!u || (last && last.rect === u.rect && last.crop === u.crop)) return;
+    this.undoStack.push(u);
+    if (this.undoStack.length > UNDO_LIMIT) this.undoStack.shift();
   }
 
   private grabTolerance() {
     return GRAB_PX / this.ed.state.viewport.zoom;
   }
 
-  /** CSS cursor for a pointer at `p` (grid units) in edit mode. */
-  cursorAt(p: Point | null): string {
+  /** A side or corner handle of the edit frame under canvas point `s`, if the frame is shown. */
+  private frameHandle(s: Point): Exclude<Handle, "inside"> | null {
+    const f = this.frame();
+    return f ? frameHandleAt(f, s, GRAB_PX) : null;
+  }
+
+  /** CSS cursor in edit mode for a pointer at grid point `p` / canvas point `s`. */
+  cursorAt(p: Point | null, s: Point | null): string {
     const u = this.data;
     if (this.drag) return CURSORS[this.drag.handle];
+    if (this.frameDrag) return CURSORS[this.frameDrag.handle];
+    const fh = s && this.frameHandle(s);
+    if (fh) return CURSORS[fh];
     const h = u && p ? handleAt(u.rect, p, this.grabTolerance()) : null;
     return h ? CURSORS[h] : "default";
   }
 
-  pointerDown(p: Point) {
+  /** The edit frame's handles first, then the image's own handles; inside the image = move. */
+  pointerDown(p: Point, s: Point) {
     const u = this.data;
-    const handle = u && handleAt(u.rect, p, this.grabTolerance());
-    if (u && handle) this.drag = { handle, from: p, start: u };
+    if (!u) return;
+    const fh = this.frameHandle(s);
+    if (fh) {
+      this.remember();
+      this.frameDrag = { handle: fh, from: s, frame: this.frame()!, start: u };
+      return;
+    }
+    const handle = handleAt(u.rect, p, this.grabTolerance());
+    if (handle) {
+      this.remember();
+      this.drag = { handle, from: p, start: u };
+    }
   }
 
-  pointerMove(p: Point, free: boolean) {
+  /**
+   * Edit frame: the dragged side follows the pointer and the opposite side stays pinned — on the frame and on the
+   * image under it (pin and stretch), so a grid line can be dragged onto the chart's grid line.
+   */
+  pointerMove(p: Point, s: Point, free: boolean) {
+    const fd = this.frameDrag;
+    if (fd) {
+      const f0 = fd.frame, f1 = resizeRect(f0, fd.handle, s.x - fd.from.x, s.y - fd.from.y, free, FRAME_MIN);
+      const h = fd.handle, east = h.includes("e"), west = h.includes("w"), south = h.startsWith("s"), north = h.startsWith("n");
+      const pin = this.ed.viewport.toGrid(west ? f0.x + f0.w : f0.x, north ? f0.y + f0.h : f0.y);
+      const sx = east || west ? f1.w / f0.w : 1, sy = north || south ? f1.h / f0.h : 1;
+      this.ed.store.setState({ underlayFrame: f1 });
+      this.set({ ...fd.start, rect: scaleAround(fd.start.rect, pin, sx, sy) }, false);
+      return;
+    }
     const d = this.drag;
     if (!d) return;
     this.set({ ...d.start, ...dragUnderlay(d.start, d.handle, p.x - d.from.x, p.y - d.from.y, free) }, false);
   }
 
   pointerUp() {
-    if (!this.drag) return;
+    if (!this.drag && !this.frameDrag) return;
     this.drag = null;
+    this.frameDrag = null;
     this.save();
   }
 

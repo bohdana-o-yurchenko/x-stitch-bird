@@ -93,8 +93,8 @@ export interface EditorState {
   menuReveal: string[] | null;
   /** The quick-start guide is open (shown once on the first visit, then from the menu). */
   guideOpen: boolean;
-  /** The floating alignment pad for the underlay is shown (opt-in, SPEC §15.15). */
-  underlayPad: boolean;
+  /** The zoomed-in edit frame of the underlay, in canvas px, once the user has resized it (SPEC §15.15). */
+  underlayFrame: Rect | null;
   /** Fade every key entry except the active one (SPEC §15.16). */
   highlight: boolean;
   hasClipboard: boolean;
@@ -135,7 +135,7 @@ export const createEditorStore = () =>
     underlay: null,
     underlayImage: null,
     highlight: false,
-    underlayPad: false,
+    underlayFrame: null,
     guideOpen: false,
     menuReveal: null,
     hasClipboard: false,

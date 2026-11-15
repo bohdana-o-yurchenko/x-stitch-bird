@@ -11,6 +11,7 @@ export interface CanvasTheme {
   rulers: { size: number; background: string; text: string; line: string };
   preview: { alpha: number };
   highlight: { dimAlpha: number };
+  underlayFrame: { handle: number };
   partials: { splitLine: string; symbolsFill: string };
   knots: { radius: number; outline: string; symbolsDot: string };
   ambiguous: { corner: number; minZoom: number };
@@ -32,6 +33,7 @@ export const defaultCanvasTheme: CanvasTheme = {
   rulers: { size: 26, background: "#F4EFE6", text: "#7A7064", line: "#E2D9CA" },
   preview: { alpha: 0.55 },
   highlight: { dimAlpha: 0.15 },
+  underlayFrame: { handle: 11 },
   partials: { splitLine: "rgba(0,0,0,.45)", symbolsFill: "rgba(0,0,0,.06)" },
   knots: { radius: 0.2, outline: "rgba(0,0,0,.6)", symbolsDot: "#1d1a16" },
   ambiguous: { corner: 0.28, minZoom: 6 },

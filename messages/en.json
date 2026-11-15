@@ -72,7 +72,7 @@
     "ambiguousNext": "Next mark (Shift+A)",
     "ambiguousClear": "Clear all marks",
     "markedAmbiguous": "marked ambiguous",
-    "underlayHint": "Editing the image behind the chart · drag to move · corners resize (Shift = free) · arrows nudge · Esc or U = done",
+    "underlayHint": "Editing the image behind the chart · drag to move · zoomed in: drag the frame’s sides to stretch · arrows nudge · Ctrl/⌘+Z undo · Esc or U = done",
     "noEntry": "No key entry chosen",
     "ambiguousClearTitle": "Clear all {count, plural, one {# “?” mark} other {# “?” marks}}?",
     "ambiguousClearConfirm": "Clear marks",
@@ -422,7 +422,7 @@
     "heading": "Image behind the chart",
     "behind": "Behind stitches",
     "behindHint": "The image sits under your stitches; all tools work. Turn off (or press U) to move, resize or crop it.",
-    "editHint": "Edit mode: drag to move, corners resize (Shift = free), Crop trims edges. Tick “Behind stitches” or press Esc when done.",
+    "editHint": "Edit mode: drag to move, corners resize (Shift = free), Crop trims edges. Zoomed in, a frame appears in the middle — drag its sides to stretch the photo right there. Ctrl/⌘+Z undoes. Tick “Behind stitches” or press Esc when done.",
     "show": "Show",
     "opacity": "Opacity",
     "move": "Move & resize",
@@ -435,34 +435,13 @@
     "resetCrop": "Reset crop",
     "replace": "Replace image…",
     "remove": "Remove",
-    "padTitle": "Image behind the chart",
-    "adjustWithMouse": "Edit",
-    "adjustWithMouseTitle": "Edit with the mouse: drag, resize corners, crop (U)",
-    "done": "Done",
-    "doneTitle": "Back to stitching (Esc)",
-    "collapsePad": "Hide alignment controls",
-    "expandPad": "Show alignment controls",
-    "moveLeft": "Move left",
-    "moveUp": "Move up",
-    "moveDown": "Move down",
-    "moveRight": "Move right",
-    "width": "Width",
-    "height": "Height",
-    "size": "Both",
-    "step": "Step",
-    "stepTitle": "{n} cell per click",
-    "shrink": "{what} smaller",
-    "grow": "{what} larger",
-    "padHint": "Resizing keeps the middle of the screen in place — zoom into the area you are aligning and click.",
-    "nudge": "Move",
     "straighten": "Straighten (4 corners)…",
     "straightenTitle": "Drag the photo’s corners onto the chart grid; the picture is flattened to fit it exactly",
-    "padToggle": "Quick move & resize panel on the chart",
-    "padToggleHint": "A small floating panel to nudge and stretch the image at any zoom",
-    "closePad": "Hide this panel (turn it on again in the side panel)",
     "removeTitle": "Remove the picture behind the chart?",
     "removeConfirm": "Remove picture",
-    "removeBody": "The photo behind the chart leaves this pattern, with its straightening and position. Your stitches stay. This can’t be undone."
+    "removeBody": "The photo behind the chart leaves this pattern, with its straightening and position. Your stitches stay. This can’t be undone.",
+    "editOn": "Edit the image behind the chart (U)",
+    "editOff": "Done editing the image (U or Esc)"
   },
   "fileMenu": {
     "label": "Menu ▾",
@@ -556,7 +535,8 @@
     "panel": "Show/hide side panel",
     "save": "Save now (also automatic)",
     "underlayEdit": "Edit / done",
-    "highlight": "Highlight selected entry"
+    "highlight": "Highlight selected entry",
+    "underlayUndo": "Undo the image’s last change (edit mode)"
   },
   "straighten": {
     "title": "Straighten the chart photo",
@@ -611,7 +591,7 @@
         "2": "Drag the <hl>4 corners</hl> onto the grid corners — the photo lies flat.",
         "3": "Trace the symbols with the key entries."
       },
-      "tip": "Photo not perfect? Turn on <hl>Quick move & resize panel on the chart</hl> (side panel, <hl>Image behind the chart</hl>) and adjust it block by block, 10×10."
+      "tip": "Photo not perfect? Zoom in and press the <hl>edit image</hl> button by the zoom (or U): a <hl>frame</hl> appears — drag its side and the photo under it follows, the other side stays pinned."
     },
     "views": {
       "title": "4. Views",

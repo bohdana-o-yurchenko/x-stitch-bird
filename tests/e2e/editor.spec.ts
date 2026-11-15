@@ -346,14 +346,27 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   await fileAction(page, "Download pattern file (.xbird)");
   const doc = JSON.parse(readFileSync(await (await download).path(), "utf8"));
   expect(doc.underlay).toMatchObject({ behind: true, imageW: 40, imageH: 20 });
-  // the alignment pad is opt-in; it works while the image is behind the stitches; × hides it again
-  const pad = page.getByTestId("underlay-pad");
-  await expect(pad).toHaveCount(0);
-  await page.getByTestId("pad-toggle").check();
-  const w = doc.underlay.rect.w as number;
-  await pad.getByRole("button", { name: "Width larger" }).click();
-  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeCloseTo(w + 0.5, 5);
-  await pad.getByRole("button", { name: /^Hide this panel/ }).click();
-  await expect(pad).toHaveCount(0);
-  await expect(page.getByTestId("pad-toggle")).not.toBeChecked();
+  // the edit toggle by the zoom; zoomed in, the edit frame stretches the photo with one side pinned
+  const toggle = page.getByTestId("underlay-edit");
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  const r = doc.underlay.rect as { x: number; y: number; w: number; h: number };
+  await page.evaluate(([cx, cy]) => {
+    const ed = (window as unknown as { __stitchwork: { viewport: { width: number; height: number }; store: { setState(s: object): void } } }).__stitchwork;
+    const z = 40;
+    ed.store.setState({ viewport: { zoom: z, offX: (ed.viewport.width + 26) / 2 - 26 - cx! * z, offY: (ed.viewport.height + 26) / 2 - 26 - cy! * z } });
+  }, [r.x + r.w / 2, r.y + r.h / 2]);
+  const frame = await editorState<{ x: number; y: number; w: number; h: number }>(page, "(ed) => ed.underlay.frame()");
+  const box = (await page.getByTestId("chart").boundingBox())!;
+  const w0 = await editorState<number>(page, "(ed) => ed.state.underlay.rect.w");
+  await page.mouse.move(box.x + frame.x + frame.w, box.y + frame.y + frame.h / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + frame.x + frame.w + 40, box.y + frame.y + frame.h / 2, { steps: 4 });
+  await page.mouse.up();
+  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeCloseTo(w0 * (frame.w + 40) / frame.w, 3);
+  await page.keyboard.press("ControlOrMeta+z");
+  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeCloseTo(w0, 6);
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
 });

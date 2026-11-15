@@ -31,6 +31,7 @@ function scene(ed: Editor): ChartScene {
       ? { image: st.underlayImage, crop: st.underlay.crop, rect: st.underlay.rect, opacity: st.underlay.opacity, editing: !st.underlay.behind }
       : null,
     highlight: st.highlight && st.activeEntry ? st.activeEntry : null,
+    underlayFrame: ed.underlay.frame(),
   };
 }
 

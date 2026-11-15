@@ -150,6 +150,30 @@ describe("chart underlay (SPEC §15.15)", () => {
     ed.shortcuts.keyDown(key("u"));
     expect(ed.underlay.editing).toBe(true);
   });
+  it("zoomed in, the edit frame pins one side and the photo under the dragged side follows the pointer; Ctrl+Z undoes", () => {
+    ed.viewport.setSize(826, 626);
+    ed.store.setState({ underlay: { ...ed.state.underlay!, rect: { x: -50, y: -50, w: 200, h: 200 } }, viewport: { zoom: 20, offX: 0, offY: 0 } });
+    const f = ed.underlay.frame()!;
+    expect(f).toEqual({ x: 306, y: 246, w: 240, h: 160 });
+    const sp = (x: number, y: number): ToolPointer => ({ ...at(0, 0), sx: x, sy: y, grid: ed.viewport.toGrid(x, y) });
+    const imageAt = (x: number, y: number) => {
+      const g = ed.viewport.toGrid(x, y), r = ed.state.underlay!.rect;
+      return [+((g.x - r.x) / r.w).toFixed(6), +((g.y - r.y) / r.h).toFixed(6)];
+    };
+    const pinned = imageAt(f.x, f.y + 50), grabbed = imageAt(f.x + f.w, f.y + 50);
+    ed.tools.down(sp(f.x + f.w, f.y + 50));
+    ed.tools.move(sp(f.x + f.w + 30, f.y + 50));
+    ed.tools.up(sp(f.x + f.w + 30, f.y + 50));
+    expect(imageAt(f.x, f.y + 50)).toEqual(pinned);
+    expect(imageAt(f.x + f.w + 30, f.y + 50)).toEqual(grabbed);
+    expect(ed.underlay.frame()!.w).toBe(270);
+    ed.shortcuts.keyDown(key("z", { ctrl: true }));
+    expect(ed.state.underlay!.rect).toEqual({ x: -50, y: -50, w: 200, h: 200 });
+    // fitted (all sides visible) → no frame
+    ed.store.setState({ viewport: { zoom: 2, offX: 150, offY: 150 } });
+    expect(ed.underlay.frame()).toBeNull();
+  });
+
   it("pictures go to the image store and travel in .json files as data URLs", async () => {
     const png = "data:image/png;base64,iVBORw0KGgo=";
     const [ref] = await ed.images.refsFromFile([{ id: "r1", name: "Photo", src: png, marks: null, x: 0, y: 0, w: 300, h: 200, min: false, op: 1, view: null, tool: "pan", color: "#000", size: 4, grid: false, showSt: false }]);

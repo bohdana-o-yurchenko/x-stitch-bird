@@ -83,6 +83,18 @@ export function handleAt(r: Rect, p: Point, tol: number): Handle | null {
   return p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h ? "inside" : null;
 }
 
+/** Like `handleAt`, but a whole side is grabbable (the edit frame's sides work as rulers); never "inside". */
+export function frameHandleAt(r: Rect, p: Point, tol: number): Exclude<Handle, "inside"> | null {
+  const h = handleAt(r, p, tol);
+  if (h && h !== "inside") return h;
+  const inX = p.x >= r.x && p.x <= r.x + r.w, inY = p.y >= r.y && p.y <= r.y + r.h;
+  if (inY && Math.abs(p.x - r.x) <= tol) return "w";
+  if (inY && Math.abs(p.x - r.x - r.w) <= tol) return "e";
+  if (inX && Math.abs(p.y - r.y) <= tol) return "n";
+  if (inX && Math.abs(p.y - r.y - r.h) <= tol) return "s";
+  return null;
+}
+
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 /**
@@ -106,26 +118,46 @@ export function dragUnderlay(u: UnderlayData, handle: Handle, dx: number, dy: nu
     return { crop, rect: { x: left, y: top, w: right - left, h: bottom - top } };
   }
 
+  return { crop: c, rect: resizeRect(r, handle, dx, dy, free, MIN) };
+}
+
+/**
+ * `r` with the side or corner `handle` dragged by (dx, dy); the opposite side stays put. Corners keep the aspect
+ * ratio unless `free`; nothing gets smaller than `min`. Same units in and out (grid units or screen px).
+ */
+export function resizeRect(r: Rect, handle: Exclude<Handle, "inside">, dx: number, dy: number, free: boolean, min: number): Rect {
+  const west = handle.includes("w"), east = handle.includes("e"), north = handle.startsWith("n"), south = handle.startsWith("s");
   let w = r.w + (east ? dx : west ? -dx : 0), h = r.h + (south ? dy : north ? -dy : 0);
   const corner = (west || east) && (north || south);
   if (corner && !free) {
     const aspect = r.h / r.w;
-    w = Math.max(MIN, Math.abs(dx) >= Math.abs(dy) ? w : h / aspect);
+    w = Math.max(min, Math.abs(dx) >= Math.abs(dy) ? w : h / aspect);
     h = w * aspect;
-    if (h < MIN) { h = MIN; w = h / aspect; }
+    if (h < min) { h = min; w = h / aspect; }
   }
-  w = Math.max(MIN, w);
-  h = Math.max(MIN, h);
-  return { crop: c, rect: { x: west ? r.x + r.w - w : r.x, y: north ? r.y + r.h - h : r.y, w, h } };
+  w = Math.max(min, w);
+  h = Math.max(min, h);
+  return { x: west ? r.x + r.w - w : r.x, y: north ? r.y + r.h - h : r.y, w, h };
 }
 
 /**
- * Width and height grown by (dw, dh) grid units with `anchor` (a grid point, usually the middle of the screen)
- * staying put, so the part being aligned doesn't drift while the far parts move.
+ * `r` scaled by (sx, sy) around `anchor`: the image point under the anchor stays put (the pinned side of the
+ * zoomed-in edit frame, SPEC §15.15) and every other point moves away from or towards it.
  */
-export function stretchUnderlay(r: Rect, anchor: Point, dw: number, dh: number): Rect {
-  const w = Math.max(MIN, r.w + dw), h = Math.max(MIN, r.h + dh);
+export function scaleAround(r: Rect, anchor: Point, sx: number, sy: number): Rect {
+  const w = Math.max(MIN, r.w * sx), h = Math.max(MIN, r.h * sy);
   return { x: anchor.x - ((anchor.x - r.x) * w) / r.w, y: anchor.y - ((anchor.y - r.y) * h) / r.h, w, h };
+}
+
+/**
+ * The zoomed-in edit frame is needed when the image covers the middle of the view and at least 3 of its 4 sides
+ * are outside it — so its own handles can't be reached. `view` is the visible chart area in grid units.
+ */
+export function frameNeeded(img: Rect, view: Rect): boolean {
+  const cx = view.x + view.w / 2, cy = view.y + view.h / 2;
+  if (cx < img.x || cx > img.x + img.w || cy < img.y || cy > img.y + img.h) return false;
+  const outside = [img.x <= view.x, img.x + img.w >= view.x + view.w, img.y <= view.y, img.y + img.h >= view.y + view.h];
+  return outside.filter(Boolean).length >= 3;
 }
 
 /** Show the whole image again; the part that was visible stays exactly where it was. */

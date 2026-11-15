@@ -102,7 +102,7 @@ stitchwork/
 │  │  │  ├─ EditorLayout.tsx         slot-based shell: header | stage | side | status
 │  │  │  └─ layout.module.css
 │  │  ├─ header/                     PatternName, PatternInfoButton, FileMenu, TransformMenu, ViewSwitch, ExportMenu
-│  │  ├─ stage/                      ChartCanvas, ZoomControls (+ view switch), UnderlayPad, SelectionActions
+│  │  ├─ stage/                      ChartCanvas, ZoomControls (+ view switch, underlay edit toggle), SelectionActions
 │  │  ├─ side/                       ToolBar, KeyPanel, KeyRow, FabricPanel (+ grid numbering), TotalsPanel, UnderlayPanel
 │  │  ├─ status/                     StatusBar, AmbiguousStatus (only rendered when N > 0)
 │  │  ├─ dialogs/
@@ -1049,9 +1049,11 @@ Decisions taken while implementing this plan. Each one lives in the single place
   600 ms instead of the browser's own delay.
 - Menus: `Dropdown` in `ui/common/widgets.tsx` takes `MenuItem[]` (actions, `"-"` separators, nested `items` for
   submenus, optional `hint` line). The File menu is defined in `ui/header/Header.tsx`.
-- Floating stage panels (the underlay alignment pad) use `ui/stage/FloatingPanel.tsx`: draggable
-  by a grip, position kept in `localStorage` (a per-browser convenience).
-- Underlay stretching keeps the screen centre fixed: `stretchUnderlay` in `core/underlay/`, `ViewportService.centre()`.
+- Underlay zoomed-in edit frame (SPEC §15.15): `frameNeeded`, `frameHandleAt`, `resizeRect`, `scaleAround` in
+  `core/underlay/`; `UnderlayService.frame()` (screen px; `underlayFrame` in the store once resized, reset when edit
+  mode turns on), pin-and-stretch in `pointerMove`, own undo stack (`underlay.undo`, bound to mod+z in
+  `underlayEditing`); `ViewportService.visibleGrid()` / `centreOnScreen()`; drawn by `ChartRenderer.drawEditFrame`.
+  The old floating pad and `FloatingPanel` were removed.
 - Small dialogs share `ui/dialogs/simpleDialogs.tsx`; the key-entry form has its own folder.
 - Key-entry form (2026-11-15): not a modal — `keyForm` in the store (`Editor.openKeyForm`/`closeKeyForm`, commands
   `key.add`/`key.edit`), rendered by `ui/side/SidePanel.tsx` in place of the panel's sections, so the chart and

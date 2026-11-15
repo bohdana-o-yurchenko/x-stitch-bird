@@ -1,4 +1,4 @@
-import type { Point } from "@/core/pattern/types";
+import type { Point, Rect } from "@/core/pattern/types";
 import type { EditorStore } from "../store/editorStore";
 
 const MIN_ZOOM = 2, MAX_ZOOM = 60, MAX_FIT_ZOOM = 40;
@@ -22,9 +22,15 @@ export class ViewportService {
     return { x: (sx - this.ruler - offX) / zoom, y: (sy - this.ruler - offY) / zoom };
   }
 
-  /** Grid point at the middle of the visible chart area (right of and below the rulers). */
-  centre(): Point {
-    return this.toGrid((this.width + this.ruler) / 2, (this.height + this.ruler) / 2);
+  /** The visible chart area (right of and below the rulers) in grid units. */
+  visibleGrid(): Rect {
+    const a = this.toGrid(this.ruler, this.ruler), b = this.toGrid(this.width, this.height);
+    return { x: a.x, y: a.y, w: b.x - a.x, h: b.y - a.y };
+  }
+
+  /** The middle of the visible chart area, in canvas pixels. */
+  centreOnScreen(): Point {
+    return { x: (this.width + this.ruler) / 2, y: (this.height + this.ruler) / 2 };
   }
 
   toCell(sx: number, sy: number): Point {

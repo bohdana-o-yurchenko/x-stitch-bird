@@ -33,6 +33,8 @@ export interface ChartScene {
   flash: { cell: number; until: number } | null;
   /** Behind: drawn under the stitches. Editing: drawn on top with handles. */
   underlay: (UnderlayView & { editing: boolean }) | null;
+  /** Zoomed-in edit frame for the underlay, in canvas px (SPEC §15.15). */
+  underlayFrame: Rect | null;
   /** Only this entry at full strength, the rest faded (stitch highlighting). */
   highlight: KeyIndex | null;
 }
@@ -128,6 +130,7 @@ export class ChartRenderer {
       drawLines(g, p, only!, f, style);
     } else drawLines(g, p, s.palette, f, style);
     if (s.underlay?.editing) this.drawUnderlayEditor(s.underlay, p, f);
+    if (s.underlayFrame) this.drawEditFrame(s.underlayFrame);
     this.drawOverlays(s, f);
     this.drawRulers(s, f);
     const flashing = !!s.flash && s.flash.until > Date.now();
@@ -236,6 +239,28 @@ export class ChartRenderer {
   }
 
   /** Edit mode: the image above the stitches, its outline and 8 handles. */
+  /** A dashed outline with 8 handles, transparent inside so the photo under it stays visible. */
+  private drawEditFrame(r: Rect) {
+    const g = this.g, t = this.theme, H = t.underlayFrame.handle;
+    g.save();
+    g.lineWidth = 3;
+    g.strokeStyle = "rgba(255,255,255,0.85)";
+    g.strokeRect(r.x, r.y, r.w, r.h);
+    g.setLineDash([7, 5]);
+    g.lineWidth = 1.5;
+    g.strokeStyle = t.accent;
+    g.strokeRect(r.x, r.y, r.w, r.h);
+    g.setLineDash([]);
+    for (const [hx, hy] of [[0, 0], [0.5, 0], [1, 0], [1, 0.5], [1, 1], [0.5, 1], [0, 1], [0, 0.5]] as const) {
+      const x = r.x + hx * r.w - H / 2, y = r.y + hy * r.h - H / 2;
+      g.fillStyle = t.accent;
+      g.fillRect(x, y, H, H);
+      g.strokeStyle = "#fff";
+      g.strokeRect(x + 0.5, y + 0.5, H - 1, H - 1);
+    }
+    g.restore();
+  }
+
   private drawUnderlayEditor(u: UnderlayView, p: Pattern, f: ChartFrame) {
     const g = this.g, t = this.theme, { z, ox, oy } = f;
     drawUnderlay(g, p, u, f, false);

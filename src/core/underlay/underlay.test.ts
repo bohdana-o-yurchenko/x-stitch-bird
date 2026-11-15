@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, resetCrop, straightenedSize, stretchUnderlay } from "./underlay";
+import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, frameHandleAt, frameNeeded, resetCrop, resizeRect, scaleAround, straightenedSize } from "./underlay";
 
 // image 200×100 px placed over a 40×40 chart
 const base = () => ({ ...newUnderlay("data:image/jpeg;base64,x", 200, 100, { w: 40, h: 40 }) });
@@ -34,11 +34,31 @@ describe("chart underlay geometry (SPEC §15.15)", () => {
     expect(resetCrop({ ...u, ...left })).toEqual({ crop: { x: 0, y: 0, w: 200, h: 100 }, rect: { x: 0, y: 10, w: 40, h: 20 } });
   });
 
-  it("stretches around an anchor point, which stays on the same image spot", () => {
-    const r = stretchUnderlay({ x: 0, y: 0, w: 100, h: 50 }, { x: 25, y: 10 }, 2, 1);
+  it("scales around a pinned point, which stays on the same image spot", () => {
+    const r = scaleAround({ x: 0, y: 0, w: 100, h: 50 }, { x: 25, y: 10 }, 1.02, 1.02);
     expect([r.x, r.y, r.w, r.h].map((v) => +v.toFixed(6))).toEqual([-0.5, -0.2, 102, 51]);
     expect((25 - r.x) / r.w).toBeCloseTo(0.25);
   });
+
+  it("asks for the edit frame only when the image covers the view and 3+ of its sides are off-screen", () => {
+    const img = { x: 0, y: 0, w: 100, h: 80 };
+    expect(frameNeeded(img, { x: 40, y: 30, w: 10, h: 8 })).toBe(true);
+    expect(frameNeeded(img, { x: -5, y: 30, w: 10, h: 8 })).toBe(true);
+    expect(frameNeeded(img, { x: -5, y: -5, w: 10, h: 8 })).toBe(false);
+    expect(frameNeeded(img, { x: -10, y: -10, w: 120, h: 100 })).toBe(false);
+    expect(frameNeeded(img, { x: 200, y: 200, w: 10, h: 8 })).toBe(false);
+  });
+
+  it("lets the edit frame be grabbed anywhere along a side, corners first", () => {
+    const f = { x: 0, y: 0, w: 240, h: 160 };
+    expect([frameHandleAt(f, { x: 241, y: 30 }, 8), frameHandleAt(f, { x: 2, y: 158 }, 8), frameHandleAt(f, { x: 120, y: 80 }, 8)]).toEqual(["e", "sw", null]);
+  });
+
+  it("resizes a box from a side, or a corner with the aspect kept", () => {
+    expect(resizeRect({ x: 0, y: 0, w: 200, h: 100 }, "e", 20, 5, false, 10)).toEqual({ x: 0, y: 0, w: 220, h: 100 });
+    expect(resizeRect({ x: 0, y: 0, w: 200, h: 100 }, "nw", -20, 0, false, 10)).toEqual({ x: -20, y: -10, w: 220, h: 110 });
+  });
+
 
   it("sizes a straightened picture like the photo, within the limit", () => {
     const corners = [{ x: 0, y: 0 }, { x: 800, y: 0 }, { x: 800, y: 600 }, { x: 0, y: 600 }] as const;

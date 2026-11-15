@@ -1220,22 +1220,26 @@ over it. One underlay per pattern.
 - **Fit to chart**: scale the visible part to fit the chart, keep aspect, centre it.
 - **Reset crop**: show the whole image again at the current scale.
 
-**Alignment pad** (opt-in: off by default, switched on with **Quick move & resize panel on the chart** in the side
-panel section, or off with its **×**; remembered in this browser). While on and the image is shown it works in both
-modes, at any zoom: a small floating panel on the stage (bottom-left, draggable by its grip, can be folded to its
-title). Buttons, each one click:
-- **Move** ← ↑ ↓ → by the step.
-- **Width − +**, **Height − +**: change that side by the step; **Both − +**: change the width by the step and the
-  height in proportion (aspect kept).
-- **Step**: 0.1 · 0.5 · 2 cells (default 0.5; remembered in this browser).
-- Resizing keeps the **middle of the screen** fixed (the grid point at the centre of the visible chart area), so the
-  area being aligned stays put while the far parts move. Typical use with a scan that is slightly off: zoom into a
-  10×10 block, click Width/Height until it lines up, scroll to the next block — no mode switching or zooming out.
-- **Edit / Done** button in the pad's title switches between edit and behind mode (same as `U`).
+**Edit toggle** (replaced the floating alignment pad, 2026-11-15): a small icon button at the end of the zoom box,
+shown whenever the pattern has an image behind the chart. Pressed = edit mode; same as `U` and the "Behind stitches"
+checkbox. No setting to switch it on.
+
+**Zoomed-in edit frame** — in edit mode, Move & resize sub-tool, when the image covers the middle of the view and at
+least 3 of its 4 sides are outside the view (so its own handles can't be reached), a frame is drawn in the middle of
+the view: 240 × 160 screen px, dashed accent outline, 8 handles, transparent inside. It is a screen tool: panning
+slides the photo under it. Not shown when zoomed out (the image's own handles are visible) or in Crop.
+- **Pin and stretch**: drag a side (anywhere along it) or a corner; the frame follows the pointer and the photo
+  under the dragged side moves exactly with it, while the opposite side stays pinned — on the frame and on the photo
+  (the image is scaled around the pinned side's grid point). Corners scale both axes, aspect kept; Shift = free.
+  Smallest frame 40 px. Use: pin one grid line of the scan, drag another onto the chart's grid line.
+- The frame keeps its new size and place until edit mode is turned off; turning it on again starts a fresh frame.
+- Inside the frame (and anywhere on the image) dragging moves the image, as before.
+- **Ctrl/⌘+Z in edit mode** undoes the image's last change (drags, frame stretches, nudges, panel values; up to 50
+  steps); leaving edit mode clears that history. Chart undo is unaffected.
 
 **Straighten (4 corners)** — for photos and scans that aren't a perfect rectangle (taken at an angle, tilted,
 slightly trapezoid), like a phone document scanner. Opens automatically after adding an image, and from
-**Straighten (4 corners)…** in the pad and the side panel. (Replaced the 3-point alignment of the first version,
+**Straighten (4 corners)…** in the side panel. (Replaced the 3-point alignment of the first version,
 which could only move and stretch.)
 1. A full-screen editor shows the **original photo** with 4 round corner handles (top-left, top-right,
    bottom-right, bottom-left) joined by an outline; outside the outline is dimmed.
@@ -1253,7 +1257,7 @@ which could only move and stretch.)
    corners** puts the handles back near the photo's edges.
 - The original photo, the corners, the size and the position are kept, so reopening the editor continues from the
   previous corners, and straightening is always redone from the original (never from an already-warped picture).
-- Afterwards the pad still fine-tunes; a page that is bent (book spine) isn't fixed by 4 corners.
+- Afterwards the zoomed-in edit frame fine-tunes; a page that is bent (book spine) isn't fixed by 4 corners.
 
 **Side panel section "Image behind the chart"** (only when one exists): Behind stitches toggle, Show/hide, opacity slider
 (10–100 %, default 50 %), Move & resize / Crop (edit mode only), X / Y / W / H fields, Fit to chart, Reset crop,

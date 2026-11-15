@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ChartView } from "@/render/chart";
 import { Icon } from "../common/Icon";
 import { cx, ui } from "../common/widgets";
-import { useCommand, useEditor, useEditorState } from "../hooks/editor";
+import { useCommand, useEditorState } from "../hooks/editor";
 import { ChartCanvas } from "./ChartCanvas";
-import { FloatingPanel } from "./FloatingPanel";
 import s from "./stage.module.css";
 
 /** Colour / Both / Symbols — how the chart is drawn; sits with the zoom. */
@@ -26,6 +24,27 @@ function ViewSwitch() {
   );
 }
 
+/**
+ * Edit mode for the image behind the chart (same as U): shown whenever the pattern has one. When zoomed in, edit
+ * mode also draws the small edit frame in the middle of the view (SPEC §15.15).
+ */
+function UnderlayEditToggle() {
+  const t = useTranslations("underlay");
+  const run = useCommand();
+  const has = useEditorState((st) => !!st.underlay);
+  const editing = useEditorState((st) => !!st.underlay && st.underlay.visible && !st.underlay.behind);
+  if (!has) return null;
+  const label = editing ? t("editOff") : t("editOn");
+  return (
+    <>
+      <span className={s.zoomDivider} />
+      <button type="button" className={cx(s.editToggle, editing && s.on)} title={label} aria-label={label} aria-pressed={editing} data-testid="underlay-edit" data-guide="underlay-edit" onClick={() => run("underlay.toggleBehind")}>
+        <Icon name="underlayEdit" size={17} />
+      </button>
+    </>
+  );
+}
+
 function ZoomControls() {
   const t = useTranslations("tools");
   const run = useCommand();
@@ -38,88 +57,9 @@ function ZoomControls() {
         <span>{Math.round((zoom / 12) * 100)}%</span>
         <button type="button" title={t("zoomIn")} onClick={() => run("view.zoomIn")}>+</button>
         <button type="button" title={t("fit")} onClick={() => run("view.fit")}>⤢</button>
+        <UnderlayEditToggle />
       </div>
     </div>
-  );
-}
-
-const STEPS = [0.1, 0.5, 2] as const;
-
-function useStored<T>(key: string, fallback: T, valid: (v: unknown) => boolean): [T, (v: T) => void] {
-  const [v, setV] = useState<T>(() => {
-    try {
-      const raw = JSON.parse(localStorage.getItem(key) ?? "null") as unknown;
-      return valid(raw) ? (raw as T) : fallback;
-    } catch {
-      return fallback;
-    }
-  });
-  const set = (next: T) => {
-    setV(next);
-    try {
-      localStorage.setItem(key, JSON.stringify(next));
-    } catch {
-      // a convenience only
-    }
-  };
-  return [v, set];
-}
-
-/**
- * Always-available underlay alignment (SPEC §15.15): move and stretch by fixed steps at any zoom, in either mode.
- * Stretching keeps the middle of the screen in place, so zoom into the area being aligned and click.
- */
-function UnderlayPad() {
-  const t = useTranslations("underlay");
-  const run = useCommand();
-  const behind = useEditorState((st) => st.underlay?.behind ?? true);
-  const rect = useEditorState((st) => st.underlay?.rect);
-  const [step, setStep] = useStored<number>("stitchwork.underlayStep", 0.5, (v) => STEPS.includes(v as never));
-  const [open, setOpen] = useStored<boolean>("stitchwork.underlayPadOpen", true, (v) => typeof v === "boolean");
-  if (!rect) return null;
-  const nudge = (dx: number, dy: number) => () => run("underlay.nudge", { dx: dx * step, dy: dy * step });
-  const stretch = (dw: number, dh: number) => () => run("underlay.stretch", { dw: dw * step, dh: dh * step });
-  const both = (sign: number) => () => run("underlay.stretch", { dw: sign * step, dh: (sign * step * rect.h) / rect.w });
-  const pair = (onMinus: () => void, onPlus: () => void, what: string) => (
-    <div className={s.padBtns}>
-      <button type="button" title={t("shrink", { what })} aria-label={t("shrink", { what })} onClick={onMinus}>−</button>
-      <button type="button" title={t("grow", { what })} aria-label={t("grow", { what })} onClick={onPlus}>+</button>
-    </div>
-  );
-  return (
-    <FloatingPanel id="underlayPad" corner="bottomLeft" className={s.pad} testId="underlay-pad">
-      <div className={s.padHead}>
-        <b>{t("padTitle")}</b>
-        <button type="button" className={cx(s.padMode, !behind && s.on)} title={behind ? t("adjustWithMouseTitle") : t("doneTitle")} onClick={() => run("underlay.toggleBehind")}>{behind ? t("adjustWithMouse") : t("done")}</button>
-        <button type="button" className={s.padToggle} aria-label={open ? t("collapsePad") : t("expandPad")} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "–" : "+"}</button>
-        <button type="button" className={s.padToggle} title={t("closePad")} aria-label={t("closePad")} onClick={() => run("underlay.togglePad")}>×</button>
-      </div>
-      {open && (
-        <div className={s.padBody}>
-          <button type="button" className={s.alignStart} title={t("straightenTitle")} onClick={() => run("underlay.openStraighten")}>{t("straighten")}</button>
-          <span>{t("nudge")}</span>
-          <div className={s.padBtns}>
-            <button type="button" aria-label={t("moveLeft")} onClick={nudge(-1, 0)}>←</button>
-            <button type="button" aria-label={t("moveUp")} onClick={nudge(0, -1)}>↑</button>
-            <button type="button" aria-label={t("moveDown")} onClick={nudge(0, 1)}>↓</button>
-            <button type="button" aria-label={t("moveRight")} onClick={nudge(1, 0)}>→</button>
-          </div>
-          <span>{t("width")}</span>
-          {pair(stretch(-1, 0), stretch(1, 0), t("width"))}
-          <span>{t("height")}</span>
-          {pair(stretch(0, -1), stretch(0, 1), t("height"))}
-          <span>{t("size")}</span>
-          {pair(both(-1), both(1), t("size"))}
-          <span>{t("step")}</span>
-          <div className={s.padBtns}>
-            {STEPS.map((v) => (
-              <button key={v} type="button" className={cx(step === v && s.on)} aria-pressed={step === v} title={t("stepTitle", { n: v })} onClick={() => setStep(v)}>{v}</button>
-            ))}
-          </div>
-          <p className={s.padHint}>{t("padHint")}</p>
-        </div>
-      )}
-    </FloatingPanel>
   );
 }
 
@@ -149,38 +89,12 @@ function SelectionActions() {
   );
 }
 
-const PAD_KEY = "stitchwork.underlayPad";
-
-/** The pad is opt-in (side panel); the choice is remembered in this browser. */
-function useRememberedPad() {
-  const ed = useEditor();
-  const on = useEditorState((st) => st.underlayPad);
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(PAD_KEY) === "1") ed.store.setState({ underlayPad: true });
-    } catch {
-      // a convenience only
-    }
-  }, [ed]);
-  useEffect(() => {
-    try {
-      localStorage.setItem(PAD_KEY, on ? "1" : "0");
-    } catch {
-      // a convenience only
-    }
-  }, [on]);
-  return on;
-}
-
 export function Stage() {
   const hasSelection = useEditorState((st) => !!st.selection || !!st.floating);
-  const hasUnderlay = useEditorState((st) => !!st.underlay?.visible && !!st.underlayImage);
-  const padOn = useRememberedPad();
   return (
     <>
       <ChartCanvas />
       {hasSelection && <SelectionActions />}
-      {hasUnderlay && padOn && <UnderlayPad />}
       <ZoomControls />
     </>
   );

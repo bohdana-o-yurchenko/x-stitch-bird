@@ -13,6 +13,7 @@ export class ToolManager {
   private panning = false;
   private underlayDrag = false;
   private lastGrid: ToolPointer["grid"] | null = null;
+  private lastScreen: { x: number; y: number } | null = null;
 
   constructor(private ed: Editor) {}
 
@@ -23,7 +24,7 @@ export class ToolManager {
 
   cursor(): string {
     if (this.panning) return "grabbing";
-    if (this.ed.underlay.editing && !this.ed.state.momentaryTool) return this.ed.underlay.cursorAt(this.lastGrid);
+    if (this.ed.underlay.editing && !this.ed.state.momentaryTool) return this.ed.underlay.cursorAt(this.lastGrid, this.lastScreen);
     if (this.ed.state.floating) return "move";
     return this.resolve().cursor;
   }
@@ -44,7 +45,7 @@ export class ToolManager {
     }
     if (p.button !== 0) return;
     if (ed.underlay.editing) {
-      ed.underlay.pointerDown(p.grid);
+      ed.underlay.pointerDown(p.grid, { x: p.sx, y: p.sy });
       this.underlayDrag = true;
       return;
     }
@@ -59,7 +60,8 @@ export class ToolManager {
 
   move(p: ToolPointer) {
     this.lastGrid = p.grid;
-    if (this.underlayDrag) return this.ed.underlay.pointerMove(p.grid, p.shift);
+    this.lastScreen = { x: p.sx, y: p.sy };
+    if (this.underlayDrag) return this.ed.underlay.pointerMove(p.grid, this.lastScreen, p.shift);
     if (this.ed.underlay.editing && !this.active) return this.ed.setHover(p.cell, 1, false);
     const ed = this.ed, size = this.active?.usesBrush || (!this.active && this.resolve().usesBrush) ? ed.state.brush : 1;
     if (!this.active && !ed.state.floating) this.resolve().hover?.(ed, p);
