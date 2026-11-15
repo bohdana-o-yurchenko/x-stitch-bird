@@ -450,3 +450,16 @@ test("switching the language keeps the theme, without reloading the page", async
   await page.getByRole("button", { name: /^Меню ▾$/ }).click();
   await expect(page.getByRole("radio", { name: "Темна" })).toHaveAttribute("aria-checked", "true");
 });
+
+test("the key form picks a symbol from the quick row or from All…, by group", async ({ page }) => {
+  await page.locator("[data-entry]").first().dblclick();
+  const form = page.getByTestId("key-form");
+  await form.getByTestId("symbol-quick").locator("button").nth(1).click();
+  await expect(form.getByTestId("symbol-quick").locator("button").first()).toHaveAttribute("aria-pressed", "true");
+  await form.getByTestId("symbol-button").click();
+  await page.getByRole("tab", { name: "Decorative" }).click();
+  await page.locator("[data-symbol-pop] [data-sym='sym:club']").click();
+  await expect(page.locator("[data-symbol-pop]")).toHaveCount(0);
+  await expect(form.getByTestId("symbol-quick").locator("[data-sym='sym:club']")).toHaveAttribute("aria-pressed", "true");
+  await expect(form.getByTestId("entry-type").getByRole("radio", { name: "Cross stitch" })).toHaveAttribute("aria-checked", "true");
+});

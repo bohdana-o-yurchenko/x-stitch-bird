@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { beadShape } from "@/core/catalog/beadShapes";
 import { ENTRY_KINDS, entryKind } from "@/core/entryKinds/registry";
@@ -40,42 +41,87 @@ function LineSample({ sym, w, h }: { sym: string; w: number; h: number }) {
   return <canvas ref={ref} style={{ width: w, height: h, display: "block" }} />;
 }
 
-/** Characters for stitches, beads and knots; line styles for backstitch. */
+/** Symbols in the order the picker offers them: shapes (basic, decorative), digits & letters, signs; or line styles. */
+function symbolGroups(symbols: readonly string[], lines: boolean) {
+  if (lines) return [{ key: "lines", items: symbols }];
+  return [
+    { key: "groupBasic", items: symbols.filter((x) => shapeSymbol(x)?.group === "basic") },
+    { key: "groupDecorative", items: symbols.filter((x) => shapeSymbol(x)?.group === "decorative") },
+    { key: "groupLetters", items: symbols.filter((x) => !isShapeSymbol(x) && /[0-9A-Za-z]/.test(x)) },
+    { key: "groupSigns", items: symbols.filter((x) => !isShapeSymbol(x) && !/[0-9A-Za-z]/.test(x)) },
+  ].filter((gr) => gr.items.length);
+}
+
+/**
+ * One line: the current symbol and the next free ones to pick in one click, then "All" — a popover with the whole
+ * set in tabs (Basic shapes · Decorative · Digits & letters · Signs). Line styles for backstitch.
+ */
 function SymbolPicker({ value, used, symbols, onPick }: { value: string; used: Set<string>; symbols: readonly string[]; onPick: (s: string) => void }) {
   const t = useTranslations("keyDialog");
-  const [open, setOpen] = useState(false);
+  const [pop, setPop] = useState<{ top?: number; bottom?: number; right: number } | null>(null);
+  const more = useRef<HTMLButtonElement>(null);
   const lines = isLineStyle(value);
-  const face = (sym: string, big: boolean) => (lines ? <LineSample sym={sym} w={big ? 60 : 52} h={big ? 22 : 20} /> : <SymbolGlyph sym={sym} size={big ? 22 : 17} />);
-  // shapes, then digits and letters, then arithmetic signs (line styles: one group)
-  const groups = lines
-    ? [{ key: "lines", items: symbols }]
-    : [
-        { key: "groupBasic", items: symbols.filter((x) => shapeSymbol(x)?.group === "basic") },
-        { key: "groupDecorative", items: symbols.filter((x) => shapeSymbol(x)?.group === "decorative") },
-        { key: "groupLetters", items: symbols.filter((x) => !isShapeSymbol(x) && /[0-9A-Za-z]/.test(x)) },
-        { key: "groupSigns", items: symbols.filter((x) => !isShapeSymbol(x) && !/[0-9A-Za-z]/.test(x)) },
-      ].filter((gr) => gr.items.length);
+  const face = (sym: string) => (lines ? <LineSample sym={sym} w={40} h={18} /> : <SymbolGlyph sym={sym} size={17} />);
+  const quick = [value, ...symbols.filter((x) => x !== value && !used.has(x)).slice(0, lines ? 2 : 5)];
+  const groups = symbolGroups(symbols, lines);
+  const [tab, setTab] = useState(() => Math.max(0, groups.findIndex((gr) => gr.items.includes(value))));
+  const open = () => {
+    const r = more.current!.getBoundingClientRect();
+    // open upwards when the button sits in the lower half of the window
+    setPop(r.top > window.innerHeight / 2 ? { bottom: window.innerHeight - r.top + 6, right: window.innerWidth - r.right } : { top: r.bottom + 6, right: window.innerWidth - r.right });
+  };
+  useEffect(() => {
+    if (!pop) return;
+    const outside = (e: PointerEvent) => !(e.target as Element).closest?.("[data-symbol-pop]") && !more.current?.contains(e.target as Node) && setPop(null);
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && (e.stopPropagation(), setPop(null));
+    document.addEventListener("pointerdown", outside);
+    window.addEventListener("keydown", esc, true);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      window.removeEventListener("keydown", esc, true);
+    };
+  }, [pop]);
+  const cell = (sym: string, close: boolean) => (
+    <button key={sym} type="button" data-sym={sym} aria-pressed={sym === value} className={cx(s.symcell, lines && s.wide, sym === value && s.cur, used.has(sym) && s.used)} title={used.has(sym) ? t("symbolUsed") : ""} onClick={() => { onPick(sym); if (close) setPop(null); }}>
+      {face(sym)}
+    </button>
+  );
+  const items = groups[Math.min(tab, groups.length - 1)]!.items;
   return (
-    <div className={s.group}>
+    <div className={s.choiceRow}>
       <span className={s.label}>{lines ? t("lineStyle") : t("symbol")}</span>
-      <div className={s.inline}>
-        <button type="button" className={cx(s.symbtn, lines && s.wide)} data-testid="symbol-button" onClick={() => setOpen(!open)}>{face(value, true)}</button>
-        <span className={ui.hint}>{lines ? t("lineStyleHint") : t("symbolHint")}</span>
-      </div>
-      {open && (
-        <div className={s.symgroups}>
-          {groups.map((gr) => (
-            <div key={gr.key}>
-              {!lines && <div className={s.symgroupTitle}>{t(gr.key)}</div>}
-              <div className={cx(s.symgrid, lines && s.lines)}>
-                {gr.items.map((sym) => (
-                  <button key={sym} type="button" data-sym={sym} className={cx(sym === value && s.cur, used.has(sym) && s.used)} title={used.has(sym) ? t("symbolUsed") : ""} onClick={() => onPick(sym)}>{face(sym, false)}</button>
-                ))}
-              </div>
+      <div className={s.quick} data-testid="symbol-quick">{quick.map((sym) => cell(sym, false))}</div>
+      <button ref={more} type="button" className={cx(ui.btn, ui.sm, s.allBtn)} aria-expanded={!!pop} data-testid="symbol-button" onClick={() => (pop ? setPop(null) : open())}>{t("allSymbols")}</button>
+      {pop && createPortal(
+        <div className={s.symPop} style={{ top: pop.top, bottom: pop.bottom, right: pop.right }} data-symbol-pop data-no-shortcuts role="dialog" aria-label={lines ? t("lineStyle") : t("symbol")}>
+          {groups.length > 1 && (
+            <div className={s.symTabs} role="tablist">
+              {groups.map((gr, i) => (
+                <button key={gr.key} type="button" role="tab" aria-selected={i === tab} className={cx(i === tab && s.tabOn)} title={t(gr.key)} onClick={() => setTab(i)}>{t(`${gr.key}Tab`)}</button>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+          <div className={cx(s.symgrid, lines && s.lines)}>{items.map((sym) => cell(sym, true))}</div>
+          <div className={ui.hint}>{t("symbolUsed")}</div>
+        </div>,
+        document.body,
       )}
+    </div>
+  );
+}
+
+/** A row of icon buttons (entry type, stitch) with the chosen one's name beside them. */
+function IconChoice<T extends string>({ label, options, value, onPick, testId }: { label?: string; options: { id: T; name: string; icon: React.ReactNode }[]; value: T; onPick: (id: T) => void; testId?: string }) {
+  const cur = options.find((o) => o.id === value);
+  return (
+    <div className={s.choiceRow}>
+      {label && <span className={s.label}>{label}</span>}
+      <div className={s.iconSeg} role="radiogroup" aria-label={label} data-testid={testId}>
+        {options.map((o) => (
+          <button key={o.id} type="button" role="radio" aria-checked={o.id === value} aria-label={o.name} title={o.name} className={cx(o.id === value && s.on)} onClick={() => onPick(o.id)}>{o.icon}</button>
+        ))}
+      </div>
+      <span className={s.choiceName}>{cur?.name}</span>
     </div>
   );
 }
@@ -159,7 +205,13 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
     bead: d.t === "combo" && colour.bead ? { hex: colour.bead.hex, ink: colour.bead.ink, shape: beadShape(colour.bead.series) } : d.t === "bead" ? { hex: colour.hex, ink: colour.ink, shape: beadShape(colour.series) } : undefined,
   };
   // each stitch-type card shows that stitch in the chosen colour (grey until one is picked)
-  const stitchSample = (st: StitchTypeId): PaletteSlot => ({ hex: colour?.thread?.hex ?? colour?.hex ?? "#8C8378", ink: "#fff", sym: "", t: "thread", st, n: 2 });
+  const sampleHex = colour?.thread?.hex ?? colour?.hex ?? "#8C8378";
+  const stitchSample = (st: StitchTypeId): PaletteSlot => ({ hex: sampleHex, ink: "#fff", sym: "", t: "thread", st, n: 2 });
+  // each entry type drawn as it looks in the key, in the chosen colour
+  const kindSample = (t2: KeyDraft["t"]): PaletteSlot => ({
+    hex: sampleHex, ink: "#fff", sym: "", t: t2, st: "full", n: 2,
+    bead: t2 === "bead" || t2 === "combo" ? { hex: t2 === "combo" ? "#C9A227" : sampleHex, ink: "#000", shape: beadShape(undefined) } : undefined,
+  });
   const label = colour && src ? formatLabel(labelData({ ...draftEntry(d, src), sym: d.sym }, colour), tr) : null;
   const used = new Set(ed.doc.key.flatMap((e, i) => (e && i !== edit ? [e.sym] : [])));
   const dupLabel = dup ? formatLabel(keyLabelData(ed.doc, ed.doc.key[dup]!), tr).title : "";
@@ -190,14 +242,8 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
       </div>
 
       <div className={s.formBody}>
-        <div className={s.group}>
-          <span className={s.label}>{t("type")}</span>
-          <div className={s.chips}>
-            {ENTRY_KINDS.map((k) => (
-              <button key={k.id} type="button" className={cx(d.t === k.id && s.chipOn)} aria-pressed={d.t === k.id} onClick={() => setType(k.id)}>{t(`types.${k.id}`)}</button>
-            ))}
-          </div>
-        </div>
+        <IconChoice label={t("type")} testId="entry-type" value={d.t} onPick={setType}
+          options={ENTRY_KINDS.map((k) => ({ id: k.id, name: t(`types.${k.id}`), icon: <KeyIcon slot={kindSample(k.id)} size={24} view="color" /> }))} />
 
         <div className={s.group}>
           <div className={s.inline}>
@@ -230,25 +276,15 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
               <button type="button" className={cx(ui.btn, ui.sm)} style={{ alignSelf: "flex-start" }} onClick={() => { update({ slots: [...d.slots, { id: null, n: 1 }] }); setLine(d.slots.length); }}>{t("addFloss")}</button>
             )}
           </div>
-          <ColourPicker key={`${d.t}:${d.mode}:${lines.indexOf(current)}`} kind={current.kind} selected={current.id ?? ""} onPick={pick} height={230} autoFocus />
+          <ColourPicker key={`${d.t}:${d.mode}:${lines.indexOf(current)}`} kind={current.kind} selected={current.id ?? ""} onPick={pick} height={150} autoFocus />
           {usesBlend(d) && <BlendFinder onPick={(slots) => { update({ slots }); setLine(0); }} />}
         </div>
 
         {(kind.fields.includes("stitchType") || kind.fields.includes("wraps")) && (
           <div className={s.group}>
             {kind.fields.includes("stitchType") && (
-              <>
-                <span className={s.label} id="stitch-type-label">{t("stitch")}</span>
-                <div className={s.stitchCards} role="radiogroup" aria-labelledby="stitch-type-label">
-                  {STITCH_TYPES.map((st) => (
-                    <button key={st.id} type="button" role="radio" aria-checked={d.st === st.id} className={cx(s.stitchCard, d.st === st.id && s.on)} onClick={() => update({ st: st.id })}>
-                      <KeyIcon slot={stitchSample(st.id)} size={40} view="color" />
-                      <span className={s.stitchName}>{tr(`stitches.${st.id}Name`)}</span>
-                      <span className={s.stitchSub}>{tr(`stitches.${st.id}Sub`)}</span>
-                    </button>
-                  ))}
-                </div>
-              </>
+              <IconChoice label={t("stitch")} testId="stitch-type" value={d.st} onPick={(st) => update({ st })}
+                options={STITCH_TYPES.map((st) => ({ id: st.id, name: `${tr(`stitches.${st.id}Name`)} · ${tr(`stitches.${st.id}Sub`)}`, icon: <KeyIcon slot={stitchSample(st.id)} size={24} view="color" /> }))} />
             )}
             {kind.fields.includes("wraps") && (
               <div className={s.inline}>

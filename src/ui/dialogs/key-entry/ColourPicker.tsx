@@ -60,7 +60,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
         ) : (
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => setSort(sort === "num" ? "hue" : "num")}>{sort === "num" ? t("byNumber") : t("byColour")}</button>
         )}
-        <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => setCustom({ ...custom, open: !custom.open })}>{kind === "bead" ? t("customBead") : t("customThread")}</button>
+        <button type="button" className={cx(ui.btn, ui.sm)} title={kind === "bead" ? t("customBead") : t("customThread")} aria-label={kind === "bead" ? t("customBead") : t("customThread")} aria-pressed={custom.open} onClick={() => setCustom({ ...custom, open: !custom.open })}>+</button>
       </div>
       {custom.open && (
         <div className={ui.row}>

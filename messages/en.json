@@ -203,7 +203,12 @@
     "groupBasic": "Basic shapes",
     "groupDecorative": "Decorative",
     "groupLetters": "Digits & letters",
-    "groupSigns": "Signs"
+    "groupSigns": "Signs",
+    "allSymbols": "All…",
+    "groupBasicTab": "Basic",
+    "groupDecorativeTab": "Decorative",
+    "groupLettersTab": "123 ABC",
+    "groupSignsTab": "+ − ×"
   },
   "picker": {
     "searchThread": "Search DMC number or name",

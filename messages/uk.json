@@ -203,7 +203,12 @@
     "groupBasic": "Прості фігури",
     "groupDecorative": "Декоративні",
     "groupLetters": "Цифри й літери",
-    "groupSigns": "Знаки"
+    "groupSigns": "Знаки",
+    "allSymbols": "Усі…",
+    "groupBasicTab": "Прості",
+    "groupDecorativeTab": "Декоративні",
+    "groupLettersTab": "123 ABC",
+    "groupSignsTab": "+ − ×"
   },
   "picker": {
     "searchThread": "Пошук за номером DMC або назвою",
