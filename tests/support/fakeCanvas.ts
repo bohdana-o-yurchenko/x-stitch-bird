@@ -31,4 +31,6 @@ export function fakeCanvas(): { g: CanvasRenderingContext2D; log: CanvasLog; cal
 /** Path2D exists only in browsers; drawing code just hands it back to the context. */
 export class FakePath2D {
   constructor(readonly d?: string) {}
+  rect() {}
+  addPath() {}
 }

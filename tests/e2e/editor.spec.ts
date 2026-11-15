@@ -586,11 +586,11 @@ test("a symbol can be drawn by hand from a few shapes, is kept in the file, and 
   await drawer.getByRole("radio", { name: /^Arrow/ }).click();
   await drag([2, 11], [10, 11]);
   await drag([5, 5], [5, 5]); // a click draws nothing
-  await expect(page.getByTestId("draw-count")).toHaveText("3 of 6 shapes");
-  // the guardrail: after six shapes the grid takes no more
-  for (let n = 0; n < 4; n++) await drag([n, 0], [n + 3, 3]);
-  await expect(page.getByTestId("draw-count")).toContainText("6 shapes is the most");
-  for (let n = 0; n < 3; n++) await drawer.getByRole("button", { name: "Remove last" }).click();
+  await expect(page.getByTestId("draw-count")).toHaveText("3 of 8 shapes");
+  // the guardrail: after eight shapes the grid takes no more
+  for (let n = 0; n < 5; n++) await drag([n, 0], [n + 3, 3]);
+  await expect(page.getByTestId("draw-count")).toContainText("8 shapes is the most");
+  for (let n = 0; n < 5; n++) await drawer.getByRole("button", { name: "Remove last" }).click();
   await use.click();
   await expect(drawer).toHaveCount(0);
   await page.getByRole("button", { name: "Save changes" }).click();

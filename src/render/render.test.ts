@@ -110,6 +110,16 @@ describe("stitches and symbols", () => {
     expect(half.calls("rect")).toEqual([[0, 0, 12, 24]]);
   });
 
+  it("cut a hand-drawn symbol's empty shapes out of what was drawn before them, only for that part", () => {
+    const c = fakeCanvas();
+    drawShape(c.g, shapeSymbol("draw:S00cc;o3399;P5577")!, 12, 12, 24, "#000", null);
+    // the rectangle is clipped once (by the circle); the circle and the later star are not clipped
+    expect(c.calls("clip").map((x) => x[1])).toEqual(["evenodd"]);
+    const order = c.log.map((l) => l[0]).filter((n) => ["save", "clip", "fill", "stroke", "restore"].includes(n));
+    expect(order.slice(order.indexOf("clip") - 1, order.indexOf("clip") + 3)).toEqual(["save", "clip", "fill", "restore"]);
+    expect(c.calls("save").length).toBe(c.calls("restore").length);
+  });
+
   it("give shapes a halo wide enough to show around the outline, and never hair-thin strokes", () => {
     const c = fakeCanvas();
     drawShape(c.g, shapeSymbol("sym:circle-o")!, 3, 3, 6, "#000", { color: "#fff", width: 1 });

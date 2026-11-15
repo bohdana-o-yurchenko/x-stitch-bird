@@ -31,7 +31,7 @@ describe("hand-drawn symbols", () => {
   });
 
   it("read nothing but what the drawing tool writes", () => {
-    for (const bad of ["draw:", "draw:x0011", "draw:o22a", "draw:o22aad", "draw:t0055", "draw:t0055x", "draw:oaa22", "draw:o22aa;", "draw:" + Array(7).fill("o22aa").join(";"), "sym:circle", "draw:o22aa<script>"])
+    for (const bad of ["draw:", "draw:x0011", "draw:o22a", "draw:o22aad", "draw:t0055", "draw:t0055x", "draw:oaa22", "draw:o22aa;", "draw:" + Array(CUSTOM_MAX_SHAPES + 1).fill("o22aa").join(";"), "sym:circle", "draw:o22aa<script>"])
       expect(decodeCustomSymbol(bad), bad).toBeNull();
     expect(customShape("draw:o22aa<script>")).toBeUndefined();
   });
@@ -46,6 +46,40 @@ describe("hand-drawn symbols", () => {
     expect(Math.min(...numbers)).toBeGreaterThanOrEqual(0);
     expect(Math.max(...numbers)).toBeLessThanOrEqual(24);
     expect(shapeSymbol("draw:o00cc")!.group).toBe("custom");
+  });
+
+  it("draw lines 1 or 2 cells thick, flat-ended, horizontal, vertical or diagonal, and nothing slanted", () => {
+    const [thin, thick] = shapeSymbol("draw:l16b6;L6162")!.parts;
+    expect(thin).toMatchObject({ d: "M3.67 12L20.33 12", paint: "stroke", cap: "butt", w: 1.67 });
+    expect(thick).toMatchObject({ d: "M12 3.67L12 5.33", w: 3.33 });
+    expect(decodeCustomSymbol("draw:l0044")).toEqual([{ kind: "line", width: 1, x1: 0, y1: 0, x2: 4, y2: 4 }]);
+    expect(decodeCustomSymbol("draw:L0042")).toBeNull(); // 4 across, 2 down: not a straight or diagonal line
+    expect(decodeCustomSymbol("draw:l5555")).toBeNull(); // no length
+    expect(encodeCustomSymbol([{ kind: "line", width: 2, x1: 12, y1: 3, x2: 2, y2: 3 }])).toBe("draw:Lc32" + "3");
+  });
+
+  it("draw a star, outlined or filled, inside its box", () => {
+    const [outline, filled] = shapeSymbol("draw:p00cc;P00cc")!.parts;
+    expect(outline!.paint).toBe("stroke");
+    expect(filled!.paint).toBe("fill");
+    expect(outline!.d.match(/L/g)).toHaveLength(9); // ten points
+    const xs = [...outline!.d.matchAll(/(-?\d+(?:\.\d+)?) /g)].map((m) => Number(m[1]));
+    expect(Math.min(...xs)).toBeCloseTo(2, 1);
+    expect(Math.max(...xs)).toBeCloseTo(22, 0);
+  });
+
+  it("let an empty shape cut a hole in what was drawn before it — and only before it", () => {
+    // a filled rectangle, then an empty circle inside it: the rectangle has a hole; the circle's outline is plain
+    const [rect, circle] = shapeSymbol("draw:S00cc;o3399")!.parts;
+    expect(rect!.holes).toEqual([circle!.d]);
+    expect(circle!.holes).toBeUndefined();
+    // a ring with a dot in it (drawn after): the dot is not cut
+    const [ring, dot] = shapeSymbol("draw:o00cc;S5577")!.parts;
+    expect([ring!.holes, dot!.holes]).toEqual([undefined, undefined]);
+    // two empty shapes after a filled one cut it twice; filled and line shapes never cut
+    expect(shapeSymbol("draw:S00cc;o1144;t6699u;P3355;l16b6")!.parts[0]!.holes).toHaveLength(2);
+    // an empty shape cuts earlier outlines too
+    expect(shapeSymbol("draw:o00cc;s3399")!.parts[0]!.holes).toHaveLength(1);
   });
 
   it("survive saving and loading, count as taken, and show as ✎ in text lists", () => {

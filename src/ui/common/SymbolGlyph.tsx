@@ -14,14 +14,20 @@ export function SymbolGlyph({ sym, size = 18 }: { sym: string; size?: number }) 
       <defs>
         <clipPath id={`${id}l`}><rect x="0" y="0" width={box / 2} height={box} /></clipPath>
         <clipPath id={`${id}t`}><rect x="0" y="0" width={box} height={box / 2} /></clipPath>
+        {/* hand-drawn symbols: an empty shape cuts a hole in what was drawn before it */}
+        {shape.parts.flatMap((p, n) => (p.holes ?? []).map((d, k) => (
+          <clipPath key={`${n}-${k}`} id={`${id}h${n}_${k}`}><path clipRule="evenodd" d={`M-1000 -1000H2000V2000H-1000Z${d}`} /></clipPath>
+        )))}
       </defs>
-      {shape.parts.map((p, n) =>
-        p.paint === "stroke" ? (
-          <path key={n} d={p.d} fill="none" stroke="currentColor" strokeWidth={p.w ?? (2.2 * box) / 24} strokeLinejoin={p.join ?? "round"} strokeLinecap={p.cap ?? "round"} />
+      {shape.parts.map((p, n) => {
+        let node = p.paint === "stroke" ? (
+          <path d={p.d} fill="none" stroke="currentColor" strokeWidth={p.w ?? (2.2 * box) / 24} strokeLinejoin={p.join ?? "round"} strokeLinecap={p.cap ?? "round"} />
         ) : (
-          <path key={n} d={p.d} fill="currentColor" fillRule={p.rule} clipPath={p.clip ? `url(#${id}${p.clip === "left" ? "l" : "t"})` : undefined} />
-        ),
-      )}
+          <path d={p.d} fill="currentColor" fillRule={p.rule} clipPath={p.clip ? `url(#${id}${p.clip === "left" ? "l" : "t"})` : undefined} />
+        );
+        (p.holes ?? []).forEach((_, k) => (node = <g clipPath={`url(#${id}h${n}_${k})`}>{node}</g>));
+        return <g key={n}>{node}</g>;
+      })}
     </svg>
   );
 }

@@ -234,7 +234,7 @@
     },
     "drawSymbol": "Draw your own symbol…",
     "drawTitle": "Draw a symbol",
-    "drawHint": "Pick a shape and drag on the grid. Keep it simple — up to {max} shapes — so it still reads at chart size.",
+    "drawHint": "Pick a shape and drag on the grid. An empty shape cuts a hole in what you drew before it. Keep it simple — up to {max} shapes — so it still reads at chart size.",
     "drawShape": "Shape",
     "drawDirection": "Direction",
     "drawTool": {
@@ -244,7 +244,11 @@
       "rectF": "Filled rectangle",
       "triangle": "Triangle",
       "triangleF": "Filled triangle",
-      "arrow": "Arrow — drag from its tail to its head"
+      "arrow": "Arrow — drag from its tail to its head",
+      "star": "Star",
+      "starF": "Filled star",
+      "line1": "Line, 1 cell thick — drag along, up or across",
+      "line2": "Line, 2 cells thick — drag along, up or across"
     },
     "drawDir": {
       "u": "Pointing up",

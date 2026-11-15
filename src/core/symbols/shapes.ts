@@ -19,6 +19,8 @@ export interface SymbolPart {
   rule?: "evenodd";
   /** Only this half of the box is painted (half-filled variants). */
   clip?: "left" | "top";
+  /** Paths whose insides are cut out of this part (hand-drawn symbols: the empty shapes drawn after it). */
+  holes?: readonly string[];
 }
 
 /** Basic = simple geometric shapes and marks; decorative = pictures and intricate shapes; custom = drawn by the user. */

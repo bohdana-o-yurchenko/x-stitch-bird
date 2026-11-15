@@ -2,6 +2,17 @@ import type { ShapeSymbol, SymbolPart } from "@/core/symbols/shapes";
 import type { Ctx } from "./cells";
 
 const paths = new Map<string, Path2D>();
+const outsides = new Map<string, Path2D>();
+/** Everything except the inside of `d`: clipping to it cuts a hole. Use with the "evenodd" rule. */
+const outside = (d: string) => {
+  let p = outsides.get(d);
+  if (!p) {
+    outsides.set(d, (p = new Path2D()));
+    p.rect(-1000, -1000, 3000, 3000);
+    p.addPath(path(d));
+  }
+  return p;
+};
 const path = (d: string) => {
   let p = paths.get(d);
   if (!p) paths.set(d, (p = new Path2D(d)));
@@ -31,6 +42,10 @@ export function drawShape(g: Ctx, shape: ShapeSymbol, cx: number, cy: number, si
   g.fillStyle = g.strokeStyle = color;
   for (const part of shape.parts) {
     const p = path(part.d);
+    if (part.holes) {
+      g.save();
+      for (const hole of part.holes) g.clip(outside(hole), "evenodd");
+    }
     if (part.paint === "stroke") {
       pen(part);
       g.lineWidth = width(part);
@@ -45,6 +60,7 @@ export function drawShape(g: Ctx, shape: ShapeSymbol, cx: number, cy: number, si
       g.fill(p, part.rule ?? "nonzero");
       g.restore();
     }
+    if (part.holes) g.restore();
   }
   g.restore();
 }
