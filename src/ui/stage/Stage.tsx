@@ -50,6 +50,8 @@ function ZoomControls() {
     <div className={s.zoom}>
       <ViewSwitch />
       <div className={s.zoomRow}>
+        {/* on the far side from "fit", so the two aren't mixed up */}
+        <UnderlayEditToggle />
         <div className={s.zoomGroup}>
           <button type="button" title={t("zoomOut")} aria-label={t("zoomOut")} onClick={() => run("view.zoomOut")}>−</button>
           <span>{Math.round((zoom / 12) * 100)}%</span>
@@ -58,7 +60,6 @@ function ZoomControls() {
         <button type="button" className={s.iconBtn} title={t("fit")} aria-label={t("fit")} onClick={() => run("view.fit")}>
           <Icon name="fit" size={16} />
         </button>
-        <UnderlayEditToggle />
       </div>
     </div>
   );
@@ -81,9 +82,13 @@ function SelectionActions() {
         </>
       ) : (
         <>
-          <button type="button" className={btn} onClick={() => run("selection.clear")}>{t("delete")}</button>
+          <button type="button" className={btn} title={t("clearHint")} onClick={() => run("selection.clear")}>{t("clear")}</button>
           <button type="button" className={btn} onClick={() => run("selection.requestReplaceKey")}>{t("replaceKey")}</button>
           <button type="button" className={btn} onClick={() => run("selection.crop")}>{t("crop")}</button>
+          <span className={s.barSep} />
+          <button type="button" className={btn} title={t("deselectHint")} data-testid="deselect" onClick={() => run("selection.none")}>
+            <Icon name="deselect" size={15} /> {t("deselect")}
+          </button>
         </>
       )}
     </div>

@@ -32,6 +32,7 @@ function scene(ed: Editor): ChartScene {
       : null,
     highlight: st.highlight && st.activeEntry ? st.activeEntry : null,
     underlayFrame: ed.underlay.frame(),
+    underlayHot: st.underlayHot,
     underlayButtons: ed.underlay.rotateButtons(),
   };
 }
@@ -73,7 +74,12 @@ export function ChartCanvas() {
       ed.tools.down(pointer(e));
       canvas.style.cursor = ed.tools.cursor();
     };
-    const move = (e: PointerEvent) => ed.tools.move(pointer(e));
+    const move = (e: PointerEvent) => {
+      ed.tools.move(pointer(e));
+      // every move, not only when the state changes: inside one large cell the pointer still crosses handles
+      const cursor = ed.tools.cursor();
+      if (canvas.style.cursor !== cursor) canvas.style.cursor = cursor;
+    };
     const up = (e: PointerEvent) => {
       ed.tools.up(pointer(e));
       canvas.style.cursor = ed.tools.cursor();

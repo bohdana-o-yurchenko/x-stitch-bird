@@ -88,16 +88,17 @@ export function handleAt(r: Rect, p: Point, tol: number): Handle | null {
   return p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h ? "inside" : null;
 }
 
-/** Like `handleAt`, but a whole side is grabbable (the edit frame's sides work as rulers); never "inside". */
+/**
+ * The edit frame's side or corner within `tol` of `p` — a band along the whole outline, inside and outside it
+ * (the sides work as rulers); never "inside". Corners win where two sides meet; in a small frame the nearer side wins.
+ */
 export function frameHandleAt(r: Rect, p: Point, tol: number): Exclude<Handle, "inside"> | null {
-  const h = handleAt(r, p, tol);
-  if (h && h !== "inside") return h;
-  const inX = p.x >= r.x && p.x <= r.x + r.w, inY = p.y >= r.y && p.y <= r.y + r.h;
-  if (inY && Math.abs(p.x - r.x) <= tol) return "w";
-  if (inY && Math.abs(p.x - r.x - r.w) <= tol) return "e";
-  if (inX && Math.abs(p.y - r.y) <= tol) return "n";
-  if (inX && Math.abs(p.y - r.y - r.h) <= tol) return "s";
-  return null;
+  const dw = Math.abs(p.x - r.x), de = Math.abs(p.x - r.x - r.w), dn = Math.abs(p.y - r.y), ds = Math.abs(p.y - r.y - r.h);
+  const inX = p.x >= r.x - tol && p.x <= r.x + r.w + tol, inY = p.y >= r.y - tol && p.y <= r.y + r.h + tol;
+  if (!inX || !inY) return null;
+  const west = dw <= tol && dw <= de, east = de <= tol && de < dw, north = dn <= tol && dn <= ds, south = ds <= tol && ds < dn;
+  const v = north ? "n" : south ? "s" : "", h = west ? "w" : east ? "e" : "";
+  return ((v + h) as Exclude<Handle, "inside">) || null;
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));

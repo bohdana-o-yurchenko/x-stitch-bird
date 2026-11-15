@@ -35,6 +35,8 @@ export interface ChartScene {
   underlay: (UnderlayView & { editing: boolean }) | null;
   /** Zoomed-in edit frame for the underlay, in canvas px (SPEC §15.15). */
   underlayFrame: Rect | null;
+  /** The frame's side ("n", "e", …) or corner ("ne", …) to highlight. */
+  underlayHot: string | null;
   /** ↺ ↻ buttons for the underlay, in canvas px. */
   underlayButtons: { x: number; y: number; dir: -1 | 1 }[];
   /** Only this entry at full strength, the rest faded (stitch highlighting). */
@@ -132,7 +134,7 @@ export class ChartRenderer {
       drawLines(g, p, only!, f, style);
     } else drawLines(g, p, s.palette, f, style);
     if (s.underlay?.editing) this.drawUnderlayEditor(s.underlay, p, f);
-    if (s.underlayFrame) this.drawEditFrame(s.underlayFrame);
+    if (s.underlayFrame) this.drawEditFrame(s.underlayFrame, s.underlayHot);
     for (const b of s.underlayButtons) this.drawRotateButton(b.x, b.y, b.dir);
     this.drawOverlays(s, f);
     this.drawRulers(s, f);
@@ -272,8 +274,11 @@ export class ChartRenderer {
     g.restore();
   }
 
-  /** A dashed outline with 8 handles, transparent inside so the photo under it stays visible. */
-  private drawEditFrame(r: Rect) {
+  /**
+   * A dashed outline with 8 handles, transparent inside so the photo under it stays visible. `hot`: the side or
+   * corner a press would take — its side(s) are drawn solid and thick, so it's clear the frame will stretch.
+   */
+  private drawEditFrame(r: Rect, hot: string | null) {
     const g = this.g, t = this.theme, H = t.underlayFrame.handle;
     g.save();
     g.lineWidth = 3;
@@ -284,6 +289,22 @@ export class ChartRenderer {
     g.strokeStyle = t.accent;
     g.strokeRect(r.x, r.y, r.w, r.h);
     g.setLineDash([]);
+    if (hot) {
+      const sides: Record<string, [number, number, number, number]> = { n: [r.x, r.y, r.x + r.w, r.y], s: [r.x, r.y + r.h, r.x + r.w, r.y + r.h], w: [r.x, r.y, r.x, r.y + r.h], e: [r.x + r.w, r.y, r.x + r.w, r.y + r.h] };
+      g.lineCap = "round";
+      for (const [width, colour] of [[7, "rgba(255,255,255,0.9)"], [4, t.accent]] as const) {
+        g.lineWidth = width;
+        g.strokeStyle = colour;
+        g.beginPath();
+        for (const side of hot) {
+          const [x1, y1, x2, y2] = sides[side]!;
+          g.moveTo(x1, y1);
+          g.lineTo(x2, y2);
+        }
+        g.stroke();
+      }
+      g.lineWidth = 1;
+    }
     for (const [hx, hy] of [[0, 0], [0.5, 0], [1, 0], [1, 0.5], [1, 1], [0.5, 1], [0, 1], [0, 0.5]] as const) {
       const x = r.x + hx * r.w - H / 2, y = r.y + hy * r.h - H / 2;
       g.fillStyle = t.accent;

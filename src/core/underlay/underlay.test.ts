@@ -75,6 +75,12 @@ describe("chart underlay geometry (SPEC §15.15)", () => {
   it("lets the edit frame be grabbed anywhere along a side, corners first", () => {
     const f = { x: 0, y: 0, w: 240, h: 160 };
     expect([frameHandleAt(f, { x: 241, y: 30 }, 8), frameHandleAt(f, { x: 2, y: 158 }, 8), frameHandleAt(f, { x: 120, y: 80 }, 8)]).toEqual(["e", "sw", null]);
+    // a band along the whole outline, inside and outside; corners win where two sides meet
+    expect([frameHandleAt(f, { x: 228, y: 30 }, 14), frameHandleAt(f, { x: 252, y: 30 }, 14), frameHandleAt(f, { x: 256, y: 30 }, 14)]).toEqual(["e", "e", null]);
+    expect([frameHandleAt(f, { x: 250, y: 170 }, 14), frameHandleAt(f, { x: 120, y: 172 }, 14), frameHandleAt(f, { x: 120, y: 176 }, 14)]).toEqual(["se", "s", null]);
+    // a frame smaller than the band: the nearer side wins, so every side can still be taken
+    const tiny = { x: 0, y: 0, w: 20, h: 20 };
+    expect([frameHandleAt(tiny, { x: 4, y: 10 }, 14), frameHandleAt(tiny, { x: 16, y: 10 }, 14)].map((h) => h![h!.length - 1])).toEqual(["w", "e"]);
   });
 
   it("resizes a box from a side, or a corner with the aspect kept", () => {

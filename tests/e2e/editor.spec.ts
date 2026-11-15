@@ -391,6 +391,10 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   // the edit toggle by the zoom; zoomed in, the edit frame stretches the photo with one side pinned
   const toggle = page.getByTestId("underlay-edit");
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  // it sits left of the zoom buttons, away from "fit to window", so the two aren't mixed up
+  const toggleBox = (await toggle.boundingBox())!, zoomOut = (await page.getByRole("button", { name: "Zoom out" }).boundingBox())!, fit = (await page.getByRole("button", { name: "Fit", exact: false }).last().boundingBox())!;
+  expect(toggleBox.x + toggleBox.width).toBeLessThanOrEqual(zoomOut.x);
+  expect(zoomOut.x).toBeLessThan(fit.x);
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
   const r = doc.underlay.rect as { x: number; y: number; w: number; h: number };
@@ -411,6 +415,19 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeGreaterThan(w0);
   await page.keyboard.press("ControlOrMeta+z");
   expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeCloseTo(w0, 6);
+  // 10 px inside the frame's side still takes the side (the cursor says so), and the photo is stretched, not moved
+  const f2 = await editorState<{ x: number; y: number; w: number; h: number }>(page, "(ed) => ed.underlay.frame()");
+  await page.mouse.move(box.x + f2.x + f2.w / 2, box.y + f2.y + f2.h / 2);
+  await expect(page.getByTestId("chart")).toHaveCSS("cursor", "move");
+  await page.mouse.move(box.x + f2.x + f2.w - 10, box.y + f2.y + f2.h / 2 + 30);
+  await expect(page.getByTestId("chart")).toHaveCSS("cursor", "ew-resize");
+  expect(await editorState<string>(page, "(ed) => ed.state.underlayHot")).toBe("e");
+  await page.mouse.down();
+  await page.mouse.move(box.x + f2.x + f2.w + 20, box.y + f2.y + f2.h / 2 + 30, { steps: 3 });
+  await page.mouse.up();
+  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.x")).toBeCloseTo(r.x, 6);
+  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeGreaterThan(w0);
+  await page.keyboard.press("ControlOrMeta+z");
   // a slight turn with ] and the side panel's angle field; 0° resets
   await page.keyboard.press("]");
   await page.keyboard.press("]");
@@ -510,4 +527,18 @@ test("exports a PDF for Pattern Keeper after explaining what it can't track", as
   // chart + key for Pattern Keeper, then the full chart + its key
   expect(pdf.match(/\/Type \/Page /g)).toHaveLength(4);
   if (process.env.PK_PDF_OUT) await file.saveAs(process.env.PK_PDF_OUT);
+});
+
+test("the selection bar can deselect without changing anything, and clears cells by name", async ({ page }) => {
+  await page.keyboard.press("ControlOrMeta+a");
+  const deselect = page.getByRole("button", { name: "Deselect" });
+  await expect(deselect).toBeVisible();
+  await deselect.click();
+  await expect(deselect).toHaveCount(0);
+  expect(await editorState<boolean>(page, "(ed) => !!ed.state.selection")).toBe(false);
+  await expect(page.getByTestId("totals")).toContainText("91 full");
+  expect(await editorState<boolean>(page, "(ed) => ed.state.canUndo")).toBe(false);
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.getByRole("button", { name: "Clear cells" }).click();
+  await expect(page.getByTestId("totals")).toContainText("0 full");
 });

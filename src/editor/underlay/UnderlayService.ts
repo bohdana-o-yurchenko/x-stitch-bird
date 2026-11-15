@@ -8,8 +8,13 @@ import type { Editor } from "../createEditor";
 const SAVE_DELAY = 700;
 /** Photos larger than this (longer side, px) are scaled down once when added; others are stored untouched. */
 const MAX_SIDE = 6000;
-/** Grab distance for handles, in screen pixels. */
+/** Grab distance for the image's own handles, in screen pixels. */
 const GRAB_PX = 8;
+/**
+ * Grab distance for the edit frame's sides and corners. Wider: everything around the frame is the photo, so a
+ * press that misses the frame moves the photo instead — the band has to be easy to hit.
+ */
+const FRAME_GRAB_PX = 14;
 /** The zoomed-in edit frame: starting size and smallest size, in screen pixels. */
 const FRAME = { w: 320, h: 220 }, FRAME_MIN = 40;
 /** Rotate buttons: distance above the edge and between the two (screen px); their size is the theme's. */
@@ -106,7 +111,7 @@ export class UnderlayService {
   /** Behind = stitching; off = edit mode, which starts with a fresh edit frame and its own undo. */
   setBehind(behind: boolean) {
     this.update({ behind, visible: true });
-    this.ed.store.setState({ underlayFrame: null });
+    this.ed.store.setState({ underlayFrame: null, underlayHot: null });
     if (behind) this.undoStack = [];
     this.ed.tools.leave();
   }
@@ -182,7 +187,6 @@ export class UnderlayService {
     return GRAB_PX / this.ed.state.viewport.zoom;
   }
 
-  /** A side or corner handle of the edit frame under canvas point `s`, if the frame is shown. */
   /**
    * The ↺ ↻ buttons in edit mode (Move & resize), in canvas px: above the frame when it is shown (turning around its
    * middle), and above the image's top edge when that is on screen (turning around the image's middle).
@@ -230,7 +234,16 @@ export class UnderlayService {
 
   private frameHandle(s: Point): Exclude<Handle, "inside"> | null {
     const f = this.frame();
-    return f ? frameHandleAt(f, s, GRAB_PX) : null;
+    return f ? frameHandleAt(f, s, FRAME_GRAB_PX) : null;
+  }
+
+  private setHot(hot: Exclude<Handle, "inside"> | null) {
+    if (this.ed.state.underlayHot !== hot) this.ed.store.setState({ underlayHot: hot });
+  }
+
+  /** Pointer moved with no button down (canvas point `s`; null = left the canvas): highlight the frame side a press would take. */
+  hover(s: Point | null) {
+    this.setHot(s && this.editing && !this.rotateButtonAt(s) ? this.frameHandle(s) : null);
   }
 
   /** CSS cursor in edit mode for a pointer at grid point `p` / canvas point `s`. */
@@ -255,6 +268,7 @@ export class UnderlayService {
     if (fh) {
       this.remember();
       this.frameDrag = { handle: fh, from: s, frame: this.frame()!, start: u };
+      this.setHot(fh);
       return;
     }
     const handle = handleAt(u.rect, toLocal(u, p), this.grabTolerance());

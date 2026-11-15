@@ -8,7 +8,7 @@ import type { MirrorMode } from "@/core/transform/mirror";
 import type { ChartView } from "@/render/chart";
 import type { Viewport } from "@/render/ChartRenderer";
 import type { RefWindowData } from "@/persistence/ports";
-import type { UnderlayData } from "@/core/underlay/underlay";
+import type { Handle, UnderlayData } from "@/core/underlay/underlay";
 
 export type ToolId = "pencil" | "line" | "rect" | "filledRect" | "fill" | "eraser" | "picker" | "pan" | "select" | "magicWand" | "partial";
 
@@ -100,6 +100,8 @@ export interface EditorState {
   pendingTip: string | null;
   /** The zoomed-in edit frame of the underlay, in canvas px, once the user has resized it (SPEC §15.15). */
   underlayFrame: Rect | null;
+  /** The side or corner of the edit frame under the pointer (or being dragged): drawn highlighted. */
+  underlayHot: Exclude<Handle, "inside"> | null;
   /** Fade every key entry except the active one (SPEC §15.16). */
   highlight: boolean;
   hasClipboard: boolean;
@@ -141,6 +143,7 @@ export const createEditorStore = () =>
     underlayImage: null,
     highlight: false,
     underlayFrame: null,
+    underlayHot: null,
     guide: null,
     pendingTip: null,
     menuReveal: null,

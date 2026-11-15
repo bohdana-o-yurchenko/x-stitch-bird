@@ -62,7 +62,10 @@ export class ToolManager {
     this.lastGrid = p.grid;
     this.lastScreen = { x: p.sx, y: p.sy };
     if (this.underlayDrag) return this.ed.underlay.pointerMove(p.grid, this.lastScreen, p.shift);
-    if (this.ed.underlay.editing && !this.active) return this.ed.setHover(p.cell, 1, false);
+    if (this.ed.underlay.editing && !this.active) {
+      this.ed.underlay.hover(this.lastScreen);
+      return this.ed.setHover(p.cell, 1, false);
+    }
     const ed = this.ed, size = this.active?.usesBrush || (!this.active && this.resolve().usesBrush) ? ed.state.brush : 1;
     if (!this.active && !ed.state.floating) this.resolve().hover?.(ed, p);
     ed.setHover(p.cell, size, this.showsHoverSquare());
@@ -83,6 +86,7 @@ export class ToolManager {
   }
 
   leave() {
+    this.ed.underlay.hover(null);
     this.ed.setHover(null, 1, false);
     this.ed.setOverlay({ hoverPoint: null, knotPreview: null, partialPreview: null, eraseHighlight: null });
   }

@@ -371,11 +371,14 @@
     "flipH": "Flip horizontal",
     "flipV": "Flip vertical",
     "rotate": "Rotate 90°",
-    "delete": "Delete",
+    "clear": "Clear cells",
+    "clearHint": "Erase everything in the selected cells (Delete)",
     "replaceKey": "Replace key…",
     "crop": "Crop to selection",
     "commit": "Place (Enter)",
-    "cancel": "Cancel (Esc)"
+    "cancel": "Cancel (Esc)",
+    "deselect": "Deselect",
+    "deselectHint": "Remove the selection without changing anything (Esc)"
   },
   "snapshots": {
     "reason": {

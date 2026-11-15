@@ -1111,6 +1111,8 @@ Decisions taken while implementing this plan. Each one lives in the single place
 - Straightening (SPEC §15.15): `core/geometry/homography.ts` (`homography`, `project`, `warpQuad`),
   `workers/straightenImage.ts` (decode → warp → JPEG, also the main-thread fallback) run via `runStraighten` in
   `editor/heavy.ts`; `UnderlayService.straighten`; the editor UI is `ui/dialogs/StraightenDialog.tsx`.
+- Edit frame hit-testing: `frameHandleAt` (core) with `FRAME_GRAB_PX`; `UnderlayService.hover` keeps
+  `state.underlayHot` (the side a press would take) for the renderer; `ChartCanvas` sets the cursor on every move.
 - Chart underlay (SPEC §15.15): geometry in `core/underlay/`, `UnderlayService` in `editor/underlay/`, its own
   `UnderlayRepository` port and IndexedDB store (database version 3). In edit mode `ToolManager` routes the
   pointer to the service; middle/right-drag and Space still pan. It is reference material, so it is outside the

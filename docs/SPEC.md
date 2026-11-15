@@ -993,12 +993,14 @@ any existing behaviour.
 - **Select** tool (`S`): drag a marquee; Shift+drag adds to the selection.
 - **Magic wand** (`W`): click to select contiguous cells of the same key; Shift+click selects every cell of that
   key.
-- Ctrl/⌘+A selects all; Esc or Ctrl/⌘+D deselects.
+- Ctrl/⌘+A selects all; Esc, Ctrl/⌘+D or the **Deselect** button on the selection bar removes the selection
+  without changing anything.
 - The selection is a cell mask drawn with marching ants. It carries stitches, beads, ambiguous marks, and
   backstitch segments whose both endpoints lie inside the selection's outline.
 
 **Operations**
-- Delete/Backspace clears the selection.
+- **Clear cells** (Delete/Backspace) erases everything in the selected cells. (The button was called "Delete",
+  which read as "delete the selection".)
 - Ctrl/⌘+C / X / V copy, cut and paste.
 - Drag inside the selection to move it. Arrow keys nudge it 1 cell (Shift = 10).
 - Flip H/V and rotate 90° within the selection, using the §15.3 rules.
@@ -1269,8 +1271,9 @@ over it. One underlay per pattern.
 - **Fit to chart**: scale the visible part to fit the chart, keep aspect, centre it.
 - **Reset crop**: show the whole image again at the current scale.
 
-**Edit toggle** (replaced the floating alignment pad, 2026-11-15): a small icon button at the end of the zoom box,
-shown whenever the pattern has an image behind the chart. Pressed = edit mode; same as `U` and the "Behind stitches"
+**Edit toggle** (replaced the floating alignment pad, 2026-11-15): a small icon button at the left end of the zoom
+box's bottom row — on the far side from "fit to screen", which it was confused with — shown whenever the pattern
+has an image behind the chart. Pressed = edit mode; same as `U` and the "Behind stitches"
 checkbox. No setting to switch it on.
 
 **Zoomed-in edit frame** — in edit mode, Move & resize sub-tool, when the image covers the middle of the view and at
@@ -1284,6 +1287,11 @@ slides the photo under it. Not shown when zoomed out (the image's own handles ar
   grid line of the scan onto the chart's grid line.
 - The frame keeps its new size and place until edit mode is turned off; turning it on again starts a fresh frame.
 - Inside the frame (and anywhere on the image) dragging moves the image, as before.
+- **Grabbing a side** (fixed 2026-11-15): everything around the frame is the photo, so a press that misses the
+  frame moves the photo. The sides and corners therefore take presses within **14 px** on either side of the line
+  (it was 8, corners and midpoints only outside the line's ends); the side or corner under the pointer is drawn
+  solid and thick, and the cursor follows every pointer move (it used to update only when the pointer entered
+  another chart cell — zoomed in, a stale resize cursor could sit over a spot that would move the photo).
 - **Rotation** (2026-11-15) for slightly tilted scans: `rotation` in degrees (clockwise, ±45°) around the middle of
   the image. In edit mode (Move & resize) two round **↺ ↻** buttons sit above the middle of the image's top edge
   (turned with it; shown when on screen) and above the edit frame; each click turns by **0.2°** (fixed). The image

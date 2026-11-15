@@ -180,6 +180,45 @@ describe("chart underlay (SPEC §15.15)", () => {
     expect(ed.underlay.frame()).toBeNull();
   });
 
+  it("the edit frame's sides are easy to grab: a press close to a side resizes, only the middle of the frame moves the photo", () => {
+    ed.viewport.setSize(826, 626);
+    ed.store.setState({ underlay: { ...ed.state.underlay!, rect: { x: -50, y: -50, w: 200, h: 200 } }, viewport: { zoom: 20, offX: 0, offY: 0 } });
+    const f = ed.underlay.frame()!;
+    const sp = (x: number, y: number): ToolPointer => ({ ...at(0, 0), sx: x, sy: y, grid: ed.viewport.toGrid(x, y) });
+    const pull = (x: number, y: number, dx: number) => {
+      ed.store.setState({ underlay: { ...ed.state.underlay!, rect: { x: -50, y: -50, w: 200, h: 200 } }, underlayFrame: null });
+      ed.tools.down(sp(x, y));
+      ed.tools.move(sp(x + dx, y));
+      ed.tools.up(sp(x + dx, y));
+      const r = ed.state.underlay!.rect;
+      return r.x === -50 && r.w !== 200 ? "resized" : r.x !== -50 && r.w === 200 ? "moved" : "nothing";
+    };
+    // a little inside or outside the right side, anywhere along it — not just exactly on the line
+    for (const off of [-12, -6, 0, 6, 12]) expect(pull(f.x + f.w + off, f.y + 40, 30), `off ${off}`).toBe("resized");
+    // just past a corner still takes the corner
+    expect(pull(f.x + f.w + 10, f.y + f.h + 10, 30)).toBe("resized");
+    expect(pull(f.x + f.w / 2, f.y + f.h / 2, 30)).toBe("moved");
+  });
+
+  it("hovering shows which side of the edit frame a press would take, even inside one chart cell; leaving clears it", () => {
+    ed.viewport.setSize(826, 626);
+    ed.store.setState({ underlay: { ...ed.state.underlay!, rect: { x: -50, y: -50, w: 200, h: 200 } }, viewport: { zoom: 20, offX: 0, offY: 0 } });
+    const f = ed.underlay.frame()!;
+    const sp = (x: number, y: number): ToolPointer => {
+      const grid = ed.viewport.toGrid(x, y);
+      return { ...at(Math.floor(grid.x), Math.floor(grid.y)), sx: x, sy: y, grid };
+    };
+    // both points are in the same chart cell (cells are 20 px): the highlight and the cursor still follow
+    ed.tools.move(sp(f.x + f.w - 19, f.y + 100));
+    expect([ed.state.underlayHot, ed.tools.cursor()]).toEqual([null, "move"]);
+    ed.tools.move(sp(f.x + f.w - 5, f.y + 100));
+    expect([ed.state.underlayHot, ed.tools.cursor()]).toEqual(["e", "ew-resize"]);
+    ed.tools.move(sp(f.x + 2, f.y + 3));
+    expect(ed.state.underlayHot).toBe("nw");
+    ed.tools.leave();
+    expect(ed.state.underlayHot).toBeNull();
+  });
+
   it("the ↻ button above the frame turns the image a small step around the frame's middle; [ turns back", () => {
     ed.viewport.setSize(826, 626);
     ed.store.setState({ underlay: { ...ed.state.underlay!, rect: { x: -50, y: -50, w: 200, h: 200 } }, viewport: { zoom: 20, offX: 0, offY: 0 } });

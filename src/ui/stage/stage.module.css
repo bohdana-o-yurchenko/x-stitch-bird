@@ -101,3 +101,14 @@
   box-shadow: var(--shadow);
   z-index: 6;
 }
+.selectionBar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.barSep {
+  width: 1px;
+  align-self: stretch;
+  margin: 3px 2px;
+  background: var(--line2);
+}
