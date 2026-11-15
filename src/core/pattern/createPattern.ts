@@ -33,6 +33,7 @@ export function createPattern(w = 80, h = 80, name = "Untitled pattern"): Patter
     combos: {},
     customs: {},
     layers: emptyLayers(w, h),
+    spent: 0,
   };
 }
 

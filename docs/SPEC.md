@@ -980,6 +980,10 @@ any existing behaviour.
 - **UI**: a **History…** entry in the Open dialog lists `time · reason · W×H` with thumbnails. **Restore** first
   snapshots the current state, then loads the chosen one (same project id).
 - This softens quirks §14.3 and §14.4: lost undo history and "New" without saving become recoverable.
+- **In .xbird files** (2026-11-15): the pattern's versions travel along as `versions: [{time, reason, doc}]`,
+  oldest first (`doc` is the pattern file of that version, without pictures or nested versions; thumbnails are
+  redrawn on import). Opening the file adds them to this browser's versions of the pattern — ones already there
+  (same time) are kept — and the usual retention applies. `.oxs` exports never carry versions.
 
 ### 15.8 Multi-brand threads
 - **Brands**: DMC (existing) plus Anchor, Cosmo, Madeira, and vintage lines common on old paper charts (e.g. J&P
@@ -1277,6 +1281,17 @@ Idea from Pattern Maker v4 (Professional). Toggle with the eye button in the key
   beads, backstitch, knots) at 15 % opacity; fabric, grid, underlay and overlays are unchanged. Picking another
   entry moves the highlight. With no active entry, nothing is faded.
 - View-only: not saved, not in exports or undo.
+
+### 15.17 Time spent on a pattern (implemented 2026-11-15)
+- Counted automatically while the user works on the pattern: any pointer press, drag, wheel or key in the app
+  (drawing, adding to the key, setting up references and the underlay, filling in dialogs). Only moving the mouse
+  doesn't count.
+- The time between two actions counts when they are at most **3 minutes** apart; a longer gap is a pause and
+  none of it counts. Switching to another pattern starts afresh.
+- Nothing to start, stop or edit. Shown read-only as **Total time spent on this pattern** in Pattern info and in
+  Versions, with "counting now" while it runs.
+- Saved with the pattern (`spent`, whole seconds; draft, library and .xbird); not part of undo; restoring a
+  version keeps the time spent so far. Not in .oxs.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

@@ -19,6 +19,7 @@ import { ReferenceService } from "./references/references";
 import { SelectionService } from "./selection/selection";
 import { ShortcutManager } from "./shortcuts/ShortcutManager";
 import { SnapshotService } from "./snapshots/SnapshotService";
+import { WorkTimer } from "./timer/WorkTimer";
 import { createEditorStore, type DialogRequest, type EditorState, type Overlay, type ToolId } from "./store/editorStore";
 import { ToolManager } from "./tools/ToolManager";
 import { UnderlayService } from "./underlay/UnderlayService";
@@ -44,6 +45,7 @@ export class Editor {
   readonly snapshots: SnapshotService;
   readonly autosave: Autosave;
   readonly images: ImageService;
+  readonly timer: WorkTimer;
   theme: CanvasTheme = defaultCanvasTheme;
   /** Translation for exported texts and labels built here; set by the UI for the current locale. */
   t: Translate = (key) => key;
@@ -68,6 +70,7 @@ export class Editor {
     this.underlay = new UnderlayService(this);
     this.snapshots = new SnapshotService(this);
     this.autosave = new Autosave(persistence.draft, () => this.doc, () => saveToLibrary(this, { quiet: true }));
+    this.timer = new WorkTimer(this);
   }
 
   get state(): EditorState {

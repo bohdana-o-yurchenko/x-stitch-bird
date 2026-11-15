@@ -8,6 +8,7 @@ import { symbolText } from "@/core/symbols/lineStyles";
 import type { PatternMeta } from "@/core/pattern/types";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { copyText } from "@/platform/files";
+import { TimeSpent } from "../common/TimeSpent";
 import { Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
@@ -93,6 +94,7 @@ export function PatternInfoDialog({ onClose }: Close) {
   };
   return (
     <Modal title={t("dialogs.infoTitle")} wide onClose={onClose} buttons={[{ label: t("dialogs.cancel") }, { label: t("dialogs.ok"), primary: true, onClick: save }]}>
+      <TimeSpent />
       <h4 className={ui.sectionTitle}>{t("dialogs.infoOxs")}</h4>
       <p className={ui.hint} style={{ margin: "0 0 10px" }}>{t("dialogs.infoOxsHint")}</p>
       <div className={ui.grid2}>

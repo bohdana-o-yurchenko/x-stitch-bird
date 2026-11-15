@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { PatternSummary, SnapshotSummary } from "@/editor/types";
+import { TimeSpent } from "../common/TimeSpent";
 import { Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor } from "../hooks/editor";
 
@@ -67,6 +68,7 @@ export function VersionsDialog({ onClose }: { onClose: () => void }) {
   }, [ed]);
   return (
     <Modal title={t("dialogs.versionsTitle")} onClose={onClose} buttons={[{ label: t("dialogs.close") }]}>
+      <TimeSpent />
       <p className={ui.hint}>{t("dialogs.versionsHint")}</p>
       {!snaps && <p className={ui.hint}>{t("dialogs.loading")}</p>}
       {snaps && !snaps.length && <p className={ui.hint}>{t("dialogs.noHistory")}</p>}

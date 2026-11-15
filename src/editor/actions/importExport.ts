@@ -2,7 +2,7 @@ import { calculator } from "@/core/calculator/registry";
 import { computeUsage, entryCount, partialCount } from "@/core/calculator/usage";
 import { exportCsv } from "@/core/formats/csv/exportCsv";
 import { parsePattern } from "@/core/formats/json/parse";
-import { serializePattern } from "@/core/formats/json/serialize";
+import { serializePattern, type FileVersion, type PatternFile } from "@/core/formats/json/serialize";
 import { exportOxs } from "@/core/formats/oxs/exportOxs";
 import { importOxs } from "@/core/formats/oxs/importOxs";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
@@ -51,8 +51,7 @@ export const shoppingList = (p: Pattern) => calculator().calculate({ pattern: p,
 export async function exportAs(ed: Editor, format: ExportFormat) {
   const p = ed.doc, base = safeName(p);
   if (format === "pattern") {
-    const underlay = ed.underlay.data ? await ed.images.underlayToFile(ed.underlay.data) : undefined;
-    return offer(ed, `${base}.${PATTERN_EXT}`, JSON.stringify({ ...serializePattern(p), refs: await ed.references.exportFile(), underlay }), PATTERN_EXT);
+    return offer(ed, `${base}.${PATTERN_EXT}`, JSON.stringify(await patternFile(ed)), PATTERN_EXT);
   }
   if (format === "oxs") return offer(ed, `${base}.oxs`, exportOxs(p), "oxs");
   if (format === "csv") return offer(ed, `${base}-shopping-list.csv`, exportCsv(p, shoppingList(p), ed.t), "csv");
@@ -62,21 +61,28 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
   offer(ed, `${base}${view === "color" ? "-preview" : "-chart"}.png`, await canvasToBlob(canvas), "png");
 }
 
+/** Everything a .xbird file holds: the pattern, its reference windows, underlay and versions. */
+export async function patternFile(ed: Editor): Promise<PatternFile> {
+  const underlay = ed.underlay.data ? await ed.images.underlayToFile(ed.underlay.data) : undefined;
+  const versions = await ed.snapshots.exportFile();
+  return { ...serializePattern(ed.doc), refs: await ed.references.exportFile(), underlay, ...(versions.length ? { versions } : {}) };
+}
+
 /** Read a .xbird (or older .json) or .oxs file into a pattern — told apart by content; throws on anything else. */
-export async function readPatternFile(ed: Editor, file: File): Promise<{ pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; simplified: number }> {
+export async function readPatternFile(ed: Editor, file: File): Promise<{ pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; versions: FileVersion[]; simplified: number }> {
   const text = await readText(file);
   if (text.startsWith("<")) {
     const { pattern, report } = importOxs(text, ed.state.symbols);
-    return { pattern, refs: null, underlay: null, simplified: report.simplified };
+    return { pattern, refs: null, underlay: null, versions: [], simplified: report.simplified };
   }
-  const { pattern, refs, underlay } = parsePattern(JSON.parse(text), ed.state.symbols);
-  return { pattern, refs, underlay, simplified: 0 };
+  return { ...parsePattern(JSON.parse(text), ed.state.symbols), simplified: 0 };
 }
 
 export async function loadFile(ed: Editor, file: File) {
   try {
-    const { pattern, refs, underlay, simplified } = await readPatternFile(ed, file);
+    const { pattern, refs, underlay, versions, simplified } = await readPatternFile(ed, file);
     loadPattern(ed, pattern, refs as never, underlay);
+    await ed.snapshots.importFile(pattern.id, versions);
     ed.toast(simplified ? "toasts.loadedReport" : "toasts.loaded", { name: file.name, count: simplified });
   } catch (e) {
     console.error(e);

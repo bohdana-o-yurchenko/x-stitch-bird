@@ -650,5 +650,13 @@
         "2": "The guide is always here: <hl>Menu ▸ Quick start guide</hl>."
       }
     }
+  },
+  "work": {
+    "spent": "Total time spent on this pattern",
+    "hm": "{h} h {m} min",
+    "m": "{m} min",
+    "none": "under a minute",
+    "running": "counting now",
+    "hint": "Counted automatically while you work on this pattern. Stops after 3 minutes without any action."
   }
 }

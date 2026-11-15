@@ -18,7 +18,7 @@ import { StatusBar } from "./status/StatusBar";
 
 const inField = (t: EventTarget | null) => t instanceof HTMLElement && (t.matches("input, select, textarea") || t.isContentEditable);
 
-/** Global keyboard, page-leave flush and drag & drop, all routed to the editor. */
+/** Global keyboard, work-time tracking, page-leave flush and drag & drop, all routed to the editor. */
 function useGlobalEvents(ed: Editor, setDragging: (on: boolean) => void) {
   useEffect(() => {
     let depth = 0;
@@ -40,8 +40,17 @@ function useGlobalEvents(ed: Editor, setDragging: (on: boolean) => void) {
         void ed.commands.run("file.drop", [...(e.dataTransfer?.files ?? [])]);
       }],
     ];
+    // anything the user does counts as work time (SPEC §15.17), seen before any panel can stop it; just moving
+    // the mouse doesn't
+    const work = (e: Event) => (e.type !== "pointermove" || (e as PointerEvent).buttons) && ed.timer.activity();
+    const workEvents = ["pointerdown", "pointermove", "wheel", "keydown"];
+    const capture = { capture: true, passive: true };
+    workEvents.forEach((name) => window.addEventListener(name, work, capture));
     handlers.forEach(([target, name, fn]) => target.addEventListener(name, fn as EventListener));
-    return () => handlers.forEach(([target, name, fn]) => target.removeEventListener(name, fn as EventListener));
+    return () => {
+      workEvents.forEach((name) => window.removeEventListener(name, work, capture));
+      handlers.forEach(([target, name, fn]) => target.removeEventListener(name, fn as EventListener));
+    };
   }, [ed, setDragging]);
 }
 

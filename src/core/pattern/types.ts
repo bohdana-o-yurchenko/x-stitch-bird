@@ -104,6 +104,8 @@ export interface Pattern {
   combos: Record<string, Combo>;
   customs: Record<string, CustomColor>;
   layers: Layers;
+  /** Active work time in ms (SPEC §15.17). Counted by the editor, never edited by hand, not part of undo. */
+  spent: number;
 }
 
 export interface Size {

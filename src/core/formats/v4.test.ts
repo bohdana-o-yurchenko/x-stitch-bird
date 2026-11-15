@@ -6,6 +6,7 @@ import { formatLabel, keyLabelData } from "../labels/keyLabel";
 import { createPattern } from "../pattern/createPattern";
 import { addEntry } from "../pattern/keyEntries";
 import { ALL_SYMBOLS } from "../symbols/symbols";
+import { splitDuration, workGap } from "../time/workTime";
 import { parsePattern } from "./json/parse";
 import { serializePattern } from "./json/serialize";
 import { exportOxs } from "./oxs/exportOxs";
@@ -38,7 +39,26 @@ describe("JSON v4", () => {
   });
 
   it("omits v4 fields that are empty, so plain charts look like v3", () => {
-    expect(Object.keys(serializePattern(createPattern(5, 5)))).not.toContain("meta");
+    const keys = Object.keys(serializePattern(createPattern(5, 5)));
+    for (const k of ["meta", "spent", "versions"]) expect(keys).not.toContain(k);
+  });
+
+  it("keeps the time spent, in whole seconds, and ignores nonsense", () => {
+    const p = createPattern(5, 5);
+    p.spent = 90_400;
+    const doc = serializePattern(p);
+    expect(doc.spent).toBe(90);
+    expect(parsePattern(doc, ALL_SYMBOLS).pattern.spent).toBe(90_000);
+    expect(parsePattern({ ...doc, spent: -5 }, ALL_SYMBOLS).pattern.spent).toBe(0);
+    expect(parsePattern({ ...doc, spent: "lots" }, ALL_SYMBOLS).pattern.spent).toBe(0);
+  });
+
+  it("reads the versions a .xbird file carries, oldest first, skipping broken ones", () => {
+    const doc = serializePattern(createPattern(5, 5));
+    const versions = [{ time: 20, reason: "resize", doc }, { time: 10, doc }, { time: "x", doc }, { time: 30, reason: "timer", doc: { app: "other" } }, null];
+    const read = parsePattern({ ...doc, versions }, ALL_SYMBOLS).versions;
+    expect(read.map((v) => [v.time, v.reason])).toEqual([[10, "timer"], [20, "resize"]]);
+    expect(parsePattern(doc, ALL_SYMBOLS).versions).toEqual([]);
   });
 
   it("migrates v1 key entries", () => {
@@ -119,5 +139,20 @@ describe("totals and labels with the new stitch kinds", () => {
   it("labels knots with their wraps", () => {
     const { p, knot } = richPattern();
     expect(formatLabel(keyLabelData(p, p.key[knot]!), translateEn)).toEqual({ title: "DMC 321", sub: "Red · 2 strands · French knot, 2 wraps" });
+  });
+});
+
+describe("work time (SPEC §15.17)", () => {
+  it("counts the gap between actions unless it is a pause of over 3 minutes", () => {
+    expect(workGap(null, 5_000)).toBe(0);
+    expect(workGap(1_000, 61_000)).toBe(60_000);
+    expect(workGap(0, 180_000)).toBe(180_000);
+    expect(workGap(0, 180_001)).toBe(0);
+    expect(workGap(5_000, 4_000)).toBe(0);
+  });
+
+  it("splits into hours and minutes", () => {
+    expect(splitDuration(59_999)).toEqual({ h: 0, m: 0 });
+    expect(splitDuration(2 * 3_600_000 + 5 * 60_000 + 30_000)).toEqual({ h: 2, m: 5 });
   });
 });

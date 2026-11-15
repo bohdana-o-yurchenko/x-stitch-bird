@@ -4,6 +4,8 @@ import { addEntry } from "@/core/pattern/keyEntries";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import type { Snapshot } from "@/persistence/ports";
 import { memoryPersistence } from "../../../tests/support/memoryPersistence";
+import { parsePattern } from "@/core/formats/json/parse";
+import { patternFile } from "../actions/importExport";
 import { loadPattern } from "../actions/pattern";
 import { Editor } from "../createEditor";
 
@@ -48,5 +50,31 @@ describe("versions", () => {
     for (let i = 1; i <= 15; i++) snaps.push({ ...{ projectId: ed.doc.id, reason: "timer", w: 10, h: 10, data: "{}", thumb: null }, time: Date.now() - 30 * day - i });
     await ed.snapshots.take("timer");
     expect(snaps.length).toBe(10);
+  });
+});
+
+describe("versions in .xbird files", () => {
+  it("travel with the pattern and join another browser's versions without duplicates", async () => {
+    ed.doc.layers.stitches[0] = red;
+    await ed.snapshots.take("resize");
+    snaps[0]!.time -= 60_000;
+    await ed.snapshots.take("timer");
+    const file = JSON.parse(JSON.stringify(await patternFile(ed)));
+    expect(file.versions.map((v: { reason: string }) => v.reason)).toEqual(["resize", "timer"]);
+    expect(file.versions[0].doc).toMatchObject({ app: "stitchwork", id: ed.doc.id });
+
+    const elsewhere: Snapshot[] = [];
+    const other = new Editor(memoryPersistence(elsewhere), false);
+    other.store.setState({ symbols: [...ALL_SYMBOLS] });
+    const { pattern, versions } = parsePattern(file, ALL_SYMBOLS);
+    loadPattern(other, pattern);
+    await other.snapshots.importFile(pattern.id, versions);
+    await other.snapshots.importFile(pattern.id, versions);
+    expect((await other.snapshots.list()).map((s) => s.reason)).toEqual(["timer", "resize"]);
+    expect(JSON.parse(elsewhere.find((s) => s.reason === "resize")!.data).s).toEqual(file.versions[0].doc.s);
+  });
+
+  it("leave the file out when the pattern has none", async () => {
+    expect(await patternFile(ed)).not.toHaveProperty("versions");
   });
 });

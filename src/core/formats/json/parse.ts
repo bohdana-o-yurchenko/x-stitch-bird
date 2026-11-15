@@ -6,7 +6,7 @@ import { createPattern, DEFAULT_FABRIC, DEFAULT_GRID } from "../../pattern/creat
 import type { CustomColor, GridNumbering, KeyEntry, Pattern } from "../../pattern/types";
 import { normalizeSymbol } from "../../symbols/symbols";
 import { cleanUnderlay, type UnderlayData } from "../../underlay/underlay";
-import { OPTIONAL_LAYER_FIELDS, type PatternFile } from "./serialize";
+import { OPTIONAL_LAYER_FIELDS, type FileVersion, type PatternFile } from "./serialize";
 
 export class PatternFormatError extends Error {}
 
@@ -30,10 +30,21 @@ function cleanGrid(raw: unknown): GridNumbering {
   };
 }
 
+const isDoc = (d: unknown): d is PatternFile => !!d && typeof d === "object" && (d as PatternFile).app === "stitchwork" && !!(d as PatternFile).w && !!(d as PatternFile).h;
+
+/** The versions a .xbird file carries, oldest first; anything malformed is skipped. */
+export function cleanVersions(raw: unknown): FileVersion[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((v): v is FileVersion => !!v && Number.isFinite(v.time) && isDoc(v.doc))
+    .map((v) => ({ time: Number(v.time), reason: typeof v.reason === "string" ? v.reason : "timer", doc: v.doc }))
+    .sort((a, b) => a.time - b.time);
+}
+
 /** Reads any Stitchwork JSON (v1–v4). `symbols` normalises chart symbols to this device's set. */
-export function parsePattern(raw: unknown, symbols: readonly string[]): { pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null } {
+export function parsePattern(raw: unknown, symbols: readonly string[]): { pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; versions: FileVersion[] } {
   const d = raw as Partial<PatternFile> & { pal?: unknown[] };
-  if (!d || d.app !== "stitchwork" || !d.w || !d.h) throw new PatternFormatError("Not a Stitchwork pattern file");
+  if (!isDoc(d)) throw new PatternFormatError("Not a Stitchwork pattern file");
   const p = createPattern(d.w, d.h, d.name || "Untitled pattern");
   if (d.id) p.id = d.id;
   p.count = d.count || 14;
@@ -44,6 +55,7 @@ export function parsePattern(raw: unknown, symbols: readonly string[]): { patter
   p.customs = Object.fromEntries(Object.values(d.customs ?? {}).map((c: CustomColor) => [c.id, { ...c }]));
   p.meta = cleanMeta(d.meta);
   p.grid = cleanGrid(d.grid);
+  p.spent = Number.isFinite(d.spent) && d.spent! > 0 ? d.spent! * 1000 : 0;
   const v = d.v ?? 1;
   const pal = (d.pal ?? []).map((e) => {
     if (!e) return null;
@@ -53,6 +65,6 @@ export function parsePattern(raw: unknown, symbols: readonly string[]): { patter
   p.key = [null, ...pal];
   fixEntrySymbols(p, symbols);
   const size = { w: p.w, h: p.h };
-  for (const l of LAYERS) l.set(p.layers, l.parse((d as Record<string, unknown>)[LAYER_FIELD[l.id]!], size));
-  return { pattern: p, refs: Array.isArray(d.refs) ? d.refs : null, underlay: cleanUnderlay(d.underlay) };
+  for (const l of LAYERS) l.set(p.layers, l.parse((d as unknown as Record<string, unknown>)[LAYER_FIELD[l.id]!], size));
+  return { pattern: p, refs: Array.isArray(d.refs) ? d.refs : null, underlay: cleanUnderlay(d.underlay), versions: cleanVersions(d.versions) };
 }

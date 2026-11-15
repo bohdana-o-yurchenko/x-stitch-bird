@@ -26,7 +26,7 @@ export function memoryPersistence(snaps: Snapshot[] = []): Persistence {
         if (i >= 0) snaps[i] = s;
         else snaps.push(s);
       },
-      list: async (projectId) => snaps.filter((s) => s.projectId === projectId).sort((a, b) => b.time - a.time).map(({ data: _, ...rest }) => rest),
+      list: async (projectId) => snaps.filter((s) => s.projectId === projectId).sort((a, b) => b.time - a.time).map((s) => ({ projectId: s.projectId, time: s.time, reason: s.reason, w: s.w, h: s.h, thumb: s.thumb })),
       get: async (projectId, time) => snaps.find((s) => s.projectId === projectId && s.time === time) ?? null,
       removeMany: async (keys) => {
         for (const [projectId, time] of keys) {

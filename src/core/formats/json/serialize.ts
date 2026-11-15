@@ -28,6 +28,17 @@ export interface PatternFile {
   amb?: number[];
   refs?: unknown[];
   underlay?: unknown;
+  /** Active work time in whole seconds. */
+  spent?: number;
+  /** The pattern's versions (automatic snapshots), oldest first; only in .xbird files. */
+  versions?: FileVersion[];
+}
+
+/** A version inside a .xbird file: the pattern as it was then, without pictures or nested versions. */
+export interface FileVersion {
+  time: number;
+  reason: string;
+  doc: PatternFile;
 }
 
 export const FORMAT_VERSION = 4;
@@ -75,6 +86,7 @@ export function serializePattern(p: Pattern): PatternFile {
   };
   if (Object.keys(p.meta).length) doc.meta = p.meta;
   if (JSON.stringify(p.grid) !== JSON.stringify(DEFAULT_GRID)) doc.grid = p.grid;
+  if (p.spent >= 1000) doc.spent = Math.round(p.spent / 1000);
   for (const [field, id] of OPTIONAL_LAYER_FIELDS) {
     const h = layerHandler(id);
     if (!h.isEmpty(h.get(p.layers))) (doc as unknown as Record<string, unknown>)[field] = layer(id);
