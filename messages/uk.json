@@ -142,9 +142,12 @@
     "full": "повний хрестик",
     "half": "півхрестик ╱",
     "halfb": "півхрестик ╲",
-    "fullButton": "✕ Повний хрестик",
-    "halfButton": "╱ Півхрестик",
-    "halfbButton": "╲ Півхрестик"
+    "fullName": "Хрестик",
+    "fullSub": "повний",
+    "halfName": "Півхрестик",
+    "halfSub": "нахил ╱",
+    "halfbName": "Півхрестик",
+    "halfbSub": "нахил ╲"
   },
   "label": {
     "blendTitle": "Суміш {code}",

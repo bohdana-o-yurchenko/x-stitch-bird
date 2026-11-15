@@ -142,9 +142,12 @@
     "full": "full cross",
     "half": "half cross ╱",
     "halfb": "half cross ╲",
-    "fullButton": "✕ Full cross",
-    "halfButton": "╱ Half cross",
-    "halfbButton": "╲ Half cross"
+    "fullName": "Cross",
+    "fullSub": "full",
+    "halfName": "Half cross",
+    "halfSub": "slant ╱",
+    "halfbName": "Half cross",
+    "halfbSub": "slant ╲"
   },
   "label": {
     "blendTitle": "Blend {code}",

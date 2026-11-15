@@ -9,6 +9,7 @@ import type { PaletteSlot } from "@/core/pattern/palette";
 import { blendStrands, resolveColor } from "@/core/pattern/resolve";
 import type { KeyIndex } from "@/core/pattern/types";
 import { STITCH_TYPES } from "@/core/stitches/registry";
+import type { StitchTypeId } from "@/core/pattern/types";
 import { isLineStyle, symbolText } from "@/core/symbols/lineStyles";
 import { symbolsFor } from "@/core/pattern/keyEntries";
 import { drawLineStyleSample } from "@/render/keyIcon";
@@ -138,6 +139,8 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
     n: kind.fields.includes("strands") && !usesBlend(d) ? d.n : blendStrands(colour) || 1,
     bead: d.t === "combo" && colour.bead ? { hex: colour.bead.hex, ink: colour.bead.ink, shape: beadShape(colour.bead.series) } : d.t === "bead" ? { hex: colour.hex, ink: colour.ink, shape: beadShape(colour.series) } : undefined,
   };
+  // each stitch-type card shows that stitch in the chosen colour (grey until one is picked)
+  const stitchSample = (st: StitchTypeId): PaletteSlot => ({ hex: colour?.thread?.hex ?? colour?.hex ?? "#8C8378", ink: "#fff", sym: "", t: "thread", st, n: 2 });
   const label = colour && src ? formatLabel(labelData({ ...draftEntry(d, src), sym: d.sym }, colour), tr) : null;
   const used = new Set(ed.doc.key.flatMap((e, i) => (e && i !== edit ? [e.sym] : [])));
   const dupLabel = dup ? formatLabel(keyLabelData(ed.doc, ed.doc.key[dup]!), tr).title : "";
@@ -216,10 +219,14 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
           <div className={s.group}>
             {kind.fields.includes("stitchType") && (
               <>
-                <span className={s.label}>{t("stitch")}</span>
-                <div className={ui.seg}>
+                <span className={s.label} id="stitch-type-label">{t("stitch")}</span>
+                <div className={s.stitchCards} role="radiogroup" aria-labelledby="stitch-type-label">
                   {STITCH_TYPES.map((st) => (
-                    <button key={st.id} type="button" className={cx(d.st === st.id && ui.on)} onClick={() => update({ st: st.id })}>{tr(`stitches.${st.id}Button`)}</button>
+                    <button key={st.id} type="button" role="radio" aria-checked={d.st === st.id} className={cx(s.stitchCard, d.st === st.id && s.on)} onClick={() => update({ st: st.id })}>
+                      <KeyIcon slot={stitchSample(st.id)} size={40} view="color" />
+                      <span className={s.stitchName}>{tr(`stitches.${st.id}Name`)}</span>
+                      <span className={s.stitchSub}>{tr(`stitches.${st.id}Sub`)}</span>
+                    </button>
                   ))}
                 </div>
               </>

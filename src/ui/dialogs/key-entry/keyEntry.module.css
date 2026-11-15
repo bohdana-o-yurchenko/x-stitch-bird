@@ -238,3 +238,38 @@
   color: var(--muted);
   padding: 2px 0 6px;
 }
+.stitchCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.stitchCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px 8px;
+  border: 1.5px solid var(--line2);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.stitchCard:hover {
+  border-color: var(--muted);
+}
+.stitchCard.on {
+  border-color: var(--accent);
+  background: rgba(181, 69, 47, 0.06);
+  box-shadow: 0 0 0 3px rgba(181, 69, 47, 0.12);
+}
+.stitchName {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+}
+.stitchSub {
+  font-size: 11.5px;
+  color: var(--muted);
+}
