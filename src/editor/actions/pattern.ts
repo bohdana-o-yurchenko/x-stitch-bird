@@ -10,6 +10,7 @@ import type { Editor } from "../createEditor";
 
 /** Make `p` the edited pattern: fresh history, no selection, view fitted, its reference windows restored. */
 export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null = null, underlay: UnderlayData | null = null) {
+  ed.autosave.saveBeforeSwitch();
   invalidateColors(p);
   ed.history.clear();
   ed.tools.cancel();

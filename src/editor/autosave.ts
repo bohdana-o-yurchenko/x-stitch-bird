@@ -31,6 +31,15 @@ export class Autosave {
     this.libraryTimer = null;
   }
 
+  /**
+   * Another pattern is about to replace this one: its unsaved changes go to the library now. Otherwise opening
+   * another pattern within the minute would drop them (the library save only waits for the timer).
+   */
+  saveBeforeSwitch() {
+    // the pattern is serialised right away, before the call returns
+    if (this.unsaved) void this.saveLibrary();
+  }
+
   private flushDraft() {
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;

@@ -125,6 +125,9 @@ export async function loadFile(ed: Editor, file: File) {
   try {
     const { pattern, refs, underlay, versions, simplified } = await readPatternFile(ed, file);
     loadPattern(ed, pattern, refs as never, underlay);
+    // straight into the library, like a pattern opened from it: listed under Open saved right away
+    ed.autosave.markSaved();
+    void saveToLibrary(ed, { quiet: true });
     await ed.snapshots.importFile(pattern.id, versions);
     ed.toast(simplified ? "toasts.loadedReport" : "toasts.loaded", { name: file.name, count: simplified });
   } catch (e) {

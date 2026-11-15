@@ -7,7 +7,7 @@ import { memoryPersistence } from "../../tests/support/memoryPersistence";
 import { loadPattern } from "./actions/pattern";
 import { LIBRARY_EVERY } from "./autosave";
 import { patternFile } from "./actions/importExport";
-import { XBIRD_VERSION } from "@/core/formats/json/serialize";
+import { serializePattern, XBIRD_VERSION } from "@/core/formats/json/serialize";
 import { gridToImage } from "@/core/underlay/underlay";
 import { Editor } from "./createEditor";
 import { shortcutLabel, shortcutLabels } from "./shortcuts/keymap";
@@ -275,6 +275,24 @@ describe("autosave", () => {
     await vi.advanceTimersByTimeAsync(LIBRARY_EVERY);
     expect(saved).toHaveLength(1);
     vi.useRealTimers();
+  });
+
+  it("puts a file opened from the computer into the library at once, and saves changes before another pattern replaces them", async () => {
+    const saved: string[] = [];
+    ed.persistence.patterns.save = async (d) => (saved.push(d.name), { ok: true });
+    ed.autosave.markSaved();
+    const file = new File([JSON.stringify(serializePattern(createPattern(5, 5, "Imported")))], "imported.xbird");
+    await ed.commands.run("file.load", file);
+    expect(ed.doc.name).toBe("Imported");
+    expect(saved).toEqual(["Imported"]);
+    // changed, then straight away another pattern opens: the change is not lost
+    ed.doc.layers.stitches[0] = red;
+    ed.changed();
+    loadPattern(ed, createPattern(5, 5, "Other"));
+    expect(saved).toEqual(["Imported", "Imported"]);
+    // a brand-new pattern counts as unsaved too (it would have been saved within the minute)
+    loadPattern(ed, createPattern(5, 5, "Third"));
+    expect(saved).toEqual(["Imported", "Imported", "Other"]);
   });
 });
 
