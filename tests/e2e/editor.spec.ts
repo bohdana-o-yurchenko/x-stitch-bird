@@ -605,3 +605,18 @@ test("a symbol can be drawn by hand from a few shapes, is kept in the file, and 
   await expect(page.locator("[data-entry]").first()).toBeVisible();
   expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe(sym);
 });
+
+test("which side-panel sections are open is remembered after a reload", async ({ page }) => {
+  const section = (id: string) => page.locator(`[data-section=${id}]`);
+  await expect(section("totals")).toHaveAttribute("open", "");
+  await expect(section("fabric")).not.toHaveAttribute("open", "");
+  await section("totals").locator("summary").click();
+  await section("fabric").locator("summary").click();
+  await expect(section("totals")).not.toHaveAttribute("open", "");
+  // the browser reports a toggle a moment after the click
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("stitchwork.sections"))).toBe('{"totals":false,"fabric":true}');
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await expect(section("totals")).not.toHaveAttribute("open", "");
+  await expect(section("fabric")).toHaveAttribute("open", "");
+});

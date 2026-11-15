@@ -1,5 +1,6 @@
 "use client";
 
+import { Section } from "./Section";
 import { useTranslations } from "next-intl";
 import { cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
@@ -18,8 +19,7 @@ export function FabricPanel() {
   const b = (chunks: React.ReactNode) => <b>{chunks}</b>;
   const grid = p.grid;
   return (
-    <details className={s.details}>
-      <summary>{t("heading")}</summary>
+    <Section id="fabric" title={t("heading")}>
       <div className={s.section}>
         <div className={ui.grid2}>
           <label className={ui.field}>
@@ -65,6 +65,6 @@ export function FabricPanel() {
           </label>
         </div>
       </div>
-    </details>
+    </Section>
   );
 }

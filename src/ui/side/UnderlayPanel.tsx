@@ -1,5 +1,6 @@
 "use client";
 
+import { Section } from "./Section";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { Rect } from "@/core/pattern/types";
@@ -29,8 +30,7 @@ export function UnderlayPanel() {
     </label>
   );
   return (
-    <details className={s.details} open data-testid="underlay-panel">
-      <summary>{t("heading")}</summary>
+    <Section id="underlay" title={t("heading")} defaultOpen testId="underlay-panel">
       <div className={s.section}>
         <label className={ui.chk}>
           <input type="checkbox" checked={u.behind} onChange={(e) => run("underlay.update", { behind: e.target.checked, visible: true })} />
@@ -82,6 +82,6 @@ export function UnderlayPanel() {
           <p className={ui.hint}>{t("removeBody")}</p>
         </ConfirmDelete>
       )}
-    </details>
+    </Section>
   );
 }

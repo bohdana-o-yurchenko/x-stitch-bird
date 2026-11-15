@@ -1,5 +1,6 @@
 "use client";
 
+import { Section } from "./Section";
 import { useTranslations } from "next-intl";
 import { brandCode } from "@/core/catalog/catalog";
 import { ui } from "../common/widgets";
@@ -16,8 +17,7 @@ export function TotalsPanel() {
   const beads = shopping.lines.filter((l) => l.kind === "bead");
   const skeins = threads.reduce((a, l) => a + l.quantity, 0);
   return (
-    <details className={s.details} open>
-      <summary>{t("totals.heading")}</summary>
+    <Section id="totals" title={t("totals.heading")} defaultOpen>
       <div className={s.section} data-testid="totals">
         <div className={s.totals}>
           <span>{t.rich("totals.full", { count: totals.full.toLocaleString(), b })}</span>
@@ -31,6 +31,6 @@ export function TotalsPanel() {
         {beads.length > 0 && <p className={ui.hint}>{beads.map((l) => `${brandCode(l.item)} ${l.item.name}: ${l.quantity}`).join(" · ")}</p>}
         {shopping.notes.map((n) => <p key={n} className={ui.hint}>{t(n)}</p>)}
       </div>
-    </details>
+    </Section>
   );
 }

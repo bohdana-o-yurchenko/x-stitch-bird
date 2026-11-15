@@ -411,6 +411,8 @@ re-render key panel and autosave.
 
 ### 7.1 Key list (`renderKey`, `index.html:1730`)
 One row per non-null `P.pal` entry in index order:
+- **Collapsible side-panel sections** (image behind the chart, Fabric & size, Totals) remember whether they are open
+  across reloads, per browser (`stitchwork.sections`); first visit: Fabric closed, the others open.
 - **Long keys (2026-11-15):** from 10 entries on, the key gets a row of tools — a search box (thread or bead
   number, "dmc 310", or part of a colour name; blends and floss + bead match by any of their parts), an order
   (As added · By number · Most used) and **Group by type** (on by default): collapsible groups Cross stitch ·
