@@ -12,6 +12,8 @@ export interface CanvasTheme {
   preview: { alpha: number };
   highlight: { dimAlpha: number };
   underlayFrame: { handle: number; rotate: number };
+  /** Key icons: when a floss is this close (ΔE) to the fabric, the icon gets a contrasting tile instead. */
+  keyIcon: { minDelta: number; dark: string; light: string };
   partials: { splitLine: string; symbolsFill: string };
   knots: { radius: number; outline: string; symbolsDot: string };
   ambiguous: { corner: number; minZoom: number };
@@ -34,6 +36,7 @@ export const defaultCanvasTheme: CanvasTheme = {
   preview: { alpha: 0.55 },
   highlight: { dimAlpha: 0.15 },
   underlayFrame: { handle: 11, rotate: 11 },
+  keyIcon: { minDelta: 16, dark: "#7F776D", light: "#F4EFE6" },
   partials: { splitLine: "rgba(0,0,0,.45)", symbolsFill: "rgba(0,0,0,.06)" },
   knots: { radius: 0.2, outline: "rgba(0,0,0,.6)", symbolsDot: "#1d1a16" },
   ambiguous: { corner: 0.28, minZoom: 6 },

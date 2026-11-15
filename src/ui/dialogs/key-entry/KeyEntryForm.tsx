@@ -36,7 +36,8 @@ function LineSample({ sym, w, h }: { sym: string; w: number; h: number }) {
     c.height = Math.round(h * dpr);
     const g = c.getContext("2d")!;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    drawLineStyleSample(g, sym, w, h, ed.theme);
+    // drawn in the surrounding text colour, so it shows in the dark theme too (ed.theme changes with the theme)
+    drawLineStyleSample(g, sym, w, h, getComputedStyle(c).color);
   }, [sym, w, h, ed.theme]);
   return <canvas ref={ref} style={{ width: w, height: h, display: "block" }} />;
 }

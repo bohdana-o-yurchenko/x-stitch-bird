@@ -110,7 +110,7 @@ export function KeyIcon({ slot, size = 30, view }: { slot: PaletteSlot; size?: n
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawKeyIcon(g, slot, size, view ?? current, ed.theme, fabric);
   }, [slot, size, view, current, fabric, ed.theme]);
-  return <canvas ref={ref} style={{ width: size, height: size, borderRadius: 5, border: "1px solid rgba(0,0,0,.18)", flex: "none" }} />;
+  return <canvas ref={ref} style={{ width: size, height: size, borderRadius: 5, border: "1px solid var(--edge)", flex: "none" }} />;
 }
 
 export function Toasts() {

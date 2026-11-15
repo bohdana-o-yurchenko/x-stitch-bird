@@ -13,6 +13,7 @@
   --muted: #7a7064;
   --line: #e2d9ca;
   --line2: #cfc3b0;
+  --edge: color-mix(in srgb, var(--ink) 22%, transparent); /* outline of colour swatches and key icons: visible around white and around black, in any theme */
   --accent: #b5452f;
   --on-accent: #fff;
   --strong: var(--ink); /* "on" state of toggles, toasts, tooltips */
@@ -84,6 +85,7 @@
   --muted: #9aa1c4;
   --line: #3a3d50;
   --line2: #4e5270;
+  --edge: color-mix(in srgb, var(--ink) 38%, transparent);
   --accent: #bd93f9;
   --on-accent: #1d1e27;
   --strong: #6272a4;

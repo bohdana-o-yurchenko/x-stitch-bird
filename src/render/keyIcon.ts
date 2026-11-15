@@ -1,13 +1,19 @@
+import { visibleOn } from "@/core/color/colorMath";
 import type { PaletteSlot } from "@/core/pattern/palette";
 import { viewStyle, type ChartView } from "./chart";
 import { drawBackstitch, drawBeadCell, drawKnot, drawStitchCell, drawSymbol, type Ctx } from "./primitives/cells";
 import { strokeLineStyle } from "./primitives/lineStyles";
 import type { CanvasTheme } from "./theme";
 
-/** Small sample of a key entry: a stitch, bead, backstitch line (in its line style) or knot with its symbol. */
+/**
+ * Small sample of a key entry: a stitch, bead, backstitch line (in its line style) or knot with its symbol.
+ * Stitches are drawn on the fabric colour, unless the floss would vanish on it (white on white): then on a
+ * contrasting tile, so a half cross still reads as a half cross. Lines, knots and beads carry their own outlines.
+ */
 export function drawKeyIcon(g: Ctx, slot: PaletteSlot, size: number, view: ChartView, theme: CanvasTheme, fabric: string) {
   const style = viewStyle(view === "color" ? "both" : view, theme);
-  g.fillStyle = style.showColour ? fabric : "#fff";
+  const stitch = slot.t === "thread" || slot.t === "combo";
+  g.fillStyle = !style.showColour ? "#fff" : stitch ? visibleOn(fabric, slot.hex, theme.keyIcon) : fabric;
   g.fillRect(0, 0, size, size);
   if (slot.t === "bead") drawBeadCell(g, 0, 0, size, slot, style);
   else if (slot.t === "back") drawBackstitch(g, size * 0.12, size * 0.88, size * 0.88, size * 0.12, size * 0.8, slot, viewStyle(view, theme));
@@ -31,9 +37,9 @@ export function keyIconCanvas(slot: PaletteSlot, size: number, view: ChartView, 
   return c;
 }
 
-/** A line style on its own, for the backstitch style picker. */
-export function drawLineStyleSample(g: Ctx, sym: string, w: number, h: number, theme: CanvasTheme) {
+/** A line style on its own, for the backstitch style picker; `color` is the interface's text colour (light or dark theme). */
+export function drawLineStyleSample(g: Ctx, sym: string, w: number, h: number, color: string) {
   g.clearRect(0, 0, w, h);
-  g.strokeStyle = theme.backstitch.symbolsColor;
+  g.strokeStyle = color;
   strokeLineStyle(g, h * 0.3, h / 2, w - h * 0.3, h / 2, Math.max(1.5, h * 0.09), Math.max(2, h * 0.075), sym);
 }

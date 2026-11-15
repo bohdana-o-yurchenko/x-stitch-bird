@@ -174,7 +174,7 @@
   width: 26px;
   height: 26px;
   border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--edge);
   flex: none;
   position: relative;
   overflow: hidden;

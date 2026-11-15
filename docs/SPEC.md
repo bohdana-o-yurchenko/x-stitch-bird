@@ -393,6 +393,10 @@ re-render key panel and autosave.
 ### 7.1 Key list (`renderKey`, `index.html:1730`)
 One row per non-null `P.pal` entry in index order:
 - Key icon (canvas, 30 px) rendered in the current view mode: a stitch/bead/backstitch sample with symbol.
+  *New app (2026-11-15):* a stitch icon sits on the fabric colour unless the floss would vanish on it (ΔE < 16,
+  e.g. white or ecru on white fabric) — then on a contrasting grey (or light) tile, so full and half crosses stay
+  distinguishable everywhere icons are shown (key, key form, status bar, PNG key). Swatches and icons have an
+  outline that shows around white and around black in every theme; line-style samples use the theme's text colour.
   *(New app:)* the backstitch icon is a diagonal line drawn exactly like on the chart (§5 step 8): solid and
   strand-sized in Colour view, the line style in Symbols view, no character.
 - Title (with shortcut badge `1`…`9` for the first nine rows) and subtitle (§3.4).

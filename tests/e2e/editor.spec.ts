@@ -453,6 +453,36 @@ test("switching the language keeps the theme, without reloading the page", async
   await expect(page.getByRole("radio", { name: "Темна" })).toHaveAttribute("aria-checked", "true");
 });
 
+test("key form icons stay visible: white floss on a contrasting tile, line styles in the dark theme", async ({ page }) => {
+  // the middle pixel of a canvas, and one near its top-left corner
+  const pixels = (canvas: import("@playwright/test").Locator) =>
+    canvas.evaluate((c: HTMLCanvasElement) => {
+      const g = c.getContext("2d")!, at = (x: number, y: number) => [...g.getImageData(Math.round(x), Math.round(y), 1, 1).data];
+      return { mid: at(c.width / 2, c.height / 2), corner: at(c.width * 0.2, c.height * 0.2) };
+    });
+  await page.getByRole("button", { name: /^Menu ▾$/ }).click();
+  await page.getByRole("radio", { name: "Dark" }).click();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form"), search = form.getByRole("textbox").first();
+  await search.fill("B5200");
+  await search.press("Enter");
+  // half cross in white: a white diagonal on a darker tile, not white on the white fabric
+  const half = await pixels(form.getByTestId("stitch-type").getByRole("radio").nth(1).locator("canvas"));
+  expect(half.mid.slice(0, 3)).toEqual([255, 255, 255]);
+  expect(half.corner[0]).toBeLessThan(160);
+  // backstitch line styles are drawn in the theme's text colour: light on dark
+  await form.getByRole("radio", { name: "Backstitch" }).click();
+  const line = form.getByTestId("symbol-quick").locator("canvas").first();
+  const drawn = await line.evaluate((c: HTMLCanvasElement) => {
+    const d = c.getContext("2d")!.getImageData(0, 0, c.width, c.height).data;
+    let max = 0;
+    for (let i = 0; i < d.length; i += 4) if (d[i + 3]! > 100) max = Math.max(max, d[i]!);
+    return max;
+  });
+  expect(drawn).toBeGreaterThan(200);
+});
+
 test("the key form picks a symbol from the quick row or from All…, by group", async ({ page }) => {
   await page.locator("[data-entry]").first().dblclick();
   const form = page.getByTestId("key-form");

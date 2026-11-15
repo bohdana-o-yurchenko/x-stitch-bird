@@ -41,3 +41,13 @@ export const luma = ([r, g, b]: Rgb): number => 0.299 * r + 0.587 * g + 0.114 * 
 /** Lighten (amount > 0, towards white) or darken (amount < 0) a hex colour. */
 export const shade = (hex: string, amount: number): string =>
   rgbToHex(hexToRgb(hex).map((v) => (amount < 0 ? v * (1 + amount) : v + (255 - v) * amount)));
+
+/**
+ * A background on which `hex` can be seen: `base` when the two differ enough (ΔE76 ≥ `minDelta`), otherwise
+ * whichever of `dark` / `light` is further from `hex`. Used for key icons, e.g. white floss on white fabric.
+ */
+export function visibleOn(base: string, hex: string, o: { minDelta: number; dark: string; light: string }): string {
+  const lab = (h: string) => rgbToLab(hexToRgb(h)), c = lab(hex);
+  if (deltaE2(lab(base), c) >= o.minDelta * o.minDelta) return base;
+  return deltaE2(lab(o.dark), c) >= deltaE2(lab(o.light), c) ? o.dark : o.light;
+}
