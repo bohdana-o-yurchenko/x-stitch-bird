@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { THEME_BOOT_SCRIPT } from "@/ui/theme/appTheme";
 import "../globals.css";
 
 const dmSans = DM_Sans({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600"], variable: "--font-sans" });
@@ -27,7 +28,10 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   return (
-    <html lang={locale} className={`${dmSans.variable} ${fraunces.variable} ${nunito.variable}`}>
+    <html lang={locale} className={`${dmSans.variable} ${fraunces.variable} ${nunito.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+      </head>
       <body>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
         <SpeedInsights />

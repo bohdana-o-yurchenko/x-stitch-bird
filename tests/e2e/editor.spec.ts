@@ -420,3 +420,19 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
 });
+
+test("the theme is picked in the menu, applies at once and stays after a reload", async ({ page }) => {
+  const html = page.locator("html");
+  await expect(html).not.toHaveAttribute("data-theme");
+  await page.getByRole("button", { name: /^Menu ▾$/ }).click();
+  await page.getByRole("radio", { name: "Dark" }).click();
+  await expect(html).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("radio", { name: "Dark" })).toHaveAttribute("aria-checked", "true");
+  // the chart around the fabric follows; floss colours are data and don't
+  await expect.poll(() => editorState<string>(page, "(ed) => ed.theme.stageBackground")).toBe("#1a1b22");
+  await page.reload();
+  await expect(html).toHaveAttribute("data-theme", "dark");
+  await page.getByRole("button", { name: /^Menu ▾$/ }).click();
+  await page.getByRole("radio", { name: "Royal blue" }).click();
+  await expect(html).toHaveAttribute("data-theme", "royal");
+});

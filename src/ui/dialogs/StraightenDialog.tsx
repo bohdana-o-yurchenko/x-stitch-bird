@@ -107,7 +107,7 @@ export function StraightenDialog({ onClose }: { onClose: () => void }) {
         g.lineWidth = 1.5;
         drawGrid(g, h, cols, rows, toS, false);
       }
-      g.strokeStyle = valid ? "#B5452F" : "#d00";
+      g.strokeStyle = valid ? ed.theme.accent : "#d00";
       g.lineWidth = 2;
       g.beginPath();
       q.forEach((p, i) => (i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)));
@@ -119,10 +119,10 @@ export function StraightenDialog({ onClose }: { onClose: () => void }) {
       const q = toScreen(p);
       g.beginPath();
       g.arc(q.x, q.y, HANDLE_R, 0, Math.PI * 2);
-      g.fillStyle = i === active ? "#B5452F" : "#fff";
+      g.fillStyle = i === active ? ed.theme.accent : "#fff";
       g.fill();
       g.lineWidth = 2;
-      g.strokeStyle = "#B5452F";
+      g.strokeStyle = ed.theme.accent;
       g.stroke();
     });
     // loupe: the active corner magnified, placed in the corner of the view away from it
@@ -137,7 +137,7 @@ export function StraightenDialog({ onClose }: { onClose: () => void }) {
       g.clip();
       const c0 = corners[active]!;
       scene((pt) => ({ x: cx + (pt.x - c0.x) * z, y: cy + (pt.y - c0.y) * z }), z);
-      g.strokeStyle = "#B5452F";
+      g.strokeStyle = ed.theme.accent;
       g.lineWidth = 1;
       g.beginPath();
       g.moveTo(cx - 12, cy); g.lineTo(cx + 12, cy); g.moveTo(cx, cy - 12); g.lineTo(cx, cy + 12);
@@ -149,7 +149,7 @@ export function StraightenDialog({ onClose }: { onClose: () => void }) {
       g.strokeStyle = "#fff";
       g.stroke();
       g.lineWidth = 1.5;
-      g.strokeStyle = "#B5452F";
+      g.strokeStyle = ed.theme.accent;
       g.stroke();
     }
   });

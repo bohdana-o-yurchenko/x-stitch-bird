@@ -131,7 +131,8 @@ export function Toasts() {
  * A menu entry: an action, a submenu (`items`), or "-" for a separator. `hint` is a second, muted line; `id`
  * names it for the quick-start guide (`data-guide="menu:<id>"`), which can open the menu on it.
  */
-export type MenuItem = { label: string; hint?: string; onClick?: () => void; disabled?: boolean; items?: MenuItem[]; id?: string } | "-";
+/** A menu entry, a separator, or a ready-made row (`node`) such as the theme switcher. */
+export type MenuItem = { label: string; hint?: string; onClick?: () => void; disabled?: boolean; items?: MenuItem[]; id?: string } | { node: ReactNode; id: string } | "-";
 
 type MenuPos = { top: number; left?: number; right?: number };
 
@@ -148,7 +149,7 @@ function MenuList({ items, pos, onDone, testId, reveal }: { items: MenuItem[]; p
   const subItems = sub && items[sub.index];
   useLayoutEffect(() => {
     const id = reveal?.[0];
-    const n = items.findIndex((i) => i !== "-" && i.id === id && i.items);
+    const n = items.findIndex((i) => i !== "-" && !("node" in i) && i.id === id && i.items);
     const el = n >= 0 ? list.current?.querySelector<HTMLElement>(`[data-guide="menu:${id}"]`) : null;
     if (el) openSub(n, el);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,6 +160,8 @@ function MenuList({ items, pos, onDone, testId, reveal }: { items: MenuItem[]; p
         {items.map((i, n) =>
           i === "-" ? (
             <hr key={n} className={s.menuSep} />
+          ) : "node" in i ? (
+            <div key={i.id} onPointerEnter={() => setSub(null)}>{i.node}</div>
           ) : (
             <button
               key={i.label}
@@ -182,7 +185,7 @@ function MenuList({ items, pos, onDone, testId, reveal }: { items: MenuItem[]; p
           ),
         )}
       </div>
-      {sub && subItems && subItems !== "-" && subItems.items && <MenuList items={subItems.items} pos={sub.pos} onDone={onDone} reveal={reveal?.slice(1)} />}
+      {sub && subItems && subItems !== "-" && "items" in subItems && subItems.items && <MenuList items={subItems.items} pos={sub.pos} onDone={onDone} reveal={reveal?.slice(1)} />}
     </>
   );
 }

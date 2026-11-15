@@ -28,13 +28,13 @@
   padding: 6px 8px 6px 10px;
   border-left: 3px solid transparent;
   cursor: pointer;
-  border-bottom: 1px solid #eee6d8;
+  border-bottom: 1px solid var(--line);
   width: 100%;
   background: transparent;
   text-align: left;
 }
 .row:hover {
-  background: #f5eee3;
+  background: var(--surface2);
 }
 .row.on {
   background: var(--sel);
@@ -183,8 +183,8 @@
   display: grid;
   place-items: center;
   border-radius: 8px;
-  background: var(--ink);
-  color: #fff;
+  background: var(--strong);
+  color: var(--on-strong);
 }
 .held {
   background: var(--accent);

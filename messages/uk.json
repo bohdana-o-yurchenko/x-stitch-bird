@@ -693,5 +693,13 @@
     "current": "У вас версія {version}.",
     "release": "Версія {version}",
     "close": "Зрозуміло"
+  },
+  "theme": {
+    "label": "Тема",
+    "terracotta": "Теракота",
+    "olive": "Оливкова",
+    "royal": "Королівська синя",
+    "rose": "Рожева",
+    "dark": "Темна"
   }
 }

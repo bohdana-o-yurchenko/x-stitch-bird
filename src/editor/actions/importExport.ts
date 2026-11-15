@@ -13,6 +13,7 @@ import { buildPalette } from "@/core/pattern/palette";
 import type { Pattern } from "@/core/pattern/types";
 import type { UnderlayData } from "@/core/underlay/underlay";
 import { renderChartImage, type KeyLine } from "@/render/exportChart";
+import { defaultCanvasTheme } from "@/render/theme";
 import type { ChartView } from "@/render/chart";
 import { downloadFile, isImageFile, isPatternFile, readText } from "@/platform/files";
 import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
@@ -57,7 +58,7 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
   if (format === "csv") return offer(ed, `${base}-shopping-list.csv`, exportCsv(p, shoppingList(p), ed.t), "csv");
   const view: ChartView = format === "png-color" ? "color" : format === "png-symbols" ? "symbols" : "both";
   const byline = [p.meta.designer, p.meta.copyright && `© ${p.meta.copyright}`].filter(Boolean).join(" · ") || undefined;
-  const canvas = renderChartImage(p, ed.state.palette, view, ed.theme, { heading: ed.t("png.keyHeading", { name: p.name }), byline, key: keyLines(ed) });
+  const canvas = renderChartImage(p, ed.state.palette, view, { ...ed.theme, accent: defaultCanvasTheme.accent }, { heading: ed.t("png.keyHeading", { name: p.name }), byline, key: keyLines(ed) });
   offer(ed, `${base}${view === "color" ? "-preview" : "-chart"}.png`, await canvasToBlob(canvas), "png");
 }
 

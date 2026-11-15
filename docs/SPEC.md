@@ -1343,6 +1343,15 @@ Idea from Pattern Maker v4 (Professional). Toggle with the eye button in the key
 - Saved with the pattern (`spent`, whole seconds; draft, library and .xbird); not part of undo; restoring a
   version keeps the time spent so far. Not in .oxs.
 
+### 15.18 Colour themes (implemented 2026-11-15)
+
+- **Menu ▸ Theme**: a row of five dots — Terracotta (default), Olive, Royal blue, Rose (light, only the accent
+  changes) and Dark (bluish, after the Dracula colour scheme). Picking one applies at once and keeps the menu open.
+- Remembered per browser (`localStorage` `stitchwork.theme`), applied before the first paint so nothing flashes.
+- Only the interface is themed: panels, menus, buttons, the stage around the fabric and the rulers. The chart itself
+  — fabric colour, floss and bead colours, symbols, grid — stays exactly the same, so what you see is what you stitch.
+- Exported PNGs don't depend on the theme.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

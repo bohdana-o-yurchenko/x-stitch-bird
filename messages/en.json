@@ -693,5 +693,13 @@
     "current": "You have version {version}.",
     "release": "Version {version}",
     "close": "Got it"
+  },
+  "theme": {
+    "label": "Theme",
+    "terracotta": "Terracotta",
+    "olive": "Olive",
+    "royal": "Royal blue",
+    "rose": "Rose",
+    "dark": "Dark"
   }
 }

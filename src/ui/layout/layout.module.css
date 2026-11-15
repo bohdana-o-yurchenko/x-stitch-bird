@@ -65,7 +65,7 @@
   justify-content: center;
   border: 3px dashed var(--accent);
   border-radius: 16px;
-  background: rgba(244, 239, 230, 0.85);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
   pointer-events: none;
   font-family: var(--font-heading);
   font-size: 22px;

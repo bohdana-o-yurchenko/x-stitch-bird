@@ -10,7 +10,7 @@
   overflow-y: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
 }
 .item {
   display: flex;
@@ -44,7 +44,7 @@
   font-size: 10.5px;
   padding: 1px 6px;
   border-radius: 10px;
-  background: #efe7da;
+  background: var(--surface2);
   color: var(--muted);
   white-space: nowrap;
 }
@@ -60,7 +60,7 @@
   height: 38px;
   border: 1px solid var(--line2);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   font-size: 20px;
 }
 .symgrid {
@@ -75,7 +75,7 @@
   height: 32px;
   border: 1px solid var(--line2);
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface);
   font-size: 16px;
 }
 .symbtn.wide {
@@ -93,12 +93,12 @@
   opacity: 0.3;
 }
 .symgrid button.cur {
-  background: var(--ink);
-  color: #fff;
+  background: var(--strong);
+  color: var(--on-strong);
   opacity: 1;
 }
 .symgrid.lines button.cur {
-  background: #fff;
+  background: var(--surface);
   outline: 2px solid var(--ink);
 }
 .preview {
@@ -106,7 +106,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px;
-  background: #f3ece0;
+  background: var(--surface2);
   border-radius: 10px;
 }
 
@@ -169,7 +169,7 @@
 }
 .chips button {
   border: 1px solid var(--line2);
-  background: #fff;
+  background: var(--surface);
   border-radius: 999px;
   padding: 5px 12px;
   font-size: 13px;
@@ -178,9 +178,9 @@
   background: var(--sel);
 }
 .chips button.chipOn {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: #fff;
+  background: var(--strong);
+  border-color: var(--strong);
+  color: var(--on-strong);
 }
 /* colour lines: a single floss, each floss of a blend, a combo's floss and bead — same look, own strands */
 .lines {
@@ -195,7 +195,7 @@
   padding: 6px 8px;
   border: 1px solid var(--line2);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface);
   cursor: pointer;
 }
 .line.lineOn {
@@ -251,7 +251,7 @@
   padding: 10px 6px 8px;
   border: 1.5px solid var(--line2);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface);
   cursor: pointer;
   transition: border-color 0.12s, background 0.12s;
 }
@@ -260,8 +260,8 @@
 }
 .stitchCard.on {
   border-color: var(--accent);
-  background: rgba(181, 69, 47, 0.06);
-  box-shadow: 0 0 0 3px rgba(181, 69, 47, 0.12);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
 }
 .stitchName {
   font-size: 13px;

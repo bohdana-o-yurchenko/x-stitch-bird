@@ -11,13 +11,13 @@
   position: absolute;
   border: 2.5px solid var(--accent);
   border-radius: 9px;
-  box-shadow: 0 0 0 4px rgba(181, 69, 47, 0.28);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 28%, transparent);
   pointer-events: none;
   animation: pulse 1.6s ease-in-out infinite;
 }
 @keyframes pulse {
   50% {
-    box-shadow: 0 0 0 9px rgba(181, 69, 47, 0.12);
+    box-shadow: 0 0 0 9px color-mix(in srgb, var(--accent) 12%, transparent);
   }
 }
 .card {
@@ -56,8 +56,8 @@
 .hl {
   padding: 1px 7px;
   border-radius: 6px;
-  background: rgba(181, 69, 47, 0.13);
-  color: #8f3121;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  color: color-mix(in srgb, var(--accent) 75%, var(--ink));
   font-weight: 700;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;

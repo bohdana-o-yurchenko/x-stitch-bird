@@ -10,6 +10,7 @@ import { APP_VERSION } from "../dialogs/ChangelogDialog";
 import { ShortcutsInfo } from "./ShortcutsInfo";
 import { ToolBar } from "./ToolBar";
 import { useCommand, useEditorState } from "../hooks/editor";
+import { ThemeSwitcher } from "../theme/ThemeSwitcher";
 import s from "./header.module.css";
 
 function PatternName() {
@@ -56,6 +57,8 @@ function FileMenu() {
     ] },
     "-",
     { id: "info", label: t("info"), hint: t("infoHint"), onClick: go("pattern.editInfo") },
+    "-",
+    { id: "theme", node: <ThemeSwitcher /> },
     "-",
     { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
     { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },

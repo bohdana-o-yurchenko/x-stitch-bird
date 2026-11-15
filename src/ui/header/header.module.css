@@ -31,7 +31,7 @@
 .name:hover,
 .name:focus {
   border-color: var(--line2);
-  background: #fff;
+  background: var(--surface);
   outline: none;
 }
 .spacer {
@@ -80,7 +80,7 @@
   border-radius: 7px;
   overflow: hidden;
   height: 30px;
-  background: #fff;
+  background: var(--surface);
 }
 .sizes button {
   min-width: 22px;
@@ -98,8 +98,8 @@
   background: var(--sel);
 }
 .sizes button.on {
-  background: var(--ink);
-  color: #fff;
+  background: var(--strong);
+  color: var(--on-strong);
 }
 .info {
   width: 26px;
@@ -107,7 +107,7 @@
   margin: 0 4px;
   border-radius: 50%;
   border: 1.5px solid var(--line2);
-  background: #fff;
+  background: var(--surface);
   color: var(--muted);
   font-family: var(--font-heading);
   font-style: italic;
@@ -172,7 +172,7 @@
   border-radius: 5px;
   padding: 0 5px;
   margin-left: 3px;
-  background: #fff;
+  background: var(--surface);
   white-space: nowrap;
 }
 .lang {
@@ -180,7 +180,7 @@
   border: 1px solid var(--line2);
   border-radius: 7px;
   padding: 4px;
-  background: #fff;
+  background: var(--surface);
 }
 .sizes.idle {
   opacity: 0.45;

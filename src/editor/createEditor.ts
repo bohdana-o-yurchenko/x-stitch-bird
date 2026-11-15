@@ -9,6 +9,7 @@ import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
 import { createPersistence, type Persistence } from "@/persistence";
 import { downscaleToBlob, loadImage } from "@/platform/images";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
+import { chromeColours } from "@/platform/themeColours";
 import { createFromImage, saveToLibrary } from "./actions/importExport";
 import { demoPattern, loadPattern } from "./actions/pattern";
 import { Autosave } from "./autosave";
@@ -26,6 +27,13 @@ import { UnderlayService } from "./underlay/UnderlayService";
 import { ViewportService } from "./viewport/viewport";
 
 let toastId = 0;
+
+/** The canvas theme with the stage, rulers and accent taken from the interface theme. */
+function withChrome(theme: CanvasTheme): CanvasTheme {
+  const c = chromeColours();
+  if (!c) return theme;
+  return { ...theme, stageBackground: c.stage, accent: c.accent, rulers: { ...theme.rulers, background: c.rulerBackground, text: c.rulerText, line: c.rulerLine } };
+}
 
 /**
  * One editor instance: state store, undo history and services. React gets it through context; the canvas,
@@ -87,10 +95,16 @@ export class Editor {
     return this.initialising;
   }
 
+  /** The canvas around the fabric follows the interface theme (CSS tokens); the chart itself never changes. */
+  refreshChrome() {
+    this.theme = withChrome(this.theme);
+    this.store.setState({});
+  }
+
   private async boot() {
     await document.fonts?.ready;
     const family = bodyFontFamily();
-    this.theme = { ...defaultCanvasTheme, fontFamily: family };
+    this.theme = withChrome({ ...defaultCanvasTheme, fontFamily: family });
     // vector shapes always draw; only the letters, digits and signs depend on the font
     const drawable = new Set(usableSymbols(ALL_SYMBOLS.filter((s) => !isShapeSymbol(s)), family));
     const symbols = ALL_SYMBOLS.filter((s) => isShapeSymbol(s) || drawable.has(s));

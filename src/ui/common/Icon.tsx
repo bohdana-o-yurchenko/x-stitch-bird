@@ -34,7 +34,7 @@ const ICONS: Record<string, ReactNode> = {
   rotate: <g {...S}><path d="M20 12a8 8 0 11-3-6.2" /><path d="M20 4v5h-5" /></g>,
   brand: (
     <>
-      <rect x="1" y="1" width="22" height="22" rx="5" fill="#B5452F" />
+      <rect x="1" y="1" width="22" height="22" rx="5" style={{ fill: "var(--accent)" }} />
       <path d="M6 6l12 12M18 6L6 18" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" />
     </>
   ),

@@ -1,0 +1,39 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { cx } from "../common/widgets";
+import { useEditor } from "../hooks/editor";
+import { applyTheme, savedTheme, THEMES, type ThemeId } from "./appTheme";
+import s from "./theme.module.css";
+
+/** A row of colour dots inside the menu; picking one keeps the menu open so themes can be compared. */
+export function ThemeSwitcher() {
+  const t = useTranslations("theme");
+  const ed = useEditor();
+  const [current, setCurrent] = useState<ThemeId>(savedTheme);
+  const pick = (id: ThemeId) => {
+    applyTheme(id);
+    setCurrent(id);
+    ed.refreshChrome();
+  };
+  return (
+    <div className={s.row} role="radiogroup" aria-label={t("label")} data-testid="theme-switcher">
+      <span className={s.label}>{t("label")}</span>
+      {THEMES.map((th) => (
+        <button
+          key={th.id}
+          type="button"
+          role="radio"
+          aria-checked={current === th.id}
+          aria-label={t(th.id)}
+          title={t(th.id)}
+          data-theme-id={th.id}
+          className={cx(s.dot, current === th.id && s.on, th.id === "dark" && s.dark)}
+          style={{ background: th.swatch }}
+          onClick={() => pick(th.id)}
+        />
+      ))}
+    </div>
+  );
+}

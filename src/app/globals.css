@@ -1,15 +1,24 @@
-/* UI design tokens. Canvas colours live in src/render/theme.ts. */
+/*
+ * UI design tokens. Canvas colours live in src/render/theme.ts; the canvas reads --stage, --bg, --muted, --line and
+ * --accent from here (editor `refreshChrome`). Themes (Menu ▸ Theme) set `data-theme` on <html>: the light ones only
+ * change the accent, "dark" changes the neutrals too. Floss, bead and fabric colours are data and never themed.
+ */
 :root {
   --bg: #f4efe6;
   --panel: #fbf8f2;
+  --surface: #fff; /* inputs, buttons, cards */
+  --surface2: #f3ece0; /* tinted fills: tags, previews, window heads */
   --ink: #2b2620;
   --muted: #7a7064;
   --line: #e2d9ca;
   --line2: #cfc3b0;
   --accent: #b5452f;
+  --on-accent: #fff;
+  --strong: var(--ink); /* "on" state of toggles, toasts, tooltips */
+  --on-strong: #fff;
   --accent2: #2f5d62;
-  --sel: #f1e3d3;
-  --sel2: #eadfcf;
+  --sel: color-mix(in srgb, var(--accent) 11%, var(--panel));
+  --sel2: color-mix(in srgb, var(--accent) 7%, var(--panel));
   --warn-bg: #fff4d6;
   --warn-line: #ebd28e;
   --danger: #b3261e;
@@ -19,6 +28,48 @@
   --radius: 8px;
   --font-body: var(--font-sans), system-ui, sans-serif;
   --font-heading: var(--font-serif), serif;
+  color-scheme: light;
+}
+
+:root[data-theme="olive"] {
+  --accent: #56682a;
+  --accent2: #7a4a2a;
+}
+
+:root[data-theme="royal"] {
+  --accent: #2a4c9c;
+  --accent2: #2f6b62;
+}
+
+:root[data-theme="rose"] {
+  --accent: #b03a6c;
+  --accent2: #2f5d62;
+}
+
+/* bluish dark, after the Dracula colour scheme */
+:root[data-theme="dark"] {
+  --bg: #21222c;
+  --panel: #282a36;
+  --surface: #323445;
+  --surface2: #2f3140;
+  --ink: #f2f2ec;
+  --muted: #9aa1c4;
+  --line: #3a3d50;
+  --line2: #4e5270;
+  --accent: #bd93f9;
+  --on-accent: #1d1e27;
+  --strong: #6272a4;
+  --on-strong: #fff;
+  --accent2: #8be9fd;
+  --sel: color-mix(in srgb, var(--accent) 16%, var(--panel));
+  --sel2: color-mix(in srgb, var(--accent) 10%, var(--panel));
+  --warn-bg: #3b3527;
+  --warn-line: #8a7643;
+  --danger: #ff6e6e;
+  --danger-bg: #43282f;
+  --stage: #1a1b22;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
 }
 
 * {
