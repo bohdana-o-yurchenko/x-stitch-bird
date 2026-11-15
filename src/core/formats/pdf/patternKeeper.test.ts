@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
+import en from "../../../../messages/en.json";
 import { describe, expect, it } from "vitest";
 import { fixtureJson } from "../../../../tests/support/fixtures";
 import { createPattern } from "../../pattern/createPattern";
@@ -7,6 +8,7 @@ import { ALL_SYMBOLS } from "../../symbols/symbols";
 import { SYMBOL_FONT, SYMBOL_GLYPHS } from "../../symbols/symbolFont";
 import { parsePattern } from "../json/parse";
 import { checkPatternKeeper, patternKeeperPdf } from "./patternKeeper";
+import { APP_URL_EN } from "./pdfLayout";
 
 const file = (name: string) => new Uint8Array(readFileSync(new URL(`../../../../public/fonts/${name}.ttf`, import.meta.url)));
 const fonts = { symbols: file("ptashechka-symbols"), regular: file("ptashechka-text-regular"), bold: file("ptashechka-text-bold"), cyrRegular: file("ptashechka-text-cyr-regular"), cyrBold: file("ptashechka-text-cyr-bold") };
@@ -64,6 +66,10 @@ describe("Pattern Keeper PDF", () => {
     expect(s.match(/\/Subtype \/Type0/g)).toHaveLength(5);
     expect(s.match(/\/FontFile2/g)).toHaveLength(5);
     expect(s).not.toContain("/Subtype /Type1");
+    // the same address the English interface uses
+    expect(APP_URL_EN).toBe(en.app.url);
+    // the footer links to the app, in English like the rest of this file
+    expect(s.match(/\/URI \(https:\/\/x-stitch-bird\.vercel\.app\/en\)/g)).toHaveLength(4);
   });
 
   it("shows a hand-drawn symbol with a spare standard glyph, since the chart must be text in the symbol font", async () => {

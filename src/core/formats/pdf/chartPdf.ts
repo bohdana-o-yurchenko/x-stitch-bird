@@ -322,7 +322,7 @@ async function addKey(pdf: PdfWriter, p: Pattern, tr: Translate, title: string, 
       page.lines([[L, y + KEY_ROW - 3, R, y + KEY_ROW - 3]], 0.3, 0.8);
     });
     symbols.draw(page);
-    drawFooter(page, tr("chartPdf.footer", { app: "{app}" }));
+    drawFooter(page, tr("chartPdf.footer", { app: "{app}", url: "{url}" }), tr("app.url"));
     await pdf.addPage(page);
   }
 }
@@ -340,7 +340,7 @@ export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Arr
   await pdf.embedTextFonts(o.fonts);
   await pdf.embedSymbolFont(SYMBOL_FONT.name, o.fonts.symbols, Object.values(SYMBOL_GLYPHS));
   const palette = buildPalette(p), l = chartLayout(p, o.overlap), name = p.name || "Pattern", accents = accentsFor(p), tr = o.t;
-  const view = (v: ChartView) => tr(`chartPdf.views.${v}`), footer = tr("chartPdf.footer", { app: "{app}" });
+  const view = (v: ChartView) => tr(`chartPdf.views.${v}`), footer = tr("chartPdf.footer", { app: "{app}", url: "{url}" }), url = tr("app.url");
   const pagesPerView = l.tiles.length;
   const usage = computeUsage(p).perEntry;
   const rows: KeyRow[] = p.key.flatMap((e, k) => {
@@ -382,7 +382,7 @@ export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Arr
     page.text("bold", 11, L, y, tr("chartPdf.howTitle"));
     for (const line of wrap(tr("chartPdf.howText", { count: pagesPerView, overlap: l.overlap }), 9, PAGE.w - L - PAGE.right)) page.text("regular", 9, L, (y += 13), line, "left", 0.25);
     drawPageMap(page, p, l, null, L, y + 16, PAGE.w - L - PAGE.right, PAGE.h - y - 16 - 60, true);
-    drawFooter(page, footer);
+    drawFooter(page, footer, url);
     await pdf.addPage(page);
   }
 
@@ -394,7 +394,7 @@ export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Arr
       if (l.tiles.length > 1) drawPageMap(page, p, l, t.n, PAGE.w - PAGE.right - 70, 10, 70, 34, false);
       drawRulers(page, p, t, l.cell, PAGE.left, PAGE.top);
       drawChartPage(page, p, palette, l, t, v, accents, o.lineStyle);
-      drawFooter(page, footer);
+      drawFooter(page, footer, url);
       await pdf.addPage(page);
     }
   };

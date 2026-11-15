@@ -96,6 +96,8 @@ export class PdfPage {
   readonly images: { name: string; ref: Ref }[] = [];
   /** Fill opacities used on the page, in percent (each becomes an ExtGState). */
   readonly alphas = new Set<number>();
+  /** Clickable web links: areas from the top-left, and where they go. */
+  readonly links: { x: number; y: number; w: number; h: number; url: string }[] = [];
   constructor(readonly width: number, readonly height: number) {}
 
   private y(v: number) {
@@ -152,6 +154,11 @@ export class PdfPage {
   /** Clip what follows to everything outside a path (a hole), until `restore`. */
   clipOutside(pdfPath: string) {
     this.ops.push(`-10000 -10000 30000 30000 re ${pdfPath} W* n`);
+  }
+
+  /** Makes an area of the page a link to a web address. */
+  link(x: number, y: number, w: number, h: number, url: string) {
+    this.links.push({ x, y, w, h, url });
   }
 
   /** Fill opacity (0–1) for what follows, until `restore`. */
@@ -272,7 +279,11 @@ export class PdfWriter {
     const fonts = Object.entries(this.fonts).map(([k, ref]) => `/${k} ${ref} 0 R`).join(" ");
     const images = page.images.length ? ` /XObject << ${page.images.map((i) => `/${i.name} ${i.ref} 0 R`).join(" ")} >>` : "";
     const states = page.alphas.size ? ` /ExtGState << ${[...page.alphas].map((a) => `/GA${a} << /ca ${num(a / 100)} /CA ${num(a / 100)} >>`).join(" ")} >>` : "";
-    this.pageRefs.push(this.add(`<< /Type /Page /Parent ${this.pagesRef} 0 R /MediaBox [0 0 ${num(page.width)} ${num(page.height)}] /Resources << /Font << ${fonts} >>${images}${states} >> /Contents ${contents} 0 R >>`));
+    // links: only plain web addresses, written as a PDF string with ( ) \\ escaped
+    const annots = page.links.filter((l) => /^https?:\/\/[\x21-\x7e]+$/.test(l.url)).map((l) =>
+      this.add(`<< /Type /Annot /Subtype /Link /Rect [${num(l.x)} ${num(page.height - l.y - l.h)} ${num(l.x + l.w)} ${num(page.height - l.y)}] /Border [0 0 0] /A << /S /URI /URI (${l.url.replace(/[\\()]/g, "\\$&")}) >> >>`));
+    const links = annots.length ? ` /Annots [${annots.map((r) => `${r} 0 R`).join(" ")}]` : "";
+    this.pageRefs.push(this.add(`<< /Type /Page /Parent ${this.pagesRef} 0 R /MediaBox [0 0 ${num(page.width)} ${num(page.height)}] /Resources << /Font << ${fonts} >>${images}${states} >>${links} /Contents ${contents} 0 R >>`));
   }
 
   get pageCount() {
