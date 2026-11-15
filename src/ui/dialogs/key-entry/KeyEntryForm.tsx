@@ -21,7 +21,9 @@ import { isShapeSymbol } from "@/core/symbols/symbols";
 import { shapeSymbol } from "@/core/symbols/shapes";
 import { useEditor, useEditorState } from "../../hooks/editor";
 import { useTranslate } from "../../i18n/labels";
+import { Icon } from "../../common/Icon";
 import { BlendFinder } from "./BlendFinder";
+import { SymbolDrawer } from "./SymbolDrawer";
 import { ColourPicker } from "./ColourPicker";
 import s from "./keyEntry.module.css";
 
@@ -60,6 +62,7 @@ function symbolGroups(symbols: readonly string[], lines: boolean) {
 function SymbolPicker({ value, used, symbols, onPick }: { value: string; used: Set<string>; symbols: readonly string[]; onPick: (s: string) => void }) {
   const t = useTranslations("keyDialog");
   const [pop, setPop] = useState<{ top?: number; bottom?: number; right: number } | null>(null);
+  const [drawing, setDrawing] = useState(false);
   const more = useRef<HTMLButtonElement>(null);
   const lines = isLineStyle(value);
   const face = (sym: string) => (lines ? <LineSample sym={sym} w={40} h={18} /> : <SymbolGlyph sym={sym} size={17} />);
@@ -93,6 +96,10 @@ function SymbolPicker({ value, used, symbols, onPick }: { value: string; used: S
       <span className={s.label}>{lines ? t("lineStyle") : t("symbol")}</span>
       <div className={s.quick} data-testid="symbol-quick">{quick.map((sym) => cell(sym, false))}</div>
       <button ref={more} type="button" className={cx(ui.btn, ui.sm, s.allBtn)} aria-expanded={!!pop} data-testid="symbol-button" onClick={() => (pop ? setPop(null) : open())}>{t("allSymbols")}</button>
+      {!lines && (
+        <button type="button" className={cx(ui.btn, ui.sm, s.allBtn)} title={t("drawSymbol")} aria-label={t("drawSymbol")} data-testid="symbol-draw" onClick={() => { setPop(null); setDrawing(true); }}><Icon name="pencil" size={14} /></button>
+      )}
+      {drawing && createPortal(<SymbolDrawer initial={value} onUse={onPick} onClose={() => setDrawing(false)} />, document.body)}
       {pop && createPortal(
         <div className={s.symPop} style={{ top: pop.top, bottom: pop.bottom, right: pop.right }} data-symbol-pop data-no-shortcuts role="dialog" aria-label={lines ? t("lineStyle") : t("symbol")}>
           {groups.length > 1 && (

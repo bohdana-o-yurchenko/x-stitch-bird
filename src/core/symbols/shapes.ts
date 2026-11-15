@@ -4,6 +4,7 @@
  * `sym:<name>`; letters, digits and signs stay plain characters drawn with the app's bundled font. To add a shape:
  * add it to the symbol sheet and re-run scripts/symbols-from-svg.py, or add it to BASES/MARKS below.
  */
+import { customShape } from "./customSymbol";
 import { BASIC, DECORATIVE } from "./shapeLibrary";
 
 export interface SymbolPart {
@@ -20,8 +21,8 @@ export interface SymbolPart {
   clip?: "left" | "top";
 }
 
-/** Basic = simple geometric shapes and marks; decorative = pictures and intricate shapes. */
-export type ShapeGroup = "basic" | "decorative";
+/** Basic = simple geometric shapes and marks; decorative = pictures and intricate shapes; custom = drawn by the user. */
+export type ShapeGroup = "basic" | "decorative" | "custom";
 
 export interface ShapeSymbol {
   id: string;
@@ -104,7 +105,8 @@ export const SHAPES: readonly ShapeSymbol[] = [
 ];
 
 const BY_ID = new Map(SHAPES.map((s) => [s.id, s]));
-export const shapeSymbol = (id: string): ShapeSymbol | undefined => BY_ID.get(id);
+/** The drawable shape of a symbol: a built-in one (`sym:…`) or a hand-drawn one (`draw:…`); undefined for characters. */
+export const shapeSymbol = (id: string): ShapeSymbol | undefined => BY_ID.get(id) ?? customShape(id);
 
 /** Plain characters drawn with the bundled font (no I/O — they look like 1/0). */
 export const TEXT_SYMBOLS: readonly string[] = [

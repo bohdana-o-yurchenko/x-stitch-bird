@@ -94,7 +94,23 @@
       "knot": "knots"
     },
     "partials": "+ {count} partial",
-    "highlight": "Highlight the selected entry — everything else fades (V)"
+    "highlight": "Highlight the selected entry — everything else fades (V)",
+    "search": "Find by number or name",
+    "sortLabel": "Order of the key",
+    "sort": {
+      "added": "As added",
+      "number": "By number",
+      "used": "Most used"
+    },
+    "group": "Group by type",
+    "noMatch": "Nothing in the key matches.",
+    "groups": {
+      "thread": "Cross stitch",
+      "back": "Backstitch",
+      "knot": "French knots",
+      "combo": "Floss + bead",
+      "bead": "Beads"
+    }
   },
   "fabric": {
     "heading": "Fabric & size",
@@ -215,7 +231,34 @@
       "bead": "Bead",
       "combo": "Floss+bead",
       "knot": "Knot"
-    }
+    },
+    "drawSymbol": "Draw your own symbol…",
+    "drawTitle": "Draw a symbol",
+    "drawHint": "Pick a shape and drag on the grid. Keep it simple — up to {max} shapes — so it still reads at chart size.",
+    "drawShape": "Shape",
+    "drawDirection": "Direction",
+    "drawTool": {
+      "circle": "Circle",
+      "circleF": "Filled circle",
+      "rect": "Rectangle",
+      "rectF": "Filled rectangle",
+      "triangle": "Triangle",
+      "triangleF": "Filled triangle",
+      "arrow": "Arrow — drag from its tail to its head"
+    },
+    "drawDir": {
+      "u": "Pointing up",
+      "r": "Pointing right",
+      "d": "Pointing down",
+      "l": "Pointing left"
+    },
+    "drawPreview": "On the chart",
+    "drawCount": "{n} of {max} shapes",
+    "drawFull": "{max} shapes is the most a symbol can have. Remove one to add another.",
+    "drawUndo": "Remove last",
+    "drawClear": "Clear",
+    "drawCancel": "Cancel",
+    "drawUse": "Use this symbol"
   },
   "picker": {
     "searchThread": "Search DMC number or name",

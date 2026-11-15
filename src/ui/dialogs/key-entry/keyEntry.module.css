@@ -307,3 +307,68 @@
 .symgrid.lines {
   grid-template-columns: repeat(auto-fill, 52px);
 }
+/* drawing a symbol by hand */
+.drawer {
+  width: min(520px, 100%);
+}
+.drawTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.drawRow {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.drawArea {
+  position: relative;
+  flex: none;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  background: #fff;
+  color: #1d1a16;
+  cursor: crosshair;
+  touch-action: none;
+}
+.drawArea.drawFull {
+  cursor: not-allowed;
+}
+.drawArea svg {
+  display: block;
+}
+.gridLine line {
+  stroke: #e6dfd2;
+  stroke-width: 1;
+}
+.gridLine.gridMid line {
+  stroke: #c9bda9;
+}
+.drawInk {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.drawSide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+.drawSamples {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+.drawSample {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--edge);
+  border-radius: 5px;
+  background: #fff;
+  color: #1d1a16;
+}
+.drawWarn {
+  color: var(--danger);
+}

@@ -1,4 +1,5 @@
 import { entryKind } from "../entryKinds/registry";
+import { customShape } from "../symbols/customSymbol";
 import { mirroredStitchType } from "../stitches/registry";
 import { isLineStyle, LINE_STYLES } from "../symbols/lineStyles";
 import { firstFreeSymbol } from "../symbols/symbols";
@@ -26,7 +27,8 @@ export function fixEntrySymbols(p: Pattern, symbols: readonly string[]) {
   const seen = new Set<string>();
   p.key.forEach((e, i) => {
     if (!e) return;
-    const ok = e.t === "back" ? isLineStyle(e.sym) : !isLineStyle(e.sym) && symbols.includes(e.sym) && !seen.has(e.sym);
+    const known = symbols.includes(e.sym) || !!customShape(e.sym);
+    const ok = e.t === "back" ? isLineStyle(e.sym) : !isLineStyle(e.sym) && known && !seen.has(e.sym);
     if (!ok) p.key[i] = { ...e, sym: nextSymbol(p, symbols, i, e.t) };
     seen.add(p.key[i]!.sym);
   });

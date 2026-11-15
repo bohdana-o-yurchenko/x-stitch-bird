@@ -80,6 +80,25 @@ function englishLabel(d: LabelData): { title: string; sub: string } {
   return { title: d.blend ? `Blend ${d.title}` : d.title, sub: parts.filter(Boolean).join(" · ") };
 }
 
+/**
+ * The font glyph for each entry of the Pattern Keeper chart. The chart must be text in the symbol font, so a
+ * hand-drawn symbol (which has no glyph) is shown with a standard symbol no other entry of the chart uses.
+ */
+function chartGlyphs(p: Pattern, report: PkReport): { glyphs: Map<KeyIndex, number>; replaced: number } {
+  const glyphs = new Map<KeyIndex, number>(), taken = new Set<number>(), without: KeyIndex[] = [];
+  for (const k of report.supported.keys()) {
+    const g = SYMBOL_GLYPHS[p.key[k]!.sym]?.[0];
+    if (g === undefined) without.push(k);
+    else {
+      glyphs.set(k, g);
+      taken.add(g);
+    }
+  }
+  const spare = Object.values(SYMBOL_GLYPHS).map(([g]) => g).filter((g) => !taken.has(g));
+  without.forEach((k, i) => spare[i] !== undefined && glyphs.set(k, spare[i]!));
+  return { glyphs, replaced: without.length };
+}
+
 export interface PkPdfOptions {
   /** The font files: chart symbols (`SYMBOL_FONT.url`) and the text font (`TEXT_FONTS.*.url`). All are embedded. */
   fonts: { symbols: Uint8Array; regular: Uint8Array; bold: Uint8Array };
@@ -138,6 +157,7 @@ export async function patternKeeperPdf(p: Pattern, report: PkReport, o: PkPdfOpt
   await pdf.embedSymbolFont(SYMBOL_FONT.name, o.fonts.symbols, Object.values(SYMBOL_GLYPHS));
   const { cell, list } = tiles(p);
   const full = report.issues.length > 0 && !!o.fullChart;
+  const { glyphs, replaced } = chartGlyphs(p, report);
 
   // 1. the chart Pattern Keeper reads
   for (const t of list) {
@@ -148,7 +168,7 @@ export async function patternKeeperPdf(p: Pattern, report: PkReport, o: PkPdfOpt
     for (let y = t.y; y < t.y + t.h; y++)
       for (let x = t.x; x < t.x + t.w; x++) {
         const k = p.layers.stitches[y * p.w + x]!;
-        const glyph = report.supported.has(k) ? SYMBOL_GLYPHS[p.key[k]!.sym]?.[0] : undefined;
+        const glyph = glyphs.get(k);
         if (glyph) cells.push({ x: ox + (x - t.x) * cell, y: oy + (y - t.y) * cell, glyph });
       }
     page.glyphs(cell, cells);
@@ -165,7 +185,7 @@ export async function patternKeeperPdf(p: Pattern, report: PkReport, o: PkPdfOpt
     // "DMC" "310", and for a blend "DMC" "310" "+" "DMC" "321"
     const words = threads.flatMap((t, i) => [...(i ? ["+"] : []), ...brandCode(t).split(" ")]);
     return {
-      glyph: SYMBOL_GLYPHS[e.sym]?.[0],
+      glyph: glyphs.get(k),
       hex: c?.hex ?? "#cccccc",
       dark: !!c && luma(hexToRgb(c.hex)) < 140,
       words,
@@ -218,15 +238,22 @@ export async function patternKeeperPdf(p: Pattern, report: PkReport, o: PkPdfOpt
     await pdf.addPage(page);
   }
 
-  // what the chart leaves out: plain lines on their own page, away from the thread list
-  if (report.issues.length) {
+  // what the chart leaves out or shows differently: plain lines on their own page, away from the thread list
+  if (report.issues.length || replaced) {
     const page = new PdfPage(PAGE.w, PAGE.h);
     page.text("bold", 10, PAGE.left, 24, p.name || "Pattern");
     page.text("regular", 8, PAGE.left, 36, "About this chart", "left", 0.35);
-    let y = 62;
-    page.text("bold", 9, PAGE.left, y, "Not in the Pattern Keeper chart (it tracks full crosses only)");
-    for (const issue of report.issues) page.text("regular", 9, PAGE.left, (y += 14), `${issue.count} ${ISSUE_TEXT[issue.kind]}`);
-    if (full) page.text("regular", 9, PAGE.left, y + 28, "They are on the full chart on the following pages. Import only the pages before this one into Pattern Keeper.");
+    let y = 48;
+    if (replaced) {
+      page.text("bold", 9, PAGE.left, (y += 14), "Hand-drawn symbols");
+      page.text("regular", 9, PAGE.left, (y += 14), `${replaced} hand-drawn symbol${replaced === 1 ? " is" : "s are"} shown with standard symbols in the Pattern Keeper chart and its thread list.`);
+      y += 14;
+    }
+    if (report.issues.length) {
+      page.text("bold", 9, PAGE.left, (y += 14), "Not in the Pattern Keeper chart (it tracks full crosses only)");
+      for (const issue of report.issues) page.text("regular", 9, PAGE.left, (y += 14), `${issue.count} ${ISSUE_TEXT[issue.kind]}`);
+      if (full) page.text("regular", 9, PAGE.left, y + 28, "They are on the full chart on the following pages. Import only the pages before this one into Pattern Keeper.");
+    }
     await pdf.addPage(page);
   }
 

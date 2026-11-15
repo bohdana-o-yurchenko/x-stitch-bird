@@ -10,7 +10,7 @@ export function SymbolGlyph({ sym, size = 18 }: { sym: string; size?: number }) 
   if (!shape) return <span style={{ fontSize: size, fontWeight: 600, lineHeight: 1 }}>{sym}</span>;
   const box = shape.box ?? 24;
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${box} ${box}`} aria-hidden style={{ display: "block" }}>
+    <svg width={size} height={size} viewBox={`0 0 ${box} ${box}`} aria-hidden style={{ display: "block", overflow: "visible" }}>
       <defs>
         <clipPath id={`${id}l`}><rect x="0" y="0" width={box / 2} height={box} /></clipPath>
         <clipPath id={`${id}t`}><rect x="0" y="0" width={box} height={box / 2} /></clipPath>

@@ -111,6 +111,20 @@ Colour maths (must be reproduced exactly; used by blending, image import, blend 
 - Loading: old characters become their closest shape or sign (`●` → filled circle, `✖` → `×`, …); characters
   that are no longer in the list get the next free symbol, so every entry keeps a distinct one. This changes the
   look of old files (allowed, 2026-11-15); the file format stays version 1.
+- **Hand-drawn symbols (2026-11-15)** — to match a paper chart's icon exactly without an endless ready-made list.
+  The pencil button beside **All…** opens *Draw a symbol*: pick a shape — circle, rectangle or triangle (outline or
+  filled; triangles point up / right / down / left) or an arrow (drag from tail to head, any direction) — and drag on
+  a 12 × 12 grid. *Remove last*, *Clear*, and a preview at chart sizes. Opening it on an entry that already has a
+  drawn symbol edits that drawing.
+  - **Guardrail:** at most **6 shapes**; a box shape is at least one grid cell each way, an arrow at least two
+    cells long; the tool can make nothing else.
+  - **Storage:** the drawing *is* the symbol string in `KeyEntry.sym` — `draw:` + shapes separated by `;`, each a
+    letter (`o O` circle, `s S` rectangle, `t T` triangle, capitals filled, `a` arrow), four grid coordinates in
+    base 13 and, for triangles, the direction (`u r d l`) — e.g. `draw:o11bb;T4488d;a2bab` (at most 47
+    characters). No new field in the file. A string that doesn't parse exactly is not a symbol and gets a standard
+    one on load, like any unknown symbol; an older app version does the same with every drawn symbol.
+  - Text lists and CSV show ✎. The Pattern Keeper chart must be text in the symbol font, so there a drawn symbol
+    is shown with a spare standard symbol, and the PDF's *About this chart* page says so.
 - The key dialog groups the grid: Basic shapes · Decorative · Digits & letters · Signs. CSV and text lists show each shape as its
   nearest Unicode character.
 
@@ -392,6 +406,12 @@ re-render key panel and autosave.
 
 ### 7.1 Key list (`renderKey`, `index.html:1730`)
 One row per non-null `P.pal` entry in index order:
+- **Long keys (2026-11-15):** from 10 entries on, the key gets a row of tools — a search box (thread or bead
+  number, "dmc 310", or part of a colour name; blends and floss + bead match by any of their parts), an order
+  (As added · By number · Most used) and **Group by type** (on by default): collapsible groups Cross stitch ·
+  Backstitch · French knots · Floss + bead · Beads, each with its count. Only the view changes: key order, the
+  chart and the 1–9 shortcuts (their badges stay on the same entries) are untouched. Order and grouping are
+  remembered per browser (`stitchwork.keyView`). Shorter keys stay a plain list.
 - Key icon (canvas, 30 px) rendered in the current view mode: a stitch/bead/backstitch sample with symbol.
   *New app (2026-11-15):* a stitch icon sits on the fabric colour unless the floss would vanish on it (ΔE < 16,
   e.g. white or ecru on white fabric) — then on a contrasting grey (or light) tile, so full and half crosses stay

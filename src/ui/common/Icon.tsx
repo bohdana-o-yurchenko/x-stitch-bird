@@ -11,6 +11,7 @@ const ICONS: Record<string, ReactNode> = {
   eraser: <g {...S}><path d="M8 20h12M4.5 14.5l9-9 6 6-8.5 8.5H9z" /></g>,
   picker: <g {...S}><path d="M15 4.5a2.1 2.1 0 013 3l-1.5 1.5-3-3z" /><path d="M13.5 6l4.5 4.5M15 9l-8.5 8.5L4 20l2.5-2.5" /></g>,
   pan: <g {...S}><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3" /></g>,
+  group: <g {...S}><path d="M4 5h4M4 12h4M4 19h4" /><path d="M11 5h9M11 12h9M11 19h9" strokeWidth="2.6" /></g>,
   select: <g {...S}><rect x="4" y="4" width="16" height="16" strokeDasharray="3 3" /></g>,
   deselect: <g {...S}><rect x="4" y="4" width="16" height="16" strokeDasharray="3 3" /><path d="M9.5 9.5l5 5M14.5 9.5l-5 5" /></g>,
   wand: <g {...S}><path d="M5 19L15 9" /><path d="M15 3v3M18 6h3M19 2l-2 2M12 6l-1-1" /></g>,

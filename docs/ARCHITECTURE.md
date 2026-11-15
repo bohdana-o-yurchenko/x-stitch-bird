@@ -1035,6 +1035,10 @@ Decisions taken while implementing this plan. Each one lives in the single place
   `KeyEntry.sym` as `line:<name>`; `nextSymbol`/`symbolsFor` pick by entry kind and `fixEntrySymbols` repairs
   older files. Drawing is `render/primitives/lineStyles.ts`; strand thickness is `strandFactor` with
   `theme.backstitch.strandFirst`/`strandStep`. Adding a style = one id in core + one drawing entry in render.
+- Hand-drawn symbols: `core/symbols/customSymbol.ts` (encode / decode / `customShape`); `shapeSymbol()` returns
+  them like built-in shapes, so the canvas, `SymbolGlyph` and exports need no special case; `fixEntrySymbols`
+  accepts the ones that parse. UI: `ui/dialogs/key-entry/SymbolDrawer.tsx`. Key list view: `core/pattern/keyView.ts`
+  (search, sort, group — pure) used by `ui/side/KeyPanel.tsx`.
 - Chart symbols (SPEC §2.5, 2026-11-15): shapes are `sym:<name>` in `KeyEntry.sym`, defined once as 24×24 SVG path
   data in `core/symbols/shapes.ts` (`fill`/`stroke` parts, optional half clip, a Unicode `text` for CSV). The canvas
   draws them with `render/primitives/symbolArt.ts` (`Path2D`, cached, white halo like text symbols), the interface

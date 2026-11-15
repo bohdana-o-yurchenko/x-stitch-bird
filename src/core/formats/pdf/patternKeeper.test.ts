@@ -73,6 +73,16 @@ describe("Pattern Keeper PDF", () => {
     expect(text(short).match(/\/Type \/Page /g)).toHaveLength(4);
   });
 
+  it("shows a hand-drawn symbol with a spare standard glyph, since the chart must be text in the symbol font", async () => {
+    const p = createPattern(3, 1);
+    const drawn = addEntry(p, { t: "thread", src: "dmc:310", n: 2, st: "full", sym: "draw:o22aa" }, ALL_SYMBOLS);
+    const plain = addEntry(p, { t: "thread", src: "dmc:321", n: 2, st: "full", sym: ALL_SYMBOLS[0] }, ALL_SYMBOLS);
+    p.layers.stitches.set([drawn, plain, drawn]);
+    const pdf = await patternKeeperPdf(p, checkPatternKeeper(p), { fonts });
+    // chart + thread list + the note about the replaced symbol
+    expect(text(pdf).match(/\/Type \/Page /g)).toHaveLength(3);
+  });
+
   it("keeps text Latin: Cyrillic is transliterated", () => {
     expect(latin("Пташечка — Їжак")).toBe("Ptashechka — Izhak");
   });

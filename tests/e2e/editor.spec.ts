@@ -542,3 +542,66 @@ test("the selection bar can deselect without changing anything, and clears cells
   await page.getByRole("button", { name: "Clear cells" }).click();
   await expect(page.getByTestId("totals")).toContainText("0 full");
 });
+
+test("a long key can be searched, sorted and grouped by type; a short one stays a plain list", async ({ page }) => {
+  await expect(page.getByTestId("key-tools")).toHaveCount(0);
+  await loadFixture(page, "1.json");
+  const tools = page.getByTestId("key-tools");
+  await expect(tools).toBeVisible();
+  // grouped by type, in the order of the key form
+  await expect(page.locator("[data-key-group]").first()).toHaveAttribute("data-key-group", "thread");
+  const total = await page.locator("[data-entry]").count();
+  await tools.getByRole("searchbox").fill("310");
+  await expect(page.locator("[data-entry]").first()).toContainText("DMC 310");
+  expect(await page.locator("[data-entry]").count()).toBeLessThan(total);
+  await tools.getByRole("searchbox").fill("no such thread");
+  await expect(page.getByText("Nothing in the key matches.")).toBeVisible();
+  await tools.getByRole("searchbox").fill("");
+  // collapsing a group hides its entries; ungrouping shows one plain list again
+  await page.locator("[data-key-group=thread] button").first().click();
+  expect(await page.locator("[data-entry]").count()).toBeLessThan(total);
+  await tools.getByRole("button", { name: "Group by type" }).click();
+  await expect(page.locator("[data-key-group]")).toHaveCount(0);
+  await expect(page.locator("[data-entry]")).toHaveCount(total);
+  await tools.getByRole("combobox").selectOption("number");
+  await expect(page.locator("[data-entry]").first()).toContainText("DMC B5200");
+});
+
+test("a symbol can be drawn by hand from a few shapes, is kept in the file, and can't get too complex", async ({ page }) => {
+  await page.locator("[data-entry]").first().dblclick();
+  await page.getByTestId("symbol-draw").click();
+  const drawer = page.getByTestId("symbol-drawer"), use = drawer.getByRole("button", { name: "Use this symbol" });
+  await expect(use).toBeDisabled();
+  const box = (await page.getByTestId("draw-area").boundingBox())!;
+  const drag = async (a: [number, number], b: [number, number]) => {
+    await page.mouse.move(box.x + 24 + a[0] * 20, box.y + 24 + a[1] * 20);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 24 + b[0] * 20, box.y + 24 + b[1] * 20, { steps: 3 });
+    await page.mouse.up();
+  };
+  await drag([1, 1], [11, 11]);
+  await drawer.getByRole("radio", { name: "Filled triangle" }).click();
+  await drawer.getByRole("radio", { name: "Pointing down" }).click();
+  await drag([4, 4], [8, 8]);
+  await drawer.getByRole("radio", { name: /^Arrow/ }).click();
+  await drag([2, 11], [10, 11]);
+  await drag([5, 5], [5, 5]); // a click draws nothing
+  await expect(page.getByTestId("draw-count")).toHaveText("3 of 6 shapes");
+  // the guardrail: after six shapes the grid takes no more
+  for (let n = 0; n < 4; n++) await drag([n, 0], [n + 3, 3]);
+  await expect(page.getByTestId("draw-count")).toContainText("6 shapes is the most");
+  for (let n = 0; n < 3; n++) await drawer.getByRole("button", { name: "Remove last" }).click();
+  await use.click();
+  await expect(drawer).toHaveCount(0);
+  await page.getByRole("button", { name: "Save changes" }).click();
+  const sym = "draw:o11bb;T4488d;a2bab";
+  expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe(sym);
+  // it travels in the pattern file and comes back
+  const download = page.waitForEvent("download");
+  await fileAction(page, "Download pattern file (.xbird)");
+  const doc = JSON.parse(readFileSync((await (await download).path())!, "utf8"));
+  expect(doc.pal[0].sym).toBe(sym);
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe(sym);
+});
