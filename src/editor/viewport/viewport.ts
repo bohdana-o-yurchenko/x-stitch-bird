@@ -22,6 +22,11 @@ export class ViewportService {
     return { x: (sx - this.ruler - offX) / zoom, y: (sy - this.ruler - offY) / zoom };
   }
 
+  toScreen(p: Point): Point {
+    const { zoom, offX, offY } = this.store.getState().viewport;
+    return { x: this.ruler + offX + p.x * zoom, y: this.ruler + offY + p.y * zoom };
+  }
+
   /** The visible chart area (right of and below the rulers) in grid units. */
   visibleGrid(): Rect {
     const a = this.toGrid(this.ruler, this.ruler), b = this.toGrid(this.width, this.height);

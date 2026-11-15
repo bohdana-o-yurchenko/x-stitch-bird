@@ -6,56 +6,86 @@
   touch-action: none;
   display: block;
 }
+/* Bottom-right view box: Colour / Both / Symbols on top; zoom, fit and the underlay edit toggle below */
 .zoom {
   position: absolute;
   right: 12px;
   bottom: 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  padding: 6px;
   background: var(--panel);
   border: 1px solid var(--line2);
-  border-radius: 10px;
-  padding: 4px;
+  border-radius: 12px;
   box-shadow: var(--shadow);
 }
 .zoom button {
   border: 0;
   background: transparent;
+  color: var(--ink);
   border-radius: 7px;
-  width: 30px;
   height: 28px;
+  min-width: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  line-height: 1;
 }
 .zoom button:hover {
   background: var(--sel);
 }
-.zoom .viewSwitch {
+.viewSwitch {
   display: flex;
   gap: 2px;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--sel);
+}
+.zoom .viewSwitch button {
+  flex: 1 0 auto;
+  padding: 0 10px;
+  white-space: nowrap;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.zoom .viewSwitch button.on {
+  background: #fff;
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(40, 25, 10, 0.18);
 }
 .zoomRow {
   display: flex;
-  gap: 4px;
-  justify-content: space-between;
-  padding-top: 4px;
-  border-top: 1px solid var(--line);
+  align-items: center;
+  gap: 6px;
 }
-.zoom .viewSwitch button {
+.zoomGroup {
+  display: flex;
+  align-items: center;
   flex: 1;
-  width: auto;
-  padding: 0 9px;
-  font-size: 12.5px;
+  border: 1px solid var(--line2);
+  border-radius: 9px;
+  padding: 1px;
 }
-.zoom .viewSwitch button.on {
-  background: var(--ink);
-  color: #fff;
-}
-.zoom span {
-  min-width: 44px;
+.zoomGroup span {
+  flex: 1;
+  min-width: 48px;
   text-align: center;
-  align-self: center;
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
   color: var(--muted);
+}
+.zoom .iconBtn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line2);
+  border-radius: 9px;
+}
+.zoom .editToggle.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 .selectionBar {
   position: absolute;
@@ -70,18 +100,4 @@
   padding: 4px;
   box-shadow: var(--shadow);
   z-index: 6;
-}
-.zoomDivider {
-  width: 1px;
-  align-self: stretch;
-  margin: 3px 2px;
-  background: var(--line2);
-}
-.zoomRow .editToggle {
-  display: grid;
-  place-items: center;
-}
-.zoomRow .editToggle.on {
-  background: var(--accent);
-  color: #fff;
 }

@@ -6,6 +6,7 @@ import type { Snapshot } from "@/persistence/ports";
 import { memoryPersistence } from "../../tests/support/memoryPersistence";
 import { loadPattern } from "./actions/pattern";
 import { LIBRARY_EVERY } from "./autosave";
+import { gridToImage } from "@/core/underlay/underlay";
 import { Editor } from "./createEditor";
 import { shortcutLabel, shortcutLabels } from "./shortcuts/keymap";
 import { resolveTool } from "./tools/registry";
@@ -154,7 +155,7 @@ describe("chart underlay (SPEC §15.15)", () => {
     ed.viewport.setSize(826, 626);
     ed.store.setState({ underlay: { ...ed.state.underlay!, rect: { x: -50, y: -50, w: 200, h: 200 } }, viewport: { zoom: 20, offX: 0, offY: 0 } });
     const f = ed.underlay.frame()!;
-    expect(f).toEqual({ x: 306, y: 246, w: 240, h: 160 });
+    expect(f).toEqual({ x: 266, y: 216, w: 320, h: 220 });
     const sp = (x: number, y: number): ToolPointer => ({ ...at(0, 0), sx: x, sy: y, grid: ed.viewport.toGrid(x, y) });
     const imageAt = (x: number, y: number) => {
       const g = ed.viewport.toGrid(x, y), r = ed.state.underlay!.rect;
@@ -166,12 +167,26 @@ describe("chart underlay (SPEC §15.15)", () => {
     ed.tools.up(sp(f.x + f.w + 30, f.y + 50));
     expect(imageAt(f.x, f.y + 50)).toEqual(pinned);
     expect(imageAt(f.x + f.w + 30, f.y + 50)).toEqual(grabbed);
-    expect(ed.underlay.frame()!.w).toBe(270);
+    expect(ed.underlay.frame()!.w).toBe(350);
     ed.shortcuts.keyDown(key("z", { ctrl: true }));
     expect(ed.state.underlay!.rect).toEqual({ x: -50, y: -50, w: 200, h: 200 });
     // fitted (all sides visible) → no frame
     ed.store.setState({ viewport: { zoom: 2, offX: 150, offY: 150 } });
     expect(ed.underlay.frame()).toBeNull();
+  });
+
+  it("the ↻ button above the frame turns the image a small step around the frame's middle; [ turns back", () => {
+    ed.viewport.setSize(826, 626);
+    ed.store.setState({ underlay: { ...ed.state.underlay!, rect: { x: -50, y: -50, w: 200, h: 200 } }, viewport: { zoom: 20, offX: 0, offY: 0 } });
+    const f = ed.underlay.frame()!, cw = ed.underlay.rotateButtons().find((b) => b.dir === 1)!;
+    const mid = ed.viewport.toGrid(f.x + f.w / 2, f.y + f.h / 2), under = gridToImage(ed.state.underlay!, mid);
+    ed.tools.down({ ...at(0, 0), sx: cw.x, sy: cw.y, grid: ed.viewport.toGrid(cw.x, cw.y) });
+    ed.tools.up({ ...at(0, 0), sx: cw.x, sy: cw.y });
+    expect(ed.state.underlay!.rotation).toBe(0.2);
+    const still = gridToImage(ed.state.underlay!, mid);
+    expect(Math.hypot(still.x - under.x, still.y - under.y)).toBeLessThan(1e-6);
+    ed.shortcuts.keyDown(key("["));
+    expect(ed.state.underlay!.rotation).toBe(0);
   });
 
   it("pictures go to the image store and travel in .json files as data URLs", async () => {

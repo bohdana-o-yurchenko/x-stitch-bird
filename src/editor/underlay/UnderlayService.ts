@@ -1,6 +1,7 @@
 import type { Point, Rect } from "@/core/pattern/types";
-import { defaultCorners, dragUnderlay, fitToChart, frameHandleAt, frameNeeded, handleAt, newUnderlay, resetCrop, resizeRect, scaleAround, straightenedSize, type Handle, type Straighten, type UnderlayData } from "@/core/underlay/underlay";
+import { defaultCorners, dragUnderlay, fitToChart, frameHandleAt, frameNeeded, gridToImage, handleAt, imageToGrid, newUnderlay, pinImagePoint, resetCrop, resizeRect, rotateUnderlay, ROTATION_STEP, straightenedSize, toLocal, turnedBounds, type Handle, type Straighten, type UnderlayData } from "@/core/underlay/underlay";
 import { downscaleToBlob, loadImage } from "@/platform/images";
+import { RULER_SIZE } from "@/render/ChartRenderer";
 import { runStraighten } from "../heavy";
 import type { Editor } from "../createEditor";
 
@@ -10,7 +11,17 @@ const MAX_SIDE = 6000;
 /** Grab distance for handles, in screen pixels. */
 const GRAB_PX = 8;
 /** The zoomed-in edit frame: starting size and smallest size, in screen pixels. */
-const FRAME = { w: 240, h: 160 }, FRAME_MIN = 40;
+const FRAME = { w: 320, h: 220 }, FRAME_MIN = 40;
+/** Rotate buttons: distance above the edge and between the two (screen px); their size is the theme's. */
+const ROT_GAP = 26, ROT_SPREAD = 16;
+
+export interface RotateButton {
+  x: number;
+  y: number;
+  dir: -1 | 1;
+  /** The grid point the image turns around. */
+  pivot: Point;
+}
 const UNDO_LIMIT = 50;
 
 const CURSORS: Record<Handle, string> = { nw: "nwse-resize", se: "nwse-resize", ne: "nesw-resize", sw: "nesw-resize", n: "ns-resize", s: "ns-resize", e: "ew-resize", w: "ew-resize", inside: "move" };
@@ -137,7 +148,7 @@ export class UnderlayService {
     const out = await runStraighten({ blob, corners: o.corners, w: size.w, h: size.h });
     const image = await this.ed.images.put(out);
     const straighten: Straighten = { source: start.source, sourceW: start.sourceW, sourceH: start.sourceH, ...o };
-    const next: UnderlayData = { ...u, image, imageW: size.w, imageH: size.h, crop: { x: 0, y: 0, w: size.w, h: size.h }, rect: { x: o.at.x, y: o.at.y, w: o.cols, h: o.rows }, straighten, visible: true, tool: "move" };
+    const next: UnderlayData = { ...u, image, imageW: size.w, imageH: size.h, crop: { x: 0, y: 0, w: size.w, h: size.h }, rect: { x: o.at.x, y: o.at.y, w: o.cols, h: o.rows }, straighten, visible: true, tool: "move", rotation: 0 };
     await this.show(next);
     this.save();
     this.ed.toast("toasts.straightened");
@@ -146,7 +157,7 @@ export class UnderlayService {
   /** The zoomed-in edit frame (SPEC §15.15), in canvas pixels; null when the image's own handles are reachable. */
   frame(): Rect | null {
     const u = this.data;
-    if (!u || !this.editing || u.tool !== "move" || !frameNeeded(u.rect, this.ed.viewport.visibleGrid())) return null;
+    if (!u || !this.editing || u.tool !== "move" || !frameNeeded(turnedBounds(u), this.ed.viewport.visibleGrid())) return null;
     if (this.ed.state.underlayFrame) return this.ed.state.underlayFrame;
     const c = this.ed.viewport.centreOnScreen();
     return { x: c.x - FRAME.w / 2, y: c.y - FRAME.h / 2, ...FRAME };
@@ -170,6 +181,51 @@ export class UnderlayService {
   }
 
   /** A side or corner handle of the edit frame under canvas point `s`, if the frame is shown. */
+  /**
+   * The ↺ ↻ buttons in edit mode (Move & resize), in canvas px: above the frame when it is shown (turning around its
+   * middle), and above the image's top edge when that is on screen (turning around the image's middle).
+   */
+  rotateButtons(): RotateButton[] {
+    const u = this.data, v = this.ed.viewport;
+    if (!u || !this.editing || u.tool !== "move") return [];
+    const out: RotateButton[] = [];
+    const f = this.frame();
+    if (f) {
+      const pivot = v.toGrid(f.x + f.w / 2, f.y + f.h / 2), y = f.y - ROT_GAP;
+      out.push({ x: f.x + f.w / 2 - ROT_SPREAD, y, dir: -1, pivot }, { x: f.x + f.w / 2 + ROT_SPREAD, y, dir: 1, pivot });
+    }
+    // above the middle of the image's top edge, along the image's own (turned) axes
+    const a = ((u.rotation ?? 0) * Math.PI) / 180, top = v.toScreen(imageToGrid(u, { x: u.crop.x + u.crop.w / 2, y: u.crop.y }));
+    const pivot = imageToGrid(u, { x: u.crop.x + u.crop.w / 2, y: u.crop.y + u.crop.h / 2 });
+    const up = { x: Math.sin(a), y: -Math.cos(a) }, along = { x: Math.cos(a), y: Math.sin(a) };
+    for (const dir of [-1, 1] as const) {
+      const b = { x: top.x + up.x * ROT_GAP + along.x * dir * ROT_SPREAD, y: top.y + up.y * ROT_GAP + along.y * dir * ROT_SPREAD, dir, pivot };
+      if (b.x > RULER_SIZE && b.y > RULER_SIZE && b.x < v.width && b.y < v.height) out.push(b);
+    }
+    return out;
+  }
+
+  /** Turn by one small step (↺ = -1, ↻ = 1) around a grid point (default: the middle of the view). */
+  rotate(dir: number, pivot = this.ed.viewport.toGrid(this.ed.viewport.centreOnScreen().x, this.ed.viewport.centreOnScreen().y)) {
+    const u = this.data;
+    if (!u) return;
+    this.remember();
+    this.set(rotateUnderlay(u, dir * ROTATION_STEP, pivot));
+  }
+
+  /** An exact angle (side panel), turning around the image's middle. */
+  setRotation(deg: number) {
+    const u = this.data;
+    if (!u || !Number.isFinite(deg)) return;
+    this.remember();
+    this.set(rotateUnderlay(u, deg - (u.rotation ?? 0), imageToGrid(u, { x: u.crop.x + u.crop.w / 2, y: u.crop.y + u.crop.h / 2 })));
+  }
+
+  private rotateButtonAt(s: Point): RotateButton | undefined {
+    const r = this.ed.theme.underlayFrame.rotate + 2;
+    return this.rotateButtons().find((b) => Math.hypot(b.x - s.x, b.y - s.y) <= r);
+  }
+
   private frameHandle(s: Point): Exclude<Handle, "inside"> | null {
     const f = this.frame();
     return f ? frameHandleAt(f, s, GRAB_PX) : null;
@@ -180,23 +236,26 @@ export class UnderlayService {
     const u = this.data;
     if (this.drag) return CURSORS[this.drag.handle];
     if (this.frameDrag) return CURSORS[this.frameDrag.handle];
+    if (s && this.rotateButtonAt(s)) return "pointer";
     const fh = s && this.frameHandle(s);
     if (fh) return CURSORS[fh];
-    const h = u && p ? handleAt(u.rect, p, this.grabTolerance()) : null;
+    const h = u && p ? handleAt(u.rect, toLocal(u, p), this.grabTolerance()) : null;
     return h ? CURSORS[h] : "default";
   }
 
-  /** The edit frame's handles first, then the image's own handles; inside the image = move. */
+  /** Rotate buttons first, then the edit frame's sides, then the image's own handles; inside the image = move. */
   pointerDown(p: Point, s: Point) {
     const u = this.data;
     if (!u) return;
+    const rb = this.rotateButtonAt(s);
+    if (rb) return this.rotate(rb.dir, rb.pivot);
     const fh = this.frameHandle(s);
     if (fh) {
       this.remember();
       this.frameDrag = { handle: fh, from: s, frame: this.frame()!, start: u };
       return;
     }
-    const handle = handleAt(u.rect, p, this.grabTolerance());
+    const handle = handleAt(u.rect, toLocal(u, p), this.grabTolerance());
     if (handle) {
       this.remember();
       this.drag = { handle, from: p, start: u };
@@ -214,8 +273,9 @@ export class UnderlayService {
       const h = fd.handle, east = h.includes("e"), west = h.includes("w"), south = h.startsWith("s"), north = h.startsWith("n");
       const pin = this.ed.viewport.toGrid(west ? f0.x + f0.w : f0.x, north ? f0.y + f0.h : f0.y);
       const sx = east || west ? f1.w / f0.w : 1, sy = north || south ? f1.h / f0.h : 1;
+      const u0 = fd.start, stretched = { ...u0, rect: { ...u0.rect, w: u0.rect.w * sx, h: u0.rect.h * sy } };
       this.ed.store.setState({ underlayFrame: f1 });
-      this.set({ ...fd.start, rect: scaleAround(fd.start.rect, pin, sx, sy) }, false);
+      this.set(pinImagePoint(stretched, gridToImage(u0, pin), pin), false);
       return;
     }
     const d = this.drag;

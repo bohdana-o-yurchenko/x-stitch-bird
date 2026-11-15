@@ -441,7 +441,11 @@
     "removeConfirm": "Remove picture",
     "removeBody": "The photo behind the chart leaves this pattern, with its straightening and position. Your stitches stay. This can’t be undone.",
     "editOn": "Edit the image behind the chart (U)",
-    "editOff": "Done editing the image (U or Esc)"
+    "editOff": "Done editing the image (U or Esc)",
+    "rotation": "Rotation (°)",
+    "rotateLeft": "Turn left a little ([)",
+    "rotateRight": "Turn right a little (])",
+    "rotationReset": "0°"
   },
   "fileMenu": {
     "label": "Menu ▾",
@@ -536,7 +540,8 @@
     "save": "Save now (also automatic)",
     "underlayEdit": "Edit / done",
     "highlight": "Highlight selected entry",
-    "underlayUndo": "Undo the image’s last change (edit mode)"
+    "underlayUndo": "Undo the image’s last change (edit mode)",
+    "underlayRotate": "Turn the image a little ↺ ↻ (edit mode)"
   },
   "straighten": {
     "title": "Straighten the chart photo",

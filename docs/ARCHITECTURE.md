@@ -1054,6 +1054,9 @@ Decisions taken while implementing this plan. Each one lives in the single place
   mode turns on), pin-and-stretch in `pointerMove`, own undo stack (`underlay.undo`, bound to mod+z in
   `underlayEditing`); `ViewportService.visibleGrid()` / `centreOnScreen()`; drawn by `ChartRenderer.drawEditFrame`.
   The old floating pad and `FloatingPanel` were removed.
+- Underlay rotation: `rotation` on `UnderlayData`; core `imageToGrid` / `gridToImage` / `toLocal` / `pinImagePoint` /
+  `rotateUnderlay` / `turnedBounds` (every geometric change ends by pinning the image pixel that must stay put);
+  `UnderlayService.rotateButtons()` / `rotate()` / `setRotation()`; drawing via `turnAround` in `render/chart.ts`.
 - Small dialogs share `ui/dialogs/simpleDialogs.tsx`; the key-entry form has its own folder.
 - Key-entry form (2026-11-15): not a modal — `keyForm` in the store (`Editor.openKeyForm`/`closeKeyForm`, commands
   `key.add`/`key.edit`), rendered by `ui/side/SidePanel.tsx` in place of the panel's sections, so the chart and

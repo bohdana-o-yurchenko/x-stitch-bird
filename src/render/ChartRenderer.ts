@@ -2,7 +2,7 @@ import { rulerLabels } from "@/core/grid/numbering";
 import type { Palette } from "@/core/pattern/palette";
 import type { KeyIndex, PartialStitch, Pattern, Point, Rect, Segment } from "@/core/pattern/types";
 import type { MirrorMode } from "@/core/transform/mirror";
-import { drawCells, drawGrid, drawLines, drawUnderlay, viewStyle, type ChartFrame, type ChartView, type UnderlayView } from "./chart";
+import { drawCells, drawGrid, drawLines, drawUnderlay, turnAround, viewStyle, type ChartFrame, type ChartView, type UnderlayView } from "./chart";
 import { drawBackstitch, drawBeadCell, drawKnot, drawPartial, drawStitchCell } from "./primitives/cells";
 import { font, type CanvasTheme } from "./theme";
 
@@ -35,6 +35,8 @@ export interface ChartScene {
   underlay: (UnderlayView & { editing: boolean }) | null;
   /** Zoomed-in edit frame for the underlay, in canvas px (SPEC §15.15). */
   underlayFrame: Rect | null;
+  /** ↺ ↻ buttons for the underlay, in canvas px. */
+  underlayButtons: { x: number; y: number; dir: -1 | 1 }[];
   /** Only this entry at full strength, the rest faded (stitch highlighting). */
   highlight: KeyIndex | null;
 }
@@ -131,6 +133,7 @@ export class ChartRenderer {
     } else drawLines(g, p, s.palette, f, style);
     if (s.underlay?.editing) this.drawUnderlayEditor(s.underlay, p, f);
     if (s.underlayFrame) this.drawEditFrame(s.underlayFrame);
+    for (const b of s.underlayButtons) this.drawRotateButton(b.x, b.y, b.dir);
     this.drawOverlays(s, f);
     this.drawRulers(s, f);
     const flashing = !!s.flash && s.flash.until > Date.now();
@@ -239,6 +242,36 @@ export class ChartRenderer {
   }
 
   /** Edit mode: the image above the stitches, its outline and 8 handles. */
+  /** A round ↺ / ↻ button (curved arrow) for turning the underlay a little. */
+  private drawRotateButton(x: number, y: number, dir: -1 | 1) {
+    const g = this.g, t = this.theme, r = t.underlayFrame.rotate;
+    g.save();
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.fillStyle = "#fff";
+    g.fill();
+    g.lineWidth = 1.5;
+    g.strokeStyle = t.accent;
+    g.stroke();
+    // a clockwise arc with its arrow head; mirrored for ↺
+    g.translate(x, y);
+    g.scale(dir, 1);
+    const a0 = -Math.PI * 0.85, a1 = Math.PI * 0.35, rr = r * 0.5;
+    g.beginPath();
+    g.arc(0, 0, rr, a0, a1);
+    g.lineWidth = 1.6;
+    g.stroke();
+    const ex = Math.cos(a1) * rr, ey = Math.sin(a1) * rr, tang = a1 + Math.PI / 2;
+    g.beginPath();
+    g.moveTo(ex + Math.cos(tang) * 3.2, ey + Math.sin(tang) * 3.2);
+    g.lineTo(ex + Math.cos(tang + 2.4) * 3.6, ey + Math.sin(tang + 2.4) * 3.6);
+    g.lineTo(ex + Math.cos(tang - 2.4) * 3.6, ey + Math.sin(tang - 2.4) * 3.6);
+    g.closePath();
+    g.fillStyle = t.accent;
+    g.fill();
+    g.restore();
+  }
+
   /** A dashed outline with 8 handles, transparent inside so the photo under it stays visible. */
   private drawEditFrame(r: Rect) {
     const g = this.g, t = this.theme, H = t.underlayFrame.handle;
@@ -266,6 +299,7 @@ export class ChartRenderer {
     drawUnderlay(g, p, u, f, false);
     const x = ox + u.rect.x * z, y = oy + u.rect.y * z, w = u.rect.w * z, h = u.rect.h * z;
     g.save();
+    turnAround(g, u, f);
     g.setLineDash(t.selection.dash);
     g.lineWidth = 1.5;
     g.strokeStyle = t.accent;

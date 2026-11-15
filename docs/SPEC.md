@@ -1226,7 +1226,7 @@ checkbox. No setting to switch it on.
 
 **Zoomed-in edit frame** — in edit mode, Move & resize sub-tool, when the image covers the middle of the view and at
 least 3 of its 4 sides are outside the view (so its own handles can't be reached), a frame is drawn in the middle of
-the view: 240 × 160 screen px, dashed accent outline, 8 handles, transparent inside. It is a screen tool: panning
+the view: 320 × 220 screen px, dashed accent outline, 8 handles, transparent inside. It is a screen tool: panning
 slides the photo under it. Not shown when zoomed out (the image's own handles are visible) or in Crop.
 - **Pin and stretch**: drag a side (anywhere along it) or a corner; the frame follows the pointer and the photo
   under the dragged side moves exactly with it, while the opposite side stays pinned — on the frame and on the photo
@@ -1234,6 +1234,14 @@ slides the photo under it. Not shown when zoomed out (the image's own handles ar
   Smallest frame 40 px. Use: pin one grid line of the scan, drag another onto the chart's grid line.
 - The frame keeps its new size and place until edit mode is turned off; turning it on again starts a fresh frame.
 - Inside the frame (and anywhere on the image) dragging moves the image, as before.
+- **Rotation** (2026-11-15) for slightly tilted scans: `rotation` in degrees (clockwise, ±45°) around the middle of
+  the image. In edit mode (Move & resize) two round **↺ ↻** buttons sit above the middle of the image's top edge
+  (turned with it; shown when on screen) and above the edit frame; each click turns by **0.2°** (fixed). The image
+  turns around the image's middle (edge buttons) or the frame's middle (frame buttons), so what you look at stays put.
+  Also `[` / `]` in edit mode (around the middle of the view) and the side panel's **Rotation (°)** field with ↺ ↻
+  and **0°** reset. Handles, crop and the frame work in the image's own turned axes; after every resize, crop,
+  stretch or turn the point that should stay put (opposite side, pinned side, pivot) is put back exactly.
+  Straightening resets the rotation to 0. Stored in the underlay (and in .xbird files).
 - **Ctrl/⌘+Z in edit mode** undoes the image's last change (drags, frame stretches, nudges, panel values; up to 50
   steps); leaving edit mode clears that history. Chart undo is unaffected.
 

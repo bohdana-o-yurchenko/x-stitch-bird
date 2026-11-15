@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { Rect } from "@/core/pattern/types";
+import { ROTATION_MAX, ROTATION_STEP } from "@/core/underlay/underlay";
 import { Icon } from "../common/Icon";
 import { ConfirmDelete, cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
@@ -17,6 +18,7 @@ export function UnderlayPanel() {
   const u = useEditorState((st) => st.underlay);
   const [confirm, setConfirm] = useState(false);
   if (!u) return null;
+  const rotation = u.rotation ?? 0;
   const editing = !u.behind;
   const setRect = (patch: Partial<Rect>) => run("underlay.update", { rect: { ...u.rect, ...patch } });
   const num = (key: keyof Rect, label: string) => (
@@ -56,6 +58,16 @@ export function UnderlayPanel() {
           {num("y", t("y"))}
           {num("w", t("w"))}
           {num("h", t("h"))}
+        </div>
+        <div className={ui.row} style={{ alignItems: "flex-end" }}>
+          <label className={ui.field} style={{ flex: 1 }}>
+            {t("rotation")}
+            <input type="number" step={0.1} min={-ROTATION_MAX} max={ROTATION_MAX} value={round(rotation)} data-testid="underlay-rotation"
+              onChange={(e) => run("underlay.setRotation", e.target.valueAsNumber)} />
+          </label>
+          <button type="button" className={cx(ui.btn, ui.sm)} title={t("rotateLeft")} aria-label={t("rotateLeft")} onClick={() => run("underlay.setRotation", rotation - ROTATION_STEP)}>↺</button>
+          <button type="button" className={cx(ui.btn, ui.sm)} title={t("rotateRight")} aria-label={t("rotateRight")} onClick={() => run("underlay.setRotation", rotation + ROTATION_STEP)}>↻</button>
+          <button type="button" className={cx(ui.btn, ui.sm)} disabled={!rotation} onClick={() => run("underlay.setRotation", 0)}>{t("rotationReset")}</button>
         </div>
         <div className={ui.row}>
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.openStraighten")}>{t("straighten")}</button>

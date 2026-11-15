@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, frameHandleAt, frameNeeded, resetCrop, resizeRect, scaleAround, straightenedSize } from "./underlay";
+import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, frameHandleAt, frameNeeded, gridToImage, imageToGrid, pinImagePoint, resetCrop, resizeRect, rotateUnderlay, ROTATION_STEP, straightenedSize, turnedBounds } from "./underlay";
 
 // image 200×100 px placed over a 40×40 chart
 const base = () => ({ ...newUnderlay("data:image/jpeg;base64,x", 200, 100, { w: 40, h: 40 }) });
@@ -34,11 +34,34 @@ describe("chart underlay geometry (SPEC §15.15)", () => {
     expect(resetCrop({ ...u, ...left })).toEqual({ crop: { x: 0, y: 0, w: 200, h: 100 }, rect: { x: 0, y: 10, w: 40, h: 20 } });
   });
 
-  it("scales around a pinned point, which stays on the same image spot", () => {
-    const r = scaleAround({ x: 0, y: 0, w: 100, h: 50 }, { x: 25, y: 10 }, 1.02, 1.02);
-    expect([r.x, r.y, r.w, r.h].map((v) => +v.toFixed(6))).toEqual([-0.5, -0.2, 102, 51]);
-    expect((25 - r.x) / r.w).toBeCloseTo(0.25);
+  it("maps image pixels to the chart and back, turn included, and pins a pixel back in place", () => {
+    const u = { ...base(), rect: { x: 2, y: 3, w: 40, h: 20 }, rotation: 3 };
+    const px = { x: 37, y: 81 }, g = imageToGrid(u, px), back = gridToImage(u, g);
+    expect([back.x, back.y].map((v) => +v.toFixed(6))).toEqual([37, 81]);
+    const moved = pinImagePoint({ ...u, rect: { ...u.rect, w: 44 } }, px, g), again = imageToGrid(moved, px);
+    expect(Math.hypot(again.x - g.x, again.y - g.y)).toBeLessThan(1e-6);
   });
+
+  it("turns in small steps around a pivot, which stays on the same image spot, within ±45°", () => {
+    const u = { ...base(), rect: { x: 0, y: 0, w: 40, h: 20 } };
+    const pivot = { x: 30, y: 5 }, under = gridToImage(u, pivot);
+    const r = rotateUnderlay(u, ROTATION_STEP, pivot);
+    expect(r.rotation).toBe(0.2);
+    const still = gridToImage(r, pivot);
+    expect(Math.hypot(still.x - under.x, still.y - under.y)).toBeLessThan(1e-6);
+    expect(rotateUnderlay({ ...u, rotation: 44.9 }, 1, pivot).rotation).toBe(45);
+    expect(turnedBounds({ ...u, rotation: 90 })).toMatchObject({ w: expect.closeTo(20, 6), h: expect.closeTo(40, 6) });
+  });
+
+  it("resizing a turned image keeps the opposite side where it was", () => {
+    const u = { ...base(), rect: { x: 0, y: 0, w: 40, h: 20 }, rotation: 10 };
+    const leftMid = imageToGrid(u, { x: 0, y: 50 });
+    const next = { ...u, ...dragUnderlay(u, "e", 4, 0, false) };
+    const after = imageToGrid(next, { x: 0, y: 50 });
+    expect(Math.hypot(after.x - leftMid.x, after.y - leftMid.y)).toBeLessThan(1e-6);
+    expect(next.rect.w).toBeGreaterThan(40);
+  });
+
 
   it("asks for the edit frame only when the image covers the view and 3+ of its sides are off-screen", () => {
     const img = { x: 0, y: 0, w: 100, h: 80 };
@@ -76,6 +99,7 @@ describe("chart underlay geometry (SPEC §15.15)", () => {
     const legacy = cleanUnderlay({ ...base(), image: undefined, src: "data:image/jpeg;base64,x", straighten: { corners: [1, 2] } });
     expect(legacy).toMatchObject({ image: "data:image/jpeg;base64,x" });
     expect(legacy!.straighten).toBeUndefined();
+    expect(cleanUnderlay({ ...base(), rotation: 80 })!.rotation).toBe(45);
     expect(cleanUnderlay(base())).toMatchObject({ opacity: 0.5, behind: false, tool: "move" });
   });
 });

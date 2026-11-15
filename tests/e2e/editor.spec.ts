@@ -367,6 +367,14 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeCloseTo(w0 * (frame.w + 40) / frame.w, 3);
   await page.keyboard.press("ControlOrMeta+z");
   expect(await editorState<number>(page, "(ed) => ed.state.underlay.rect.w")).toBeCloseTo(w0, 6);
+  // a slight turn with ] and the side panel's angle field; 0° resets
+  await page.keyboard.press("]");
+  await page.keyboard.press("]");
+  await expect(page.getByTestId("underlay-rotation")).toHaveValue("0.4");
+  await page.getByTestId("underlay-rotation").fill("-1.5");
+  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rotation")).toBeCloseTo(-1.5, 6);
+  await page.getByRole("button", { name: "0°" }).click();
+  expect(await editorState<number>(page, "(ed) => ed.state.underlay.rotation")).toBe(0);
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
 });

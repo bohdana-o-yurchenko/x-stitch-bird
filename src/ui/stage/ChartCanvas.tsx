@@ -28,10 +28,11 @@ function scene(ed: Editor): ChartScene {
     eraseHighlight: (st.momentaryTool ?? st.tool) === "eraser" ? st.overlay.eraseHighlight : null,
     flash: st.flash,
     underlay: st.underlay && st.underlay.visible && st.underlayImage
-      ? { image: st.underlayImage, crop: st.underlay.crop, rect: st.underlay.rect, opacity: st.underlay.opacity, editing: !st.underlay.behind }
+      ? { image: st.underlayImage, crop: st.underlay.crop, rect: st.underlay.rect, opacity: st.underlay.opacity, rotation: st.underlay.rotation ?? 0, editing: !st.underlay.behind }
       : null,
     highlight: st.highlight && st.activeEntry ? st.activeEntry : null,
     underlayFrame: ed.underlay.frame(),
+    underlayButtons: ed.underlay.rotateButtons(),
   };
 }
 

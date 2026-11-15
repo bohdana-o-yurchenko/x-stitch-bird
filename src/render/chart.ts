@@ -27,6 +27,17 @@ export interface UnderlayView {
   crop: Rect;
   rect: Rect;
   opacity: number;
+  /** Clockwise turn in degrees around the middle of `rect`. */
+  rotation: number;
+}
+
+/** Sets up `g` so that drawing at grid-scaled coordinates (rect.x * z …) lands turned around the image's middle. */
+export function turnAround(g: Ctx, u: UnderlayView, f: ChartFrame) {
+  if (!u.rotation) return;
+  const cx = f.ox + (u.rect.x + u.rect.w / 2) * f.z, cy = f.oy + (u.rect.y + u.rect.h / 2) * f.z;
+  g.translate(cx, cy);
+  g.rotate((u.rotation * Math.PI) / 180);
+  g.translate(-cx, -cy);
 }
 
 /** The underlay at its opacity; `clip` keeps it inside the chart (behind mode). */
@@ -39,6 +50,7 @@ export function drawUnderlay(g: Ctx, p: Pattern, u: UnderlayView, f: ChartFrame,
     g.clip();
   }
   g.globalAlpha = u.opacity;
+  turnAround(g, u, f);
   g.drawImage(u.image, u.crop.x, u.crop.y, u.crop.w, u.crop.h, ox + u.rect.x * z, oy + u.rect.y * z, u.rect.w * z, u.rect.h * z);
   g.restore();
 }

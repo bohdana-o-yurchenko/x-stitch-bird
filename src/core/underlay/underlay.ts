@@ -33,7 +33,12 @@ export interface UnderlayData {
   visible: boolean;
   tool: "move" | "crop";
   straighten?: Straighten;
+  /** Small clockwise turn in degrees around the middle of `rect`, for slightly tilted scans (±ROTATION_MAX). */
+  rotation?: number;
 }
+
+/** One click of a rotate button, in degrees; and the most an underlay may be turned. */
+export const ROTATION_STEP = 0.2, ROTATION_MAX = 45;
 
 export type Handle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "inside";
 
@@ -103,6 +108,18 @@ const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v
  * scale of what stays visible do not change, and the crop never passes the image edges.
  */
 export function dragUnderlay(u: UnderlayData, handle: Handle, dx: number, dy: number, free: boolean): Pick<UnderlayData, "crop" | "rect"> {
+  if (handle === "inside" || !u.rotation) return dragUnturned(u, handle, dx, dy, free);
+  // turned: drag in the image's own frame, then put the opposite side or corner back where it was
+  const a = -rad(u), d = { x: dx * Math.cos(a) - dy * Math.sin(a), y: dx * Math.sin(a) + dy * Math.cos(a) };
+  const west = handle.includes("w"), east = handle.includes("e"), north = handle.startsWith("n"), south = handle.startsWith("s");
+  const fx = west ? 1 : east ? 0 : 0.5, fy = north ? 1 : south ? 0 : 0.5;
+  const fixedPx = { x: u.crop.x + fx * u.crop.w, y: u.crop.y + fy * u.crop.h }, fixedAt = imageToGrid(u, fixedPx);
+  const next = { ...u, ...dragUnturned(u, handle, d.x, d.y, free) };
+  const pinned = pinImagePoint(next, fixedPx, fixedAt);
+  return { crop: pinned.crop, rect: pinned.rect };
+}
+
+function dragUnturned(u: UnderlayData, handle: Handle, dx: number, dy: number, free: boolean): Pick<UnderlayData, "crop" | "rect"> {
   const { rect: r, crop: c } = u;
   if (handle === "inside") return { crop: c, rect: { ...r, x: r.x + dx, y: r.y + dy } };
   const west = handle.includes("w"), east = handle.includes("e"), north = handle.startsWith("n"), south = handle.startsWith("s");
@@ -140,13 +157,50 @@ export function resizeRect(r: Rect, handle: Exclude<Handle, "inside">, dx: numbe
   return { x: west ? r.x + r.w - w : r.x, y: north ? r.y + r.h - h : r.y, w, h };
 }
 
+const rad = (u: UnderlayData) => ((u.rotation ?? 0) * Math.PI) / 180;
+const turn = (p: Point, c: Point, a: number): Point => {
+  const cos = Math.cos(a), sin = Math.sin(a), dx = p.x - c.x, dy = p.y - c.y;
+  return { x: c.x + dx * cos - dy * sin, y: c.y + dx * sin + dy * cos };
+};
+const middle = (r: Rect): Point => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
+
+/** A grid point in the image's own unturned frame (where `rect`, handles and crop are defined). */
+export const toLocal = (u: UnderlayData, p: Point): Point => turn(p, middle(u.rect), -rad(u));
+
+/** Where a pixel of the image (`px` in image pixels) is on the chart, in grid units, turn included. */
+export function imageToGrid(u: UnderlayData, px: Point): Point {
+  const { rect: r, crop: c } = u;
+  return turn({ x: r.x + ((px.x - c.x) * r.w) / c.w, y: r.y + ((px.y - c.y) * r.h) / c.h }, middle(r), rad(u));
+}
+
+/** The image pixel under a grid point. */
+export function gridToImage(u: UnderlayData, p: Point): Point {
+  const { rect: r, crop: c } = u, l = toLocal(u, p);
+  return { x: c.x + ((l.x - r.x) * c.w) / r.w, y: c.y + ((l.y - r.y) * c.h) / r.h };
+}
+
 /**
- * `r` scaled by (sx, sy) around `anchor`: the image point under the anchor stays put (the pinned side of the
- * zoomed-in edit frame, SPEC §15.15) and every other point moves away from or towards it.
+ * `u` moved so that image pixel `px` lands on grid point `at` again. Every resize, crop, stretch and turn ends with
+ * this: the point that should stay put (the opposite side, the pinned side, the pivot) is put back exactly.
  */
-export function scaleAround(r: Rect, anchor: Point, sx: number, sy: number): Rect {
-  const w = Math.max(MIN, r.w * sx), h = Math.max(MIN, r.h * sy);
-  return { x: anchor.x - ((anchor.x - r.x) * w) / r.w, y: anchor.y - ((anchor.y - r.y) * h) / r.h, w, h };
+export function pinImagePoint(u: UnderlayData, px: Point, at: Point): UnderlayData {
+  const now = imageToGrid(u, px);
+  return { ...u, rect: { ...u.rect, x: u.rect.x + at.x - now.x, y: u.rect.y + at.y - now.y } };
+}
+
+/** Turned by `deg` degrees around grid point `pivot` (the image point there stays put); kept within ±ROTATION_MAX. */
+export function rotateUnderlay(u: UnderlayData, deg: number, pivot: Point): UnderlayData {
+  const px = gridToImage(u, pivot);
+  const rotation = Math.round(Math.max(-ROTATION_MAX, Math.min(ROTATION_MAX, (u.rotation ?? 0) + deg)) * 1000) / 1000;
+  return pinImagePoint({ ...u, rotation }, px, pivot);
+}
+
+/** The axis-aligned box around the turned image, in grid units. */
+export function turnedBounds(u: UnderlayData): Rect {
+  const r = u.rect, c = middle(r), a = rad(u);
+  const pts = [{ x: r.x, y: r.y }, { x: r.x + r.w, y: r.y }, { x: r.x + r.w, y: r.y + r.h }, { x: r.x, y: r.y + r.h }].map((p) => turn(p, c, a));
+  const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+  return { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
 }
 
 /**
@@ -190,5 +244,6 @@ export function cleanUnderlay(raw: unknown): UnderlayData | null {
     image, imageW: Number(u.imageW), imageH: Number(u.imageH), crop: u.crop, rect: u.rect,
     opacity: clamp(Number(u.opacity) || 0.5, 0.1, 1), behind: !!u.behind, visible: u.visible !== false, tool: u.tool === "crop" ? "crop" : "move",
     ...(straighten && { straighten }),
+    ...(Number.isFinite(u.rotation) && u.rotation && { rotation: clamp(Number(u.rotation), -ROTATION_MAX, ROTATION_MAX) }),
   };
 }

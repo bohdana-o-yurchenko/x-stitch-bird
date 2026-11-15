@@ -36,12 +36,9 @@ function UnderlayEditToggle() {
   if (!has) return null;
   const label = editing ? t("editOff") : t("editOn");
   return (
-    <>
-      <span className={s.zoomDivider} />
-      <button type="button" className={cx(s.editToggle, editing && s.on)} title={label} aria-label={label} aria-pressed={editing} data-testid="underlay-edit" data-guide="underlay-edit" onClick={() => run("underlay.toggleBehind")}>
-        <Icon name="underlayEdit" size={17} />
-      </button>
-    </>
+    <button type="button" className={cx(s.iconBtn, s.editToggle, editing && s.on)} title={label} aria-label={label} aria-pressed={editing} data-testid="underlay-edit" data-guide="underlay-edit" onClick={() => run("underlay.toggleBehind")}>
+      <Icon name="underlayEdit" size={17} />
+    </button>
   );
 }
 
@@ -53,10 +50,14 @@ function ZoomControls() {
     <div className={s.zoom}>
       <ViewSwitch />
       <div className={s.zoomRow}>
-        <button type="button" title={t("zoomOut")} onClick={() => run("view.zoomOut")}>−</button>
-        <span>{Math.round((zoom / 12) * 100)}%</span>
-        <button type="button" title={t("zoomIn")} onClick={() => run("view.zoomIn")}>+</button>
-        <button type="button" title={t("fit")} onClick={() => run("view.fit")}>⤢</button>
+        <div className={s.zoomGroup}>
+          <button type="button" title={t("zoomOut")} aria-label={t("zoomOut")} onClick={() => run("view.zoomOut")}>−</button>
+          <span>{Math.round((zoom / 12) * 100)}%</span>
+          <button type="button" title={t("zoomIn")} aria-label={t("zoomIn")} onClick={() => run("view.zoomIn")}>+</button>
+        </div>
+        <button type="button" className={s.iconBtn} title={t("fit")} aria-label={t("fit")} onClick={() => run("view.fit")}>
+          <Icon name="fit" size={16} />
+        </button>
         <UnderlayEditToggle />
       </div>
     </div>
