@@ -3,7 +3,7 @@
  * TrueType fonts addressed by glyph id — the text font (regular and bold) and the chart-symbol font. Just enough
  * for chart export — no library, so the file contains exactly what we put in it.
  */
-import { TEXT_FONTS, TEXT_GLYPHS } from "./textFonts";
+import { CYR_GLYPHS, TEXT_FONTS, TEXT_GLYPHS } from "./textFonts";
 
 export type Ref = number;
 
@@ -34,35 +34,42 @@ async function deflate(data: Uint8Array): Promise<Uint8Array> {
 /** A number as PDF wants it: at most two decimals, no exponent. */
 export const num = (n: number): string => String(Math.round(n * 100) / 100);
 
-const CYRILLIC: Record<string, string> = {
-  а: "a", б: "b", в: "v", г: "h", ґ: "g", д: "d", е: "e", є: "ie", ж: "zh", з: "z", и: "y", і: "i", ї: "i", й: "i", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p",
-  р: "r", с: "s", т: "t", у: "u", ф: "f", х: "kh", ц: "ts", ч: "ch", ш: "sh", щ: "shch", ь: "", ю: "iu", я: "ia", ы: "y", э: "e", ё: "e", ъ: "",
-};
+const QUESTION = TEXT_GLYPHS[0x3f]!;
+/** Characters neither text font has, and what is printed instead. */
+const STAND_INS: Record<string, string> = { "╱": "/", "╲": "\\", "\u202f": " " };
 
-/** Text for the PDF's text font: Latin only. Cyrillic is transliterated; other unknown characters become "?" when drawn. */
-export function latin(text: string): string {
-  let out = "";
-  for (const ch of text) {
-    const low = ch.toLowerCase(), tr = CYRILLIC[low];
-    if (tr !== undefined) out += ch === low ? tr : tr.charAt(0).toUpperCase() + tr.slice(1);
-    else out += ch;
+/** A stretch of text in one font: DM Sans, or Onest for the letters DM Sans lacks (Cyrillic). */
+interface Run {
+  cyr: boolean;
+  ids: number[];
+}
+
+/** Text as runs of glyph ids, switching to the Cyrillic font letter by letter; anything else unknown becomes "?". */
+function textRuns(text: string): Run[] {
+  const out: Run[] = [];
+  for (const raw of text) {
+    for (const ch of STAND_INS[raw] ?? raw) {
+      const code = ch.codePointAt(0)!, latinId = TEXT_GLYPHS[code], cyrId = latinId === undefined ? CYR_GLYPHS[code] : undefined;
+      const cyr = cyrId !== undefined, id = cyr ? cyrId : (latinId ?? QUESTION);
+      const last = out[out.length - 1];
+      if (last && last.cyr === cyr) last.ids.push(id);
+      else out.push({ cyr, ids: [id] });
+    }
   }
   return out;
 }
 
-const QUESTION = TEXT_GLYPHS[0x3f]!;
-const glyphIds = (text: string): number[] => [...latin(text)].map((ch) => TEXT_GLYPHS[ch.codePointAt(0)!] ?? QUESTION);
+const fontOf = (font: "regular" | "bold", cyr: boolean) => (cyr ? (font === "bold" ? "cyrBold" : "cyrRegular") : font);
 
 /** Width of `text` in points at `size`, in the regular or bold text font. */
 export function textWidth(text: string, size: number, font: "regular" | "bold" = "regular"): number {
-  const widths = TEXT_FONTS[font].widths;
-  return (glyphIds(text).reduce((w, g) => w + (widths[g] ?? 0), 0) * size) / 1000;
+  return (textRuns(text).reduce((w, r) => w + r.ids.reduce((s, g) => s + (TEXT_FONTS[fontOf(font, r.cyr)].widths[g] ?? 0), 0), 0) * size) / 1000;
 }
 
 const hex4 = (n: number) => n.toString(16).padStart(4, "0");
 
 export type FontName = "regular" | "bold" | "symbols";
-const FONT_KEY: Record<FontName, string> = { regular: "F1", bold: "F2", symbols: "F3" };
+const FONT_KEY = { regular: "F1", bold: "F2", symbols: "F3", cyrRegular: "F4", cyrBold: "F5" } as const;
 
 /** "r g b" for a "#RRGGBB" colour, as the rg / RG operators take it. */
 export function rgb(hex: string): string {
@@ -158,7 +165,9 @@ export class PdfPage {
   text(font: Exclude<FontName, "symbols">, size: number, x: number, y: number, text: string, align: "left" | "right" | "centre" = "left", grey = 0) {
     const w = align === "left" ? 0 : textWidth(text, size, font);
     const left = align === "right" ? x - w : align === "centre" ? x - w / 2 : x;
-    this.ops.push(`BT ${num(grey)} g /${FONT_KEY[font]} ${num(size)} Tf 1 0 0 1 ${num(left)} ${this.y(y)} Tm <${glyphIds(text).map(hex4).join("")}> Tj ET`);
+    // one text object: each run picks its font, and the next run continues where the last one ended
+    const shows = textRuns(text).map((r) => `/${FONT_KEY[fontOf(font, r.cyr)]} ${num(size)} Tf <${r.ids.map(hex4).join("")}> Tj`);
+    this.ops.push(`BT ${num(grey)} g 1 0 0 1 ${num(left)} ${this.y(y)} Tm ${shows.join(" ")} ET`);
   }
 
   /**
@@ -245,11 +254,12 @@ export class PdfWriter {
   }
 
   /** The text fonts (`PdfPage.text`): the files named by `TEXT_FONTS`. */
-  async embedTextFonts(files: { regular: Uint8Array; bold: Uint8Array }) {
-    const unicode = Object.entries(TEXT_GLYPHS).map(([code, gid]) => [gid, Number(code)] as const);
-    for (const [key, id] of [["F1", "regular"], ["F2", "bold"]] as const) {
-      const f = TEXT_FONTS[id];
-      await this.embedFont(key, { name: f.name, file: files[id], unicode, widths: f.widths, symbolic: false, ascent: f.ascent, descent: f.descent, capHeight: f.capHeight, bbox: f.bbox });
+  async embedTextFonts(files: { regular: Uint8Array; bold: Uint8Array; cyrRegular: Uint8Array; cyrBold: Uint8Array }) {
+    const latinMap = Object.entries(TEXT_GLYPHS).map(([code, gid]) => [gid, Number(code)] as const);
+    const cyrMap = Object.entries(CYR_GLYPHS).map(([code, gid]) => [gid, Number(code)] as const);
+    for (const id of ["regular", "bold", "cyrRegular", "cyrBold"] as const) {
+      const f = TEXT_FONTS[id], unicode = id.startsWith("cyr") ? cyrMap : latinMap;
+      await this.embedFont(FONT_KEY[id], { name: f.name, file: files[id], unicode, widths: f.widths, symbolic: false, ascent: f.ascent, descent: f.descent, capHeight: f.capHeight, bbox: f.bbox });
     }
   }
 
@@ -272,8 +282,9 @@ export class PdfWriter {
   build(info: { title: string; producer: string }): Uint8Array {
     this.put(this.pagesRef, `<< /Type /Pages /Count ${this.pageRefs.length} /Kids [${this.pageRefs.map((r) => `${r} 0 R`).join(" ")}] >>`);
     const catalog = this.add(`<< /Type /Catalog /Pages ${this.pagesRef} 0 R >>`);
-    const plain = (t: string) => `(${latin(t).replace(/[^\x20-\x7e]/g, "?").replace(/[\\()]/g, "\\$&")})`;
-    const infoRef = this.add(`<< /Title ${plain(info.title)} /Producer ${plain(info.producer)} >>`);
+    // UTF-16 with a byte-order mark: any language in the title
+    const utf16 = (t: string) => `<FEFF${[...t].flatMap((ch) => { const c = ch.codePointAt(0)!; return c > 0xffff ? [0xd800 + ((c - 0x10000) >> 10), 0xdc00 + ((c - 0x10000) & 0x3ff)] : [c]; }).map(hex4).join("")}>`;
+    const infoRef = this.add(`<< /Title ${utf16(info.title)} /Producer ${utf16(info.producer)} >>`);
     // the second line marks the file as binary
     const parts: Uint8Array[] = [ascii("%PDF-1.7\n%\xE2\xE3\xCF\xD3\n")];
     const offsets: number[] = [];

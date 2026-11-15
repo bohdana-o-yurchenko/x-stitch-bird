@@ -26,5 +26,6 @@ export function exportCsv(p: Pattern, shopping: ShoppingList, t: Translate): str
     lines.push("", q(t("csv.patternInfo")));
     for (const f of info) lines.push([q(t(`meta.${f.id}`)), q(p.meta[f.id])].join(","));
   }
+  lines.push("", q(t("csv.generatedBy")));
   return lines.join("\n");
 }

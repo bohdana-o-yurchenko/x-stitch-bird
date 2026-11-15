@@ -1146,6 +1146,9 @@ Decisions taken while implementing this plan. Each one lives in the single place
   `chartPdf` — cover, three views, key), shared page pieces in `pdfLayout.ts` (A4, grid, rulers, English labels),
   `svgPath.ts` turns symbol path data (incl. arcs) into PDF path operators. `symbolColours.ts` picks the symbol chart's red / green / blue
   symbols; `pdfCanvas.ts` is a canvas-like adapter that writes PDF, so the editor can pass the screen's own
-  `strokeLineStyle` (render) in as `lineStyle` — core never imports render. `PdfPage` draws rectangles, polygons,
+  `strokeLineStyle` (render) in as `lineStyle` — core never imports render.
+  PDF text: `PdfPage.text` splits each string into runs — DM Sans (F1/F2) where it has the letter, else the
+  Onest Cyrillic cut (F4/F5); glyph tables in `textFonts.ts`, fonts built by `scripts/build-symbol-font.py`
+  (third argument: Onest). `drawFooter` (pdfLayout) writes the app-name footer. `PdfPage` draws rectangles, polygons,
   circles, paths, clipping and see-through fills (ExtGState). Editor: `exportChartPdf` / command
   `file.exportChartPdf`; both PDFs load their fonts through `pdfFonts()`.

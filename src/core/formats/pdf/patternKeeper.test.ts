@@ -7,10 +7,9 @@ import { ALL_SYMBOLS } from "../../symbols/symbols";
 import { SYMBOL_FONT, SYMBOL_GLYPHS } from "../../symbols/symbolFont";
 import { parsePattern } from "../json/parse";
 import { checkPatternKeeper, patternKeeperPdf } from "./patternKeeper";
-import { latin } from "./pdfWriter";
 
 const file = (name: string) => new Uint8Array(readFileSync(new URL(`../../../../public/fonts/${name}.ttf`, import.meta.url)));
-const fonts = { symbols: file("ptashechka-symbols"), regular: file("ptashechka-text-regular"), bold: file("ptashechka-text-bold") };
+const fonts = { symbols: file("ptashechka-symbols"), regular: file("ptashechka-text-regular"), bold: file("ptashechka-text-bold"), cyrRegular: file("ptashechka-text-cyr-regular"), cyrBold: file("ptashechka-text-cyr-bold") };
 const text = (pdf: Uint8Array) => Buffer.from(pdf).toString("latin1");
 
 /** Every object offset in the cross-reference table points at that object. */
@@ -61,9 +60,9 @@ describe("Pattern Keeper PDF", () => {
     // 72×72 cells: 2 chart pages + thread list + notes; no pictures of the full chart any more
     expect(s.match(/\/Type \/Page /g)).toHaveLength(4);
     expect(s).not.toContain("/Subtype /Image");
-    // three embedded fonts (text regular and bold, symbols) and no built-in ones
-    expect(s.match(/\/Subtype \/Type0/g)).toHaveLength(3);
-    expect(s.match(/\/FontFile2/g)).toHaveLength(3);
+    // five embedded fonts (text regular and bold, their Cyrillic, symbols) and no built-in ones
+    expect(s.match(/\/Subtype \/Type0/g)).toHaveLength(5);
+    expect(s.match(/\/FontFile2/g)).toHaveLength(5);
     expect(s).not.toContain("/Subtype /Type1");
   });
 
@@ -77,7 +76,16 @@ describe("Pattern Keeper PDF", () => {
     expect(text(pdf).match(/\/Type \/Page /g)).toHaveLength(3);
   });
 
-  it("keeps text Latin: Cyrillic is transliterated", () => {
-    expect(latin("Пташечка — Їжак")).toBe("Ptashechka — Izhak");
+  it("writes Cyrillic text in the Cyrillic font, letter by letter, and a footer naming the app", async () => {
+    const { PdfPage } = await import("./pdfWriter");
+    const page = new PdfPage(100, 100);
+    page.text("bold", 10, 0, 10, "Black Їжак");
+    expect(page.ops[0]).toMatch(/^BT 0 g 1 0 0 1 0 90 Tm \/F2 10 Tf <[0-9a-f]+> Tj \/F5 10 Tf <[0-9a-f]+> Tj ET$/);
+    const p = createPattern(2, 1, "Їжачок");
+    p.layers.stitches[0] = addEntry(p, { t: "thread", src: "dmc:310", n: 2, st: "full" }, ALL_SYMBOLS);
+    const pdf = text(await patternKeeperPdf(p, checkPatternKeeper(p), { fonts }));
+    // the title keeps its letters (UTF-16), and the Cyrillic font is embedded
+    expect(pdf).toContain("/Title <FEFF0407");
+    expect(pdf.match(/\/Subtype \/Type0/g)).toHaveLength(5);
   });
 });

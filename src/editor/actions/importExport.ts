@@ -71,8 +71,8 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
 /** The fonts every PDF embeds: chart symbols and the text font (regular, bold). */
 async function pdfFonts(): Promise<PdfFonts> {
   const load = async (url: string) => new Uint8Array(await (await fetch(url)).arrayBuffer());
-  const [symbols, regular, bold] = await Promise.all([load(SYMBOL_FONT.url), load(TEXT_FONTS.regular.url), load(TEXT_FONTS.bold.url)]);
-  return { symbols, regular, bold };
+  const [symbols, regular, bold, cyrRegular, cyrBold] = await Promise.all([SYMBOL_FONT.url, TEXT_FONTS.regular.url, TEXT_FONTS.bold.url, TEXT_FONTS.cyrRegular.url, TEXT_FONTS.cyrBold.url].map(load));
+  return { symbols: symbols!, regular: regular!, bold: bold!, cyrRegular: cyrRegular!, cyrBold: cyrBold! };
 }
 
 async function offerPdf(ed: Editor, filename: string, make: (fonts: PdfFonts) => Promise<Uint8Array>) {
@@ -101,7 +101,7 @@ export async function exportChartPdf(ed: Editor) {
   const p = ed.doc;
   if (!p.key.some(Boolean)) return ed.toast("toasts.needKeyEmpty");
   // backstitch in the screen's own line styles
-  await offerPdf(ed, `${safeName(p)}-chart.pdf`, (fonts) => chartPdf(p, { fonts, lineStyle: (g, x1, y1, x2, y2, w, u, sym) => strokeLineStyle(g as unknown as Ctx, x1, y1, x2, y2, w, u, sym) }));
+  await offerPdf(ed, `${safeName(p)}-chart.pdf`, (fonts) => chartPdf(p, { fonts, t: ed.t, lineStyle: (g, x1, y1, x2, y2, w, u, sym) => strokeLineStyle(g as unknown as Ctx, x1, y1, x2, y2, w, u, sym) }));
 }
 
 /** Everything a .xbird file holds: the pattern, its reference windows, underlay and versions. */

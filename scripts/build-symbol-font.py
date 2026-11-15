@@ -5,10 +5,11 @@ symbol — the vector shapes and the DM Sans letters, digits and signs — becom
 
     pip install fonttools shapely
     node scripts/dump-symbols.mjs > symbols.json
-    python3 scripts/build-symbol-font.py symbols.json path/to/DMSans[opsz,wght].ttf
+    python3 scripts/build-symbol-font.py symbols.json path/to/DMSans[opsz,wght].ttf path/to/Onest[wght].ttf
 
-DM Sans (SIL Open Font License 1.1) comes from https://github.com/google/fonts/tree/main/ofl/dmsans; the built font
-contains its glyphs and is under the same licence (public/fonts/OFL.txt). Re-run after changing the symbol list.
+DM Sans and Onest (both SIL Open Font License 1.1) come from https://github.com/google/fonts/tree/main/ofl/dmsans and
+.../ofl/onest; the built fonts contain their glyphs and are under the same licence (public/fonts/OFL*.txt). The PDF
+text is DM Sans; letters it lacks (Cyrillic) come from Onest. Re-run after changing the symbol list.
 """
 import importlib.util, json, os, sys
 from fontTools.fontBuilder import FontBuilder
@@ -87,49 +88,72 @@ def draw_geometry(pen, geom, side):
 TEXT_CHARS = [*range(0x20, 0x7F), *range(0xA0, 0x100), 0x2013, 0x2014, 0x2018, 0x2019, 0x201C, 0x201D, 0x2026, 0x2022, 0x2212, 0x20AC]
 
 
-def build_text_fonts(dm_path):
+# Cyrillic for Ukrainian text (and the app's name), taken from Onest: А–я, Ѐ–џ (Є І Ї …), Ґ ґ, №, ʼ, narrow no-break space
+CYR_CHARS = [*range(0x400, 0x460), 0x490, 0x491, 0x2116, 0x2BC, 0x202F]
+
+
+def subset_font(path, axes, chars, out):
+    """A static cut of a variable font at `axes`, with only `chars`; returns the font."""
+    from fontTools import subset
+    f = instancer.instantiateVariableFont(TTFont(path), axes)
+    opts = subset.Options()
+    opts.layout_features = []
+    opts.hinting = False
+    opts.notdef_outline = True
+    opts.name_IDs = [1, 2, 4, 6, 13]
+    sub = subset.Subsetter(opts)
+    sub.populate(unicodes=chars)
+    sub.subset(f)
+    f.save(out)
+    return f
+
+
+def font_info(f, key, url, name):
+    head, os2 = f["head"], f["OS/2"]
+    k = 1000 / head.unitsPerEm
+    return {
+        "url": url, "name": name,
+        "ascent": round(f["hhea"].ascent * k), "descent": round(f["hhea"].descent * k), "capHeight": round(os2.sCapHeight * k),
+        "bbox": [round(v * k) for v in (head.xMin, head.yMin, head.xMax, head.yMax)],
+        "widths": [round(f["hmtx"][g][0] * k) for g in f.getGlyphOrder()],
+    }
+
+
+def glyph_map(f):
+    order, cmap = f.getGlyphOrder(), f.getBestCmap()
+    return {u: order.index(g) for u, g in sorted(cmap.items())}
+
+
+def build_text_fonts(dm_path, cyr_path):
     """
     The PDF's text font: DM Sans regular and bold, cut down to TEXT_CHARS, embedded like the symbol font (Pattern
     Keeper reads the thread list from embedded fonts in the charts it imports). Writes the two .ttf files and the
     glyph table src/core/formats/pdf/textFonts.ts.
     """
-    from fontTools import subset
-    fonts, order = {}, None
-    for key, wght in (("regular", 450), ("bold", 700)):
-        f = instancer.instantiateVariableFont(TTFont(dm_path), {"wght": wght, "opsz": 14})
-        opts = subset.Options()
-        opts.layout_features = []
-        opts.hinting = False
-        opts.notdef_outline = True
-        opts.name_IDs = [1, 2, 4, 6, 13]
-        sub = subset.Subsetter(opts)
-        sub.populate(unicodes=TEXT_CHARS)
-        sub.subset(f)
-        out = os.path.join(HERE, "..", "public", "fonts", f"ptashechka-text-{key}.ttf")
-        f.save(out)
-        glyph_order, cmap = f.getGlyphOrder(), f.getBestCmap()
-        gids = {u: glyph_order.index(g) for u, g in sorted(cmap.items())}
-        if order is None:
-            order = gids
-        elif order != gids:
-            raise SystemExit("regular and bold have different glyph ids")
-        head, os2 = f["head"], f["OS/2"]
-        k = 1000 / head.unitsPerEm
-        fonts[key] = {
-            "url": f"/fonts/ptashechka-text-{key}.ttf", "name": f"PTSHKA+DMSans-{key.capitalize()}",
-            "ascent": round(f["hhea"].ascent * k), "descent": round(f["hhea"].descent * k), "capHeight": round(os2.sCapHeight * k),
-            "bbox": [round(v * k) for v in (head.xMin, head.yMin, head.xMax, head.yMax)],
-            "widths": [round(f["hmtx"][g][0] * k) for g in glyph_order],
-        }
-        print(f"text font {key}: {len(glyph_order)} glyphs, {os.path.getsize(out)} bytes")
+    fonts, maps = {}, {}
+    for script, path, chars, axes in (("", dm_path, TEXT_CHARS, {"opsz": 14}), ("cyr", cyr_path, CYR_CHARS, {})):
+        for weight, wght in (("regular", 450), ("bold", 700)):
+            key = f"{script}{weight.capitalize()}" if script else weight
+            out = os.path.join(HERE, "..", "public", "fonts", f"ptashechka-text-{script + '-' if script else ''}{weight}.ttf")
+            f = subset_font(path, {"wght": wght, **axes}, chars, out)
+            family = "Onest" if script else "DMSans"
+            fonts[key] = font_info(f, key, "/fonts/" + os.path.basename(out), f"PTSHKA+{family}-{weight.capitalize()}")
+            m = glyph_map(f)
+            if script in maps and maps[script] != m:
+                raise SystemExit(f"{script or 'latin'}: regular and bold have different glyph ids")
+            maps[script] = m
+            print(f"text font {key}: {len(f.getGlyphOrder())} glyphs, {os.path.getsize(out)} bytes")
     lines = [
         "// Generated by scripts/build-symbol-font.py together with public/fonts/ptashechka-text-*.ttf; do not edit.",
         "",
-        "/** The PDF text fonts (DM Sans, Latin only): metrics in 1/1000 em; `widths` by glyph id. */",
+        "/** The PDF text fonts — DM Sans (Latin) and Onest (Cyrillic), regular and bold: metrics in 1/1000 em; `widths` by glyph id. */",
         f"export const TEXT_FONTS = {json.dumps(fonts)} as const;",
         "",
-        "/** Character code → glyph id, the same in both fonts. */",
-        f"export const TEXT_GLYPHS: Readonly<Record<number, number>> = {json.dumps(order)};",
+        "/** Character code → glyph id in the DM Sans fonts (the same in regular and bold). */",
+        f"export const TEXT_GLYPHS: Readonly<Record<number, number>> = {json.dumps(maps[''])};",
+        "",
+        "/** Character code → glyph id in the Onest (Cyrillic) fonts. */",
+        f"export const CYR_GLYPHS: Readonly<Record<number, number>> = {json.dumps(maps['cyr'])};",
         "",
     ]
     open(os.path.join(HERE, "..", "src", "core", "formats", "pdf", "textFonts.ts"), "w").write("\n".join(lines))
@@ -137,7 +161,7 @@ def build_text_fonts(dm_path):
 
 def main():
     data = json.load(open(sys.argv[1]))
-    build_text_fonts(sys.argv[2])
+    build_text_fonts(sys.argv[2], sys.argv[3])
     dm = instancer.instantiateVariableFont(TTFont(sys.argv[2]), {"wght": 600, "opsz": 14})
     dm_glyphs, dm_cmap, dm_upm = dm.getGlyphSet(), dm.getBestCmap(), dm["head"].unitsPerEm
     cap_height = dm["OS/2"].sCapHeight

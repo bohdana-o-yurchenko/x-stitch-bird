@@ -1,7 +1,7 @@
 import { computeUsage, entryCount, partialCount } from "../../calculator/usage";
 import { shade } from "../../color/colorMath";
 import type { EntryKindId, KeyIndex } from "../../pattern/types";
-import { labelData } from "../../labels/keyLabel";
+import { formatLabel, labelData, type Translate } from "../../labels/keyLabel";
 import { buildPalette, type Palette, type PaletteSlot } from "../../pattern/palette";
 import { resolveColor } from "../../pattern/resolve";
 import type { Pattern } from "../../pattern/types";
@@ -9,7 +9,7 @@ import { partialAnchor, partialKind } from "../../stitches/partialKinds";
 import { shapeSymbol } from "../../symbols/shapes";
 import { SYMBOL_FONT, SYMBOL_GLYPHS } from "../../symbols/symbolFont";
 import type { PdfFonts } from "./patternKeeper";
-import { drawGrid, drawRulers, englishLabel, PAGE, type Tile } from "./pdfLayout";
+import { drawFooter, drawGrid, drawRulers, PAGE, type Tile } from "./pdfLayout";
 import { PdfPage, PdfWriter, textWidth } from "./pdfWriter";
 import { PdfCanvas, type CanvasLike } from "./pdfCanvas";
 import { SYMBOL_INKS, symbolColours, type SymbolColour } from "./symbolColours";
@@ -21,12 +21,12 @@ import { svgPathToPdf } from "./svgPath";
  * their colours; a colour chart in pale colours where backstitch and knots stand out in bright colours, thick, in
  * their line styles; and the full key. A4 portrait, about 40 stitches across; neighbouring pages repeat a few rows
  * or columns, shaded grey on both pages, so the pages can be lined up. Everything is vector: symbols from the
- * embedded symbol font (hand-drawn ones as paths), colours, lines. The text is Latin only, in English.
+ * embedded symbol font (hand-drawn ones as paths), colours, lines. The text is in the interface language (`t`, the
+ * `chartPdf.*` messages; key labels as in the app), in DM Sans with Onest for Cyrillic.
  */
 
 export type ChartView = "symbols" | "symbolsColour" | "full";
 
-const VIEW_TITLE: Record<ChartView, string> = { symbols: "Symbol chart", symbolsColour: "Symbols on colour", full: "Colour chart with backstitch" };
 
 /** Stitches across a page, the biggest cell, and how many rows / columns neighbouring pages share. */
 const COLS = 40, MAX_CELL = 18, OVERLAP = 2;
@@ -41,6 +41,8 @@ export type LineStyleDraw = (g: CanvasLike, x1: number, y1: number, x2: number, 
 
 export interface ChartPdfOptions {
   fonts: PdfFonts;
+  /** The interface's translations: page texts are `chartPdf.*`, key labels as in the app. */
+  t: Translate;
   /** Rows / columns repeated on neighbouring pages (default 2). */
   overlap?: number;
   /** Backstitch line styles; without it lines are solid. */
@@ -284,18 +286,31 @@ interface KeyRow {
   sub: string;
 }
 
-const UNIT: Record<EntryKindId, [string, string]> = { thread: ["stitch", "stitches"], combo: ["stitch", "stitches"], bead: ["bead", "beads"], back: ["line", "lines"], knot: ["knot", "knots"] };
 const KEY_ROW = 22, KEY_TOP = 92, KEY_PER_PAGE = Math.floor((PAGE.h - KEY_TOP - PAGE.bottom) / KEY_ROW);
 const keyPageCount = (rows: number) => Math.max(1, Math.ceil(rows / KEY_PER_PAGE));
 
 /** Key pages: each row an icon (drawn by `icon` in a 16 pt square), brand and number, details, count. */
-async function addKey(pdf: PdfWriter, p: Pattern, title: string, note: string, rows: KeyRow[], icon: (page: PdfPage, symbols: Symbols, r: KeyRow, x: number, y: number, size: number) => void) {
+/** One line of text broken into lines of at most `max` points. */
+function wrap(text: string, size: number, max: number): string[] {
+  const out: string[] = [];
+  let line = "";
+  for (const word of text.split(" ")) {
+    const next = line ? `${line} ${word}` : word;
+    if (line && textWidth(next, size) > max) {
+      out.push(line);
+      line = word;
+    } else line = next;
+  }
+  return line ? [...out, line] : out;
+}
+
+async function addKey(pdf: PdfWriter, p: Pattern, tr: Translate, title: string, note: string, rows: KeyRow[], icon: (page: PdfPage, symbols: Symbols, r: KeyRow, x: number, y: number, size: number) => void) {
   const name = p.name || "Pattern", pages = keyPageCount(rows.length);
   for (let n = 0; n < pages; n++) {
     const page = new PdfPage(PAGE.w, PAGE.h), L = PAGE.left, R = PAGE.w - PAGE.right, S = 16, symbols = new Symbols();
     page.text("bold", 10, L, 24, fit(name, 10, 400, "bold"));
-    page.text("regular", 8, L, 36, `${title} · page ${n + 1} of ${pages}`, "left", 0.35);
-    page.text("regular", 9, L, 60, fit(note, 9, R - L), "left", 0.3);
+    page.text("regular", 8, L, 36, `${title} · ${tr("chartPdf.pageOf", { n: n + 1, total: pages })}`, "left", 0.35);
+    wrap(note, 9, R - L).slice(0, 2).forEach((line, i) => page.text("regular", 9, L, 56 + i * 12, line, "left", 0.3));
     page.lines([[L, KEY_TOP - 10, R, KEY_TOP - 10]], 0.6);
     rows.slice(n * KEY_PER_PAGE, (n + 1) * KEY_PER_PAGE).forEach((r, i) => {
       const y = KEY_TOP + i * KEY_ROW, base = y + 11.5;
@@ -303,10 +318,11 @@ async function addKey(pdf: PdfWriter, p: Pattern, title: string, note: string, r
       page.rect(L, y, S, S, { stroke: 0.45, width: 0.4 });
       page.text("bold", 9.5, L + 26, base, fit(r.title, 9.5, 150, "bold"));
       page.text("regular", 9, L + 182, base, fit(r.sub, 9, R - L - 182 - 80), "left", 0.2);
-      page.text("regular", 9, R, base, `${r.count.toLocaleString("en-US")} ${UNIT[r.t][r.count === 1 ? 0 : 1]}`, "right");
+      page.text("regular", 9, R, base, tr(`chartPdf.unit.${r.t}`, { count: r.count }), "right");
       page.lines([[L, y + KEY_ROW - 3, R, y + KEY_ROW - 3]], 0.3, 0.8);
     });
     symbols.draw(page);
+    drawFooter(page, tr("chartPdf.footer", { app: "{app}" }));
     await pdf.addPage(page);
   }
 }
@@ -323,22 +339,23 @@ export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Arr
   const pdf = new PdfWriter();
   await pdf.embedTextFonts(o.fonts);
   await pdf.embedSymbolFont(SYMBOL_FONT.name, o.fonts.symbols, Object.values(SYMBOL_GLYPHS));
-  const palette = buildPalette(p), l = chartLayout(p, o.overlap), name = p.name || "Pattern", accents = accentsFor(p);
+  const palette = buildPalette(p), l = chartLayout(p, o.overlap), name = p.name || "Pattern", accents = accentsFor(p), tr = o.t;
+  const view = (v: ChartView) => tr(`chartPdf.views.${v}`), footer = tr("chartPdf.footer", { app: "{app}" });
   const pagesPerView = l.tiles.length;
   const usage = computeUsage(p).perEntry;
   const rows: KeyRow[] = p.key.flatMap((e, k) => {
     const u = usage.get(k), count = entryCount(u) + partialCount(u);
-    return e && k && count ? [{ k, t: e.t, count, ...englishLabel(labelData(e, resolveColor(p, e.src))) }] : [];
+    return e && k && count ? [{ k, t: e.t, count, ...formatLabel(labelData(e, resolveColor(p, e.src)), tr) }] : [];
   });
   // the symbol chart shows what fills cells; its key lists just those
   const symbolRows = rows.filter((r) => r.t === "thread" || r.t === "combo" || r.t === "bead");
   const symbolKeyPages = keyPageCount(symbolRows.length), keyPages = keyPageCount(rows.length);
   const sections = [
-    { title: VIEW_TITLE.symbols, pages: pagesPerView },
-    { title: "Symbol chart key", pages: symbolKeyPages },
-    { title: VIEW_TITLE.symbolsColour, pages: pagesPerView },
-    { title: VIEW_TITLE.full, pages: pagesPerView },
-    { title: "Key", pages: keyPages },
+    { title: view("symbols"), pages: pagesPerView },
+    { title: tr("chartPdf.symbolKey"), pages: symbolKeyPages },
+    { title: view("symbolsColour"), pages: pagesPerView },
+    { title: view("full"), pages: pagesPerView },
+    { title: tr("chartPdf.key"), pages: keyPages },
   ];
 
   // cover: what the pattern is, what is in the file, how the pages fit together
@@ -346,43 +363,45 @@ export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Arr
     const page = new PdfPage(PAGE.w, PAGE.h), L = PAGE.left;
     page.text("bold", 20, L, 70, fit(name, 20, PAGE.w - L - PAGE.right, "bold"));
     let y = 92;
-    for (const line of [p.meta.designer && `Designed by ${p.meta.designer}`, p.meta.copyright && `© ${p.meta.copyright}`].filter(Boolean) as string[]) {
+    for (const line of [p.meta.designer && tr("chartPdf.designedBy", { name: p.meta.designer }), p.meta.copyright && `© ${p.meta.copyright}`].filter(Boolean) as string[]) {
       page.text("regular", 10, L, y, line, "left", 0.3);
       y += 14;
     }
-    const count = Math.floor(p.count) || 14, cm = (n: number) => ((n / count) * 2.54).toFixed(1), inch = (n: number) => (n / count).toFixed(1);
-    page.text("regular", 10, L, (y += 10), `${p.w} x ${p.h} stitches · on ${count} ct: ${cm(p.w)} x ${cm(p.h)} cm (${inch(p.w)} x ${inch(p.h)} in)`);
+    // numbers, so each language writes them its own way (10.9 / 10,9)
+    const count = Math.floor(p.count) || 14, cm = (n: number) => Math.round((n / count) * 25.4) / 10, inch = (n: number) => Math.round((n / count) * 10) / 10;
+    page.text("regular", 10, L, (y += 10), tr("chartPdf.size", { w: p.w, h: p.h, count, cmW: cm(p.w), cmH: cm(p.h), inW: inch(p.w), inH: inch(p.h) }));
     y += 26;
-    page.text("bold", 11, L, y, "In this file");
+    page.text("bold", 11, L, y, tr("chartPdf.inFile"));
     let at = 2;
     for (const sec of sections) {
       page.text("regular", 10, L + 8, (y += 16), sec.title);
-      page.text("regular", 10, L + 230, y, sec.pages > 1 ? `pages ${at}-${at + sec.pages - 1}` : `page ${at}`, "left", 0.35);
+      page.text("regular", 10, L + 250, y, sec.pages > 1 ? tr("chartPdf.pageRange", { from: at, to: at + sec.pages - 1 }) : tr("chartPdf.pageOne", { n: at }), "left", 0.35);
       at += sec.pages;
     }
     y += 30;
-    page.text("bold", 11, L, y, "How the chart pages fit together");
-    page.text("regular", 9, L, (y += 15), `Each chart is split into ${pagesPerView} page${pagesPerView === 1 ? "" : "s"}, numbered as below. Grey cells at the edge of a page repeat`, "left", 0.25);
-    page.text("regular", 9, L, (y += 12), `the ${l.overlap} row${l.overlap === 1 ? "" : "s"} or column${l.overlap === 1 ? "" : "s"} of the page next to it: lay them over each other to join the pages.`, "left", 0.25);
+    page.text("bold", 11, L, y, tr("chartPdf.howTitle"));
+    for (const line of wrap(tr("chartPdf.howText", { count: pagesPerView, overlap: l.overlap }), 9, PAGE.w - L - PAGE.right)) page.text("regular", 9, L, (y += 13), line, "left", 0.25);
     drawPageMap(page, p, l, null, L, y + 16, PAGE.w - L - PAGE.right, PAGE.h - y - 16 - 60, true);
+    drawFooter(page, footer);
     await pdf.addPage(page);
   }
 
-  const chartPages = async (view: ChartView) => {
+  const chartPages = async (v: ChartView) => {
     for (const t of l.tiles) {
       const page = new PdfPage(PAGE.w, PAGE.h);
       page.text("bold", 10, PAGE.left, 24, fit(name, 10, 330, "bold"));
-      page.text("regular", 8, PAGE.left, 36, `${VIEW_TITLE[view]} · page ${t.n} of ${pagesPerView} · columns ${t.x + 1}-${t.x + t.w}, rows ${t.y + 1}-${t.y + t.h} of ${p.w} x ${p.h}`, "left", 0.35);
+      page.text("regular", 8, PAGE.left, 36, `${view(v)} · ${tr("chartPdf.pageOf", { n: t.n, total: pagesPerView })} · ${tr("chartPdf.cells", { x1: t.x + 1, x2: t.x + t.w, y1: t.y + 1, y2: t.y + t.h, w: p.w, h: p.h })}`, "left", 0.35);
       if (l.tiles.length > 1) drawPageMap(page, p, l, t.n, PAGE.w - PAGE.right - 70, 10, 70, 34, false);
       drawRulers(page, p, t, l.cell, PAGE.left, PAGE.top);
-      drawChartPage(page, p, palette, l, t, view, accents, o.lineStyle);
+      drawChartPage(page, p, palette, l, t, v, accents, o.lineStyle);
+      drawFooter(page, footer);
       await pdf.addPage(page);
     }
   };
 
   // 1. the symbol chart and its own key: the symbols in the inks the chart uses
   await chartPages("symbols");
-  await addKey(pdf, p, "Symbol chart key", "Symbols as on the symbol chart. Some are printed red, green or blue so neighbouring symbols are easy to tell apart.", symbolRows, (page, symbols, r, x, y, S) => {
+  await addKey(pdf, p, tr, tr("chartPdf.symbolKey"), tr("chartPdf.symbolKeyNote"), symbolRows, (page, symbols, r, x, y, S) => {
     const s = palette[r.k]!, inkFor = SYMBOL_INKS[accents.symbol.get(r.k) ?? "black"], cx = x + S / 2, cy = y + S / 2;
     page.rect(x, y, S, S, { fill: "#FFFFFF" });
     if (r.t === "bead") page.circle(cx, cy, S * 0.42, { fill: "#FFFFFF", stroke: "#777777", width: 0.5 });
@@ -395,7 +414,7 @@ export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Arr
   await chartPages("full");
 
   // the full key: thread colours; backstitch and knots in the bright colours and line styles of the last chart
-  await addKey(pdf, p, "Key", `Fabric: ${Math.floor(p.count) || 14} ct · ${p.w} x ${p.h} stitches · backstitch and knots are shown in the colours they have on the colour chart`, rows, (page, symbols, r, x, y, S) => {
+  await addKey(pdf, p, tr, tr("chartPdf.key"), tr("chartPdf.keyNote", { count: Math.floor(p.count) || 14, w: p.w, h: p.h }), rows, (page, symbols, r, x, y, S) => {
     const s = palette[r.k]!, cx = x + S / 2, cy = y + S / 2;
     if (r.t === "back") {
       page.rect(x, y, S, S, { fill: "#FFFFFF" });
