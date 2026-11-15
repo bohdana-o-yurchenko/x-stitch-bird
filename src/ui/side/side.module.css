@@ -90,14 +90,45 @@
 .empty p {
   margin: 0 0 8px;
 }
+/* collapsible sections: a tinted header band with a clear edge, titled like "Key", so each section starts visibly */
 .details {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--line2);
 }
 .details summary {
-  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 12px;
+  background: var(--bg);
+  font-family: var(--font-heading);
   font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
-  font-size: 13.5px;
+  list-style: none;
+  user-select: none;
+}
+.details summary::-webkit-details-marker {
+  display: none;
+}
+.details summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin: 0 2px 0 1px;
+  border-right: 1.8px solid var(--muted);
+  border-bottom: 1.8px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+.details[open] summary::before {
+  transform: rotate(45deg) translate(-2px, -1px);
+}
+.details summary:hover {
+  background: var(--sel2);
+}
+.details[open] summary {
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--line);
 }
 .section {
   padding: 0 12px 12px;
