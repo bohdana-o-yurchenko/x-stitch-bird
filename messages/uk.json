@@ -823,12 +823,12 @@
   },
   "theme": {
     "label": "Тема",
-    "terracotta": "DMC 3830 · Terra Cotta",
-    "olive": "DMC 937 · Avocado Green Medium",
-    "royal": "DMC 797 · Royal Blue",
-    "rose": "DMC 3350 · Dusty Rose Ultra Dark",
-    "dark": "DMC 550 · Violet Very Dark",
-    "black": "DMC 310 · Black"
+    "terracotta": "3830",
+    "olive": "937",
+    "royal": "797",
+    "rose": "3350",
+    "dark": "550",
+    "black": "310"
   },
   "chartPdf": {
     "views": {

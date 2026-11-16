@@ -1469,12 +1469,11 @@ Idea from Pattern Maker v4 (Professional). Toggle with the eye button in the key
   Olive (sage), Royal blue (cool grey-blue), Rose (blush) — all light, each with its own tinted background, panels,
   lines and stage — and Dark (bluish, after the Dracula colour scheme). Picking one applies at once and keeps the
   menu open.
-- **Named after DMC floss** (2026-11-16, a small easter egg; the tooltip of each dot, the same in both languages, as
-  the official names are English): DMC 3830 · Terra Cotta, DMC 937 · Avocado Green Medium, DMC 797 · Royal Blue,
-  DMC 3350 · Dusty Rose Ultra Dark, DMC 550 · Violet Very Dark (the dark one) — the flosses nearest each theme's
-  colour (Royal Blue for its name). The theme ids stay `terracotta`, `olive`, `royal`, `rose`, `dark`, so saved
-  choices keep working.
-- **DMC 310 · Black** (`black`, 2026-11-16): a sixth, true black theme — black background and stage, near-black
+- **Named after DMC floss** (2026-11-16, a small easter egg): each dot's tooltip is just the floss number, the same
+  in both languages — stitchers know them: 3830 (Terra Cotta), 937 (Avocado Green Medium), 797 (Royal Blue), 3350
+  (Dusty Rose Ultra Dark), 550 (Violet Very Dark, the dark one) — the flosses nearest each theme's colour (Royal
+  Blue for its name). The theme ids stay `terracotta`, `olive`, `royal`, `rose`, `dark`, so saved choices keep working.
+- **310** (DMC Black; `black`, 2026-11-16): a sixth, true black theme — black background and stage, near-black
   panels, white text and a white accent, monochrome. The chart's own marks (hover square, frames, Autofill) can't be
   white on the fabric, so the theme sets `--canvas-accent` (near-black) for the canvas.
 - Remembered per browser (`localStorage` `stitchwork.theme`), applied before the first paint so nothing flashes.
