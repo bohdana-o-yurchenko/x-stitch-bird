@@ -12,6 +12,22 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "1.3.0",
+    date: "2026-11-16",
+    uk: [
+      "Вхід (за бажанням): через Google або з кодом на пошту. Після входу збережені схеми потрапляють і до вашого облікового запису, тож їх можна відкрити на будь-якому пристрої. Без входу все, як і раніше, лишається у браузері.",
+      "У вікні «Відкрити збережену схему» видно, де лежить кожна схема: у цьому браузері, в обліковому записі чи там і там.",
+      "Більше місця для схем: збережені схеми й чернетка тепер зберігаються в просторішому сховищі браузера, тож великі схеми більше не впираються в ліміт. Схеми, збережені раніше, переносяться самі.",
+      "Політика конфіденційності — внизу головного меню.",
+    ],
+    en: [
+      "Sign in (optional): with Google or a code by email. Once signed in, the patterns you save also go to your account, so you can open them on any device. Without signing in, everything stays in your browser as before.",
+      "The Open saved pattern dialog shows where each pattern is: in this browser, in your account, or both.",
+      "More room for patterns: saved patterns and the draft now live in the browser’s roomier storage, so big charts no longer hit the limit. Patterns you saved before move over by themselves.",
+      "A privacy policy, at the bottom of the main menu.",
+    ],
+  },
+  {
     version: "1.2.1",
     date: "2026-11-16",
     uk: [
