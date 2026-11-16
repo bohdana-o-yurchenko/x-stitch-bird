@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { RefWindowData } from "@/editor/types";
-import { wheelGesture } from "@/editor/viewport/viewport";
+import { WheelReader } from "@/editor/viewport/viewport";
 import { drawReference, type RefView } from "@/render/referenceRenderer";
 import { Icon } from "../common/Icon";
 import { ConfirmDelete, cx, ui } from "../common/widgets";
@@ -189,12 +189,13 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
     else if (a) saveMarks();
   };
   /** The same gestures as on the chart: pinch (or Ctrl/⌘ + wheel, or a mouse wheel) zooms, two fingers move. */
+  const wheelReader = useRef(new WheelReader());
   const wheel = (e: WheelEvent) => {
     // never the browser's own page zoom or scroll
     e.preventDefault();
     e.stopPropagation();
     if (!view.current) return;
-    const b = canvas.current!.getBoundingClientRect(), sx = e.clientX - b.left, sy = e.clientY - b.top, v = view.current, g = wheelGesture(e);
+    const b = canvas.current!.getBoundingClientRect(), sx = e.clientX - b.left, sy = e.clientY - b.top, v = view.current, g = wheelReader.current.read(e);
     if (g.zoom) {
       const ns = Math.max(0.02, Math.min(40, v.s * g.zoom));
       view.current = { s: ns, tx: sx - ((sx - v.tx) * ns) / v.s, ty: sy - ((sy - v.ty) * ns) / v.s };

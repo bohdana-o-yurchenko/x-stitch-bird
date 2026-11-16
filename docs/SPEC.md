@@ -373,6 +373,11 @@ Order of drawing:
 - `zoomAt(f, sx, sy)`: zoom clamp 2..60, keeps the point under the cursor fixed. `+`/`=` ×1.25, `-` ×0.8.
 - Wheel: **Ctrl/⌘+wheel or a real mouse wheel** (deltaMode≠0, or integer |deltaY|≥50 with no deltaX) → zoom by
   `exp(-clamp(deltaY*(deltaMode?33:1), ±120)*0.0025)`. Otherwise (trackpad) pans; Shift+wheel pans horizontally.
+- *New app (2026-11-16):* **a two-finger move stays a move.** When the page is busy for a moment, the browser hands
+  over several trackpad steps as one big whole-number step — which looks exactly like a mouse wheel notch, and used
+  to zoom the chart suddenly in the middle of a move. So once a trackpad's small steps arrive, every step within
+  300 ms belongs to the same move; a mouse wheel used on its own still zooms, and a pinch (Ctrl) always zooms.
+  The same rule serves the photo windows (§11.3).
 - Pan: middle or right mouse drag, Pan tool, or hold Space.
 - Canvas resizes with a `ResizeObserver`.
 

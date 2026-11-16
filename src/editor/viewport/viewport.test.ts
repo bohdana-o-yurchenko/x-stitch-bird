@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { testEditor } from "../../../tests/support/editorHarness";
-import { wheelGesture } from "./viewport";
+import { WheelReader, wheelGesture } from "./viewport";
 
 let ed: ReturnType<typeof testEditor>["ed"];
 const RULER = 26;
@@ -44,17 +44,21 @@ describe("viewport (SPEC §5.1)", () => {
   });
 
   it("pans with the trackpad, sideways with Shift + wheel, and zooms with a mouse wheel", () => {
+    vi.useFakeTimers({ now: 1_000_000 });
     ed.store.setState({ viewport: { zoom: 10, offX: 0, offY: 0 } });
     const wheel = (o: Partial<Parameters<typeof ed.viewport.wheel>[0]>) => ed.viewport.wheel({ deltaX: 0, deltaY: 0, deltaMode: 0, ctrlKey: false, metaKey: false, shiftKey: false, ...o }, 100, 100);
     wheel({ deltaX: 4, deltaY: 7.5 });
     expect(ed.state.viewport).toEqual({ zoom: 10, offX: -4, offY: -7.5 });
     wheel({ deltaY: 100, shiftKey: true });
     expect(ed.state.viewport).toEqual({ zoom: 10, offX: -104, offY: -7.5 });
+    // a mouse, a moment after the trackpad was put down
+    vi.setSystemTime(Date.now() + 1000);
     wheel({ deltaY: -100 }); // a wheel notch up: zoom in
     expect(ed.state.viewport.zoom).toBeGreaterThan(10);
     const z = ed.state.viewport.zoom;
     wheel({ deltaY: 3, deltaMode: 1 }); // line-based wheels zoom too
     expect(ed.state.viewport.zoom).toBeLessThan(z);
+    vi.useRealTimers();
   });
 
   it("centres a cell, zooming in when it would be too small, and flashes it", () => {
@@ -75,6 +79,28 @@ describe("viewport (SPEC §5.1)", () => {
     // a real mouse wheel zooms; with Shift it moves sideways
     expect(wheelGesture(ev({ deltaY: 100 })).zoom).toBeLessThan(1);
     expect(wheelGesture(ev({ deltaY: 100, shiftKey: true }))).toEqual({ zoom: 0, dx: -100, dy: 0 });
+  });
+
+  it("keeps a two-finger move a move when the browser bundles its steps into one big one during a pause", () => {
+    const ev = (deltaY: number, deltaX = 0) => ({ deltaX, deltaY, deltaMode: 0, ctrlKey: false, metaKey: false, shiftKey: false });
+    const r = new WheelReader();
+    // a trackpad's own steps: small, fractional
+    expect(r.read(ev(6.5, 0.5), 1000).zoom).toBe(0);
+    expect(r.read(ev(8), 1016).zoom).toBe(0);
+    // the page was busy for a moment: one bundled step, big and whole — it looks like a mouse wheel notch
+    expect(r.read(ev(96), 1180)).toEqual({ zoom: 0, dx: -0, dy: -96 });
+    expect(r.read(ev(120), 1300).zoom).toBe(0);
+    // the same alone, long after: a real mouse wheel, which zooms
+    expect(r.read(ev(100), 5000).zoom).toBeLessThan(1);
+    // a pinch zooms even mid-move
+    expect(r.read({ ...ev(-4), ctrlKey: true }, 5010).zoom).toBeGreaterThan(1);
+  });
+
+  it("the chart moves, not zooms, through the whole two-finger gesture", () => {
+    const zoom = ed.state.viewport.zoom;
+    ed.viewport.wheel({ deltaX: 0.5, deltaY: 6.5, deltaMode: 0, ctrlKey: false, metaKey: false, shiftKey: false }, 100, 100);
+    ed.viewport.wheel({ deltaX: 0, deltaY: 96, deltaMode: 0, ctrlKey: false, metaKey: false, shiftKey: false }, 100, 100);
+    expect(ed.state.viewport.zoom).toBe(zoom);
   });
 });
 

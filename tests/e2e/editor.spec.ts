@@ -895,3 +895,18 @@ test("a photo window moves with two fingers and zooms with a pinch, like the cha
   await expect.poll(async () => (await view()).s).toBeGreaterThan(again.s);
   expect(await page.evaluate(() => window.visualViewport?.scale ?? 1)).toBe(1);
 });
+
+test("a two-finger move on the chart stays a move, even when a pause bundles its steps into a big one", async ({ page }) => {
+  const zoom = () => editorState<number>(page, "(ed) => ed.state.viewport.zoom");
+  const before = await zoom();
+  await page.evaluate(async () => {
+    const c = document.querySelector("[data-testid=chart]")!, b = c.getBoundingClientRect();
+    const send = (deltaY: number, deltaX = 0) => c.dispatchEvent(new WheelEvent("wheel", { deltaX, deltaY, clientX: b.left + 300, clientY: b.top + 300, bubbles: true, cancelable: true }));
+    for (let i = 0; i < 5; i++) send(6.5, 0.5);
+    // the page was busy for a moment: the browser hands over one big, whole step
+    await new Promise((ok) => setTimeout(ok, 120));
+    send(96);
+    send(6.5);
+  });
+  expect(await zoom()).toBe(before);
+});

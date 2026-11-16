@@ -7,13 +7,17 @@ const WHEEL_SPEED = 0.0025, PINCH_SPEED = 0.012;
 
 export type WheelLike = { deltaX: number; deltaY: number; deltaMode: number; ctrlKey: boolean; metaKey: boolean; shiftKey: boolean };
 
+/** How long after a trackpad's own small steps a big step still belongs to the same two-finger move (ms). */
+const TRACKPAD_HOLD = 300;
+
 /**
  * What a wheel event means on a zoomable picture (the chart, a photo window): a trackpad pinch (it arrives as Ctrl +
  * small pixel deltas), Ctrl/⌘ + wheel or a real mouse wheel zooms by `zoom`; two fingers on a trackpad move by
- * (dx, dy); Shift + wheel moves sideways.
+ * (dx, dy); Shift + wheel moves sideways. `trackpad`: a trackpad gesture is under way — then a big whole-number step
+ * is several of its steps that the browser bundled while the page was busy, not a mouse wheel notch.
  */
-export function wheelGesture(e: WheelLike): { zoom: number; dx: 0; dy: 0 } | { zoom: 0; dx: number; dy: number } {
-  const mouseWheel = e.deltaMode !== 0 || (e.deltaX === 0 && Math.abs(e.deltaY) >= 50 && Number.isInteger(e.deltaY));
+export function wheelGesture(e: WheelLike, trackpad = false): { zoom: number; dx: 0; dy: 0 } | { zoom: 0; dx: number; dy: number } {
+  const mouseWheel = e.deltaMode !== 0 || (!trackpad && e.deltaX === 0 && Math.abs(e.deltaY) >= 50 && Number.isInteger(e.deltaY));
   if (e.ctrlKey || e.metaKey || (mouseWheel && !e.shiftKey)) {
     const pinch = !mouseWheel && e.deltaMode === 0;
     const d = Math.max(-120, Math.min(120, e.deltaY * (e.deltaMode ? 33 : 1)));
@@ -23,8 +27,26 @@ export function wheelGesture(e: WheelLike): { zoom: number; dx: 0; dy: 0 } | { z
   return { zoom: 0, dx: -e.deltaX, dy: -e.deltaY };
 }
 
+/**
+ * Reads wheel events one after another, remembering whether a trackpad is in use: once its small steps arrive, the
+ * gesture stays a two-finger move. Without it a step bundled during a short pause looked like a mouse wheel notch,
+ * and the chart suddenly zoomed in the middle of a move.
+ */
+export class WheelReader {
+  private trackpadAt = -Infinity;
+
+  read(e: WheelLike, now = Date.now()) {
+    const g = wheelGesture(e, now - this.trackpadAt < TRACKPAD_HOLD);
+    // a trackpad's own steps: small or fractional, often sideways too (a pinch's are small as well)
+    const small = e.deltaMode === 0 && (e.deltaX !== 0 || Math.abs(e.deltaY) < 50 || !Number.isInteger(e.deltaY));
+    if (small || (g.zoom === 0 && now - this.trackpadAt < TRACKPAD_HOLD)) this.trackpadAt = now;
+    return g;
+  }
+}
+
 /** Zoom and pan of the chart canvas (SPEC §5.1). Screen points are relative to the canvas element. */
 export class ViewportService {
+  private wheelReader = new WheelReader();
   width = 0;
   height = 0;
 
@@ -97,7 +119,7 @@ export class ViewportService {
 
   /** Mouse wheel: real wheels and Ctrl/⌘ zoom, trackpads pan (SPEC §5.1). */
   wheel(e: WheelLike, sx: number, sy: number) {
-    const g = wheelGesture(e);
+    const g = this.wheelReader.read(e);
     if (g.zoom) this.zoomAt(g.zoom, sx, sy);
     else this.panBy(g.dx, g.dy);
   }
