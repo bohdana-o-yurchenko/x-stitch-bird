@@ -45,7 +45,7 @@ export function OpenPatternDialog({ onClose }: { onClose: () => void }) {
               <span className={ui.hint} style={{ display: "block" }}>
                 {it.designer ? `${it.designer} · ` : ""}
                 {`${it.w}×${it.h} · ${new Date(it.updatedAt).toLocaleString()}`}
-                {t("dialogs.thisBrowser")}
+                {t(it.where === "account" ? "dialogs.inAccount" : it.where === "both" ? "dialogs.browserAndAccount" : "dialogs.thisBrowser")}
               </span>
             </span>
           </button>

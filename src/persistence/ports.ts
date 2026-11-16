@@ -13,6 +13,10 @@ export interface PatternSummary {
   h: number;
   updatedAt: number;
   designer?: string;
+  /** Where it is kept: this browser, the signed-in account, or both (absent: this browser). */
+  where?: "browser" | "account" | "both";
+  /** The account has a preview picture of it. */
+  hasPreview?: boolean;
 }
 
 export type SaveResult = { ok: true } | { ok: false; reason: "quota" | "conflict" | "error" };

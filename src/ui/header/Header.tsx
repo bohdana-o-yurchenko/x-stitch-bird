@@ -8,6 +8,7 @@ import { Icon } from "../common/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { APP_VERSION } from "../dialogs/ChangelogDialog";
 import { ShortcutsInfo } from "./ShortcutsInfo";
+import { AccountButton } from "../account/AccountButton";
 import { ToolBar } from "./ToolBar";
 import { useCommand, useEditorState } from "../hooks/editor";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
@@ -145,6 +146,7 @@ export function Header() {
       <div className={s.spacer} data-slot="spacer" />
       <ShortcutsInfo />
       <LanguageSwitch />
+      <AccountButton />
       <PanelToggle />
     </header>
   );

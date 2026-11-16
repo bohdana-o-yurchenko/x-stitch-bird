@@ -22,6 +22,7 @@ import type { Ctx } from "@/render/primitives/cells";
 import { strokeLineStyle } from "@/render/primitives/lineStyles";
 import { downloadFile, isImageFile, isPatternFile, readText } from "@/platform/files";
 import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
+import { accountPatternApi } from "@/persistence";
 import type { Editor } from "../createEditor";
 import { loadPattern } from "./pattern";
 
@@ -182,8 +183,17 @@ export async function saveToLibrary(ed: Editor, o: { quiet?: boolean } = {}) {
   const r = await ed.persistence.patterns.save(doc);
   if (r.ok) {
     ed.store.setState({ savedAt: Date.now() });
-    if (!o.quiet) ed.toast("toasts.savedLocal", { name: doc.name });
+    if (!o.quiet) ed.toast(ed.state.account ? "toasts.savedAccount" : "toasts.savedLocal", { name: doc.name });
+    // signed in: the account also gets a small colour preview, for the list of patterns
+    if (ed.state.account) void uploadPreview(ed).catch(() => {});
   } else ed.toast(r.reason === "quota" ? "toasts.tooLarge" : "toasts.saveFailed");
+}
+
+/** A small colour picture of the chart (~240 px on its long side) for the account's list of patterns. */
+async function uploadPreview(ed: Editor) {
+  const p = ed.doc, cell = Math.max(1, Math.floor(240 / Math.max(p.w, p.h)));
+  const canvas = renderChartImage(p, ed.state.palette, "color", ed.theme, { heading: "", key: [] }, cell);
+  await accountPatternApi.putPreview(p.id, await canvasToBlob(canvas));
 }
 
 export async function openFromLibrary(ed: Editor, id: string) {

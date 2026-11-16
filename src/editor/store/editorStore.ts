@@ -115,6 +115,8 @@ export interface EditorState {
   matchView: "both" | "symbols" | null;
   /** The proposals hidden for a moment (held down), to see the photo under them. */
   matchPeek: boolean;
+  /** Who is signed in (SPEC §15.23); null = nobody — everything stays in this browser. */
+  account: { id: string; email: string; name?: string } | null;
 }
 
 export const emptyOverlay: Overlay = { hover: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null };
@@ -162,6 +164,7 @@ export const createEditorStore = () =>
     match: null,
     matchView: null,
     matchPeek: false,
+    account: null,
   }));
 
 export type EditorStore = ReturnType<typeof createEditorStore>;

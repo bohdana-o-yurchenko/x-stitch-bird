@@ -1,0 +1,42 @@
+.avatarBtn {
+  border: 0;
+  background: none;
+  padding: 2px;
+  cursor: pointer;
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+  font-size: 14px;
+}
+.google {
+  width: 100%;
+  justify-content: center;
+  margin-top: 6px;
+}
+.or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.or::before,
+.or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line2);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

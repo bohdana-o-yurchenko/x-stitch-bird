@@ -6,7 +6,7 @@ import type { KeyIndex, Pattern, Point } from "@/core/pattern/types";
 import { ALL_SYMBOLS, isShapeSymbol } from "@/core/symbols/symbols";
 import { RULER_SIZE } from "@/render/ChartRenderer";
 import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
-import { createPersistence, type Persistence } from "@/persistence";
+import { account, createPersistence, type Persistence } from "@/persistence";
 import { downscaleToBlob, loadImage } from "@/platform/images";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { chromeColours } from "@/platform/themeColours";
@@ -184,6 +184,12 @@ export class Editor {
     const prev = this.state.hoverCell;
     if (prev?.x === cell?.x && prev?.y === cell?.y && this.state.overlay.hover?.size === size && !!this.state.overlay.hover === showSquare) return;
     this.store.setState({ hoverCell: cell, overlay: { ...this.state.overlay, hover: cell && showSquare ? { ...cell, size } : null } });
+  }
+
+  /** Signed in or out (the account menu tells): while signed in, saved patterns also go to the account. */
+  setAccount(user: EditorState["account"]) {
+    account.signedIn = !!user;
+    if (this.state.account?.id !== user?.id) this.store.setState({ account: user });
   }
 
   setTool(tool: ToolId) {

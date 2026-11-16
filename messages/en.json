@@ -418,7 +418,9 @@
       "back": "Backstitch lines: {count}",
       "knot": "French knots: {count}"
     },
-    "pkTwoCharts": "The PDF holds only what Pattern Keeper can track. For a chart with everything on it, use Export ▸ PDF chart to print."
+    "pkTwoCharts": "The PDF holds only what Pattern Keeper can track. For a chart with everything on it, use Export ▸ PDF chart to print.",
+    "inAccount": " · in your account",
+    "browserAndAccount": " · this browser and your account"
   },
   "meta": {
     "designer": "Author (designer)",
@@ -544,7 +546,8 @@
     "matchNeedsUnderlay": "Add an image under the chart first",
     "matchOffPhoto": "This block isn't on the image",
     "matchNoExamples": "Stitch a few cells first, so the app learns the symbols",
-    "matchNothingEmpty": "No empty cells in this block"
+    "matchNothingEmpty": "No empty cells in this block",
+    "savedAccount": "Saved “{name}” in this browser and your account"
   },
   "underlay": {
     "heading": "Image behind the chart",
@@ -961,5 +964,27 @@
     "peekHint": "Hold to hide the found symbols and see the image under them",
     "tipAlign": "Line the image up on this block more closely (U), then try again.",
     "tipStitch": "Stitch a few more cells by hand. Autofill learns from what you mark — it gets better as you go."
+  },
+  "account": {
+    "signIn": "Sign in",
+    "title": "Sign in to пташечка",
+    "why": "Your patterns are kept in your account too, so you can open them on any device. Without signing in, everything stays in this browser.",
+    "google": "Continue with Google",
+    "or": "or with a code by email",
+    "email": "Email",
+    "sendCode": "Send me a code",
+    "code": "Code from the email",
+    "codeSent": "We sent a code to {email}.",
+    "signInWithCode": "Sign in",
+    "otherEmail": "Use another email",
+    "cancel": "Cancel",
+    "sendFailed": "Couldn’t send the code — check the address and try again.",
+    "codeFailed": "That code didn’t work — check it, or ask for a new one.",
+    "googleFailed": "Couldn’t sign in with Google.",
+    "menu": "Account: {email}",
+    "signedInHint": "Signed in — patterns you save also go to your account",
+    "signOut": "Sign out",
+    "signedIn": "Signed in as {email}",
+    "signedOut": "Signed out — patterns stay in this browser"
   }
 }

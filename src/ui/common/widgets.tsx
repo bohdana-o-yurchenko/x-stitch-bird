@@ -195,7 +195,7 @@ function MenuList({ items, pos, onDone, testId, reveal }: { items: MenuItem[]; p
  * scrolling or clipped containers (like the header) can't hide them. Follows the button on scroll and resize;
  * closes on outside click or Esc.
  */
-export function Dropdown({ label, title, items, className, reveal }: { label: string; title?: string; className?: string; items: MenuItem[]; reveal?: string[] | null }) {
+export function Dropdown({ label, title, items, className, reveal }: { label: ReactNode; title?: string; className?: string; items: MenuItem[]; reveal?: string[] | null }) {
   const [pos, setPos] = useState<MenuPos | null>(null);
   /** Opened by the user; the guide can also hold it open (`reveal`), and then outside clicks don't close it. */
   const [manual, setManual] = useState(false);

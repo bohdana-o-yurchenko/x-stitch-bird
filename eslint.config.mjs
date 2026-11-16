@@ -13,7 +13,9 @@ const levels = {
   editor: ["core", "render", "persistence", "platform", "workers", "editor"],
   ui: ["editor", "render", "core", "platform", "i18n", "ui"],
   i18n: ["i18n"],
-  app: ["ui", "i18n", "app"],
+  // server-only: sign-in, database, object storage — imported by the app's API routes, never by the browser code
+  server: ["core", "server"],
+  app: ["ui", "i18n", "server", "app"],
 };
 
 const frameworkImports = ["react", "react-dom", "react/*", "next", "next/*", "next-intl", "next-intl/*", "zustand/react"];
