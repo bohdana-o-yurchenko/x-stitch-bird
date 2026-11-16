@@ -212,3 +212,20 @@
   border-color: var(--ink);
   font-weight: 600;
 }
+
+/* ☰ ▸ Toolbar: what the toolbar leaves out */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 7px 10px 8px;
+  font-size: 13.5px;
+}
+.optionRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 2px;
+  color: var(--muted);
+  cursor: pointer;
+}

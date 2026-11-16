@@ -1652,6 +1652,8 @@ read-only share links.
   Preview images (PNG) ›, Shopping list (CSV), Open Cross Stitch file (.oxs).
 - **☰** — Quick start guide, Keyboard shortcuts (the list that used to sit under the ⓘ button), What's new,
   Language (Українська · English), Theme, Privacy policy, Glory to Ukraine 🇺🇦.
+  **Toolbar** (2026-11-17): *Hide line and rectangle tools*, *Hide fractional stitches* — off by default, remembered
+  in this browser (`stitchwork.toolbar`); only the buttons go, the tools and their shortcuts still work.
 - The guide holds the menu its step talks about open (`menuReveal: { menu, path }`).
 
 **Saving** (built 2026-11-17): the draft in this browser 0.6 s after every change; the saved patterns — and the

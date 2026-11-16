@@ -1042,3 +1042,26 @@ test("patterns saved by an earlier version (in localStorage) are moved into Inde
   // copied, and the old copy kept as a backup
   expect(await page.evaluate(() => !!localStorage.getItem("stitchwork.libraryMoved") && !!localStorage.getItem("stitchwork.library"))).toBe(true);
 });
+
+test("☰ ▸ Toolbar hides the shape tools and fractional stitches, and remembers it", async ({ page }) => {
+  const toolbar = page.getByTestId("toolbar");
+  await expect(toolbar.getByRole("button", { name: "Line (L)", exact: true })).toBeVisible();
+  await expect(toolbar.getByRole("group", { name: /^Partial stitches/ })).toBeVisible();
+  await openAppMenu(page);
+  const options = page.getByTestId("toolbar-options");
+  await options.getByLabel("Hide line and rectangle tools").check();
+  await options.getByLabel("Hide fractional stitches").check();
+  await page.keyboard.press("Escape");
+  await expect(toolbar.getByRole("button", { name: "Line (L)", exact: true })).toHaveCount(0);
+  await expect(toolbar.getByRole("button", { name: "Fill area (F)", exact: true })).toBeVisible();
+  await expect(toolbar.getByRole("group", { name: /^Partial stitches/ })).toHaveCount(0);
+  // the tools themselves still work from the keyboard
+  await page.keyboard.press("l");
+  await expect(page.getByTestId("current-tool-name")).toContainText("Line");
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await expect(toolbar.getByRole("button", { name: "Line (L)", exact: true })).toHaveCount(0);
+  await openAppMenu(page);
+  await page.getByTestId("toolbar-options").getByLabel("Hide line and rectangle tools").uncheck();
+  await expect(toolbar.getByRole("button", { name: "Line (L)", exact: true })).toBeVisible();
+});

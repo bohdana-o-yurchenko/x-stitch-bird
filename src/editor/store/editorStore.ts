@@ -96,6 +96,8 @@ export interface EditorState {
   hasOtherPatterns: boolean;
   /** The keyboard shortcuts list, opened from ☰. */
   shortcutsOpen: boolean;
+  /** Toolbar groups hidden in ☰ ▸ Toolbar (remembered in this browser; ui/header/toolbarPrefs). */
+  toolbarHide: { shapes: boolean; partials: boolean };
   dialog: DialogRequest | null;
   /** The add/edit key entry form, docked in the side panel so the chart and references stay visible. */
   keyForm: { edit?: KeyIndex; seq: number } | null;
@@ -159,6 +161,7 @@ export const createEditorStore = () =>
     saveState: null,
     hasOtherPatterns: false,
     shortcutsOpen: false,
+    toolbarHide: { shapes: false, partials: false },
     dialog: null,
     keyForm: null,
     toasts: [],

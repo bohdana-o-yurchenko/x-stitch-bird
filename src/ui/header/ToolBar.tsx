@@ -25,6 +25,7 @@ export function ToolBar() {
   const canUndo = useEditorState((st) => st.canUndo || !!st.floating);
   const canRedo = useEditorState((st) => st.canRedo);
   const usesBrush = toolById(tool).usesBrush;
+  const hide = useEditorState((st) => st.toolbarHide);
   // while the image behind the chart is edited, the pointer moves the image: no tool works
   const paused = useEditorState((st) => !!st.underlay && st.underlay.visible && !st.underlay.behind);
   const toolButton = (id: ToolId) => (
@@ -60,15 +61,19 @@ export function ToolBar() {
         ))}
       </div>
       <span className={s.sep} />
-      {(["line", "rect", "filledRect", "fill"] as const).map(toolButton)}
+      {(hide.shapes ? (["fill"] as const) : (["line", "rect", "filledRect", "fill"] as const)).map(toolButton)}
       <span className={s.sep} />
-      {toolButton("partial")}
-      <div className={cx(s.sizes, tool !== "partial" && s.idle)} role="group" aria-label={t("partial")}>
-        {PARTIAL_KINDS.map((k) => (
-          <button key={k.id} type="button" className={cx(partialKind === k.id && s.on)} title={t(`partialKind.${k.id}`)} aria-label={t(`partialKind.${k.id}`)} aria-pressed={partialKind === k.id} onClick={() => setPartial(k.id)}>{k.glyph}</button>
-        ))}
-      </div>
-      <span className={s.sep} />
+      {!hide.partials && (
+        <>
+          {toolButton("partial")}
+          <div className={cx(s.sizes, tool !== "partial" && s.idle)} role="group" aria-label={t("partial")}>
+            {PARTIAL_KINDS.map((k) => (
+              <button key={k.id} type="button" className={cx(partialKind === k.id && s.on)} title={t(`partialKind.${k.id}`)} aria-label={t(`partialKind.${k.id}`)} aria-pressed={partialKind === k.id} onClick={() => setPartial(k.id)}>{k.glyph}</button>
+            ))}
+          </div>
+          <span className={s.sep} />
+        </>
+      )}
       {(["picker", "pan"] as const).map(toolButton)}
       <span className={s.sep} />
       {(["select", "magicWand"] as const).map(toolButton)}

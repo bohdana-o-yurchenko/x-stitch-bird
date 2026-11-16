@@ -625,6 +625,9 @@
     "guide": "Quick start guide",
     "guideHint": "Step by step: an e-copy of a paper chart",
     "shortcuts": "Keyboard shortcuts",
+    "toolbar": "Toolbar",
+    "hideShapes": "Hide line and rectangle tools",
+    "hidePartials": "Hide fractional stitches",
     "changelog": "What’s new",
     "changelogHint": "Version {version} — what changed",
     "privacy": "Privacy policy"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
@@ -13,6 +13,7 @@ import { ToolBar } from "./ToolBar";
 import type { HeaderMenu } from "@/editor/store/editorStore";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
+import { savedToolbarHide, setToolbarHide } from "./toolbarPrefs";
 import s from "./header.module.css";
 
 function PatternName() {
@@ -34,6 +35,26 @@ function Glory() {
     <div className={s.glory} data-testid="glory">
       {t("glory")}
       <span className={s.flag} aria-hidden />
+    </div>
+  );
+}
+
+/** ☰ ▸ Toolbar: hide the groups this person never uses. */
+function ToolbarOptions() {
+  const t = useTranslations("fileMenu");
+  const ed = useEditor();
+  const hide = useEditorState((st) => st.toolbarHide);
+  const row = (k: keyof typeof hide, label: string) => (
+    <label className={s.optionRow}>
+      <input type="checkbox" checked={hide[k]} onChange={(e) => setToolbarHide(ed, { ...hide, [k]: e.target.checked })} />
+      {label}
+    </label>
+  );
+  return (
+    <div className={s.options} data-testid="toolbar-options">
+      <span>{t("toolbar")}</span>
+      {row("shapes", t("hideShapes"))}
+      {row("partials", t("hidePartials"))}
     </div>
   );
 }
@@ -120,6 +141,7 @@ function AppMenu() {
     "-",
     { id: "language", node: <LanguageSwitch /> },
     { id: "theme", node: <ThemeSwitcher /> },
+    { id: "toolbar", node: <ToolbarOptions /> },
     "-",
     { id: "privacy", label: t("privacy"), onClick: () => void window.open(`/${locale}/privacy`, "_blank", "noopener") },
     "-",
@@ -166,6 +188,8 @@ function PanelToggle() {
 }
 
 export function Header() {
+  const ed = useEditor();
+  useEffect(() => ed.store.setState({ toolbarHide: savedToolbarHide() }), [ed]);
   const t = useTranslations();
   const run = useCommand();
   const btn = cx(ui.btn, ui.ghost);
