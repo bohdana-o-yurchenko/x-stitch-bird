@@ -170,3 +170,13 @@ export const CUSTOM_EXAMPLES: readonly { id: string; sym: string }[] = [
   { id: "squareHole", sym: "draw:S00cc;!O3399" },
   { id: "crossCut", sym: "draw:O00cc;!l06c6;!l606c" },
 ];
+
+/**
+ * The colour a hand-drawn symbol's cut-out shows: paper white, so it never lets the cell's colour through — or dark
+ * when the symbol itself is drawn light (on dark floss), so the cut-out still shows.
+ */
+export function cutOutColour(ink: string): string {
+  const h = ink.replace("#", ""), full = h.length === 3 ? h.replace(/./g, (c) => c + c) : h;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) || 0);
+  return 0.299 * r! + 0.587 * g! + 0.114 * b! > 160 ? "#1D1A16" : "#FFFFFF";
+}

@@ -156,6 +156,11 @@ export class PdfPage {
     this.ops.push(`-10000 -10000 30000 30000 re ${pdfPath} W* n`);
   }
 
+  /** Clip what follows to the inside of a path, until `restore`. */
+  clipInside(pdfPath: string) {
+    this.ops.push(`${pdfPath} W n`);
+  }
+
   /** Makes an area of the page a link to a web address. */
   link(x: number, y: number, w: number, h: number, url: string) {
     this.links.push({ x, y, w, h, url });

@@ -100,6 +100,8 @@
   --danger-bg: #43282f;
   --stage: #1a1b22;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.3);
+  /* symbols are drawn light here: a hand-drawn symbol's cut-out shows dark */
+  --cut-out: var(--bg);
   color-scheme: dark;
 }
 
@@ -128,6 +130,7 @@
   --danger-bg: #3a1f22;
   --stage: #000000;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.6);
+  --cut-out: var(--bg);
   color-scheme: dark;
 }
 

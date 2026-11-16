@@ -110,13 +110,18 @@ describe("stitches and symbols", () => {
     expect(half.calls("rect")).toEqual([[0, 0, 12, 24]]);
   });
 
-  it("cut a hand-drawn symbol's empty shapes out of what was drawn before them, only for that part", () => {
+  it("cut a hand-drawn symbol's empty shapes out of what was drawn before them as white paper, only for that part", () => {
     const c = fakeCanvas();
     drawShape(c.g, shapeSymbol("draw:S00cc;!O3399;P5577")!, 12, 12, 24, "#000", null);
-    // the rectangle is clipped once (by the cut circle); the star drawn after the cut is not
-    expect(c.calls("clip").map((x) => x[1])).toEqual(["evenodd"]);
+    // the rectangle: in ink outside the cut circle, then in white inside it; the star drawn after the cut is not cut
+    expect(c.calls("clip").map((x) => x[1])).toEqual(["evenodd", undefined]);
     const order = c.log.map((l) => l[0]).filter((n) => ["save", "clip", "fill", "stroke", "restore"].includes(n));
-    expect(order.slice(order.indexOf("clip") - 1, order.indexOf("clip") + 3)).toEqual(["save", "clip", "fill", "restore"]);
+    expect(order).toEqual(["save", "save", "clip", "fill", "restore", "save", "clip", "fill", "restore", "fill", "restore"]);
+    // never the colour under the symbol: the cut-out is white (dark for a light symbol)
+    expect(c.values("fillStyle")).toEqual(["#000", "#FFFFFF", "#000"]);
+    const light = fakeCanvas();
+    drawShape(light.g, shapeSymbol("draw:S00cc;!O3399")!, 12, 12, 24, "#fff", null);
+    expect(light.values("fillStyle")).toEqual(["#fff", "#1D1A16"]);
     expect(c.calls("save").length).toBe(c.calls("restore").length);
   });
 

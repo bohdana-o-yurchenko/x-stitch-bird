@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { entryCount, partialCount } from "@/core/calculator/usage";
 import { keyView, type KeySort } from "@/core/pattern/keyView";
 import { Icon } from "../common/Icon";
@@ -28,6 +28,49 @@ function savedView(): { sort: KeySort; grouped: boolean } {
   }
 }
 
+/**
+ * Where the key list (and the side panel) were scrolled to. The key form takes the whole panel, so the list is
+ * built anew when it closes: it comes back where it was — or, if it was at the very bottom and an entry was added,
+ * moved on just enough to show the new entry (at the new bottom, or in its group) — before anything is painted.
+ */
+const scrollMemory = { top: 0, atBottom: false, count: 0, sideTop: 0 };
+
+/** Keeps the key list's scroll position across the key form (see `scrollMemory`). */
+function useListScroll(count: number, active: number) {
+  const list = useRef<HTMLDivElement>(null), countNow = useRef(count);
+  useLayoutEffect(() => {
+    countNow.current = count;
+  }, [count]);
+  useLayoutEffect(() => {
+    const el = list.current, side = el?.closest("aside");
+    if (!el) return;
+    if (side) side.scrollTop = scrollMemory.sideTop;
+    el.scrollTop = scrollMemory.top;
+    const added = el.querySelector<HTMLElement>(`[data-entry="${active}"]`);
+    if (scrollMemory.atBottom && count > scrollMemory.count && added) {
+      const row = added.getBoundingClientRect(), box = el.getBoundingClientRect();
+      if (row.bottom > box.bottom) el.scrollTop += row.bottom - box.bottom;
+      else if (row.top < box.top) el.scrollTop -= box.top - row.top;
+    }
+    const save = () => {
+      scrollMemory.top = el.scrollTop;
+      scrollMemory.atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+      scrollMemory.count = countNow.current;
+      scrollMemory.sideTop = side?.scrollTop ?? 0;
+    };
+    save();
+    el.addEventListener("scroll", save);
+    side?.addEventListener("scroll", save);
+    return () => {
+      el.removeEventListener("scroll", save);
+      side?.removeEventListener("scroll", save);
+    };
+    // once per showing of the list: the form replaces it, and it is built again after
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return list;
+}
+
 export function KeyPanel() {
   const t = useTranslations("key");
   const run = useCommand();
@@ -43,6 +86,7 @@ export function KeyPanel() {
   const [view, setView] = useState(savedView);
   const [closed, setClosed] = useState<ReadonlySet<string>>(new Set());
   const all = key.flatMap((e, i) => (e && i ? [i] : []));
+  const listRef = useListScroll(all.length, active);
   const long = all.length >= LONG_KEY;
   const used = (k: number) => entryCount(usage.perEntry.get(k)) + partialCount(usage.perEntry.get(k));
   // a short key stays a plain list, as added
@@ -103,7 +147,7 @@ export function KeyPanel() {
           <button type="button" className={cx(ui.tool, view.grouped && ui.on)} title={t("group")} aria-label={t("group")} aria-pressed={view.grouped} onClick={() => change({ grouped: !view.grouped })}><Icon name="group" size={17} /></button>
         </div>
       )}
-      <div className={s.keyList} data-shrink>
+      <div ref={listRef} className={s.keyList} data-shrink data-testid="key-list">
         {!all.length && (
           <div className={s.empty}>
             <p>{t("empty")}</p>

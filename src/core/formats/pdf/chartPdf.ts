@@ -6,6 +6,7 @@ import { buildPalette, type Palette, type PaletteSlot } from "../../pattern/pale
 import { resolveColor } from "../../pattern/resolve";
 import type { Pattern } from "../../pattern/types";
 import { partialAnchor, partialKind } from "../../stitches/partialKinds";
+import { cutOutColour } from "../../symbols/customSymbol";
 import { DEFAULT_LINE_INK, LINE_INKS } from "../../symbols/lineInks";
 import { shapeSymbol } from "../../symbols/shapes";
 import { SYMBOL_FONT, SYMBOL_GLYPHS } from "../../symbols/symbolFont";
@@ -147,14 +148,24 @@ function drawShapeSymbol(page: PdfPage, sym: string, cx: number, cy: number, siz
   const box = shape.box ?? 24, span = size * 0.82, k = span / box, x0 = cx - span / 2, y0 = cy - span / 2;
   const at = (x: number, y: number) => page.place(x0 + x * k, y0 + y * k);
   for (const part of shape.parts) {
-    if (part.holes) {
-      page.save();
-      for (const hole of part.holes) page.clipOutside(svgPathToPdf(hole, at));
-    }
     const d = svgPathToPdf(part.d, at);
-    if (part.paint === "stroke") page.path(d, { stroke: ink, width: (part.w ?? (2.2 * box) / 24) * k, cap: part.cap ?? "round", join: part.join ?? "round" });
-    else page.path(d, { fill: ink, evenOdd: part.rule === "evenodd" });
-    if (part.holes) page.restore();
+    const paint = (colour: string) =>
+      part.paint === "stroke" ? page.path(d, { stroke: colour, width: (part.w ?? (2.2 * box) / 24) * k, cap: part.cap ?? "round", join: part.join ?? "round" }) : page.path(d, { fill: colour, evenOdd: part.rule === "evenodd" });
+    if (!part.holes) {
+      paint(ink);
+      continue;
+    }
+    page.save();
+    for (const hole of part.holes) page.clipOutside(svgPathToPdf(hole, at));
+    paint(ink);
+    page.restore();
+    // a cut-out is white paper where it crosses the shape, as on screen
+    for (const hole of part.holes) {
+      page.save();
+      page.clipInside(svgPathToPdf(hole, at));
+      paint(cutOutColour(ink));
+      page.restore();
+    }
   }
 }
 

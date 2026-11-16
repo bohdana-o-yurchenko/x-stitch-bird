@@ -835,3 +835,33 @@ test("a plain bead sits in its cell, or between cells like a French knot", async
   expect(await editorState<object>(page, "(ed) => ed.doc.layers.knots.at(-1)")).toEqual({ x: 7, y: 7, k });
   await expect(page.locator(`[data-entry='${k}']`)).toContainText(/between cells.*1\s*beads/);
 });
+
+test("the key list keeps its place across the key form, and shows a new entry when it was at the bottom", async ({ page }) => {
+  // a long key, so the list scrolls
+  await page.evaluate(() => {
+    type Ed = { doc: { key: unknown[] }; state: { symbols: string[] }; changed(o: object): void };
+    const ed = (window as unknown as { __stitchwork: Ed }).__stitchwork;
+    const codes = ["150", "151", "152", "153", "154", "155", "156", "157", "158", "159", "160", "161", "162", "163", "164", "165", "166", "167", "168", "169", "170", "171"];
+    codes.forEach((c, i) => ed.doc.key.push({ t: "thread", src: `dmc:${c}`, n: 2, st: "full", sym: ed.state.symbols[40 + i] }));
+    ed.changed({ keys: true });
+  });
+  const list = page.getByTestId("key-list");
+  const scroll = () => list.evaluate((el) => ({ top: el.scrollTop }));
+  // in the middle: editing an entry brings the list back to the same place
+  await list.evaluate((el) => (el.scrollTop = 200));
+  const row = page.locator("[data-entry='12']");
+  await row.hover();
+  await row.getByRole("button", { name: "Edit entry" }).click();
+  await page.getByTestId("key-form").getByRole("button", { name: "Save changes" }).click();
+  expect((await scroll()).top).toBe(200);
+  // at the bottom: a new entry, and the list shows it
+  await list.evaluate((el) => (el.scrollTop = el.scrollHeight));
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  await page.getByPlaceholder("Search DMC number or name").fill("666");
+  await page.locator("[data-id='dmc:666']").click();
+  await page.getByTestId("key-form").getByRole("button", { name: "Add to key", exact: true }).click();
+  // the new entry is in view, wherever its group puts it
+  const added = page.locator(`[data-entry='${await editorState<number>(page, "(ed) => ed.state.activeEntry")}']`);
+  await expect(added).toContainText("666");
+  await expect(added).toBeInViewport({ ratio: 1 });
+});

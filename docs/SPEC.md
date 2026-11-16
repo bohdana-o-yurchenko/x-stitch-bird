@@ -141,6 +141,10 @@ Colour maths (must be reproduced exactly; used by blending, image import, blend 
     sit on top again — so a ring with a dot works (ring, then a filled dot) and so does a circle with a star cut out
     (filled circle, then a cut-out star). A cut-out is outlined on the grid with a dashed accent line so it can be
     seen even over empty space; a drawing with only cut-outs is not a symbol yet ("needs something to cut").
+  - **A cut-out is white paper** (2026-11-16), not a hole: where it crosses the shapes drawn before it, it shows
+    white — never the floss colour under the symbol. When the symbol itself is drawn light (white on dark floss), the
+    cut-out shows dark instead, so it never vanishes. Same on the chart, in the key, in the form and in the PDFs; in
+    the dark themes the interface's glyphs use the theme's background for it.
   - **Teaching**: a tip in the dialog spells out the circle-with-a-star recipe, and four examples — ring with a dot,
     circle with a star cut out, square with a round hole, circle with a cross cut out — load a ready drawing to look
     at and change. *Remove last*, *Clear*, and a preview at chart sizes. Opening the dialog on an entry that already
@@ -502,6 +506,9 @@ clears undo history, deselects if active, toast "Entry deleted".
 > windows stay visible and usable. Colours are "lines" — one for a single floss, 2–3 for a blend, floss + bead for
 > a combo — each with its own strands; one searchable list fills the highlighted line (type a number, Enter).
 > Deleting an entry always asks, used on the chart or not, and names it.
+> When the form closes, the key list is back where it was scrolled to (and the side panel too) — invisibly, before
+> it is drawn. If the list was at its very bottom and an entry was added, it moves on just enough to show it
+> (2026-11-16).
 
 Wide modal titled **Add to key** / **Edit key entry**.
 

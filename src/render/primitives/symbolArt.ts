@@ -1,3 +1,4 @@
+import { cutOutColour } from "@/core/symbols/customSymbol";
 import type { ShapeSymbol, SymbolPart } from "@/core/symbols/shapes";
 import type { Ctx } from "./cells";
 
@@ -39,13 +40,7 @@ export function drawShape(g: Ctx, shape: ShapeSymbol, cx: number, cy: number, si
       g.stroke(path(part.d));
     }
   }
-  g.fillStyle = g.strokeStyle = color;
-  for (const part of shape.parts) {
-    const p = path(part.d);
-    if (part.holes) {
-      g.save();
-      for (const hole of part.holes) g.clip(outside(hole), "evenodd");
-    }
+  const paint = (part: SymbolPart, p: Path2D) => {
     if (part.paint === "stroke") {
       pen(part);
       g.lineWidth = width(part);
@@ -60,7 +55,26 @@ export function drawShape(g: Ctx, shape: ShapeSymbol, cx: number, cy: number, si
       g.fill(p, part.rule ?? "nonzero");
       g.restore();
     }
-    if (part.holes) g.restore();
+  };
+  for (const part of shape.parts) {
+    const p = path(part.d);
+    g.fillStyle = g.strokeStyle = color;
+    if (!part.holes) {
+      paint(part, p);
+      continue;
+    }
+    g.save();
+    for (const hole of part.holes) g.clip(outside(hole), "evenodd");
+    paint(part, p);
+    g.restore();
+    // a cut-out is white paper where it crosses the shape — never the cell's colour showing through
+    g.fillStyle = g.strokeStyle = cutOutColour(color);
+    for (const hole of part.holes) {
+      g.save();
+      g.clip(path(hole));
+      paint(part, p);
+      g.restore();
+    }
   }
   g.restore();
 }
