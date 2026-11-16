@@ -111,7 +111,7 @@ export class Editor {
     const symbols = ALL_SYMBOLS.filter((s) => isShapeSymbol(s) || drawable.has(s));
     this.store.setState({ symbols });
     let pattern: Pattern | null = null;
-    const draft = this.persistence.draft.load();
+    const draft = await this.persistence.draft.load().catch(() => null);
     if (draft)
       try {
         pattern = parsePattern(draft, symbols).pattern;

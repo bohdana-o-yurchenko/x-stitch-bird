@@ -1,10 +1,11 @@
 /**
  * The "stitchwork" IndexedDB database: v1 had "refs"; v2 adds "snaps" (SPEC §15.7); v3 adds "underlays" (§15.15);
- * v4 adds "images" (pictures as Blobs, referred to by id).
+ * v4 adds "images" (pictures as Blobs, referred to by id); v5 the saved patterns ("patterns": id → file,
+ * "patternMeta": id → what the Open dialog lists) and the working draft ("drafts"), out of localStorage's ~5 MB.
  */
 export const DB_NAME = "stitchwork";
-const DB_VERSION = 4;
-const STORES = ["refs", "snaps", "underlays", "images"] as const;
+const DB_VERSION = 5;
+const STORES = ["refs", "snaps", "underlays", "images", "patterns", "patternMeta", "drafts"] as const;
 export type StoreName = (typeof STORES)[number];
 
 let opening: Promise<IDBDatabase> | null = null;

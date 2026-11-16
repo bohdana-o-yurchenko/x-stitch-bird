@@ -1015,3 +1015,19 @@ test("the first time an entry is added, a tip on symbols: draw your own, as on t
   await expect(page.getByTestId("key-form")).toBeVisible();
   await expect(guide).toHaveCount(0);
 });
+
+test("patterns saved by an earlier version (in localStorage) are moved into IndexedDB and open as before", async ({ page }) => {
+  // what 1.2.1 and earlier saved: the library in one localStorage key
+  await page.evaluate(() => {
+    const doc = { app: "stitchwork", v: 4, xbird: 1, id: "old-1", name: "Saved before", w: 12, h: 8, count: 14, strands: 2, fabric: "#FFFFFF", pal: [{ t: "thread", src: "dmc:310", n: 2, st: "full", sym: "A" }], blends: {}, combos: {}, customs: {}, cells: "" };
+    localStorage.setItem("stitchwork.library", JSON.stringify({ "old-1": { name: "Saved before", updated: 1000, w: 12, h: 8, data: JSON.stringify(doc) } }));
+    localStorage.removeItem("stitchwork.libraryMoved");
+  });
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await fileAction(page, "Open saved pattern…");
+  await page.getByRole("dialog").getByRole("button", { name: /Saved before 12×8/ }).click();
+  await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Saved before");
+  // copied, and the old copy kept as a backup
+  expect(await page.evaluate(() => !!localStorage.getItem("stitchwork.libraryMoved") && !!localStorage.getItem("stitchwork.library"))).toBe(true);
+});

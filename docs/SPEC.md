@@ -595,6 +595,16 @@ bead MH 00557, strands = `P.strands` (2), full cross.
 **IndexedDB** database `stitchwork` (v1), object store `refs`, key = project id, value = array of serialized
 reference windows (§11.4). Used because photos + marks quickly exceed localStorage's ~5 MB.
 
+**New app (2026-11-16): saved patterns and the draft moved to IndexedDB** (database v5). localStorage holds ~5 MB for
+the whole site and one 1000 × 1000 pattern is ~1.75 MB, so the library is now in the stores `patterns` (id → file)
+and `patternMeta` (id → name, size, date, designer — what the Open dialog lists without loading every pattern).
+- **Moving in**, once, the first time the library is used: every pattern in `stitchwork.library` is copied in (one
+  already there and newer is kept); then `stitchwork.libraryMoved` is set. The old key is **kept untouched as a
+  backup** and no longer written — only deleting a pattern removes it from there too.
+- **Draft**: `{ savedAt, doc }` in the store `drafts` (key `current`) on every autosave, and in `stitchwork.current`
+  too while it fits (that write surely finishes when the page closes; a draft too big for it removes the stale small
+  copy). On start the newer of the two is used; a bare file in `stitchwork.current` (earlier versions) counts as oldest.
+
 All storage access is wrapped in try/catch; quota failures are silent except where noted.
 
 **Flush on leave**: on `pagehide` and when the page becomes hidden, the current project is written to

@@ -19,7 +19,7 @@ export function memoryPersistence(snaps: Snapshot[] = []): Persistence {
     patterns: { list: async () => [], load: async () => null, save: async () => ({ ok: true }), remove: async () => {} },
     references: { load: async () => [], save: async () => ({ ok: true }) },
     underlays: { load: async () => null, save: async () => ({ ok: true }) },
-    draft: { load: () => null, save: () => {} },
+    draft: { load: async () => null, save: () => {} },
     snapshots: {
       add: async (s) => {
         const i = snaps.findIndex((x) => x.projectId === s.projectId && x.time === s.time);

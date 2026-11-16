@@ -71,7 +71,7 @@ export interface UnderlayRepository {
 
 /** The pattern being edited, written on every change and read at start-up. */
 export interface DraftStore {
-  load(): PatternFile | null;
+  load(): Promise<PatternFile | null>;
   save(doc: PatternFile): void;
 }
 
