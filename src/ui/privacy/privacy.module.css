@@ -1,0 +1,39 @@
+/* the editor's body never scrolls; this page does */
+.page {
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--bg);
+  color: var(--ink);
+}
+.doc {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  line-height: 1.6;
+  font-size: 15px;
+}
+.doc h1 {
+  font-family: var(--font-serif), serif;
+  font-size: 30px;
+  margin: 18px 0 4px;
+}
+.doc h2 {
+  font-family: var(--font-serif), serif;
+  font-size: 19px;
+  margin: 28px 0 6px;
+}
+.doc p {
+  margin: 0 0 10px;
+}
+.updated {
+  color: var(--muted);
+  font-size: 13px;
+}
+.back {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back:hover {
+  text-decoration: underline;
+}

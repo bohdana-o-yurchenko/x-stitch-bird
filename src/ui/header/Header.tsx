@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
 import { Icon } from "../common/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
@@ -32,6 +32,7 @@ function FileMenu() {
   const run = useCommand();
   const go = (command: string, args?: unknown) => () => void run(command, args);
   const reveal = useEditorState((st) => st.menuReveal);
+  const locale = useLocale();
   const items: MenuItem[] = [
     { id: "new", label: t("new"), items: [
       { id: "newBlank", label: t("newBlank"), hint: t("newBlankHint"), onClick: go("file.new") },
@@ -67,6 +68,7 @@ function FileMenu() {
     "-",
     { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
     { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
+    { id: "privacy", label: t("privacy"), onClick: () => void window.open(`/${locale}/privacy`, "_blank", "noopener") },
   ];
   return (
     <span data-guide="menu">

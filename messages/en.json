@@ -616,6 +616,7 @@
     "guideHint": "Step by step: an e-copy of a paper chart",
     "changelog": "What’s new",
     "changelogHint": "Version {version} — what changed",
+    "privacy": "Privacy policy",
     "pdfPk": "PDF for Pattern Keeper",
     "pdfPkHint": "A symbol chart and thread list the app can import",
     "pdfChart": "PDF chart to print",
