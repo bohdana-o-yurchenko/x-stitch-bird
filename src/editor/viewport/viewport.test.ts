@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { testEditor } from "../../../tests/support/editorHarness";
+import { wheelGesture } from "./viewport";
 
 let ed: ReturnType<typeof testEditor>["ed"];
 const RULER = 26;
@@ -63,4 +64,17 @@ describe("viewport (SPEC §5.1)", () => {
     expect(ed.viewport.toGrid(RULER + 200, RULER + 150)).toEqual({ x: 5.5, y: 1.5 });
     expect(ed.state.flash?.cell).toBe(25);
   });
+
+  it("reads wheel gestures the same for the chart and the photo windows: pinch zooms, two fingers move", () => {
+    const ev = (o: Partial<Parameters<typeof wheelGesture>[0]>) => ({ deltaX: 0, deltaY: 0, deltaMode: 0, ctrlKey: false, metaKey: false, shiftKey: false, ...o });
+    // two fingers on a trackpad: small pixel deltas, no Ctrl — a move, never a zoom
+    expect(wheelGesture(ev({ deltaX: 3, deltaY: -7.5 }))).toEqual({ zoom: 0, dx: -3, dy: 7.5 });
+    // a pinch arrives as Ctrl + small deltas: a zoom (in for a negative delta)
+    expect(wheelGesture(ev({ deltaY: -4, ctrlKey: true })).zoom).toBeGreaterThan(1);
+    expect(wheelGesture(ev({ deltaY: 4, ctrlKey: true })).zoom).toBeLessThan(1);
+    // a real mouse wheel zooms; with Shift it moves sideways
+    expect(wheelGesture(ev({ deltaY: 100 })).zoom).toBeLessThan(1);
+    expect(wheelGesture(ev({ deltaY: 100, shiftKey: true }))).toEqual({ zoom: 0, dx: -100, dy: 0 });
+  });
 });
+

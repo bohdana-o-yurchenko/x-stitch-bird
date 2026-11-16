@@ -865,3 +865,33 @@ test("the key list keeps its place across the key form, and shows a new entry wh
   await expect(added).toContainText("666");
   await expect(added).toBeInViewport({ ratio: 1 });
 });
+
+test("a photo window moves with two fingers and zooms with a pinch, like the chart, and never zooms the page", async ({ page }) => {
+  await loadFixture(page, "1.json");
+  const win = page.getByTestId("reference-window"), canvas = win.locator("canvas");
+  const box = (await canvas.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  const view = () => editorState<{ s: number; tx: number; ty: number }>(page, "(ed) => ed.state.references[0].view");
+  const before = await view();
+  // two fingers: a small-step wheel with no Ctrl — the photo moves, its zoom stays
+  await page.mouse.wheel(12, 30);
+  await expect.poll(async () => (await view()).ty).toBeCloseTo(before.ty - 30, 0);
+  expect((await view()).s).toBe(before.s);
+  // a pinch: Ctrl + wheel — the photo zooms, the page doesn't
+  const moved = await view();
+  await page.keyboard.down("Control");
+  await page.mouse.wheel(0, -8);
+  await page.keyboard.up("Control");
+  await expect.poll(async () => (await view()).s).toBeGreaterThan(moved.s);
+  expect(await page.evaluate(() => window.visualViewport?.scale ?? 1)).toBe(1);
+  // still so after the window was minimised and opened again (its picture is drawn anew then)
+  await win.getByTitle("Minimise").click();
+  await win.getByTitle("Minimise").click();
+  const again = await view(), b2 = (await win.locator("canvas").boundingBox())!;
+  await page.mouse.move(b2.x + b2.width / 2, b2.y + b2.height / 2);
+  await page.keyboard.down("Control");
+  await page.mouse.wheel(0, -8);
+  await page.keyboard.up("Control");
+  await expect.poll(async () => (await view()).s).toBeGreaterThan(again.s);
+  expect(await page.evaluate(() => window.visualViewport?.scale ?? 1)).toBe(1);
+});

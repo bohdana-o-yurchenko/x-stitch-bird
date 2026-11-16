@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { RefWindowData } from "@/editor/types";
+import { wheelGesture } from "@/editor/viewport/viewport";
 import { drawReference, type RefView } from "@/render/referenceRenderer";
 import { Icon } from "../common/Icon";
 import { ConfirmDelete, cx, ui } from "../common/widgets";
@@ -187,15 +188,24 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
     if (a?.pan) update({ view: view.current });
     else if (a) saveMarks();
   };
-  const wheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
-    if (!view.current) return;
+  /** The same gestures as on the chart: pinch (or Ctrl/⌘ + wheel, or a mouse wheel) zooms, two fingers move. */
+  const wheel = (e: WheelEvent) => {
+    // never the browser's own page zoom or scroll
+    e.preventDefault();
     e.stopPropagation();
-    const b = canvas.current!.getBoundingClientRect(), sx = e.clientX - b.left, sy = e.clientY - b.top, v = view.current;
-    const f = Math.exp(-Math.max(-120, Math.min(120, e.deltaY * (e.deltaMode ? 33 : 1))) * 0.0025), ns = Math.max(0.02, Math.min(40, v.s * f));
-    view.current = { s: ns, tx: sx - ((sx - v.tx) * ns) / v.s, ty: sy - ((sy - v.ty) * ns) / v.s };
+    if (!view.current) return;
+    const b = canvas.current!.getBoundingClientRect(), sx = e.clientX - b.left, sy = e.clientY - b.top, v = view.current, g = wheelGesture(e);
+    if (g.zoom) {
+      const ns = Math.max(0.02, Math.min(40, v.s * g.zoom));
+      view.current = { s: ns, tx: sx - ((sx - v.tx) * ns) / v.s, ty: sy - ((sy - v.ty) * ns) / v.s };
+    } else view.current = { ...v, tx: v.tx + g.dx, ty: v.ty + g.dy };
     redraw();
     update({ view: view.current });
   };
+  const onWheel = useRef(wheel);
+  useLayoutEffect(() => {
+    onWheel.current = wheel;
+  });
   const undoMark = () => {
     const u = undo.current.pop();
     if (!u || !marks.current) return;
@@ -222,12 +232,15 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
     saveMarks();
   };
 
+  // a native listener (React's are passive, so the browser would zoom the page too), on the canvas whenever it is
+  // shown — a minimised window has none, and gets it again when restored
   useEffect(() => {
     const c = canvas.current;
-    const stop = (e: WheelEvent) => e.preventDefault();
-    c?.addEventListener("wheel", stop, { passive: false });
-    return () => c?.removeEventListener("wheel", stop);
-  }, []);
+    if (!c) return;
+    const handle = (e: WheelEvent) => onWheel.current(e);
+    c.addEventListener("wheel", handle, { passive: false });
+    return () => c.removeEventListener("wheel", handle);
+  }, [data.min]);
 
   return (
     <div className={s.win} style={{ left: pos.x, top: pos.y, width: pos.w, height: data.min ? undefined : pos.h, zIndex: z, opacity: data.op }} onPointerDownCapture={front} data-testid="reference-window" data-guide="ref-window">
@@ -260,7 +273,7 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
             <Tb name="trash" title={t("references.clear")} on={false} onClick={askClear} />
           </div>
           <div ref={body} className={s.body}>
-            <canvas ref={canvas} style={{ cursor: data.tool === "pan" ? "grab" : "crosshair" }} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={() => setInfo("")} onWheel={wheel} onContextMenu={(e) => e.preventDefault()} />
+            <canvas ref={canvas} style={{ cursor: data.tool === "pan" ? "grab" : "crosshair" }} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={() => setInfo("")} onContextMenu={(e) => e.preventDefault()} />
             {info && <div className={s.info}>{info}</div>}
           </div>
           <div className={s.grip} title={t("references.resize")} onPointerDown={dragGrip} />

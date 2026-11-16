@@ -815,7 +815,11 @@ New windows cascade from the stage's top-right (28 px offset per window).
   (at least 80 px visible horizontally, header inside vertically) on move/resize and on window resize.
 
 ### 11.3 Canvas behaviour
-- Photo drawn with pan/zoom (`view`); wheel zooms around cursor (scale 0.02–40); right/middle drag or Pan tool pans.
+- Photo drawn with pan/zoom (`view`); right/middle drag or Pan tool pans.
+- *New app (2026-11-16):* the wheel works **as on the chart** (§5.1, one shared rule): a trackpad pinch, Ctrl/⌘ +
+  wheel or a real mouse wheel zooms around the cursor (scale 0.02–40); two fingers on a trackpad move the photo;
+  Shift + wheel moves it sideways. The window takes the gesture itself, so the browser never zooms or scrolls the
+  page — also after the window was minimised and opened again.
 - Marker draws round strokes on a separate full-resolution `marks` canvas (line width = size / scale);
   eraser uses `destination-out`. Marks are displayed at 50 % opacity.
 - **Show stitched** shades every cell that has a stitch or bead with `rgba(181,69,47,.38)`, mapping the pattern

@@ -5,6 +5,24 @@ const MIN_ZOOM = 2, MAX_ZOOM = 60, MAX_FIT_ZOOM = 40;
 /** Zoom per wheel delta unit: a mouse notch is ~100 units, a trackpad pinch sends many small deltas. */
 const WHEEL_SPEED = 0.0025, PINCH_SPEED = 0.012;
 
+export type WheelLike = { deltaX: number; deltaY: number; deltaMode: number; ctrlKey: boolean; metaKey: boolean; shiftKey: boolean };
+
+/**
+ * What a wheel event means on a zoomable picture (the chart, a photo window): a trackpad pinch (it arrives as Ctrl +
+ * small pixel deltas), Ctrl/⌘ + wheel or a real mouse wheel zooms by `zoom`; two fingers on a trackpad move by
+ * (dx, dy); Shift + wheel moves sideways.
+ */
+export function wheelGesture(e: WheelLike): { zoom: number; dx: 0; dy: 0 } | { zoom: 0; dx: number; dy: number } {
+  const mouseWheel = e.deltaMode !== 0 || (e.deltaX === 0 && Math.abs(e.deltaY) >= 50 && Number.isInteger(e.deltaY));
+  if (e.ctrlKey || e.metaKey || (mouseWheel && !e.shiftKey)) {
+    const pinch = !mouseWheel && e.deltaMode === 0;
+    const d = Math.max(-120, Math.min(120, e.deltaY * (e.deltaMode ? 33 : 1)));
+    return { zoom: Math.exp(-d * (pinch ? PINCH_SPEED : WHEEL_SPEED)), dx: 0, dy: 0 };
+  }
+  if (e.shiftKey && !e.deltaX) return { zoom: 0, dx: -e.deltaY, dy: 0 };
+  return { zoom: 0, dx: -e.deltaX, dy: -e.deltaY };
+}
+
 /** Zoom and pan of the chart canvas (SPEC §5.1). Screen points are relative to the canvas element. */
 export class ViewportService {
   width = 0;
@@ -78,15 +96,10 @@ export class ViewportService {
   }
 
   /** Mouse wheel: real wheels and Ctrl/⌘ zoom, trackpads pan (SPEC §5.1). */
-  wheel(e: { deltaX: number; deltaY: number; deltaMode: number; ctrlKey: boolean; metaKey: boolean; shiftKey: boolean }, sx: number, sy: number) {
-    const mouseWheel = e.deltaMode !== 0 || (e.deltaX === 0 && Math.abs(e.deltaY) >= 50 && Number.isInteger(e.deltaY));
-    if (e.ctrlKey || e.metaKey || (mouseWheel && !e.shiftKey)) {
-      // trackpad pinch arrives as ctrl + small pixel deltas
-      const pinch = !mouseWheel && e.deltaMode === 0;
-      const d = Math.max(-120, Math.min(120, e.deltaY * (e.deltaMode ? 33 : 1)));
-      this.zoomAt(Math.exp(-d * (pinch ? PINCH_SPEED : WHEEL_SPEED)), sx, sy);
-    } else if (e.shiftKey && !e.deltaX) this.panBy(-e.deltaY, 0);
-    else this.panBy(-e.deltaX, -e.deltaY);
+  wheel(e: WheelLike, sx: number, sy: number) {
+    const g = wheelGesture(e);
+    if (g.zoom) this.zoomAt(g.zoom, sx, sy);
+    else this.panBy(g.dx, g.dy);
   }
 
   get percent() {
