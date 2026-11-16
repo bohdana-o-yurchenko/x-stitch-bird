@@ -50,3 +50,15 @@ export async function loadFixture(page: Page, name: string) {
   await fileAction(page, "Open file from computer…");
   await (await chooser).setFiles(fixture(name));
 }
+
+/** Screen position of grid point (x, y) — a cell corner, where backstitch and knots go. */
+export const gridPoint = (page: Page, x: number, y: number) => cellPoint(page, x - 0.5, y - 0.5);
+
+/** Press on cell `a`, drag to cell `b`, release. */
+export async function dragCells(page: Page, a: [number, number], b: [number, number]) {
+  const from = await cellPoint(page, ...a), to = await cellPoint(page, ...b);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(to.x, to.y, { steps: 5 });
+  await page.mouse.up();
+}

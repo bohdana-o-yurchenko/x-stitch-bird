@@ -20,8 +20,10 @@ Next.js 16.4.6 (App Router, Turbopack, `src/proxy.ts` = next-intl middleware), R
 Node 24 via fnm (**run `eval "$(fnm env)"` before pnpm in the shell**), next-intl 4 (en/uk), zustand 5, Vitest 5,
 Playwright (port 3200, `channel: "chrome"`), eslint-plugin-boundaries.
 - `pnpm test` (149 unit), `pnpm test:coverage` (per-area minimums: core 85/75, editor 60), `pnpm lint`,
-  `pnpm exec tsc --noEmit -p .`, `pnpm exec playwright test` (26 e2e; kill port 3200 first:
-  `lsof -ti :3200 | xargs kill`). Known flake: one e2e occasionally fails on page load — rerun.
+  `pnpm exec tsc --noEmit -p .`, `pnpm exec playwright test` (52 e2e: `editor.spec.ts` per feature, `flows.spec.ts`
+  main journeys; kill port 3200 first: `lsof -ti :3200 | xargs kill` — it reuses a running server, so a stale build
+  tests old code). The old "fails on page load" flake was a real bug (flush before start-up saved the blank
+  placeholder over the draft), fixed 2026-11-16; stress check: `--repeat-each 8 --workers 12`.
 - e2e helper `openEditor(page, locale, { firstVisit })` sets `stitchwork.guideSeen` so the guide doesn't block tests.
 
 ## Code map (levels: core ← render/editor ← ui ← app; persistence, platform, workers on the side)
