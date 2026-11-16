@@ -108,7 +108,9 @@ function MatchBar() {
   const m = useEditorState((st) => st.match);
   const paused = useEditorState((st) => !!st.underlay && !st.underlay.behind);
   const [tip, setTip] = useState(false);
-  useEditorState((st) => st.viewport);
+  // the bar follows the block across the screen only while one is being reviewed: otherwise panning and zooming
+  // don't redraw it at all
+  useEditorState((st) => (st.match?.phase === "review" ? st.viewport : null));
   if (!m) return null;
   if (m.phase === "pick")
     return (
