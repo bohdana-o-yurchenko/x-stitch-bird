@@ -916,7 +916,7 @@ All toasts/modals listed in the sections above should be kept verbatim; they are
 | Accounts and cloud storage (Neon), sign-in, pattern gallery with previews (§15.23) | XL | new server storage; browser data migrated | not started |
 | More chart checks (§15.4): backstitch, knots, beads | S–M | none | ideas |
 | More thread brands (§15.8) | M code, L data | new `src` id namespaces | not started |
-| Not yet discussed (§15.12): keyboard entry, specialty stitches, beads on intersections, proofread tracking, second-screen window | — | — | ideas |
+| Not yet discussed (§15.12): keyboard entry, specialty stitches, proofread tracking, second-screen window | — | — | ideas |
 | Stash management (§16) | XL | needs a server | future phase |
 
 Implemented: §15.24 Mill Hill Treasures and bead packages, §15.11 symbol matching in a block, §15.4 chart checks (empty cells, lone stitches, near symmetry), §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.5 ambiguous
@@ -1226,7 +1226,6 @@ symbols) could use the patch's mean colour instead — later.
 - **Not yet discussed**:
   - keyboard data-entry mode (cursor + type a key, run-length entry)
   - long stitches, lazy daisies and other specialty stitches
-  - beads placed on grid intersections (point-based, like knots)
   - uploaded symbol images (drawn symbols exist, §2.5)
   - proofread tracking ("mark region as proofed")
   - two-screen pop-out window
@@ -1319,7 +1318,18 @@ Combinations that must fit into one cell:
   - PNG and PDF draw them; the key lists them.
 
 **Decisions (as built, 2026-11-14):** knot entries may have a symbol (shown in Symbols view; otherwise a dark dot);
-placement is on the half grid. Still open, moved to §15.12: beads on intersections; long stitches and lazy daisies.
+placement is on the half grid. Still open, moved to §15.12: long stitches and lazy daisies.
+
+**Beads between cells (2026-11-16).** A floss + bead entry has a 4th stitch next to the full and half crosses:
+**Between cells** (`st: "point"`), for a bead or a Treasure tacked on a grid point instead of sitting in a cell.
+- Placed exactly like a knot: same half-grid points, same tools, eraser, picker, mirror and transforms, stored
+  with the knots (`knots: [[x, y, k]]`, `k` the floss + bead entry). Only floss + bead has it; switching such an
+  entry to a cross stitch makes it a full cross. An entry on the chart can't move between cells and points.
+- Drawn as the bead centred on the point over a short tacking stitch in the floss, with its symbol.
+- Counts as beads (not knots) in the totals; the shopping list adds the bead and half a cross of floss each.
+  Pattern Keeper's list of what it can't track counts them as floss + bead.
+- PDF chart to print: on every chart, like beads in cells; in both keys as a bead.
+- OXS: written as knot objects of the floss + bead's palette item (the format has nothing closer).
 
 ### 15.15 Chart underlay — a reference image behind the stitches (implemented 2026-11-14)
 Goal: put a scan or photo of the paper chart **on the chart canvas itself**, line it up with the grid, then stitch

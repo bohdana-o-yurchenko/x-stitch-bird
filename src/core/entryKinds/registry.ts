@@ -1,4 +1,4 @@
-import type { EntryKindId, LayerId } from "../pattern/types";
+import type { EntryKindId, KeyEntry, LayerId } from "../pattern/types";
 
 export type EntryField = "colour" | "blend" | "bead" | "stitchType" | "strands" | "wraps";
 
@@ -25,3 +25,12 @@ export const ENTRY_KINDS: readonly EntryKind[] = [
 
 const BY_ID = new Map(ENTRY_KINDS.map((k) => [k.id, k]));
 export const entryKind = (id: EntryKindId): EntryKind => BY_ID.get(id) ?? ENTRY_KINDS[0]!;
+
+/** A floss + bead sewn on a grid point (between cells), placed like a French knot. */
+export const isPointBead = (e: Pick<KeyEntry, "t" | "st">): boolean => e.t === "combo" && e.st === "point";
+
+/** Where an entry goes: its kind's placement, except a floss + bead on a grid point. */
+export const entryPlacement = (e: Pick<KeyEntry, "t" | "st">): EntryKind["placement"] => (isPointBead(e) ? "point" : entryKind(e.t).placement);
+
+/** The layer an entry's stitches live in: its kind's, except a floss + bead on a grid point (with the knots). */
+export const entryLayerOf = (e: Pick<KeyEntry, "t" | "st">): LayerId => (isPointBead(e) ? "knots" : entryKind(e.t).layer);

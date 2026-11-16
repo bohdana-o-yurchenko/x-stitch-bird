@@ -75,7 +75,7 @@ export function findLoneStitches(p: Pattern, max: number, alone: boolean): Findi
     .map((cells) => ({ id: `lone:${cells.join(",")}`, check: "lone", cells }));
 }
 
-const MIRRORED: Record<StitchTypeId, StitchTypeId> = { full: "full", half: "halfb", halfb: "half" };
+const MIRRORED: Record<StitchTypeId, StitchTypeId> = { full: "full", half: "halfb", halfb: "half", point: "point" };
 /** Does `b` show what the mirror image of `a` should? Same thread, kind and stitch, a half cross turned over. */
 const mirrors = (a: KeyEntry | null, b: KeyEntry | null) => !!a && !!b && a.src === b.src && a.t === b.t && MIRRORED[a.st ?? "full"] === (b.st ?? "full");
 

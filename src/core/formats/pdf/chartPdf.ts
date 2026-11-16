@@ -186,7 +186,7 @@ function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayo
   for (let y = t.y; y < t.y + t.h; y++)
     for (let x = t.x; x < t.x + t.w; x++) {
       const i = y * p.w + x, k = stitches[i] ?? 0, s = palette[k];
-      if (!s) continue;
+      if (!s || s.st === "point") continue;
       const px = X(x), py = Y(y), hex = fill(s.hex);
       if (s.st === "full") {
         if (colour) (fills.get(hex) ?? fills.set(hex, []).get(hex)!).push([px, py, cell, cell]);
@@ -225,6 +225,14 @@ function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayo
       symbols.add(s.sym, cx, cy, cell * 0.72, ink(k, s, s.bead?.ink ?? s.ink));
     }
 
+  // floss + bead sewn on grid points: on every chart, like the beads in cells
+  for (const kn of knots) {
+    const s = palette[kn.k];
+    if (!s || s.t !== "combo" || kn.x < t.x || kn.y < t.y || kn.x > t.x + t.w || kn.y > t.y + t.h) continue;
+    page.circle(X(kn.x), Y(kn.y), cell * 0.3, colour ? { fill: fill(s.bead?.hex ?? s.hex), stroke: "#555555", width: 0.4 } : { fill: "#FFFFFF", stroke: "#777777", width: 0.5 });
+    symbols.add(s.sym, X(kn.x), Y(kn.y), cell * 0.55, ink(kn.k, s, s.bead?.ink ?? s.ink));
+  }
+
   // the shared cells, tinted over the colours so the symbols on them stay crisp
   if (colour && shared.length) {
     page.save();
@@ -248,7 +256,7 @@ function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayo
     strokeLines(page, lines, draw);
     for (const kn of knots) {
       const s = palette[kn.k];
-      if (s && kn.x >= t.x && kn.y >= t.y && kn.x <= t.x + t.w && kn.y <= t.y + t.h) page.circle(X(kn.x), Y(kn.y), cell * 0.26, { fill: accents.line.get(kn.k) ?? s.hex, stroke: INK, width: 0.7 });
+      if (s && s.t !== "combo" && kn.x >= t.x && kn.y >= t.y && kn.x <= t.x + t.w && kn.y <= t.y + t.h) page.circle(X(kn.x), Y(kn.y), cell * 0.26, { fill: accents.line.get(kn.k) ?? s.hex, stroke: INK, width: 0.7 });
     }
     page.restore();
   }
@@ -407,9 +415,9 @@ export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Arr
   await addKey(pdf, p, tr, tr("chartPdf.symbolKey"), tr("chartPdf.symbolKeyNote"), symbolRows, (page, symbols, r, x, y, S) => {
     const s = palette[r.k]!, inkFor = SYMBOL_INKS[accents.symbol.get(r.k) ?? "black"], cx = x + S / 2, cy = y + S / 2;
     page.rect(x, y, S, S, { fill: "#FFFFFF" });
-    if (r.t === "bead") page.circle(cx, cy, S * 0.42, { fill: "#FFFFFF", stroke: "#777777", width: 0.5 });
+    if (r.t === "bead" || s.st === "point") page.circle(cx, cy, S * 0.42, { fill: "#FFFFFF", stroke: "#777777", width: 0.5 });
     else if (s.st !== "full") page.lines([s.st === "half" ? [x, y + S, x + S, y] : [x, y, x + S, y + S]], 0.6, 0.6);
-    symbols.add(s.sym, cx, cy, r.t === "bead" ? S * 0.72 : s.st === "full" ? S : S * 0.75, inkFor);
+    symbols.add(s.sym, cx, cy, r.t === "bead" || s.st === "point" ? S * 0.72 : s.st === "full" ? S : S * 0.75, inkFor);
   });
 
   // 2 and 3: on colour, and pale colour with the lines
@@ -426,7 +434,8 @@ export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Arr
     } else if (r.t === "knot") {
       page.rect(x, y, S, S, { fill: "#FFFFFF" });
       page.circle(cx, cy, S * 0.27, { fill: accents.line.get(r.k) ?? s.hex, stroke: INK, width: 0.6 });
-    } else if (r.t === "bead") {
+    } else if (r.t === "bead" || s.st === "point") {
+      // a bead, in a cell or on a grid point
       page.rect(x, y, S, S, { fill: p.fabric });
       page.circle(cx, cy, S * 0.42, { fill: s.bead?.hex ?? s.hex, stroke: "#555555", width: 0.4 });
       symbols.add(s.sym, cx, cy, S * 0.72, s.bead?.ink ?? s.ink);

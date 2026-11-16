@@ -46,6 +46,9 @@ export const classicSkeins: ShoppingCalculator = {
       else if (e.t === "combo") {
         addThread(c.thread, cells * n * stitchType(e.st).threadFactor);
         addBead(c.bead, cells);
+        // beads sewn on grid points: a tacking stitch (half a cross) each
+        addThread(c.thread, (u.knot ?? 0) * n * 0.5);
+        addBead(c.bead, u.knot ?? 0);
       } else if (e.t === "back") addColour(c, (u.segmentLength ?? 0) * s.backstitchFactor!, n);
       else if (e.t === "knot") addColour(c, (u.knot ?? 0) * s.knotAllowance!, n);
       else addColour(c, cells * stitchType(e.st).threadFactor, n);

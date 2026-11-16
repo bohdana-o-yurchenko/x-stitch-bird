@@ -192,7 +192,8 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
   const setType = (t2: KeyDraft["t"]) => {
     if (before && usedOnChart && entryKind(t2).group !== entryKind(before.t).group) return ed.toast("keyDialog.typeLocked");
     const n = !before && entryKind(t2).defaultStrands ? (t2 === "back" ? 1 : d.n === 1 && d.t === "back" ? ed.doc.strands || 2 : d.n) : d.n;
-    update({ t: t2, n, sym: draftSymbol(ed, d, t2, edit) });
+    // only floss + bead can sit on a grid point
+    update({ t: t2, n, sym: draftSymbol(ed, d, t2, edit), ...(t2 !== "combo" && d.st === "point" ? { st: "full" as const } : {}) });
     setLine(0);
   };
 
@@ -233,7 +234,12 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
     bead: d.t === "combo" && colour.bead ? { hex: colour.bead.hex, ink: colour.bead.ink, shape: beadShape(colour.bead.series) } : d.t === "bead" ? { hex: colour.hex, ink: colour.ink, shape: beadShape(colour.series) } : undefined,
   };
   // each stitch-type card shows that stitch in the chosen colour (grey until one is picked)
-  const stitchSample = (st: StitchTypeId): PaletteSlot => ({ hex: colour?.thread?.hex ?? colour?.hex ?? "#8C8378", ink: "#fff", sym: "", t: "thread", st, n: 2 });
+  const stitchSample = (st: StitchTypeId): PaletteSlot =>
+    st === "point"
+      ? { hex: colour?.thread?.hex ?? "#8C8378", ink: "#fff", sym: "", t: "combo", st, n: 2, bead: { hex: colour?.bead?.hex ?? "#C9B27C", ink: "#000", shape: beadShape(colour?.bead?.series) } }
+      : { hex: colour?.thread?.hex ?? colour?.hex ?? "#8C8378", ink: "#fff", sym: "", t: "thread", st, n: 2 };
+  // floss + bead may also be sewn on a grid point, like a French knot
+  const stitchChoices: StitchTypeId[] = [...STITCH_TYPES.map((x) => x.id), ...(d.t === "combo" ? ["point" as const] : [])];
   const label = colour && src ? formatLabel(labelData({ ...draftEntry(d, src), sym: d.sym }, colour), tr) : null;
   const used = new Set(ed.doc.key.flatMap((e, i) => (e && i !== edit ? [e.sym] : [])));
   const dupLabel = dup ? formatLabel(keyLabelData(ed.doc, ed.doc.key[dup]!), tr).title : "";
@@ -309,7 +315,7 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
           <div className={s.group}>
             {kind.fields.includes("stitchType") && (
               <IconChoice label={t("stitch")} testId="stitch-type" value={d.st} onPick={(st) => update({ st })}
-                options={STITCH_TYPES.map((st) => ({ id: st.id, name: `${tr(`stitches.${st.id}Name`)} · ${tr(`stitches.${st.id}Sub`)}`, icon: <KeyIcon slot={stitchSample(st.id)} size={24} view="color" /> }))} />
+                options={stitchChoices.map((id) => ({ id, name: `${tr(`stitches.${id}Name`)} · ${tr(`stitches.${id}Sub`)}`, icon: <KeyIcon slot={stitchSample(id)} size={24} view="color" /> }))} />
             )}
             {kind.fields.includes("wraps") && (
               <div className={s.inline}>

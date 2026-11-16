@@ -1,4 +1,4 @@
-import { entryKind } from "../entryKinds/registry";
+import { entryLayerOf } from "../entryKinds/registry";
 import { customShape } from "../symbols/customSymbol";
 import { cleanInk, DEFAULT_LINE_INK } from "../symbols/lineInks";
 import { mirroredStitchType } from "../stitches/registry";
@@ -6,7 +6,7 @@ import { isLineStyle, LINE_STYLES } from "../symbols/lineStyles";
 import { firstFreeSymbol } from "../symbols/symbols";
 import type { EntryKindId, KeyEntry, KeyIndex, LayerId, Pattern } from "./types";
 
-export const entryLayer = (e: KeyEntry): LayerId => entryKind(e.t).layer;
+export const entryLayer = (e: KeyEntry): LayerId => entryLayerOf(e);
 
 export const usedSymbols = (p: Pattern, except?: KeyIndex): string[] =>
   p.key.flatMap((e, i) => (e && i !== except ? [e.sym] : []));
@@ -49,7 +49,7 @@ export const findSameKey = (p: Pattern, k: Omit<KeyEntry, "sym">, except?: KeyIn
 export function cleanEntry(k: Omit<KeyEntry, "sym"> & { sym?: string }, sym: string): KeyEntry {
   const e: KeyEntry = { t: k.t, src: k.src, sym };
   if (k.t !== "bead") e.n = k.n ?? null;
-  if (k.t === "thread" || k.t === "combo") e.st = k.st ?? "full";
+  if (k.t === "thread" || k.t === "combo") e.st = k.st === "point" && k.t !== "combo" ? "full" : k.st ?? "full";
   if (k.t === "knot" && k.wraps) e.wraps = k.wraps;
   const ink = k.t === "back" ? cleanInk(k.ink) : undefined;
   if (ink && ink !== DEFAULT_LINE_INK) e.ink = ink;

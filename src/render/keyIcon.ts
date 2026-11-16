@@ -20,6 +20,9 @@ export function drawKeyIcon(g: Ctx, slot: PaletteSlot, size: number, view: Chart
   else if (slot.t === "knot") {
     drawKnot(g, size * 0.5, size * 0.5, size * 1.4, slot, { ...style, showSymbol: false });
     if (slot.sym) drawSymbol(g, size * 0.78, size * 0.22, size * 0.5, slot.sym, theme.symbols.darkInk, 0.7, theme, true);
+  } else if (slot.t === "combo" && slot.st === "point") {
+    // a bead on a grid point: drawn on the middle of the tile, as on the chart
+    drawKnot(g, size * 0.5, size * 0.5, size * 0.9, slot, style);
   } else if (slot.t === "combo" && slot.bead && view === "color") {
     // Colour view draws floss + bead as a bead, so the key adds the symbol to tell entries apart
     drawStitchCell(g, 0, 0, size, slot, { ...style, showSymbol: false });

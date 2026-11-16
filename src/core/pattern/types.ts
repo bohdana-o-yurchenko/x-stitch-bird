@@ -1,7 +1,8 @@
 /** Index into `Pattern.key`. 0 always means "nothing". */
 export type KeyIndex = number;
 
-export type StitchTypeId = "full" | "half" | "halfb";
+/** `point`: floss + bead only — the bead sewn on a grid point, like a French knot, not in a cell. */
+export type StitchTypeId = "full" | "half" | "halfb" | "point";
 export type EntryKindId = "thread" | "combo" | "bead" | "back" | "knot";
 export type PartialKindId = "quarter" | "threeQuarter" | "petite";
 /** Cell corner: 0 top-left, 1 top-right, 2 bottom-right, 3 bottom-left. */

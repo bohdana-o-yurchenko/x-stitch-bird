@@ -159,12 +159,15 @@
     "full": "full cross",
     "half": "half cross ╱",
     "halfb": "half cross ╲",
+    "point": "between cells",
     "fullName": "Cross",
     "fullSub": "full",
     "halfName": "Half cross",
     "halfSub": "slant ╱",
     "halfbName": "Half cross",
-    "halfbSub": "slant ╲"
+    "halfbSub": "slant ╲",
+    "pointName": "Between cells",
+    "pointSub": "on a grid point, like a French knot"
   },
   "label": {
     "blendTitle": "Blend {code}",

@@ -24,6 +24,8 @@ export const stitchType = (id: StitchTypeId | undefined): StitchType => BY_ID.ge
 
 /** The stitch type with the opposite diagonal, or the same one if it has none. */
 export const mirroredStitchType = (id: StitchTypeId | undefined): StitchTypeId => {
+  // a bead on a grid point has no direction
+  if (id === "point") return id;
   const s = stitchType(id);
   if (!s.direction) return s.id;
   return STITCH_TYPES.find((o) => o.direction && o.direction !== s.direction)?.id ?? s.id;

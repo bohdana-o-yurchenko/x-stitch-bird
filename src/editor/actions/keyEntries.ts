@@ -111,7 +111,8 @@ export function commitEntry(ed: Editor, d: KeyDraft, edit?: KeyIndex): KeyIndex 
   const used = edit ? usageCount(ed, edit) : 0;
   const preview = resolveDraftSource(ed, d, false);
   if (!preview) return null;
-  if (before && used && entryKind(d.t).group !== entryKind(before.t).group) {
+  // an entry on the chart keeps its layer: no moving between cells and grid points
+  if (before && used && (entryKind(d.t).group !== entryKind(before.t).group || entryLayer(cleanEntry(draftEntry(d, before.src), d.sym)) !== entryLayer(before))) {
     ed.toast("keyDialog.layerLocked");
     return null;
   }

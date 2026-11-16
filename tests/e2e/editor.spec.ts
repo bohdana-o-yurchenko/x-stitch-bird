@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
-import { cellPoint, editorState, fileAction, fixtureDataUrl, loadFixture, openEditor } from "./helpers";
+import { cellPoint, editorState, fileAction, fixtureDataUrl, gridPoint, loadFixture, openEditor } from "./helpers";
 
 test.beforeEach(async ({ page }) => openEditor(page));
 
@@ -784,4 +784,25 @@ test("a backstitch has its own line colour for the Symbols view and the print PD
   // only backstitch has it
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   await expect(form.getByTestId("line-ink")).toHaveCount(0);
+});
+
+test("floss + bead can be sewn between cells: on a grid point, placed like a French knot", async ({ page }) => {
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form");
+  // a cross stitch has 3 ways, floss + bead a 4th
+  await expect(form.getByTestId("stitch-type").getByRole("radio")).toHaveCount(3);
+  await form.getByRole("radio", { name: "Floss + bead" }).click();
+  await expect(form.getByTestId("stitch-type").getByRole("radio")).toHaveCount(4);
+  await form.getByTestId("stitch-type").getByRole("radio", { name: /^Between cells/ }).click();
+  await form.getByRole("button", { name: "Add to key", exact: true }).click();
+  await expect(form).toHaveCount(0);
+  const k = await editorState<number>(page, "(ed) => ed.state.activeEntry");
+  expect(await editorState<string>(page, `(ed) => ed.doc.key[${k}].st`)).toBe("point");
+  // the pencil puts it on the nearest grid point, as for a knot
+  const before = await editorState<number>(page, "(ed) => ed.doc.layers.knots.length");
+  const pt = await gridPoint(page, 5, 5);
+  await page.mouse.click(pt.x, pt.y);
+  expect(await editorState<object>(page, "(ed) => ed.doc.layers.knots.at(-1)")).toEqual({ x: 5, y: 5, k });
+  expect(await editorState<number>(page, "(ed) => ed.doc.layers.knots.length")).toBe(before + 1);
+  await expect(page.locator(`[data-entry='${k}']`)).toContainText(/between cells.*1\s*beads/);
 });

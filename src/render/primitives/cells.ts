@@ -223,7 +223,29 @@ export function drawBackstitch(g: Ctx, x1: number, y1: number, x2: number, y2: n
 }
 
 /** French knot: a dot with a highlight; symbols view shows a black dot or the entry's symbol. */
+/**
+ * A floss + bead sewn on a grid point, like a knot: a short tacking stitch in the floss under the bead, the bead
+ * centred on the point, its symbol on it when there is room.
+ */
+export function drawPointBead(g: Ctx, cx: number, cy: number, z: number, s: PaletteSlot, style: CellStyle, alpha = 1) {
+  if (!s.bead) return;
+  const { theme, showColour, showSymbol } = style;
+  g.save();
+  g.globalAlpha = alpha;
+  g.strokeStyle = showColour ? s.hex : theme.halfStitch.symbolColor;
+  g.lineWidth = Math.max(1, z * 0.08);
+  g.lineCap = "round";
+  g.beginPath();
+  g.moveTo(cx - z * 0.32, cy + z * 0.32);
+  g.lineTo(cx + z * 0.32, cy - z * 0.32);
+  g.stroke();
+  drawBeadShape(g, cx - z / 2, cy - z / 2, z, s.bead.hex, s.bead.shape, style);
+  if (showSymbol && z >= theme.symbols.minZoom) drawSymbol(g, cx, cy, z, s.sym, showColour ? s.bead.ink : theme.symbols.darkInk, theme.symbols.scale.bead, theme);
+  g.restore();
+}
+
 export function drawKnot(g: Ctx, cx: number, cy: number, z: number, s: PaletteSlot, style: CellStyle, alpha = 1) {
+  if (s.t === "combo") return drawPointBead(g, cx, cy, z, s, style, alpha);
   const { theme, showColour, showSymbol } = style, r = Math.max(2, z * theme.knots.radius);
   g.save();
   g.globalAlpha = alpha;

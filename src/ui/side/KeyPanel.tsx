@@ -10,6 +10,7 @@ import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
 import s from "./side.module.css";
 import { useUsage } from "./useUsage";
+import { isPointBead } from "@/core/entryKinds/registry";
 
 const UNIT = { thread: "cell", combo: "cell", bead: "bead", back: "segment", knot: "knot" } as const;
 
@@ -73,7 +74,7 @@ export function KeyPanel() {
         <div className={s.num}>
           {n || parts ? n.toLocaleString() : "—"}
           {parts > 0 && <div className={s.sub}>{t("partials", { count: parts })}</div>}
-          <div className={s.sub}>{t(`unit.${UNIT[e.t]}`, { count: n })}</div>
+          <div className={s.sub}>{t(`unit.${isPointBead(e) ? "bead" : UNIT[e.t]}`, { count: n })}</div>
         </div>
         <div className={s.actions}>
           <button type="button" className={ui.iconbtn} title={t("edit")} aria-label={t("edit")} onClick={(ev) => { ev.stopPropagation(); run("key.edit", i); }}><Icon name="pencil" size={16} /></button>

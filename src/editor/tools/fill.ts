@@ -1,5 +1,6 @@
 import { fillAt, requireEntry } from "../actions/paint";
 import { inChart, type Tool } from "./types";
+import { entryPlacement } from "@/core/entryKinds/registry";
 
 export const fillTool: Tool = {
   id: "fill",
@@ -9,7 +10,7 @@ export const fillTool: Tool = {
   down(ed, p) {
     const a = requireEntry(ed);
     if (!a || !inChart(ed, p.cell)) return;
-    if (a.e.t === "back" || a.e.t === "knot") return ed.toast("toasts.fillBackstitch");
+    if (entryPlacement(a.e) !== "cell") return ed.toast("toasts.fillBackstitch");
     ed.history.transaction("fill", () => fillAt(ed, p.cell, a.k, a.e));
     ed.changed();
   },
