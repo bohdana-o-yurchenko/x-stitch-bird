@@ -62,12 +62,32 @@ function useGlobalEvents(ed: Editor, setDragging: (on: boolean) => void) {
   }, [ed, setDragging]);
 }
 
+/**
+ * Coming from the patterns page: `?open=<id>` opens that pattern, `?new=1` the New pattern dialog — once start-up has
+ * restored the draft and the session is known (an account's pattern needs it). The address is cleaned afterwards.
+ */
+function useStartRequest(ed: Editor) {
+  const ready = useEditorState((st) => st.ready && st.accountKnown);
+  useEffect(() => {
+    if (!ready) return;
+    const url = new URL(window.location.href), open = url.searchParams.get("open"), make = url.searchParams.has("new");
+    if (!open && !make) return;
+    url.searchParams.delete("open");
+    url.searchParams.delete("new");
+    window.history.replaceState(null, "", url);
+    // the open pattern is already here, newer than its saved copy
+    if (open === ed.doc.id) return;
+    void ed.commands.run(open ? "file.openSaved" : "file.new", open ?? undefined);
+  }, [ed, ready]);
+}
+
 function Shell() {
   const ed = useEditor();
   const t = useTranslations("dialogs");
   const collapsed = useEditorState((s) => s.panelCollapsed);
   const [dragging, setDragging] = useState(false);
   useGlobalEvents(ed, setDragging);
+  useStartRequest(ed);
   return (
     <EditorLayout
       collapsed={collapsed}

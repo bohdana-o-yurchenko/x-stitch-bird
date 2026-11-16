@@ -96,6 +96,8 @@ export interface EditorState {
   saveState: "saving" | "saved" | "offline" | null;
   /** Saved patterns besides the open one exist (in this browser or the account): Pattern ▸ Open is offered. */
   hasOtherPatterns: boolean;
+  /** The session has been checked (signed in or not): the account's patterns can be asked for. */
+  accountKnown: boolean;
   /** The sign-in dialog is open (from the header, or "Sign in to keep it"). */
   signInOpen: boolean;
   /** The keyboard shortcuts list, opened from ☰. */
@@ -166,6 +168,7 @@ export const createEditorStore = () =>
     hasOtherPatterns: false,
     shortcutsOpen: false,
     signInOpen: false,
+    accountKnown: false,
     toolbarHide: { shapes: false, partials: false },
     dialog: null,
     keyForm: null,

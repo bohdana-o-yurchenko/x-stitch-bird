@@ -226,3 +226,29 @@ test("exports a stitched preview: bigger cells than the flat one, with the foote
   expect(stitched).toMatchObject({ w: 60 * 28 + 32, h: 60 * 28 + 32 + 28 });
   expect(flat.w).toBeLessThan(stitched.w);
 });
+
+test("the logo leads to My patterns: cards with previews, open one in the editor, or start a new one", async ({ page }) => {
+  // a pattern saved in this browser before the one-pattern rule
+  await page.evaluate(() => {
+    const doc = JSON.stringify({ app: "stitchwork", v: 4, xbird: 1, id: "roses", name: "Roses", w: 12, h: 8, count: 14, strands: 2, fabric: "#FFFFFF", pal: [{ t: "thread", src: "dmc:310", n: 2, st: "full", sym: "A" }], blends: {}, combos: {}, customs: {}, cells: "" });
+    localStorage.setItem("stitchwork.library", JSON.stringify({ roses: { name: "Roses", updated: 1000, w: 12, h: 8, data: doc } }));
+    localStorage.removeItem("stitchwork.libraryMoved");
+    localStorage.removeItem("stitchwork.keptPatterns");
+  });
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await page.getByTestId("to-home").click();
+  await expect(page).toHaveURL(/\/en\/patterns$/);
+  await expect(page.getByRole("heading", { name: "My patterns" })).toBeVisible();
+  await expect(page.getByTestId("home-signed-out")).toBeVisible();
+  const roses = page.getByRole("link", { name: "Open “Roses”" });
+  await expect(roses).toContainText("12×8");
+  // the preview is drawn from the pattern itself
+  await expect(roses.locator("img")).toHaveAttribute("src", /^data:image\/png/);
+  await roses.click();
+  await expect(page).toHaveURL(/\/en$/);
+  await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Roses");
+  await page.getByTestId("to-home").click();
+  await page.getByTestId("home-new").click();
+  await expect(page.getByRole("dialog", { name: "New pattern" })).toBeVisible();
+});

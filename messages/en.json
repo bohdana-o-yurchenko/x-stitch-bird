@@ -341,7 +341,8 @@
     "name": "Name",
     "fabric": "Fabric",
     "keepKey": "Start with the same key (threads, beads, symbols)",
-    "newHint": "Unsaved changes to the current pattern will be lost — save first if you want to keep it. A snapshot is kept in History.",
+    "newHint": "The pattern open now stays in your saved patterns, and Versions keeps a copy of it.",
+    "newHintSignedOut": "Without signing in you work on one pattern at a time: if the open one has work in it, you’ll be asked how to keep it first.",
     "create": "Create",
     "openTitle": "Open a pattern",
     "loading": "Loading…",
@@ -1006,5 +1007,24 @@
     "signIn": "Sign in to keep it",
     "replace": "Replace it",
     "cancel": "Cancel"
+  },
+  "home": {
+    "title": "My patterns",
+    "nav": "Sections",
+    "patterns": "Patterns",
+    "openEditor": "Open the editor",
+    "newPattern": "New pattern",
+    "newPatternHint": "Blank, or from a picture",
+    "signedOut": "Sign in to keep every pattern in your account, on any device. Without signing in, you work on one pattern at a time, kept in this browser.",
+    "signIn": "Sign in",
+    "onlyHere": "{count, plural, one {# pattern is} other {# patterns are}} only in this browser. Move {count, plural, one {it} other {them}} to your account to have {count, plural, one {it} other {them}} everywhere.",
+    "move": "Move to my account",
+    "moving": "Moving… {done} of {count}",
+    "loading": "Loading…",
+    "empty": "No saved patterns yet — start a new one.",
+    "open": "Open “{name}”",
+    "inBrowser": "In this browser",
+    "inAccount": "In your account",
+    "inBoth": "In your account and this browser"
   }
 }

@@ -197,6 +197,7 @@ export class Editor {
   /** Signed in or out (the account menu tells): while signed in, saved patterns also go to the account. */
   setAccount(user: EditorState["account"]) {
     account.signedIn = !!user;
+    if (!this.state.accountKnown) this.store.setState({ accountKnown: true });
     if (this.state.account?.id === user?.id) return;
     this.store.setState({ account: user, saveState: null, ...(user ? { signInOpen: false } : {}) });
     void this.refreshPatterns();

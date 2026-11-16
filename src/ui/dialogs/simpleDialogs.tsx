@@ -35,6 +35,7 @@ export function DeleteEntryDialog({ index, count, onClose }: Close & { index: nu
 }
 
 export function NewPatternDialog({ onClose }: Close) {
+  const signedIn = useEditorState((st) => !!st.account);
   const t = useTranslations("dialogs");
   const tf = useTranslations("fabric");
   const run = useCommand();
@@ -53,7 +54,7 @@ export function NewPatternDialog({ onClose }: Close) {
         <label className={ui.field}>{t("height")}<input type="number" min={5} max={500} value={o.h} onChange={(e) => set({ ...o, h: Number(e.target.value) })} /></label>
       </div>
       <label className={ui.chk}><input type="checkbox" checked={o.keepKey} onChange={(e) => set({ ...o, keepKey: e.target.checked })} />{t("keepKey")}</label>
-      <p className={ui.hint}>{t("newHint")}</p>
+      <p className={ui.hint}>{t(signedIn ? "newHint" : "newHintSignedOut")}</p>
     </Modal>
   );
 }

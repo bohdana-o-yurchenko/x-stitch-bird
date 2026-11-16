@@ -9,6 +9,8 @@
   background: var(--panel);
 }
 .brand {
+  color: var(--ink);
+  text-decoration: none;
   font-family: var(--font-brand), var(--font-heading);
   font-weight: 800;
   font-size: 21px;

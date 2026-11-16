@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
 import { Icon } from "../common/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
@@ -139,7 +140,7 @@ function AppMenu() {
     { id: "shortcuts", label: t("shortcuts"), onClick: () => ed.store.setState({ shortcutsOpen: true }) },
     { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
     "-",
-    { id: "language", node: <LanguageSwitch /> },
+    { id: "language", node: <LanguageSwitch before={() => ed.flush()} /> },
     { id: "theme", node: <ThemeSwitcher /> },
     { id: "toolbar", node: <ToolbarOptions /> },
     "-",
@@ -197,11 +198,12 @@ export function Header() {
   const stacked = useStacked(bar);
   return (
     <header ref={bar} className={cx(s.bar, stacked && s.stacked)}>
-      <div className={s.brand}>
+      {/* the logo leads to the main page, My patterns (the open pattern is saved first) */}
+      <Link href="/patterns" className={s.brand} title={t("home.title")} data-testid="to-home" onClick={() => ed.flush()}>
         {/* src/app/icon.svg — Next.js serves it at /icon.svg and uses it as the favicon too */}
         <Image src="/icon.svg" alt="" width={30} height={30} unoptimized priority />
         <span className={s.brandText}>{t("app.brand")}</span>
-      </div>
+      </Link>
       <PatternMenu />
       <PatternName />
       <div className={s.spacer} data-slot="spacer" />

@@ -1672,7 +1672,18 @@ Never asked, never removed: signed in; patterns in this browser on the first sta
 (`stitchwork.keptPatterns`, so earlier libraries stay); patterns that reached the account. The question comes after
 "Create" or picking a file, so cancelling a dialog never loses anything. Signing in with work open puts it into the
 account at once.
-**Next:** My patterns; moving this browser's patterns on first sign-in.
+**Next:** My patterns (§15.26).
+
+### 15.26 The main page: My patterns (built 2026-11-17)
+`/[locale]/patterns` (`ui/home`, `editor/library.ts`). The editor's logo and name lead here (the open pattern is
+saved first); the editor stays at `/[locale]`, so links in exported files keep working. A header (logo, languages,
+account, **Open the editor**), a left column of sections — only *Patterns* now; threads and the stash come later —
+and **My patterns**: a *New pattern* card (→ the editor's New dialog, `/?new=1`) and a card per saved pattern —
+preview, name, size, date, where it's kept (this browser · your account · both), delete (asks first). A card opens
+the pattern in the editor (`/?open=<id>`, after start-up and the session check; the one already open isn't
+reloaded). Previews: the account's picture when it has one, otherwise drawn from the pattern in this browser.
+Signed out: an invitation to sign in (one pattern at a time without it). Signed in, with patterns only in this
+browser: **Move to my account** — each goes up with its preview and is kept here for good.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

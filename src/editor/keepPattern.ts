@@ -34,11 +34,7 @@ export class KeepPattern {
 
   keep(...ids: string[]) {
     for (const id of ids) this.kept.add(id);
-    try {
-      localStorage.setItem(KEPT_KEY, JSON.stringify([...this.kept]));
-    } catch {
-      // not remembered; asking again next time is harmless
-    }
+    keepForGood(...this.kept);
   }
 
   /** Another pattern is about to be opened or made (just before the editor takes it in): nothing in it to lose yet. */
@@ -99,5 +95,15 @@ function remembered(): string | null {
     return localStorage.getItem(EDITED_KEY);
   } catch {
     return null;
+  }
+}
+
+/** Patterns that are never taken out of this browser by the rule (they're in the account, or were here before). */
+export function keepForGood(...ids: string[]) {
+  try {
+    const kept = new Set([...((JSON.parse(localStorage.getItem(KEPT_KEY) || "[]") as string[]) ?? []), ...ids]);
+    localStorage.setItem(KEPT_KEY, JSON.stringify([...kept]));
+  } catch {
+    // not remembered; asking again next time is harmless
   }
 }
