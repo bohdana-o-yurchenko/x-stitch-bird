@@ -115,51 +115,64 @@ export function drawStitchCell(g: Ctx, px: number, py: number, z: number, s: Pal
 }
 
 /**
- * Legs of a cross as embroidered (the stitched preview): each a thick thread with a shadow edge, a highlight and,
- * when big enough, a couple of twist marks. Drawn in order, so the last leg lies on top. `up` = ╱, `down` = ╲.
+ * Legs of a cross as embroidered (the stitched preview). Each leg is as wide as it takes for a full cross to cover
+ * ~95% of the cell (0.39 of the cell each side of the diagonal), cut at the cell's edges; two strands with their
+ * twist; shaded round across like a thread. The legs catch the light differently: the top one (drawn last) is
+ * brighter and casts a soft shadow on the one below. `up` = ╱, `down` = ╲.
  */
 export function drawThreadLegs(g: Ctx, px: number, py: number, z: number, hex: string, legs: ("up" | "down")[]) {
-  const inset = z * 0.12, w = z * 0.34, dark = shade(hex, -0.38), light = shade(hex, 0.32);
+  const hw = (0.39 / Math.SQRT2) * z, L = z * Math.SQRT2;
   g.save();
-  g.lineCap = "round";
-  for (const leg of legs) {
-    const [x1, y1, x2, y2] = leg === "up" ? [px + inset, py + z - inset, px + z - inset, py + inset] : [px + inset, py + inset, px + z - inset, py + z - inset];
-    const line = (dx: number, dy: number, t0 = 0, t1 = 1) => {
-      g.beginPath();
-      g.moveTo(x1 + (x2 - x1) * t0 + dx, y1 + (y2 - y1) * t0 + dy);
-      g.lineTo(x1 + (x2 - x1) * t1 + dx, y1 + (y2 - y1) * t1 + dy);
-      g.stroke();
-    };
-    // across the leg, towards its lower side: where the shadow falls
-    const len = Math.hypot(x2 - x1, y2 - y1), nx = -(y2 - y1) / len, ny = (x2 - x1) / len, down = ny < 0 ? -1 : 1;
-    g.strokeStyle = dark;
-    g.lineWidth = w;
-    line(nx * down * w * 0.12, ny * down * w * 0.12);
-    g.strokeStyle = hex;
-    g.lineWidth = w * 0.8;
-    line(0, 0);
-    g.globalAlpha = 0.7;
-    g.strokeStyle = light;
-    g.lineWidth = Math.max(0.8, w * 0.18);
-    line(-nx * down * w * 0.2, -ny * down * w * 0.2, 0.15, 0.85);
-    g.globalAlpha = 1;
-    if (z >= 10) {
-      // the strands' twist: short slanted marks across the thread
-      g.strokeStyle = dark;
-      g.globalAlpha = 0.35;
-      g.lineWidth = Math.max(0.6, z * 0.03);
-      g.lineCap = "butt";
-      for (const t of [0.32, 0.5, 0.68]) {
-        const cx = x1 + (x2 - x1) * t, cy = y1 + (y2 - y1) * t, ux = (x2 - x1) / len, uy = (y2 - y1) / len, h = w * 0.36;
-        g.beginPath();
-        g.moveTo(cx + nx * h - ux * h * 0.5, cy + ny * h - uy * h * 0.5);
-        g.lineTo(cx - nx * h + ux * h * 0.5, cy - ny * h + uy * h * 0.5);
-        g.stroke();
-      }
-      g.globalAlpha = 1;
-      g.lineCap = "round";
+  g.beginPath();
+  g.rect(px, py, z, z);
+  g.clip();
+  g.translate(px + z / 2, py + z / 2);
+  legs.forEach((leg, i) => {
+    // a half cross lies on the fabric with nothing over it: lit like a top leg
+    const lit = legs.length === 1 || i > 0, base = shade(hex, lit ? 0.05 : -0.14);
+    g.save();
+    g.rotate(leg === "up" ? -Math.PI / 4 : Math.PI / 4);
+    if (i > 0) {
+      g.fillStyle = "rgba(0,0,0,.2)";
+      g.fillRect(-L / 2, -hw - z * 0.05, L, 2 * hw + z * 0.1);
     }
-  }
+    const round = g.createLinearGradient(0, -hw, 0, hw);
+    round.addColorStop(0, shade(base, -0.32));
+    round.addColorStop(0.28, lit ? shade(base, 0.2) : shade(base, 0.06));
+    round.addColorStop(0.6, base);
+    round.addColorStop(1, shade(base, -0.38));
+    g.fillStyle = round;
+    g.fillRect(-L / 2, -hw, L, 2 * hw);
+    if (z >= 8) {
+      // floss: two strands, each twisted — fine slanted marks with a glint beside them, and a groove between
+      const step = Math.max(2.5, hw * 0.5), dark = shade(base, -0.5), light = shade(base, 0.45);
+      g.lineWidth = Math.max(0.5, z * 0.022);
+      for (const [v0, v1] of [[-hw, 0], [0, hw]] as const)
+        for (let u = -L / 2 - step; u < L / 2 + step; u += step) {
+          const slant = (v1 - v0) * 0.9;
+          g.strokeStyle = dark;
+          g.globalAlpha = 0.22;
+          g.beginPath();
+          g.moveTo(u, v0);
+          g.lineTo(u + slant, v1);
+          g.stroke();
+          g.strokeStyle = light;
+          g.globalAlpha = lit ? 0.2 : 0.1;
+          g.beginPath();
+          g.moveTo(u + step * 0.4, v0);
+          g.lineTo(u + step * 0.4 + slant, v1);
+          g.stroke();
+        }
+      g.globalAlpha = 0.3;
+      g.strokeStyle = dark;
+      g.beginPath();
+      g.moveTo(-L / 2, 0);
+      g.lineTo(L / 2, 0);
+      g.stroke();
+      g.globalAlpha = 1;
+    }
+    g.restore();
+  });
   g.restore();
 }
 
