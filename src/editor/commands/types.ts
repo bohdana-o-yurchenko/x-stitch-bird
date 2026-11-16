@@ -7,4 +7,6 @@ export interface Command {
   enabled?(ed: Editor): boolean;
   /** Snapshot reason; the registry takes a snapshot before running (SPEC §15.7). */
   destructive?: string;
+  /** Opens or makes another pattern in place of the open one: signed out, it may ask first (editor/keepPattern). */
+  replacesPattern?: boolean;
 }

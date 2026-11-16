@@ -17,7 +17,8 @@ export function AccountButton() {
   const ed = useEditor();
   const { data: session, isPending } = authClient.useSession();
   const user = useEditorState((st) => st.account);
-  const [open, setOpen] = useState(false);
+  const open = useEditorState((st) => st.signInOpen);
+  const setOpen = (on: boolean) => ed.store.setState({ signInOpen: on });
 
   useEffect(() => {
     if (isPending) return;

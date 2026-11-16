@@ -1663,7 +1663,16 @@ save cut off (tab closed) is caught up on the next sign-in: browser copies newer
 account's preview picture is redrawn at most once a minute. The status bar says where the work is: *Saving…* ·
 *✓ Saved to your account* · *✓ Saved in this browser* · *Saved in this browser — your account gets it once you're
 back online*.
-**Next:** the signed-out limit and its question; My patterns; moving this browser's patterns on first sign-in.
+**One working pattern, signed out** (built 2026-11-17, `editor/keepPattern.ts`): commands that put another pattern
+in place of the open one (`replacesPattern`: New, from a picture, open a work file, open a saved one) first ask
+*Keep this pattern?* — **Download it, then continue** · **Sign in to keep it** · **Replace it** · Cancel — when the
+open pattern has edits since it was opened or made (remembered across visits, `stitchwork.editedPattern`). The
+replaced pattern then leaves this browser's saved patterns; an untouched one leaves without the question.
+Never asked, never removed: signed in; patterns in this browser on the first start with the rule
+(`stitchwork.keptPatterns`, so earlier libraries stay); patterns that reached the account. The question comes after
+"Create" or picking a file, so cancelling a dialog never loses anything. Signing in with work open puts it into the
+account at once.
+**Next:** My patterns; moving this browser's patterns on first sign-in.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

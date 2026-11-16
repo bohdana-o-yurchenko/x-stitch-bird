@@ -65,20 +65,20 @@ export const COMMANDS: readonly Command[] = [
   { id: "key.delete", run: (ed, i) => deleteEntry(ed, i as KeyIndex), destructive: "deleteKey" },
   // pattern & files
   { id: "file.new", run: (ed) => ed.openDialog({ type: "newPattern" }) },
-  { id: "file.create", run: (ed, o) => newPattern(ed, o as Parameters<typeof newPattern>[1]), destructive: "new" },
+  { id: "file.create", run: (ed, o) => newPattern(ed, o as Parameters<typeof newPattern>[1]), destructive: "new", replacesPattern: true },
   { id: "file.open", run: (ed) => ed.openDialog({ type: "open" }) },
-  { id: "file.openSaved", run: (ed, id) => openFromLibrary(ed, id as string), destructive: "open" },
+  { id: "file.openSaved", run: (ed, id) => openFromLibrary(ed, id as string), destructive: "open", replacesPattern: true },
   { id: "file.save", run: (ed) => saveToLibrary(ed) },
   { id: "file.versions", run: (ed) => ed.openDialog({ type: "versions" }) },
   { id: "file.export", run: (ed, f) => exportAs(ed, f as ExportFormat) },
   { id: "file.exportPatternKeeper", run: (ed, confirmed) => exportPatternKeeper(ed, confirmed === true) },
   { id: "file.exportChartPdf", run: (ed) => exportChartPdf(ed) },
   { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird,.oxs,.json,.xml"); if (f) await ed.commands.run("file.load", f); } },
-  { id: "file.load", run: (ed, f) => loadFile(ed, f as File), destructive: "import" },
+  { id: "file.load", run: (ed, f) => loadFile(ed, f as File), destructive: "import", replacesPattern: true },
   { id: "file.drop", run: (ed, files) => handleDrop(ed, files as File[]) },
   { id: "image.pick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await openImageDialog(ed, f); } },
   { id: "image.open", run: (ed, f) => openImageDialog(ed, f as File) },
-  { id: "image.create", run: (ed, a) => { const { result, image, keepReference } = a as never; ed.createFromImage(result, image, keepReference); }, destructive: "image" },
+  { id: "image.create", run: (ed, a) => { const { result, image, keepReference } = a as never; ed.createFromImage(result, image, keepReference); }, destructive: "image", replacesPattern: true },
   { id: "reference.pick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await ed.addReferenceFromFile(f); } },
   { id: "reference.open", run: (ed, f) => ed.addReferenceFromFile(f as File) },
   { id: "pattern.editInfo", run: (ed) => ed.openDialog({ type: "patternInfo" }) },
@@ -154,10 +154,14 @@ export class CommandRegistry {
     return !!c && (c.enabled?.(this.ed) ?? true);
   }
 
-  async run(id: string, args?: unknown): Promise<void> {
+  /** `confirmed`: the question about the open pattern was answered (signed out, SPEC §15.25). */
+  async run(id: string, args?: unknown, confirmed = false): Promise<void> {
     const c = this.byId.get(id);
     if (!c || !this.enabled(id)) return;
+    const keep = this.ed.keep;
+    if (c.replacesPattern && !confirmed && keep.mustAsk) return this.ed.openDialog({ type: "keepPattern", then: { command: id, args } });
     if (c.destructive) this.ed.snapshots.before(c.destructive);
+    if (c.replacesPattern && keep.leaves) return keep.replace(async () => void (await c.run(this.ed, args)));
     await c.run(this.ed, args);
   }
 }

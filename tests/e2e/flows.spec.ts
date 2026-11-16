@@ -57,11 +57,44 @@ test("a blank pattern: build the key, draw with line, rectangles and fill, save,
   await page.reload();
   await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Tulip");
   await expect(page.getByTestId("totals")).toContainText("73 full");
-  await fileAction(page, "Open…");
-  await expect(page.getByRole("dialog").getByRole("button", { name: /Tulip 30×20/ })).toBeVisible();
+  // signed out, it's the one working pattern: the untouched demo it replaced is gone, nothing else to open
+  await page.getByRole("button", { name: /^Pattern ▾$/ }).click();
+  await expect(page.getByRole("menuitem", { name: /^New/ })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: /^Open…/ })).toHaveCount(0);
 });
 
-test("a file opened from the computer is kept, even when another pattern is opened straight after", async ({ page }) => {
+test("signed out, replacing a pattern with work in it asks first: download it, sign in, or replace it", async ({ page }) => {
+  await page.keyboard.press("l");
+  await dragCells(page, [1, 1], [4, 1]);
+  await fileAction(page, "New", "Blank pattern…");
+  await page.getByRole("dialog").getByLabel("Name").fill("Second");
+  await page.getByRole("dialog").getByRole("button", { name: "Create" }).click();
+  const ask = page.getByTestId("keep-pattern");
+  await expect(ask).toContainText("only in this browser");
+  // "Sign in to keep it": the sign-in dialog, and the pattern stays
+  await page.getByRole("button", { name: "Sign in to keep it" }).click();
+  await expect(page.getByTestId("sign-in-email")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Untitled pattern");
+  // "Download it, then continue": the work file, then the new pattern
+  await fileAction(page, "New", "Blank pattern…");
+  await page.getByRole("dialog").getByLabel("Name").fill("Second");
+  await page.getByRole("dialog").getByRole("button", { name: "Create" }).click();
+  const file = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download it, then continue" }).click();
+  expect((await file).suggestedFilename()).toMatch(/\.xbird$/);
+  await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Second");
+  // the old one left this browser; an untouched pattern is replaced without asking
+  await fileAction(page, "New", "Blank pattern…");
+  await page.getByRole("dialog").getByRole("button", { name: "Create" }).click();
+  await expect(ask).toHaveCount(0);
+  await page.getByRole("button", { name: /^Pattern ▾$/ }).click();
+  await expect(page.getByRole("menuitem", { name: /^Open…/ })).toHaveCount(0);
+});
+
+test("signed in, a file opened from the computer is kept, even when another pattern is opened straight after", async ({ page }) => {
+  // signed in (the account itself isn't reachable here; this browser's copies are what's checked)
+  await page.evaluate(() => (window as unknown as { __stitchwork: { setAccount(u: unknown): void } }).__stitchwork.setAccount({ id: "e2e", email: "e2e@example.com" }));
   await page.keyboard.press("ControlOrMeta+s");
   await loadFixture(page, "1.oxs");
   await expect(page.locator("[data-entry]")).toHaveCount(12);

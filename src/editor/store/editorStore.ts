@@ -37,7 +37,9 @@ export type DialogRequest =
   | { type: "replaceKey" }
   | { type: "dropChoice"; file: File }
   | { type: "patternKeeper"; issues: PkReport["issues"] }
-  | { type: "textFallback"; ext: string; text: string };
+  | { type: "textFallback"; ext: string; text: string }
+  /** Signed out, before another pattern replaces one with work in it: download, sign in, or replace. */
+  | { type: "keepPattern"; then: { command: string; args?: unknown } };
 
 export interface Overlay {
   hover: { x: number; y: number; size: number } | null;
@@ -94,6 +96,8 @@ export interface EditorState {
   saveState: "saving" | "saved" | "offline" | null;
   /** Saved patterns besides the open one exist (in this browser or the account): Pattern ▸ Open is offered. */
   hasOtherPatterns: boolean;
+  /** The sign-in dialog is open (from the header, or "Sign in to keep it"). */
+  signInOpen: boolean;
   /** The keyboard shortcuts list, opened from ☰. */
   shortcutsOpen: boolean;
   /** Toolbar groups hidden in ☰ ▸ Toolbar (remembered in this browser; ui/header/toolbarPrefs). */
@@ -161,6 +165,7 @@ export const createEditorStore = () =>
     saveState: null,
     hasOtherPatterns: false,
     shortcutsOpen: false,
+    signInOpen: false,
     toolbarHide: { shapes: false, partials: false },
     dialog: null,
     keyForm: null,

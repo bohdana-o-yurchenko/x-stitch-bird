@@ -245,10 +245,17 @@ test("Open is only offered when there is another saved pattern; deleting one ask
   await expect(page.getByRole("menuitem", { name: /^New/ })).toBeVisible();
   await expect(page.getByRole("menuitem", { name: /^Open…/ })).toHaveCount(0);
   await page.keyboard.press("Escape");
-  await loadFixture(page, "1.oxs");
-  await expect(page.locator("[data-entry]")).toHaveCount(12);
+  // patterns saved in this browser before the one-pattern rule stay, and can be opened
+  await page.evaluate(() => {
+    const doc = (id: string, name: string) => JSON.stringify({ app: "stitchwork", v: 4, xbird: 1, id, name, w: 12, h: 8, count: 14, strands: 2, fabric: "#FFFFFF", pal: [], blends: {}, combos: {}, customs: {}, cells: "" });
+    localStorage.setItem("stitchwork.library", JSON.stringify({ a: { name: "Kept A", updated: 1000, w: 12, h: 8, data: doc("a", "Kept A") }, b: { name: "Kept B", updated: 1001, w: 12, h: 8, data: doc("b", "Kept B") } }));
+    localStorage.removeItem("stitchwork.libraryMoved");
+    localStorage.removeItem("stitchwork.keptPatterns");
+  });
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
   await fileAction(page, "Open…");
-  const trash = page.getByRole("button", { name: /^Delete “/ });
+  const trash = page.getByRole("button", { name: /^Delete “Kept/ });
   await expect(trash).toHaveCount(2);
   await trash.first().click();
   const confirm = page.getByTestId("confirm-delete");

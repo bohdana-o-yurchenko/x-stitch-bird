@@ -997,5 +997,14 @@
     "signOut": "Sign out",
     "signedIn": "Signed in as {email}",
     "signedOut": "Signed out — patterns stay in this browser"
+  },
+  "keepPattern": {
+    "title": "Keep this pattern?",
+    "body": "“{name}” is only in this browser. Without signing in, you work on one pattern at a time — the new one takes its place.",
+    "why": "Sign in, and every pattern is kept in your account, on any device. Or download its work file (.xbird) and open it again whenever you like.",
+    "download": "Download it, then continue",
+    "signIn": "Sign in to keep it",
+    "replace": "Replace it",
+    "cancel": "Cancel"
   }
 }

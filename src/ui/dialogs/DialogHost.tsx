@@ -5,6 +5,7 @@ import { ImageImportDialog } from "./ImageImportDialog";
 import { OpenPatternDialog, VersionsDialog } from "./OpenPatternDialog";
 import { ChangelogDialog } from "./ChangelogDialog";
 import { StraightenDialog } from "./StraightenDialog";
+import { KeepPatternDialog } from "./KeepPatternDialog";
 import {
   DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, MirrorFromCentreDialog, NewPatternDialog,
   PatternInfoDialog, PatternKeeperDialog, ReplaceKeyDialog, ResizeDialog, TextFallbackDialog,
@@ -15,7 +16,8 @@ export function DialogHost() {
   const ed = useEditor();
   const d = useEditorState((st) => st.dialog);
   if (!d) return null;
-  const close = () => ed.closeDialog();
+  // only this dialog: a button may have opened the next one already (the question before replacing a pattern)
+  const close = () => ed.state.dialog === d && ed.closeDialog();
   switch (d.type) {
     case "deleteEntry": return <DeleteEntryDialog index={d.index} count={d.count} onClose={close} />;
     case "newPattern": return <NewPatternDialog onClose={close} />;
@@ -33,5 +35,6 @@ export function DialogHost() {
     case "dropChoice": return <DropChoiceDialog file={d.file} onClose={close} />;
     case "patternKeeper": return <PatternKeeperDialog issues={d.issues} onClose={close} />;
     case "textFallback": return <TextFallbackDialog ext={d.ext} text={d.text} onClose={close} />;
+    case "keepPattern": return <KeepPatternDialog then={d.then} onClose={close} />;
   }
 }

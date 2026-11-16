@@ -192,6 +192,8 @@ export async function saveToLibrary(ed: Editor, o: { quiet?: boolean } = {}) {
   const r = await ed.persistence.patterns.save(doc);
   if (r.ok) {
     ed.store.setState({ savedAt: Date.now(), saveState: r.account === false ? "offline" : "saved" });
+    // in the account: safe, never taken out of this browser by the one-pattern rule
+    if (r.account) ed.keep.keep(doc.id);
     if (!o.quiet) ed.toast(ed.state.account ? "toasts.savedAccount" : "toasts.savedLocal", { name: doc.name });
     // signed in: the account also gets a small colour preview, for the list of patterns — not on every save
     if (r.account && Date.now() - (previewAt.get(doc.id) ?? 0) > PREVIEW_EVERY) {

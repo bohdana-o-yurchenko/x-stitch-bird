@@ -14,6 +14,7 @@ import { createFromImage, saveToLibrary } from "./actions/importExport";
 import { demoPattern, loadPattern } from "./actions/pattern";
 import { Autosave } from "./autosave";
 import { CommandRegistry } from "./commands/registry";
+import { KeepPattern } from "./keepPattern";
 import { History } from "./history/history";
 import { ImageService } from "./images/ImageService";
 import { canMatch, PICKING } from "./matching/matching";
@@ -47,6 +48,7 @@ export class Editor {
   readonly viewport: ViewportService;
   readonly tools: ToolManager;
   readonly commands: CommandRegistry;
+  readonly keep: KeepPattern;
   readonly shortcuts: ShortcutManager;
   readonly selection: SelectionService;
   readonly references: ReferenceService;
@@ -73,6 +75,7 @@ export class Editor {
     this.viewport = new ViewportService(this.store, RULER_SIZE);
     this.tools = new ToolManager(this);
     this.commands = new CommandRegistry(this);
+    this.keep = new KeepPattern(this);
     this.shortcuts = new ShortcutManager(this, isMac);
     this.selection = new SelectionService(this);
     this.references = new ReferenceService(this);
@@ -121,6 +124,9 @@ export class Editor {
     loadPattern(this, pattern ?? demoPattern(symbols));
     // a restored draft is saved to the library once it's edited; the demo only then too
     this.autosave.markSaved();
+    await this.keep.init();
+    // what came back from an earlier visit is work if it was edited then; the demo isn't
+    if (pattern) this.keep.restored();
     this.store.setState({ ready: true });
     void this.refreshPatterns();
     // pictures no record uses any more (closed windows, replaced underlays, old marks)
@@ -138,6 +144,7 @@ export class Editor {
     });
     if (s.activeEntry && !s.doc.key[s.activeEntry]) this.store.setState({ activeEntry: 0 });
     this.autosave.schedule();
+    this.keep.changed();
   }
 
   flush() {
@@ -191,8 +198,10 @@ export class Editor {
   setAccount(user: EditorState["account"]) {
     account.signedIn = !!user;
     if (this.state.account?.id === user?.id) return;
-    this.store.setState({ account: user, saveState: null });
+    this.store.setState({ account: user, saveState: null, ...(user ? { signInOpen: false } : {}) });
     void this.refreshPatterns();
+    // signed in with work open ("Sign in to keep it"): it goes to the account now
+    if (user && this.state.ready && this.keep.edited) void saveToLibrary(this, { quiet: true });
     // an upload cut off last time (tab closed mid-save): the browser copy is newer, so it goes up now
     if (user) void this.persistence.patterns.catchUp?.().catch(() => {});
   }

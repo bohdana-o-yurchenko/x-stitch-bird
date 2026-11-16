@@ -104,7 +104,7 @@ describe("pattern settings and new patterns", () => {
     const { ed, red, snaps } = t;
     ed.tools.down(at(0, 0));
     ed.tools.up(at(0, 0));
-    await ed.commands.run("file.create", { name: "", w: 30, h: 5000, count: 16, keepKey: true });
+    await ed.commands.run("file.create", { name: "", w: 30, h: 5000, count: 16, keepKey: true }, true);
     expect(ed.doc.name).toBe("Untitled pattern");
     expect(ed.doc.w).toBe(30);
     expect(ed.doc.h).toBeLessThan(5000); // clamped
@@ -112,7 +112,7 @@ describe("pattern settings and new patterns", () => {
     expect(ed.doc.key[red]).toMatchObject({ src: "dmc:321" });
     expect(ed.state.canUndo).toBe(false);
     expect(snaps.map((s) => s.reason)).toEqual(["new"]);
-    await ed.commands.run("file.create", { name: "Blank", w: 10, h: 10, count: 14, keepKey: false });
+    await ed.commands.run("file.create", { name: "Blank", w: 10, h: 10, count: 14, keepKey: false }, true);
     expect(ed.doc.key.filter(Boolean)).toHaveLength(0);
     expect(ed.state.activeEntry).toBe(0);
   });
