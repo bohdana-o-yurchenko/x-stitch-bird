@@ -46,6 +46,7 @@ function FileMenu() {
       { label: t("pngBoth"), onClick: go("file.export", "png-both") },
       { label: t("pngSymbols"), onClick: go("file.export", "png-symbols") },
       { label: t("pngColor"), onClick: go("file.export", "png-color") },
+      { label: t("pngStitched"), onClick: go("file.export", "png-stitched") },
       "-",
       { id: "oxs", label: t("oxs"), hint: t("oxsHint"), onClick: go("file.export", "oxs") },
       { label: t("csv"), onClick: go("file.export", "csv") },

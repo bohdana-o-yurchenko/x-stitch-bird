@@ -20,7 +20,7 @@ export interface CanvasTheme {
   eraser: { highlight: string; minWidth: number; width: number };
   selection: { ants: [string, string]; dash: number[]; floatingAlpha: number };
   flash: { durationMs: number };
-  export: { chartCell: [number, number]; previewCell: [number, number]; margin: { chart: number; preview: number }; keyColumnWidth: number; text: string; subText: string };
+  export: { chartCell: [number, number]; previewCell: [number, number]; stitchedCell: [number, number]; margin: { chart: number; preview: number }; keyColumnWidth: number; text: string; subText: string };
 }
 
 export const defaultCanvasTheme: CanvasTheme = {
@@ -43,7 +43,7 @@ export const defaultCanvasTheme: CanvasTheme = {
   eraser: { highlight: "rgba(181,69,47,.5)", minWidth: 7, width: 0.32 },
   selection: { ants: ["#000", "#fff"], dash: [4, 4], floatingAlpha: 0.8 },
   flash: { durationMs: 900 },
-  export: { chartCell: [16, 24], previewCell: [4, 12], margin: { chart: 40, preview: 16 }, keyColumnWidth: 420, text: "#111", subText: "#555" },
+  export: { chartCell: [16, 24], previewCell: [4, 12], stitchedCell: [10, 28], margin: { chart: 40, preview: 16 }, keyColumnWidth: 420, text: "#111", subText: "#555" },
 };
 
 export const font = (theme: CanvasTheme, weight: number, px: number) => `${weight} ${px}px ${theme.fontFamily}`;

@@ -16,18 +16,17 @@ import { buildPalette } from "@/core/pattern/palette";
 import { SYMBOL_FONT } from "@/core/symbols/symbolFont";
 import type { Pattern } from "@/core/pattern/types";
 import type { UnderlayData } from "@/core/underlay/underlay";
-import { renderChartImage, type KeyLine } from "@/render/exportChart";
+import { renderChartImage, type ImageView, type KeyLine } from "@/render/exportChart";
 import { defaultCanvasTheme } from "@/render/theme";
 import type { Ctx } from "@/render/primitives/cells";
 import { strokeLineStyle } from "@/render/primitives/lineStyles";
-import type { ChartView } from "@/render/chart";
 import { downloadFile, isImageFile, isPatternFile, readText } from "@/platform/files";
 import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import type { Editor } from "../createEditor";
 import { loadPattern } from "./pattern";
 
 /** "pattern": our own file — the pattern, key, reference windows and underlay, as text in a `.xbird` file. */
-export type ExportFormat = "png-both" | "png-symbols" | "png-color" | "csv" | "oxs" | "pattern";
+export type ExportFormat = "png-both" | "png-symbols" | "png-color" | "png-stitched" | "csv" | "oxs" | "pattern";
 
 /** Extension of our own pattern files. Older files ended in `.json`; they hold the same text and still open. */
 export const PATTERN_EXT = "xbird";
@@ -62,10 +61,13 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
   }
   if (format === "oxs") return offer(ed, `${base}.oxs`, exportOxs(p), "oxs");
   if (format === "csv") return offer(ed, `${base}-shopping-list.csv`, exportCsv(p, shoppingList(p), ed.t), "csv");
-  const view: ChartView = format === "png-color" ? "color" : format === "png-symbols" ? "symbols" : "both";
+  const view: ImageView = format === "png-color" ? "color" : format === "png-stitched" ? "stitched" : format === "png-symbols" ? "symbols" : "both";
   const byline = [p.meta.designer, p.meta.copyright && `© ${p.meta.copyright}`].filter(Boolean).join(" · ") || undefined;
-  const canvas = renderChartImage(p, ed.state.palette, view, { ...ed.theme, accent: defaultCanvasTheme.accent }, { heading: ed.t("png.keyHeading", { name: p.name }), byline, key: keyLines(ed) });
-  offer(ed, `${base}${view === "color" ? "-preview" : "-chart"}.png`, await canvasToBlob(canvas), "png");
+  // the same line as at the end of the PDFs and the CSV, in the interface's language
+  const footer = ed.t("csv.generatedBy", { url: ed.t("app.url") });
+  const canvas = renderChartImage(p, ed.state.palette, view, { ...ed.theme, accent: defaultCanvasTheme.accent }, { heading: ed.t("png.keyHeading", { name: p.name }), byline, key: keyLines(ed), footer });
+  const suffix = view === "stitched" ? "-stitched" : view === "color" ? "-preview" : "-chart";
+  offer(ed, `${base}${suffix}.png`, await canvasToBlob(canvas), "png");
 }
 
 /** The fonts every PDF embeds: chart symbols and the text font (regular, bold). */

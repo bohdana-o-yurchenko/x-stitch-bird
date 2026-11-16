@@ -1,3 +1,4 @@
+import { shade } from "@/core/color/colorMath";
 import { isMajorLine, majorOffset } from "@/core/grid/numbering";
 import type { Palette } from "@/core/pattern/palette";
 import type { Pattern, Rect } from "@/core/pattern/types";
@@ -61,6 +62,7 @@ export function drawCells(g: Ctx, p: Pattern, palette: Palette, f: ChartFrame, s
   if (withFabric) {
     g.fillStyle = style.showColour ? p.fabric : "#FFFFFF";
     g.fillRect(ox, oy, p.w * z, p.h * z);
+    if (style.stitched) fabricHoles(g, p, f);
   }
   if (underlay) drawUnderlay(g, p, underlay, f, true);
   for (let y = f.y0; y < f.y1; y++)
@@ -81,6 +83,19 @@ export function drawCells(g: Ctx, p: Pattern, palette: Palette, f: ChartFrame, s
       const s = palette[beads[y * p.w + x] ?? 0];
       if (s) drawBeadCell(g, ox + x * z, oy + y * z, z, s, style);
     }
+}
+
+/** The stitched preview's fabric: a faint hole at every cell corner, as in Aida. */
+function fabricHoles(g: Ctx, p: Pattern, f: ChartFrame) {
+  const { z, ox, oy } = f, r = Math.max(0.6, z * 0.07);
+  g.fillStyle = shade(p.fabric, -0.22);
+  g.beginPath();
+  for (let y = f.y0; y <= f.y1; y++)
+    for (let x = f.x0; x <= f.x1; x++) {
+      g.moveTo(ox + x * z + r, oy + y * z);
+      g.arc(ox + x * z, oy + y * z, r, 0, Math.PI * 2);
+    }
+  g.fill();
 }
 
 /** Thin grid (when zoomed in enough), bold lines every 10 aligned with the numbering, and the border. */

@@ -14,6 +14,8 @@ export interface CellStyle {
   theme: CanvasTheme;
   showColour: boolean;
   showSymbol: boolean;
+  /** Crosses drawn as embroidered thread (the stitched preview), not as flat colour. */
+  stitched?: boolean;
 }
 
 /** A chart symbol: a vector shape (`sym:…`) or a character in the app's font, about `z * scale` px tall. */
@@ -75,7 +77,8 @@ export function drawBeadShape(g: Ctx, px: number, py: number, z: number, hex: st
 /** A cell of the stitch layer: full or half cross, plus the bead of a floss + bead combo (SPEC §5). */
 export function drawStitchCell(g: Ctx, px: number, py: number, z: number, s: PaletteSlot, style: CellStyle) {
   const { theme, showColour, showSymbol } = style;
-  if (s.st === "full") {
+  if (style.stitched) drawThreadLegs(g, px, py, z, s.hex, s.st === "full" ? ["up", "down"] : [s.st === "half" ? "up" : "down"]);
+  else if (s.st === "full") {
     if (showColour) {
       g.fillStyle = s.hex;
       g.fillRect(px, py, z, z);
@@ -109,6 +112,55 @@ export function drawStitchCell(g: Ctx, px: number, py: number, z: number, s: Pal
   if (!symOk) return;
   if (s.st === "full") drawSymbol(g, px + z / 2, py + z / 2, z, s.sym, showColour ? s.ink : theme.symbols.darkInk, theme.symbols.scale.full, theme);
   else drawSymbol(g, px + z / 2, py + z / 2, z, s.sym, theme.symbols.darkInk, theme.symbols.scale.half, theme, true);
+}
+
+/**
+ * Legs of a cross as embroidered (the stitched preview): each a thick thread with a shadow edge, a highlight and,
+ * when big enough, a couple of twist marks. Drawn in order, so the last leg lies on top. `up` = ╱, `down` = ╲.
+ */
+export function drawThreadLegs(g: Ctx, px: number, py: number, z: number, hex: string, legs: ("up" | "down")[]) {
+  const inset = z * 0.12, w = z * 0.34, dark = shade(hex, -0.38), light = shade(hex, 0.32);
+  g.save();
+  g.lineCap = "round";
+  for (const leg of legs) {
+    const [x1, y1, x2, y2] = leg === "up" ? [px + inset, py + z - inset, px + z - inset, py + inset] : [px + inset, py + inset, px + z - inset, py + z - inset];
+    const line = (dx: number, dy: number, t0 = 0, t1 = 1) => {
+      g.beginPath();
+      g.moveTo(x1 + (x2 - x1) * t0 + dx, y1 + (y2 - y1) * t0 + dy);
+      g.lineTo(x1 + (x2 - x1) * t1 + dx, y1 + (y2 - y1) * t1 + dy);
+      g.stroke();
+    };
+    // across the leg, towards its lower side: where the shadow falls
+    const len = Math.hypot(x2 - x1, y2 - y1), nx = -(y2 - y1) / len, ny = (x2 - x1) / len, down = ny < 0 ? -1 : 1;
+    g.strokeStyle = dark;
+    g.lineWidth = w;
+    line(nx * down * w * 0.12, ny * down * w * 0.12);
+    g.strokeStyle = hex;
+    g.lineWidth = w * 0.8;
+    line(0, 0);
+    g.globalAlpha = 0.7;
+    g.strokeStyle = light;
+    g.lineWidth = Math.max(0.8, w * 0.18);
+    line(-nx * down * w * 0.2, -ny * down * w * 0.2, 0.15, 0.85);
+    g.globalAlpha = 1;
+    if (z >= 10) {
+      // the strands' twist: short slanted marks across the thread
+      g.strokeStyle = dark;
+      g.globalAlpha = 0.35;
+      g.lineWidth = Math.max(0.6, z * 0.03);
+      g.lineCap = "butt";
+      for (const t of [0.32, 0.5, 0.68]) {
+        const cx = x1 + (x2 - x1) * t, cy = y1 + (y2 - y1) * t, ux = (x2 - x1) / len, uy = (y2 - y1) / len, h = w * 0.36;
+        g.beginPath();
+        g.moveTo(cx + nx * h - ux * h * 0.5, cy + ny * h - uy * h * 0.5);
+        g.lineTo(cx - nx * h + ux * h * 0.5, cy - ny * h + uy * h * 0.5);
+        g.stroke();
+      }
+      g.globalAlpha = 1;
+      g.lineCap = "round";
+    }
+  }
+  g.restore();
 }
 
 export function drawBeadCell(g: Ctx, px: number, py: number, z: number, s: PaletteSlot, style: CellStyle) {

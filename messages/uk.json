@@ -577,6 +577,7 @@
     "pngBoth": "Зображення схеми — колір + символи (PNG)",
     "pngSymbols": "Зображення схеми — лише символи, для друку (PNG)",
     "pngColor": "Прев’ю — кольорові блоки (PNG)",
+    "pngStitched": "Прев’ю — вишите (PNG)",
     "oxs": "Файл Open Cross Stitch (.oxs)",
     "oxsHint": "Відкривається в Хрестиках і Ruta Stitch",
     "csv": "Список покупок (CSV)",

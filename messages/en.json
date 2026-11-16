@@ -577,6 +577,7 @@
     "pngBoth": "Chart image — colour + symbols (PNG)",
     "pngSymbols": "Chart image — symbols only, for printing (PNG)",
     "pngColor": "Preview image — colour blocks (PNG)",
+    "pngStitched": "Preview image — stitched (PNG)",
     "oxs": "Open Cross Stitch file (.oxs)",
     "oxsHint": "Opens in Хрестики and Ruta Stitch",
     "csv": "Shopping list (CSV)",
