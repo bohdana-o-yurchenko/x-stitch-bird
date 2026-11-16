@@ -668,8 +668,8 @@ from **Menu ▸ Quick start guide** (uk: "Як зробити перенабір
 - Steps: welcome · 1 create a pattern with the chart's size · 2 fill in the key (floss, bead, blends, floss + bead;
   the paper key in a floating photo window, ticking lines off with its marker) · 3 image behind the chart,
   straighten by 4 corners, trace (tip: the quick move & resize panel, block by block) · **4 Autofill** — stitch a
-  few cells of each symbol, pick Autofill (Shift+F), click the lined-up block, accept or decline (tip: it fills only
-  what it's sure about; check the result) · 5 Colour / Both / Symbols · 6 undo, hold Alt/⌥ to pick, select / copy /
+  few cells of each symbol, pick Autofill (Shift+F), click the lined-up block, accept or decline; works best when every
+  key symbol looks exactly like the paper chart's (tip: it fills only what it's sure about; check the result) · 5 Colour / Both / Symbols · 6 undo, hold Alt/⌥ to pick, select / copy /
   paste / move, override off by default (tip: the **i** button) · 7 automatic saving in the browser, and download the
   .xbird file to the device · 8 Versions · 9 pattern info and export .oxs for Хрестики and Ruta Stitch · Voilà.
 - Highlight targets are `data-guide` attributes (menu, add-key, views, toolbar, shortcuts, saved); a missing target
@@ -682,8 +682,13 @@ from **Menu ▸ Quick start guide** (uk: "Як зробити перенабір
     edit toggle in the zoom box (frame, ↺ ↻, Ctrl/⌘+Z).
   - *Photo window* — after the first window is opened: what to put there (the key, or the chart scan instead of the
     canvas), then highlights the window's **Marker** and **Shade stitched** buttons.
+  - *Key symbols* (2026-11-16) — the first time the form is opened to add an entry (not to edit one): every entry has
+    a symbol (the row, All…); draw your own with the pencil when none matches the paper chart; most useful with
+    Autofill, which works best when every symbol looks exactly like the paper chart's. Outlines the symbol row and the
+    draw button.
   - *Autofill* (2026-11-16) — the first time it is picked, three steps: before you start (a key, the image behind the
-    chart, a few cells of each symbol stitched by hand — Autofill only sees the symbols it has learned from them);
+    chart, a few cells of each symbol stitched by hand — Autofill only sees the symbols it has learned from them; tip:
+    make every symbol look exactly like the paper chart's, drawing your own where needed);
     line the block up first (image editing, U); helpful, not perfect (only what it's sure about, may still be wrong,
     check every block, it gets better as you mark).
   - *Autofill's results* (2026-11-16) — the first time it shows what it found: the bar (faint suggestions, Accept /

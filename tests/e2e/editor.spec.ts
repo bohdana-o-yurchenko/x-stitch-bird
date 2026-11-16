@@ -971,6 +971,7 @@ test("Autofill's guides: what it needs the first time it's picked, and its butto
   await page.keyboard.press("Shift+F");
   await expect(guide).toContainText("Autofill: before you start");
   await expect(guide).toContainText("only sees the symbols it has already learned");
+  await expect(guide).toContainText("Make every key symbol look exactly like the paper chart’s");
   await guide.getByRole("button", { name: "Next" }).click();
   await expect(guide).toContainText("Line the block up first");
   await guide.getByRole("button", { name: "Next" }).click();
@@ -990,5 +991,27 @@ test("Autofill's guides: what it needs the first time it's picked, and its butto
   await page.keyboard.press("Shift+F");
   await page.mouse.click(p.x, p.y);
   await expect(page.getByTestId("match-count")).toBeVisible();
+  await expect(guide).toHaveCount(0);
+});
+
+test("the first time an entry is added, a tip on symbols: draw your own, as on the paper chart — most useful with Autofill", async ({ page }) => {
+  await page.evaluate(() => localStorage.removeItem("stitchwork.tipSeen.keyEntry"));
+  const guide = page.getByTestId("guide");
+  // editing an entry doesn't bring it up
+  const row = page.locator("[data-entry]").first();
+  await row.hover();
+  await row.getByRole("button", { name: "Edit entry" }).click();
+  await expect(page.getByTestId("key-form")).toBeVisible();
+  await expect(guide).toHaveCount(0);
+  await page.getByTestId("key-form").getByRole("button", { name: "Cancel" }).click();
+  // adding one does, with the symbol row and the draw button outlined
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  await expect(guide).toContainText("A symbol for every entry");
+  await expect(guide).toContainText("works best when every symbol looks exactly like the one on the paper chart");
+  await guide.getByRole("button", { name: "Got it" }).click();
+  await expect(guide).toHaveCount(0);
+  await page.getByTestId("key-form").getByRole("button", { name: "Cancel" }).click();
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  await expect(page.getByTestId("key-form")).toBeVisible();
   await expect(guide).toHaveCount(0);
 });

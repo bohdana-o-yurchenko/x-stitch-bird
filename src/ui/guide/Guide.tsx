@@ -33,9 +33,11 @@ export const TOURS: Record<string, Step[]> = {
     { id: "referenceTip", targets: ["ref-window"] },
     { id: "referenceMarks", targets: ["ref-marker", "ref-done"] },
   ],
+  // the first time an entry is being added to the key: symbols, and drawing your own
+  keyEntry: [{ id: "keySymbolTip", targets: ["symbol-quick", "symbol-draw"] }],
   // the first time Autofill is picked: what it needs, lining up, and that it isn't perfect
   autofill: [
-    { id: "autofillPrepare", targets: ["add-key", "tool-autofill"] },
+    { id: "autofillPrepare", targets: ["add-key", "tool-autofill"], tip: true },
     { id: "autofillAlign", targets: ["underlay-edit"] },
     { id: "autofillHonest", targets: ["tool-autofill"] },
   ],

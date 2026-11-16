@@ -742,7 +742,8 @@
       "points": {
         "1": "Stitch a few cells of each symbol by hand.",
         "2": "Pick <hl>Autofill</hl> (Shift+F) and click the 10 × 10 block you’ve lined up.",
-        "3": "It shows what it found — <hl>Accept</hl> or <hl>Decline</hl>, then on to the next block."
+        "3": "It shows what it found — <hl>Accept</hl> or <hl>Decline</hl>, then on to the next block.",
+        "4": "Works best when every key symbol looks exactly like the paper chart’s — draw your own where needed."
       },
       "tip": "It only fills cells it’s sure about. Check the result — it gets better the more you mark."
     },
@@ -823,7 +824,8 @@
         "1": "Make the <hl>key</hl> first — Autofill fills cells with its entries.",
         "2": "Put the chart under the stitches: <hl>Image behind the chart</hl>.",
         "3": "<hl>Stitch a few cells of each symbol by hand.</hl> Autofill only sees the symbols it has already learned from your stitches."
-      }
+      },
+      "tip": "Make every key symbol look exactly like the paper chart’s — draw your own where there’s no match. Autofill works best that way."
     },
     "autofillAlign": {
       "title": "Line the block up first",
@@ -853,6 +855,14 @@
       "points": {
         "1": "<hl>Symbols only</hl> — show the suggestions as symbols, or on their colour. Just this preview.",
         "2": "<hl>Hold the eye</hl> — the suggestions disappear while you hold it, so you can compare with the photo."
+      }
+    },
+    "keySymbolTip": {
+      "title": "A symbol for every entry",
+      "points": {
+        "1": "Each key entry gets a symbol — pick one from the row or from <hl>All…</hl>.",
+        "2": "Nothing like the paper chart’s? <hl>Draw your own</hl> with the pencil: circles, squares, stars, lines, arrows — filled, outlined or cut out.",
+        "3": "Most useful with <hl>Autofill</hl>: it works best when every symbol looks exactly like the one on the paper chart."
       }
     }
   },

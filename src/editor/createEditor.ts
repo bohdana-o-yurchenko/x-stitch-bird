@@ -168,7 +168,8 @@ export class Editor {
   openKeyForm(edit?: KeyIndex) {
     this.tools.cancel();
     this.shortcuts.releaseAll();
-    this.store.setState({ keyForm: { edit, seq: (this.state.keyForm?.seq ?? 0) + 1 }, panelCollapsed: false });
+    // the first time an entry is added: a tip on symbols and drawing your own (shown once — the guide keeps track)
+    this.store.setState({ keyForm: { edit, seq: (this.state.keyForm?.seq ?? 0) + 1 }, panelCollapsed: false, ...(edit ? {} : { pendingTip: "keyEntry" }) });
   }
 
   closeKeyForm() {

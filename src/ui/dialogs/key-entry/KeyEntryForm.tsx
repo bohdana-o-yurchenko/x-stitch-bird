@@ -95,10 +95,10 @@ function SymbolPicker({ value, used, symbols, onPick }: { value: string; used: S
   return (
     <div className={s.choiceRow}>
       <span className={s.label}>{lines ? t("lineStyle") : t("symbol")}</span>
-      <div className={s.quick} data-testid="symbol-quick">{quick.map((sym) => cell(sym, false))}</div>
+      <div className={s.quick} data-testid="symbol-quick" data-guide="symbol-quick">{quick.map((sym) => cell(sym, false))}</div>
       <button ref={more} type="button" className={cx(ui.btn, ui.sm, s.allBtn)} aria-expanded={!!pop} data-testid="symbol-button" onClick={() => (pop ? setPop(null) : open())}>{t("allSymbols")}</button>
       {!lines && (
-        <button type="button" className={cx(ui.btn, ui.sm, s.allBtn)} title={t("drawSymbol")} aria-label={t("drawSymbol")} data-testid="symbol-draw" onClick={() => { setPop(null); setDrawing(true); }}><Icon name="pencil" size={14} /></button>
+        <button type="button" className={cx(ui.btn, ui.sm, s.allBtn)} title={t("drawSymbol")} aria-label={t("drawSymbol")} data-testid="symbol-draw" data-guide="symbol-draw" onClick={() => { setPop(null); setDrawing(true); }}><Icon name="pencil" size={14} /></button>
       )}
       {drawing && createPortal(<SymbolDrawer initial={value} onUse={onPick} onClose={() => setDrawing(false)} />, document.body)}
       {pop && createPortal(
