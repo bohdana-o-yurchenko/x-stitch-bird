@@ -4,6 +4,7 @@ import { resolveColor } from "../../pattern/resolve";
 import type { Corner, KeyIndex, Pattern } from "../../pattern/types";
 import { stitchType } from "../../stitches/registry";
 import { cornerOffset } from "./partials";
+import { isPointBead } from "../../entryKinds/registry";
 
 /*
  * Open Cross Stitch export (SPEC §10.3). Each used key entry becomes its own palette item; beads are
@@ -49,10 +50,11 @@ export function exportOxs(p: Pattern): string {
     const e = resolveColor(p, entry.src);
     if (!e) return;
     if (entry.t === "bead") return void beadIndex(e);
+    // a floss + bead sewn between cells: its blend item says so (it goes out as a short backstitch, see below)
     const suffix = entry.t === "back" ? " (backstitch)" : entry.t === "knot" ? " (French knot)" : stitchType(entry.st).id === "full" ? "" : " (half cross)";
     if (entry.t === "combo" && e.thread && e.bead) {
       items.push({
-        number: `${e.bead.code}+${e.thread.code}`, name: `${e.bead.code} + ${e.thread.code}`, color: hx(e.thread.hex), blendcolor: hx(e.bead.hex),
+        number: `${e.bead.code}+${e.thread.code}`, name: `${e.bead.code} + ${e.thread.code}${isPointBead(entry) ? " (bead between cells)" : ""}`, color: hx(e.thread.hex), blendcolor: hx(e.bead.hex),
         strands: entry.n ?? 2, comments: "blend", parts: [{ e: e.bead, n: 1 }, { e: e.thread, n: entry.n ?? 2 }],
       });
     } else if (e.isBlend && e.parts) {
@@ -118,7 +120,19 @@ export function exportOxs(p: Pattern): string {
   segments.forEach((s, q) => {
     if (keyItem.has(s.k)) L.push(`<backstitch x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" palindex="${keyItem.get(s.k)}" objecttype="backstitch" sequence="${q}"/>`);
   });
-  for (const k of knots) if (keyItem.has(k.k)) objects.push(`<object x1="${k.x}" y1="${k.y}" palindex="${keyItem.get(k.k)}" objecttype="knot"/>`);
+  let sequence = segments.length;
+  for (const k of knots) {
+    const entry = p.key[k.k], e = entry && resolveColor(p, entry.src);
+    if (!entry || !e) continue;
+    // beads between cells: a plain bead is a bead at its point; a floss + bead is its tacking stitch — a short
+    // backstitch through the point, in the blend of floss and bead — so readers don't take it for a French knot
+    if (entry.t === "bead") {
+      if (beadItem.has(e.id)) objects.push(`<object x1="${k.x}" y1="${k.y}" palindex="${beadItem.get(e.id)}" objecttype="${beadKind.get(e.id)}"/>`);
+    } else if (entry.t === "combo") {
+      const cx = (v: number) => Math.min(p.w, Math.max(0, v)), cy = (v: number) => Math.min(p.h, Math.max(0, v));
+      if (keyItem.has(k.k)) L.push(`<backstitch x1="${cx(k.x - 0.5)}" y1="${cy(k.y + 0.5)}" x2="${cx(k.x + 0.5)}" y2="${cy(k.y - 0.5)}" palindex="${keyItem.get(k.k)}" objecttype="backstitch" sequence="${sequence++}"/>`);
+    } else if (keyItem.has(k.k)) objects.push(`<object x1="${k.x}" y1="${k.y}" palindex="${keyItem.get(k.k)}" objecttype="knot"/>`);
+  }
   L.push("</backstitches>", "<ornaments_inc_knots_and_beads>", ...objects, "</ornaments_inc_knots_and_beads>", "<commentboxes>", "</commentboxes>", "</chart>");
   return L.join("\n");
 }

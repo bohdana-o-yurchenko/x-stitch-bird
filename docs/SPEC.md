@@ -1187,7 +1187,9 @@ chart. Plain image arithmetic, no AI (§15.12).
 selection tool. It needs the image behind the chart, shown and loaded; otherwise a toast and the tool stays as it was.
 1. Line the photo up on a block, as today. Stitch one cell of each symbol in the block the app hasn't seen yet.
 2. Pick **Autofill** (toolbar, Shift+F, or *Autofill* in the image's panel). Instead of single cells, the
-   10 × 10 block under the pointer is outlined (dashed); a hint bar says to click the block.
+   10 × 10 block under the pointer is shown in the look of the image's edit frame: a light accent wash, a white halo,
+   a dashed accent outline and the 8 accent handles. A hint bar says to click the block. The chosen block keeps the
+   frame with a solid outline.
 3. **Click the block** you lined up. Only the **sure** proposals appear, faintly (the entry at half strength), and
    **Accept** / **Decline** show just above the block (below it at the top of the view), with the count
    ("38 symbols found · 4 left empty"). While reviewing, the chart takes no drawing.
@@ -1336,7 +1338,9 @@ chart it is the bead alone (no floss shown), and it counts as a bead.
 - Counts as beads (not knots) in the totals; the shopping list adds the bead and half a cross of floss each.
   Pattern Keeper's list of what it can't track counts them as floss + bead.
 - PDF chart to print: on every chart, like beads in cells; in both keys as a bead.
-- OXS: written as knot objects of the floss + bead's palette item (the format has nothing closer).
+- OXS: not as knots (readers showed them as French knots of a blend). A floss + bead between cells is its tacking
+  stitch: a short backstitch through the point (one cell's diagonal, kept inside the chart) in the floss + bead's
+  blend palette item, named "… (bead between cells)". A plain bead between cells is a bead object at its point.
 
 ### 15.15 Chart underlay — a reference image behind the stitches (implemented 2026-11-14)
 Goal: put a scan or photo of the paper chart **on the chart canvas itself**, line it up with the grid, then stitch

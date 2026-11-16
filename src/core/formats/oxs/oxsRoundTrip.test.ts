@@ -35,4 +35,22 @@ describe("OXS round trip", () => {
     expect(kind(q.layers.beads[5]!)).toBe("bead:-:02011");
     expect(q.layers.segments.map((s) => [s.x1, s.y1, s.x2, s.y2, kind(s.k)])).toEqual([[0, 2, 3, 2, "back:-:321"]]);
   });
+
+  it("writes beads between cells as what they are, not as French knots", () => {
+    const p = createPattern(6, 6, "Points");
+    p.combos["combo:a"] = { thread: "dmc:321", bead: "bead:00557" };
+    const tacked = addEntry(p, { t: "combo", src: "combo:a", n: 1, st: "point" }, ALL_SYMBOLS);
+    const plain = addEntry(p, { t: "bead", src: "bead:02011", st: "point" }, ALL_SYMBOLS);
+    const knot = addEntry(p, { t: "knot", src: "dmc:310", n: 2 }, ALL_SYMBOLS);
+    p.layers.knots.push({ x: 2, y: 2, k: tacked }, { x: 0, y: 3, k: tacked }, { x: 4, y: 4, k: plain }, { x: 5, y: 1, k: knot });
+    const xml = exportOxs(p);
+    // floss + bead: its blend palette item, named so, and a short backstitch through the point (kept in the chart)
+    expect(xml).toMatch(/<palette_item index="1" number="00557\+321" name="00557 \+ 321 \(bead between cells\)"[^>]*comments="blend"/);
+    expect(xml).toContain('<backstitch x1="1.5" y1="2.5" x2="2.5" y2="1.5" palindex="1" objecttype="backstitch"');
+    expect(xml).toContain('<backstitch x1="0" y1="3.5" x2="0.5" y2="2.5" palindex="1" objecttype="backstitch"');
+    // a plain bead: a bead at its point; only the real knot is a knot
+    expect(xml).toMatch(/<object x1="4" y1="4" palindex="\d+" objecttype="bead"\/>/);
+    expect(xml.match(/objecttype="knot"/g)).toHaveLength(1);
+  });
 });
+

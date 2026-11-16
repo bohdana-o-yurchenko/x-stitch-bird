@@ -249,23 +249,43 @@ export class ChartRenderer {
     }
   }
 
-  /** Symbol matching: the block between heavy lines, and the proposals at half strength. */
+  /**
+   * Autofill: the block between heavy lines — in the look of the image's edit frame (white halo, accent outline,
+   * accent handles) over a light accent wash, dashed while picking and solid once chosen — and the proposals at
+   * half strength.
+   */
   private drawMatch(m: NonNullable<ChartScene["match"]>, s: ChartScene, f: ChartFrame) {
-    const g = this.g, t = this.theme, { z, ox, oy } = f, b = m.block;
+    const g = this.g, t = this.theme, { z, ox, oy } = f, H = t.underlayFrame.handle;
+    const x = ox + m.block.x * z, y = oy + m.block.y * z, w = m.block.w * z, h = m.block.h * z;
+    g.save();
+    if (!m.chosen) {
+      g.globalAlpha = 0.14;
+      g.fillStyle = t.accent;
+      g.fillRect(x, y, w, h);
+      g.globalAlpha = 1;
+    }
     if (m.ghosts) {
-      const fo = { z, ox: ox + b.x * z, oy: oy + b.y * z, x0: 0, y0: 0, x1: b.w, y1: b.h };
+      const fo = { z, ox: x, oy: y, x0: 0, y0: 0, x1: m.block.w, y1: m.block.h };
       g.globalAlpha = 0.5;
       drawCells(g, m.ghosts, s.palette, fo, viewStyle(s.view, t), false);
       g.globalAlpha = 1;
     }
-    g.save();
-    if (!m.chosen) g.setLineDash([6, 4]);
-    g.lineWidth = 3;
+    g.lineWidth = 5;
     g.strokeStyle = "rgba(255,255,255,0.9)";
-    g.strokeRect(ox + b.x * z, oy + b.y * z, b.w * z, b.h * z);
-    g.lineWidth = 2;
+    g.strokeRect(x, y, w, h);
+    if (!m.chosen) g.setLineDash([9, 6]);
+    g.lineWidth = 2.5;
     g.strokeStyle = t.accent;
-    g.strokeRect(ox + b.x * z, oy + b.y * z, b.w * z, b.h * z);
+    g.strokeRect(x, y, w, h);
+    g.setLineDash([]);
+    for (const [hx, hy] of [[0, 0], [0.5, 0], [1, 0], [1, 0.5], [1, 1], [0.5, 1], [0, 1], [0, 0.5]] as const) {
+      const px = x + hx * w - H / 2, py = y + hy * h - H / 2;
+      g.fillStyle = t.accent;
+      g.fillRect(px, py, H, H);
+      g.lineWidth = 1;
+      g.strokeStyle = "#fff";
+      g.strokeRect(px + 0.5, py + 0.5, H - 1, H - 1);
+    }
     g.restore();
   }
 
