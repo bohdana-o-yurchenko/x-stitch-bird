@@ -1597,7 +1597,22 @@ Both languages.
 - **Beads**: today a count of beads. Add packs: the catalogue now knows each bead's package size (§2.2,
   `ColorEntry.pack`). The list then shows "2 packs (≈ 640 beads)". What's left is code only.
 
-### 15.23 Accounts and cloud storage with Neon; sign-in; pattern gallery (backlog, added 2026-11-16) — effort XL
+### 15.23 Accounts and cloud storage with Neon; sign-in; pattern gallery (step 1 built 2026-11-16) — effort XL
+**Built (step 1):** Neon project `still-rain-82314870` (eu-central-1), branch `production`; `neon.ts` declares Auth and
+a private `assets` bucket.
+- **Sign-in** (header, "Sign in"): Google, or a code by email (the first sign-in creates the account). Managed Better
+  Auth through the app's own `/api/auth/*`. Signed in: an initial in the header, with the email and Sign out.
+- **Patterns in the account** (Postgres table `patterns`, `db/migrations/001_patterns.sql`, `node scripts/db/migrate.mjs`):
+  while signed in, every save to the library also goes to the account (toast says so), with a small colour preview in
+  the bucket (`users/<id>/previews/<pattern>.png`). The Open dialog lists both, marked "this browser", "in your
+  account" or both. API: `/api/patterns` (list), `/api/patterns/[id]` (GET, PUT, DELETE), `/api/patterns/[id]/preview`
+  (PUT png, GET → short-lived signed link); every route checks the session and touches only that user's rows.
+- Signed out, nothing changes: everything stays in the browser.
+**Still to do:** the gallery page with previews; offering to upload this browser's patterns on first sign-in; custom
+threads in the account; pictures (photos behind the chart, photo windows) in the account; production setup (Vercel
+env vars, trusted domain, own SMTP, own Google OAuth app — see below).
+
+**Plan as discussed:**
 A big turn: patterns are stored on a server under a user account, not only in the browser.
 - **Sign-in**: Neon Auth (email code or magic link, Google). Without signing in, the app works as now, in the
   browser.

@@ -1150,3 +1150,14 @@ Decisions taken while implementing this plan. Each one lives in the single place
   (third argument: Onest). `drawFooter` (pdfLayout) writes the app-name footer. `PdfPage` draws rectangles, polygons,
   circles, paths, clipping and see-through fills (ExtGState). Editor: `exportChartPdf` / command
   `file.exportChartPdf`; both PDFs load their fonts through `pdfFonts()`.
+
+## Server level (2026-11-16)
+
+`src/server/` is server-only code, imported only by the API routes in `src/app/api/` (eslint level `server`: core +
+server). `auth.ts` — Neon Managed Better Auth (`createNeonAuth`, `currentUserId()`); `db.ts` — `@neondatabase/serverless`
+over HTTP, pooled `DATABASE_URL`; `storage.ts` — the `assets` bucket via `files-sdk/neon`; `patterns.ts` — the user's
+patterns (every query scoped by user id). Env: `DATABASE_URL(_UNPOOLED)`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_JWKS_URL`,
+`NEON_AUTH_COOKIE_SECRET` (app secret, not from Neon), `AWS_*` (storage) — `neon deploy` / `neon env pull` write them
+to `.env.local`. Browser side: `ui/account` (auth client, account button), `persistence/cloud/accountPatterns.ts`
+(`withAccount(local)`: local-first, also to the account while signed in; `account.signedIn` set by
+`Editor.setAccount`). Schema changes: `db/migrations/*.sql`, applied by `node scripts/db/migrate.mjs`.
