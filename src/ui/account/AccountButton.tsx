@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { cx, Dropdown, ui } from "../common/widgets";
 import { SignInDialog } from "./SignInDialog";
 import { useEditor, useEditorState } from "../hooks/editor";
+import { useRouter } from "@/i18n/navigation";
 import { authClient } from "./authClient";
 import s from "./account.module.css";
 
@@ -17,6 +18,7 @@ export function AccountButton() {
   const ed = useEditor();
   const { data: session, isPending } = authClient.useSession();
   const user = useEditorState((st) => st.account);
+  const router = useRouter();
   const open = useEditorState((st) => st.signInOpen);
   const setOpen = (on: boolean) => ed.store.setState({ signInOpen: on });
 
@@ -33,6 +35,10 @@ export function AccountButton() {
       signInOpen={open}
       setSignInOpen={setOpen}
       onSignedIn={(email) => ed.toast("account.signedIn", { email })}
+      onMyPatterns={() => {
+        ed.flush();
+        router.push("/patterns");
+      }}
       onSignedOut={() => {
         ed.setAccount(null);
         ed.toast("account.signedOut");
@@ -42,12 +48,14 @@ export function AccountButton() {
 }
 
 /** "Sign in", or signed in: the initial, with the email and Sign out. Shared by the editor and the patterns page. */
-export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, onSignedOut }: {
+export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, onSignedOut, onMyPatterns }: {
   user: { email: string; name?: string } | null;
   signInOpen: boolean;
   setSignInOpen: (on: boolean) => void;
   onSignedIn?: (email: string) => void;
   onSignedOut?: () => void;
+  /** Leave for the My patterns page (not given on that page itself). */
+  onMyPatterns?: () => void;
 }) {
   const t = useTranslations("account");
   if (!user)
@@ -66,6 +74,7 @@ export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, onSig
         items={[
           { label: user.email, hint: t("signedInHint"), onClick: () => {} },
           "-",
+          ...(onMyPatterns ? [{ label: t("myPatterns"), onClick: onMyPatterns }, "-" as const] : []),
           { label: t("signOut"), onClick: async () => { await authClient.signOut(); onSignedOut?.(); } },
         ]}
       />

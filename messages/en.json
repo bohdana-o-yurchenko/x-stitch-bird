@@ -997,7 +997,8 @@
     "signedInHint": "Signed in — patterns you save also go to your account",
     "signOut": "Sign out",
     "signedIn": "Signed in as {email}",
-    "signedOut": "Signed out — patterns stay in this browser"
+    "signedOut": "Signed out — patterns stay in this browser",
+    "myPatterns": "My patterns"
   },
   "keepPattern": {
     "title": "Keep this pattern?",

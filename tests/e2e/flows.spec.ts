@@ -252,3 +252,11 @@ test("the logo leads to My patterns: cards with previews, open one in the editor
   await page.getByTestId("home-new").click();
   await expect(page.getByRole("dialog", { name: "New pattern" })).toBeVisible();
 });
+
+test("signed in, the account menu leads to My patterns", async ({ page }) => {
+  await page.evaluate(() => (window as unknown as { __stitchwork: { setAccount(u: unknown): void } }).__stitchwork.setAccount({ id: "e2e", email: "e2e@example.com" }));
+  await page.getByRole("button", { name: /e2e@example\.com/ }).click();
+  await page.getByRole("menuitem", { name: "My patterns" }).click();
+  await expect(page).toHaveURL(/\/en\/patterns$/);
+  await expect(page.getByRole("heading", { name: "My patterns" })).toBeVisible();
+});

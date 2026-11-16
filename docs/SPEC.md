@@ -1675,7 +1675,8 @@ account at once.
 **Next:** My patterns (§15.26).
 
 ### 15.26 The main page: My patterns (built 2026-11-17)
-`/[locale]/patterns` (`ui/home`, `editor/library.ts`). The editor's logo and name lead here (the open pattern is
+`/[locale]/patterns` (`ui/home`, `editor/library.ts`). The editor's logo and name lead here, and so does
+**My patterns** in the account menu (signed in) (the open pattern is
 saved first); the editor stays at `/[locale]`, so links in exported files keep working. A header (logo, languages,
 account, **Open the editor**), a left column of sections — only *Patterns* now; threads and the stash come later —
 and **My patterns**: a *New pattern* card (→ the editor's New dialog, `/?new=1`) and a card per saved pattern —
