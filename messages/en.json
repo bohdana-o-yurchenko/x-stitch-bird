@@ -63,7 +63,9 @@
     "zoomIn": "Zoom in (+)",
     "zoomOut": "Zoom out (−)",
     "brushSizeN": "Brush {n}×{n}",
-    "toolbar": "Drawing tools"
+    "toolbar": "Drawing tools",
+    "autofill": "Autofill (Shift+F) — reads a 10 × 10 block off the image behind the chart",
+    "pausedForImage": "The tools wait while you edit the image behind the chart (U or Esc to finish)"
   },
   "status": {
     "position": "Column <b>{col}</b> · Row <b>{row}</b>",
@@ -294,7 +296,9 @@
       "orange": "Orange",
       "purple": "Purple",
       "own": "Own colour"
-    }
+    },
+    "placement": "Placement",
+    "placementCell": "In a cell"
   },
   "picker": {
     "searchThread": "Search DMC number or name",
@@ -568,8 +572,8 @@
     "rotateLeft": "Turn left a little ([)",
     "rotateRight": "Turn right a little (])",
     "rotationReset": "0°",
-    "match": "Find symbols",
-    "matchHint": "Read the symbols of one 10 × 10 block off the image (Shift+F)"
+    "match": "Autofill",
+    "matchHint": "Fill one 10 × 10 block at a time from the image (Shift+F)"
   },
   "fileMenu": {
     "label": "Menu ▾",
@@ -625,7 +629,8 @@
     "select": "Select",
     "magicWand": "Magic wand",
     "backstitch": "Backstitch line",
-    "knot": "French knot"
+    "knot": "French knot",
+    "autofill": "Autofill"
   },
   "current": {
     "title": "Drawing with",
@@ -883,11 +888,13 @@
     }
   },
   "match": {
-    "pick": "Click the 10 × 10 block you've lined up",
-    "cancel": "Cancel",
+    "pick": "Autofill: click the 10 × 10 block you've lined up",
     "found": "{n, plural, one {# symbol found} other {# symbols found}}",
     "unsure": "{n} left empty",
     "accept": "Accept",
-    "decline": "Decline"
+    "decline": "Decline",
+    "paused": "Autofill waits while you edit the image",
+    "tipTitle": "Not quite right?",
+    "tip": "Stitch a few more cells by hand, then try again. Autofill learns from what you mark — it gets better as you go."
   }
 }

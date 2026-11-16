@@ -1,5 +1,4 @@
 import type { Editor } from "../createEditor";
-import { hoverMatching, pickBlock } from "../matching/matching";
 import { panTool } from "./pan";
 import { PLACEMENT_TOOLS, resolveTool, toolById } from "./registry";
 import type { Tool, ToolPointer } from "./types";
@@ -25,7 +24,6 @@ export class ToolManager {
 
   cursor(): string {
     if (this.panning) return "grabbing";
-    if (this.ed.state.match) return this.ed.state.match.phase === "pick" ? "pointer" : "default";
     if (this.ed.underlay.editing && !this.ed.state.momentaryTool) return this.ed.underlay.cursorAt(this.lastGrid, this.lastScreen);
     if (this.ed.state.floating) return "move";
     return this.resolve().cursor;
@@ -46,8 +44,6 @@ export class ToolManager {
       return;
     }
     if (p.button !== 0) return;
-    // symbol matching: a click picks the block; while reviewing, the chart waits for Accept or Decline
-    if (ed.state.match) return pickBlock(ed, p.cell);
     if (ed.underlay.editing) {
       ed.underlay.pointerDown(p.grid, { x: p.sx, y: p.sy });
       this.underlayDrag = true;
@@ -66,10 +62,6 @@ export class ToolManager {
     this.lastGrid = p.grid;
     this.lastScreen = { x: p.sx, y: p.sy };
     if (this.underlayDrag) return this.ed.underlay.pointerMove(p.grid, this.lastScreen, p.shift);
-    if (this.ed.state.match && !this.active) {
-      hoverMatching(this.ed, p.cell);
-      return this.ed.setHover(p.cell, 1, false);
-    }
     if (this.ed.underlay.editing && !this.active) {
       this.ed.underlay.hover(this.lastScreen);
       return this.ed.setHover(p.cell, 1, false);
@@ -110,6 +102,6 @@ export class ToolManager {
   private showsHoverSquare(): boolean {
     const t = this.resolve();
     const onLine = t.id === "eraser" && !!this.ed.state.overlay.eraseHighlight;
-    return t.id !== "pan" && t.id !== "backstitch" && t.id !== "knot" && t.id !== "partial" && !onLine && !this.ed.state.floating;
+    return t.id !== "pan" && t.id !== "autofill" && t.id !== "backstitch" && t.id !== "knot" && t.id !== "partial" && !onLine && !this.ed.state.floating;
   }
 }

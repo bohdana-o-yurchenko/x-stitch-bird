@@ -1,6 +1,6 @@
 import { PARTIAL_KINDS } from "@/core/stitches/partialKinds";
 import type { CheckOptions } from "@/core/checks/checks";
-import { acceptMatching, endMatching, toggleMatching } from "../matching/matching";
+import { acceptMatching, declineBlock } from "../matching/matching";
 import { closeChecks, goToFinding, ignoreFinding, runChartChecks, stepFinding } from "../checks/checks";
 import type { TransformId } from "@/core/transform/cellTransform";
 import { MIRROR_MODES } from "@/core/transform/mirror";
@@ -21,7 +21,7 @@ const hasSelection = (ed: Editor) => !!ed.state.selection || !!ed.state.floating
 
 export const COMMANDS: readonly Command[] = [
   // tools & drawing
-  { id: "tool.select", run: (ed, id) => ed.setTool(id as ToolId) },
+  { id: "tool.select", run: (ed, id) => ed.setTool(id as ToolId), enabled: (ed) => !ed.underlay.editing },
   { id: "tool.cancel", run: (ed) => ed.tools.cancel() },
   { id: "draw.toggleOverride", run: (ed) => { const on = !ed.state.override; ed.store.setState({ override: on }); ed.toast(on ? "toasts.overrideOn" : "toasts.overrideOff"); } },
   {
@@ -138,9 +138,8 @@ export const COMMANDS: readonly Command[] = [
   { id: "checks.ignore", run: (ed, id) => ignoreFinding(ed, String(id)) },
   { id: "checks.close", run: (ed) => closeChecks(ed) },
   // symbol matching in a block (SPEC §15.11)
-  { id: "match.toggle", run: (ed) => toggleMatching(ed) },
   { id: "match.accept", run: (ed) => acceptMatching(ed) },
-  { id: "match.decline", run: (ed) => endMatching(ed) },
+  { id: "match.decline", run: (ed) => declineBlock(ed) },
   // snapshots
   { id: "snapshot.restore", run: (ed, time) => ed.snapshots.restore(time as number) },
 ];

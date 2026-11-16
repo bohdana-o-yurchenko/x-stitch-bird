@@ -4,6 +4,7 @@ import { downscaleToBlob, loadImage } from "@/platform/images";
 import { RULER_SIZE } from "@/render/ChartRenderer";
 import { runStraighten } from "../heavy";
 import type { Editor } from "../createEditor";
+import { PICKING } from "../matching/matching";
 
 const SAVE_DELAY = 700;
 /** Photos larger than this (longer side, px) are scaled down once when added; others are stored untouched. */
@@ -111,8 +112,8 @@ export class UnderlayService {
   /** Behind = stitching; off = edit mode, which starts with a fresh edit frame and its own undo. */
   setBehind(behind: boolean) {
     this.update({ behind, visible: true });
-    // symbol matching reads the photo where it is: moving it ends the mode
-    this.ed.store.setState({ underlayFrame: null, underlayHot: null, ...(behind ? {} : { match: null }) });
+    // Autofill reads the photo where it is: editing it pauses the tool and drops the block being reviewed
+    this.ed.store.setState({ underlayFrame: null, underlayHot: null, ...(!behind && this.ed.state.match ? { match: PICKING } : {}) });
     if (behind) this.undoStack = [];
     this.ed.tools.leave();
   }
@@ -127,7 +128,8 @@ export class UnderlayService {
 
   remove() {
     this.set(null);
-    this.ed.store.setState({ underlayImage: null, match: null });
+    this.ed.store.setState({ underlayImage: null });
+    if (this.ed.state.tool === "autofill") this.ed.setTool("pencil");
   }
 
   nudge(dx: number, dy: number) {

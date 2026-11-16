@@ -50,6 +50,8 @@ export function cleanEntry(k: Omit<KeyEntry, "sym"> & { sym?: string }, sym: str
   const e: KeyEntry = { t: k.t, src: k.src, sym };
   if (k.t !== "bead") e.n = k.n ?? null;
   if (k.t === "thread" || k.t === "combo") e.st = k.st === "point" && k.t !== "combo" ? "full" : k.st ?? "full";
+  // a plain bead sits in its cell unless it is sewn between cells
+  if (k.t === "bead" && k.st === "point") e.st = "point";
   if (k.t === "knot" && k.wraps) e.wraps = k.wraps;
   const ink = k.t === "back" ? cleanInk(k.ink) : undefined;
   if (ink && ink !== DEFAULT_LINE_INK) e.ink = ink;

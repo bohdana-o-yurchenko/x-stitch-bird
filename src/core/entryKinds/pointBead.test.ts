@@ -42,4 +42,19 @@ describe("floss + bead on a grid point (like a French knot)", () => {
     // Pattern Keeper: a combo, not a knot
     expect(checkPatternKeeper(p).issues).toEqual([{ kind: "combo", count: 4 }]);
   });
+
+  it("works for a plain bead too: in its cell by default, or between cells", () => {
+    const p = createPattern(6, 6);
+    const inCell = addEntry(p, { t: "bead", src: "bead:00557" }, ALL_SYMBOLS);
+    const between = addEntry(p, { t: "bead", src: "bead:02011", st: "point" }, ALL_SYMBOLS);
+    expect([p.key[inCell]!.st, p.key[between]!.st]).toEqual([undefined, "point"]);
+    expect([entryLayer(p.key[inCell]!), entryLayer(p.key[between]!)]).toEqual(["beads", "knots"]);
+    p.layers.beads[0] = inCell;
+    p.layers.knots.push({ x: 2, y: 2, k: between }, { x: 3, y: 2, k: between });
+    const usage = computeUsage(p);
+    expect([chartTotals(p, usage).beads, chartTotals(p, usage).knots]).toEqual([3, 0]);
+    expect(classicSkeins.calculate({ pattern: p, usage, settings: {} }).lines.map((l) => [l.item.id, l.quantity])).toEqual([["bead:00557", 1], ["bead:02011", 2]]);
+    expect(checkPatternKeeper(p).issues).toEqual([{ kind: "bead", count: 3 }]);
+    expect(parsePattern(serializePattern(p), ALL_SYMBOLS).pattern.key[between]!.st).toBe("point");
+  });
 });

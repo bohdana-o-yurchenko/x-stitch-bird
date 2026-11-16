@@ -16,6 +16,7 @@ import { Autosave } from "./autosave";
 import { CommandRegistry } from "./commands/registry";
 import { History } from "./history/history";
 import { ImageService } from "./images/ImageService";
+import { canMatch, PICKING } from "./matching/matching";
 import { ReferenceService } from "./references/references";
 import { SelectionService } from "./selection/selection";
 import { ShortcutManager } from "./shortcuts/ShortcutManager";
@@ -185,8 +186,10 @@ export class Editor {
   }
 
   setTool(tool: ToolId) {
+    // Autofill reads the image behind the chart
+    if (tool === "autofill" && !canMatch(this)) return this.toast("toasts.matchNeedsUnderlay");
     this.tools.cancel();
-    this.store.setState({ tool, overlay: { ...this.state.overlay, preview: null, partialPreview: null, knotPreview: null, hoverPoint: null, marquee: null, eraseHighlight: null } });
+    this.store.setState({ tool, match: tool === "autofill" ? (this.state.match ?? PICKING) : null, overlay: { ...this.state.overlay, preview: null, partialPreview: null, knotPreview: null, hoverPoint: null, marquee: null, eraseHighlight: null } });
   }
 
   setMomentaryTool(tool: ToolId) {

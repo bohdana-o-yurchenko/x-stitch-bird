@@ -1,7 +1,7 @@
 /** Index into `Pattern.key`. 0 always means "nothing". */
 export type KeyIndex = number;
 
-/** `point`: floss + bead only — the bead sewn on a grid point, like a French knot, not in a cell. */
+/** `point`: beads only (plain or with floss) — sewn on a grid point, like a French knot, not in a cell. */
 export type StitchTypeId = "full" | "half" | "halfb" | "point";
 export type EntryKindId = "thread" | "combo" | "bead" | "back" | "knot";
 export type PartialKindId = "quarter" | "threeQuarter" | "petite";

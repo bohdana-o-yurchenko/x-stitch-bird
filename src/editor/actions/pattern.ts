@@ -7,6 +7,7 @@ import { reframe as reframeCore, resizePattern } from "@/core/transform/wholeCha
 import type { RefWindowData } from "@/persistence/ports";
 import type { UnderlayData } from "@/core/underlay/underlay";
 import type { Editor } from "../createEditor";
+import { PICKING } from "../matching/matching";
 
 /** Make `p` the edited pattern: fresh history, no selection, view fitted, its reference windows restored. */
 export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null = null, underlay: UnderlayData | null = null) {
@@ -15,7 +16,7 @@ export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null
   ed.history.clear();
   ed.tools.cancel();
   const keep = ed.state.activeEntry && p.key[ed.state.activeEntry] ? ed.state.activeEntry : Math.max(0, p.key.findIndex((e, i) => i > 0 && e));
-  ed.store.setState({ doc: p, selection: null, floating: null, activeEntry: keep, keyForm: null, match: null, overlay: { ...ed.state.overlay, chain: null, preview: null } });
+  ed.store.setState({ doc: p, selection: null, floating: null, activeEntry: keep, keyForm: null, match: ed.state.tool === "autofill" ? PICKING : null, overlay: { ...ed.state.overlay, chain: null, preview: null } });
   ed.changed({ keys: true, structural: true });
   ed.viewport.fit();
   void ed.references.switchTo(p.id, refs);

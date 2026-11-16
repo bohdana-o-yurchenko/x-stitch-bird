@@ -71,7 +71,7 @@ export function UnderlayPanel() {
         </div>
         <div className={ui.row}>
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.openStraighten")}>{t("straighten")}</button>
-          <button type="button" className={cx(ui.btn, ui.sm)} title={t("matchHint")} data-testid="match-start" onClick={() => run("match.toggle")}>{t("match")}</button>
+          <button type="button" className={cx(ui.btn, ui.sm)} title={t("matchHint")} data-testid="match-start" onClick={() => run("tool.select", "autofill")}>{t("match")}</button>
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.fit")}>{t("fit")}</button>
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.resetCrop")}>{t("resetCrop")}</button>
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("underlay.replacePick")}>{t("replace")}</button>

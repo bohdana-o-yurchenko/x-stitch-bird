@@ -5,9 +5,9 @@ import { greyRegion } from "@/platform/images";
 import type { Editor } from "../createEditor";
 
 /*
- * Symbol matching in the editor (SPEC §15.11). Shift+F turns the mode on; the 10 × 10 block under the pointer
- * is outlined; a click reads that block off the photo and shows the sure proposals faintly, with Accept and
- * Decline above the block. Either one (or Esc) ends the mode. Unsure cells stay empty.
+ * Symbol matching in the editor (SPEC §15.11), the Autofill tool. The 10 × 10 block under the pointer is outlined;
+ * a click reads that block off the photo and shows the sure proposals faintly, with Accept and Decline above the
+ * block. Either one (Enter, Esc) goes on to the next block; the tool stays on. Unsure cells stay empty.
  */
 
 export type MatchState =
@@ -17,17 +17,10 @@ export type MatchState =
 /** Matching needs the photo behind the chart, shown and loaded. */
 export const canMatch = (ed: Editor) => !!ed.state.underlay?.visible && !!ed.state.underlayImage;
 
-export function toggleMatching(ed: Editor) {
-  if (ed.state.match) return endMatching(ed);
-  if (!canMatch(ed)) return ed.toast("toasts.matchNeedsUnderlay");
-  ed.tools.cancel();
-  // the photo goes behind the chart so the pointer picks blocks instead of moving the image
-  if (ed.underlay.editing) ed.underlay.setBehind(true);
-  const cell = ed.state.hoverCell;
-  ed.store.setState({ match: { phase: "pick", hover: cell && inChart(ed, cell) ? blockAt(ed.doc, cell.x, cell.y) : null } });
-}
+export const PICKING: MatchState = { phase: "pick", hover: null };
 
-export const endMatching = (ed: Editor) => ed.store.setState({ match: null });
+/** Decline: drop the proposals, on to the next block. */
+export const declineBlock = (ed: Editor) => ed.state.match && ed.store.setState({ match: PICKING });
 
 const inChart = (ed: Editor, c: Point) => c.x >= 0 && c.y >= 0 && c.x < ed.doc.w && c.y < ed.doc.h;
 
@@ -42,7 +35,8 @@ export function hoverMatching(ed: Editor, cell: Point) {
 /** A click in pick mode: read the block under the pointer. */
 export function pickBlock(ed: Editor, cell: Point) {
   const u = ed.state.underlay, img = ed.state.underlayImage;
-  if (ed.state.match?.phase !== "pick" || !inChart(ed, cell) || !u || !img) return;
+  if (ed.state.match?.phase !== "pick" || !inChart(ed, cell)) return;
+  if (!u || !img || !canMatch(ed)) return ed.toast("toasts.matchNeedsUnderlay");
   const block = blockAt(ed.doc, cell.x, cell.y), area = blockImageRect(u, block);
   if (!area.w || !area.h) return ed.toast("toasts.matchOffPhoto");
   reviewBlock(ed, block, cellPatches(u, greyRegion(img, area), block, ed.doc.w));
@@ -88,7 +82,7 @@ export function reviewBlock(ed: Editor, block: Rect, patches: Map<number, Patch>
   ed.store.setState({ match: { phase: "review", block, proposals: r.proposals, unsure: r.unsure.length, ghosts } });
 }
 
-/** Writes the proposals (one undo step) into cells still empty, and ends the mode. */
+/** Writes the proposals (one undo step) into cells still empty; on to the next block. */
 export function acceptMatching(ed: Editor) {
   const m = ed.state.match;
   if (m?.phase !== "review") return;
@@ -100,5 +94,5 @@ export function acceptMatching(ed: Editor) {
       else p.layers.stitches[cell] = k;
     }
   });
-  endMatching(ed);
+  ed.store.setState({ match: PICKING });
 }

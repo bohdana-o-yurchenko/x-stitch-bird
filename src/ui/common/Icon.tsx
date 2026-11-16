@@ -14,6 +14,7 @@ const ICONS: Record<string, ReactNode> = {
   group: <g {...S}><path d="M4 5h4M4 12h4M4 19h4" /><path d="M11 5h9M11 12h9M11 19h9" strokeWidth="2.6" /></g>,
   select: <g {...S}><rect x="4" y="4" width="16" height="16" strokeDasharray="3 3" /></g>,
   deselect: <g {...S}><rect x="4" y="4" width="16" height="16" strokeDasharray="3 3" /><path d="M9.5 9.5l5 5M14.5 9.5l-5 5" /></g>,
+  autofill: <g {...S}><rect x="3" y="7" width="13" height="13" rx="1.5" /><path d="M3 13.5h13M9.5 7v13" /><path d="M19 2v5M16.5 4.5h5" /></g>,
   wand: <g {...S}><path d="M5 19L15 9" /><path d="M15 3v3M18 6h3M19 2l-2 2M12 6l-1-1" /></g>,
   partial: <g {...S}><rect x="4" y="4" width="16" height="16" rx="1" /><path d="M4 4h8L4 12z" fill="currentColor" /></g>,
   knot: <g {...S}><circle cx="12" cy="12" r="5" fill="currentColor" fillOpacity=".3" /></g>,

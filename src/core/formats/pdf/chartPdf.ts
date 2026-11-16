@@ -225,10 +225,10 @@ function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayo
       symbols.add(s.sym, cx, cy, cell * 0.72, ink(k, s, s.bead?.ink ?? s.ink));
     }
 
-  // floss + bead sewn on grid points: on every chart, like the beads in cells
+  // beads sewn on grid points: on every chart, like the beads in cells
   for (const kn of knots) {
     const s = palette[kn.k];
-    if (!s || s.t !== "combo" || kn.x < t.x || kn.y < t.y || kn.x > t.x + t.w || kn.y > t.y + t.h) continue;
+    if (!s || (s.t !== "combo" && s.t !== "bead") || kn.x < t.x || kn.y < t.y || kn.x > t.x + t.w || kn.y > t.y + t.h) continue;
     page.circle(X(kn.x), Y(kn.y), cell * 0.3, colour ? { fill: fill(s.bead?.hex ?? s.hex), stroke: "#555555", width: 0.4 } : { fill: "#FFFFFF", stroke: "#777777", width: 0.5 });
     symbols.add(s.sym, X(kn.x), Y(kn.y), cell * 0.55, ink(kn.k, s, s.bead?.ink ?? s.ink));
   }
@@ -256,7 +256,7 @@ function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayo
     strokeLines(page, lines, draw);
     for (const kn of knots) {
       const s = palette[kn.k];
-      if (s && s.t !== "combo" && kn.x >= t.x && kn.y >= t.y && kn.x <= t.x + t.w && kn.y <= t.y + t.h) page.circle(X(kn.x), Y(kn.y), cell * 0.26, { fill: accents.line.get(kn.k) ?? s.hex, stroke: INK, width: 0.7 });
+      if (s && s.t === "knot" && kn.x >= t.x && kn.y >= t.y && kn.x <= t.x + t.w && kn.y <= t.y + t.h) page.circle(X(kn.x), Y(kn.y), cell * 0.26, { fill: accents.line.get(kn.k) ?? s.hex, stroke: INK, width: 0.7 });
     }
     page.restore();
   }

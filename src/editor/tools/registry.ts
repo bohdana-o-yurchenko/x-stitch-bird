@@ -7,6 +7,7 @@ import { partialTool } from "./partial";
 import { pencilTool } from "./pencil";
 import { pickerTool } from "./picker";
 import { magicWandTool, selectTool } from "./select";
+import { autofillTool } from "./autofill";
 import { filledRectTool, lineTool, rectTool } from "./shapes";
 import { entryPlacement } from "@/core/entryKinds/registry";
 import type { EditorState, ToolId } from "../store/editorStore";
@@ -25,6 +26,7 @@ export const TOOLS: readonly Tool[] = [
   panTool,
   selectTool,
   magicWandTool,
+  autofillTool,
 ];
 
 

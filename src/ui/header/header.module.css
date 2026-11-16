@@ -188,3 +188,11 @@
 .sizes.idle:hover {
   opacity: 0.8;
 }
+/* the image behind the chart is being edited: the tools wait */
+.paused {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+.paused > * {
+  pointer-events: none;
+}

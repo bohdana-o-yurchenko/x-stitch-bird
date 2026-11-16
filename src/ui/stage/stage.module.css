@@ -122,3 +122,55 @@
 .matchBar {
   align-items: center;
 }
+/* Autofill: the tip on Decline — it should pop, without asking for a click */
+.declineTip {
+  position: absolute;
+  right: 0;
+  width: 280px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+  animation: tipPop 0.22s cubic-bezier(0.2, 1.4, 0.4, 1);
+  z-index: 7;
+}
+.declineTip b {
+  display: block;
+  margin-bottom: 2px;
+}
+.tipBelow {
+  top: calc(100% + 10px);
+  transform-origin: 85% 0;
+}
+.tipAbove {
+  bottom: calc(100% + 10px);
+  transform-origin: 85% 100%;
+}
+.declineTip::before {
+  content: "";
+  position: absolute;
+  right: 36px;
+  border: 7px solid transparent;
+}
+.tipBelow::before {
+  bottom: 100%;
+  border-bottom-color: var(--accent);
+}
+.tipAbove::before {
+  top: 100%;
+  border-top-color: var(--accent);
+}
+@keyframes tipPop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

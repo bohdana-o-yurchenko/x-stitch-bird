@@ -42,7 +42,7 @@ export const classicSkeins: ShoppingCalculator = {
       const c = e && resolveColor(p, e.src);
       if (!e || !c) continue;
       const cells = u.cell ?? 0, n = e.n ?? 1;
-      if (e.t === "bead") addBead(c, cells);
+      if (e.t === "bead") addBead(c, cells + (u.knot ?? 0));
       else if (e.t === "combo") {
         addThread(c.thread, cells * n * stitchType(e.st).threadFactor);
         addBead(c.bead, cells);

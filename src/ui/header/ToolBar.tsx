@@ -23,6 +23,8 @@ export function ToolBar() {
   const canUndo = useEditorState((st) => st.canUndo || !!st.floating);
   const canRedo = useEditorState((st) => st.canRedo);
   const usesBrush = toolById(tool).usesBrush;
+  // while the image behind the chart is edited, the pointer moves the image: no tool works
+  const paused = useEditorState((st) => !!st.underlay && st.underlay.visible && !st.underlay.behind);
   const toolButton = (id: ToolId) => (
     <button key={id} type="button" className={cx(ui.tool, tool === id && ui.on)} title={t(id)} aria-label={t(id)} aria-pressed={tool === id} onClick={() => run("tool.select", id)}>
       <Icon name={toolById(id).icon} size={18} />
@@ -39,7 +41,7 @@ export function ToolBar() {
     if (tool !== "partial") run("tool.select", "partial");
   };
   return (
-    <div className={s.tools} role="toolbar" aria-label={t("toolbar")} data-guide="toolbar">
+    <div className={cx(s.tools, paused && s.paused)} role="toolbar" aria-label={t("toolbar")} aria-disabled={paused} title={paused ? t("pausedForImage") : undefined} data-guide="toolbar" data-testid="toolbar">
       <button type="button" className={ui.tool} title={t("undo")} disabled={!canUndo} onClick={() => run("history.undo")}><Icon name="undo" size={18} /></button>
       <button type="button" className={ui.tool} title={t("redo")} disabled={!canRedo} onClick={() => run("history.redo")}><Icon name="redo" size={18} /></button>
       <span className={s.sep} />
@@ -66,6 +68,8 @@ export function ToolBar() {
       {(["picker", "pan"] as const).map(toolButton)}
       <span className={s.sep} />
       {(["select", "magicWand"] as const).map(toolButton)}
+      <span className={s.sep} />
+      {toolButton("autofill")}
     </div>
   );
 }

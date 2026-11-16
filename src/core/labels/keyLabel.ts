@@ -23,7 +23,7 @@ export interface LabelData {
 export function labelData(e: KeyEntry, c: ColorEntry | undefined): LabelData {
   const base = { kind: e.t, name: c?.name ?? "?", strands: e.n ?? null, stitch: null, blend: false };
   if (!c) return { ...base, title: "?" };
-  if (e.t === "bead") return { ...base, strands: null, title: brandCode(c), series: c.series };
+  if (e.t === "bead") return { ...base, strands: null, title: brandCode(c), series: c.series, stitch: e.st === "point" ? "point" : null };
   if (e.t === "combo")
     return { ...base, title: `${brandCode(c.thread)} + ${brandCode(c.bead)}`, stitch: e.st ?? "full", beadName: c.bead?.name, name: c.thread?.name ?? "?" };
   const blend = !!c.isBlend;
@@ -42,7 +42,7 @@ export function formatLabel(d: LabelData, t: Translate): { title: string; sub: s
   const parts: (string | null)[] = [d.name];
   switch (d.kind) {
     case "bead":
-      parts.push(d.series ? t("label.beadSeries", { series: d.series }) : t("label.bead"));
+      parts.push(d.series ? t("label.beadSeries", { series: d.series }) : t("label.bead"), stitch);
       break;
     case "combo":
       parts.splice(0, 1, strands, stitch, t("label.withBead", { name: d.beadName ?? "?" }));

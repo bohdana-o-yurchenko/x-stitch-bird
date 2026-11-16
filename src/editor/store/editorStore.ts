@@ -12,7 +12,7 @@ import type { Handle, UnderlayData } from "@/core/underlay/underlay";
 import type { ChecksState } from "../checks/checks";
 import type { MatchState } from "../matching/matching";
 
-export type ToolId = "pencil" | "line" | "rect" | "filledRect" | "fill" | "eraser" | "picker" | "pan" | "select" | "magicWand" | "partial";
+export type ToolId = "pencil" | "line" | "rect" | "filledRect" | "fill" | "eraser" | "picker" | "pan" | "select" | "magicWand" | "partial" | "autofill";
 
 export interface Toast {
   id: number;

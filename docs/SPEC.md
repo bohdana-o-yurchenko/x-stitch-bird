@@ -1177,22 +1177,27 @@ the symbol chart, a see-through grey over the colours), so the pages can be laid
 its column and row ranges, the chart's own numbering every 10, a small page map with this page filled, and
 centre marks below and right of the grid.
 
-### 15.11 Symbol matching in one 10 × 10 block (implemented)
+### 15.11 Autofill: symbol matching in one 10 × 10 block (implemented; a toolbar tool since 2026-11-16)
 **Why per block.** Even straightened, a photo of a paper chart is never exact: pages bend, print drifts. Mappers
 line the photo up **block by block** (the 10 × 10 squares between the heavy grid lines), with the underlay's edit
 frame (§15.15). So matching works the same way: only inside the block you have just lined up, never over the whole
 chart. Plain image arithmetic, no AI (§15.12).
 
-**Flow**
+**Flow** — **Autofill** is a tool in the toolbar (the last one; Shift+F). Not "Magic wand": that is the
+selection tool. It needs the image behind the chart, shown and loaded; otherwise a toast and the tool stays as it was.
 1. Line the photo up on a block, as today. Stitch one cell of each symbol in the block the app hasn't seen yet.
-2. **Shift+F** (or *Find symbols* in the image's panel) turns the mode on; the photo goes behind the chart. The
+2. Pick **Autofill** (toolbar, Shift+F, or *Autofill* in the image's panel). Instead of single cells, the
    10 × 10 block under the pointer is outlined (dashed); a hint bar says to click the block.
 3. **Click the block** you lined up. Only the **sure** proposals appear, faintly (the entry at half strength), and
    **Accept** / **Decline** show just above the block (below it at the top of the view), with the count
    ("38 symbols found · 4 left empty"). While reviewing, the chart takes no drawing.
-4. **Accept** writes the proposals into cells still empty, as one undo step. **Decline** (or Esc) drops them.
-   Either one ends the mode. Unsure cells and cells that look blank stay empty. Enter = Accept.
-- The mode also ends when the image goes into edit mode or is removed, and when another pattern opens.
+4. **Accept** (Enter) writes the proposals into cells still empty, as one undo step. **Decline** (Esc) drops them.
+   Either one goes straight on: the next block can be clicked at once. Unsure and blank-looking cells stay empty.
+- **Pointing at Decline** (or focusing it) pops a tip in the accent colour next to the bar: "Not quite right? Stitch
+  a few more cells by hand, then try again. Autofill learns from what you mark — it gets better as you go." No click.
+- **Paused while the image is edited**: the pointer edits the image, a block being reviewed is dropped, the hint bar
+  says Autofill waits. Back to stitching mode, it carries on.
+- Another tool ends it; removing the image switches to Draw; another pattern opens with Autofill still picked.
 - Toasts: no image under the chart; block not on the image; nothing learned yet; no empty cell in the block.
 
 **Teaching — no separate step.** The examples are the cells already stitched, read off the photo:
@@ -1322,6 +1327,8 @@ placement is on the half grid. Still open, moved to §15.12: long stitches and l
 
 **Beads between cells (2026-11-16).** A floss + bead entry has a 4th stitch next to the full and half crosses:
 **Between cells** (`st: "point"`), for a bead or a Treasure tacked on a grid point instead of sitting in a cell.
+A plain bead entry has **Placement**: *In a cell* (the default, no `st`) or *Between cells* (`st: "point"`); on the
+chart it is the bead alone (no floss shown), and it counts as a bead.
 - Placed exactly like a knot: same half-grid points, same tools, eraser, picker, mirror and transforms, stored
   with the knots (`knots: [[x, y, k]]`, `k` the floss + bead entry). Only floss + bead has it; switching such an
   entry to a cross stitch makes it a full cross. An entry on the chart can't move between cells and points.
@@ -1337,7 +1344,8 @@ over it. One underlay per pattern.
 
 **Two modes**, switched by the **Behind stitches** toggle (or `U`):
 - **Edit mode** (toggle off) — for placing the image. The image is drawn **above** the stitches at its opacity, with
-  a dashed outline and 8 handles (corners and edge midpoints). Chart tools are paused: the pointer edits the image.
+  a dashed outline and 8 handles (corners and edge midpoints). Chart tools are paused: the pointer edits the image,
+  and the toolbar shows it — greyed out, not clickable, its tool shortcuts ignored (2026-11-16).
   The rest of the image outside the chart is still visible, so it can be dragged in from anywhere.
 - **Behind mode** (toggle on) — for stitching. The image is drawn **under** the stitches (after the fabric, before
   crosses, partial stitches, beads, grid, backstitch and knots), clipped to the chart. It cannot be touched; every

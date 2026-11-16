@@ -48,8 +48,11 @@ export function checkPatternKeeper(p: Pattern): PkReport {
   bump("partial", partials);
   bump("bead", p.layers.beads.reduce((n, k) => n + (k ? 1 : 0), 0));
   bump("back", p.layers.segments.length);
-  // a floss + bead on a grid point is a combo, not a knot
-  for (const kn of p.layers.knots) bump(p.key[kn.k]?.t === "combo" ? "combo" : "knot");
+  // a bead on a grid point is a bead (or floss + bead), not a knot
+  for (const kn of p.layers.knots) {
+    const t = p.key[kn.k]?.t;
+    bump(t === "combo" ? "combo" : t === "bead" ? "bead" : "knot");
+  }
   const order: PkIssueKind[] = ["half", "partial", "blend", "combo", "bead", "back", "knot"];
   return { supported, issues: order.flatMap((kind) => (left.has(kind) ? [{ kind, count: left.get(kind)! }] : [])) };
 }

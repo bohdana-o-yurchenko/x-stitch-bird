@@ -192,8 +192,8 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
   const setType = (t2: KeyDraft["t"]) => {
     if (before && usedOnChart && entryKind(t2).group !== entryKind(before.t).group) return ed.toast("keyDialog.typeLocked");
     const n = !before && entryKind(t2).defaultStrands ? (t2 === "back" ? 1 : d.n === 1 && d.t === "back" ? ed.doc.strands || 2 : d.n) : d.n;
-    // only floss + bead can sit on a grid point
-    update({ t: t2, n, sym: draftSymbol(ed, d, t2, edit), ...(t2 !== "combo" && d.st === "point" ? { st: "full" as const } : {}) });
+    // only beads (plain or with floss) can sit on a grid point
+    update({ t: t2, n, sym: draftSymbol(ed, d, t2, edit), ...(t2 !== "combo" && t2 !== "bead" && d.st === "point" ? { st: "full" as const } : {}) });
     setLine(0);
   };
 
@@ -238,6 +238,10 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
     st === "point"
       ? { hex: colour?.thread?.hex ?? "#8C8378", ink: "#fff", sym: "", t: "combo", st, n: 2, bead: { hex: colour?.bead?.hex ?? "#C9B27C", ink: "#000", shape: beadShape(colour?.bead?.series) } }
       : { hex: colour?.thread?.hex ?? colour?.hex ?? "#8C8378", ink: "#fff", sym: "", t: "thread", st, n: 2 };
+  const beadSample = (st: StitchTypeId): PaletteSlot => {
+    const hex = colour?.hex ?? "#C9B27C";
+    return { hex, ink: "#000", sym: "", t: "bead", st, n: 1, bead: { hex, ink: "#000", shape: beadShape(colour?.series) } };
+  };
   // floss + bead may also be sewn on a grid point, like a French knot
   const stitchChoices: StitchTypeId[] = [...STITCH_TYPES.map((x) => x.id), ...(d.t === "combo" ? ["point" as const] : [])];
   const label = colour && src ? formatLabel(labelData({ ...draftEntry(d, src), sym: d.sym }, colour), tr) : null;
@@ -325,6 +329,13 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
                 </select>
               </div>
             )}
+          </div>
+        )}
+
+        {d.t === "bead" && (
+          <div className={s.group}>
+            <IconChoice label={t("placement")} testId="bead-placement" value={d.st === "point" ? "point" : "full"} onPick={(st) => update({ st })}
+              options={(["full", "point"] as const).map((id) => ({ id, name: id === "point" ? `${tr("stitches.pointName")} · ${tr("stitches.pointSub")}` : t("placementCell"), icon: <KeyIcon slot={beadSample(id)} size={24} view="color" /> }))} />
           </div>
         )}
 

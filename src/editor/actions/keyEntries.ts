@@ -78,7 +78,7 @@ export function draftEntry(d: KeyDraft, src: string): Omit<KeyEntry, "sym"> {
     t: d.t,
     src,
     n: d.t === "bead" ? undefined : usesBlend(d) ? null : d.n,
-    st: fields.includes("stitchType") ? d.st : undefined,
+    st: fields.includes("stitchType") ? d.st : d.t === "bead" && d.st === "point" ? "point" : undefined,
     wraps: d.t === "knot" ? d.wraps : undefined,
     ink: d.t === "back" ? d.ink : undefined,
   };

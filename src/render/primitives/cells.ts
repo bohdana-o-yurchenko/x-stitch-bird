@@ -232,20 +232,23 @@ export function drawPointBead(g: Ctx, cx: number, cy: number, z: number, s: Pale
   const { theme, showColour, showSymbol } = style;
   g.save();
   g.globalAlpha = alpha;
-  g.strokeStyle = showColour ? s.hex : theme.halfStitch.symbolColor;
-  g.lineWidth = Math.max(1, z * 0.08);
-  g.lineCap = "round";
-  g.beginPath();
-  g.moveTo(cx - z * 0.32, cy + z * 0.32);
-  g.lineTo(cx + z * 0.32, cy - z * 0.32);
-  g.stroke();
+  // floss + bead shows its tacking stitch; a plain bead is sewn with a thread nobody sees
+  if (s.t === "combo") {
+    g.strokeStyle = showColour ? s.hex : theme.halfStitch.symbolColor;
+    g.lineWidth = Math.max(1, z * 0.08);
+    g.lineCap = "round";
+    g.beginPath();
+    g.moveTo(cx - z * 0.32, cy + z * 0.32);
+    g.lineTo(cx + z * 0.32, cy - z * 0.32);
+    g.stroke();
+  }
   drawBeadShape(g, cx - z / 2, cy - z / 2, z, s.bead.hex, s.bead.shape, style);
   if (showSymbol && z >= theme.symbols.minZoom) drawSymbol(g, cx, cy, z, s.sym, showColour ? s.bead.ink : theme.symbols.darkInk, theme.symbols.scale.bead, theme);
   g.restore();
 }
 
 export function drawKnot(g: Ctx, cx: number, cy: number, z: number, s: PaletteSlot, style: CellStyle, alpha = 1) {
-  if (s.t === "combo") return drawPointBead(g, cx, cy, z, s, style, alpha);
+  if (s.t === "combo" || s.t === "bead") return drawPointBead(g, cx, cy, z, s, style, alpha);
   const { theme, showColour, showSymbol } = style, r = Math.max(2, z * theme.knots.radius);
   g.save();
   g.globalAlpha = alpha;

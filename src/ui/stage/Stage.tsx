@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ChartView } from "@/render/chart";
 import { Icon } from "../common/Icon";
@@ -96,30 +97,38 @@ function SelectionActions() {
 }
 
 /**
- * Symbol matching (SPEC §15.11): a hint while picking a block; once read, Accept and Decline just above the
- * block (below it when the block is at the top of the view).
+ * Autofill (SPEC §15.11): a hint while picking a block (or that the tool waits while the image is edited); once a
+ * block is read, Accept and Decline just above it (below it when the block is at the top of the view). Pointing at
+ * Decline brings up a tip: more hand stitching makes the next try better.
  */
 function MatchBar() {
   const t = useTranslations("match");
   const run = useCommand();
   const ed = useEditor();
   const m = useEditorState((st) => st.match);
+  const paused = useEditorState((st) => !!st.underlay && !st.underlay.behind);
+  const [tip, setTip] = useState(false);
   useEditorState((st) => st.viewport);
   if (!m) return null;
   if (m.phase === "pick")
     return (
       <div className={s.selectionBar} data-testid="match-bar">
-        <span className={s.barText}>{t("pick")}</span>
-        <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("match.decline")}>{t("cancel")}</button>
+        <span className={s.barText}>{paused ? t("paused") : t("pick")}</span>
       </div>
     );
   const a = ed.viewport.toScreen({ x: m.block.x + m.block.w / 2, y: m.block.y }), below = ed.viewport.toScreen({ x: 0, y: m.block.y + m.block.h }).y;
   const above = a.y > 70;
+  const showTip = { onMouseEnter: () => setTip(true), onMouseLeave: () => setTip(false), onFocus: () => setTip(true), onBlur: () => setTip(false) };
   return (
     <div className={cx(s.selectionBar, s.matchBar)} data-testid="match-bar" style={{ left: a.x, top: above ? a.y - 8 : below + 8, transform: `translate(-50%, ${above ? "-100%" : "0"})` }}>
       <span className={s.barText} data-testid="match-count">{t("found", { n: m.proposals.length })}{m.unsure ? ` · ${t("unsure", { n: m.unsure })}` : ""}</span>
-      <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} disabled={!m.proposals.length} data-testid="match-accept" onClick={() => run("match.accept")}>{t("accept")}</button>
-      <button type="button" className={cx(ui.btn, ui.sm)} data-testid="match-decline" onClick={() => run("match.decline")}>{t("decline")}</button>
+      <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} disabled={!m.proposals.length} data-testid="match-accept" onClick={() => { setTip(false); run("match.accept"); }}>{t("accept")}</button>
+      <button type="button" className={cx(ui.btn, ui.sm)} data-testid="match-decline" {...showTip} onClick={() => { setTip(false); run("match.decline"); }}>{t("decline")}</button>
+      {tip && (
+        <div className={cx(s.declineTip, above ? s.tipBelow : s.tipAbove)} role="status" data-testid="match-tip">
+          <b>{t("tipTitle")}</b> {t("tip")}
+        </div>
+      )}
     </div>
   );
 }

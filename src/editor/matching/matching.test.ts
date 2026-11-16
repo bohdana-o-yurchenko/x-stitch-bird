@@ -31,11 +31,15 @@ function photo(blue: number): Map<number, Patch> {
   ]);
 }
 
-describe("symbol matching in the editor (SPEC §15.11)", () => {
-  it("Shift+F picks the block under the pointer; Accept fills the sure cells in one undo step and ends the mode", async () => {
+const esc = { key: "Escape", ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, preventDefault() {} };
+const shiftF = { ...esc, key: "F", shiftKey: true };
+
+describe("Autofill, symbol matching in the editor (SPEC §15.11)", () => {
+  it("is a tool (Shift+F): the block under the pointer; Accept fills the sure cells in one undo step, then the next block", async () => {
     const { ed, red } = t;
     const blue = t.entry({ t: "thread", src: "dmc:797", n: 2, st: "full" });
-    await ed.commands.run("match.toggle");
+    ed.shortcuts.keyDown(shiftF);
+    expect(ed.state.tool).toBe("autofill");
     ed.tools.move(at(13, 4));
     expect(ed.state.match).toEqual({ phase: "pick", hover: { x: 10, y: 0, w: 10, h: 10 } });
     reviewBlock(ed, block, photo(blue));
@@ -51,40 +55,59 @@ describe("symbol matching in the editor (SPEC §15.11)", () => {
     ed.tools.up(at(8, 8));
     expect(ed.doc.layers.stitches[8 * 20 + 8]).toBe(0);
     await ed.commands.run("match.accept");
-    expect(ed.state.match).toBeNull();
+    // still Autofill: straight on to the next block
+    expect([ed.state.tool, ed.state.match?.phase]).toEqual(["autofill", "pick"]);
     expect([...ed.doc.layers.stitches.slice(0, 6)]).toEqual([red, blue, red, red, blue, 0]);
     await ed.commands.run("history.undo");
     expect([...ed.doc.layers.stitches.slice(0, 6)]).toEqual([red, blue, 0, 0, 0, 0]);
+    // another tool ends it
+    await ed.commands.run("tool.select", "pencil");
+    expect(ed.state.match).toBeNull();
   });
 
-  it("Decline and Esc leave the chart as it was; the examples are learned either way and saved with the pattern", async () => {
+  it("Decline and Esc leave the chart as it was and go on to the next block; the examples are learned either way", async () => {
     const { ed } = t;
     const blue = t.entry({ t: "thread", src: "dmc:797", n: 2, st: "full" });
-    await ed.commands.run("match.toggle");
+    await ed.commands.run("tool.select", "autofill");
     reviewBlock(ed, block, photo(blue));
     await ed.commands.run("match.decline");
-    expect(ed.state.match).toBeNull();
+    expect(ed.state.match).toEqual({ phase: "pick", hover: null });
     expect(ed.doc.layers.stitches[2]).toBe(0);
     expect(Object.keys(ed.doc.samples ?? {})).toEqual(["thread|dmc:321|full", "thread|dmc:797|full"]);
     // a block with nothing stitched still finds symbols, from what earlier blocks taught
     ed.doc.layers.stitches.fill(0);
-    await ed.commands.run("match.toggle");
     reviewBlock(ed, block, new Map([[2, printed(ring, 0, 1, 8)]]));
     expect(ed.state.match?.phase === "review" && ed.state.match.proposals).toEqual([{ cell: 2, k: blue }]);
-    ed.shortcuts.keyDown({ key: "Escape", ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, preventDefault() {} });
-    expect(ed.state.match).toBeNull();
+    ed.shortcuts.keyDown(esc);
+    expect([ed.state.tool, ed.state.match?.phase]).toEqual(["autofill", "pick"]);
+  });
+
+  it("waits while the image is edited: the block being reviewed is dropped, no tool can be picked, then it goes on", async () => {
+    const { ed } = t;
+    const blue = t.entry({ t: "thread", src: "dmc:797", n: 2, st: "full" });
+    await ed.commands.run("tool.select", "autofill");
+    reviewBlock(ed, block, photo(blue));
+    ed.underlay.setBehind(false);
+    expect(ed.state.match).toEqual({ phase: "pick", hover: null });
+    // the pointer edits the image, not the chart; the toolbar is idle
+    expect(ed.commands.enabled("tool.select")).toBe(false);
+    ed.tools.move(at(13, 4));
+    expect(ed.state.match).toEqual({ phase: "pick", hover: null });
+    ed.underlay.setBehind(true);
+    ed.tools.move(at(13, 4));
+    expect([ed.state.tool, ed.state.match?.phase]).toEqual(["autofill", "pick"]);
   });
 
   it("explains what's missing: no image, nothing learned yet", async () => {
     const { ed } = t;
-    await ed.commands.run("match.toggle");
+    await ed.commands.run("tool.select", "autofill");
     reviewBlock(ed, block, new Map([[2, printed(cross)]]));
     expect(t.lastToast()).toBe("toasts.matchNoExamples");
     expect(ed.state.match?.phase).toBe("pick");
-    await ed.commands.run("match.toggle");
+    await ed.commands.run("tool.select", "pencil");
     ed.store.setState({ underlay: null, underlayImage: null });
-    await ed.commands.run("match.toggle");
-    expect(ed.state.match).toBeNull();
+    await ed.commands.run("tool.select", "autofill");
+    expect([ed.state.tool, ed.state.match]).toEqual(["pencil", null]);
     expect(t.lastToast()).toBe("toasts.matchNeedsUnderlay");
   });
 });

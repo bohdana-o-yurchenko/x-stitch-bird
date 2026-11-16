@@ -749,16 +749,29 @@ test("finds symbols in one 10 × 10 block of the photo behind the chart, and fil
     return [a, b];
   });
   await expect.poll(() => editorState<boolean>(page, "(ed) => !!ed.state.underlayImage")).toBe(true);
-  await page.keyboard.press("Shift+F");
-  await expect(page.getByTestId("match-bar")).toContainText("Click the 10 × 10 block");
+  // Autofill sits in the toolbar (and Shift+F)
+  await page.getByTestId("toolbar").getByRole("button", { name: /^Autofill/ }).click();
+  await expect(page.getByTestId("match-bar")).toContainText("click the 10 × 10 block");
   const p = await cellPoint(page, 5, 5);
   await page.mouse.move(p.x, p.y);
   await page.mouse.click(p.x, p.y);
   await expect(page.getByTestId("match-count")).toHaveText("4 symbols found");
+  // pointing at Decline brings up the tip, without a click
+  await page.getByTestId("match-decline").hover();
+  await expect(page.getByTestId("match-tip")).toContainText("Stitch a few more cells by hand");
   await page.getByTestId("match-accept").click();
-  await expect(page.getByTestId("match-bar")).toHaveCount(0);
+  // on to the next block, still in Autofill
+  await expect(page.getByTestId("match-count")).toHaveCount(0);
+  await expect(page.getByTestId("match-bar")).toContainText("click the 10 × 10 block");
   const [a, b] = keys;
   expect(await editorState<number[]>(page, "(ed) => [...ed.doc.layers.stitches.slice(0, 8)]")).toEqual([a, b, a, b, a, 0, b, 0]);
+  // editing the image pauses it, and the whole toolbar
+  await page.keyboard.press("u");
+  await expect(page.getByTestId("toolbar")).toHaveAttribute("aria-disabled", "true");
+  await expect(page.getByTestId("match-bar")).toContainText("waits while you edit the image");
+  await page.keyboard.press("u");
+  await expect(page.getByTestId("toolbar")).toHaveAttribute("aria-disabled", "false");
+  expect(await editorState<string>(page, "(ed) => ed.state.tool")).toBe("autofill");
   // what it learned is saved with the pattern
   expect(await editorState<number>(page, "(ed) => Object.keys(ed.doc.samples).length")).toBe(2);
 });
@@ -804,5 +817,21 @@ test("floss + bead can be sewn between cells: on a grid point, placed like a Fre
   await page.mouse.click(pt.x, pt.y);
   expect(await editorState<object>(page, "(ed) => ed.doc.layers.knots.at(-1)")).toEqual({ x: 5, y: 5, k });
   expect(await editorState<number>(page, "(ed) => ed.doc.layers.knots.length")).toBe(before + 1);
+  await expect(page.locator(`[data-entry='${k}']`)).toContainText(/between cells.*1\s*beads/);
+});
+
+test("a plain bead sits in its cell, or between cells like a French knot", async ({ page }) => {
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form");
+  await form.getByRole("radio", { name: "Bead", exact: true }).click();
+  const placement = form.getByTestId("bead-placement");
+  await expect(placement.getByRole("radio")).toHaveCount(2);
+  await expect(placement.getByRole("radio", { name: "In a cell" })).toHaveAttribute("aria-checked", "true");
+  await placement.getByRole("radio", { name: /^Between cells/ }).click();
+  await form.getByRole("button", { name: "Add to key", exact: true }).click();
+  const k = await editorState<number>(page, "(ed) => ed.state.activeEntry");
+  const pt = await gridPoint(page, 7, 7);
+  await page.mouse.click(pt.x, pt.y);
+  expect(await editorState<object>(page, "(ed) => ed.doc.layers.knots.at(-1)")).toEqual({ x: 7, y: 7, k });
   await expect(page.locator(`[data-entry='${k}']`)).toContainText(/between cells.*1\s*beads/);
 });

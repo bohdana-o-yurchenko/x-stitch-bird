@@ -12,7 +12,7 @@ export interface HoldBinding {
   tool: "pan" | "picker";
 }
 
-export type Context = "hasSelection" | "floating" | "chain" | "underlayEditing" | "hasUnderlay" | "matching" | "matchReview";
+export type Context = "hasSelection" | "floating" | "chain" | "underlayEditing" | "hasUnderlay" | "matchReview";
 
 export const HOLD_BINDINGS: readonly HoldBinding[] = [
   { hold: "Space", tool: "pan" },
@@ -43,7 +43,7 @@ export function shortcutLabel(command: string, args?: unknown): string | null {
 /** `mod` = ⌘ on macOS, Ctrl elsewhere. Letters respect Shift; symbols and digits ignore it. */
 export const KEYMAP: readonly KeyBinding[] = [
   // symbol matching (SPEC §15.11): Esc and Enter answer for the block before anything else
-  { keys: "escape", command: "match.decline", when: "matching" },
+  { keys: "escape", command: "match.decline", when: "matchReview" },
   { keys: "enter", command: "match.accept", when: "matchReview" },
   // in the underlay's edit mode Ctrl/⌘+Z undoes the image's last change (SPEC §15.15)
   { keys: "mod+z", command: "underlay.undo", when: "underlayEditing" },
@@ -85,7 +85,7 @@ export const KEYMAP: readonly KeyBinding[] = [
   { keys: "r", command: "tool.select", args: "rect" },
   { keys: "shift+r", command: "tool.select", args: "filledRect" },
   { keys: "f", command: "tool.select", args: "fill" },
-  { keys: "shift+f", command: "match.toggle" },
+  { keys: "shift+f", command: "tool.select", args: "autofill" },
   { keys: "e", command: "tool.select", args: "eraser" },
   { keys: "i", command: "tool.select", args: "picker" },
   { keys: "h", command: "tool.select", args: "pan" },

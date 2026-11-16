@@ -50,13 +50,13 @@ export function chartTotals(p: Pattern, usage: UsageReport): ChartTotals {
       else t.half += cells;
     }
     if (e.t === "bead" || e.t === "combo") t.beads += cells;
-    // floss + bead on grid points count as beads, not knots
-    if (e.t === "combo") t.beads += u.knot ?? 0;
+    // beads on grid points count as beads, not knots
+    if (e.t === "combo" || e.t === "bead") t.beads += u.knot ?? 0;
     t.quarter += u.quarter ?? 0;
     t.threeQuarter += u.threeQuarter ?? 0;
     t.petite += u.petite ?? 0;
     t.backstitch += u.segment ?? 0;
-    if (e.t !== "combo") t.knots += u.knot ?? 0;
+    if (e.t === "knot") t.knots += u.knot ?? 0;
   }
   return t;
 }
