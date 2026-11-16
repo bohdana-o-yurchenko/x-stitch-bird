@@ -145,6 +145,10 @@ Colour maths (must be reproduced exactly; used by blending, image import, blend 
     white — never the floss colour under the symbol. When the symbol itself is drawn light (white on dark floss), the
     cut-out shows dark instead, so it never vanishes. Same on the chart, in the key, in the form and in the PDFs; in
     the dark themes the interface's glyphs use the theme's background for it.
+  - **Drawing speed** (2026-11-16): a symbol with cut-outs is drawn once per colour, size and screen scale into a
+    small picture and stamped on each cell (whole screen pixels, 1:1). Drawing its cut-outs anew on every cell of
+    every frame had nearly doubled the cost of panning a chart full of them; now it costs about what letters do.
+    Plain drawn symbols are still filled directly (quicker than stamping).
   - **Teaching**: a tip in the dialog spells out the circle-with-a-star recipe, and four examples — ring with a dot,
     circle with a star cut out, square with a round hole, circle with a cross cut out — load a ready drawing to look
     at and change. *Remove last*, *Clear*, and a preview at chart sizes. Opening the dialog on an entry that already
