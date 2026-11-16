@@ -1123,6 +1123,16 @@ any existing behaviour.
 - **Shopping list**: grouped by brand, with skein length from a per-brand table.
 - **OXS**: export prefixes the name with the brand for non-DMC threads. Import (`oxsResolve`) learns the prefixes
   `Anchor`, `ANC`, `Cosmo`, `Madeira`.
+- **Brands asked for by users (2026-11-16):** Anchor, Dimensions, Palmira, Avrora, Kreinik, Rainbow Gallery, Weeks Dye
+  Works. Loading is no concern: a brand's table is ~5–20 KB compressed, loaded only when the brand is first used.
+  The work is the data (codes, names, a screen colour, licensing), brand by brand. Hand-dyed lines (Rainbow Gallery,
+  Weeks Dye Works) are variegated: one colour only approximates them — they need a variegated look.
+- **Kreinik — sources and scope** (not built yet):
+  - Every colour, codes and names: Kreinik's stash inventory form,
+    https://kreinik.com/PDF/KREINIK_HOME_INVENTORY_2024.pdf (a list, not a colour chart — screen colours still needed).
+  - DMC → Kreinik metallics: https://www.kreinik.com/PDF/DMC_FLOSS_TO_KREINIK_METALLICS.pdf
+  - Only the most used lines: **Blending Filament**, **Very Fine #4 Braid** and **Fine #8 Braid**. The limited and
+    special lines are left out. Metallic: a flat colour is an approximation (perhaps a sheen in the key icon).
 
 ### 15.10 PDF chart export — Pattern Keeper–compatible (implemented; works in Pattern Keeper since 2026-11-15)
 **Menu ▸ Export ▸ PDF for Pattern Keeper.** A multi-page A4 PDF that the Android app **Pattern Keeper** can import
