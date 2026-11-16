@@ -313,7 +313,7 @@ history.transaction(label, () => { /* actions record patches */ });
 - Small edits use `cells` / `items` patches. **Whole-chart operations** (resize, flip, rotate, mirror from centre,
   crop, extend, delete key entry, replace key) use one `document` patch. It holds `w`, `h` and every layer,
   including ambiguous marks, as SPEC §15 groundwork requires. These operations are rare, so a full copy is fine.
-- So, unlike the single-file app, **resize and deleting a key entry no longer clear the history** (SPEC §14.4).
+- So, unlike the single-file app, **resize and deleting a key entry no longer clear the history**.
   Loading another pattern still starts a fresh history.
 - The patch kinds don't name specific layers. `items` patches are applied through the layer's handler (§7.1), so
   knots and partials need no new history code.
@@ -1018,8 +1018,8 @@ Decisions taken while implementing this plan. Each one lives in the single place
   strands — `core/calculator/classicSkeins.ts`.
 
 **Small departures from the single-file app**
-- Key-entry edits and deletions, resize and transforms are undoable (SPEC quirk §14.4).
-- No 240 000-character limit on library saves; a full browser storage shows a toast instead (quirk §14.6).
+- Key-entry edits and deletions, resize and transforms are undoable.
+- No 240 000-character limit on library saves; a full browser storage shows a toast instead.
 - New shortcuts: `M` cycles mirror drawing, `Q` cycles the partial-stitch kind.
 - File names keep non-Latin letters (e.g. Ukrainian pattern names).
 - The header's file actions live in one **Menu ▾** (formerly File ▾).

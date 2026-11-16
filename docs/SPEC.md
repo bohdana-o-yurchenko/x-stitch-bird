@@ -874,18 +874,6 @@ All toasts/modals listed in the sections above should be kept verbatim; they are
 
 ---
 
-## 14. Known quirks / technical debt (do not necessarily preserve)
-
-Cleaned up 2026-11-16: the quirks of the single-file app that the new app fixed or no longer has (1–6, 9, 11) are
-gone, and 12 is a decision recorded in §15.3. Numbers are kept, as other sections refer to them.
-
-- **7.** `count` uses `14.01`/`16.01` to encode "over 2" fabrics; OXS import cannot restore them.
-- **8.** OXS export: floss + bead stitches are only represented inside the blend palette item (quarter,
-  three-quarter and petite stitches are exported since §15.13).
-- **10.** Image import always starts a new pattern (no "import into current").
-
----
-
 ## 15. Features beyond the original app, and the backlog
 
 > Brainstormed 2026-11-14 with **e-pattern mappers** in mind: people who turn paper charts into faithful digital
@@ -964,7 +952,7 @@ Rules:
   their cells.
 - **Mirror drawing mode.** The mirror button cycles: off → ↔ (vertical axis, current behaviour) → ↕ (horizontal
   axis) → 4-way. The guides are drawn for each active axis. Mirrored half crosses keep the same entry and
-  direction (rule above; quirk §14.12 is the intended behaviour).
+  direction (rule above).
 
 ### 15.4 Chart checks (implemented 2026-11-16)
 A **Chart checks** section in the side panel (collapsible like the others, closed at first) that looks for likely
@@ -1055,7 +1043,7 @@ any existing behaviour.
   project. When the quota is hit, drop the oldest.
 - **UI**: a **History…** entry in the Open dialog lists `time · reason · W×H` with thumbnails. **Restore** first
   snapshots the current state, then loads the chosen one (same project id).
-- This softens quirks §14.3 and §14.4: lost undo history and "New" without saving become recoverable.
+- Lost undo history and "New" without saving become recoverable.
 - **In .xbird files** (2026-11-15): the pattern's versions travel along as `versions: [{time, reason, doc}]`,
   oldest first (`doc` is the pattern file of that version, without pictures or nested versions; thumbnails are
   redrawn on import). Opening the file adds them to this browser's versions of the pattern — ones already there
@@ -1278,7 +1266,7 @@ Combinations that must fit into one cell:
 9. **OXS.**
    - Export `<partstitch>` with directions for quarters and three-quarters, and `palindex1`/`palindex2` for split
      cells.
-   - Import maps them back. Today they are "simplified" (§12.2), which fixes part of quirk §14.8.
+   - Import maps them back. Today they are "simplified" (§12.2).
    - Petite has no clear OXS form; this needs checking against real files.
    - *Implemented (fixed 2026-11-14 after testing in Хрестики / Ruta Stitch):* three-quarters as `<partstitch>`
      (direction 2 = split along ╱, 1 = along ╲). Quarters and petites as `<object>`s **on the half grid**: x1/y1 is the
