@@ -1,7 +1,7 @@
 import { visibleOn } from "@/core/color/colorMath";
 import type { PaletteSlot } from "@/core/pattern/palette";
 import { viewStyle, type ChartView } from "./chart";
-import { drawBackstitch, drawBeadCell, drawKnot, drawStitchCell, drawSymbol, type Ctx } from "./primitives/cells";
+import { darkInk, drawBackstitch, drawBeadCell, drawKnot, drawStitchCell, drawSymbol, type Ctx } from "./primitives/cells";
 import { strokeLineStyle } from "./primitives/lineStyles";
 import type { CanvasTheme } from "./theme";
 
@@ -10,8 +10,8 @@ import type { CanvasTheme } from "./theme";
  * Stitches are drawn on the fabric colour, unless the floss would vanish on it (white on white): then on a
  * contrasting tile, so a half cross still reads as a half cross. Lines, knots and beads carry their own outlines.
  */
-export function drawKeyIcon(g: Ctx, slot: PaletteSlot, size: number, view: ChartView, theme: CanvasTheme, fabric: string) {
-  const style = viewStyle(view === "color" ? "both" : view, theme);
+export function drawKeyIcon(g: Ctx, slot: PaletteSlot, size: number, view: ChartView, theme: CanvasTheme, fabric: string, symbolInks?: ReadonlyMap<PaletteSlot, string>) {
+  const style = { ...viewStyle(view === "color" ? "both" : view, theme), symbolInks };
   const stitch = slot.t === "thread" || slot.t === "combo";
   g.fillStyle = !style.showColour ? "#fff" : stitch ? visibleOn(fabric, slot.hex, theme.keyIcon) : fabric;
   g.fillRect(0, 0, size, size);
@@ -22,7 +22,7 @@ export function drawKeyIcon(g: Ctx, slot: PaletteSlot, size: number, view: Chart
   else if (slot.t === "back") drawBackstitch(g, size * 0.12, size * 0.88, size * 0.88, size * 0.12, size * 0.8, slot, viewStyle(view, theme));
   else if (slot.t === "knot") {
     drawKnot(g, size * 0.5, size * 0.5, size * 1.4, slot, { ...style, showSymbol: false });
-    if (slot.sym) drawSymbol(g, size * 0.78, size * 0.22, size * 0.5, slot.sym, theme.symbols.darkInk, 0.7, theme, true);
+    if (slot.sym) drawSymbol(g, size * 0.78, size * 0.22, size * 0.5, slot.sym, darkInk(slot, style), 0.7, theme, true);
   } else if (slot.t === "combo" && slot.bead && view === "color") {
     // Colour view draws floss + bead as a bead, so the key adds the symbol to tell entries apart
     drawStitchCell(g, 0, 0, size, slot, { ...style, showSymbol: false });

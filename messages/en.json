@@ -601,6 +601,8 @@
     "export": "Export",
     "pngBoth": "Chart image — colour + symbols (PNG)",
     "pngSymbols": "Chart image — symbols only, for printing (PNG)",
+    "pngSymbolsInk": "Chart image — symbols for printing, some in colour (PNG)",
+    "pngSymbolsInkHint": "Like the PDF’s symbol chart: a few symbols in red, green or blue where many different ones mix",
     "pngColor": "Preview image — colour blocks (PNG)",
     "pngStitched": "Preview image — stitched (PNG)",
     "oxs": "Open Cross Stitch file (.oxs)",

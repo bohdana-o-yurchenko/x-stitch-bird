@@ -57,6 +57,7 @@ function FileMenu() {
     { id: "export", label: t("export"), items: [
       { label: t("pngBoth"), onClick: go("file.export", "png-both") },
       { label: t("pngSymbols"), onClick: go("file.export", "png-symbols") },
+      { label: t("pngSymbolsInk"), hint: t("pngSymbolsInkHint"), onClick: go("file.export", "png-symbols-ink") },
       { label: t("pngColor"), onClick: go("file.export", "png-color") },
       { label: t("pngStitched"), onClick: go("file.export", "png-stitched") },
       "-",

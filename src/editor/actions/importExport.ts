@@ -6,13 +6,14 @@ import { serializePattern, XBIRD_VERSION, type FileVersion, type PatternFile } f
 import { exportOxs } from "@/core/formats/oxs/exportOxs";
 import { chartPdf } from "@/core/formats/pdf/chartPdf";
 import { checkPatternKeeper, patternKeeperPdf, type PdfFonts } from "@/core/formats/pdf/patternKeeper";
+import { SYMBOL_INKS, symbolColours } from "@/core/formats/pdf/symbolColours";
 import { TEXT_FONTS } from "@/core/formats/pdf/textFonts";
 import { importOxs } from "@/core/formats/oxs/importOxs";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
 import { formatLabel, keyLabelData } from "@/core/labels/keyLabel";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { createPattern } from "@/core/pattern/createPattern";
-import { buildPalette } from "@/core/pattern/palette";
+import { buildPalette, type Palette, type PaletteSlot } from "@/core/pattern/palette";
 import { SYMBOL_FONT } from "@/core/symbols/symbolFont";
 import type { Pattern } from "@/core/pattern/types";
 import type { UnderlayData } from "@/core/underlay/underlay";
@@ -27,7 +28,7 @@ import type { Editor } from "../createEditor";
 import { loadPattern } from "./pattern";
 
 /** "pattern": our own file — the pattern, key, reference windows and underlay, as text in a `.xbird` file. */
-export type ExportFormat = "png-both" | "png-symbols" | "png-color" | "png-stitched" | "csv" | "oxs" | "pattern";
+export type ExportFormat = "png-both" | "png-symbols" | "png-symbols-ink" | "png-color" | "png-stitched" | "csv" | "oxs" | "pattern";
 
 /** Extension of our own pattern files. Older files ended in `.json`; they hold the same text and still open. */
 export const PATTERN_EXT = "xbird";
@@ -53,6 +54,13 @@ export function keyLines(ed: Editor): KeyLine[] {
   });
 }
 
+/** The PDF symbol chart's inks (symbolColours.ts): the few entries it prints red, green or blue, by palette slot. */
+function printInks(p: Pattern, palette: Palette): Map<PaletteSlot, string> {
+  const inks = new Map<PaletteSlot, string>();
+  for (const [k, c] of symbolColours(p)) if (c !== "black" && palette[k]) inks.set(palette[k], SYMBOL_INKS[c]);
+  return inks;
+}
+
 export const shoppingList = (p: Pattern) => calculator().calculate({ pattern: p, usage: computeUsage(p), settings: {} });
 
 export async function exportAs(ed: Editor, format: ExportFormat) {
@@ -62,12 +70,12 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
   }
   if (format === "oxs") return offer(ed, `${base}.oxs`, exportOxs(p), "oxs");
   if (format === "csv") return offer(ed, `${base}-shopping-list.csv`, exportCsv(p, shoppingList(p), ed.t), "csv");
-  const view: ImageView = format === "png-color" ? "color" : format === "png-stitched" ? "stitched" : format === "png-symbols" ? "symbols" : "both";
+  const view: ImageView = format === "png-color" ? "color" : format === "png-stitched" ? "stitched" : format === "png-symbols" || format === "png-symbols-ink" ? "symbols" : "both";
   const byline = [p.meta.designer, p.meta.copyright && `© ${p.meta.copyright}`].filter(Boolean).join(" · ") || undefined;
   // the same line as at the end of the PDFs and the CSV, in the interface's language
   const footer = `${ed.t("csv.generatedBy", { url: ed.t("app.url") })} · ${ed.t("app.glory")}`;
-  const canvas = renderChartImage(p, ed.state.palette, view, { ...ed.theme, accent: defaultCanvasTheme.accent }, { heading: ed.t("png.keyHeading", { name: p.name }), byline, key: keyLines(ed), footer });
-  const suffix = view === "stitched" ? "-stitched" : view === "color" ? "-preview" : "-chart";
+  const canvas = renderChartImage(p, ed.state.palette, view, { ...ed.theme, accent: defaultCanvasTheme.accent }, { heading: ed.t("png.keyHeading", { name: p.name }), byline, key: keyLines(ed), footer, symbolInks: format === "png-symbols-ink" ? printInks(p, ed.state.palette) : undefined });
+  const suffix = view === "stitched" ? "-stitched" : view === "color" ? "-preview" : format === "png-symbols-ink" ? "-chart-print" : "-chart";
   offer(ed, `${base}${suffix}.png`, await canvasToBlob(canvas), "png");
 }
 

@@ -768,6 +768,7 @@ fallback `pattern`.
 - Stitches, beads drawn as on screen (symbols always, since z ≥ 16). Chart modes add thin grid `rgba(0,0,0,.3)`,
   bold 2 px grid every 10 and border, column/row numbers every 10, red centre triangles.
 - Backstitch on top.
+- **Symbols for printing, some in colour** (Export ▸ "Chart image — symbols for printing, some in colour", file `…-chart-print.png`, 1.3.1): the symbols-only chart with exactly the PDF symbol chart's inks (`symbolColours`, §15.10b) — a few entries red, green or blue where many different symbols mix; the key shows the same inks.
 - Chart modes append a **key** below: heading `"<name>  —  key"` (Fraunces 20 px), then used entries only in
   columns of 420 px (`keyCols = max(1, floor((w*z + 2M - 40)/420))`), 34 px rows: 26 px icon with border, title,
   and `sub (count)` truncated to 58 chars.

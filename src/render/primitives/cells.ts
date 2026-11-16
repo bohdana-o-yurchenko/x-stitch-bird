@@ -16,7 +16,12 @@ export interface CellStyle {
   showSymbol: boolean;
   /** Crosses drawn as embroidered thread (the stitched preview), not as flat colour. */
   stitched?: boolean;
+  /** Symbol-only views: the ink of each entry's symbol where it isn't the theme's dark ink (the printed chart's red, green, blue). */
+  symbolInks?: ReadonlyMap<PaletteSlot, string>;
 }
+
+/** The ink of an entry's symbol when the symbol is drawn without its colour. */
+export const darkInk = (s: PaletteSlot, style: CellStyle) => style.symbolInks?.get(s) ?? style.theme.symbols.darkInk;
 
 /** A chart symbol: a vector shape (`sym:…`) or a character in the app's font, about `z * scale` px tall. */
 export function drawSymbol(g: Ctx, cx: number, cy: number, z: number, ch: string, color: string, scale: number, theme: CanvasTheme, halo = false) {
@@ -110,8 +115,8 @@ export function drawStitchCell(g: Ctx, px: number, py: number, z: number, s: Pal
     return;
   }
   if (!symOk) return;
-  if (s.st === "full") drawSymbol(g, px + z / 2, py + z / 2, z, s.sym, showColour ? s.ink : theme.symbols.darkInk, theme.symbols.scale.full, theme);
-  else drawSymbol(g, px + z / 2, py + z / 2, z, s.sym, theme.symbols.darkInk, theme.symbols.scale.half, theme, true);
+  if (s.st === "full") drawSymbol(g, px + z / 2, py + z / 2, z, s.sym, showColour ? s.ink : darkInk(s, style), theme.symbols.scale.full, theme);
+  else drawSymbol(g, px + z / 2, py + z / 2, z, s.sym, darkInk(s, style), theme.symbols.scale.half, theme, true);
 }
 
 /**
@@ -180,7 +185,7 @@ export function drawBeadCell(g: Ctx, px: number, py: number, z: number, s: Palet
   if (!s.bead) return;
   drawBeadShape(g, px, py, z, s.bead.hex, s.bead.shape, style);
   if (style.showSymbol && z >= style.theme.symbols.minZoom)
-    drawSymbol(g, px + z / 2, py + z / 2, z, s.sym, style.showColour ? s.bead.ink : style.theme.symbols.darkInk, style.theme.symbols.scale.bead, style.theme);
+    drawSymbol(g, px + z / 2, py + z / 2, z, s.sym, style.showColour ? s.bead.ink : darkInk(s, style), style.theme.symbols.scale.bead, style.theme);
 }
 
 /** Quarter, three-quarter or petite stitch: filled shape in colour views, outline + small symbol otherwise. */
@@ -199,7 +204,7 @@ export function drawPartial(g: Ctx, px: number, py: number, z: number, ps: Parti
   }
   if (showSymbol && z >= theme.symbols.minZoom) {
     const [ax, ay] = partialAnchor(ps.kind, ps.corner);
-    drawSymbol(g, px + ax * z, py + ay * z, z, s.sym, showColour ? s.ink : theme.symbols.darkInk, theme.symbols.scale.partial, theme, !showColour);
+    drawSymbol(g, px + ax * z, py + ay * z, z, s.sym, showColour ? s.ink : darkInk(s, style), theme.symbols.scale.partial, theme, !showColour);
   }
 }
 
@@ -243,7 +248,7 @@ export function drawPointBead(g: Ctx, cx: number, cy: number, z: number, s: Pale
     g.stroke();
   }
   drawBeadShape(g, cx - z / 2, cy - z / 2, z, s.bead.hex, s.bead.shape, style);
-  if (showSymbol && z >= theme.symbols.minZoom) drawSymbol(g, cx, cy, z, s.sym, showColour ? s.bead.ink : theme.symbols.darkInk, theme.symbols.scale.bead, theme);
+  if (showSymbol && z >= theme.symbols.minZoom) drawSymbol(g, cx, cy, z, s.sym, showColour ? s.bead.ink : darkInk(s, style), theme.symbols.scale.bead, theme);
   g.restore();
 }
 
@@ -265,6 +270,6 @@ export function drawKnot(g: Ctx, cx: number, cy: number, z: number, s: PaletteSl
   g.lineWidth = Math.max(1, z / 16);
   g.strokeStyle = theme.knots.outline;
   g.stroke();
-  if (s.sym && showSymbol && z >= theme.symbols.minZoom * 1.4) drawSymbol(g, cx, cy, z, s.sym, showColour ? s.ink : theme.symbols.darkInk, 0.32, theme);
+  if (s.sym && showSymbol && z >= theme.symbols.minZoom * 1.4) drawSymbol(g, cx, cy, z, s.sym, showColour ? s.ink : darkInk(s, style), 0.32, theme);
   g.restore();
 }
