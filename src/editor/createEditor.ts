@@ -139,6 +139,9 @@ export class Editor {
   }
 
   flush() {
+    // before start-up has restored the draft, the open pattern is only a blank placeholder: saving it would
+    // replace the draft (closing or reloading the page while it loads)
+    if (!this.state.ready) return;
     this.autosave.flush();
     this.references.flush();
     this.underlay.flush();

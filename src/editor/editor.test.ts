@@ -277,6 +277,16 @@ describe("autosave", () => {
     vi.useRealTimers();
   });
 
+  it("doesn't save the blank placeholder over the draft when the page closes before start-up finished", () => {
+    const drafts: string[] = [];
+    const early = new Editor({ ...memoryPersistence([]), draft: { load: () => null, save: (d) => void drafts.push(d.name) } }, false);
+    early.flush();
+    expect(drafts).toEqual([]);
+    early.store.setState({ ready: true });
+    early.flush();
+    expect(drafts).toHaveLength(1);
+  });
+
   it("puts a file opened from the computer into the library at once, and saves changes before another pattern replaces them", async () => {
     const saved: string[] = [];
     ed.persistence.patterns.save = async (d) => (saved.push(d.name), { ok: true });

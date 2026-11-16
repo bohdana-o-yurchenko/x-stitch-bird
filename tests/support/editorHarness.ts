@@ -22,6 +22,8 @@ export function testEditor(w = 10, h = 10) {
   const p = createPattern(w, h);
   const red = addEntry(p, { t: "thread", src: "dmc:321", n: 2, st: "full" }, ALL_SYMBOLS);
   loadPattern(ed, p);
+  // as after start-up: the pattern above is the real one, not the placeholder
+  ed.store.setState({ ready: true });
   /** Adds a key entry and makes it the active one. */
   const entry = (e: Omit<KeyEntry, "sym">): KeyIndex => {
     const k = addEntry(ed.doc, e, ALL_SYMBOLS);
