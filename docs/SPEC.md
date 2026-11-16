@@ -166,6 +166,9 @@ not a character. The `sym` of a `back` entry holds `line:<name>`, picked from 20
 unused one is auto-assigned; once all 20 are taken they repeat):
 solid · dashed · long dash · dotted · dash-dot · dash-dot-dot · long-short · sparse dots · short dash ·
 dash-dash-dot · double · thick-thin · ticks · wave · zigzag · scallop · circles · squares · chevrons · crosses.
+- The two lines of dots keep their dots close, and the dots are bigger than the line is wide (2026-11-16): far
+  apart, small dots stopped reading as one line. Dotted: dots almost touching; sparse dots: a little looser.
+  Same in the editor and the PDFs.
 - The key dialog shows a grid of line samples instead of characters for backstitch ("Line"). Switching the
   entry type between backstitch and anything else swaps the symbol to the other family.
 - Files from older versions (and the single-file app) are fixed on load: backstitch entries with a character

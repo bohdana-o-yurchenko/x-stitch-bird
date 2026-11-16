@@ -1,15 +1,18 @@
 import { lineStyleName } from "@/core/symbols/lineStyles";
 import type { Ctx } from "./cells";
 
-/** Dashes and gaps in pattern units; 0-length dashes become round dots. */
+/**
+ * Dashes and gaps in pattern units; 0-length dashes become round dots (the gap also gets the line's width, so a
+ * gap of 0 means dots touching). Dotted lines keep their dots close: far apart they stop reading as one line.
+ */
 const DASHES: Record<string, number[]> = {
   dashed: [3, 1.6],
   longDash: [6, 1.6],
-  dotted: [0, 1.6],
+  dotted: [0, 0.3],
   dashDot: [3.5, 1.2, 0, 1.2],
   dashDotDot: [3.5, 1.2, 0, 1.2, 0, 1.2],
   longShort: [5, 1.2, 1.5, 1.2],
-  sparseDots: [0, 3.2],
+  sparseDots: [0, 0.9],
   shortDash: [1.2, 1.2],
   dashDashDot: [2.5, 1.2, 2.5, 1.2, 0, 1.2],
 };
@@ -135,8 +138,11 @@ export function strokeLineStyle(g: Ctx, x1: number, y1: number, x2: number, y2: 
   const deco = DECORATED[name], dash = DASHES[name];
   if (deco) deco(g, len, u, w);
   else {
+    // a line of dots only: bigger dots than the line is wide, or they vanish on a thin line
+    const dots = !!dash && dash.every((v, i) => i % 2 || v === 0), dw = dots ? Math.max(w * 1.7, w + 1.2) : w;
+    g.lineWidth = dw;
     // Round caps grow each dash by the line width, so the gaps make room for it
-    if (dash) g.setLineDash(dash.map((v, i) => (i % 2 ? v * u + w : v * u)));
+    if (dash) g.setLineDash(dash.map((v, i) => (i % 2 ? v * u + dw : v * u)));
     line(g, 0, 0, len, 0);
   }
   g.restore();
