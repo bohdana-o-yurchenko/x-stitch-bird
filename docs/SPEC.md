@@ -378,6 +378,8 @@ Order of drawing:
   to zoom the chart suddenly in the middle of a move. So once a trackpad's small steps arrive, every step within
   300 ms belongs to the same move; a mouse wheel used on its own still zooms, and a pinch (Ctrl) always zooms.
   The same rule serves the photo windows (§11.3).
+- *New app (2026-11-16):* the editor page has `overscroll-behavior: none`, so two fingers sideways never trigger the
+  browser's back / forward swipe (which froze the chart mid-move) or the page's rubber-band bounce.
 - Pan: middle or right mouse drag, Pan tool, or hold Space.
 - Canvas resizes with a `ResizeObserver`.
 

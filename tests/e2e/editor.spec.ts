@@ -910,3 +910,15 @@ test("a two-finger move on the chart stays a move, even when a pause bundles its
   });
   expect(await zoom()).toBe(before);
 });
+
+test("two fingers sideways move the chart, never the browser back or forward", async ({ page }) => {
+  for (const el of ["html", "body"]) expect(await page.locator(el).evaluate((e) => getComputedStyle(e).overscrollBehaviorX)).toBe("none");
+  // and the chart takes the sideways gesture itself
+  const handled = await page.evaluate(() => {
+    const c = document.querySelector("[data-testid=chart]")!, b = c.getBoundingClientRect();
+    const e = new WheelEvent("wheel", { deltaX: -40.5, deltaY: 0, clientX: b.left + 200, clientY: b.top + 200, bubbles: true, cancelable: true });
+    c.dispatchEvent(e);
+    return e.defaultPrevented;
+  });
+  expect(handled).toBe(true);
+});

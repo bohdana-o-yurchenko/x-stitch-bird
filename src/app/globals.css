@@ -142,6 +142,9 @@ html,
 body {
   height: 100%;
   margin: 0;
+  /* two fingers sideways move the chart (or a photo window): never the browser's "back" / "forward" swipe, nor the
+     page's rubber-band bounce — the editor page itself never scrolls */
+  overscroll-behavior: none;
 }
 
 body {
