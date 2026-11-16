@@ -1,6 +1,6 @@
 # пташечка (Stitchwork)
 
-Turn a paper cross-stitch chart into a digital one — https://x-stitch-bird.vercel.app
+Turn a paper cross-stitch chart into a digital one — https://www.x-stitch-bird.app
 
 - **Autofill** — put a photo of the chart behind the stitches, stitch a few cells of each symbol by hand, line the
   photo up on a 10 × 10 block and click it: the app reads the symbols off the photo and fills the cells it is sure

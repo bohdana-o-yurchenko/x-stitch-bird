@@ -69,7 +69,7 @@ describe("Pattern Keeper PDF", () => {
     // the same address the English interface uses
     expect(APP_URL_EN).toBe(en.app.url);
     // the footer links to the app, in English like the rest of this file
-    expect(s.match(/\/URI \(https:\/\/x-stitch-bird\.vercel\.app\/en\)/g)).toHaveLength(4);
+    expect(s.match(/\/URI \(https:\/\/www\.x-stitch-bird\.app\/en\)/g)).toHaveLength(4);
   });
 
   it("shows a hand-drawn symbol with a spare standard glyph, since the chart must be text in the symbol font", async () => {
