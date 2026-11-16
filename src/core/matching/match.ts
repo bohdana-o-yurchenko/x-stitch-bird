@@ -32,6 +32,44 @@ export function blockAt(p: Pattern, x: number, y: number): Rect {
 /** An entry's identity for learned examples: what it is, not where it sits in the key (indices change). */
 export const sampleKey = (e: KeyEntry) => `${e.t}|${e.src}|${e.st ?? ""}`;
 
+/** How far (px) centring may move a symbol: beyond that it's a neighbour's ink, not a misaligned cell. */
+const MAX_CENTRING = 5;
+
+/**
+ * The patch with its symbol moved to the middle: the centre of its ink, without the chart's grid lines (rows and
+ * columns inked nearly end to end — symbols don't reach that far). Comparing centred symbols leaves only small
+ * offsets for the shift search; without it a cell that drifted more than SHIFT px only matched the entry with the
+ * most examples (one of them happened to sit the same way): a T read as a Y.
+ */
+export function centre(patch: Patch): Patch {
+  const sorted = [...patch].sort((a, b) => a - b), paper = sorted[Math.floor(sorted.length * 0.8)]!;
+  const dark = (x: number, y: number) => paper - patch[y * SIDE + x]! > 25;
+  const span = (n: number, at: (i: number) => boolean) => Array.from({ length: SIDE }, (_, i) => at(i)).filter(Boolean).length > n;
+  const lineRow = Array.from({ length: SIDE }, (_, y) => span(SIDE * 0.9, (x) => dark(x, y)));
+  const lineCol = Array.from({ length: SIDE }, (_, x) => span(SIDE * 0.9, (y) => dark(x, y)));
+  let sw = 0, sx = 0, sy = 0;
+  for (let y = 0; y < SIDE; y++)
+    for (let x = 0; x < SIDE; x++) {
+      if (lineRow[y] || lineCol[x]) continue;
+      // well below the paper: print, not the paper's own grain
+      const w = Math.max(0, paper - patch[y * SIDE + x]! - 20);
+      sw += w;
+      sx += w * (x + 0.5);
+      sy += w * (y + 0.5);
+    }
+  if (sw < 1) return patch;
+  const clamp = (v: number) => Math.max(-MAX_CENTRING, Math.min(MAX_CENTRING, v));
+  const dx = clamp(sx / sw - SIDE / 2), dy = clamp(sy / sw - SIDE / 2);
+  const at = (x: number, y: number) => (x < 0 || y < 0 || x > SIDE - 1 || y > SIDE - 1 ? paper : patch[y * SIDE + x]!);
+  const out = new Uint8Array(patch.length);
+  for (let y = 0; y < SIDE; y++)
+    for (let x = 0; x < SIDE; x++) {
+      const fx = x + dx, fy = y + dy, x0 = Math.floor(fx), y0 = Math.floor(fy), ax = fx - x0, ay = fy - y0;
+      out[y * SIDE + x] = Math.round(at(x0, y0) * (1 - ax) * (1 - ay) + at(x0 + 1, y0) * ax * (1 - ay) + at(x0, y0 + 1) * (1 - ax) * ay + at(x0 + 1, y0 + 1) * ax * ay);
+    }
+  return out;
+}
+
 /** The middle INNER × INNER of a patch, shifted by (dx, dy), normalised: mean 0, length 1. Null when flat. */
 function window(patch: Patch, dx: number, dy: number): Float32Array | null {
   const v = new Float32Array(INNER * INNER);
@@ -101,7 +139,8 @@ export interface MatchResult {
 
 export function matchBlock(input: MatchInput): MatchResult {
   const out: MatchResult = { proposals: [], unsure: [], blank: [] };
-  const examples = [...input.examples].map(([k, list]) => ({ k, list: list.map((p) => window(p, 0, 0)).filter((w): w is Float32Array => !!w) })).filter((e) => e.list.length);
+  // symbols are compared centred (examples are stored as photographed; centring happens here)
+  const examples = [...input.examples].map(([k, list]) => ({ k, list: list.map((p) => window(centre(p), 0, 0)).filter((w): w is Float32Array => !!w) })).filter((e) => e.list.length);
   // what counts as blank: little ink compared with the cells known to hold symbols (and never a faint smudge)
   const inks = [...input.examples.values()].flat().map(inkiness).sort((a, b) => a - b);
   const typical = inks.length ? inks[Math.floor(inks.length / 2)]! : 40;
@@ -113,7 +152,7 @@ export function matchBlock(input: MatchInput): MatchResult {
       out.blank.push(cell);
       continue;
     }
-    const windows = shifted(patch);
+    const windows = shifted(centre(patch));
     const scores = examples.map((e) => ({ k: e.k, s: Math.max(...e.list.map((ex) => score(ex, windows))) })).sort((a, b) => b.s - a.s);
     const [first, second] = scores;
     const sure = !!first && (second ? first.s >= SURE_SCORE && first.s - second.s >= SURE_MARGIN : first.s >= ONLY_ONE_SCORE);

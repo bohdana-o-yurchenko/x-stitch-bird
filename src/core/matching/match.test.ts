@@ -4,9 +4,9 @@ import { addEntry } from "../pattern/keyEntries";
 import { ALL_SYMBOLS } from "../symbols/symbols";
 import { parsePattern } from "../formats/json/parse";
 import { serializePattern } from "../formats/json/serialize";
-import { bar, blank, cross, printed, ring } from "../../../tests/support/printedPatch";
+import { bar, blank, cross, gridded, letterT, letterY, printed, ring } from "../../../tests/support/printedPatch";
 import { newUnderlay } from "../underlay/underlay";
-import { blockAt, blockImageRect, cellPatches, cleanSamples, decodePatch, encodePatch, learn, libraryExamples, matchBlock, MAX_SAMPLES, SIDE, type GreyImage, type Patch } from "./match";
+import { blockAt, blockImageRect, cellPatches, centre, cleanSamples, decodePatch, encodePatch, learn, libraryExamples, matchBlock, MAX_SAMPLES, SIDE, type GreyImage, type Patch } from "./match";
 
 describe("symbol matching in a block", () => {
   it("finds the 10 × 10 block between heavy lines, cut to the chart, following the numbering", () => {
@@ -67,6 +67,24 @@ describe("symbol matching in a block", () => {
     // moved half a cell right: column 0 is half off the photo, so it gets no patch
     const moved = { ...u, rect: { ...u.rect, x: 0.5 } }, partly = cellPatches(moved, { ...blockImageRect(moved, block), data }, block, 3);
     expect([...partly.keys()]).toEqual([1, 2, 4, 5]);
+  });
+
+  it("tells a T from a Y when the cells are a few pixels out of line, however many examples each has (a T was read as a Y)", () => {
+    const T = gridded(letterT), Y = gridded(letterY);
+    const examples = new Map([[1, [printed(T, 0, 0, 3)]], [2, [-3, -1, 0, 1, 2, 3].map((d, i) => printed(Y, d, -d, 20 + i))]]);
+    const offsets = [[3, 2], [-3, 3], [4, -2], [-4, -3], [2, 4], [-2, -4]] as const;
+    const patches = new Map<number, Patch>(), empty: number[] = [];
+    offsets.forEach(([dx, dy], i) => {
+      patches.set(i, printed(T, dx, dy, 40 + i));
+      patches.set(10 + i, printed(Y, -dx, dy, 60 + i));
+      empty.push(i, 10 + i);
+    });
+    const r = matchBlock({ patches, empty, examples });
+    expect(r.proposals.filter((p) => p.cell < 10).map((p) => p.k)).toEqual([1, 1, 1, 1, 1, 1]);
+    expect(r.proposals.filter((p) => p.cell >= 10).map((p) => p.k)).toEqual([2, 2, 2, 2, 2, 2]);
+    // centring moves the symbol, not the paper: a blank stays blank
+    const paper = printed(blank), moved = centre(paper);
+    expect(Math.max(...[...moved].map((v, i) => Math.abs(v - paper[i]!)))).toBeLessThanOrEqual(4);
   });
 });
 

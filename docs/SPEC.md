@@ -1212,8 +1212,12 @@ selection tool. It needs the image behind the chart, shown and loaded; otherwise
 **How a cell is matched**
 1. Through the underlay's placement (crop, rectangle, rotation — `gridToImage`), each cell of the block is cut out
    of the photo as a 20 × 20 grey patch (each pixel averages 2 × 2 points). Cells partly off the photo are skipped.
-2. The middle 16 × 16 is compared (grid lines left out), normalised (minus its mean, divided by its spread), so
-   faded or uneven print still matches. A cell with less ink than 30% of the examples' typical ink is **blank**.
+2. **Centred first** (2026-11-16): the symbol is moved to the middle of its patch — the centre of its ink, leaving
+   out the grid lines (rows and columns inked nearly end to end), at most 5 px. Without it a cell more than 2 px out
+   of line only matched the entry with the most examples, one of which happened to sit the same way: a T was read as
+   a Y. Examples are stored as photographed; centring happens when comparing.
+   Then the middle 16 × 16 is compared, normalised (minus its mean, divided by its spread), so faded or uneven
+   print still matches. A cell with less ink than 30% of the examples' typical ink is **blank**.
 3. Each patch is compared with every example by normalised cross-correlation, allowing a shift of up to 2 px each
    way. Per entry the best example counts.
 4. **Sure** when the best score ≥ 0.6 **and** beats the next entry by ≥ 0.1 (≥ 0.72 when only one entry has
