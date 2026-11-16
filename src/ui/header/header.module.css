@@ -196,3 +196,20 @@
 .paused > * {
   pointer-events: none;
 }
+
+/* "Glory to Ukraine" at the bottom of the main menu: not clickable */
+.glory {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 4px;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: default;
+}
+.flag {
+  width: 18px;
+  height: 12px;
+  border-radius: 2px;
+  background: linear-gradient(#0057b7 50%, #ffd700 50%);
+}

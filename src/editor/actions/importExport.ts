@@ -65,7 +65,7 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
   const view: ImageView = format === "png-color" ? "color" : format === "png-stitched" ? "stitched" : format === "png-symbols" ? "symbols" : "both";
   const byline = [p.meta.designer, p.meta.copyright && `© ${p.meta.copyright}`].filter(Boolean).join(" · ") || undefined;
   // the same line as at the end of the PDFs and the CSV, in the interface's language
-  const footer = ed.t("csv.generatedBy", { url: ed.t("app.url") });
+  const footer = `${ed.t("csv.generatedBy", { url: ed.t("app.url") })} · ${ed.t("app.glory")}`;
   const canvas = renderChartImage(p, ed.state.palette, view, { ...ed.theme, accent: defaultCanvasTheme.accent }, { heading: ed.t("png.keyHeading", { name: p.name }), byline, key: keyLines(ed), footer });
   const suffix = view === "stitched" ? "-stitched" : view === "color" ? "-preview" : "-chart";
   offer(ed, `${base}${suffix}.png`, await canvasToBlob(canvas), "png");

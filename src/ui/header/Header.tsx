@@ -26,6 +26,16 @@ function PatternNameInput({ name }: { name: string }) {
   return <input className={s.name} aria-label={t("patternName")} value={value} onChange={(e) => setValue(e.target.value)} onBlur={() => run("pattern.rename", value)} onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()} />;
 }
 
+/** "Glory to Ukraine" at the bottom of the menu: just words, not a command. The flag is drawn (Windows has no flag emoji). */
+function Glory() {
+  const t = useTranslations("app");
+  return (
+    <div className={s.glory} data-testid="glory">
+      {t("glory")}
+      <span className={s.flag} aria-hidden />
+    </div>
+  );
+}
 
 function FileMenu() {
   const t = useTranslations("fileMenu");
@@ -69,6 +79,8 @@ function FileMenu() {
     { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
     { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
     { id: "privacy", label: t("privacy"), onClick: () => void window.open(`/${locale}/privacy`, "_blank", "noopener") },
+    "-",
+    { id: "glory", node: <Glory /> },
   ];
   return (
     <span data-guide="menu">
