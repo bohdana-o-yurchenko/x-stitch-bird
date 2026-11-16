@@ -1469,6 +1469,10 @@ Idea from Pattern Maker v4 (Professional). Toggle with the eye button in the key
   Olive (sage), Royal blue (cool grey-blue), Rose (blush) — all light, each with its own tinted background, panels,
   lines and stage — and Dark (bluish, after the Dracula colour scheme). Picking one applies at once and keeps the
   menu open.
+- **Named after DMC floss** (2026-11-16, a small easter egg; the tooltip of each dot, the same in both languages, as
+  the official names are English): DMC 3830 · Terra Cotta, DMC 937 · Avocado Green Medium, DMC 797 · Royal Blue,
+  DMC 3350 · Dusty Rose Ultra Dark, DMC 310 · Black — the flosses nearest each theme's colour (Royal Blue for its
+  name). The theme ids stay `terracotta`, `olive`, `royal`, `rose`, `dark`, so saved choices keep working.
 - Remembered per browser (`localStorage` `stitchwork.theme`), applied before the first paint so nothing flashes.
 - Only the interface is themed: panels, menus, buttons, the stage around the fabric and the rulers. The chart itself
   — fabric colour, floss and bead colours, symbols, grid — stays exactly the same, so what you see is what you stitch.
