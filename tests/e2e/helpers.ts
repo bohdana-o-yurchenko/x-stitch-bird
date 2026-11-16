@@ -15,7 +15,7 @@ export async function openEditor(page: Page, locale = "en", o: { firstVisit?: bo
     localStorage.clear();
     // the quick-start guide, feature tips and "What's new" appear on their own; tests start past them unless they ask
     if (!first) {
-      for (const tour of ["guideSeen", "tipSeen.underlay", "tipSeen.reference"]) localStorage.setItem(`stitchwork.${tour}`, "1");
+      for (const tour of ["guideSeen", "tipSeen.underlay", "tipSeen.reference", "tipSeen.autofill", "tipSeen.autofillReview"]) localStorage.setItem(`stitchwork.${tour}`, "1");
       localStorage.setItem("stitchwork.seenVersion", version);
     }
     await new Promise((r) => { const q = indexedDB.deleteDatabase("stitchwork"); q.onsuccess = q.onerror = q.onblocked = r; });

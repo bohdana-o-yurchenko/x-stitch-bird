@@ -79,7 +79,8 @@ export function reviewBlock(ed: Editor, block: Rect, patches: Map<number, Patch>
     if (p.key[k]?.t === "bead") ghosts.layers.beads[gi] = k;
     else ghosts.layers.stitches[gi] = k;
   }
-  ed.store.setState({ match: { phase: "review", block, proposals: r.proposals, unsure: r.unsure.length, ghosts } });
+  // the first results: a guide to the bar (shown once — the guide keeps track)
+  ed.store.setState({ match: { phase: "review", block, proposals: r.proposals, unsure: r.unsure.length, ghosts }, pendingTip: "autofillReview" });
 }
 
 /** Writes the proposals (one undo step) into cells still empty; on to the next block. */

@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "пташечка — cross stitch & bead pattern designer",
-    "description": "Design cross stitch and bead patterns: key, chart, totals, pattern and OXS files.",
+    "description": "Turn a paper cross stitch chart into a digital one — Autofill reads the symbols off a photo, block by block. Key, chart, totals, PDF, Pattern Keeper and OXS files.",
     "brand": "пташечка",
     "loading": "Loading the editor…",
     "language": "Language",
@@ -708,7 +708,7 @@
       "title": "E-copy of a paper chart",
       "points": {
         "1": "The quickest way from a paper chart to a digital one.",
-        "2": "8 short steps — a couple of minutes.",
+        "2": "9 short steps — a couple of minutes.",
         "3": "Come back any time: <hl>Menu ▸ Quick start guide</hl>."
       }
     },
@@ -737,8 +737,17 @@
       },
       "tip": "Photo not perfect? Zoom in and press the <hl>edit image</hl> button by the zoom (or U): a <hl>frame</hl> appears — drag its side and the photo under it follows, the photo’s opposite side stays in place."
     },
+    "autofill": {
+      "title": "4. Autofill — the fast way",
+      "points": {
+        "1": "Stitch a few cells of each symbol by hand.",
+        "2": "Pick <hl>Autofill</hl> (Shift+F) and click the 10 × 10 block you’ve lined up.",
+        "3": "It shows what it found — <hl>Accept</hl> or <hl>Decline</hl>, then on to the next block."
+      },
+      "tip": "It only fills cells it’s sure about. Check the result — it gets better the more you mark."
+    },
     "views": {
-      "title": "4. Views",
+      "title": "5. Views",
       "points": {
         "1": "<hl>Colour</hl> — check the colours.",
         "2": "<hl>Symbols</hl> — compare with the paper chart.",
@@ -746,7 +755,7 @@
       }
     },
     "tools": {
-      "title": "5. Fast, without mistakes",
+      "title": "6. Fast, without mistakes",
       "points": {
         "1": "<hl>Ctrl/⌘ + Z</hl> — undo.",
         "2": "Hold <hl>Alt/⌥</hl> — pick a colour from the chart.",
@@ -756,20 +765,20 @@
       "tip": "Every shortcut: the <hl>i</hl> button."
     },
     "save": {
-      "title": "6. Keep a copy",
+      "title": "7. Keep a copy",
       "points": {
         "1": "Your work saves itself in the browser.",
         "2": "But browsers can wipe it — regularly use <hl>Download pattern file (.xbird)</hl>."
       }
     },
     "versions": {
-      "title": "7. Versions",
+      "title": "8. Versions",
       "points": {
         "1": "Made a mess? <hl>Versions</hl> bring back an earlier state."
       }
     },
     "finish": {
-      "title": "8. Export",
+      "title": "9. Export",
       "points": {
         "1": "In <hl>Pattern info</hl> fill in the <hl>name</hl> and <hl>author</hl> — Хрестики show them.",
         "2": "Export an <hl>Open Cross Stitch file (.oxs)</hl> — for Хрестики and Ruta Stitch."
@@ -806,6 +815,44 @@
       "points": {
         "1": "<hl>Marker</hl> — paint over what you’ve already copied: key lines or parts of the chart.",
         "2": "<hl>Shade stitched</hl> — the window shades the squares that are already on the chart (when the photo is the whole chart)."
+      }
+    },
+    "autofillPrepare": {
+      "title": "Autofill: before you start",
+      "points": {
+        "1": "Make the <hl>key</hl> first — Autofill fills cells with its entries.",
+        "2": "Put the chart under the stitches: <hl>Image behind the chart</hl>.",
+        "3": "<hl>Stitch a few cells of each symbol by hand.</hl> Autofill only sees the symbols it has already learned from your stitches."
+      }
+    },
+    "autofillAlign": {
+      "title": "Line the block up first",
+      "points": {
+        "1": "Before you click, make sure the <hl>10 × 10 block</hl> you want to fill sits exactly on the photo.",
+        "2": "Not quite? Turn on <hl>image editing</hl> (U), nudge the photo, then turn it off again."
+      }
+    },
+    "autofillHonest": {
+      "title": "Helpful, not perfect",
+      "points": {
+        "1": "Autofill fills only the cells it’s sure about and leaves the rest empty.",
+        "2": "It can still make a mistake — glance over every block before you accept it.",
+        "3": "The more you stitch by hand, the better it gets."
+      }
+    },
+    "autofillReview": {
+      "title": "What Autofill found",
+      "points": {
+        "1": "The faint symbols in the block are its suggestions — nothing is on the chart yet.",
+        "2": "<hl>Accept</hl> (Enter) puts them on the chart, <hl>Decline</hl> (Esc) drops them. Either way, click the next block.",
+        "3": "Point at <hl>Decline</hl> for advice when the result isn’t right."
+      }
+    },
+    "autofillPreview": {
+      "title": "Look closer",
+      "points": {
+        "1": "<hl>Symbols only</hl> — show the suggestions as symbols, or on their colour. Just this preview.",
+        "2": "<hl>Hold the eye</hl> — the suggestions disappear while you hold it, so you can compare with the photo."
       }
     }
   },

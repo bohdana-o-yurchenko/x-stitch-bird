@@ -1,6 +1,17 @@
-# Stitchwork
+# пташечка (Stitchwork)
 
-Cross-stitch and bead pattern designer — a Next.js rewrite of the single-file app in `index.html`.
+Turn a paper cross-stitch chart into a digital one — https://x-stitch-bird.vercel.app
+
+- **Autofill** — put a photo of the chart behind the stitches, stitch a few cells of each symbol by hand, line the
+  photo up on a 10 × 10 block and click it: the app reads the symbols off the photo and fills the cells it is sure
+  about, for you to accept or decline. Block by block; it learns from what you mark.
+- A full cross-stitch and bead editor: key with floss, blends, beads (Mill Hill, Treasures included) and floss + bead,
+  half, quarter and petite stitches, backstitch in line styles, French knots, beads between cells.
+- Chart checks, versions, photo windows with progress marks, themes, Ukrainian and English.
+- Exports: .xbird pattern file, .oxs (Хрестики, Ruta Stitch), PDF for Pattern Keeper, PDF chart to print, PNG
+  (including a stitched preview), shopping list CSV.
+
+A Next.js rewrite of the single-file app in `index.html`.
 
 - Behaviour: [`docs/SPEC.md`](docs/SPEC.md)
 - Structure and conventions: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)

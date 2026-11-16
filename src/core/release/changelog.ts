@@ -12,6 +12,34 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "1.2.0",
+    date: "2026-11-16",
+    uk: [
+      "Автозаповнення (Shift+F): позначте вручну кілька клітинок кожного символу, вирівняйте фото на блоці 10 × 10 і клацніть його — застосунок сам прочитає символи з фото. Ставить лише те, у чому певний; ви приймаєте чи відхиляєте, і далі наступний блок. Вчиться на ваших позначках і зберігає вивчене разом зі схемою.",
+      "Перевірка схеми: порожні клітинки (до 10), поодинокі стібки й майже-симетрія — вмикаються за бажанням, згруповані, з переходом від однієї знахідки до іншої.",
+      "Бісер між клітинками: намистина (з ниткою чи без) може сидіти у вузлі сітки, як французький вузлик.",
+      "Mill Hill: Treasures — 269 підвісок і фігурок, кількість у пакетику для кожної серії бісеру та кілька бісерин, яких бракувало.",
+      "Бекстіч: свій колір лінії для вигляду «Символи» й схеми для друку; крапкові лінії тепер добре видно.",
+      "Експорт «Прев’ю — вишите»: хрестики, як справжні нитки на канві. Кожен PNG підписано «Створено в застосунку пташечка».",
+      "Теми названо номерами ниток DMC — 3830, 937, 797, 3350, 550 — і нова справді чорна тема 310.",
+      "Свої символи: вирізи тепер білі, а не прозорі, і схема з такими символами рухається плавніше.",
+      "Трекпад: два пальці рухають схему плавно й без раптового масштабування, щипок масштабує й фото у вікні, а жест «назад» більше не вмикається.",
+      "Виправлено: файл, відкритий з комп’ютера, не губиться, якщо одразу відкрити інший; чернетка не затирається, поки сторінка завантажується; список ключа лишається на тому ж місці після редагування; нова схема починається з порожнього ключа.",
+    ],
+    en: [
+      "Autofill (Shift+F): stitch a few cells of each symbol by hand, line the photo up on a 10 × 10 block and click it — the app reads the symbols off the photo. It fills only what it’s sure about; you accept or decline, then on to the next block. It learns from what you mark and keeps what it learned with the pattern.",
+      "Chart checks: empty cells (up to 10), lone stitches and near symmetry — each on when you want it, grouped, with a step from one finding to the next.",
+      "Beads between cells: a bead (with or without floss) can sit on a grid point, like a French knot.",
+      "Mill Hill: Treasures — 269 charms and shapes, the number of beads per package for every series, and a few beads that were missing.",
+      "Backstitch: its own line colour for the Symbols view and the chart to print; dotted lines are easy to see now.",
+      "“Preview image — stitched” export: crosses that look like real thread on fabric. Every PNG now says it was made in пташечка.",
+      "Themes are named after DMC flosses — 3830, 937, 797, 3350, 550 — plus a new true black theme, 310.",
+      "Your own symbols: cut-outs are white instead of see-through, and charts full of them move more smoothly.",
+      "Trackpad: two fingers move the chart smoothly with no sudden zoom, pinch zooms photo windows too, and the “back” swipe no longer fires.",
+      "Fixed: a file opened from the computer isn’t lost when you open another one straight away; the draft is never overwritten while the page loads; the key list keeps its place after an edit; a new pattern starts with an empty key.",
+    ],
+  },
+  {
     version: "1.1.0",
     date: "2026-11-16",
     uk: [

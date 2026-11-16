@@ -20,6 +20,7 @@ export const TOURS: Record<string, Step[]> = {
     { id: "create", targets: ["menu", "menu:newBlank"], reveal: ["new"] },
     { id: "key", targets: ["add-key", "menu:refWindow"], reveal: ["references"], tip: true },
     { id: "trace", targets: ["menu:refUnderlay"], reveal: ["references"], tip: true },
+    { id: "autofill", targets: ["tool-autofill"], tip: true },
     { id: "views", targets: ["views"] },
     { id: "tools", targets: ["toolbar", "override", "shortcuts"], tip: true },
     { id: "save", targets: ["saved", "menu:download"], reveal: [] },
@@ -31,6 +32,17 @@ export const TOURS: Record<string, Step[]> = {
   reference: [
     { id: "referenceTip", targets: ["ref-window"] },
     { id: "referenceMarks", targets: ["ref-marker", "ref-done"] },
+  ],
+  // the first time Autofill is picked: what it needs, lining up, and that it isn't perfect
+  autofill: [
+    { id: "autofillPrepare", targets: ["add-key", "tool-autofill"] },
+    { id: "autofillAlign", targets: ["underlay-edit"] },
+    { id: "autofillHonest", targets: ["tool-autofill"] },
+  ],
+  // the first time Autofill shows what it found: the bar's buttons
+  autofillReview: [
+    { id: "autofillReview", targets: ["match-bar"] },
+    { id: "autofillPreview", targets: ["match-view", "match-peek"] },
   ],
 };
 

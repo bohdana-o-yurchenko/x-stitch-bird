@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { cellPoint, editorState, fileAction, fixtureDataUrl, gridPoint, loadFixture, openEditor } from "./helpers";
 
 test.beforeEach(async ({ page }) => openEditor(page));
@@ -269,7 +269,10 @@ test("the quick-start guide opens on the first visit only, highlights what it ex
   await expect(guide).toHaveCount(0);
   await fileAction(page, "Як зробити перенабір");
   await expect(guide).toBeVisible();
-  for (let i = 0; i < 10; i++) await guide.getByRole("button", { name: /^(Далі|До вишивання)$/ }).click();
+  for (let i = 0; i < 4; i++) await guide.getByRole("button", { name: "Далі" }).click();
+  await expect(guide).toContainText("4. Автозаповнення");
+  await expect(page.locator('[data-guide="tool-autofill"]')).toBeVisible();
+  for (let i = 0; i < 7; i++) await guide.getByRole("button", { name: /^(Далі|До вишивання)$/ }).click();
   await expect(guide).toHaveCount(0);
 });
 
@@ -711,8 +714,8 @@ test("chart checks are opt-in, run on demand, and their findings can be stepped 
   await expect(page.getByTestId("checks-panel").getByRole("checkbox", { name: "Empty cells" })).toBeChecked();
 });
 
-test("finds symbols in one 10 × 10 block of the photo behind the chart, and fills them on Accept", async ({ page }) => {
-  // a 10 × 10 block printed at 30 px a cell: crosses and rings in the top row, the first of each already stitched
+/** A 10 × 10 block printed at 30 px a cell: crosses and rings in the top row, the first of each already stitched. */
+async function autofillPhoto(page: Page): Promise<[number, number]> {
   const keys = await page.evaluate(async () => {
     type Ed = {
       commands: { run(id: string, a: unknown): Promise<void> };
@@ -749,6 +752,11 @@ test("finds symbols in one 10 × 10 block of the photo behind the chart, and fil
     return [a, b];
   });
   await expect.poll(() => editorState<boolean>(page, "(ed) => !!ed.state.underlayImage")).toBe(true);
+  return keys as [number, number];
+}
+
+test("finds symbols in one 10 × 10 block of the photo behind the chart, and fills them on Accept", async ({ page }) => {
+  const keys = await autofillPhoto(page);
   // Autofill sits in the toolbar (and Shift+F), in a group of its own before the drawing tools
   const toolbarButtons = await page.getByTestId("toolbar").getByRole("button").evaluateAll((bs) => bs.map((b) => b.getAttribute("aria-label") ?? ""));
   expect(toolbarButtons.findIndex((n) => n.startsWith("Autofill"))).toBeLessThan(toolbarButtons.findIndex((n) => n.startsWith("Draw")));
@@ -954,4 +962,33 @@ test("two fingers sideways move the chart, never the browser back or forward", a
     return e.defaultPrevented;
   });
   expect(handled).toBe(true);
+});
+
+test("Autofill's guides: what it needs the first time it's picked, and its buttons with the first results", async ({ page }) => {
+  await page.evaluate(() => ["autofill", "autofillReview"].forEach((t) => localStorage.removeItem(`stitchwork.tipSeen.${t}`)));
+  await autofillPhoto(page);
+  const guide = page.getByTestId("guide");
+  await page.keyboard.press("Shift+F");
+  await expect(guide).toContainText("Autofill: before you start");
+  await expect(guide).toContainText("only sees the symbols it has already learned");
+  await guide.getByRole("button", { name: "Next" }).click();
+  await expect(guide).toContainText("Line the block up first");
+  await guide.getByRole("button", { name: "Next" }).click();
+  await expect(guide).toContainText("Helpful, not perfect");
+  await guide.getByRole("button", { name: "Got it" }).click();
+  await expect(guide).toHaveCount(0);
+  // the first results: the bar explained
+  const p = await cellPoint(page, 5, 5);
+  await page.mouse.click(p.x, p.y);
+  await expect(guide).toContainText("What Autofill found");
+  await guide.getByRole("button", { name: "Next" }).click();
+  await expect(guide).toContainText("Look closer");
+  await guide.getByRole("button", { name: "Got it" }).click();
+  // once only
+  await page.getByTestId("match-decline").click();
+  await page.keyboard.press("p");
+  await page.keyboard.press("Shift+F");
+  await page.mouse.click(p.x, p.y);
+  await expect(page.getByTestId("match-count")).toBeVisible();
+  await expect(guide).toHaveCount(0);
 });

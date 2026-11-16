@@ -28,7 +28,7 @@ export function ToolBar() {
   // while the image behind the chart is edited, the pointer moves the image: no tool works
   const paused = useEditorState((st) => !!st.underlay && st.underlay.visible && !st.underlay.behind);
   const toolButton = (id: ToolId) => (
-    <button key={id} type="button" className={cx(ui.tool, shown === id && ui.on)} title={t(id)} aria-label={t(id)} aria-pressed={shown === id} onClick={() => run("tool.select", id)}>
+    <button key={id} type="button" className={cx(ui.tool, shown === id && ui.on)} title={t(id)} aria-label={t(id)} aria-pressed={shown === id} data-guide={`tool-${id}`} onClick={() => run("tool.select", id)}>
       <Icon name={toolById(id).icon} size={18} />
     </button>
   );

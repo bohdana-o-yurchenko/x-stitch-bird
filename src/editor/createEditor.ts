@@ -189,6 +189,8 @@ export class Editor {
     // Autofill reads the image behind the chart
     if (tool === "autofill" && !canMatch(this)) return this.toast("toasts.matchNeedsUnderlay");
     this.tools.cancel();
+    // the first time Autofill is picked, its guide (shown once — the guide keeps track)
+    if (tool === "autofill" && this.state.tool !== "autofill") this.store.setState({ pendingTip: "autofill" });
     this.store.setState({ tool, match: tool === "autofill" ? (this.state.match ?? PICKING) : null, overlay: { ...this.state.overlay, preview: null, partialPreview: null, knotPreview: null, hoverPoint: null, marquee: null, eraseHighlight: null } });
   }
 

@@ -164,7 +164,7 @@ function MatchBar() {
   const above = a.y > 70;
   const showTip = { onMouseEnter: () => setTip(true), onMouseLeave: () => setTip(false), onFocus: () => setTip(true), onBlur: () => setTip(false) };
   return (
-    <div ref={bar} data-x={a.x} className={cx(s.selectionBar, s.matchBar)} data-testid="match-bar" style={{ left: a.x, top: above ? a.y - 8 : below + 8, transform: `translate(-50%, ${above ? "-100%" : "0"})` }}>
+    <div ref={bar} data-x={a.x} className={cx(s.selectionBar, s.matchBar)} data-testid="match-bar" data-guide="match-bar" style={{ left: a.x, top: above ? a.y - 8 : below + 8, transform: `translate(-50%, ${above ? "-100%" : "0"})` }}>
       <span className={s.barText} data-testid="match-count">{t("found", { n: m.proposals.length })}{m.unsure ? ` · ${t("unsure", { n: m.unsure })}` : ""}</span>
       <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} disabled={!m.proposals.length} data-testid="match-accept" onClick={() => { setTip(false); run("match.accept"); }}>{t("accept")}</button>
       <span className={s.declineWrap}>
@@ -180,8 +180,8 @@ function MatchBar() {
         )}
       </span>
       <span className={s.barSep} />
-      <button type="button" className={cx(ui.btn, ui.sm)} aria-pressed={view === "symbols"} title={t("symbolsOnlyHint")} data-testid="match-view" onClick={toggleView}>{t("symbolsOnly")}</button>
-      <button type="button" className={cx(ui.btn, ui.sm)} aria-pressed={peek} title={t("peekHint")} aria-label={t("peek")} data-testid="match-peek"
+      <button type="button" className={cx(ui.btn, ui.sm)} aria-pressed={view === "symbols"} title={t("symbolsOnlyHint")} data-testid="match-view" data-guide="match-view" onClick={toggleView}>{t("symbolsOnly")}</button>
+      <button type="button" className={cx(ui.btn, ui.sm)} aria-pressed={peek} title={t("peekHint")} aria-label={t("peek")} data-testid="match-peek" data-guide="match-peek"
         onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); setPeek(true); }} onPointerUp={() => setPeek(false)} onPointerCancel={() => setPeek(false)} onLostPointerCapture={() => setPeek(false)}>
         <Icon name="peek" size={16} />
       </button>

@@ -667,10 +667,11 @@ from **Menu ▸ Quick start guide** (uk: "Як зробити перенабір
   options are **highlighted** in the text. Keys: → or Enter next, ← back, Esc closes (and closes the menu).
 - Steps: welcome · 1 create a pattern with the chart's size · 2 fill in the key (floss, bead, blends, floss + bead;
   the paper key in a floating photo window, ticking lines off with its marker) · 3 image behind the chart,
-  straighten by 4 corners, trace (tip: the quick move & resize panel, block by block) · 4 Colour / Both / Symbols ·
-  5 undo, hold Alt/⌥ to pick, select / copy / paste / move, override off by default (tip: the **i** button) ·
-  6 automatic saving in the browser, and download the .xbird file to the device · 7 Versions · 8 pattern info and
-  export .oxs for Хрестики and Ruta Stitch · Voilà.
+  straighten by 4 corners, trace (tip: the quick move & resize panel, block by block) · **4 Autofill** — stitch a
+  few cells of each symbol, pick Autofill (Shift+F), click the lined-up block, accept or decline (tip: it fills only
+  what it's sure about; check the result) · 5 Colour / Both / Symbols · 6 undo, hold Alt/⌥ to pick, select / copy /
+  paste / move, override off by default (tip: the **i** button) · 7 automatic saving in the browser, and download the
+  .xbird file to the device · 8 Versions · 9 pattern info and export .oxs for Хрестики and Ruta Stitch · Voilà.
 - Highlight targets are `data-guide` attributes (menu, add-key, views, toolbar, shortcuts, saved); a missing target
   (e.g. side panel hidden) just isn't highlighted.
 
@@ -681,6 +682,12 @@ from **Menu ▸ Quick start guide** (uk: "Як зробити перенабір
     edit toggle in the zoom box (frame, ↺ ↻, Ctrl/⌘+Z).
   - *Photo window* — after the first window is opened: what to put there (the key, or the chart scan instead of the
     canvas), then highlights the window's **Marker** and **Shade stitched** buttons.
+  - *Autofill* (2026-11-16) — the first time it is picked, three steps: before you start (a key, the image behind the
+    chart, a few cells of each symbol stitched by hand — Autofill only sees the symbols it has learned from them);
+    line the block up first (image editing, U); helpful, not perfect (only what it's sure about, may still be wrong,
+    check every block, it gets better as you mark).
+  - *Autofill's results* (2026-11-16) — the first time it shows what it found: the bar (faint suggestions, Accept /
+    Enter, Decline / Esc, advice on Decline), then **Symbols only** and the hold-to-see-under eye.
 - **App version** = `package.json` `version` (semver). **Menu ▸ What's new** lists the user-facing release notes
   (`src/core/release/changelog.ts`, uk + en). It opens by itself once after an update (`stitchwork.seenVersion` older
   than the app's version); brand-new users don't get it (the intro guide instead). Release steps:
