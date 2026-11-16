@@ -610,7 +610,7 @@ File ▸ Save) still saves at once, with a toast.
   sorted newest first. Each row: name, `W×H · <locale date time>` (+ ` · this browser` for local), delete 🗑
   (no confirmation; toast "Deleted"). Click → load, toast "Opened “name”". Empty: "No saved patterns yet. Use Save to keep your work."
 - **New** modal: Name, Fabric (11/14/16/18 ct), Width, Height (80×80 default, 5..500), checkbox
-  "Start with the same key (threads, beads, symbols)" (checked) — copies `pal`, `blends`, `combos`, `customs`.
+  "Start with the same key (threads, beads, symbols)" (unchecked by default) — copies `pal`, `blends`, `combos`, `customs`.
   Warning "Unsaved changes to the current pattern will be lost — save first if you want to keep it."
   New project gets a new id; `strands` carried over.
 

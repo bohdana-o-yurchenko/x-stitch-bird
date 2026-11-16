@@ -38,7 +38,7 @@ export function NewPatternDialog({ onClose }: Close) {
   const t = useTranslations("dialogs");
   const tf = useTranslations("fabric");
   const run = useCommand();
-  const [o, set] = useState({ name: "Untitled pattern", w: 80, h: 80, count: 14, keepKey: true });
+  const [o, set] = useState({ name: "Untitled pattern", w: 80, h: 80, count: 14, keepKey: false });
   return (
     <Modal title={t("newTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("create"), primary: true, onClick: () => run("file.create", o) }]}>
       <div className={ui.grid2}>
