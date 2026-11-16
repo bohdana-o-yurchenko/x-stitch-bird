@@ -8,10 +8,17 @@ export const DMC: readonly ColorEntry[] = (dmcData as [string, string, string][]
 
 export const DMC_BY_CODE = new Map(DMC.map((e) => [e.code, e]));
 
-export const BEADS: readonly ColorEntry[] = (millHillData as { series: string; beads: [string, string, string][] }[]).flatMap(
-  ({ series, beads }) => beads.map(([code, name, dmc]) => ({ code, name, dmc, series })),
-).map(({ code, name, dmc, series }, order) =>
-  makeColor({ id: `bead:${code}`, kind: "bead", brand: "Mill Hill", code, name, dmc, series, order, hex: DMC_BY_CODE.get(dmc)?.hex ?? "#B0B0B0" }),
+/**
+ * Mill Hill, per series: beads per package, and the beads as [code, name, DMC equivalent, beads per package if not
+ * the series', colour if there is no DMC equivalent]. Treasures have no DMC equivalent: their colour is read off the
+ * maker's product photo.
+ */
+type BeadRow = [code: string, name: string, dmc: string, pack?: number, hex?: string];
+
+export const BEADS: readonly ColorEntry[] = (millHillData as { series: string; pack: number; beads: BeadRow[] }[]).flatMap(
+  (s) => s.beads.map(([code, name, dmc, pack, hex]) => ({ code, name, dmc, series: s.series, pack: pack ?? s.pack, hex })),
+).map(({ code, name, dmc, series, pack, hex }, order) =>
+  makeColor({ id: `bead:${code}`, kind: "bead", brand: "Mill Hill", code, name, ...(dmc ? { dmc } : {}), series, pack, order, hex: hex ?? DMC_BY_CODE.get(dmc)?.hex ?? "#B0B0B0" }),
 );
 
 export const BEAD_SERIES: readonly string[] = [...new Set(BEADS.map((b) => b.series ?? ""))];

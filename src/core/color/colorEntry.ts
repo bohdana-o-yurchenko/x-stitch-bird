@@ -12,6 +12,8 @@ export interface ColorInput {
   order: number;
   series?: string;
   dmc?: string;
+  /** Beads: how many come in one package (Mill Hill's figures; a Treasure is often 1–6 pieces). */
+  pack?: number;
 }
 
 /** A thread, bead, blend or combo with everything the app needs precomputed (SPEC §2.4). */

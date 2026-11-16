@@ -12,6 +12,10 @@ export const BEAD_SHAPES: Record<string, BeadShape> = {
   "Small Bugle": { bugle: 0.62 },
   "Medium Bugle": { bugle: 0.8 },
   "Large Bugle": { bugle: 0.95 },
+  // shaped charms, bigger than a cell's bead
+  "Glass Treasures": { r: 0.48 },
+  "Crystal Treasures": { r: 0.48 },
+  "Metal Treasures": { r: 0.48 },
 };
 
 export const beadShape = (series: string | undefined): BeadShape => (series && BEAD_SHAPES[series]) || {};

@@ -53,6 +53,24 @@ No build step, no dependencies other than Google Fonts (Fraunces, DM Sans).
 - Bead screen colour = hex of the DMC thread named in the 3rd column; `#B0B0B0` if not found.
 - `id = "bead:" + code` (codes are 5-digit strings, e.g. `00557`, `02011`), `kind:'bead'`,
   `brand:'Mill Hill'`, plus `series` and `dmc` fields.
+- **The new app's catalogue** (`core/catalog/data/millhill.json`, updated 2026-11-16) holds 1064 beads in 15
+  series. Each series has `pack` (beads per package); a row is `[code, name, dmc, pack?, hex?]`.
+  - **Packages**, from Mill Hill's Glass Bead Inventory (2010):
+    - Glass Seed 500, except the codes marked "+" (250) and "≈" (about 450);
+    - Crayon, Frosted and Petite 500; Antique 250;
+    - Magnifica 400 (the 2 g pack, 10xxx; a 7 g pack of 1400 has the same colours under 11xxx);
+    - Size 8 275, Size 6 100, Pebble 30;
+    - bugles: small 135, medium 75, large 40.
+    - Economy packs of 1000 (codes starting with 2) are not listed separately.
+  - **Added** from the inventory and the 2015 DMC conversion chart:
+    - 00777, 40777, 70777 and 80777 Potpourri: a mix, so no DMC equivalent;
+    - 02062 Crayon Light Crimson;
+    - 02101 Purple.
+    - 42101 is now DMC 327, as the 2015 chart has it.
+  - **Treasures** (Glass 183, Crystal 85, Metal 1; from Wichelt's catalogue):
+    - a name with the size, e.g. "Small Heart Siam, 10.3/10mm";
+    - pieces per package, 1–6;
+    - no DMC equivalent; the screen colour is read off the maker's product photo, an approximation.
 
 ### 2.3 Bead shapes (`BEAD_SHAPE`, `index.html:1358`)
 
@@ -888,15 +906,14 @@ All toasts/modals listed in the sections above should be kept verbatim; they are
 | Intended fabric: name, type, count (§15.19) | S | optional fields in .xbird | not started |
 | Floss usage rework + stitching bases: plastic canvas, wood (§15.20) | L | optional calculator settings | not started |
 | Finished size for several counts in the print PDF (§15.21) | S | none | not started |
-| Skeins and bead packs in the shopping list (§15.22) | S code, M data | none | not started |
+| Skeins and bead packs in the shopping list (§15.22) | S (pack sizes are in the catalogue) | none | not started |
 | Accounts and cloud storage (Neon), sign-in, pattern gallery with previews (§15.23) | XL | new server storage; browser data migrated | not started |
-| Mill Hill Treasures in the bead list (§15.24) | M (mostly data) | new bead ids | not started |
 | More chart checks (§15.4): backstitch, knots, beads | S–M | none | ideas |
 | More thread brands (§15.8) | M code, L data | new `src` id namespaces | not started |
 | Not yet discussed (§15.12): keyboard entry, specialty stitches, beads on intersections, proofread tracking, second-screen window | — | — | ideas |
 | Stash management (§16) | XL | needs a server | future phase |
 
-Implemented: §15.11 symbol matching in a block, §15.4 chart checks (empty cells, lone stitches, near symmetry), §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.5 ambiguous
+Implemented: §15.24 Mill Hill Treasures and bead packages, §15.11 symbol matching in a block, §15.4 chart checks (empty cells, lone stitches, near symmetry), §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.5 ambiguous
 marks, §15.6 selection, §15.7 snapshots, §15.10 / §15.10b PDFs, §15.13 fractional stitches, §15.14 French knots,
 §15.15 underlay, §15.16 highlighting, §15.17 work time, §15.18 themes, and the drawn symbols of §2.5.
 
@@ -1466,9 +1483,8 @@ Both languages.
 ### 15.22 Skeins and bead packs in the shopping list (backlog, added 2026-11-16) — effort S code, M data
 - **Threads**: the CSV and the totals already give whole skeins, but they show a count with no unit. Write
   "2 skeins" and, after §15.20, the metres too.
-- **Beads**: today a count of beads. Add packs: Mill Hill sells a fixed weight per series (Glass Seed, Petite,
-  Magnifica, bugles… each a different number of beads per pack). Needs per-series pack sizes from the maker. The
-  list then shows "2 packs (≈ 640 beads)".
+- **Beads**: today a count of beads. Add packs: the catalogue now knows each bead's package size (§2.2,
+  `ColorEntry.pack`). The list then shows "2 packs (≈ 640 beads)". What's left is code only.
 
 ### 15.23 Accounts and cloud storage with Neon; sign-in; pattern gallery (backlog, added 2026-11-16) — effort XL
 A big turn: patterns are stored on a server under a user account, not only in the browser.
@@ -1488,15 +1504,9 @@ A big turn: patterns are stored on a server under a user account, not only in th
   - server costs.
 - Unlocks the stash (§16).
 
-### 15.24 Mill Hill Treasures in the bead list (backlog, added 2026-11-16) — effort M, mostly data
-The bead catalog has 12 Mill Hill series (seed, petite, antique, frosted, Magnifica, size 8 and 6, pebble,
-bugles); **Treasures are not in it**. They are shaped charms (hearts, stars, flowers, leaves…, codes 12xxx /
-13xxx).
-- **Data**: codes, names and a colour for each, from the maker's list. There are hundreds; we need a reliable
-  source.
-- **Drawing**: a few new bead shapes for the chart and the key (heart, star, flower, leaf), or a generic charm
-  shape.
-- **Shopping**: sold a few pieces per pack (see §15.22).
+### 15.24 Mill Hill Treasures in the bead list (implemented 2026-11-16)
+In the catalogue (§2.2): 269 Treasures in three series, each with pieces per package and a colour from the photo.
+Drawn as a large round bead (radius 0.48) for now. Charm-shaped icons (heart, star, flower, leaf) could come later.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
