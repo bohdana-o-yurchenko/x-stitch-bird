@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { DM_Sans, Fraunces, Nunito } from "next/font/google";
@@ -37,6 +38,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         <ThemeSync />
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
