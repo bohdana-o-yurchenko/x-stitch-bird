@@ -12,6 +12,18 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "1.2.1",
+    date: "2026-11-16",
+    uk: [
+      "Підказка про символи, коли вперше додаєте елемент до ключа: виберіть символ або намалюйте свій, точнісінько як на паперовій схемі.",
+      "Підказки до автозаповнення нагадують: воно працює найкраще, коли кожен символ ключа такий самий, як на паперовій схемі.",
+    ],
+    en: [
+      "A tip on symbols the first time you add an entry to the key: pick one, or draw your own exactly like the paper chart’s.",
+      "Autofill’s guides now remind you: it works best when every key symbol looks exactly like the one on the paper chart.",
+    ],
+  },
+  {
     version: "1.2.0",
     date: "2026-11-16",
     uk: [
