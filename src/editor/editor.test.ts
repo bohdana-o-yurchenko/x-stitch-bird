@@ -5,7 +5,7 @@ import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import type { Snapshot } from "@/persistence/ports";
 import { memoryPersistence } from "../../tests/support/memoryPersistence";
 import { loadPattern } from "./actions/pattern";
-import { LIBRARY_EVERY } from "./autosave";
+import { LIBRARY_EVERY, LIBRARY_QUIET } from "./autosave";
 import { patternFile } from "./actions/importExport";
 import { serializePattern, XBIRD_VERSION } from "@/core/formats/json/serialize";
 import { gridToImage } from "@/core/underlay/underlay";
@@ -267,7 +267,7 @@ describe("viewport", () => {
 });
 
 describe("autosave", () => {
-  it("saves changes to the library once a minute, and not after opening an unchanged pattern", async () => {
+  it("saves changes a few seconds after editing stops, at least every half minute while it goes on; not after opening an unchanged pattern", async () => {
     vi.useFakeTimers();
     const saved: string[] = [];
     ed.persistence.patterns.save = async (d) => (saved.push(d.name), { ok: true });
@@ -276,8 +276,16 @@ describe("autosave", () => {
     expect(saved).toEqual([]);
     ed.changed();
     ed.changed();
-    await vi.advanceTimersByTimeAsync(LIBRARY_EVERY);
+    expect(ed.autosave.pending).toBe(true);
+    await vi.advanceTimersByTimeAsync(LIBRARY_QUIET);
     expect(saved).toHaveLength(1);
+    expect(ed.autosave.pending).toBe(false);
+    // a change every second, without stopping: still saved within the half minute
+    for (let i = 0; i < 31; i++) {
+      ed.changed();
+      await vi.advanceTimersByTimeAsync(1_000);
+    }
+    expect(saved).toHaveLength(2);
     vi.useRealTimers();
   });
 

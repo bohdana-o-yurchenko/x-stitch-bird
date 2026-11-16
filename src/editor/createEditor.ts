@@ -122,6 +122,7 @@ export class Editor {
     // a restored draft is saved to the library once it's edited; the demo only then too
     this.autosave.markSaved();
     this.store.setState({ ready: true });
+    void this.refreshPatterns();
     // pictures no record uses any more (closed windows, replaced underlays, old marks)
     setTimeout(() => void this.persistence.images.collectGarbage().catch(() => {}), 10_000);
   }
@@ -189,7 +190,17 @@ export class Editor {
   /** Signed in or out (the account menu tells): while signed in, saved patterns also go to the account. */
   setAccount(user: EditorState["account"]) {
     account.signedIn = !!user;
-    if (this.state.account?.id !== user?.id) this.store.setState({ account: user });
+    if (this.state.account?.id === user?.id) return;
+    this.store.setState({ account: user, saveState: null });
+    void this.refreshPatterns();
+    // an upload cut off last time (tab closed mid-save): the browser copy is newer, so it goes up now
+    if (user) void this.persistence.patterns.catchUp?.().catch(() => {});
+  }
+
+  /** Whether there are saved patterns besides the open one (Pattern ▸ Open is offered then). */
+  async refreshPatterns() {
+    const list = await this.persistence.patterns.list().catch(() => []);
+    this.store.setState({ hasOtherPatterns: list.some((p) => p.id !== this.doc.id) });
   }
 
   setTool(tool: ToolId) {

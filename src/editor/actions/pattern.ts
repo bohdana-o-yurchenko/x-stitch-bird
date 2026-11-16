@@ -21,6 +21,7 @@ export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null
   ed.viewport.fit();
   void ed.references.switchTo(p.id, refs);
   void ed.underlay.switchTo(p.id, underlay);
+  void ed.refreshPatterns();
 }
 
 export function newPattern(ed: Editor, o: { name: string; w: number; h: number; count: number; keepKey: boolean }) {

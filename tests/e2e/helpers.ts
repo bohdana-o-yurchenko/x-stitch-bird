@@ -39,15 +39,26 @@ export const editorState = <T>(page: Page, fn: string): Promise<T> =>
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** Click through the File menu: `fileAction(page, "Export", "Shopping list (CSV)")`. Items match by label start. */
-export async function fileAction(page: Page, ...path: string[]) {
-  await page.getByRole("button", { name: /^(Menu|Меню) ▾$/ }).click();
+const MENU_BUTTONS = { pattern: /^(Pattern|Схема) ▾$/, print: /^(Print & share|Друк і експорт)$/, app: /^(More|Ще)$/ };
+
+/** Click through a header menu: `menuAction(page, "print", "Preview images (PNG)", "Preview image — stitched")`. Items match by label start. */
+export async function menuAction(page: Page, menu: keyof typeof MENU_BUTTONS, ...path: string[]) {
+  await page.getByRole("button", { name: MENU_BUTTONS[menu] }).click();
   for (const name of path) await page.getByRole("menuitem", { name: new RegExp(`^${escape(name)}`) }).click();
 }
 
+/** Pattern ▾: `fileAction(page, "New", "Blank pattern…")`. */
+export const fileAction = (page: Page, ...path: string[]) => menuAction(page, "pattern", ...path);
+
+/** 🖨 Print & share: `printAction(page, "Shopping list (CSV)")`. */
+export const printAction = (page: Page, ...path: string[]) => menuAction(page, "print", ...path);
+
+/** Opens ☰ (language, theme, help). */
+export const openAppMenu = (page: Page) => page.getByRole("button", { name: MENU_BUTTONS.app }).click();
+
 export async function loadFixture(page: Page, name: string) {
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Open file from computer…");
+  await fileAction(page, "Open work file…");
   await (await chooser).setFiles(fixture(name));
 }
 

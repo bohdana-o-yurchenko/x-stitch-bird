@@ -59,7 +59,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "How long we keep data, and how to delete it",
         body: [
-          "Your account and saved patterns are kept while you have the account. You can delete any saved pattern yourself, at any time (Menu ▸ Open saved pattern, then the bin icon); this also removes it from your account.",
+          "Your account and saved patterns are kept while you have the account. You can delete any saved pattern yourself, at any time (Pattern ▸ Open…, then the bin icon); this also removes it from your account.",
           `To delete your account and everything stored with it, email ${CONTACT_EMAIL} from the address you sign in with. We delete it within 30 days. Signing out does not delete anything.`,
           "Data kept only in your browser stays there until you clear it (for example by clearing the site's data in your browser settings).",
         ],
@@ -67,7 +67,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "Your rights",
         body: [
-          "You can ask us what data we hold about you, to correct it, to delete it, or to receive a copy. Your patterns can be downloaded at any time as .xbird files (Menu ▸ Download pattern file). If you are in the EU, you can also complain to your data protection authority.",
+          "You can ask us what data we hold about you, to correct it, to delete it, or to receive a copy. Your patterns can be downloaded at any time as .xbird files (Pattern ▸ Download work file). If you are in the EU, you can also complain to your data protection authority.",
         ],
       },
       {
@@ -131,7 +131,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "Скільки зберігаються дані й як їх видалити",
         body: [
-          "Обліковий запис і збережені схеми зберігаються, доки існує обліковий запис. Будь-яку збережену схему можна видалити самостійно будь-коли (Меню ▸ Відкрити збережену схему, потім значок кошика); вона зникає й з облікового запису.",
+          "Обліковий запис і збережені схеми зберігаються, доки існує обліковий запис. Будь-яку збережену схему можна видалити самостійно будь-коли (Схема ▸ Відкрити…, потім значок кошика); вона зникає й з облікового запису.",
           `Щоб видалити обліковий запис і все, що з ним збережено, напишіть на ${CONTACT_EMAIL} з адреси, якою ви входите. Ми видалимо все протягом 30 днів. Вихід нічого не видаляє.`,
           "Дані, що зберігаються лише в браузері, лишаються там, доки ви їх не очистите (наприклад, очистивши дані сайту в налаштуваннях браузера).",
         ],
@@ -139,7 +139,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "Ваші права",
         body: [
-          "Ви можете попросити нас повідомити, які дані про вас ми маємо, виправити їх, видалити або надати копію. Схеми можна будь-коли завантажити файлами .xbird (Меню ▸ Завантажити файл схеми). Якщо ви в ЄС, ви також можете звернутися до органу із захисту даних.",
+          "Ви можете попросити нас повідомити, які дані про вас ми маємо, виправити їх, видалити або надати копію. Схеми можна будь-коли завантажити файлами .xbird (Схема ▸ Завантажити робочий файл). Якщо ви в ЄС, ви також можете звернутися до органу із захисту даних.",
         ],
       },
       {

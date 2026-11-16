@@ -53,13 +53,22 @@ function CurrentEntry() {
   );
 }
 
+/** Where the work is kept, right now: "Saving…", then the account (signed in) or this browser. */
+function SaveStatus() {
+  const t = useTranslations("status");
+  const signedIn = useEditorState((st) => !!st.account);
+  const state = useEditorState((st) => st.saveState);
+  // signed out, the draft in this browser is written within a second of every change
+  const text = !signedIn ? "savedBrowser" : state === "saving" ? "saving" : state === "offline" ? "offline" : "savedAccount";
+  return <span data-guide="saved" data-testid="save-status">{t(text)}</span>;
+}
+
 export function StatusBar() {
   const t = useTranslations("status");
   const tt = useTranslations("tools");
   const hover = useEditorState((st) => st.hoverCell);
   useEditorState((st) => st.docRevision);
   const p = useEditorState((st) => st.doc);
-  const savedAt = useEditorState((st) => st.savedAt);
   const underlayEditing = useEditorState((st) => !!st.underlay && st.underlay.visible && !st.underlay.behind);
   const label = useEntryLabel();
   const inside = hover && hover.x >= 0 && hover.y >= 0 && hover.x < p.w && hover.y < p.h;
@@ -82,7 +91,7 @@ export function StatusBar() {
       <AmbiguousStatus />
       {underlayEditing && <span className={s.hint}>{t("underlayHint")}</span>}
       <span>{`${p.w}×${p.h}`}</span>
-      <span data-guide="saved">{savedAt ? t("savedAt", { time: new Date(savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }) : t("savesLocal")}</span>
+      <SaveStatus />
     </div>
   );
 }

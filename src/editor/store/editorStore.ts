@@ -58,6 +58,9 @@ export interface FloatingContent {
   preview: { pattern: Pattern; palette: Palette };
 }
 
+/** The header's menus: Pattern ▾, 🖨 Print & share, ☰. */
+export type HeaderMenu = "pattern" | "print" | "app";
+
 export interface EditorState {
   doc: Pattern;
   docRevision: number;
@@ -87,6 +90,12 @@ export interface EditorState {
   canUndo: boolean;
   canRedo: boolean;
   savedAt: number | null;
+  /** Saving to the saved patterns (and the account, signed in): under way, done, or the account didn't get it. */
+  saveState: "saving" | "saved" | "offline" | null;
+  /** Saved patterns besides the open one exist (in this browser or the account): Pattern ▸ Open is offered. */
+  hasOtherPatterns: boolean;
+  /** The keyboard shortcuts list, opened from ☰. */
+  shortcutsOpen: boolean;
   dialog: DialogRequest | null;
   /** The add/edit key entry form, docked in the side panel so the chart and references stay visible. */
   keyForm: { edit?: KeyIndex; seq: number } | null;
@@ -94,8 +103,8 @@ export interface EditorState {
   references: RefWindowData[];
   underlay: UnderlayData | null;
   underlayImage: HTMLImageElement | null;
-  /** The guide holds the main menu open on these item ids (submenus first); null = not held. */
-  menuReveal: string[] | null;
+  /** The guide holds one of the header menus open on these item ids (submenus first); null = none held. */
+  menuReveal: { menu: HeaderMenu; path: string[] } | null;
   /** The tour on screen (SPEC §9.8): "intro" or a feature tip; null = none. */
   guide: string | null;
   /** A feature tip to show once nothing else is in the way (each tip appears only the first time). */
@@ -147,6 +156,9 @@ export const createEditorStore = () =>
     canUndo: false,
     canRedo: false,
     savedAt: null,
+    saveState: null,
+    hasOtherPatterns: false,
+    shortcutsOpen: false,
     dialog: null,
     keyForm: null,
     toasts: [],

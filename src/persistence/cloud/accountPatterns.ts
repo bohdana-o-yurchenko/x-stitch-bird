@@ -45,6 +45,9 @@ export const accountPatternApi = {
   previewUrl: (id: string) => `/api/patterns/${encodeURIComponent(id)}/preview`,
 };
 
+/** Browser and server clocks differ a little; a browser copy has to be this much newer to count as newer. */
+const CLOCK_SLACK = 5_000;
+
 /** This browser's library, and the account's alongside it while signed in. */
 export function withAccount(local: PatternRepository): PatternRepository {
   return {
@@ -63,12 +66,25 @@ export function withAccount(local: PatternRepository): PatternRepository {
     },
     async save(doc) {
       const r = await local.save(doc);
-      if (account.signedIn) await accountPatternApi.save(doc);
-      return r;
+      if (!account.signedIn) return r;
+      const up = await accountPatternApi.save(doc);
+      return r.ok ? { ...r, account: up } : r;
     },
     async remove(id) {
       await local.remove(id);
       await accountPatternApi.remove(id);
+    },
+    async catchUp() {
+      const theirs = account.signedIn ? await accountPatternApi.list() : null;
+      if (!theirs) return;
+      const there = new Map(theirs.map((c) => [c.id, c.updatedAt]));
+      // only patterns already in the account: moving the rest of this browser's library is the user's choice
+      for (const p of await local.list()) {
+        const at = there.get(p.id);
+        if (at === undefined || p.updatedAt <= at + CLOCK_SLACK) continue;
+        const doc = await local.load(p.id);
+        if (doc) await accountPatternApi.save(doc);
+      }
     },
   };
 }

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
-import { cellPoint, editorState, fileAction, fixtureDataUrl, gridPoint, loadFixture, openEditor } from "./helpers";
+import { cellPoint, editorState, fileAction, fixtureDataUrl, gridPoint, loadFixture, menuAction, openAppMenu, openEditor, printAction } from "./helpers";
 
 test.beforeEach(async ({ page }) => openEditor(page));
 
@@ -97,7 +97,7 @@ test("holding Alt picks an entry from the chart and returns to the previous tool
 
 test("downloads a .xbird pattern file that loads back", async ({ page }) => {
   const download = page.waitForEvent("download");
-  await fileAction(page, "Download pattern file (.xbird)");
+  await fileAction(page, "Download work file (.xbird)");
   expect((await download).suggestedFilename()).toMatch(/\.xbird$/);
   const file = await (await download).path();
   const doc = JSON.parse(readFileSync(file, "utf8"));
@@ -139,19 +139,21 @@ test("flips the chart and undoes it in one step", async ({ page }) => {
 });
 
 test("switches to Ukrainian", async ({ page }) => {
-  await page.getByLabel("Language").selectOption("uk");
+  await openAppMenu(page);
+  await page.getByTestId("language").getByRole("radio", { name: "Українська" }).click();
   await expect(page).toHaveURL(/\/uk$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "uk");
 });
 
-test("the File menu opens above the chart, with submenus", async ({ page }) => {
+test("the print menu opens above the chart, with submenus", async ({ page }) => {
   await page.setViewportSize({ width: 1000, height: 800 });
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Open file from computer…");
+  await fileAction(page, "Open work file…");
   await (await chooser).setFiles("tests/fixtures/1.oxs");
   await expect(page.locator("[data-entry]")).toHaveCount(12);
-  await page.getByRole("button", { name: "Menu ▾" }).click();
-  await page.getByRole("menuitem", { name: /^Export/ }).hover();
+  await page.getByRole("button", { name: "Print & share" }).click();
+  await page.getByRole("menuitem", { name: /^Chart images/ }).hover();
+  await expect(page.getByRole("menuitem", { name: "Chart image — symbols only, for printing (PNG)" })).toBeInViewport();
   await expect(page.getByRole("menuitem", { name: "Shopping list (CSV)" })).toBeInViewport();
 });
 
@@ -186,7 +188,7 @@ test("the side panel scrolls when its sections don't fit", async ({ page }) => {
 
 test("straightens a photo by its 4 corners and keeps it after a reload", async ({ page }) => {
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Reference pictures", "Image behind the chart…");
+  await fileAction(page, "Image behind the chart…");
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   const dialog = page.getByTestId("straighten");
   await expect(dialog).toBeVisible();
@@ -236,18 +238,26 @@ test("highlighting fades every entry except the selected one", async ({ page }) 
   expect(await editorState<boolean>(page, "(ed) => ed.state.highlight")).toBe(false);
 });
 
-test("deleting a saved pattern asks first", async ({ page }) => {
+test("Open is only offered when there is another saved pattern; deleting one asks first", async ({ page }) => {
   await page.keyboard.press("ControlOrMeta+s");
-  await fileAction(page, "Open saved pattern…");
+  // only the open pattern is saved: nothing else to open
+  await page.getByRole("button", { name: /^Pattern ▾$/ }).click();
+  await expect(page.getByRole("menuitem", { name: /^New/ })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: /^Open…/ })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await loadFixture(page, "1.oxs");
+  await expect(page.locator("[data-entry]")).toHaveCount(12);
+  await fileAction(page, "Open…");
   const trash = page.getByRole("button", { name: /^Delete “/ });
-  await trash.click();
+  await expect(trash).toHaveCount(2);
+  await trash.first().click();
   const confirm = page.getByTestId("confirm-delete");
   await expect(confirm).toContainText("can’t be undone");
   await confirm.getByRole("button", { name: "Cancel" }).click();
-  await expect(trash).toBeVisible();
-  await trash.click();
+  await expect(trash).toHaveCount(2);
+  await trash.first().click();
   await page.getByTestId("confirm-delete").getByRole("button", { name: "Delete" }).click();
-  await expect(page.getByText("No saved patterns", { exact: false })).toBeVisible();
+  await expect(trash).toHaveCount(1);
 });
 
 test("the quick-start guide opens on the first visit only, highlights what it explains, and reopens from the menu", async ({ page }) => {
@@ -267,7 +277,7 @@ test("the quick-start guide opens on the first visit only, highlights what it ex
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
   await expect(guide).toHaveCount(0);
-  await fileAction(page, "Як зробити перенабір");
+  await menuAction(page, "app", "Як зробити перенабір");
   await expect(guide).toBeVisible();
   for (let i = 0; i < 4; i++) await guide.getByRole("button", { name: "Далі" }).click();
   await expect(guide).toContainText("4. Автозаповнення");
@@ -280,21 +290,21 @@ test("feature tips: once after the first image behind the chart, and for the fir
   await page.evaluate(() => ["underlay", "reference"].forEach((t) => localStorage.removeItem(`stitchwork.tipSeen.${t}`)));
   const guide = page.getByTestId("guide");
   let chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Reference pictures", "Image behind the chart…");
+  await fileAction(page, "Image behind the chart…");
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   await expect(guide).toHaveCount(0); // not over the straighten dialog
   await page.getByTestId("straighten").getByRole("button", { name: "Use as it is" }).click();
   await expect(guide).toContainText("Quick image editing");
   await guide.getByRole("button", { name: "Got it" }).click();
   chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Reference pictures", "Photo in a floating window…");
+  await fileAction(page, "Photo in a floating window…");
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   await expect(guide).toContainText("A photo in its own window");
   await guide.getByRole("button", { name: "Next" }).click();
   await expect(guide).toContainText("Mark what’s already done");
   await guide.getByRole("button", { name: "Got it" }).click();
   chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Reference pictures", "Photo in a floating window…");
+  await fileAction(page, "Photo in a floating window…");
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   await expect(page.getByTestId("reference-window")).toHaveCount(2);
   await expect(guide).toHaveCount(0);
@@ -314,7 +324,7 @@ test("“What’s new” opens once after an update, never for a brand-new user"
   await expect(page.getByTestId("guide")).toBeVisible();
   await expect(dialog).toHaveCount(0);
   await page.keyboard.press("Escape");
-  await fileAction(page, "What’s new");
+  await menuAction(page, "app", "What’s new");
   await expect(dialog).toBeVisible();
 });
 
@@ -347,8 +357,8 @@ test("the side panel can be resized and keeps its width", async ({ page }) => {
   expect((await aside.boundingBox())!.width).toBeCloseTo(after, 0);
 });
 
-test("the i button lists the keyboard shortcuts on hover", async ({ page }) => {
-  await page.getByRole("button", { name: "Keyboard shortcuts" }).hover();
+test("☰ ▸ Keyboard shortcuts lists them all", async ({ page }) => {
+  await menuAction(page, "app", "Keyboard shortcuts");
   const list = page.getByTestId("shortcuts");
   await expect(list).toBeVisible();
   await expect(list).toContainText("Fit to screen");
@@ -370,7 +380,7 @@ test("opens in Ukrainian by default", async ({ page }) => {
 
 test("puts a reference image behind the chart and keeps it after a reload", async ({ page }) => {
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Reference pictures", "Image behind the chart…");
+  await fileAction(page, "Image behind the chart…");
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   await page.getByTestId("straighten").getByRole("button", { name: "Use as it is" }).click();
   const panel = page.getByTestId("underlay-panel");
@@ -388,7 +398,7 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   await page.reload();
   await expect(page.getByTestId("underlay-panel").getByLabel("Behind stitches")).toBeChecked();
   const download = page.waitForEvent("download");
-  await fileAction(page, "Download pattern file (.xbird)");
+  await fileAction(page, "Download work file (.xbird)");
   const doc = JSON.parse(readFileSync(await (await download).path(), "utf8"));
   expect(doc.underlay).toMatchObject({ behind: true, imageW: 40, imageH: 20 });
   // the edit toggle by the zoom; zoomed in, the edit frame stretches the photo with one side pinned
@@ -446,7 +456,7 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
 test("the theme is picked in the menu, applies at once and stays after a reload", async ({ page }) => {
   const html = page.locator("html");
   await expect(html).not.toHaveAttribute("data-theme");
-  await page.getByRole("button", { name: /^Menu ▾$/ }).click();
+  await openAppMenu(page);
   await page.getByRole("radio", { name: "550", exact: true }).click();
   await expect(html).toHaveAttribute("data-theme", "dark");
   await expect(page.getByRole("radio", { name: "550", exact: true })).toHaveAttribute("aria-checked", "true");
@@ -454,22 +464,23 @@ test("the theme is picked in the menu, applies at once and stays after a reload"
   await expect.poll(() => editorState<string>(page, "(ed) => ed.theme.stageBackground")).toBe("#1a1b22");
   await page.reload();
   await expect(html).toHaveAttribute("data-theme", "dark");
-  await page.getByRole("button", { name: /^Menu ▾$/ }).click();
+  await openAppMenu(page);
   await page.getByRole("radio", { name: "797", exact: true }).click();
   await expect(html).toHaveAttribute("data-theme", "royal");
 });
 
 test("switching the language keeps the theme, without reloading the page", async ({ page }) => {
-  await page.getByRole("button", { name: /^Menu ▾$/ }).click();
+  await openAppMenu(page);
   await page.getByRole("radio", { name: "550", exact: true }).click();
   await page.keyboard.press("Escape");
   await page.evaluate(() => ((window as unknown as { stillHere: boolean }).stillHere = true));
-  await page.getByRole("combobox", { name: "Language" }).selectOption("uk");
+  await openAppMenu(page);
+  await page.getByTestId("language").getByRole("radio", { name: "Українська" }).click();
   await expect(page).toHaveURL(/\/uk$/);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect.poll(() => editorState<string>(page, "(ed) => ed.theme.stageBackground")).toBe("#1a1b22");
   expect(await page.evaluate(() => (window as unknown as { stillHere?: boolean }).stillHere)).toBe(true);
-  await page.getByRole("button", { name: /^Меню ▾$/ }).click();
+  await openAppMenu(page);
   await expect(page.getByRole("radio", { name: "550", exact: true })).toHaveAttribute("aria-checked", "true");
 });
 
@@ -480,7 +491,7 @@ test("key form icons stay visible: white floss on a contrasting tile, line style
       const g = c.getContext("2d")!, at = (x: number, y: number) => [...g.getImageData(Math.round(x), Math.round(y), 1, 1).data];
       return { mid: at(c.width / 2, c.height / 2), corner: at(c.width * 0.2, c.height * 0.2) };
     });
-  await page.getByRole("button", { name: /^Menu ▾$/ }).click();
+  await openAppMenu(page);
   await page.getByRole("radio", { name: "550", exact: true }).click();
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
@@ -517,7 +528,7 @@ test("the key form picks a symbol from the quick row or from All…, by group", 
 });
 
 test("exports a PDF for Pattern Keeper after explaining what it can't track", async ({ page }) => {
-  await fileAction(page, "Export", "PDF for Pattern Keeper");
+  await printAction(page, "PDF for Pattern Keeper");
   // the demo has half crosses, a floss + bead entry, beads, backstitch
   await expect(page.getByTestId("pk-issues").locator("li")).toHaveText([/Half crosses: \d+/, /Floss \+ bead stitches: \d+/, /Beads: \d+/, /Backstitch lines: \d+/]);
   const download = page.waitForEvent("download");
@@ -535,7 +546,7 @@ test("exports a PDF for Pattern Keeper after explaining what it can't track", as
 
 test("exports a PDF chart to print: cover, symbols, symbols on colour, colour with backstitch, key", async ({ page }) => {
   const download = page.waitForEvent("download");
-  await fileAction(page, "Export", "PDF chart to print");
+  await printAction(page, "PDF chart to print");
   const file = await download;
   expect(file.suggestedFilename()).toBe("Untitled-pattern-chart.pdf");
   const pdf = readFileSync((await file.path())!).toString("latin1");
@@ -623,7 +634,7 @@ test("a symbol can be drawn by hand from a few shapes, is kept in the file, and 
   expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe(sym);
   // it travels in the pattern file and comes back
   const download = page.waitForEvent("download");
-  await fileAction(page, "Download pattern file (.xbird)");
+  await fileAction(page, "Download work file (.xbird)");
   const doc = JSON.parse(readFileSync((await (await download).path())!, "utf8"));
   expect(doc.pal[0].sym).toBe(sym);
   await page.reload();
@@ -1025,7 +1036,7 @@ test("patterns saved by an earlier version (in localStorage) are moved into Inde
   });
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
-  await fileAction(page, "Open saved pattern…");
+  await fileAction(page, "Open…");
   await page.getByRole("dialog").getByRole("button", { name: /Saved before 12×8/ }).click();
   await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Saved before");
   // copied, and the old copy kept as a backup

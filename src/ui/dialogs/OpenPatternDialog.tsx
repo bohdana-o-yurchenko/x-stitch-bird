@@ -19,6 +19,7 @@ export function OpenPatternDialog({ onClose }: { onClose: () => void }) {
   }, [ed]);
   const remove = async (id: string) => {
     await ed.persistence.patterns.remove(id);
+    void ed.refreshPatterns();
     setItems((list) => list?.filter((i) => i.id !== id) ?? null);
     setConfirming(null);
     ed.toast("toasts.deleted");

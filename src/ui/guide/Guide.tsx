@@ -3,29 +3,30 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cx, ui } from "../common/widgets";
+import type { HeaderMenu } from "@/editor/store/editorStore";
 import { useEditor, useEditorState } from "../hooks/editor";
 import s from "./guide.module.css";
 
-type Step = { id: string; targets: string[]; reveal?: string[]; tip?: boolean };
+type Step = { id: string; targets: string[]; menu?: HeaderMenu; reveal?: string[]; tip?: boolean };
 
 /**
  * Tours (SPEC §9.8). `intro` is the quick start for a перенабір; the others are feature tips shown once, right after
  * the feature is first used (`pendingTip`). `targets` are `data-guide` names to highlight (`menu:<id>` = a menu
- * option); `reveal` holds the main menu open on those submenus. Texts: `guide.<step id>.title`, `.points.{1,2,…}`,
+ * option); `reveal` holds a header menu (`menu`, Pattern ▾ unless said) open on those submenus. Texts: `guide.<step id>.title`, `.points.{1,2,…}`,
  * optional `.tip`.
  */
 export const TOURS: Record<string, Step[]> = {
   intro: [
     { id: "welcome", targets: [] },
     { id: "create", targets: ["menu", "menu:newBlank"], reveal: ["new"] },
-    { id: "key", targets: ["add-key", "menu:refWindow"], reveal: ["references"], tip: true },
-    { id: "trace", targets: ["menu:refUnderlay"], reveal: ["references"], tip: true },
+    { id: "key", targets: ["add-key", "menu:refWindow"], reveal: [], tip: true },
+    { id: "trace", targets: ["menu:refUnderlay"], reveal: [], tip: true },
     { id: "autofill", targets: ["tool-autofill"], tip: true },
     { id: "views", targets: ["views"] },
-    { id: "tools", targets: ["toolbar", "override", "shortcuts"], tip: true },
+    { id: "tools", targets: ["toolbar", "override", "menu:shortcuts"], menu: "app", reveal: [], tip: true },
     { id: "save", targets: ["saved", "menu:download"], reveal: [] },
     { id: "versions", targets: ["menu:versions"], reveal: [] },
-    { id: "finish", targets: ["menu:info", "menu:oxs"], reveal: ["export"] },
+    { id: "finish", targets: ["print-menu", "menu:pdfChart", "menu:oxs"], menu: "print", reveal: [] },
     { id: "done", targets: [] },
   ],
   underlay: [{ id: "underlayTip", targets: ["underlay-edit"] }],
@@ -110,7 +111,7 @@ function GuideTour({ steps, onClose }: { steps: Step[]; onClose: () => void }) {
 
   // hold the menu open where the step points; let go when the guide closes
   useEffect(() => {
-    ed.store.setState({ menuReveal: step.reveal ?? null });
+    ed.store.setState({ menuReveal: step.reveal ? { menu: step.menu ?? "pattern", path: step.reveal } : null });
   }, [ed, step]);
   useEffect(() => () => ed.store.setState({ menuReveal: null }), [ed]);
 

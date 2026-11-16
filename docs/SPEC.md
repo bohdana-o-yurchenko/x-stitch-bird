@@ -1636,6 +1636,33 @@ A big turn: patterns are stored on a server under a user account, not only in th
 In the catalogue (§2.2): 269 Treasures in three series, each with pieces per package and a colour from the photo.
 Drawn as a large round bead (radius 0.48) for now. Charm-shaped icons (heart, star, flower, leaf) could come later.
 
+### 15.25 Signed out vs signed in; the header's menus (decided 2026-11-17)
+**Signed out** — the whole editor, one working pattern kept in this browser; to keep work elsewhere, the work
+file (.xbird). Starting a new pattern asks first: *Download .xbird* · *Sign in to keep it* · *Replace it* (never
+discarded silently). People who saved several patterns in this browser before keep them, openable; on their first
+sign-in they're offered a move to the account. **Signed in** — any number of patterns, saved to the account, on
+any device; My patterns (a page with previews); versions in the account; My threads. Later: photos in the account,
+read-only share links.
+
+**Header** (built 2026-11-17): `[🐦 пташечка] [Pattern ▾] [name] …tools… [Transform ▾] [🖨] [☰] [👤] [▥]`.
+- **Pattern ▾** — working on it: New ›, Open… (only signed in, or when other patterns are saved in this browser),
+  Download work file (.xbird), Open work file…, Versions…, Pattern info…, Image behind the chart…, Photo in a
+  floating window…. No "Save": saving is automatic (Ctrl/⌘+S still saves at once).
+- **🖨 Print & share** — the finished chart: PDF chart to print, PDF for Pattern Keeper, Chart images (PNG) ›,
+  Preview images (PNG) ›, Shopping list (CSV), Open Cross Stitch file (.oxs).
+- **☰** — Quick start guide, Keyboard shortcuts (the list that used to sit under the ⓘ button), What's new,
+  Language (Українська · English), Theme, Privacy policy, Glory to Ukraine 🇺🇦.
+- The guide holds the menu its step talks about open (`menuReveal: { menu, path }`).
+
+**Saving** (built 2026-11-17): the draft in this browser 0.6 s after every change; the saved patterns — and the
+account, signed in — 5 s after editing stops, at least every 30 s while it goes on; everything at once when the
+page is hidden. Signed in, leaving with changes not yet in the account sends them and the browser asks first. A
+save cut off (tab closed) is caught up on the next sign-in: browser copies newer than the account's go up. The
+account's preview picture is redrawn at most once a minute. The status bar says where the work is: *Saving…* ·
+*✓ Saved to your account* · *✓ Saved in this browser* · *Saved in this browser — your account gets it once you're
+back online*.
+**Next:** the signed-out limit and its question; My patterns; moving this browser's patterns on first sign-in.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

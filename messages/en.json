@@ -70,8 +70,6 @@
   },
   "status": {
     "position": "Column <b>{col}</b> · Row <b>{row}</b>",
-    "savesLocal": "Patterns save in this browser",
-    "savedAt": "Saved {time}",
     "ambiguous": "⚑ {count} ambiguous",
     "ambiguousNext": "Next mark (Shift+A)",
     "ambiguousClear": "Clear all marks",
@@ -81,7 +79,11 @@
     "ambiguousClearTitle": "Clear all {count, plural, one {# “?” mark} other {# “?” marks}}?",
     "ambiguousClearConfirm": "Clear marks",
     "ambiguousClearBody": "Only the marks go; the stitches under them stay. You can undo this.",
-    "notUsedByAutofill": "Chosen, but not in use: Autofill reads the symbols off the image"
+    "notUsedByAutofill": "Chosen, but not in use: Autofill reads the symbols off the image",
+    "saving": "Saving…",
+    "savedAccount": "✓ Saved to your account",
+    "savedBrowser": "✓ Saved in this browser",
+    "offline": "Saved in this browser — your account gets it once you’re back online"
   },
   "key": {
     "heading": "Key",
@@ -529,7 +531,7 @@
     "badImage": "Couldn’t read that image",
     "dropHint": "Drop a .xbird or .oxs pattern, or a picture",
     "imageCreated": "Pattern created — {count} colours",
-    "refsTooBig": "Reference photos are too big to remember in this browser — use Menu ▸ Download pattern file (.xbird) to keep them",
+    "refsTooBig": "Reference photos are too big to remember in this browser — use Pattern ▸ Download work file (.xbird) to keep them",
     "copied": "Copied",
     "pressCopy": "Press Ctrl+C to copy",
     "newTwins": "{count, plural, one {# new key entry} other {# new key entries}} for mirrored half crosses",
@@ -582,48 +584,50 @@
     "matchHint": "Fill one 10 × 10 block at a time from the image (Shift+F)"
   },
   "fileMenu": {
-    "label": "Menu ▾",
+    "label": "Pattern ▾",
     "new": "New",
     "newBlank": "Blank pattern…",
     "newBlankHint": "Pick a size and fabric",
     "newFromImage": "From a picture…",
     "newFromImageHint": "Convert a photo or drawing into stitches",
-    "open": "Open saved pattern…",
-    "openHint": "Patterns saved in this browser",
-    "loadFile": "Open file from computer…",
-    "loadFileHint": "A .xbird or .oxs pattern file",
+    "open": "Open…",
+    "openHint": "Patterns saved in this browser before",
+    "openHintAccount": "Your patterns — in your account and in this browser",
+    "download": "Download work file (.xbird)",
+    "downloadHint": "To carry on later or on another computer — not for printing. Key, chart, photos: everything",
+    "loadFile": "Open work file…",
+    "loadFileHint": "A .xbird from your computer — or an .oxs from another app",
     "versions": "Versions…",
     "versionsHint": "Automatic backups of this pattern — restore an earlier state",
-    "save": "Save",
-    "saveHint": "Save in this browser (Ctrl/⌘+S)",
-    "download": "Download pattern file (.xbird)",
-    "downloadHint": "Everything — key, chart, reference photos, image behind the chart. Open it again with “Open file from computer”",
-    "export": "Export",
+    "info": "Pattern info…",
+    "infoHint": "Designer, source, copyright, notes",
+    "refUnderlay": "Image behind the chart…",
+    "refUnderlayHint": "Lies under your stitches, aligned to the grid, to trace over",
+    "refWindow": "Photo in a floating window…",
+    "refWindowHint": "A movable window next to the chart, with progress marks",
+    "print": "Print & share",
+    "pdfChart": "PDF chart to print",
+    "pdfChartHint": "Symbols, symbols on colour, colour with backstitch, and the key",
+    "pdfPk": "PDF for Pattern Keeper",
+    "pdfPkHint": "A symbol chart and thread list the app can import",
+    "pngCharts": "Chart images (PNG)",
     "pngBoth": "Chart image — colour + symbols (PNG)",
     "pngSymbols": "Chart image — symbols only, for printing (PNG)",
     "pngSymbolsInk": "Chart image — symbols for printing, some in colour (PNG)",
     "pngSymbolsInkHint": "Like the PDF’s symbol chart: a few symbols in red, green or blue where many different ones mix",
+    "pngPreviews": "Preview images (PNG)",
     "pngColor": "Preview image — colour blocks (PNG)",
     "pngStitched": "Preview image — stitched (PNG)",
+    "csv": "Shopping list (CSV)",
     "oxs": "Open Cross Stitch file (.oxs)",
     "oxsHint": "Opens in Хрестики and Ruta Stitch",
-    "csv": "Shopping list (CSV)",
-    "references": "Reference pictures",
-    "refWindow": "Photo in a floating window…",
-    "refWindowHint": "A movable window next to the chart, with progress marks",
-    "refUnderlay": "Image behind the chart…",
-    "refUnderlayHint": "Lies under your stitches, aligned to the grid, to trace over",
-    "info": "Pattern info…",
-    "infoHint": "Designer, source, copyright, notes",
+    "more": "More",
     "guide": "Quick start guide",
     "guideHint": "Step by step: an e-copy of a paper chart",
+    "shortcuts": "Keyboard shortcuts",
     "changelog": "What’s new",
     "changelogHint": "Version {version} — what changed",
-    "privacy": "Privacy policy",
-    "pdfPk": "PDF for Pattern Keeper",
-    "pdfPkHint": "A symbol chart and thread list the app can import",
-    "pdfChart": "PDF chart to print",
-    "pdfChartHint": "Symbols, symbols on colour, colour with backstitch, and the key"
+    "privacy": "Privacy policy"
   },
   "toolNames": {
     "pencil": "Draw",
@@ -716,13 +720,13 @@
       "points": {
         "1": "The quickest way from a paper chart to a digital one.",
         "2": "9 short steps — a couple of minutes.",
-        "3": "Come back any time: <hl>Menu ▸ Quick start guide</hl>."
+        "3": "Come back any time: <hl>☰ ▸ Quick start guide</hl>."
       }
     },
     "create": {
       "title": "1. New pattern",
       "points": {
-        "1": "Open <hl>Menu ▸ New ▸ Blank pattern</hl>.",
+        "1": "Open <hl>Pattern ▸ New ▸ Blank pattern</hl>.",
         "2": "Enter the size in stitches — as on the paper chart.",
         "3": "Pick the fabric."
       }
@@ -770,13 +774,13 @@
         "3": "<hl>S</hl> — select, copy, paste, move.",
         "4": "By default drawing never overwrites filled squares. Need to? Turn on <hl>Override</hl> (O)."
       },
-      "tip": "Every shortcut: the <hl>i</hl> button."
+      "tip": "Every shortcut: <hl>☰ ▸ Keyboard shortcuts</hl>."
     },
     "save": {
       "title": "7. Keep a copy",
       "points": {
-        "1": "Your work saves itself in the browser.",
-        "2": "But browsers can wipe it — regularly use <hl>Download pattern file (.xbird)</hl>."
+        "1": "Your work saves itself — in this browser, and in your account when you’re signed in.",
+        "2": "Not signed in? Browsers can wipe what they keep — now and then use <hl>Download work file (.xbird)</hl>."
       }
     },
     "versions": {
@@ -788,8 +792,8 @@
     "finish": {
       "title": "9. Export",
       "points": {
-        "1": "In <hl>Pattern info</hl> fill in the <hl>name</hl> and <hl>author</hl> — Хрестики show them.",
-        "2": "Export an <hl>Open Cross Stitch file (.oxs)</hl> — for Хрестики and Ruta Stitch."
+        "1": "In <hl>Pattern ▸ Pattern info</hl> fill in the <hl>name</hl> and <hl>author</hl> — Хрестики show them.",
+        "2": "Finished? The <hl>printer button</hl>: a <hl>PDF chart to print</hl>, Pattern Keeper, images — and an <hl>Open Cross Stitch file (.oxs)</hl> for Хрестики and Ruta Stitch."
       }
     },
     "done": {
@@ -797,7 +801,7 @@
       "button": "Start stitching",
       "points": {
         "1": "Your e-copy is ready.",
-        "2": "The guide is always here: <hl>Menu ▸ Quick start guide</hl>."
+        "2": "The guide is always here: <hl>☰ ▸ Quick start guide</hl>."
       }
     },
     "tipLabel": "Tip",

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { HOLD_BINDINGS, shortcutLabels } from "@/editor/shortcuts/keymap";
 import { TOOLS } from "@/editor/tools/registry";
-import { useEditor } from "../hooks/editor";
+import { useEditor, useEditorState } from "../hooks/editor";
 import s from "./header.module.css";
 
 type Row = { label: string; keys: string[] };
@@ -72,30 +72,16 @@ function useGroups(): { title: string; rows: Row[] }[] {
   ];
 }
 
-/** The "i" button: hover (or click) shows every keyboard shortcut. */
-export function ShortcutsInfo() {
+/** Every keyboard shortcut, opened from ☰ ▸ Keyboard shortcuts; closes on Esc or a click outside. */
+export function ShortcutsPanel() {
   const t = useTranslations("shortcuts");
+  const ed = useEditor();
+  const open = useEditorState((st) => st.shortcutsOpen);
   const groups = useGroups();
-  const button = useRef<HTMLButtonElement>(null);
-  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
-  const [pinned, setPinned] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  const open = () => {
-    clearTimeout(closeTimer.current);
-    const r = button.current!.getBoundingClientRect();
-    setPos({ top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right - 280) });
-  };
-  const close = () => {
-    setPos(null);
-    setPinned(false);
-  };
-  const leave = () => {
-    if (!pinned) closeTimer.current = setTimeout(close, 200);
-  };
 
   useEffect(() => {
-    if (!pos) return;
+    if (!open) return;
+    const close = () => ed.store.setState({ shortcutsOpen: false });
     const esc = (e: KeyboardEvent) => e.key === "Escape" && close();
     const outside = (e: PointerEvent) => !(e.target as Element).closest?.("[data-shortcuts]") && close();
     window.addEventListener("keydown", esc);
@@ -104,29 +90,13 @@ export function ShortcutsInfo() {
       window.removeEventListener("keydown", esc);
       document.removeEventListener("pointerdown", outside);
     };
-  }, [pos]);
+  }, [ed, open]);
 
   return (
     <>
-      <button
-        ref={button}
-        type="button"
-        className={s.info}
-        data-guide="shortcuts"
-        aria-label={t("title")}
-        aria-expanded={!!pos}
-        data-shortcuts
-        onPointerEnter={open}
-        onPointerLeave={leave}
-        onFocus={open}
-        onBlur={leave}
-        onClick={() => (pinned ? close() : (open(), setPinned(true)))}
-      >
-        i
-      </button>
-      {pos &&
+      {open &&
         createPortal(
-          <div className={s.shortcuts} role="dialog" aria-label={t("title")} data-shortcuts data-testid="shortcuts" style={{ top: pos.top, right: pos.right }} onPointerEnter={open} onPointerLeave={leave}>
+          <div className={s.shortcuts} role="dialog" aria-label={t("title")} data-shortcuts data-testid="shortcuts" style={{ top: 56, right: 8 }}>
             <h3>{t("title")}</h3>
             <div className={s.shortcutGroups}>
               {groups.map((g) => (

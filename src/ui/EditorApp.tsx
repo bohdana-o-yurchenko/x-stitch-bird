@@ -30,6 +30,12 @@ function useGlobalEvents(ed: Editor, setDragging: (on: boolean) => void) {
       [window, "keyup", (e: KeyboardEvent) => ed.shortcuts.keyUp(e)],
       [window, "blur", () => ed.shortcuts.releaseAll()],
       [window, "pagehide", () => ed.flush()],
+      // signed in, with changes not in the account yet: they go now, and the browser asks before leaving
+      [window, "beforeunload", (e: BeforeUnloadEvent) => {
+        if (!ed.state.account || !ed.autosave.pending) return;
+        ed.flush();
+        e.preventDefault();
+      }],
       [document, "visibilitychange", () => document.visibilityState === "hidden" && ed.flush()],
       [window, "dragenter", (e: DragEvent) => { if (hasFiles(e)) { e.preventDefault(); depth++; setDragging(true); } }],
       [window, "dragleave", (e: DragEvent) => { if (hasFiles(e) && --depth <= 0) { depth = 0; setDragging(false); } }],

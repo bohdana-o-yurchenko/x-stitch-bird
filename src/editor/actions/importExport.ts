@@ -184,18 +184,30 @@ export function createFromImage(ed: Editor, r: QuantizeResult, image: HTMLImageE
       .then((id) => ed.references.add({ image: id, name: ed.t("references.photo"), grid: true }));
 }
 
-/** Into the saved-patterns library. `quiet`: the minute autosave — no toast unless it fails. */
+/** Into the saved patterns (and the account, signed in). `quiet`: the automatic save — no toast unless it fails. */
 export async function saveToLibrary(ed: Editor, o: { quiet?: boolean } = {}) {
   const doc = serializePattern(ed.doc);
   if (!o.quiet) ed.autosave.markSaved();
+  ed.store.setState({ saveState: "saving" });
   const r = await ed.persistence.patterns.save(doc);
   if (r.ok) {
-    ed.store.setState({ savedAt: Date.now() });
+    ed.store.setState({ savedAt: Date.now(), saveState: r.account === false ? "offline" : "saved" });
     if (!o.quiet) ed.toast(ed.state.account ? "toasts.savedAccount" : "toasts.savedLocal", { name: doc.name });
-    // signed in: the account also gets a small colour preview, for the list of patterns
-    if (ed.state.account) void uploadPreview(ed).catch(() => {});
-  } else ed.toast(r.reason === "quota" ? "toasts.tooLarge" : "toasts.saveFailed");
+    // signed in: the account also gets a small colour preview, for the list of patterns — not on every save
+    if (r.account && Date.now() - (previewAt.get(doc.id) ?? 0) > PREVIEW_EVERY) {
+      previewAt.set(doc.id, Date.now());
+      void uploadPreview(ed).catch(() => previewAt.delete(doc.id));
+    }
+    if (!ed.state.hasOtherPatterns) void ed.refreshPatterns();
+  } else {
+    ed.store.setState({ saveState: null });
+    ed.toast(r.reason === "quota" ? "toasts.tooLarge" : "toasts.saveFailed");
+  }
 }
+
+/** The account's preview of a pattern is redrawn at most this often while it's being edited. */
+const PREVIEW_EVERY = 60_000;
+const previewAt = new Map<string, number>();
 
 /** A small colour picture of the chart (~240 px on its long side) for the account's list of patterns. */
 async function uploadPreview(ed: Editor) {

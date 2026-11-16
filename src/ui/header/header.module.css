@@ -101,25 +101,6 @@
   background: var(--strong);
   color: var(--on-strong);
 }
-.info {
-  width: 26px;
-  height: 26px;
-  margin: 0 4px;
-  border-radius: 50%;
-  border: 1.5px solid var(--line2);
-  background: var(--surface);
-  color: var(--muted);
-  font-family: var(--font-heading);
-  font-style: italic;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1;
-}
-.info:hover,
-.info[aria-expanded="true"] {
-  border-color: var(--ink);
-  color: var(--ink);
-}
 .shortcuts {
   position: fixed;
   z-index: 85;
@@ -175,13 +156,6 @@
   background: var(--surface);
   white-space: nowrap;
 }
-.lang {
-  font-size: 12px;
-  border: 1px solid var(--line2);
-  border-radius: 7px;
-  padding: 4px;
-  background: var(--surface);
-}
 .sizes.idle {
   opacity: 0.45;
 }
@@ -212,4 +186,29 @@
   height: 12px;
   border-radius: 2px;
   background: linear-gradient(#0057b7 50%, #ffd700 50%);
+}
+
+/* ☰ ▸ language: a row of the languages, like the theme row under it */
+.langRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  font-size: 13.5px;
+}
+.langRow > span {
+  flex: 1;
+}
+/* `.langRow button` outranks the generic menu-button rule */
+.langRow button.langBtn {
+  display: block;
+  width: auto;
+  padding: 3px 9px;
+  border-radius: 7px;
+  border: 1px solid var(--line2);
+  font-size: 12.5px;
+}
+.langRow button.langOn {
+  border-color: var(--ink);
+  font-weight: 600;
 }

@@ -7,10 +7,11 @@ import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
 import { Icon } from "../common/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { APP_VERSION } from "../dialogs/ChangelogDialog";
-import { ShortcutsInfo } from "./ShortcutsInfo";
+import { ShortcutsPanel } from "./ShortcutsInfo";
 import { AccountButton } from "../account/AccountButton";
 import { ToolBar } from "./ToolBar";
-import { useCommand, useEditorState } from "../hooks/editor";
+import type { HeaderMenu } from "@/editor/store/editorStore";
+import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
 import s from "./header.module.css";
 
@@ -26,7 +27,7 @@ function PatternNameInput({ name }: { name: string }) {
   return <input className={s.name} aria-label={t("patternName")} value={value} onChange={(e) => setValue(e.target.value)} onBlur={() => run("pattern.rename", value)} onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()} />;
 }
 
-/** "Glory to Ukraine" at the bottom of the menu: just words, not a command. The flag is drawn (Windows has no flag emoji). */
+/** "Glory to Ukraine" at the bottom of ☰: just words, not a command. The flag is drawn (Windows has no flag emoji). */
 function Glory() {
   const t = useTranslations("app");
   return (
@@ -37,55 +38,96 @@ function Glory() {
   );
 }
 
-function FileMenu() {
+/** The guide holding this menu open, if it does. */
+function useReveal(menu: HeaderMenu) {
+  return useEditorState((st) => (st.menuReveal?.menu === menu ? st.menuReveal.path : null));
+}
+
+/** Pattern ▾ — working on a pattern: new, open, the work file, versions, info, photos. Nothing here is for printing. */
+function PatternMenu() {
   const t = useTranslations("fileMenu");
   const run = useCommand();
   const go = (command: string, args?: unknown) => () => void run(command, args);
-  const reveal = useEditorState((st) => st.menuReveal);
-  const locale = useLocale();
+  const reveal = useReveal("pattern");
+  const signedIn = useEditorState((st) => !!st.account);
+  // signed out, Open only matters when patterns were saved in this browser before
+  const canOpen = useEditorState((st) => !!st.account || st.hasOtherPatterns);
   const items: MenuItem[] = [
     { id: "new", label: t("new"), items: [
       { id: "newBlank", label: t("newBlank"), hint: t("newBlankHint"), onClick: go("file.new") },
       { label: t("newFromImage"), hint: t("newFromImageHint"), onClick: go("image.pick") },
     ] },
-    { label: t("open"), hint: t("openHint"), onClick: go("file.open") },
-    { label: t("loadFile"), hint: t("loadFileHint"), onClick: go("file.pickToLoad") },
-    { id: "versions", label: t("versions"), hint: t("versionsHint"), onClick: go("file.versions") },
+    ...(canOpen ? [{ id: "open", label: t("open"), hint: t(signedIn ? "openHintAccount" : "openHint"), onClick: go("file.open") }] : []),
     "-",
-    { label: t("save"), hint: t("saveHint"), onClick: go("file.save") },
     { id: "download", label: t("download"), hint: t("downloadHint"), onClick: go("file.export", "pattern") },
-    { id: "export", label: t("export"), items: [
+    { id: "loadFile", label: t("loadFile"), hint: t("loadFileHint"), onClick: go("file.pickToLoad") },
+    "-",
+    { id: "versions", label: t("versions"), hint: t("versionsHint"), onClick: go("file.versions") },
+    { id: "info", label: t("info"), hint: t("infoHint"), onClick: go("pattern.editInfo") },
+    "-",
+    { id: "refUnderlay", label: t("refUnderlay"), hint: t("refUnderlayHint"), onClick: go("underlay.pick") },
+    { id: "refWindow", label: t("refWindow"), hint: t("refWindowHint"), onClick: go("reference.pick") },
+  ];
+  return (
+    <span data-guide="menu">
+      <Dropdown className={cx(ui.btn, ui.ghost)} label={t("label")} items={items} reveal={reveal} />
+    </span>
+  );
+}
+
+/** 🖨 Print & share — the finished chart, to stitch from or for other apps. */
+function PrintMenu() {
+  const t = useTranslations("fileMenu");
+  const run = useCommand();
+  const go = (command: string, args?: unknown) => () => void run(command, args);
+  const reveal = useReveal("print");
+  const items: MenuItem[] = [
+    { id: "pdfChart", label: t("pdfChart"), hint: t("pdfChartHint"), onClick: go("file.exportChartPdf") },
+    { id: "pdfPk", label: t("pdfPk"), hint: t("pdfPkHint"), onClick: go("file.exportPatternKeeper") },
+    "-",
+    { id: "pngCharts", label: t("pngCharts"), items: [
       { label: t("pngBoth"), onClick: go("file.export", "png-both") },
       { label: t("pngSymbols"), onClick: go("file.export", "png-symbols") },
       { label: t("pngSymbolsInk"), hint: t("pngSymbolsInkHint"), onClick: go("file.export", "png-symbols-ink") },
+    ] },
+    { id: "pngPreviews", label: t("pngPreviews"), items: [
       { label: t("pngColor"), onClick: go("file.export", "png-color") },
       { label: t("pngStitched"), onClick: go("file.export", "png-stitched") },
-      "-",
-      { id: "oxs", label: t("oxs"), hint: t("oxsHint"), onClick: go("file.export", "oxs") },
-      { label: t("csv"), onClick: go("file.export", "csv") },
-      "-",
-      { id: "pdfChart", label: t("pdfChart"), hint: t("pdfChartHint"), onClick: go("file.exportChartPdf") },
-      { id: "pdfPk", label: t("pdfPk"), hint: t("pdfPkHint"), onClick: go("file.exportPatternKeeper") },
     ] },
     "-",
-    { id: "references", label: t("references"), items: [
-      { id: "refWindow", label: t("refWindow"), hint: t("refWindowHint"), onClick: go("reference.pick") },
-      { id: "refUnderlay", label: t("refUnderlay"), hint: t("refUnderlayHint"), onClick: go("underlay.pick") },
-    ] },
+    { id: "csv", label: t("csv"), onClick: go("file.export", "csv") },
+    { id: "oxs", label: t("oxs"), hint: t("oxsHint"), onClick: go("file.export", "oxs") },
+  ];
+  return (
+    <span data-guide="print-menu">
+      <Dropdown className={ui.tool} title={t("print")} label={<Icon name="print" size={18} />} items={items} reveal={reveal} />
+    </span>
+  );
+}
+
+/** ☰ — what isn't needed while stitching: help, shortcuts, language, theme, privacy. */
+function AppMenu() {
+  const t = useTranslations("fileMenu");
+  const run = useCommand();
+  const ed = useEditor();
+  const go = (command: string, args?: unknown) => () => void run(command, args);
+  const reveal = useReveal("app");
+  const locale = useLocale();
+  const items: MenuItem[] = [
+    { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
+    { id: "shortcuts", label: t("shortcuts"), onClick: () => ed.store.setState({ shortcutsOpen: true }) },
+    { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
     "-",
-    { id: "info", label: t("info"), hint: t("infoHint"), onClick: go("pattern.editInfo") },
-    "-",
+    { id: "language", node: <LanguageSwitch /> },
     { id: "theme", node: <ThemeSwitcher /> },
     "-",
-    { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
-    { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
     { id: "privacy", label: t("privacy"), onClick: () => void window.open(`/${locale}/privacy`, "_blank", "noopener") },
     "-",
     { id: "glory", node: <Glory /> },
   ];
   return (
-    <span data-guide="menu">
-      <Dropdown className={cx(ui.btn, ui.ghost)} label={t("label")} items={items} reveal={reveal} />
+    <span data-guide="app-menu">
+      <Dropdown className={ui.tool} title={t("more")} label={<Icon name="menu" size={18} />} items={items} reveal={reveal} />
     </span>
   );
 }
@@ -136,7 +178,7 @@ export function Header() {
         <Image src="/icon.svg" alt="" width={30} height={30} unoptimized priority />
         <span className={s.brandText}>{t("app.brand")}</span>
       </div>
-      <FileMenu />
+      <PatternMenu />
       <PatternName />
       <div className={s.spacer} data-slot="spacer" />
       <div className={s.toolSlot} data-slot="tools">
@@ -159,10 +201,11 @@ export function Header() {
         </div>
       </div>
       <div className={s.spacer} data-slot="spacer" />
-      <ShortcutsInfo />
-      <LanguageSwitch />
+      <PrintMenu />
+      <AppMenu />
       <AccountButton />
       <PanelToggle />
+      <ShortcutsPanel />
     </header>
   );
 }

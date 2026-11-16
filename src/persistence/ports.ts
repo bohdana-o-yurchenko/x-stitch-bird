@@ -19,13 +19,16 @@ export interface PatternSummary {
   hasPreview?: boolean;
 }
 
-export type SaveResult = { ok: true } | { ok: false; reason: "quota" | "conflict" | "error" };
+/** `account`: while signed in, whether the account got it too (false: offline or refused — the browser copy has it). */
+export type SaveResult = { ok: true; account?: boolean } | { ok: false; reason: "quota" | "conflict" | "error" };
 
 export interface PatternRepository {
   list(): Promise<PatternSummary[]>;
   load(id: string): Promise<PatternFile | null>;
   save(doc: PatternFile): Promise<SaveResult>;
   remove(id: string): Promise<void>;
+  /** Signed in: patterns saved in this browser after their last copy reached the account (an upload cut off) go up now. */
+  catchUp?(): Promise<void>;
 }
 
 /** A reference window (SPEC §11.1). `image` and `marks` are ids in the image store. */
