@@ -6,6 +6,7 @@ import { buildPalette, type Palette, type PaletteSlot } from "../../pattern/pale
 import { resolveColor } from "../../pattern/resolve";
 import type { Pattern } from "../../pattern/types";
 import { partialAnchor, partialKind } from "../../stitches/partialKinds";
+import { DEFAULT_LINE_INK, LINE_INKS } from "../../symbols/lineInks";
 import { shapeSymbol } from "../../symbols/shapes";
 import { SYMBOL_FONT, SYMBOL_GLYPHS } from "../../symbols/symbolFont";
 import type { PdfFonts } from "./patternKeeper";
@@ -33,8 +34,8 @@ const COLS = 40, MAX_CELL = 18, OVERLAP = 2;
 const INK = "#1D1A16", SHARED_BG = "#E2E2E2", SHARED_TINT = "#7A7A7A";
 /** On the colour chart with backstitch: cells this much paler (towards white), symbols in grey. */
 const PALE = 0.74, PALE_INK = "#77726B";
-/** Backstitch and knots on that chart: bright, readable on pale colours, one per entry in key order. */
-export const LINE_COLOURS = ["#E6194B", "#2E9E44", "#3A5BD9", "#F07800", "#8E24AA", "#00897B", "#D81B9C", "#8D5524", "#0091EA", "#B71C1C"];
+/** Knots on that chart: bright, readable on pale colours, one per entry in key order (backstitch: its own colour). */
+export const LINE_COLOURS = [...LINE_INKS.slice(1).map((c) => c.hex), "#00897B", "#D81B9C", "#8D5524", "#0091EA", "#B71C1C"];
 
 /** Draws a backstitch line in its line style — the screen's own drawing (render/primitives/lineStyles), passed in. */
 export type LineStyleDraw = (g: CanvasLike, x1: number, y1: number, x2: number, y2: number, width: number, unit: number, sym: string) => void;
@@ -331,7 +332,9 @@ async function addKey(pdf: PdfWriter, p: Pattern, tr: Translate, title: string, 
 function accentsFor(p: Pattern): Accents {
   const line = new Map<KeyIndex, string>();
   let n = 0;
-  for (const kind of ["back", "knot"] as const) p.key.forEach((e, k) => e?.t === kind && line.set(k, LINE_COLOURS[n++ % LINE_COLOURS.length]!));
+  // backstitch in the colour chosen in the key (black unless set); knots each in a vibrant colour of their own
+  p.key.forEach((e, k) => e?.t === "back" && line.set(k, e.ink ?? DEFAULT_LINE_INK));
+  p.key.forEach((e, k) => e?.t === "knot" && line.set(k, LINE_COLOURS[n++ % LINE_COLOURS.length]!));
   return { symbol: symbolColours(p), line };
 }
 

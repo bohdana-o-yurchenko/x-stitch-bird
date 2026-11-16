@@ -5,6 +5,7 @@ import { LAYERS } from "@/core/layers/registry";
 import { addEntry, cleanEntry, entryLayer, findSameKey, nextSymbol } from "@/core/pattern/keyEntries";
 import { makeBlendColor, makeComboColor, resolveColor, invalidateColors } from "@/core/pattern/resolve";
 import { shortId } from "@/core/pattern/createPattern";
+import { DEFAULT_LINE_INK } from "@/core/symbols/lineInks";
 import { isLineStyle } from "@/core/symbols/lineStyles";
 import type { BlendPart, CustomColor, EntryKindId, KeyEntry, KeyIndex, StitchTypeId } from "@/core/pattern/types";
 import type { Editor } from "../createEditor";
@@ -20,6 +21,8 @@ export interface KeyDraft {
   st: StitchTypeId;
   sym: string;
   wraps: number;
+  /** Backstitch: the line's colour on the Symbols view and the PDF chart to print. */
+  ink: string;
 }
 
 /** A symbol of the right family after the draft's kind changes: line styles for backstitch, characters otherwise. */
@@ -31,12 +34,12 @@ export function draftFor(ed: Editor, edit?: KeyIndex): KeyDraft {
   const p = ed.doc;
   const d: KeyDraft = {
     t: "thread", mode: "single", thread: "dmc:310", slots: [{ id: "dmc:310", n: 1 }, { id: "dmc:413", n: 1 }],
-    bead: "bead:00557", n: p.strands || 2, st: "full", sym: nextSymbol(p, ed.state.symbols, edit), wraps: 2,
+    bead: "bead:00557", n: p.strands || 2, st: "full", sym: nextSymbol(p, ed.state.symbols, edit), wraps: 2, ink: DEFAULT_LINE_INK,
   };
   const e = edit ? p.key[edit] : null;
   if (!e) return d;
   const c = resolveColor(p, e.src);
-  Object.assign(d, { t: e.t, sym: e.sym, n: e.n ?? d.n, st: e.st ?? "full", wraps: e.wraps ?? 2 });
+  Object.assign(d, { t: e.t, sym: e.sym, n: e.n ?? d.n, st: e.st ?? "full", wraps: e.wraps ?? 2, ink: e.ink ?? DEFAULT_LINE_INK });
   if (e.t === "bead") d.bead = e.src;
   else if (e.t === "combo" && c?.thread && c.bead) Object.assign(d, { thread: c.thread.id, bead: c.bead.id });
   else if (c?.isBlend && c.parts) Object.assign(d, { mode: "blend", slots: c.parts.map((q) => ({ id: q.entry.id, n: q.n })) });
@@ -77,6 +80,7 @@ export function draftEntry(d: KeyDraft, src: string): Omit<KeyEntry, "sym"> {
     n: d.t === "bead" ? undefined : usesBlend(d) ? null : d.n,
     st: fields.includes("stitchType") ? d.st : undefined,
     wraps: d.t === "knot" ? d.wraps : undefined,
+    ink: d.t === "back" ? d.ink : undefined,
   };
 }
 

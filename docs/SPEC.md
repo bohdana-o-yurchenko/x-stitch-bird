@@ -166,6 +166,9 @@ not a character. The `sym` of a `back` entry holds `line:<name>`, picked from 20
 unused one is auto-assigned; once all 20 are taken they repeat):
 solid · dashed · long dash · dotted · dash-dot · dash-dot-dot · long-short · sparse dots · short dash ·
 dash-dash-dot · double · thick-thin · ticks · wave · zigzag · scallop · circles · squares · chevrons · crosses.
+- **Line colour** (2026-11-16, backstitch only): `ink` on the entry, `#RRGGBB`; absent = black. The key form
+  offers Black, Red, Green, Blue, Orange, Purple (the PDF's line colours) and the user's own. The Colour and Both
+  views draw the line in its floss colour; the Symbols view and the PDF chart to print in its line colour.
 - The two lines of dots keep their dots close, and the dots are bigger than the line is wide (2026-11-16): far
   apart, small dots stopped reading as one line. Dotted: dots almost touching; sparse dots: a little looser.
   Same in the editor and the PDFs.
@@ -1141,11 +1144,12 @@ colours, lines), A4 portrait, in the interface language (see Language below).
 4. **Symbols on colour**: the same on the thread colours, over the fabric colour; symbols in each colour's own ink
    (white on dark); a half cross's symbol sits on a small white disc in dark ink so it reads on floss and fabric.
 5. **Colour chart with backstitch**: the cells **pale** (74% towards white, still their colour), symbols in grey,
-   so the **backstitch stands out**: each backstitch entry in its own bright colour (10 colours, in key order: red,
-   green, blue, orange, purple, teal, magenta, brown, sky, dark red), **thick** (from 0.21 of a cell for 1 strand,
+   so the **backstitch stands out**: each backstitch entry in its **line colour** from the key (§2.5: black
+   unless the user chose red, green, blue, orange, purple or their own), **thick** (from 0.21 of a cell for 1 strand,
    +0.05 per strand up to 4 — thicker than 2 strands on screen) and in its **line style**, drawn by the same code as
    on screen; the style's pattern grows with the line so dashes and ornaments stay readable. French knots: bright
-   dots (the next colours after the backstitch ones) with a dark outline.
+   dots, one colour each in key order (red, green, blue, orange, purple, teal, magenta, brown, sky, dark red), with
+   a dark outline.
 6. **Key**: every used entry — thread colours for stitches and beads; backstitch and knots in the bright colour
    (and line style) they have on the colour chart — brand and number, details, count with its unit.
 

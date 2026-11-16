@@ -16,6 +16,8 @@ export interface KeyEntry {
   st?: StitchTypeId;
   sym: string;
   wraps?: number;
+  /** Backstitch only: the line's colour on the Symbols view and the PDF chart to print; absent = black. */
+  ink?: string;
 }
 
 export interface BlendPart {

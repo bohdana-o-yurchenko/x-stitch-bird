@@ -216,7 +216,8 @@ export function drawBackstitch(g: Ctx, x1: number, y1: number, x2: number, y2: n
   const w = Math.max(b.minWidth, z * b.width) * (style.showColour ? strandFactor(s.n, b.strandFirst, b.strandStep) : 1);
   g.save();
   g.globalAlpha = alpha;
-  g.strokeStyle = style.showColour ? backstitchColour(s.hex, theme) : b.symbolsColor;
+  // Colour views: the floss; Symbols view: the entry's own line colour (black unless chosen)
+  g.strokeStyle = style.showColour ? backstitchColour(s.hex, theme) : (s.lineInk ?? b.symbolsColor);
   strokeLineStyle(g, x1, y1, x2, y2, w, Math.max(2, z * b.patternUnit), style.showSymbol ? s.sym : "line:solid");
   g.restore();
 }

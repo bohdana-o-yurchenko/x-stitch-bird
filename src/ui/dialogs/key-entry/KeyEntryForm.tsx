@@ -11,6 +11,7 @@ import { blendStrands, resolveColor } from "@/core/pattern/resolve";
 import type { KeyIndex } from "@/core/pattern/types";
 import { STITCH_TYPES } from "@/core/stitches/registry";
 import type { StitchTypeId } from "@/core/pattern/types";
+import { LINE_INKS } from "@/core/symbols/lineInks";
 import { isLineStyle, symbolText } from "@/core/symbols/lineStyles";
 import { symbolsFor } from "@/core/pattern/keyEntries";
 import { drawLineStyleSample } from "@/render/keyIcon";
@@ -146,6 +147,25 @@ interface ColourLine {
 }
 
 /**
+ * A backstitch's colour on the Symbols view and the PDF chart to print: black, one of five vibrant colours, or the
+ * user's own (SPEC §2.5).
+ */
+function LineInkPicker({ value, onPick }: { value: string; onPick: (hex: string) => void }) {
+  const t = useTranslations("keyDialog");
+  const preset = LINE_INKS.find((c) => c.hex === value);
+  return (
+    <div className={s.inline} data-testid="line-ink" title={t("lineInkHint")}>
+      <span className={s.label}>{t("lineInk")}</span>
+      <select className={ui.input} aria-label={t("lineInk")} value={preset?.id ?? "own"} onChange={(e) => { const c = LINE_INKS.find((x) => x.id === e.target.value); if (c) onPick(c.hex); }}>
+        {LINE_INKS.map((c) => <option key={c.id} value={c.id}>{t(`lineInks.${c.id}`)}</option>)}
+        {!preset && <option value="own">{t("lineInks.own")}</option>}
+      </select>
+      <input type="color" className={s.inkWell} aria-label={t("lineInkOwn")} title={t("lineInkOwn")} value={value.toLowerCase()} onChange={(e) => onPick(e.target.value.toUpperCase())} />
+    </div>
+  );
+}
+
+/**
  * Add or edit a key entry (SPEC §8), docked in the side panel so the chart and reference windows stay in view.
  * Every colour — a single floss, each floss of a blend, the floss and bead of a combo — is one line with its
  * strands; the one searchable list below fills the highlighted line. The rules live in editor/actions/keyEntries.
@@ -208,7 +228,7 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
   const colour = draftColour(ed, d);
   const dup = duplicateOf(ed, d, edit);
   const slot: PaletteSlot | undefined = colour && {
-    hex: colour.hex, ink: colour.ink, sym: d.sym, t: d.t, st: d.st,
+    hex: colour.hex, ink: colour.ink, sym: d.sym, t: d.t, st: d.st, ...(d.t === "back" ? { lineInk: d.ink } : {}),
     n: kind.fields.includes("strands") && !usesBlend(d) ? d.n : blendStrands(colour) || 1,
     bead: d.t === "combo" && colour.bead ? { hex: colour.bead.hex, ink: colour.bead.ink, shape: beadShape(colour.bead.series) } : d.t === "bead" ? { hex: colour.hex, ink: colour.ink, shape: beadShape(colour.series) } : undefined,
   };
@@ -303,6 +323,7 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
         )}
 
         <SymbolPicker value={d.sym} used={used} symbols={symbolsFor(d.t, symbols)} onPick={(sym) => update({ sym })} />
+        {d.t === "back" && <LineInkPicker value={d.ink} onPick={(ink) => update({ ink })} />}
 
         <div className={s.preview} data-testid="key-preview">
           {slot && label ? (

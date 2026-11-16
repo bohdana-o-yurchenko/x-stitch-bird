@@ -279,7 +279,19 @@
       "squareHole": "Square with a round hole",
       "crossCut": "Circle with a cross cut out"
     },
-    "drawNeedInk": "A cut-out needs something to cut: draw a filled shape first."
+    "drawNeedInk": "A cut-out needs something to cut: draw a filled shape first.",
+    "lineInk": "Line colour",
+    "lineInkHint": "The line’s colour on the Symbols view and the printed chart. On the colour views it is the floss colour.",
+    "lineInkOwn": "Your own colour",
+    "lineInks": {
+      "black": "Black",
+      "red": "Red",
+      "green": "Green",
+      "blue": "Blue",
+      "orange": "Orange",
+      "purple": "Purple",
+      "own": "Own colour"
+    }
   },
   "picker": {
     "searchThread": "Search DMC number or name",

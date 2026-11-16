@@ -762,3 +762,26 @@ test("finds symbols in one 10 × 10 block of the photo behind the chart, and fil
   // what it learned is saved with the pattern
   expect(await editorState<number>(page, "(ed) => Object.keys(ed.doc.samples).length")).toBe(2);
 });
+
+test("a backstitch has its own line colour for the Symbols view and the print PDF: black, a vibrant one, or any", async ({ page }) => {
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form");
+  await form.getByRole("radio", { name: "Backstitch" }).click();
+  const ink = form.getByTestId("line-ink");
+  await expect(ink.getByRole("combobox", { name: "Line colour" })).toHaveValue("black");
+  await ink.getByRole("combobox", { name: "Line colour" }).selectOption({ label: "Red" });
+  await form.getByRole("button", { name: "Add to key", exact: true }).click();
+  const added = () => editorState<string | undefined>(page, "(ed) => ed.doc.key[ed.doc.key.length - 1].ink");
+  expect(await added()).toBe("#E6194B");
+  // your own colour, when editing
+  const row = page.locator("[data-entry]").last();
+  await row.hover();
+  await row.getByRole("button", { name: "Edit entry" }).click();
+  await form.getByTestId("line-ink").getByLabel("Your own colour").fill("#123456");
+  await expect(form.getByTestId("line-ink").getByRole("combobox")).toHaveValue("own");
+  await form.getByRole("button", { name: "Save changes" }).click();
+  expect(await added()).toBe("#123456");
+  // only backstitch has it
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  await expect(form.getByTestId("line-ink")).toHaveCount(0);
+});

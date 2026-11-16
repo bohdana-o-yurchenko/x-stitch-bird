@@ -116,6 +116,15 @@
 .spacer {
   flex: 1;
 }
+.inkWell {
+  width: 36px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  background: var(--panel);
+  cursor: pointer;
+}
 /* colour lines: a single floss, each floss of a blend, a combo's floss and bead — same look, own strands */
 .lines {
   display: flex;
