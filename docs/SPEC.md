@@ -897,6 +897,12 @@ gone, and 12 is a decision recorded in §15.3. Numbers are kept, as other sectio
 
 | Feature | Effort | Persistence impact | Status |
 |---|---|---|---|
+| Intended fabric: name, type, count (§15.19) | S | optional fields in .xbird | not started |
+| Floss usage rework + stitching bases: plastic canvas, wood (§15.20) | L | optional calculator settings | not started |
+| Finished size for several counts in the print PDF (§15.21) | S | none | not started |
+| Skeins and bead packs in the shopping list (§15.22) | S code, M data | none | not started |
+| Accounts and cloud storage (Neon), sign-in, pattern gallery with previews (§15.23) | XL | new server storage; browser data migrated | not started |
+| Mill Hill Treasures in the bead list (§15.24) | M (mostly data) | new bead ids | not started |
 | More chart checks (§15.4): backstitch, knots, beads | S–M | none | ideas |
 | More thread brands (§15.8) | M code, L data | new `src` id namespaces | not started |
 | Not yet discussed (§15.12): keyboard entry, specialty stitches, beads on intersections, proofread tracking, second-screen window | — | — | ideas |
@@ -1433,6 +1439,76 @@ Idea from Pattern Maker v4 (Professional). Toggle with the eye button in the key
 - Only the interface is themed: panels, menus, buttons, the stage around the fabric and the rulers. The chart itself
   — fabric colour, floss and bead colours, symbols, grid — stays exactly the same, so what you see is what you stitch.
 - Exported PNGs don't depend on the theme.
+
+### 15.19 Intended fabric: name, type, count (backlog, added 2026-11-16) — effort S
+Today the pattern stores only a count (a dropdown) and a colour (a colour picker).
+- Add a free-text **fabric name**, e.g. "Zweigart Aida 14 ct Antique White 101" or "Lugana 25 ct 3613". It sits
+  next to the count in Fabric & size, and in Pattern info.
+- Optionally a **type**: Aida / evenweave / linen / plastic canvas / wood (§15.20 uses it).
+- Shown in the print PDF: on the cover with the finished size (§15.21), and in the key's header.
+- Stored as optional fields (`fabricName`, `fabricType`), so no version bump; old files open as before.
+- OXS: write the name where the format has a field for it, if any — check against the readers.
+
+### 15.20 Floss usage rework, and plastic and wooden bases (backlog, added 2026-11-16) — effort L
+**Today** (`classicSkeins`, §7.2): one full cross with one strand = 1 unit; a skein = 3600 units on 14 ct, scaled
+by count; rounded up to whole skeins per thread. Blends are split into their threads correctly; backstitch
+counts its length × 0.42, a knot 1.5 units. **Missing**: waste (starting and ending tails, travel at the back), so
+it tends to undercount on scattered ("confetti") areas; no metres shown; no settings.
+**Plan**
+1. Thread per stitch from geometry: the two diagonals on the front plus the travel at the back, for the fabric's
+   count and the stitch type (full, half, partials), × strands. A skein = 8 m × 6 strands.
+2. Waste allowance: a tail at each start and end, estimated from how many separate patches each colour has (a
+   confetti area needs many more starts than one big block); plus a % setting.
+3. Backstitch by its real length; knots by wraps.
+4. **Bases** (the fabric type of §15.19):
+   - **Plastic canvas** (7, 10, 14 mesh): larger holes, usually more strands, and longer travel at the back.
+   - **Wooden / perforated blanks**: drilled holes, thicker material, so more thread per stitch.
+   - Both get their own factors.
+5. The totals show metres and skeins per thread. The calculator's settings live in the pattern (optional).
+6. Check against published usage tables and a few real stitched pieces; unit tests per rule.
+**Open questions**:
+- Is "plastic and wood base" meant as plastic canvas and wooden blanks to stitch on? I read it that way.
+- Which stitching style is the default (loop start, waste knot)?
+
+### 15.21 Finished size for several counts in the print PDF (backlog, added 2026-11-16) — effort S
+The cover shows the size on the pattern's own count only. Add a small table: 11, 14, 16, 18, 20, 22 ct, and 28
+and 32 over 2, in cm and inches. Optionally, the fabric to buy, with a margin (e.g. 8 cm / 3 in each side).
+Both languages.
+
+### 15.22 Skeins and bead packs in the shopping list (backlog, added 2026-11-16) — effort S code, M data
+- **Threads**: the CSV and the totals already give whole skeins, but they show a count with no unit. Write
+  "2 skeins" and, after §15.20, the metres too.
+- **Beads**: today a count of beads. Add packs: Mill Hill sells a fixed weight per series (Glass Seed, Petite,
+  Magnifica, bugles… each a different number of beads per pack). Needs per-series pack sizes from the maker. The
+  list then shows "2 packs (≈ 640 beads)".
+
+### 15.23 Accounts and cloud storage with Neon; sign-in; pattern gallery (backlog, added 2026-11-16) — effort XL
+A big turn: patterns are stored on a server under a user account, not only in the browser.
+- **Sign-in**: Neon Auth (email code or magic link, Google). Without signing in, the app works as now, in the
+  browser.
+- **Storage**: Neon Postgres for patterns, versions and settings; pictures (references, underlays, previews) in
+  object storage. The `persistence` ports (ARCHITECTURE) already separate storage from the editor, so a server
+  adapter fits behind them.
+- **Gallery page**: the user's patterns as cards with a preview picture, name, size and last change; open,
+  rename, duplicate, delete.
+- **Moving in**: on first sign-in, offer to upload what is in this browser. Nothing in the browser is deleted, and
+  nothing that touches stored data ships without a warning first.
+- **Hard parts**:
+  - working offline, and conflicts when two tabs or devices change the same pattern;
+  - limits on picture size;
+  - deleting an account and all its data;
+  - server costs.
+- Unlocks the stash (§16).
+
+### 15.24 Mill Hill Treasures in the bead list (backlog, added 2026-11-16) — effort M, mostly data
+The bead catalog has 12 Mill Hill series (seed, petite, antique, frosted, Magnifica, size 8 and 6, pebble,
+bugles); **Treasures are not in it**. They are shaped charms (hearts, stars, flowers, leaves…, codes 12xxx /
+13xxx).
+- **Data**: codes, names and a colour for each, from the maker's list. There are hundreds; we need a reliable
+  source.
+- **Drawing**: a few new bead shapes for the chart and the key (heart, star, flower, leaf), or a generic charm
+  shape.
+- **Shopping**: sold a few pieces per pack (see §15.22).
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
