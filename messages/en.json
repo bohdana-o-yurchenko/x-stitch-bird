@@ -898,10 +898,11 @@
     "decline": "Decline",
     "paused": "Autofill waits while you edit the image",
     "tipTitle": "Not quite right?",
-    "tip": "Stitch a few more cells by hand, then try again. Autofill learns from what you mark — it gets better as you go.",
     "symbolsOnly": "Symbols only",
     "symbolsOnlyHint": "Show the found symbols as symbols only, or on their colour (only this preview)",
     "peek": "Hold to see under",
-    "peekHint": "Hold to hide the found symbols and see the image under them"
+    "peekHint": "Hold to hide the found symbols and see the image under them",
+    "tipAlign": "Line the image up on this block more closely (U), then try again.",
+    "tipStitch": "Stitch a few more cells by hand. Autofill learns from what you mark — it gets better as you go."
   }
 }

@@ -8,7 +8,7 @@ import type { KeyEntry, Pattern, StitchTypeId } from "../pattern/types";
 export type CheckId = "holes" | "lone" | "symmetry";
 
 export interface CheckOptions {
-  holes: { on: boolean; max: 1 | 2 | 3 };
+  holes: { on: boolean; max: 1 | 2 | 3 | 10 };
   lone: { on: boolean; max: 1 | 2; alone: boolean };
   symmetry: { on: boolean };
 }

@@ -123,9 +123,14 @@
   align-items: center;
 }
 /* Autofill: the tip on Decline — it should pop, without asking for a click */
+/* the tip hangs from the Decline button, its arrow pointing at it */
+.declineWrap {
+  position: relative;
+  display: inline-flex;
+}
 .declineTip {
   position: absolute;
-  right: 0;
+  right: -14px;
   width: 280px;
   padding: 10px 12px;
   border-radius: 10px;
@@ -153,7 +158,7 @@
 .declineTip::before {
   content: "";
   position: absolute;
-  right: 36px;
+  right: 38px;
   border: 7px solid transparent;
 }
 .tipBelow::before {
@@ -179,4 +184,11 @@
   background: var(--sel);
   border-color: var(--accent);
   color: var(--accent);
+}
+.tipList {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+.tipList li + li {
+  margin-top: 3px;
 }

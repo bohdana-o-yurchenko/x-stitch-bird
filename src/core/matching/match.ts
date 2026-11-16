@@ -18,6 +18,8 @@ const SHIFT = (SIDE - INNER) / 2;
 /** Examples kept per key entry (the newest). */
 export const MAX_SAMPLES = 8;
 const SURE_SCORE = 0.6, SURE_MARGIN = 0.1, ONLY_ONE_SCORE = 0.72;
+/** Blank below this share of a symbol's typical print; proposed only with at least this share of its examples' print. */
+const BLANK_SHARE = 0.3, MIN_INK_SHARE = 0.55;
 
 export type Patch = Uint8Array;
 
@@ -42,24 +44,10 @@ const MAX_CENTRING = 5;
  * most examples (one of them happened to sit the same way): a T read as a Y.
  */
 export function centre(patch: Patch): Patch {
-  const sorted = [...patch].sort((a, b) => a - b), paper = sorted[Math.floor(sorted.length * 0.8)]!;
-  const dark = (x: number, y: number) => paper - patch[y * SIDE + x]! > 25;
-  const span = (n: number, at: (i: number) => boolean) => Array.from({ length: SIDE }, (_, i) => at(i)).filter(Boolean).length > n;
-  const lineRow = Array.from({ length: SIDE }, (_, y) => span(SIDE * 0.9, (x) => dark(x, y)));
-  const lineCol = Array.from({ length: SIDE }, (_, x) => span(SIDE * 0.9, (y) => dark(x, y)));
-  let sw = 0, sx = 0, sy = 0;
-  for (let y = 0; y < SIDE; y++)
-    for (let x = 0; x < SIDE; x++) {
-      if (lineRow[y] || lineCol[x]) continue;
-      // well below the paper: print, not the paper's own grain
-      const w = Math.max(0, paper - patch[y * SIDE + x]! - 20);
-      sw += w;
-      sx += w * (x + 0.5);
-      sy += w * (y + 0.5);
-    }
-  if (sw < 1) return patch;
+  const { paper, amount, cx, cy } = printInk(patch);
+  if (amount < 1) return patch;
   const clamp = (v: number) => Math.max(-MAX_CENTRING, Math.min(MAX_CENTRING, v));
-  const dx = clamp(sx / sw - SIDE / 2), dy = clamp(sy / sw - SIDE / 2);
+  const dx = clamp(cx - SIDE / 2), dy = clamp(cy - SIDE / 2);
   const at = (x: number, y: number) => (x < 0 || y < 0 || x > SIDE - 1 || y > SIDE - 1 ? paper : patch[y * SIDE + x]!);
   const out = new Uint8Array(patch.length);
   for (let y = 0; y < SIDE; y++)
@@ -82,6 +70,29 @@ function window(patch: Patch, dx: number, dy: number): Float32Array | null {
   const k = 1 / Math.sqrt(sq);
   for (let i = 0; i < v.length; i++) v[i]! *= k;
   return v;
+}
+
+/**
+ * The print in a patch, without the chart's grid lines (rows and columns inked nearly end to end — symbols don't
+ * reach that far): how much there is (`amount`, the sum of how far each pixel is below the paper) and its centre.
+ */
+export function printInk(patch: Patch): { paper: number; amount: number; cx: number; cy: number } {
+  const sorted = [...patch].sort((a, b) => a - b), paper = sorted[Math.floor(sorted.length * 0.8)]!;
+  const dark = (x: number, y: number) => paper - patch[y * SIDE + x]! > 25;
+  const span = (n: number, at: (i: number) => boolean) => Array.from({ length: SIDE }, (_, i) => at(i)).filter(Boolean).length > n;
+  const lineRow = Array.from({ length: SIDE }, (_, y) => span(SIDE * 0.9, (x) => dark(x, y)));
+  const lineCol = Array.from({ length: SIDE }, (_, x) => span(SIDE * 0.9, (y) => dark(x, y)));
+  let sw = 0, sx = 0, sy = 0;
+  for (let y = 0; y < SIDE; y++)
+    for (let x = 0; x < SIDE; x++) {
+      if (lineRow[y] || lineCol[x]) continue;
+      // well below the paper: print, not the paper's own grain
+      const w = Math.max(0, paper - patch[y * SIDE + x]! - 20);
+      sw += w;
+      sx += w * (x + 0.5);
+      sy += w * (y + 0.5);
+    }
+  return { paper, amount: sw, cx: sw ? sx / sw : SIDE / 2, cy: sw ? sy / sw : SIDE / 2 };
 }
 
 /** How much ink a patch's middle has: the spread of its grey values. */
@@ -141,21 +152,26 @@ export function matchBlock(input: MatchInput): MatchResult {
   const out: MatchResult = { proposals: [], unsure: [], blank: [] };
   // symbols are compared centred (examples are stored as photographed; centring happens here)
   const examples = [...input.examples].map(([k, list]) => ({ k, list: list.map((p) => window(centre(p), 0, 0)).filter((w): w is Float32Array => !!w) })).filter((e) => e.list.length);
-  // what counts as blank: little ink compared with the cells known to hold symbols (and never a faint smudge)
-  const inks = [...input.examples.values()].flat().map(inkiness).sort((a, b) => a - b);
-  const typical = inks.length ? inks[Math.floor(inks.length / 2)]! : 40;
-  const blankBelow = Math.max(6, typical * 0.3);
+  // how much print a symbol has — grid lines left out: a misaligned empty cell has a line slid into it, and the edge
+  // of a neighbour's symbol, but far less print than a symbol
+  const median = (v: number[]) => [...v].sort((a, b) => a - b)[Math.floor(v.length / 2)] ?? 0;
+  const inkOf = new Map([...input.examples].map(([k, list]) => [k, median(list.map((p) => printInk(p).amount))]));
+  const typical = median([...input.examples.values()].flat().map((p) => printInk(p).amount));
   for (const cell of input.empty) {
     const patch = input.patches.get(cell);
     if (!patch) continue;
-    if (inkiness(patch) < blankBelow) {
+    const amount = printInk(patch).amount;
+    // blank: little print compared with the cells known to hold symbols (and never a faint smudge)
+    if (amount < Math.max(typical * BLANK_SHARE, 1) || inkiness(patch) < 6) {
       out.blank.push(cell);
       continue;
     }
     const windows = shifted(centre(patch));
     const scores = examples.map((e) => ({ k: e.k, s: Math.max(...e.list.map((ex) => score(ex, windows))) })).sort((a, b) => b.s - a.s);
     const [first, second] = scores;
-    const sure = !!first && (second ? first.s >= SURE_SCORE && first.s - second.s >= SURE_MARGIN : first.s >= ONLY_ONE_SCORE);
+    // sure: a clear winner — with about as much print as its own examples, not a scrap that happens to fit
+    const enough = !!first && amount >= (inkOf.get(first.k) ?? 0) * MIN_INK_SHARE;
+    const sure = !!first && enough && (second ? first.s >= SURE_SCORE && first.s - second.s >= SURE_MARGIN : first.s >= ONLY_ONE_SCORE);
     if (sure) out.proposals.push({ cell, k: first.k });
     else out.unsure.push(cell);
   }

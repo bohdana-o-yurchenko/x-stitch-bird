@@ -66,8 +66,8 @@ export function ChecksPanel() {
         <label className={ui.chk}>
           <input type="checkbox" checked={o.holes.on} onChange={(e) => change({ ...o, holes: { ...o.holes, on: e.target.checked } })} />
           <span className={s.checkName}>{t("holes")}</span>
-          <select className={ui.input} aria-label={t("holesSize")} value={o.holes.max} disabled={!o.holes.on} onChange={(e) => change({ ...o, holes: { ...o.holes, max: Number(e.target.value) as 1 | 2 | 3 } })}>
-            {[1, 2, 3].map((n) => <option key={n} value={n}>{t("upTo", { count: n })}</option>)}
+          <select className={ui.input} aria-label={t("holesSize")} value={o.holes.max} disabled={!o.holes.on} onChange={(e) => change({ ...o, holes: { ...o.holes, max: Number(e.target.value) as 1 | 2 | 3 | 10 } })}>
+            {[1, 2, 3, 10].map((n) => <option key={n} value={n}>{t("upTo", { count: n })}</option>)}
           </select>
         </label>
         <p className={cx(ui.hint, s.checkHint)}>{t("holesHint")}</p>

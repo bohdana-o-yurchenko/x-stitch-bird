@@ -1005,7 +1005,7 @@ mistakes in a copied chart. It runs on demand, never by itself, and never change
 
 **Choosing checks** — every check is **opt-in** (all off at first); the choice and options are remembered in the
 browser (`stitchwork.checks`):
-- **Empty cells** — holes in the stitching: a group of **1 to N** empty cells (N = 1–3, default 3) that touches no
+- **Empty cells** — holes in the stitching: a group of **1 to N** empty cells (N = 1, 2, 3 or 10; default 3) that touches no
   other empty cell, and not the chart's edge. "Empty" means no cross, half cross, partial stitch or bead; the
   groups are 8-connected (cells touching at a corner belong together), so a gap in a diagonal line of empty cells
   is not reported. Typical cause: a cell skipped while copying.
@@ -1217,8 +1217,10 @@ selection tool. It needs the image behind the chart, shown and loaded; otherwise
    ("38 symbols found · 4 left empty"). While reviewing, the chart takes no drawing.
 4. **Accept** (Enter) writes the proposals into cells still empty, as one undo step. **Decline** (Esc) drops them.
    Either one goes straight on: the next block can be clicked at once. Unsure and blank-looking cells stay empty.
-- **Pointing at Decline** (or focusing it) pops a tip in the accent colour next to the bar: "Not quite right? Stitch
-  a few more cells by hand, then try again. Autofill learns from what you mark — it gets better as you go." No click.
+- **Pointing at Decline** (or focusing it) pops a tip in the accent colour, its arrow on Decline, with two pieces of
+  advice: line the image up on this block more closely (U), then try again; stitch a few more cells by hand — Autofill
+  learns from what you mark. No click.
+- The bar stays whole inside the chart area: near the right edge it slides left instead of going under the side panel.
 - **Paused while the image is edited**: the pointer edits the image, a block being reviewed is dropped, the hint bar
   says Autofill waits. Back to stitching mode, it carries on.
 - Another tool ends it; removing the image switches to Draw; another pattern opens with Autofill still picked.
@@ -1249,7 +1251,12 @@ selection tool. It needs the image behind the chart, shown and loaded; otherwise
    of line only matched the entry with the most examples, one of which happened to sit the same way: a T was read as
    a Y. Examples are stored as photographed; centring happens when comparing.
    Then the middle 16 × 16 is compared, normalised (minus its mean, divided by its spread), so faded or uneven
-   print still matches. A cell with less ink than 30% of the examples' typical ink is **blank**.
+   print still matches.
+   **Guarding empty cells** (2026-11-16): a misaligned photo slides grid lines and the edges of the neighbours'
+   symbols into an empty cell. So the print is measured without the grid lines (rows and columns inked nearly end to
+   end): a cell with less than 30% of a symbol's typical print is blank, and a symbol is proposed only when the cell
+   has at least 55% of the print of that symbol's own examples. Before, a few empty cells per block could be given a
+   symbol; real symbols are found as before. A cell with less ink than 30% of the examples' typical ink is **blank**.
 3. Each patch is compared with every example by normalised cross-correlation, allowing a shift of up to 2 px each
    way. Per entry the best example counts.
 4. **Sure** when the best score ≥ 0.6 **and** beats the next entry by ≥ 0.1 (≥ 0.72 when only one entry has

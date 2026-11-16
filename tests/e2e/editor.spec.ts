@@ -777,6 +777,15 @@ test("finds symbols in one 10 × 10 block of the photo behind the chart, and fil
   expect(await editorState<boolean>(page, "(ed) => ed.state.matchPeek")).toBe(true);
   await page.mouse.up();
   expect(await editorState<boolean>(page, "(ed) => ed.state.matchPeek")).toBe(false);
+  // the block moved to the far right of the chart: the bar stays whole, clear of the side panel
+  await page.evaluate(() => {
+    const ed = (window as unknown as { __stitchwork: { viewport: { width: number }; state: { viewport: { zoom: number } }; store: { setState(s: object): void } } }).__stitchwork;
+    const z = ed.state.viewport.zoom;
+    ed.store.setState({ viewport: { zoom: z, offX: ed.viewport.width - 26 - 10 * z, offY: 60 } });
+  });
+  const chartBox = (await page.getByTestId("chart").boundingBox())!, barBox = (await page.getByTestId("match-bar").boundingBox())!;
+  expect(barBox.x + barBox.width).toBeLessThanOrEqual(chartBox.x + chartBox.width);
+  expect(barBox.x).toBeGreaterThanOrEqual(chartBox.x);
   // holding Alt: the picker shows as the tool, Autofill steps aside
   await page.keyboard.down("Alt");
   await expect(page.getByTestId("match-bar")).toHaveCount(0);

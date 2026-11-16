@@ -86,5 +86,24 @@ describe("symbol matching in a block", () => {
     const paper = printed(blank), moved = centre(paper);
     expect(Math.max(...[...moved].map((v, i) => Math.abs(v - paper[i]!)))).toBeLessThanOrEqual(4);
   });
+
+  it("leaves an empty cell empty when a misaligned photo slides grid lines and bits of the neighbours' symbols into it", () => {
+    const grid = gridded(() => false);
+    const SYMS = [letterT, letterY, cross, ring];
+    // the cell photographed with its own symbol (or none), the grid, and the neighbours beyond its four edges
+    const shot = (own: ((x: number, y: number) => boolean) | null, nb: (x: number, y: number) => boolean) => (x: number, y: number) =>
+      (own ? own(x, y) : false) || grid(x, y) || nb(x + 20, y) || nb(x - 20, y) || nb(x, y + 20) || nb(x, y - 20);
+    const examples = new Map(SYMS.map((ink, i) => [i + 1, [printed(shot(ink, () => false), 0, 0, 50 + i)]]));
+    const patches = new Map<number, Patch>(), empty: number[] = [];
+    [[4, 0], [-4, 4], [0, -4], [4, 4], [-4, -4], [3, -4]].forEach(([dx, dy], i) => {
+      patches.set(i, printed(shot(null, SYMS[i % 4]!), dx!, dy!, 70 + i));
+      patches.set(10 + i, printed(shot(SYMS[i % 4]!, SYMS[(i + 1) % 4]!), dx! / 2, dy! / 2, 90 + i));
+      empty.push(i, 10 + i);
+    });
+    const r = matchBlock({ patches, empty, examples });
+    expect(r.proposals.filter((p) => p.cell < 10)).toEqual([]);
+    expect(r.blank).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(r.proposals.filter((p) => p.cell >= 10).map((p) => [p.cell, p.k])).toEqual([0, 1, 2, 3, 4, 5].map((i) => [10 + i, (i % 4) + 1]));
+  });
 });
 
