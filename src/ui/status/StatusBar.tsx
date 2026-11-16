@@ -40,11 +40,12 @@ function CurrentEntry() {
   const t = useTranslations("status");
   const active = useEditorState((st) => st.activeEntry);
   const slot = useEditorState((st) => st.palette[st.activeEntry]);
+  const autofill = useEditorState((st) => st.tool === "autofill");
   const label = useEntryLabel();
   if (!active || !slot) return <span>{t("noEntry")}</span>;
   const l = label(active);
   return (
-    <span className={s.entry} data-testid="status-entry">
+    <span className={cx(s.entry, autofill && s.idle)} data-testid="status-entry" data-idle={autofill || undefined} title={autofill ? t("notUsedByAutofill") : undefined}>
       <KeyIcon slot={slot} size={18} />
       <b>{l.title}</b>
       <span className={s.entrySub}>{l.sub}</span>

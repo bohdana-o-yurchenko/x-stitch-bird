@@ -79,7 +79,8 @@
     "noEntry": "No key entry chosen",
     "ambiguousClearTitle": "Clear all {count, plural, one {# “?” mark} other {# “?” marks}}?",
     "ambiguousClearConfirm": "Clear marks",
-    "ambiguousClearBody": "Only the marks go; the stitches under them stay. You can undo this."
+    "ambiguousClearBody": "Only the marks go; the stitches under them stay. You can undo this.",
+    "notUsedByAutofill": "Chosen, but not in use: Autofill reads the symbols off the image"
   },
   "key": {
     "heading": "Key",
@@ -113,7 +114,8 @@
       "knot": "French knots",
       "combo": "Floss + bead",
       "bead": "Beads"
-    }
+    },
+    "notUsedByAutofill": "Chosen, but not in use: Autofill reads the symbols off the image"
   },
   "fabric": {
     "heading": "Fabric & size",
@@ -896,6 +898,10 @@
     "decline": "Decline",
     "paused": "Autofill waits while you edit the image",
     "tipTitle": "Not quite right?",
-    "tip": "Stitch a few more cells by hand, then try again. Autofill learns from what you mark — it gets better as you go."
+    "tip": "Stitch a few more cells by hand, then try again. Autofill learns from what you mark — it gets better as you go.",
+    "symbolsOnly": "Symbols only",
+    "symbolsOnlyHint": "Show the found symbols as symbols only, or on their colour (only this preview)",
+    "peek": "Hold to see under",
+    "peekHint": "Hold to hide the found symbols and see the image under them"
   }
 }

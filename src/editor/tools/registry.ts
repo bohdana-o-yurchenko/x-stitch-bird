@@ -15,6 +15,7 @@ import type { Tool } from "./types";
 
 /** All tools in toolbar order (the shortcut help follows it; the toolbar itself groups them, ui/header/ToolBar). */
 export const TOOLS: readonly Tool[] = [
+  autofillTool,
   pencilTool,
   eraserTool,
   lineTool,
@@ -26,7 +27,6 @@ export const TOOLS: readonly Tool[] = [
   panTool,
   selectTool,
   magicWandTool,
-  autofillTool,
 ];
 
 

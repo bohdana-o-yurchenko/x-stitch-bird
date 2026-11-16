@@ -36,16 +36,19 @@ function scene(ed: Editor): ChartScene {
     underlayFrame: ed.underlay.frame(),
     underlayHot: st.underlayHot,
     checks: checksScene(st.checks),
-    match: matchScene(st.match),
+    match: st.momentaryTool ? null : matchScene(st.match, st.matchView ?? (st.view === "symbols" ? "symbols" : "both"), st.matchPeek),
     underlayButtons: ed.underlay.rotateButtons(),
   };
 }
 
-/** What the canvas shows of symbol matching: the block under the pointer, or the one read and its proposals. */
-function matchScene(m: MatchState | null): ChartScene["match"] {
+/**
+ * What the canvas shows of Autofill: the block under the pointer, or the one read and its proposals — in their own
+ * view, or none while peeking under them. Nothing while another tool is held (Alt, Space).
+ */
+function matchScene(m: MatchState | null, view: "both" | "symbols", peek: boolean): ChartScene["match"] {
   if (!m) return null;
-  if (m.phase === "pick") return m.hover && { block: m.hover, chosen: false, ghosts: null };
-  return { block: m.block, chosen: true, ghosts: m.ghosts };
+  if (m.phase === "pick") return m.hover && { block: m.hover, chosen: false, ghosts: null, view };
+  return { block: m.block, chosen: true, ghosts: peek ? null : m.ghosts, view };
 }
 
 /** What the canvas shows of the chart checks: all findings outlined, the current one ringed. */

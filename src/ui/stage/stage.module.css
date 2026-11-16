@@ -174,3 +174,9 @@
     transform: scale(1);
   }
 }
+/* the preview's toggles in the Autofill bar: clearly on when pressed */
+.matchBar button[aria-pressed="true"] {
+  background: var(--sel);
+  border-color: var(--accent);
+  color: var(--accent);
+}

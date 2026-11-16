@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ChartView } from "@/render/chart";
 import { Icon } from "../common/Icon";
@@ -96,10 +96,29 @@ function SelectionActions() {
   );
 }
 
+const MATCH_VIEW_KEY = "stitchwork.autofillView";
+const loadMatchView = (): "both" | "symbols" | null => {
+  try {
+    const v = localStorage.getItem(MATCH_VIEW_KEY);
+    return v === "both" || v === "symbols" ? v : null;
+  } catch {
+    return null;
+  }
+};
+const saveMatchView = (v: "both" | "symbols") => {
+  try {
+    localStorage.setItem(MATCH_VIEW_KEY, v);
+  } catch {
+    // private mode: just not remembered
+  }
+};
+
 /**
  * Autofill (SPEC §15.11): a hint while picking a block (or that the tool waits while the image is edited); once a
  * block is read, Accept and Decline just above it (below it when the block is at the top of the view). Pointing at
- * Decline brings up a tip: more hand stitching makes the next try better.
+ * Decline brings up a tip: more hand stitching makes the next try better. The proposals have their own view (colour +
+ * symbols, or symbols only — one click; first as the main view, then as last chosen) and can be hidden while a
+ * button is held, to see the photo under them.
  */
 function MatchBar() {
   const t = useTranslations("match");
@@ -111,7 +130,22 @@ function MatchBar() {
   // the bar follows the block across the screen only while one is being reviewed: otherwise panning and zooming
   // don't redraw it at all
   useEditorState((st) => (st.match?.phase === "review" ? st.viewport : null));
-  if (!m) return null;
+  const held = useEditorState((st) => !!st.momentaryTool);
+  const view = useEditorState((st) => st.matchView ?? (st.view === "symbols" ? "symbols" : "both"));
+  const peek = useEditorState((st) => st.matchPeek);
+  useEffect(() => {
+    // the preview's own view, as last chosen in this browser
+    const v = loadMatchView();
+    if (v) ed.store.setState({ matchView: v });
+  }, [ed]);
+  const toggleView = () => {
+    const next = view === "symbols" ? "both" : "symbols";
+    ed.store.setState({ matchView: next });
+    saveMatchView(next);
+  };
+  const setPeek = (on: boolean) => ed.state.matchPeek !== on && ed.store.setState({ matchPeek: on });
+  // while another tool is held (Alt: picker), Autofill steps aside
+  if (!m || held) return null;
   if (m.phase === "pick")
     return (
       <div className={s.selectionBar} data-testid="match-bar">
@@ -126,6 +160,12 @@ function MatchBar() {
       <span className={s.barText} data-testid="match-count">{t("found", { n: m.proposals.length })}{m.unsure ? ` · ${t("unsure", { n: m.unsure })}` : ""}</span>
       <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} disabled={!m.proposals.length} data-testid="match-accept" onClick={() => { setTip(false); run("match.accept"); }}>{t("accept")}</button>
       <button type="button" className={cx(ui.btn, ui.sm)} data-testid="match-decline" {...showTip} onClick={() => { setTip(false); run("match.decline"); }}>{t("decline")}</button>
+      <span className={s.barSep} />
+      <button type="button" className={cx(ui.btn, ui.sm)} aria-pressed={view === "symbols"} title={t("symbolsOnlyHint")} data-testid="match-view" onClick={toggleView}>{t("symbolsOnly")}</button>
+      <button type="button" className={cx(ui.btn, ui.sm)} aria-pressed={peek} title={t("peekHint")} aria-label={t("peek")} data-testid="match-peek"
+        onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); setPeek(true); }} onPointerUp={() => setPeek(false)} onPointerCancel={() => setPeek(false)} onLostPointerCapture={() => setPeek(false)}>
+        <Icon name="peek" size={16} />
+      </button>
       {tip && (
         <div className={cx(s.declineTip, above ? s.tipBelow : s.tipAbove)} role="status" data-testid="match-tip">
           <b>{t("tipTitle")}</b> {t("tip")}

@@ -331,3 +331,9 @@
 .findingGo:hover {
   background: var(--surface2);
 }
+/* the chosen entry while a tool that doesn't draw with it (Autofill) is on: still marked, but clearly idle */
+.row.idleEntry {
+  background: transparent;
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 35%, transparent);
+  opacity: 0.55;
+}

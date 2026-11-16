@@ -110,4 +110,31 @@ describe("Autofill, symbol matching in the editor (SPEC §15.11)", () => {
     expect([ed.state.tool, ed.state.match]).toEqual(["pencil", null]);
     expect(t.lastToast()).toBe("toasts.matchNeedsUnderlay");
   });
+
+  it("Alt steps aside for the picker: released without picking, back to Autofill; after picking, on to drawing", async () => {
+    const { ed } = t;
+    const alt = { ...esc, key: "Alt", altKey: true };
+    await ed.commands.run("tool.select", "autofill");
+    ed.shortcuts.keyDown(alt);
+    expect(ed.state.momentaryTool).toBe("picker");
+    ed.shortcuts.keyUp(alt);
+    expect(ed.state.tool).toBe("autofill");
+    // this time a colour is picked from the chart
+    t.ed.doc.layers.stitches[0] = t.red;
+    ed.shortcuts.keyDown(alt);
+    ed.tools.down(at(0, 0));
+    ed.tools.up(at(0, 0));
+    ed.shortcuts.keyUp(alt);
+    expect([ed.state.tool, ed.state.activeEntry]).toEqual(["pencil", t.red]);
+  });
+
+  it("clicking an entry in the key while in Autofill (or the eraser) goes on to drawing with it", async () => {
+    const { ed } = t;
+    for (const tool of ["autofill", "eraser"] as const) {
+      await ed.commands.run("tool.select", tool);
+      await ed.commands.run("key.select", t.red);
+      expect(ed.state.tool).toBe("pencil");
+    }
+  });
 });
+

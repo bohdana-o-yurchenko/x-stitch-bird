@@ -66,3 +66,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* the chosen entry while Autofill is on: Autofill doesn't draw with it */
+.idle {
+  opacity: 0.45;
+}

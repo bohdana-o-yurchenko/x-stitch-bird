@@ -16,6 +16,8 @@ export function ToolBar() {
   const t = useTranslations("tools");
   const run = useCommand();
   const tool = useEditorState((st) => st.tool);
+  // a tool held down (Alt: picker, Space: move) shows as the selected one while it's held
+  const shown = useEditorState((st) => st.momentaryTool ?? st.tool);
   const brush = useEditorState((st) => st.brush);
   const override = useEditorState((st) => st.override);
   const mirror = useEditorState((st) => st.mirror);
@@ -26,7 +28,7 @@ export function ToolBar() {
   // while the image behind the chart is edited, the pointer moves the image: no tool works
   const paused = useEditorState((st) => !!st.underlay && st.underlay.visible && !st.underlay.behind);
   const toolButton = (id: ToolId) => (
-    <button key={id} type="button" className={cx(ui.tool, tool === id && ui.on)} title={t(id)} aria-label={t(id)} aria-pressed={tool === id} onClick={() => run("tool.select", id)}>
+    <button key={id} type="button" className={cx(ui.tool, shown === id && ui.on)} title={t(id)} aria-label={t(id)} aria-pressed={shown === id} onClick={() => run("tool.select", id)}>
       <Icon name={toolById(id).icon} size={18} />
     </button>
   );
@@ -48,6 +50,8 @@ export function ToolBar() {
       <button type="button" className={cx(ui.tool, override && ui.on)} title={t("override")} aria-pressed={override} data-guide="override" onClick={() => run("draw.toggleOverride")}><Icon name="override" size={18} /></button>
       <button type="button" className={cx(ui.tool, mirror !== "off" && ui.on)} title={`${t("mirror")} — ${t(MIRROR_LABEL[mirror])}`} onClick={() => run("draw.cycleMirror")}><Icon name="mirror" size={18} /></button>
       <span className={s.sep} />
+      {toolButton("autofill")}
+      <span className={s.sep} />
       {toolButton("pencil")}
       {toolButton("eraser")}
       <div className={cx(s.sizes, !usesBrush && s.idle)} role="group" aria-label={t("brushSize")}>
@@ -68,8 +72,6 @@ export function ToolBar() {
       {(["picker", "pan"] as const).map(toolButton)}
       <span className={s.sep} />
       {(["select", "magicWand"] as const).map(toolButton)}
-      <span className={s.sep} />
-      {toolButton("autofill")}
     </div>
   );
 }

@@ -78,6 +78,8 @@ export function KeyPanel() {
   const key = useEditorState((st) => st.doc.key);
   useEditorState((st) => st.keyRevision);
   const palette = useEditorState((st) => st.palette);
+  // Autofill doesn't draw with the chosen entry: it's shown as chosen but not in use
+  const autofill = useEditorState((st) => st.tool === "autofill");
   const active = useEditorState((st) => st.activeEntry);
   const highlight = useEditorState((st) => st.highlight);
   const label = useEntryLabel();
@@ -105,7 +107,7 @@ export function KeyPanel() {
     const e = key[i]!, u = usage.perEntry.get(i), n = entryCount(u), parts = partialCount(u), slot = palette[i];
     const { title, sub } = label(i), nth = all.indexOf(i);
     return (
-      <div key={i} role="button" tabIndex={0} data-entry={i} className={cx(s.row, i === active && s.on)} title={t("rowTitle")}
+      <div key={i} role="button" tabIndex={0} data-entry={i} className={cx(s.row, i === active && s.on, i === active && autofill && s.idleEntry)} title={i === active && autofill ? t("notUsedByAutofill") : t("rowTitle")}
         onClick={() => run("key.select", i)} onDoubleClick={() => run("key.edit", i)} onKeyDown={(ev) => ev.key === "Enter" && run("key.select", i)}>
         {slot && <KeyIcon slot={slot} />}
         <div className={s.text}>

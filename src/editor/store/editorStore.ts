@@ -111,6 +111,10 @@ export interface EditorState {
   checks: ChecksState | null;
   /** Symbol matching (SPEC §15.11): picking a block or reviewing its proposals; null = off. */
   match: MatchState | null;
+  /** How Autofill's proposals are shown: colour + symbols, or symbols only; null = as the main view. */
+  matchView: "both" | "symbols" | null;
+  /** The proposals hidden for a moment (held down), to see the photo under them. */
+  matchPeek: boolean;
 }
 
 export const emptyOverlay: Overlay = { hover: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null };
@@ -156,6 +160,8 @@ export const createEditorStore = () =>
     hasClipboard: false,
     checks: null,
     match: null,
+    matchView: null,
+    matchPeek: false,
   }));
 
 export type EditorStore = ReturnType<typeof createEditorStore>;

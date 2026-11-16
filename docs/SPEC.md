@@ -1205,7 +1205,7 @@ line the photo up **block by block** (the 10 × 10 squares between the heavy gri
 frame (§15.15). So matching works the same way: only inside the block you have just lined up, never over the whole
 chart. Plain image arithmetic, no AI (§15.12).
 
-**Flow** — **Autofill** is a tool in the toolbar (the last one; Shift+F). Not "Magic wand": that is the
+**Flow** — **Autofill** is a tool in the toolbar, in a group of its own before the drawing tools (Shift+F). Not "Magic wand": that is the
 selection tool. It needs the image behind the chart, shown and loaded; otherwise a toast and the tool stays as it was.
 1. Line the photo up on a block, as today. Stitch one cell of each symbol in the block the app hasn't seen yet.
 2. Pick **Autofill** (toolbar, Shift+F, or *Autofill* in the image's panel). Instead of single cells, the
@@ -1222,6 +1222,16 @@ selection tool. It needs the image behind the chart, shown and loaded; otherwise
 - **Paused while the image is edited**: the pointer edits the image, a block being reviewed is dropped, the hint bar
   says Autofill waits. Back to stitching mode, it carries on.
 - Another tool ends it; removing the image switches to Draw; another pattern opens with Autofill still picked.
+- **The chosen floss is idle** in Autofill: still marked, but dimmed (with a tooltip) in the key list, the "Drawing
+  with" card and the status bar — Autofill reads symbols off the image, it doesn't draw with the floss.
+- **Alt** (the held picker) steps Autofill aside: the toolbar shows the picker, the block and the bar hide. Released
+  without picking → Autofill again; after picking a colour → Draw, with it. Clicking an entry in the key while in
+  Autofill (or the eraser) also goes on to Draw. (Any held tool — Alt, Space — shows in the toolbar while held.)
+- **The proposals' own view** (2026-11-16), next to Accept / Decline: **Symbols only** — one click, on or off —
+  switches the faint proposals between colour + symbols and symbols only, without touching the main view switch.
+  The first time it follows the main view (Symbols → symbols only, otherwise colour + symbols); after that the last
+  choice is kept in this browser (`localStorage` `stitchwork.autofillView`). **Hold to see under** (an eye) hides the
+  proposals while it is held down, to look at the image under them.
 - Toasts: no image under the chart; block not on the image; nothing learned yet; no empty cell in the block.
 
 **Teaching — no separate step.** The examples are the cells already stitched, read off the photo:

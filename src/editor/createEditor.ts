@@ -201,7 +201,8 @@ export class Editor {
   releaseMomentaryTool(tool: ToolId) {
     if (this.state.momentaryTool !== tool) return;
     this.store.setState({ momentaryTool: null });
-    if (tool === "picker" && this.momentaryPicked && (this.state.tool === "eraser" || this.state.tool === "pan")) this.setTool("pencil");
+    // picked a colour with the held picker from a tool that doesn't draw with it: on to drawing with it
+    if (tool === "picker" && this.momentaryPicked && ["eraser", "pan", "autofill"].includes(this.state.tool)) this.setTool("pencil");
     this.momentaryPicked = false;
   }
 
@@ -210,7 +211,7 @@ export class Editor {
     this.tools.cancel();
     this.store.setState({ activeEntry: valid });
     if (this.state.momentaryTool === "picker") this.momentaryPicked = true;
-    else if (["eraser", "picker", "pan", "select", "magicWand"].includes(this.state.tool)) this.setTool("pencil");
+    else if (["eraser", "picker", "pan", "select", "magicWand", "autofill"].includes(this.state.tool)) this.setTool("pencil");
   }
 
   entryLabel(k: KeyIndex): string {

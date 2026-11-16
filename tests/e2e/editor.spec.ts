@@ -749,8 +749,12 @@ test("finds symbols in one 10 × 10 block of the photo behind the chart, and fil
     return [a, b];
   });
   await expect.poll(() => editorState<boolean>(page, "(ed) => !!ed.state.underlayImage")).toBe(true);
-  // Autofill sits in the toolbar (and Shift+F)
+  // Autofill sits in the toolbar (and Shift+F), in a group of its own before the drawing tools
+  const toolbarButtons = await page.getByTestId("toolbar").getByRole("button").evaluateAll((bs) => bs.map((b) => b.getAttribute("aria-label") ?? ""));
+  expect(toolbarButtons.findIndex((n) => n.startsWith("Autofill"))).toBeLessThan(toolbarButtons.findIndex((n) => n.startsWith("Draw")));
   await page.getByTestId("toolbar").getByRole("button", { name: /^Autofill/ }).click();
+  // the chosen floss is shown as not in use
+  await expect(page.getByTestId("status-entry")).toHaveAttribute("data-idle", "true");
   await expect(page.getByTestId("match-bar")).toContainText("click the 10 × 10 block");
   const p = await cellPoint(page, 5, 5);
   await page.mouse.move(p.x, p.y);
@@ -759,6 +763,26 @@ test("finds symbols in one 10 × 10 block of the photo behind the chart, and fil
   // pointing at Decline brings up the tip, without a click
   await page.getByTestId("match-decline").hover();
   await expect(page.getByTestId("match-tip")).toContainText("Stitch a few more cells by hand");
+  // the preview's own view: one click to symbols only, and remembered
+  const viewBtn = page.getByTestId("match-view");
+  await expect(viewBtn).toHaveAttribute("aria-pressed", "false");
+  await viewBtn.click();
+  await expect(viewBtn).toHaveAttribute("aria-pressed", "true");
+  expect(await page.evaluate(() => localStorage.getItem("stitchwork.autofillView"))).toBe("symbols");
+  expect(await editorState<string>(page, "(ed) => ed.state.view")).toBe("both");
+  // held down, the proposals step aside to show the photo
+  const peek = (await page.getByTestId("match-peek").boundingBox())!;
+  await page.mouse.move(peek.x + peek.width / 2, peek.y + peek.height / 2);
+  await page.mouse.down();
+  expect(await editorState<boolean>(page, "(ed) => ed.state.matchPeek")).toBe(true);
+  await page.mouse.up();
+  expect(await editorState<boolean>(page, "(ed) => ed.state.matchPeek")).toBe(false);
+  // holding Alt: the picker shows as the tool, Autofill steps aside
+  await page.keyboard.down("Alt");
+  await expect(page.getByTestId("match-bar")).toHaveCount(0);
+  await expect(page.getByTestId("toolbar").getByRole("button", { name: /^Pick a key entry/ })).toHaveAttribute("aria-pressed", "true");
+  await page.keyboard.up("Alt");
+  await expect(page.getByTestId("match-bar")).toBeVisible();
   await page.getByTestId("match-accept").click();
   // on to the next block, still in Autofill
   await expect(page.getByTestId("match-count")).toHaveCount(0);

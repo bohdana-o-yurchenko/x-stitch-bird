@@ -44,7 +44,7 @@ export interface ChartScene {
   /** Chart checks: every finding's cells (thin outline), the current one's cells (a ring). */
   checks: { all: number[][]; current: number[] | null } | null;
   /** Symbol matching: the block (outlined; `chosen` once read) and its proposals, drawn faintly. */
-  match: { block: Rect; chosen: boolean; ghosts: Pattern | null } | null;
+  match: { block: Rect; chosen: boolean; ghosts: Pattern | null; view: ChartView } | null;
 }
 
 export const RULER_SIZE = 26;
@@ -267,7 +267,7 @@ export class ChartRenderer {
     if (m.ghosts) {
       const fo = { z, ox: x, oy: y, x0: 0, y0: 0, x1: m.block.w, y1: m.block.h };
       g.globalAlpha = 0.5;
-      drawCells(g, m.ghosts, s.palette, fo, viewStyle(s.view, t), false);
+      drawCells(g, m.ghosts, s.palette, fo, viewStyle(m.view, t), false);
       g.globalAlpha = 1;
     }
     g.lineWidth = 5;
