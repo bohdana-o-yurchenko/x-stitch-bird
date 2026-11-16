@@ -1,4 +1,4 @@
-/** Colour themes (Menu ▸ Theme): four light accents and one dark. Only the interface changes — never chart data. */
+/** Colour themes (Menu ▸ Theme): four light accents, one dark and one true black. Only the interface changes — never chart data. */
 export const THEMES = [
   // swatch = accent, shade = the theme's background (the dot shows both)
   { id: "terracotta", swatch: "#b5452f", shade: "#efe5d6" },
@@ -6,6 +6,7 @@ export const THEMES = [
   { id: "royal", swatch: "#2a4c9c", shade: "#dfe4ee" },
   { id: "rose", swatch: "#b03a6c", shade: "#ecdfe5" },
   { id: "dark", swatch: "#bd93f9", shade: "#282a36" },
+  { id: "black", swatch: "#f5f5f5", shade: "#000000" },
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number]["id"];

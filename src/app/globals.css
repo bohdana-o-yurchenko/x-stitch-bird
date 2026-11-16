@@ -1,8 +1,9 @@
 /*
  * UI design tokens. Canvas colours live in src/render/theme.ts; the canvas reads --stage, --bg, --muted, --line and
  * --accent from here (editor `refreshChrome`). Themes (Menu ▸ Theme) set `data-theme` on <html>: each light theme
- * has its own tinted neutrals (background, panels, lines, stage) and accent; "dark" is the dark one. Floss, bead and
- * fabric colours are data and never themed.
+ * has its own tinted neutrals (background, panels, lines, stage) and accent; "dark" (DMC 550) is the dark one and
+ * "black" (DMC 310) the true black, monochrome one. A theme may set --canvas-accent when its accent wouldn't show on
+ * the fabric. Floss, bead and fabric colours are data and never themed.
  */
 :root {
   --bg: #f4efe6;
@@ -99,6 +100,34 @@
   --danger-bg: #43282f;
   --stage: #1a1b22;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
+/* DMC 310 · Black: true black, monochrome — white is the accent */
+:root[data-theme="black"] {
+  --bg: #000000;
+  --panel: #0b0b0b;
+  --surface: #161616;
+  --surface2: #121212;
+  --ink: #f5f5f5;
+  --muted: #9c9c9c;
+  --line: #262626;
+  --line2: #3d3d3d;
+  --edge: color-mix(in srgb, var(--ink) 38%, transparent);
+  --accent: #f5f5f5;
+  --on-accent: #000000;
+  --canvas-accent: #111111;
+  --strong: #5a5a5a;
+  --on-strong: #fff;
+  --accent2: #d0d0d0;
+  --sel: color-mix(in srgb, var(--accent) 14%, var(--panel));
+  --sel2: color-mix(in srgb, var(--accent) 8%, var(--panel));
+  --warn-bg: #2b2716;
+  --warn-line: #7a6a3a;
+  --danger: #ff6e6e;
+  --danger-bg: #3a1f22;
+  --stage: #000000;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
 

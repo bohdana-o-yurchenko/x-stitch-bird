@@ -827,7 +827,8 @@
     "olive": "DMC 937 · Avocado Green Medium",
     "royal": "DMC 797 · Royal Blue",
     "rose": "DMC 3350 · Dusty Rose Ultra Dark",
-    "dark": "DMC 310 · Black"
+    "dark": "DMC 550 · Violet Very Dark",
+    "black": "DMC 310 · Black"
   },
   "chartPdf": {
     "views": {

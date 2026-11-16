@@ -444,9 +444,9 @@ test("the theme is picked in the menu, applies at once and stays after a reload"
   const html = page.locator("html");
   await expect(html).not.toHaveAttribute("data-theme");
   await page.getByRole("button", { name: /^Menu ▾$/ }).click();
-  await page.getByRole("radio", { name: "DMC 310 · Black" }).click();
+  await page.getByRole("radio", { name: "DMC 550 · Violet Very Dark" }).click();
   await expect(html).toHaveAttribute("data-theme", "dark");
-  await expect(page.getByRole("radio", { name: "DMC 310 · Black" })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("radio", { name: "DMC 550 · Violet Very Dark" })).toHaveAttribute("aria-checked", "true");
   // the chart around the fabric follows; floss colours are data and don't
   await expect.poll(() => editorState<string>(page, "(ed) => ed.theme.stageBackground")).toBe("#1a1b22");
   await page.reload();
@@ -458,7 +458,7 @@ test("the theme is picked in the menu, applies at once and stays after a reload"
 
 test("switching the language keeps the theme, without reloading the page", async ({ page }) => {
   await page.getByRole("button", { name: /^Menu ▾$/ }).click();
-  await page.getByRole("radio", { name: "DMC 310 · Black" }).click();
+  await page.getByRole("radio", { name: "DMC 550 · Violet Very Dark" }).click();
   await page.keyboard.press("Escape");
   await page.evaluate(() => ((window as unknown as { stillHere: boolean }).stillHere = true));
   await page.getByRole("combobox", { name: "Language" }).selectOption("uk");
@@ -467,7 +467,7 @@ test("switching the language keeps the theme, without reloading the page", async
   await expect.poll(() => editorState<string>(page, "(ed) => ed.theme.stageBackground")).toBe("#1a1b22");
   expect(await page.evaluate(() => (window as unknown as { stillHere?: boolean }).stillHere)).toBe(true);
   await page.getByRole("button", { name: /^Меню ▾$/ }).click();
-  await expect(page.getByRole("radio", { name: "DMC 310 · Black" })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("radio", { name: "DMC 550 · Violet Very Dark" })).toHaveAttribute("aria-checked", "true");
 });
 
 test("key form icons stay visible: white floss on a contrasting tile, line styles in the dark theme", async ({ page }) => {
@@ -478,7 +478,7 @@ test("key form icons stay visible: white floss on a contrasting tile, line style
       return { mid: at(c.width / 2, c.height / 2), corner: at(c.width * 0.2, c.height * 0.2) };
     });
   await page.getByRole("button", { name: /^Menu ▾$/ }).click();
-  await page.getByRole("radio", { name: "DMC 310 · Black" }).click();
+  await page.getByRole("radio", { name: "DMC 550 · Violet Very Dark" }).click();
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   const form = page.getByTestId("key-form"), search = form.getByRole("textbox").first();
