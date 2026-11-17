@@ -1778,13 +1778,21 @@ unfolds the checkboxes. Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) th
   stay ticked). Unticking puts back what was there before.
 - Patterns from before (none of the fields): several thread brands as they were, every built-in bead brand.
 
-### 15.32 The side panel as tool windows (2026-11-17)
-Like an IDE's tool windows (`ui/side/SidePanel.tsx`): a thin bar of icons along the panel's bottom — **Totals & shopping
-list** (Σ), **Chart checks**, **Fabric & size**, **Threads & beads**, and **Image behind the chart** while there is
-one. "Drawing with" and the key always fill the panel; one tool at a time opens in a pane below the key (its title
-and ✕), the same icon again closes it and the key gets the room. Which one is open is remembered in this browser
-(`stitchwork.tool`; Totals at first). Putting a picture behind the chart opens its tool. The key list and the pane
-scroll on their own. While a key entry is added or edited, its form takes the panel and the strip is off.
+### 15.32 One home per thing: menus act once, the side panel shows the pattern's state (2026-11-17)
+**Rule:** a menu *does* something once (create, open, save out, turn the chart); the side panel *shows* the open
+pattern's state, to look at and tweak while working. Nothing is in two places.
+- **Pattern ▾** — the pattern as a file: New ›, Open…, Download work file, Open work file…, Photo in a floating
+  window… (it opens a window, not a section).
+- **Transform ▾** — the chart's orientation: flips, rotations, Mirror from centre.
+- **Side panel** — "Drawing with" and the key always; below them the **sections chosen in the bar along the
+  bottom** (`ui/side/SidePanel.tsx`; shown list in the editor, `editor/panelSections.ts`, remembered per browser):
+  Image behind the chart (its controls; **Add an image…** while there's none), Chart checks, Fabric & size (count,
+  colour, numbering, and **Resize… · Extend canvas… · Crop to content**), Threads & beads, **Pattern info** (time
+  spent, then the fields, saved as you leave each; the name is changed in the header), **Versions** (the copies,
+  Restore), Totals & shopping list. An icon adds its section, open — or takes it away; several can be shown; each
+  folds as before (remembered). Adding a picture behind the chart, or asking for a section elsewhere (a guide step,
+  `file.versions`, `pattern.editInfo`), brings it in open. The Pattern info and Versions dialogs are gone; Resize and
+  Extend canvas stay dialogs (they ask for numbers), opened from Fabric & size only.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

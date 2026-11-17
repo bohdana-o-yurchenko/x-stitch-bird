@@ -135,8 +135,8 @@ test("Versions brings back the pattern as it was before a risky change", async (
   await used.getByRole("button", { name: "Delete entry" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Delete", exact: true }).click();
   await expect(page.locator("[data-entry]")).toHaveCount(7);
-  await fileAction(page, "Versions…");
-  const row = page.getByRole("dialog").getByText(/Before deleting a key entry/);
+  await page.getByTestId("rail-versions").click();
+  const row = page.getByTestId("versions-panel").getByText(/Before deleting a key entry/);
   await expect(row).toBeVisible();
   await row.locator("..").getByRole("button", { name: "Restore" }).click();
   await expect(page.locator("[data-entry]")).toHaveCount(8);

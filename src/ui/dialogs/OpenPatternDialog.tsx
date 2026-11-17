@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import type { PatternSummary, SnapshotSummary } from "@/editor/types";
-import { TimeSpent } from "../common/TimeSpent";
+import type { PatternSummary } from "@/editor/types";
 import { DeleteButton, Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor } from "../hooks/editor";
 
@@ -58,30 +57,3 @@ export function OpenPatternDialog({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** Automatic snapshots of the open pattern (SPEC §15.7). */
-export function VersionsDialog({ onClose }: { onClose: () => void }) {
-  const t = useTranslations();
-  const run = useCommand();
-  const ed = useEditor();
-  const [snaps, setSnaps] = useState<SnapshotSummary[] | null>(null);
-  useEffect(() => {
-    void ed.snapshots.list().then(setSnaps);
-  }, [ed]);
-  return (
-    <Modal title={t("dialogs.versionsTitle")} onClose={onClose} buttons={[{ label: t("dialogs.close") }]}>
-      <TimeSpent />
-      <p className={ui.hint}>{t("dialogs.versionsHint")}</p>
-      {!snaps && <p className={ui.hint}>{t("dialogs.loading")}</p>}
-      {snaps && !snaps.length && <p className={ui.hint}>{t("dialogs.noHistory")}</p>}
-      {snaps?.map((sn) => (
-        <div key={sn.time} className={ui.row} style={{ flexWrap: "nowrap", padding: "4px 0" }}>
-          {sn.thumb && <span style={{ width: 48, height: 48, flex: "none", background: `center / contain no-repeat url(${sn.thumb})`, border: "1px solid var(--line2)", borderRadius: 4, imageRendering: "pixelated" }} />}
-          <span className={ui.hint} style={{ flex: 1 }}>
-            {t("snapshots.row", { time: new Date(sn.time).toLocaleString(), reason: t(`snapshots.reason.${sn.reason}`), w: sn.w, h: sn.h })}
-          </span>
-          <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => { onClose(); run("snapshot.restore", sn.time); }}>{t("dialogs.restore")}</button>
-        </div>
-      ))}
-    </Modal>
-  );
-}

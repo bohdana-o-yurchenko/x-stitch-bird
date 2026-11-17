@@ -1,108 +1,80 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Icon } from "../common/Icon";
 import { cx } from "../common/widgets";
 import { KeyEntryForm } from "../dialogs/key-entry/KeyEntryForm";
-import { useEditorState } from "../hooks/editor";
+import { useEditor, useEditorState } from "../hooks/editor";
 import { ChecksPanel } from "./ChecksPanel";
 import { CurrentTool } from "./CurrentTool";
 import { FabricPanel } from "./FabricPanel";
 import { KeyPanel } from "./KeyPanel";
 import { MaterialsPanel } from "./MaterialsPanel";
-import { InToolPane } from "./Section";
+import { PatternInfoPanel } from "./PatternInfoPanel";
 import { TotalsPanel } from "./TotalsPanel";
 import { UnderlayPanel } from "./UnderlayPanel";
+import { VersionsPanel } from "./VersionsPanel";
 import s from "./side.module.css";
 
-type ToolId = "totals" | "checks" | "fabric" | "materials" | "underlay";
-
-/** The tool windows, in the strip's order: icon, title (its message key), content. */
-const TOOLS: { id: ToolId; icon: string; title: [string, string]; panel: () => ReactNode }[] = [
-  { id: "totals", icon: "totals", title: ["totals", "heading"], panel: () => <TotalsPanel /> },
-  { id: "checks", icon: "checks", title: ["checks", "heading"], panel: () => <ChecksPanel /> },
-  { id: "fabric", icon: "fabric", title: ["fabric", "heading"], panel: () => <FabricPanel /> },
-  { id: "materials", icon: "spool", title: ["materials", "heading"], panel: () => <MaterialsPanel /> },
-  { id: "underlay", icon: "image", title: ["underlay", "heading"], panel: () => <UnderlayPanel /> },
+/** The sections, in the panel's (and the bar's) order: icon, title (message key), content. */
+const SECTIONS: { id: string; icon: string; title: string; panel: () => ReactNode }[] = [
+  { id: "underlay", icon: "image", title: "underlay.heading", panel: () => <UnderlayPanel /> },
+  { id: "checks", icon: "checks", title: "checks.heading", panel: () => <ChecksPanel /> },
+  { id: "fabric", icon: "fabric", title: "fabric.heading", panel: () => <FabricPanel /> },
+  { id: "materials", icon: "spool", title: "materials.heading", panel: () => <MaterialsPanel /> },
+  { id: "info", icon: "info", title: "side.info", panel: () => <PatternInfoPanel /> },
+  { id: "versions", icon: "history", title: "side.versions", panel: () => <VersionsPanel /> },
+  { id: "totals", icon: "totals", title: "totals.heading", panel: () => <TotalsPanel /> },
 ];
 
-const OPEN_KEY = "stitchwork.tool";
-
-function savedTool(): ToolId | null {
-  try {
-    const v = localStorage.getItem(OPEN_KEY);
-    return v === "none" ? null : ((v as ToolId | null) ?? "totals");
-  } catch {
-    return "totals";
-  }
-}
-
 /**
- * The side panel (SPEC §15.32), like an IDE's tool windows: the key always, and one tool at a time below it, picked
- * from the thin bar of icons along the bottom (again to close). Which one is open is remembered in this browser. While a key
- * entry is added or edited, its form takes the whole panel.
+ * The side panel (SPEC §15.32): "Drawing with" and the key always; below them the sections chosen in the bar along
+ * the bottom — each folds open and closed as before. An icon adds its section (open) or takes it away; which ones
+ * are shown, and folded, is remembered in this browser. A section asked for elsewhere (Pattern info, Versions…)
+ * comes into view open. While a key entry is added or edited, its form takes the panel.
  */
 export function SidePanel() {
-  const form = useEditorState((st) => st.keyForm);
-  const hasUnderlay = useEditorState((st) => !!st.underlay);
-  const [open, setOpen] = useState<ToolId | null>(savedTool);
   const t = useTranslations();
-  const choose = (id: ToolId | null) => {
-    setOpen(id);
-    try {
-      localStorage.setItem(OPEN_KEY, id ?? "none");
-    } catch {
-      // private mode: not remembered
-    }
-  };
-  // a picture just put behind the chart: its tool opens, it has the controls
-  const had = useRef(hasUnderlay);
+  const ed = useEditor();
+  const form = useEditorState((st) => st.keyForm);
+  const shown = useEditorState((st) => st.panelSections);
+  const brought = useEditorState((st) => st.sectionShown);
+  const main = useRef<HTMLDivElement>(null);
+  // a section just brought in: into view
   useEffect(() => {
-    if (hasUnderlay && !had.current) setOpen("underlay");
-    had.current = hasUnderlay;
-  }, [hasUnderlay]);
+    if (brought) requestAnimationFrame(() => main.current?.querySelector(`[data-section=${brought.id}]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
+  }, [brought]);
 
-  const tools = TOOLS.filter((x) => x.id !== "underlay" || hasUnderlay);
-  const shown = tools.find((x) => x.id === open) ?? null;
-  const title = (x: (typeof TOOLS)[number]) => t(`${x.title[0]}.${x.title[1]}`);
   return (
     <div className={s.tools}>
-      <div className={s.toolMain}>
+      <div ref={main} className={s.toolMain}>
         {form ? (
           <KeyEntryForm key={form.seq} edit={form.edit} />
         ) : (
           <>
             <CurrentTool />
             <KeyPanel />
-            {shown && (
-              <section className={s.pane} aria-label={title(shown)} data-testid={`tool-${shown.id}`}>
-                <header className={s.paneHead}>
-                  <h3>{title(shown)}</h3>
-                  <button type="button" className={s.paneClose} aria-label={t("side.closeTool", { tool: title(shown) })} title={t("side.closeTool", { tool: title(shown) })} onClick={() => choose(null)}>
-                    ✕
-                  </button>
-                </header>
-                <div className={s.paneBody}>
-                  <InToolPane.Provider value>{shown.panel()}</InToolPane.Provider>
-                </div>
-              </section>
-            )}
+            {SECTIONS.filter((x) => shown.includes(x.id)).map((x) => (
+              // brought in again while folded: it remounts, open
+              <div key={brought?.id === x.id ? `${x.id}:${brought.seq}` : x.id} className={s.shownSection}>{x.panel()}</div>
+            ))}
           </>
         )}
       </div>
       <nav className={s.rail} aria-label={t("side.tools")}>
-        {tools.map((x) => (
+        {SECTIONS.map((x) => (
           <button
             key={x.id}
             type="button"
-            className={cx(s.railBtn, open === x.id && s.on)}
-            title={title(x)}
-            aria-label={title(x)}
-            aria-pressed={open === x.id}
+            className={cx(s.railBtn, shown.includes(x.id) && s.on)}
+            title={t(x.title)}
+            aria-label={t(x.title)}
+            aria-pressed={shown.includes(x.id)}
             disabled={!!form}
             data-testid={`rail-${x.id}`}
-            onClick={() => choose(open === x.id ? null : x.id)}
+            data-guide={`side-${x.id}`}
+            onClick={() => ed.toggleSection(x.id)}
           >
             <Icon name={x.icon} size={18} />
           </button>

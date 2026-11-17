@@ -32,10 +32,12 @@ export function FabricPanel() {
             {t("colour")}
             <input type="color" value={p.fabric} style={{ height: 33, padding: 2 }} onChange={(e) => run("pattern.setFabric", { fabric: e.target.value })} />
           </label>
-          <label className={ui.field}>
-            {t("gridSize")}
-            <button type="button" className={cx(ui.btn, ui.sm)} style={{ height: 33 }} onClick={() => run("pattern.requestResize")}>{t("resize")}</button>
-          </label>
+        </div>
+        {/* everything that changes the size lives here (SPEC §15.32) */}
+        <div className={s.sizeButtons} role="group" aria-label={t("gridSize")}>
+          <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("pattern.requestResize")}>{t("resize")}</button>
+          <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("transform.requestExtend")}>{t("extend")}</button>
+          <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => run("transform.crop")}>{t("crop")}</button>
         </div>
         <div className={s.totals}>
           <span>{t.rich("grid", { w: p.w, h: p.h, b })}</span>

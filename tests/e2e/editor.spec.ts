@@ -73,16 +73,17 @@ test("the edit and delete buttons of a key entry show their own names", async ({
   await expect(page.getByTestId("tooltip")).toHaveText("Delete entry");
 });
 
-test("shows the time spent on the pattern, read-only, in Pattern info and Versions", async ({ page }) => {
+test("Pattern info in the side panel: the time spent, read-only; fields saved as you leave them", async ({ page }) => {
   await page.evaluate(() => void ((window as unknown as { __stitchwork: { doc: { spent: number } } }).__stitchwork.doc.spent = (2 * 60 + 5) * 60_000));
-  await fileAction(page, "Pattern info");
-  const time = page.getByTestId("time-spent");
+  await page.getByTestId("rail-info").click();
+  const info = page.getByTestId("info-panel");
+  const time = info.getByTestId("time-spent");
   await expect(time).toContainText("Total time spent on this pattern");
   await expect(time).toContainText("2 h 5 min");
   await expect(time.locator("input")).toHaveCount(0);
-  await page.keyboard.press("Escape");
-  await fileAction(page, "Versions");
-  await expect(page.getByTestId("time-spent")).toContainText("2 h 5 min");
+  await info.getByLabel("Author (designer)").fill("A. Designer");
+  await info.getByLabel("Author (designer)").press("Enter");
+  await expect.poll(() => editorState<string>(page, "(ed) => ed.doc.meta.designer")).toBe("A. Designer");
 });
 
 test("holding Alt picks an entry from the chart and returns to the previous tool", async ({ page }) => {
@@ -179,7 +180,7 @@ test("tooltips appear quickly and the native one is suppressed", async ({ page }
 
 test("on a short screen the open tool scrolls on its own, below the key", async ({ page }) => {
   await page.setViewportSize({ width: 1300, height: 640 });
-  const note = page.getByTestId("tool-totals").getByText("toward each thread");
+  const note = page.locator("[data-section=totals]").getByText("toward each thread");
   await note.scrollIntoViewIfNeeded();
   await expect(note).toBeInViewport();
   // the key stays where it was
@@ -188,7 +189,8 @@ test("on a short screen the open tool scrolls on its own, below the key", async 
 
 test("straightens a photo by its 4 corners and keeps it after a reload", async ({ page }) => {
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Image behind the chart…");
+  await page.getByTestId("rail-underlay").click();
+  await page.getByTestId("underlay-add").click();
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   const dialog = page.getByTestId("straighten");
   await expect(dialog).toBeVisible();
@@ -297,7 +299,8 @@ test("feature tips: once after the first image behind the chart, and for the fir
   await page.evaluate(() => ["underlay", "reference"].forEach((t) => localStorage.removeItem(`stitchwork.tipSeen.${t}`)));
   const guide = page.getByTestId("guide");
   let chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Image behind the chart…");
+  await page.getByTestId("rail-underlay").click();
+  await page.getByTestId("underlay-add").click();
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   await expect(guide).toHaveCount(0); // not over the straighten dialog
   await page.getByTestId("straighten").getByRole("button", { name: "Use as it is" }).click();
@@ -387,7 +390,8 @@ test("opens in Ukrainian by default", async ({ page }) => {
 
 test("puts a reference image behind the chart and keeps it after a reload", async ({ page }) => {
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Image behind the chart…");
+  await page.getByTestId("rail-underlay").click();
+  await page.getByTestId("underlay-add").click();
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   await page.getByTestId("straighten").getByRole("button", { name: "Use as it is" }).click();
   const panel = page.getByTestId("underlay-panel");
@@ -690,22 +694,28 @@ test("a cut-out removes what is under it: filled circle, then a star cut out of 
   expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe("draw:S00cc;!O3399");
 });
 
-test("the side panel's tools: one open below the key, picked from the strip on the edge, closed again; remembered after a reload", async ({ page }) => {
-  // Totals is open to start with
-  await expect(page.getByTestId("tool-totals")).toBeVisible();
+test("the side panel's bar adds and removes sections below the key; each folds as before; all remembered after a reload", async ({ page }) => {
+  const section = (id: string) => page.locator(`[data-section=${id}]`);
+  // Totals is there to start with
+  await expect(section("totals")).toHaveAttribute("open", "");
+  // added: shown, open; several at once
   await page.getByTestId("rail-fabric").click();
-  await expect(page.getByTestId("tool-fabric")).toBeVisible();
-  await expect(page.getByTestId("tool-totals")).toHaveCount(0);
+  await expect(section("fabric")).toHaveAttribute("open", "");
+  await expect(section("totals")).toBeVisible();
   await expect(page.getByTestId("rail-fabric")).toHaveAttribute("aria-pressed", "true");
+  // folded
+  await section("fabric").locator("summary").click();
+  await expect(section("fabric")).not.toHaveAttribute("open", "");
+  // taken away
+  await page.getByTestId("rail-totals").click();
+  await expect(section("totals")).toHaveCount(0);
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
-  await expect(page.getByTestId("tool-fabric")).toBeVisible();
-  // the same icon again closes it, the key gets the room
-  await page.getByTestId("rail-fabric").click();
-  await expect(page.getByTestId("tool-fabric")).toHaveCount(0);
-  await page.reload();
-  await expect(page.locator("[data-entry]").first()).toBeVisible();
-  await expect(page.locator("[data-testid^=tool-]")).toHaveCount(0);
+  await expect(section("totals")).toHaveCount(0);
+  await expect(section("fabric")).not.toHaveAttribute("open", "");
+  // added again: open
+  await page.getByTestId("rail-totals").click();
+  await expect(section("totals")).toHaveAttribute("open", "");
 });
 
 test("chart checks are opt-in, run on demand, and their findings can be stepped through and ignored", async ({ page }) => {

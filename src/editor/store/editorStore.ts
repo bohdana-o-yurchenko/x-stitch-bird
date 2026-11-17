@@ -26,11 +26,9 @@ export type DialogRequest =
   | { type: "newPattern" }
   | { type: "open" }
   | { type: "resize" }
-  | { type: "versions" }
   | { type: "straighten" }
   | { type: "changelog"; since?: string | null }
   | { type: "imageImport"; image: HTMLImageElement }
-  | { type: "patternInfo" }
   | { type: "goToCell" }
   | { type: "mirrorFromCentre" }
   | { type: "extendCanvas" }
@@ -102,6 +100,10 @@ export interface EditorState {
   accountKnown: boolean;
   /** The sign-in dialog is open (from the header, or "Sign in to keep it"). */
   signInOpen: boolean;
+  /** Side-panel sections shown below the key, in no particular order (SPEC §15.32; editor/panelSections). */
+  panelSections: string[];
+  /** Bumped when a section is brought into the panel, so the panel can scroll to it. */
+  sectionShown: { id: string; seq: number } | null;
   /** The keyboard shortcuts list, opened from ☰. */
   shortcutsOpen: boolean;
   /** Toolbar groups hidden in ☰ ▸ Toolbar (remembered in this browser; ui/header/toolbarPrefs). */
@@ -169,6 +171,8 @@ export const createEditorStore = () =>
     saveState: null,
     hasOtherPatterns: false,
     shortcutsOpen: false,
+    panelSections: ["totals"],
+    sectionShown: null,
     signInOpen: false,
     accountKnown: false,
     inventory: null,

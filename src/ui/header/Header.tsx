@@ -66,7 +66,7 @@ function useReveal(menu: HeaderMenu) {
   return useEditorState((st) => (st.menuReveal?.menu === menu ? st.menuReveal.path : null));
 }
 
-/** Pattern ▾ — working on a pattern: new, open, the work file, versions, info, photos. Nothing here is for printing. */
+/** Pattern ▾ — the pattern as a file: new, open, the work file; and a photo window. Its state lives in the side panel. */
 function PatternMenu() {
   const t = useTranslations("fileMenu");
   const run = useCommand();
@@ -85,10 +85,6 @@ function PatternMenu() {
     { id: "download", label: t("download"), hint: t("downloadHint"), onClick: go("file.export", "pattern") },
     { id: "loadFile", label: t("loadFile"), hint: t("loadFileHint"), onClick: go("file.pickToLoad") },
     "-",
-    { id: "versions", label: t("versions"), hint: t("versionsHint"), onClick: go("file.versions") },
-    { id: "info", label: t("info"), hint: t("infoHint"), onClick: go("pattern.editInfo") },
-    "-",
-    { id: "refUnderlay", label: t("refUnderlay"), hint: t("refUnderlayHint"), onClick: go("underlay.pick") },
     { id: "refWindow", label: t("refWindow"), hint: t("refWindowHint"), onClick: go("reference.pick") },
   ];
   return (
@@ -220,10 +216,6 @@ export function Header() {
               ...(["flipH", "flipV", "rot90cw", "rot90ccw", "rot180"] as const).map((id) => ({ label: t(`transformMenu.${id}`), onClick: () => run("transform.apply", id) })),
               "-",
               { label: t("transformMenu.mirrorFromCentre"), onClick: () => run("transform.requestMirror") },
-              "-",
-              { label: t("transformMenu.cropToContent"), onClick: () => run("transform.crop") },
-              { label: t("transformMenu.extendCanvas"), onClick: () => run("transform.requestExtend") },
-              { label: t("transformMenu.resize"), onClick: () => run("pattern.requestResize") },
             ]}
           />
         </div>

@@ -142,7 +142,9 @@
     "fromCentre": "Number from centre",
     "ct20": "20 ct over 1",
     "ct24": "24 ct over 1",
-    "ct31": "31 ct over 1"
+    "ct31": "31 ct over 1",
+    "extend": "Extend canvas…",
+    "crop": "Crop to content"
   },
   "totals": {
     "heading": "Totals & shopping list",
@@ -605,7 +607,9 @@
     "rotateRight": "Turn right a little (])",
     "rotationReset": "0°",
     "match": "Autofill",
-    "matchHint": "Fill one 10 × 10 block at a time from the image (Shift+F)"
+    "matchHint": "Fill one 10 × 10 block at a time from the image (Shift+F)",
+    "add": "Add an image…",
+    "addHint": "A photo or scan of the paper chart, lying under your stitches to trace over — and for Autofill to read."
   },
   "fileMenu": {
     "label": "Pattern ▾",
@@ -771,7 +775,7 @@
     "trace": {
       "title": "3. Chart behind the stitches",
       "points": {
-        "1": "Add the chart photo: <hl>Image behind the chart</hl>.",
+        "1": "Add the chart photo: <hl>Image behind the chart</hl> — the picture icon at the bottom of the side panel.",
         "2": "Drag the <hl>4 corners</hl> onto the grid corners — the photo lies flat.",
         "3": "Trace the symbols with the key entries."
       },
@@ -815,13 +819,13 @@
     "versions": {
       "title": "8. Versions",
       "points": {
-        "1": "Made a mess? <hl>Versions</hl> bring back an earlier state."
+        "1": "Made a mess? <hl>Versions</hl> (🕘 at the bottom of the side panel) bring back an earlier state."
       }
     },
     "finish": {
       "title": "9. Export",
       "points": {
-        "1": "In <hl>Pattern ▸ Pattern info</hl> fill in the <hl>name</hl> and <hl>author</hl> — Хрестики show them.",
+        "1": "In <hl>Pattern info</hl> (ⓘ at the bottom of the side panel) fill in the <hl>name</hl> and <hl>author</hl> — Хрестики show them.",
         "2": "Finished? The <hl>printer button</hl>: a <hl>PDF chart to print</hl>, Pattern Keeper, images — and an <hl>Open Cross Stitch file (.oxs)</hl> for Хрестики and Ruta Stitch."
       }
     },
@@ -1137,6 +1141,8 @@
   },
   "side": {
     "tools": "Tools",
-    "closeTool": "Close {tool}"
+    "closeTool": "Close {tool}",
+    "info": "Pattern info",
+    "versions": "Versions"
   }
 }

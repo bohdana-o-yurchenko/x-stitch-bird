@@ -12,13 +12,22 @@ import s from "./side.module.css";
 
 const round = (v: number) => Math.round(v * 100) / 100;
 
-/** The chart underlay's controls (SPEC §15.15). Shown only when the pattern has one. */
+/** The chart underlay (SPEC §15.15): its controls — or, when the pattern has none, the way to add one. */
 export function UnderlayPanel() {
   const t = useTranslations("underlay");
   const run = useCommand();
   const u = useEditorState((st) => st.underlay);
   const [confirm, setConfirm] = useState(false);
-  if (!u) return null;
+  // none yet: the section is where one is added (SPEC §15.32)
+  if (!u)
+    return (
+      <Section id="underlay" title={t("heading")} defaultOpen testId="underlay-panel">
+        <div className={s.section}>
+          <p className={ui.hint} style={{ margin: 0 }}>{t("addHint")}</p>
+          <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} style={{ alignSelf: "flex-start" }} onClick={() => run("underlay.pick")} data-testid="underlay-add">{t("add")}</button>
+        </div>
+      </Section>
+    );
   const rotation = u.rotation ?? 0;
   const editing = !u.behind;
   const setRect = (patch: Partial<Rect>) => run("underlay.update", { rect: { ...u.rect, ...patch } });

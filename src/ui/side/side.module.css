@@ -361,43 +361,9 @@
   flex-shrink: 1;
   min-height: 140px;
 }
-.pane {
-  display: flex;
-  flex-direction: column;
-  max-height: 55%;
-  border-top: 1px solid var(--line2);
-  background: var(--panel);
-}
-.paneHead {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 8px 9px 12px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
-}
-.paneHead h3 {
-  flex: 1;
-  margin: 0;
-  font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 15px;
-}
-.paneClose {
-  border: 0;
-  background: none;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 6px;
-}
-.paneClose:hover {
-  background: var(--surface2);
-  color: var(--ink);
-}
-.paneBody {
-  overflow-y: auto;
-  min-height: 0;
+/* a section shown from the bar keeps its own height; the key list gives way first, then the panel scrolls */
+.shownSection {
+  flex-shrink: 0;
 }
 .rail {
   flex: none;
@@ -430,4 +396,34 @@
 .railBtn:disabled {
   opacity: 0.35;
   cursor: default;
+}
+
+/* Pattern info and Versions as sections */
+.infoFields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+.version {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+.versionThumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line2);
+  border-radius: 4px;
+  background: center / contain no-repeat;
+  image-rendering: pixelated;
+}
+
+/* Fabric & size: Resize · Extend canvas · Crop to content */
+.sizeButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }

@@ -4,12 +4,9 @@ import type { PkReport } from "@/core/formats/pdf/patternKeeper";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { parseCellRef } from "@/core/grid/numbering";
-import { META_FIELDS } from "@/core/pattern/meta";
 import { symbolText } from "@/core/symbols/lineStyles";
-import type { PatternMeta } from "@/core/pattern/types";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { copyText } from "@/platform/files";
-import { TimeSpent } from "../common/TimeSpent";
 import { ConfirmDelete, KeyIcon, Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
@@ -59,44 +56,6 @@ export function ResizeDialog({ onClose }: Close) {
 }
 
 /** Pattern info (SPEC §15.1): what goes into .oxs first, the rest (kept only in .xbird) folded away. */
-export function PatternInfoDialog({ onClose }: Close) {
-  const t = useTranslations();
-  const run = useCommand();
-  const meta = useEditorState((st) => st.doc.meta);
-  const docName = useEditorState((st) => st.doc.name);
-  const [m, set] = useState<PatternMeta>({ ...meta });
-  const [name, setName] = useState(docName);
-  const field = (f: (typeof META_FIELDS)[number]) => (
-    <label key={f.id} className={ui.field} style={f.multiline ? { gridColumn: "1 / -1" } : undefined}>
-      {t(`meta.${f.id}`)}
-      {f.multiline ? <textarea value={m[f.id] ?? ""} onChange={(e) => set({ ...m, [f.id]: e.target.value })} /> : <input value={m[f.id] ?? ""} onChange={(e) => set({ ...m, [f.id]: e.target.value })} />}
-    </label>
-  );
-  const own = META_FIELDS.filter((f) => !f.oxs);
-  const save = () => {
-    if (name.trim() && name !== docName) run("pattern.rename", name);
-    run("pattern.setInfo", m);
-  };
-  return (
-    <Modal title={t("dialogs.infoTitle")} wide onClose={onClose} buttons={[{ label: t("dialogs.cancel") }, { label: t("dialogs.ok"), primary: true, onClick: save }]}>
-      <TimeSpent />
-      <h4 className={ui.sectionTitle}>{t("dialogs.infoOxs")}</h4>
-      <p className={ui.hint} style={{ margin: "0 0 10px" }}>{t("dialogs.infoOxsHint")}</p>
-      <div className={ui.grid2}>
-        <label className={ui.field}>
-          {t("header.patternName")}
-          <input value={name} onChange={(e) => setName(e.target.value)} />
-        </label>
-        {META_FIELDS.filter((f) => f.oxs).map(field)}
-      </div>
-      <details style={{ marginTop: 16 }} open={own.some((f) => !!meta[f.id])}>
-        <summary style={{ cursor: "pointer", fontWeight: 600, padding: "6px 0" }}>{t("dialogs.infoOwn")}</summary>
-        <p className={ui.hint} style={{ margin: "0 0 10px" }}>{t("dialogs.infoOwnHint")}</p>
-        <div className={ui.grid2}>{own.map(field)}</div>
-      </details>
-    </Modal>
-  );
-}
 
 export function GoToCellDialog({ onClose }: Close) {
   const t = useTranslations("dialogs");

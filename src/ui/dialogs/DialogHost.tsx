@@ -2,14 +2,14 @@
 
 import { useEditor, useEditorState } from "../hooks/editor";
 import { ImageImportDialog } from "./ImageImportDialog";
-import { OpenPatternDialog, VersionsDialog } from "./OpenPatternDialog";
+import { OpenPatternDialog } from "./OpenPatternDialog";
 import { ChangelogDialog } from "./ChangelogDialog";
 import { StraightenDialog } from "./StraightenDialog";
 import { KeepPatternDialog } from "./KeepPatternDialog";
 import { NewPatternDialog } from "./NewPatternDialog";
 import {
   DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, MirrorFromCentreDialog,
-  PatternInfoDialog, PatternKeeperDialog, ReplaceKeyDialog, ResizeDialog, TextFallbackDialog,
+  PatternKeeperDialog, ReplaceKeyDialog, ResizeDialog, TextFallbackDialog,
 } from "./simpleDialogs";
 
 /** Renders whichever dialog the editor asked for. */
@@ -24,11 +24,9 @@ export function DialogHost() {
     case "newPattern": return <NewPatternDialog onClose={close} />;
     case "open": return <OpenPatternDialog onClose={close} />;
     case "resize": return <ResizeDialog onClose={close} />;
-    case "versions": return <VersionsDialog onClose={close} />;
     case "changelog": return <ChangelogDialog since={d.since} onClose={close} />;
     case "straighten": return <StraightenDialog onClose={close} />;
     case "imageImport": return <ImageImportDialog image={d.image} onClose={close} />;
-    case "patternInfo": return <PatternInfoDialog onClose={close} />;
     case "goToCell": return <GoToCellDialog onClose={close} />;
     case "mirrorFromCentre": return <MirrorFromCentreDialog onClose={close} />;
     case "extendCanvas": return <ExtendCanvasDialog onClose={close} />;

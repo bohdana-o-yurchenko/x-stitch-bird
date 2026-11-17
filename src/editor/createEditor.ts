@@ -17,6 +17,7 @@ import { CommandRegistry } from "./commands/registry";
 import { KeepPattern } from "./keepPattern";
 import { ThreadInventory } from "./threads/inventory";
 import { forgetAccountHere } from "./library";
+import { saveSections, savedSections, unfold } from "./panelSections";
 import { History } from "./history/history";
 import { ImageService } from "./images/ImageService";
 import { canMatch, PICKING } from "./matching/matching";
@@ -129,6 +130,7 @@ export class Editor {
     // a restored draft is saved to the library once it's edited; the demo only then too
     this.autosave.markSaved();
     await this.keep.init();
+    this.store.setState({ panelSections: savedSections() });
     // what came back from an earlier visit is work if it was edited then; the demo isn't
     if (pattern) this.keep.restored();
     this.store.setState({ ready: true });
@@ -227,6 +229,22 @@ export class Editor {
     if (!gone.includes(this.doc.id)) return;
     loadPattern(this, demoPattern(this.state.symbols));
     this.autosave.markSaved();
+  }
+
+  /** Bring a side-panel section into the panel, open (Pattern info, Versions, the picture behind the chart…). */
+  showSection(id: string) {
+    unfold(id);
+    const list = this.state.panelSections.includes(id) ? this.state.panelSections : [...this.state.panelSections, id];
+    saveSections(list);
+    this.store.setState({ panelSections: list, sectionShown: { id, seq: (this.state.sectionShown?.seq ?? 0) + 1 }, panelCollapsed: false });
+  }
+
+  /** The bar's icon: a section in, open — or out. */
+  toggleSection(id: string) {
+    if (!this.state.panelSections.includes(id)) return this.showSection(id);
+    const list = this.state.panelSections.filter((x) => x !== id);
+    saveSections(list);
+    this.store.setState({ panelSections: list });
   }
 
   /** Whether there are saved patterns besides the open one (Pattern ▸ Open is offered then). */

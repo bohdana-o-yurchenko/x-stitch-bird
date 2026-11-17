@@ -26,6 +26,8 @@ const ICONS: Record<string, ReactNode> = {
   fabric: <g {...S}><rect x="4" y="4" width="16" height="16" rx="1.5" /><path d="M4 9.3h16M4 14.6h16M9.3 4v16M14.6 4v16" strokeWidth="1.2" /></g>,
   spool: <g {...S}><path d="M7 4h10M7 20h10" /><path d="M8.5 4v16M15.5 4v16" strokeWidth="1.4" /><path d="M8.5 8l7 2M8.5 11l7 2M8.5 14l7 2" strokeWidth="1.4" /></g>,
   image: <g {...S}><rect x="3.5" y="5" width="17" height="14" rx="1.5" /><circle cx="9" cy="10" r="1.6" /><path d="M4 17l5-4.5 3.5 3 3-2.5 4.5 4" /></g>,
+  info: <g {...S}><circle cx="12" cy="12" r="8.5" /><path d="M12 11v5.5" /><circle cx="12" cy="7.8" r="0.6" fill="currentColor" /></g>,
+  history: <g {...S}><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" /><path d="M4.5 4.5v3.5H8" /><path d="M12 8v4.3l2.8 1.7" /></g>,
   print: <g {...S}><path d="M7 9V3.5h10V9" /><rect x="3.5" y="9" width="17" height="8" rx="1.5" /><path d="M7 14.5h10V21H7z" /></g>,
   menu: <g {...S}><path d="M4.5 7h15M4.5 12h15M4.5 17h15" /></g>,
   undo: <g {...S}><path d="M9 14L4 9l5-5" /><path d="M4 9h10a6 6 0 010 12h-3" /></g>,
