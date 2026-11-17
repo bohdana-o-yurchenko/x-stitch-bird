@@ -1,0 +1,81 @@
+/* the New pattern dialog: one calm column of labelled rows */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: min(520px, 80vw);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.label {
+  flex: none;
+  width: 108px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.grow {
+  flex: 1;
+}
+.sizeLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.num {
+  width: 72px;
+}
+.times,
+.unit {
+  color: var(--muted);
+  font-size: 13px;
+}
+.unit {
+  margin-right: 6px;
+}
+.under {
+  margin: -6px 0 0 120px;
+}
+.materials {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.summary {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.change {
+  flex: none;
+  padding: 4px 10px;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.unfold {
+  margin: 12px 0 0 120px;
+}
+.foot {
+  margin: 4px 0 0;
+}
+@media (max-width: 560px) {
+  .row {
+    flex-wrap: wrap;
+  }
+  .label {
+    width: 100%;
+  }
+  .under,
+  .unfold {
+    margin-left: 0;
+  }
+}

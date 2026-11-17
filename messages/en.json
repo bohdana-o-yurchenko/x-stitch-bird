@@ -355,8 +355,7 @@
     "newTitle": "New pattern",
     "name": "Name",
     "fabric": "Fabric",
-    "keepKey": "Start with this pattern's key and settings — threads & beads, fabric",
-    "keepKeyHint": "The key's own brands and beads stay ticked; everything else can still change.",
+    "keepKeyHint": "Its threads & beads and fabric came along. The key's own brands and beads stay ticked; everything else can still change.",
     "newHint": "The pattern open now stays in your saved patterns, and Versions keeps a copy of it.",
     "newHintSignedOut": "Without signing in you work on one pattern at a time: if the open one has work in it, you’ll be asked how to keep it first.",
     "create": "Create",
@@ -440,7 +439,15 @@
     },
     "pkTwoCharts": "The PDF holds only what Pattern Keeper can track. For a chart with everything on it, use Export ▸ PDF chart to print.",
     "inAccount": " · in your account",
-    "browserAndAccount": " · this browser and your account"
+    "browserAndAccount": " · this browser and your account",
+    "startFrom": "Start from",
+    "blankKey": "A blank key",
+    "thisKey": "This pattern's key & settings",
+    "size": "Size",
+    "stitches": "stitches",
+    "finishedSize": "≈ {w} × {h} cm",
+    "change": "Change ▾",
+    "done": "Done ▴"
   },
   "meta": {
     "designer": "Author (designer)",
@@ -1123,6 +1130,9 @@
     "newBrand": "+ New brand",
     "onlyThreads": "Only {brand} — no other thread brands in this pattern",
     "onlyBeads": "Only {brand} — no other bead brands in this pattern",
-    "heading": "Threads & beads"
+    "heading": "Threads & beads",
+    "onlyOne": "{brand} only",
+    "noBeads": "no beads",
+    "beadsList": "beads: {list}"
   }
 }

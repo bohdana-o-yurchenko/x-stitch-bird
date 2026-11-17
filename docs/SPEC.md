@@ -1759,7 +1759,10 @@ Madeira, Mill Hill, Preciosa) can't be renamed or deleted. In the bead picker **
 new brand's tab and opens the form for its first bead (a bead brand exists through its beads).
 
 ### 15.31 Threads & beads of a pattern (2026-11-17)
-Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) in the **New dialog** and in the side panel section
+The **New dialog** (redesigned 2026-11-17, `ui/dialogs/NewPatternDialog.tsx`) is one calm column: **Start from**
+(A blank key · This pattern's key & settings), Name, Size (w × h stitches and the fabric, with the finished size in
+cm), and **Threads & beads** as one summary line ("DMC only · beads: Mill Hill, Preciosa") with **Change ▾** that
+unfolds the checkboxes. Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) there and in the side panel section
 **Threads & beads** — not in Pattern info, which is about the design and its author. Stored in the pattern:
 `brands`, `onlyBrand`, `beadBrands`, `onlyBeadBrand`, `noBeads` (all optional; `core/pattern/brands.ts` `materials`).
 - **Threads**: the brands ticked; with exactly one ticked, **Only <brand>** (on by default for a new pattern: DMC
@@ -1770,7 +1773,7 @@ Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) in the **New dialog** and 
   Off → the key form has no Floss + bead at all; Bead stays, greyed out, its hint saying beads are turned on in the
   side panel's Threads & beads (not from the key form). Beads can't be turned off while the key has some.
 - Adding a second brand ends "only one" (it applies again only when ticked). A brand the key uses can't be unticked.
-  **Start with this pattern's key and settings** (New dialog) copies the key and fills in the open pattern's threads
+  **This pattern's key & settings** (New dialog, Start from) copies the key and fills in the open pattern's threads
   & beads and fabric exactly as they are; anything the key doesn't depend on can still change (its brands and beads
   stay ticked). Unticking puts back what was there before.
 - Patterns from before (none of the fields): several thread brands as they were, every built-in bead brand.

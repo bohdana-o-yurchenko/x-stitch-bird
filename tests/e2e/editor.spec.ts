@@ -1076,6 +1076,7 @@ test("☰ ▸ Toolbar hides the line, rectangle and fill tools and fractional st
 test("thread brands: chosen for a new pattern, one tab each in the picker, your own threads added and changed there; a used brand stays", async ({ page }) => {
   await fileAction(page, "New", "Blank pattern…");
   const dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name: "Change ▾" }).click();
   const threads = dialog.getByTestId("materials-threads");
   await threads.getByRole("button", { name: "+ New brand" }).click();
   await threads.getByPlaceholder("Brand name").fill("Kreinik");
@@ -1139,8 +1140,11 @@ test("bead brands: Mill Hill and Preciosa as tabs, a finish filter, your own bea
 test("threads & beads of a new pattern: one brand only — no brand tabs, your own threads go into it; beads off — no bead kinds; changed later in the side panel", async ({ page }) => {
   await fileAction(page, "New", "Blank pattern…");
   const dialog = page.getByRole("dialog");
+  await expect(dialog.getByTestId("materials-summary")).toHaveText("DMC only · beads: Mill Hill, Preciosa");
+  await dialog.getByRole("button", { name: "Change ▾" }).click();
   await expect(dialog.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
   await dialog.getByLabel("This pattern has beads").uncheck();
+  await expect(dialog.getByTestId("materials-summary")).toHaveText("DMC only · no beads");
   await dialog.getByRole("button", { name: "Create" }).click();
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   const form = page.getByTestId("key-form");
@@ -1173,16 +1177,17 @@ test("New ▸ start with this pattern's key and settings: its threads & beads an
   await page.getByTestId("materials").getByTestId("materials-threads").getByLabel("Anchor").check();
   await fileAction(page, "New", "Blank pattern…");
   const dialog = page.getByRole("dialog"), threads = dialog.getByTestId("materials-threads");
+  await dialog.getByRole("button", { name: "Change ▾" }).click();
   await expect(threads.getByLabel("Anchor")).not.toBeChecked();
   await expect(threads.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
-  await dialog.getByLabel(/^Start with this pattern's key and settings/).check();
+  await dialog.getByRole("radio", { name: "This pattern's key & settings" }).click();
   await expect(threads.getByLabel("Anchor")).toBeChecked();
   await expect(threads.getByLabel("DMC")).toBeDisabled();
   await expect(dialog.getByLabel("This pattern has beads")).toBeDisabled();
-  await expect(dialog.getByText("The key's own brands and beads stay ticked")).toBeVisible();
+  await expect(dialog.getByText(/The key's own brands and beads stay ticked/)).toBeVisible();
   // what the key doesn't use can still change
   await threads.getByLabel("Anchor").uncheck();
-  await dialog.getByLabel(/^Start with this pattern's key and settings/).uncheck();
+  await dialog.getByRole("radio", { name: "A blank key" }).click();
   await expect(threads.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
   await expect(dialog.getByLabel("This pattern has beads")).toBeEnabled();
 });
