@@ -31,65 +31,132 @@
   gap: 8px;
 }
 
-/* a pattern's threads & beads (SPEC §15.31) */
+/* a pattern's threads & beads (SPEC §15.31): two airy groups of plain checkboxes */
 .materials {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
 }
 .matGroup {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
-.matTitle,
-.matHead {
-  font-size: 12px;
+.matTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.matTitle {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--muted);
 }
-.matHead {
-  color: var(--ink);
-  font-size: 13.5px;
+.matBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 .matBoxes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 10px 18px;
+  align-items: center;
 }
 .matBox {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px 4px 8px;
-  border: 1px solid var(--line2);
-  border-radius: 8px;
-  background: var(--surface);
+  gap: 8px;
+  min-width: 0;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
 }
-.matBox.on {
-  border-color: var(--ink);
+.matBox span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.matBox input {
+.matBox input,
+.matOnly input,
+.switch input {
   margin: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
 }
-.matAdd,
+.matAdd {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.matAdd:hover {
+  text-decoration: underline;
+}
 .materials input.matNew {
   height: 28px;
-  padding: 0 10px;
-  border: 1px dashed var(--line2);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
   font-size: 13px;
-  cursor: pointer;
-  max-width: 160px;
 }
 .matOnly {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line2);
+  color: var(--muted);
   font-size: 13px;
+  line-height: 1.35;
+  cursor: pointer;
+}
+/* beads on / off: a small switch */
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: var(--ink);
+  font-size: 13px;
+  cursor: pointer;
+}
+.switch input {
+  appearance: none;
+  position: relative;
+  width: 30px;
+  height: 17px;
+  border-radius: 999px;
+  background: var(--line2);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.switch input::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s;
+}
+.switch input:checked {
+  background: var(--accent);
+}
+.switch input:checked::after {
+  transform: translateX(13px);
+}
+.switch input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* the pattern's one brand, shown, not chosen */
@@ -98,4 +165,148 @@
   color: var(--ink);
   font-size: 14px;
   font-weight: 600;
+}
+
+/* the Threads page: brands on the left, your threads on the right */
+.layout {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+.brandList {
+  flex: none;
+  width: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: 70px;
+}
+.brandItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+button.brandItem,
+.brandPick {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.brandItem span,
+.brandPick span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.brandItem small {
+  color: var(--muted);
+}
+.brandItem.on {
+  background: var(--surface);
+  font-weight: 600;
+}
+/* rename / delete: over the row's end, only while pointing at it — the name gets the whole width otherwise */
+.brandItem {
+  position: relative;
+}
+.brandTools {
+  position: absolute;
+  right: 4px;
+  display: none;
+  background: var(--surface);
+  border-radius: 6px;
+}
+.brandItem:hover .brandTools,
+.brandItem:focus-within .brandTools {
+  display: flex;
+}
+.brandTools button {
+  padding: 4px 5px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+}
+.listSide {
+  flex: 1;
+  min-width: 0;
+}
+.threadGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+.thread {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.thread:hover {
+  border-color: var(--ink);
+}
+.swatch {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.threadText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 13px;
+}
+.threadText span,
+.threadText small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.threadText small {
+  color: var(--muted);
+}
+@media (max-width: 720px) {
+  .layout {
+    flex-direction: column;
+  }
+  .brandList {
+    position: static;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .brandItem {
+    width: auto;
+  }
 }

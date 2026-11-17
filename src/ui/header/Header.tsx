@@ -66,7 +66,7 @@ function useReveal(menu: HeaderMenu) {
   return useEditorState((st) => (st.menuReveal?.menu === menu ? st.menuReveal.path : null));
 }
 
-/** Pattern ▾ — the pattern as a file: new, open, the work file; and a photo window. Its state lives in the side panel. */
+/** Pattern ▾ — the pattern as a file: new, open, the work file. Its state lives in the side panel. */
 function PatternMenu() {
   const t = useTranslations("fileMenu");
   const run = useCommand();
@@ -84,8 +84,6 @@ function PatternMenu() {
     "-",
     { id: "download", label: t("download"), hint: t("downloadHint"), onClick: go("file.export", "pattern") },
     { id: "loadFile", label: t("loadFile"), hint: t("loadFileHint"), onClick: go("file.pickToLoad") },
-    "-",
-    { id: "refWindow", label: t("refWindow"), hint: t("refWindowHint"), onClick: go("reference.pick") },
   ];
   return (
     <span data-guide="menu">

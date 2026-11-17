@@ -179,7 +179,7 @@ describe("commands", () => {
     await ed.commands.run("file.versions");
     await ed.commands.run("pattern.editInfo");
     expect(ed.state.panelSections).toEqual(expect.arrayContaining(["versions", "info"]));
-    expect(ed.state.sectionShown?.id).toBe("info");
+    expect(ed.state.openSection).toBe("info");
     expect(ed.state.dialog).toBeNull();
     await ed.commands.run("key.requestDelete", blue);
     expect(ed.state.dialog).toEqual({ type: "deleteEntry", index: blue, count: 0 });

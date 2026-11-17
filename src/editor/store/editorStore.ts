@@ -102,8 +102,8 @@ export interface EditorState {
   signInOpen: boolean;
   /** Side-panel sections shown below the key, in no particular order (SPEC §15.32; editor/panelSections). */
   panelSections: string[];
-  /** Bumped when a section is brought into the panel, so the panel can scroll to it. */
-  sectionShown: { id: string; seq: number } | null;
+  /** The one unfolded section; null when all are folded. */
+  openSection: string | null;
   /** The keyboard shortcuts list, opened from ☰. */
   shortcutsOpen: boolean;
   /** Toolbar groups hidden in ☰ ▸ Toolbar (remembered in this browser; ui/header/toolbarPrefs). */
@@ -172,7 +172,7 @@ export const createEditorStore = () =>
     hasOtherPatterns: false,
     shortcutsOpen: false,
     panelSections: ["totals"],
-    sectionShown: null,
+    openSection: "totals",
     signInOpen: false,
     accountKnown: false,
     inventory: null,

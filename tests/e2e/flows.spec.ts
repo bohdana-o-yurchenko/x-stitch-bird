@@ -140,6 +140,8 @@ test("Versions brings back the pattern as it was before a risky change", async (
   await expect(row).toBeVisible();
   await row.locator("..").getByRole("button", { name: "Restore" }).click();
   await expect(page.locator("[data-entry]")).toHaveCount(8);
+  // one section unfolded at a time: Totals, to see the stitches are back
+  await page.getByTestId("section-totals").click();
   await expect(page.getByTestId("totals")).toContainText("91 full");
 });
 

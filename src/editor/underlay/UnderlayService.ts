@@ -102,7 +102,7 @@ export class UnderlayService {
     // the first time: once the straighten dialog is closed, point at the quick edit toggle
     this.ed.store.setState({ pendingTip: "underlay" });
     // its controls come into the side panel
-    this.ed.showSection("underlay");
+    this.ed.showSection("references");
   }
 
   update(patch: Partial<UnderlayData>) {

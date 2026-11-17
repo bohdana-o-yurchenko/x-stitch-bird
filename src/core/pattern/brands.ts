@@ -110,8 +110,8 @@ export const materialsOf = (p: Pattern): Materials => ({
   noBeads: !!p.noBeads && !usesBeads(p),
 });
 
-/** A new pattern's: DMC only, beads on with the built-in brands. */
-export const NEW_MATERIALS: Materials = { brands: ["DMC"], onlyBrand: true, beadBrands: [...BUILT_IN_BEAD_BRANDS], onlyBeadBrand: false, noBeads: false };
+/** A new pattern's: DMC only; beads on, Mill Hill (more brands can be ticked). */
+export const NEW_MATERIALS: Materials = { brands: ["DMC"], onlyBrand: true, beadBrands: ["Mill Hill"], onlyBeadBrand: false, noBeads: false };
 
 /** Sets them on a pattern (only what differs from a pattern that never chose is written). */
 export function applyMaterials(p: Pattern, m: Materials) {

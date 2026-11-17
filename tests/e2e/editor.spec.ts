@@ -189,7 +189,7 @@ test("on a short screen the open tool scrolls on its own, below the key", async 
 
 test("straightens a photo by its 4 corners and keeps it after a reload", async ({ page }) => {
   const chooser = page.waitForEvent("filechooser");
-  await page.getByTestId("rail-underlay").click();
+  await page.getByTestId("rail-references").click();
   await page.getByTestId("underlay-add").click();
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   const dialog = page.getByTestId("straighten");
@@ -279,7 +279,9 @@ test("the quick-start guide opens on the first visit only, highlights what it ex
   await expect(page.getByRole("menuitem", { name: /^Порожня схема/ })).toBeVisible();
   await page.keyboard.press("ArrowRight");
   await expect(guide).toContainText("2. Ключ");
-  await expect(page.getByRole("menuitem", { name: /^Фото в плаваючому вікні/ })).toBeVisible();
+  // photo windows are added in References: the step points at its icon in the side panel's bar
+  await expect(page.getByTestId("rail-references")).toBeVisible();
+  await expect(page.getByRole("menuitem")).toHaveCount(0);
   await page.keyboard.press("Escape");
   await expect(guide).toHaveCount(0);
   await expect(page.getByRole("menuitem")).toHaveCount(0);
@@ -299,7 +301,7 @@ test("feature tips: once after the first image behind the chart, and for the fir
   await page.evaluate(() => ["underlay", "reference"].forEach((t) => localStorage.removeItem(`stitchwork.tipSeen.${t}`)));
   const guide = page.getByTestId("guide");
   let chooser = page.waitForEvent("filechooser");
-  await page.getByTestId("rail-underlay").click();
+  await page.getByTestId("rail-references").click();
   await page.getByTestId("underlay-add").click();
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   await expect(guide).toHaveCount(0); // not over the straighten dialog
@@ -307,14 +309,14 @@ test("feature tips: once after the first image behind the chart, and for the fir
   await expect(guide).toContainText("Quick image editing");
   await guide.getByRole("button", { name: "Got it" }).click();
   chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Photo in a floating window…");
+  await page.getByTestId("ref-window-add").click();
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   await expect(guide).toContainText("A photo in its own window");
   await guide.getByRole("button", { name: "Next" }).click();
   await expect(guide).toContainText("Mark what’s already done");
   await guide.getByRole("button", { name: "Got it" }).click();
   chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Photo in a floating window…");
+  await page.getByTestId("ref-window-add").click();
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   await expect(page.getByTestId("reference-window")).toHaveCount(2);
   await expect(guide).toHaveCount(0);
@@ -390,7 +392,7 @@ test("opens in Ukrainian by default", async ({ page }) => {
 
 test("puts a reference image behind the chart and keeps it after a reload", async ({ page }) => {
   const chooser = page.waitForEvent("filechooser");
-  await page.getByTestId("rail-underlay").click();
+  await page.getByTestId("rail-references").click();
   await page.getByTestId("underlay-add").click();
   await (await chooser).setFiles("tests/fixtures/underlay.png");
   await page.getByTestId("straighten").getByRole("button", { name: "Use as it is" }).click();
@@ -694,28 +696,34 @@ test("a cut-out removes what is under it: filled circle, then a star cut out of 
   expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe("draw:S00cc;!O3399");
 });
 
-test("the side panel's bar adds and removes sections below the key; each folds as before; all remembered after a reload", async ({ page }) => {
-  const section = (id: string) => page.locator(`[data-section=${id}]`);
-  // Totals is there to start with
-  await expect(section("totals")).toHaveAttribute("open", "");
-  // added: shown, open; several at once
+test("the side panel's bar adds and removes sections below the key; one unfolded at a time, at a height set with the handle; all remembered", async ({ page }) => {
+  const head = (id: string) => page.getByTestId(`section-${id}`);
+  // Totals is there to start with, unfolded
+  await expect(head("totals")).toHaveAttribute("aria-expanded", "true");
+  // added: shown and unfolded — the other one folds
   await page.getByTestId("rail-fabric").click();
-  await expect(section("fabric")).toHaveAttribute("open", "");
-  await expect(section("totals")).toBeVisible();
+  await expect(head("fabric")).toHaveAttribute("aria-expanded", "true");
+  await expect(head("totals")).toHaveAttribute("aria-expanded", "false");
   await expect(page.getByTestId("rail-fabric")).toHaveAttribute("aria-pressed", "true");
-  // folded
-  await section("fabric").locator("summary").click();
-  await expect(section("fabric")).not.toHaveAttribute("open", "");
+  // a header unfolds its section
+  await head("totals").click();
+  await expect(head("totals")).toHaveAttribute("aria-expanded", "true");
+  await expect(head("fabric")).toHaveAttribute("aria-expanded", "false");
+  // the handle sets the height; it's kept
+  const handle = (await page.getByTestId("section-resizer").boundingBox())!;
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + 3);
+  await page.mouse.down();
+  await page.mouse.move(handle.x + handle.width / 2, handle.y - 60, { steps: 4 });
+  await page.mouse.up();
+  const tall = await page.locator("[data-section=totals]").evaluate((el) => el.parentElement!.getBoundingClientRect().height);
   // taken away
-  await page.getByTestId("rail-totals").click();
-  await expect(section("totals")).toHaveCount(0);
+  await page.getByTestId("rail-fabric").click();
+  await expect(head("fabric")).toHaveCount(0);
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
-  await expect(section("totals")).toHaveCount(0);
-  await expect(section("fabric")).not.toHaveAttribute("open", "");
-  // added again: open
-  await page.getByTestId("rail-totals").click();
-  await expect(section("totals")).toHaveAttribute("open", "");
+  await expect(head("fabric")).toHaveCount(0);
+  await expect(head("totals")).toHaveAttribute("aria-expanded", "true");
+  expect(await page.locator("[data-section=totals]").evaluate((el) => el.parentElement!.getBoundingClientRect().height)).toBeCloseTo(tall, 0);
 });
 
 test("chart checks are opt-in, run on demand, and their findings can be stepped through and ignored", async ({ page }) => {
@@ -917,6 +925,8 @@ test("the key list keeps its place across the key form, and shows a new entry wh
     codes.forEach((c, i) => ed.doc.key.push({ t: "thread", src: `dmc:${c}`, n: 2, st: "full", sym: ed.state.symbols[40 + i] }));
     ed.changed({ keys: true });
   });
+  // the key gets the panel's height (the edited row then stays fully in view where the test puts it)
+  await page.getByTestId("section-totals").click();
   const list = page.getByTestId("key-list");
   const scroll = () => list.evaluate((el) => ({ top: el.scrollTop }));
   // in the middle: editing an entry brings the list back to the same place
@@ -1153,7 +1163,7 @@ test("bead brands: Mill Hill and Preciosa as tabs, a finish filter, your own bea
 test("threads & beads of a new pattern: one brand only — no brand tabs, your own threads go into it; beads off — no bead kinds; changed later in the side panel", async ({ page }) => {
   await fileAction(page, "New", "Blank pattern…");
   const dialog = page.getByRole("dialog");
-  await expect(dialog.getByTestId("materials-summary")).toHaveText("DMC only · beads: Mill Hill, Preciosa");
+  await expect(dialog.getByTestId("materials-summary")).toHaveText("DMC only · beads: Mill Hill");
   await dialog.getByRole("button", { name: "Change ▾" }).click();
   await expect(dialog.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
   await dialog.getByLabel("This pattern has beads").uncheck();

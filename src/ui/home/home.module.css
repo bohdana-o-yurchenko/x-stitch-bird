@@ -1,7 +1,9 @@
-/* the editor's body never scrolls; this page does */
+/* the editor's body never scrolls; this page does — and its footer sits at the bottom even when the page is short */
 .page {
   height: 100vh;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   background: var(--bg);
   color: var(--ink);
 }
@@ -51,6 +53,9 @@
 }
 
 .main {
+  flex: 1 0 auto;
+  width: 100%;
+  box-sizing: border-box;
   max-width: 1120px;
   margin: 0 auto;
   padding: 28px 20px 72px;

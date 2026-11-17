@@ -1,6 +1,5 @@
 "use client";
 
-import { Section } from "./Section";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { Rect } from "@/core/pattern/types";
@@ -12,7 +11,7 @@ import s from "./side.module.css";
 
 const round = (v: number) => Math.round(v * 100) / 100;
 
-/** The chart underlay (SPEC §15.15): its controls — or, when the pattern has none, the way to add one. */
+/** The chart underlay (SPEC §15.15), in References: its controls — or, when the pattern has none, the way to add one. */
 export function UnderlayPanel() {
   const t = useTranslations("underlay");
   const run = useCommand();
@@ -21,12 +20,12 @@ export function UnderlayPanel() {
   // none yet: the section is where one is added (SPEC §15.32)
   if (!u)
     return (
-      <Section id="underlay" title={t("heading")} defaultOpen testId="underlay-panel">
+      <div className={s.refPart} data-testid="underlay-panel">
         <div className={s.section}>
           <p className={ui.hint} style={{ margin: 0 }}>{t("addHint")}</p>
           <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} style={{ alignSelf: "flex-start" }} onClick={() => run("underlay.pick")} data-testid="underlay-add">{t("add")}</button>
         </div>
-      </Section>
+      </div>
     );
   const rotation = u.rotation ?? 0;
   const editing = !u.behind;
@@ -39,7 +38,7 @@ export function UnderlayPanel() {
     </label>
   );
   return (
-    <Section id="underlay" title={t("heading")} defaultOpen testId="underlay-panel">
+    <div className={s.refPart} data-testid="underlay-panel">
       <div className={s.section}>
         <label className={ui.chk}>
           <input type="checkbox" checked={u.behind} onChange={(e) => run("underlay.update", { behind: e.target.checked, visible: true })} />
@@ -92,6 +91,6 @@ export function UnderlayPanel() {
           <p className={ui.hint}>{t("removeBody")}</p>
         </ConfirmDelete>
       )}
-    </Section>
+    </div>
   );
 }

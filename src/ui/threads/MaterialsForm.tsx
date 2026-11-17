@@ -38,22 +38,27 @@ export function MaterialsForm({ value, threadChoices, beadChoices, locks = NO_LO
   const set = (patch: Partial<Materials>) => onChange({ ...value, ...patch });
   return (
     <div className={s.materials} data-testid="materials">
-      <BrandBoxes
-        title={t("threads")}
-        kind="threads"
-        chosen={value.brands}
-        choices={threadChoices}
-        locked={locks.threads}
-        only={value.onlyBrand}
-        // a second brand ends "only one"; it comes back only when ticked again
-        onChosen={(brands) => set({ brands, onlyBrand: value.onlyBrand && brands.length === 1 })}
-        onOnly={(onlyBrand) => set({ onlyBrand })}
-      />
-      <div className={s.matGroup}>
-        <label className={cx(ui.chk, s.matHead)} title={locks.beadsUsed ? t("beadsUsed") : undefined}>
-          <input type="checkbox" checked={!value.noBeads} disabled={locks.beadsUsed} onChange={(e) => set({ noBeads: !e.target.checked })} />
-          <span>{t("hasBeads")}</span>
-        </label>
+      <section className={s.matGroup}>
+        <h4 className={s.matTitle}>{t("threads")}</h4>
+        <BrandBoxes
+          kind="threads"
+          chosen={value.brands}
+          choices={threadChoices}
+          locked={locks.threads}
+          only={value.onlyBrand}
+          onChosen={(brands) => set({ brands, onlyBrand: value.onlyBrand && brands.length === 1 })}
+          onOnly={(onlyBrand) => set({ onlyBrand })}
+        />
+      </section>
+      <section className={s.matGroup}>
+        <div className={s.matTitleRow}>
+          <h4 className={s.matTitle}>{t("beads")}</h4>
+          {/* beads on or off: a switch in the heading */}
+          <label className={s.switch} title={locks.beadsUsed ? t("beadsUsed") : undefined}>
+            <input type="checkbox" role="switch" checked={!value.noBeads} disabled={locks.beadsUsed} onChange={(e) => set({ noBeads: !e.target.checked })} />
+            <span>{t("hasBeads")}</span>
+          </label>
+        </div>
         {!value.noBeads && (
           <BrandBoxes
             kind="beads"
@@ -65,13 +70,12 @@ export function MaterialsForm({ value, threadChoices, beadChoices, locks = NO_LO
             onOnly={(onlyBeadBrand) => set({ onlyBeadBrand })}
           />
         )}
-      </div>
+      </section>
     </div>
   );
 }
 
-function BrandBoxes({ title, kind, chosen, choices, locked, only, onChosen, onOnly }: {
-  title?: string;
+function BrandBoxes({ kind, chosen, choices, locked, only, onChosen, onOnly }: {
   kind: "threads" | "beads";
   chosen: string[];
   choices: readonly string[];
@@ -90,15 +94,14 @@ function BrandBoxes({ title, kind, chosen, choices, locked, only, onChosen, onOn
     if (b && !chosen.includes(b)) onChosen([...chosen, b]);
   };
   return (
-    <div className={s.matGroup} role="group" aria-label={t(kind)} data-testid={`materials-${kind}`}>
-      {title && <span className={s.matTitle}>{title}</span>}
+    <div className={s.matBody} role="group" aria-label={t(kind)} data-testid={`materials-${kind}`}>
       <div className={s.matBoxes}>
         {all.map((b) => {
           const on = chosen.includes(b), fixed = locked.has(b) || (on && chosen.length === 1);
           return (
-            <label key={b} className={cx(s.matBox, on && s.on)} title={locked.has(b) ? t("brandUsed", { brand: b }) : undefined}>
+            <label key={b} className={s.matBox} title={locked.has(b) ? t("brandUsed", { brand: b }) : undefined}>
               <input type="checkbox" checked={on} disabled={on && fixed} onChange={(e) => toggle(b, e.target.checked)} />
-              {b}
+              <span>{b}</span>
             </label>
           );
         })}
@@ -124,7 +127,7 @@ function BrandBoxes({ title, kind, chosen, choices, locked, only, onChosen, onOn
         )}
       </div>
       {chosen.length === 1 && (
-        <label className={cx(ui.chk, s.matOnly)}>
+        <label className={s.matOnly}>
           <input type="checkbox" checked={only} onChange={(e) => onOnly(e.target.checked)} />
           <span>{t(kind === "threads" ? "onlyThreads" : "onlyBeads", { brand: chosen[0]! })}</span>
         </label>

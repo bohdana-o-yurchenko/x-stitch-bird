@@ -351,19 +351,96 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
 }
 /* the key list shrinks first; everything else keeps its height */
 .toolMain > * {
   flex-shrink: 0;
 }
 .toolMain > [data-shrink] {
-  flex-shrink: 1;
-  min-height: 140px;
+  flex: 1 1 0;
+  min-height: 96px;
 }
-/* a section shown from the bar keeps its own height; the key list gives way first, then the panel scrolls */
-.shownSection {
-  flex-shrink: 0;
+/* the sections under the key: a handle, then their headers; the unfolded one has a set height and scrolls inside */
+.sectionHandle {
+  flex: none;
+  height: 7px;
+  margin-top: -3px;
+  cursor: row-resize;
+  touch-action: none;
+  position: relative;
+  z-index: 1;
+}
+.sectionHandle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  width: 36px;
+  height: 3px;
+  margin-left: -18px;
+  border-radius: 2px;
+  background: var(--line2);
+}
+.sectionHandle:hover::after {
+  background: var(--muted);
+}
+/* when room runs out the unfolded section gives way (it scrolls inside), so every header stays in view */
+.toolMain > .sectionStack {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line2);
+}
+.stackItem {
+  flex: none;
+}
+.stackItem:has(.stackBody) {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.stackHead {
+  flex: none;
+}
+.stackItem + .stackItem {
+  border-top: 1px solid var(--line);
+}
+.stackHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+}
+.chev {
+  width: 7px;
+  height: 7px;
+  margin: 0 2px 0 1px;
+  border-right: 1.8px solid var(--muted);
+  border-bottom: 1.8px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+.stackHead.open .chev {
+  transform: rotate(45deg);
+}
+.stackBody {
+  flex: 0 1 auto;
+  min-height: 72px;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
 }
 .rail {
   flex: none;
@@ -426,4 +503,32 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+/* References: the image behind the chart, then the photo windows */
+.refTitle {
+  margin: 10px 12px 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.refPart + .refTitle {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.refRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.refName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
 }

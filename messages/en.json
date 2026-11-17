@@ -481,7 +481,14 @@
     "fit": "Fit photo to window",
     "clear": "Clear all marks",
     "resize": "Drag to resize",
-    "position": "Column {col} · Row {row}"
+    "position": "Column {col} · Row {row}",
+    "heading": "References",
+    "windows": "Photos in floating windows",
+    "windowsHint": "A movable window next to the chart — the paper key, say — with progress marks.",
+    "addWindow": "Add a photo window…",
+    "show": "Show",
+    "hide": "Hide",
+    "removeWindow": "Remove “{name}”"
   },
   "selection": {
     "flipH": "Flip horizontal",
@@ -770,12 +777,12 @@
         "1": "Every line of the paper key: <hl>+ Add to key</hl>.",
         "2": "Floss, beads, blends, floss + bead."
       },
-      "tip": "Keep the key in view: <hl>Photo in a floating window</hl>. Tick off added lines with its <hl>marker</hl>."
+      "tip": "Keep the key in view: <hl>References ▸ Add a photo window</hl> (the picture icon at the bottom of the side panel). Tick off added lines with its <hl>marker</hl>."
     },
     "trace": {
       "title": "3. Chart behind the stitches",
       "points": {
-        "1": "Add the chart photo: <hl>Image behind the chart</hl> — the picture icon at the bottom of the side panel.",
+        "1": "Add the chart photo: <hl>References ▸ Image behind the chart</hl> — the picture icon at the bottom of the side panel.",
         "2": "Drag the <hl>4 corners</hl> onto the grid corners — the photo lies flat.",
         "3": "Trace the symbols with the key entries."
       },
@@ -1143,6 +1150,7 @@
     "tools": "Tools",
     "closeTool": "Close {tool}",
     "info": "Pattern info",
-    "versions": "Versions"
+    "versions": "Versions",
+    "resize": "Drag to resize · double-click for the default height"
   }
 }

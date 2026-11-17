@@ -1761,15 +1761,16 @@ new brand's tab and opens the form for its first bead (a bead brand exists throu
 ### 15.31 Threads & beads of a pattern (2026-11-17)
 The **New dialog** (redesigned 2026-11-17, `ui/dialogs/NewPatternDialog.tsx`) is one calm column: **Start from**
 (A blank key · This pattern's key & settings), Name, Size (w × h stitches and the fabric, with the finished size in
-cm), and **Threads & beads** as one summary line ("DMC only · beads: Mill Hill, Preciosa") with **Change ▾** that
-unfolds the checkboxes. Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) there and in the side panel section
+cm), and **Threads & beads** as one summary line ("DMC only · beads: Mill Hill") with **Change ▾** that unfolds
+them: plain checkboxes in an airy grid per group, "Only …" on its own line below, beads on / off as a switch in the
+Beads heading. Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) there and in the side panel section
 **Threads & beads** — not in Pattern info, which is about the design and its author. Stored in the pattern:
 `brands`, `onlyBrand`, `beadBrands`, `onlyBeadBrand`, `noBeads` (all optional; `core/pattern/brands.ts` `materials`).
 - **Threads**: the brands ticked; with exactly one ticked, **Only <brand>** (on by default for a new pattern: DMC
   only). Only one → the key form shows no brand tabs, and your own threads go into that brand (the form shows the
   brand, not a choice). Several, or "only" off → tabs, + Brand, × (removing only while unused), your own threads in
   any brand, new brands.
-- **Beads**: **This pattern has beads** (on by default), then the same: brands (all built-in by default), "only".
+- **Beads**: **This pattern has beads** (on by default), then the same: brands (Mill Hill for a new pattern), "only".
   Off → the key form has no Floss + bead at all; Bead stays, greyed out, its hint saying beads are turned on in the
   side panel's Threads & beads (not from the key form). Beads can't be turned off while the key has some.
 - Adding a second brand ends "only one" (it applies again only when ticked). A brand the key uses can't be unticked.
@@ -1781,18 +1782,19 @@ unfolds the checkboxes. Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) th
 ### 15.32 One home per thing: menus act once, the side panel shows the pattern's state (2026-11-17)
 **Rule:** a menu *does* something once (create, open, save out, turn the chart); the side panel *shows* the open
 pattern's state, to look at and tweak while working. Nothing is in two places.
-- **Pattern ▾** — the pattern as a file: New ›, Open…, Download work file, Open work file…, Photo in a floating
-  window… (it opens a window, not a section).
+- **Pattern ▾** — the pattern as a file: New ›, Open…, Download work file, Open work file….
 - **Transform ▾** — the chart's orientation: flips, rotations, Mirror from centre.
-- **Side panel** — "Drawing with" and the key always; below them the **sections chosen in the bar along the
-  bottom** (`ui/side/SidePanel.tsx`; shown list in the editor, `editor/panelSections.ts`, remembered per browser):
-  Image behind the chart (its controls; **Add an image…** while there's none), Chart checks, Fabric & size (count,
-  colour, numbering, and **Resize… · Extend canvas… · Crop to content**), Threads & beads, **Pattern info** (time
-  spent, then the fields, saved as you leave each; the name is changed in the header), **Versions** (the copies,
-  Restore), Totals & shopping list. An icon adds its section, open — or takes it away; several can be shown; each
-  folds as before (remembered). Adding a picture behind the chart, or asking for a section elsewhere (a guide step,
-  `file.versions`, `pattern.editInfo`), brings it in open. The Pattern info and Versions dialogs are gone; Resize and
-  Extend canvas stay dialogs (they ask for numbers), opened from Fabric & size only.
+- **Side panel** — "Drawing with" and the key, then the **sections chosen in the bar along the bottom**
+  (`ui/side/SidePanel.tsx`; editor state + `editor/panelSections.ts`, remembered per browser): their headers in a row,
+  **one unfolded at a time**, at a height set with the **handle** above them (double-click: default 320 px); content
+  that doesn't fit scrolls inside the section; the key list takes the rest and scrolls on its own; when room runs
+  out the unfolded section gives way, so every header stays in view. An icon adds its section, unfolded — or takes
+  it away. Sections: **References** (the image behind the chart — its controls, or **Add an image…** — and photos
+  in floating windows: listed, shown / hidden, removed, **Add a photo window…**), Chart checks, Fabric & size (count,
+  colour, numbering, **Resize… · Extend canvas… · Crop to content**), Threads & beads, **Pattern info** (time spent,
+  the fields, saved as you leave each; the name is changed in the header), **Versions** (Restore), Totals & shopping
+  list. Adding a picture behind the chart, or asking for a section elsewhere (a guide step, `file.versions`,
+  `pattern.editInfo`), brings it in unfolded. Resize and Extend canvas stay dialogs (they ask for numbers).
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

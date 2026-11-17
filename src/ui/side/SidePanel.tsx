@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Icon } from "../common/Icon";
 import { cx } from "../common/widgets";
@@ -11,15 +11,17 @@ import { CurrentTool } from "./CurrentTool";
 import { FabricPanel } from "./FabricPanel";
 import { KeyPanel } from "./KeyPanel";
 import { MaterialsPanel } from "./MaterialsPanel";
+import { SECTION_HEIGHT, saveHeight, savedHeight } from "@/editor/panelSections";
+import { InSidePanel } from "./Section";
 import { PatternInfoPanel } from "./PatternInfoPanel";
 import { TotalsPanel } from "./TotalsPanel";
-import { UnderlayPanel } from "./UnderlayPanel";
+import { ReferencesPanel } from "./ReferencesPanel";
 import { VersionsPanel } from "./VersionsPanel";
 import s from "./side.module.css";
 
 /** The sections, in the panel's (and the bar's) order: icon, title (message key), content. */
 const SECTIONS: { id: string; icon: string; title: string; panel: () => ReactNode }[] = [
-  { id: "underlay", icon: "image", title: "underlay.heading", panel: () => <UnderlayPanel /> },
+  { id: "references", icon: "image", title: "references.heading", panel: () => <ReferencesPanel /> },
   { id: "checks", icon: "checks", title: "checks.heading", panel: () => <ChecksPanel /> },
   { id: "fabric", icon: "fabric", title: "fabric.heading", panel: () => <FabricPanel /> },
   { id: "materials", icon: "spool", title: "materials.heading", panel: () => <MaterialsPanel /> },
@@ -29,22 +31,44 @@ const SECTIONS: { id: string; icon: string; title: string; panel: () => ReactNod
 ];
 
 /**
- * The side panel (SPEC §15.32): "Drawing with" and the key always; below them the sections chosen in the bar along
- * the bottom — each folds open and closed as before. An icon adds its section (open) or takes it away; which ones
- * are shown, and folded, is remembered in this browser. A section asked for elsewhere (Pattern info, Versions…)
- * comes into view open. While a key entry is added or edited, its form takes the panel.
+ * The side panel (SPEC §15.32): "Drawing with" and the key, then the sections chosen in the bar along the bottom —
+ * their headers in a row, one unfolded at a time, at a height set with the handle above them (its content scrolls
+ * inside). The key list takes the rest. Which ones are shown, which is unfolded and its height are remembered in
+ * this browser. While a key entry is added or edited, its form takes the panel.
  */
 export function SidePanel() {
   const t = useTranslations();
   const ed = useEditor();
   const form = useEditorState((st) => st.keyForm);
   const shown = useEditorState((st) => st.panelSections);
-  const brought = useEditorState((st) => st.sectionShown);
+  const open = useEditorState((st) => st.openSection);
+  const [height, setHeight] = useState(savedHeight);
   const main = useRef<HTMLDivElement>(null);
-  // a section just brought in: into view
-  useEffect(() => {
-    if (brought) requestAnimationFrame(() => main.current?.querySelector(`[data-section=${brought.id}]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
-  }, [brought]);
+  const sections = SECTIONS.filter((x) => shown.includes(x.id));
+  const unfolded = sections.find((x) => x.id === open) ?? null;
+
+  // the handle: drag up for a taller section, down for a longer key list; double-click puts it back
+  const drag = (e: React.PointerEvent) => {
+    e.preventDefault();
+    const startY = e.clientY, start = height, box = main.current!.getBoundingClientRect();
+    const max = Math.max(160, box.height - 240);
+    let last = start;
+    const move = (ev: PointerEvent) => {
+      last = Math.max(120, Math.min(max, start + (startY - ev.clientY)));
+      setHeight(last);
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      saveHeight(last);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+  const reset = () => {
+    setHeight(SECTION_HEIGHT);
+    saveHeight(SECTION_HEIGHT);
+  };
 
   return (
     <div className={s.tools}>
@@ -55,10 +79,27 @@ export function SidePanel() {
           <>
             <CurrentTool />
             <KeyPanel />
-            {SECTIONS.filter((x) => shown.includes(x.id)).map((x) => (
-              // brought in again while folded: it remounts, open
-              <div key={brought?.id === x.id ? `${x.id}:${brought.seq}` : x.id} className={s.shownSection}>{x.panel()}</div>
-            ))}
+            {unfolded && <div className={s.sectionHandle} role="separator" aria-orientation="horizontal" title={t("side.resize")} data-testid="section-resizer" onPointerDown={drag} onDoubleClick={reset} />}
+            {sections.length > 0 && (
+              <div className={s.sectionStack}>
+                {sections.map((x) => {
+                  const isOpen = x.id === unfolded?.id;
+                  return (
+                    <div key={x.id} className={s.stackItem}>
+                      <button type="button" className={cx(s.stackHead, isOpen && s.open)} aria-expanded={isOpen} data-testid={`section-${x.id}`} onClick={() => ed.unfoldSection(isOpen ? null : x.id)}>
+                        <span className={s.chev} aria-hidden />
+                        <span>{t(x.title)}</span>
+                      </button>
+                      {isOpen && (
+                        <div className={s.stackBody} style={{ height }}>
+                          <InSidePanel.Provider value>{x.panel()}</InSidePanel.Provider>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </>
         )}
       </div>

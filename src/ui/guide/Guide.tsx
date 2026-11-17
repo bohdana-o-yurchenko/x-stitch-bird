@@ -19,8 +19,8 @@ export const TOURS: Record<string, Step[]> = {
   intro: [
     { id: "welcome", targets: [] },
     { id: "create", targets: ["menu", "menu:newBlank"], reveal: ["new"] },
-    { id: "key", targets: ["add-key", "menu:refWindow"], reveal: [], tip: true },
-    { id: "trace", targets: ["side-underlay"], tip: true },
+    { id: "key", targets: ["add-key", "side-references"], tip: true },
+    { id: "trace", targets: ["side-references"], tip: true },
     { id: "autofill", targets: ["tool-autofill"], tip: true },
     { id: "views", targets: ["views"] },
     { id: "tools", targets: ["toolbar", "override", "menu:shortcuts"], menu: "app", reveal: [], tip: true },

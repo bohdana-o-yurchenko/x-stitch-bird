@@ -1,11 +1,15 @@
 /*
  * The side panel's sections (SPEC §15.32): which ones are shown below the key (picked in the bar along its bottom),
- * and which are folded. Both are per-browser preferences, kept in localStorage; the editor holds the shown list so a
+ * which one is unfolded (one at a time), and its height. Both are per-browser preferences, kept in localStorage; the editor holds the shown list so a
  * command (Pattern ▸ …, a guide, adding a picture behind the chart) can bring one into view.
  */
 
 const SHOWN_KEY = "stitchwork.panelSections";
-const FOLDS_KEY = "stitchwork.sections";
+const OPEN_KEY = "stitchwork.openSection";
+const HEIGHT_KEY = "stitchwork.sectionHeight";
+
+/** The unfolded section's height, at first. */
+export const SECTION_HEIGHT = 320;
 
 export function savedSections(): string[] {
   try {
@@ -24,12 +28,36 @@ export function saveSections(list: string[]) {
   }
 }
 
-/** A section comes into the panel open. */
-export function unfold(id: string) {
+/** The one unfolded section (null: all folded). */
+export function savedOpen(): string | null {
   try {
-    const folds = JSON.parse(localStorage.getItem(FOLDS_KEY) || "{}") as Record<string, boolean>;
-    localStorage.setItem(FOLDS_KEY, JSON.stringify({ ...folds, [id]: true }));
+    const v = localStorage.getItem(OPEN_KEY);
+    return v === null ? "totals" : v || null;
   } catch {
-    // it opens by its default
+    return "totals";
+  }
+}
+
+export function saveOpen(id: string | null) {
+  try {
+    localStorage.setItem(OPEN_KEY, id ?? "");
+  } catch {
+    // not remembered
+  }
+}
+
+export function savedHeight(): number {
+  try {
+    return Number(localStorage.getItem(HEIGHT_KEY)) || SECTION_HEIGHT;
+  } catch {
+    return SECTION_HEIGHT;
+  }
+}
+
+export function saveHeight(h: number) {
+  try {
+    localStorage.setItem(HEIGHT_KEY, String(Math.round(h)));
+  } catch {
+    // not remembered
   }
 }

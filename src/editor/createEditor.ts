@@ -17,7 +17,7 @@ import { CommandRegistry } from "./commands/registry";
 import { KeepPattern } from "./keepPattern";
 import { ThreadInventory } from "./threads/inventory";
 import { forgetAccountHere } from "./library";
-import { saveSections, savedSections, unfold } from "./panelSections";
+import { saveOpen, saveSections, savedOpen, savedSections } from "./panelSections";
 import { History } from "./history/history";
 import { ImageService } from "./images/ImageService";
 import { canMatch, PICKING } from "./matching/matching";
@@ -130,7 +130,7 @@ export class Editor {
     // a restored draft is saved to the library once it's edited; the demo only then too
     this.autosave.markSaved();
     await this.keep.init();
-    this.store.setState({ panelSections: savedSections() });
+    this.store.setState({ panelSections: savedSections(), openSection: savedOpen() });
     // what came back from an earlier visit is work if it was edited then; the demo isn't
     if (pattern) this.keep.restored();
     this.store.setState({ ready: true });
@@ -231,20 +231,27 @@ export class Editor {
     this.autosave.markSaved();
   }
 
-  /** Bring a side-panel section into the panel, open (Pattern info, Versions, the picture behind the chart…). */
+  /** Bring a side-panel section into the panel, unfolded (Pattern info, Versions, References…). */
   showSection(id: string) {
-    unfold(id);
     const list = this.state.panelSections.includes(id) ? this.state.panelSections : [...this.state.panelSections, id];
     saveSections(list);
-    this.store.setState({ panelSections: list, sectionShown: { id, seq: (this.state.sectionShown?.seq ?? 0) + 1 }, panelCollapsed: false });
+    this.unfoldSection(id);
+    this.store.setState({ panelSections: list, panelCollapsed: false });
   }
 
-  /** The bar's icon: a section in, open — or out. */
+  /** The bar's icon: a section in, unfolded — or out. */
   toggleSection(id: string) {
     if (!this.state.panelSections.includes(id)) return this.showSection(id);
     const list = this.state.panelSections.filter((x) => x !== id);
     saveSections(list);
     this.store.setState({ panelSections: list });
+    if (this.state.openSection === id) this.unfoldSection(null);
+  }
+
+  /** One section unfolded at a time; null folds them all. */
+  unfoldSection(id: string | null) {
+    saveOpen(id);
+    this.store.setState({ openSection: id });
   }
 
   /** Whether there are saved patterns besides the open one (Pattern ▸ Open is offered then). */
