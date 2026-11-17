@@ -1716,8 +1716,13 @@ Idea: open other apps' files so пташечка also works as a converter — *
 `core/pattern/brands.ts`). Usually one; some charts mix (Mirabilia: DMC + Kreinik). Chosen in the New dialog (chips;
 "Start with the same key" keeps the old brands too) and in the picker: one tab per brand, **+ Brand** adds one (a
 known brand or a new name), **×** removes one — only while no key entry uses it, never the last. A brand the key
-uses always shows. Built-in catalogues: DMC (Mill Hill for beads, with their own picker); more catalogues come only
-from openly available data — the stitchmate.app colour library may not be reused (its terms forbid copying it).
+uses always shows. Built-in catalogues: **DMC**, **Anchor** (445, with the DMC equivalent of 342 shown as "≈ DMC …") and **Madeira**
+(369) — Anchor and Madeira from KXStitch's open colour schemes (GPL-2.0-or-later), the equivalents from convertfloss
+(MIT); `scripts/catalog/import-kxstitch.py`, credits in NOTICE.md. Built in like DMC (~10 KB compressed for both):
+colours are there at once, nothing to wait for. Mill Hill for beads, with their own picker. Other brands only from
+openly licensed data — the stitchmate.app colour library may not be reused (its terms forbid copying it); until
+then people add the threads they need as their own. OXS: other brands go out with the brand in the name ("Anchor
+Black"); an OXS number or name starting with Anchor / ANC / Madeira comes back as that brand's colour.
 
 **Your own threads** (built 2026-11-17: table `threads`, `/api/threads`, `editor/threads/inventory.ts`, the
 **Threads** page `/[locale]/threads` next to Patterns): one form — brand (picked from the

@@ -17,8 +17,21 @@ const DMC_LC = new Map(DMC.map((e) => [e.code.toLowerCase(), e]));
 DMC_LC.set("blanc", DMC_BY_CODE.get("White")!);
 DMC_LC.set("wht", DMC_BY_CODE.get("White")!);
 
+/** Brands other apps name in an OXS number or name, and their catalogue prefixes. */
+const OTHER_BRANDS = [
+  { prefix: "anchor", re: /^(anchor|anc)\s*[-:#]?\s*/i },
+  { prefix: "madeira", re: /^(madeira|mad)\s*[-:#]?\s*/i },
+];
+
 /** OXS colour number → library id, or a new custom colour (SPEC §12.2). */
 function resolveCode(number: string | undefined, name: string | undefined, color: string | undefined, asBead: boolean, customs: Record<string, CustomColor>): string {
+  // another brand, named in the number ("Anchor 403", "ANC-403") or the name ("Madeira Black")
+  const other = OTHER_BRANDS.find((b) => b.re.test((number ?? "").trim()) || b.re.test((name ?? "").trim()));
+  if (other && !asBead) {
+    const raw = (number ?? "").trim().replace(other.re, "").trim().replace(/^0+(?=\d)/, "");
+    const hit = libraryColor(`${other.prefix}:${raw}`) ?? libraryColor(`${other.prefix}:${raw.padStart(4, "0")}`);
+    if (hit) return hit.id;
+  }
   const code = (number ?? "").trim().replace(/^(dmc|mill\s*hill|mh)\s*[-:#]?\s*/i, "").trim();
   if (asBead) {
     const c = /^\d+$/.test(code) ? code.padStart(5, "0") : code;

@@ -1,3 +1,4 @@
+import { libraryColor, THREAD_CATALOGUES } from "../catalog/catalog";
 import type { Pattern } from "./types";
 
 /*
@@ -7,16 +8,16 @@ import type { Pattern } from "./types";
  */
 
 /** Thread brands built into the app (catalogues). */
-export const BUILT_IN_THREAD_BRANDS: readonly string[] = ["DMC"];
+export const BUILT_IN_THREAD_BRANDS: readonly string[] = Object.keys(THREAD_CATALOGUES);
 
-/** The brand of a single thread id, if it's a thread: `dmc:310` → DMC, a custom thread → its brand. */
+/** The brand of a single thread id, if it's a thread: `dmc:310` → DMC, `anchor:403` → Anchor, your own → its brand. */
 function threadBrand(p: Pattern, id: string): string | null {
-  if (id.startsWith("dmc:")) return "DMC";
   if (id.startsWith("custom:")) {
     const c = p.customs[id];
     return c && c.kind === "thread" ? c.brand : null;
   }
-  return null;
+  const e = libraryColor(id);
+  return e?.kind === "thread" ? e.brand : null;
 }
 
 /** Brands the key uses: its threads, the parts of its blends, the threads of floss + bead. */

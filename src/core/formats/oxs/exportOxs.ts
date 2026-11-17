@@ -32,6 +32,9 @@ interface Item {
 const FORMAT_LINE =
   '<format comments01="Designed to allow interchange of basic pattern data between any cross stitch style software" comments02="the \'properties\' section establishes size, copyright, authorship and software used" comments03="The features of each software package varies, but using XML each can pick out the things it can deal with, while ignoring others" comments04="The basic items are :" comments05="\'palette\'..a set of colors used in the design: palettecount excludes cloth color, which is item 0" comments06="\'fullstitches\'.. simple crosses" comments07="\'backstitches\'.. lines/objects with a start and end point" comments08="(There is a wide variety of ways of treating part stitches, knots, beads and so on.)" comments09="Colors are expressed in hex RGB format." comments10="Decimal numbers use US/UK format where \'.\' is the indicator - eg 0.5 is \'half\'" comments11="For readability, please use words not enumerations" comments12="The properties, fullstitches, and backstitches elements should be considered mandatory, even if empty" comments13="Exported by Stitchwork"/>';
 
+/** Threads of other brands carry the brand in their name, so the number isn't read as a DMC one (SPEC §15.8). */
+const brandedName = (e: { brand: string; name: string; kind: string }) => (e.kind === "thread" && e.brand !== "DMC" && !e.name.startsWith(e.brand) ? `${e.brand} ${e.name}` : e.name);
+
 export function exportOxs(p: Pattern): string {
   const usage = computeUsage(p).perEntry;
   const items: Item[] = [];
@@ -63,7 +66,7 @@ export function exportOxs(p: Pattern): string {
         color: hx(e.hex), blendcolor: hx(e.parts[1]?.entry.hex ?? e.hex), strands: e.parts.reduce((a, q) => a + q.n, 0), comments: "blend",
         parts: e.parts.map((q) => ({ e: q.entry, n: q.n })),
       });
-    } else items.push({ number: e.code, name: e.name + suffix, color: hx(e.hex), strands: entry.n ?? 1, comments: "" });
+    } else items.push({ number: e.code, name: brandedName(e) + suffix, color: hx(e.hex), strands: entry.n ?? 1, comments: "" });
     keyItem.set(i, items.length);
   });
 

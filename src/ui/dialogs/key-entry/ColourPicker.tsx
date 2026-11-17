@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { BEADS, BEAD_SERIES, DMC, byHue, byNumber, matchesQuery } from "@/core/catalog/catalog";
+import { BEADS, BEAD_SERIES, THREAD_CATALOGUES, byHue, byNumber, matchesQuery } from "@/core/catalog/catalog";
 import type { ColorEntry } from "@/core/color/colorEntry";
 import { BUILT_IN_THREAD_BRANDS, canRemoveBrand, patternBrands } from "@/core/pattern/brands";
 import { customColor, resolveColor } from "@/core/pattern/resolve";
@@ -55,7 +55,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   const items = useMemo(() => {
     let all: ColorEntry[];
     if (kind === "bead") all = series === "mine" ? customs : [...BEADS, ...customs].filter((e) => series === "all" || e.series === series);
-    else all = [...(brand === "DMC" ? DMC : []), ...customs.filter((e) => e.brand === brand)];
+    else all = [...(THREAD_CATALOGUES[brand] ?? []), ...customs.filter((e) => e.brand === brand)];
     all = all.filter((e) => matchesQuery(e, query));
     return kind === "thread" ? [...all].sort(sort === "num" ? byNumber : byHue) : all;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,7 +200,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
             )}
           </div>
         ))}
-        {!items.length && <p className={ui.hint} style={{ padding: 10 }}>{kind === "thread" && !query && brand !== "DMC" ? t("emptyBrand", { brand }) : t("nothing")}</p>}
+        {!items.length && <p className={ui.hint} style={{ padding: 10 }}>{kind === "thread" && !query && !THREAD_CATALOGUES[brand] ? t("emptyBrand", { brand }) : t("nothing")}</p>}
       </div>
     </div>
   );

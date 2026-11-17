@@ -27,6 +27,28 @@ Source code: <https://github.com/bohdana-o-yurchenko/x-stitch-bird> — linked f
 - **DM Sans, Fraunces, Nunito** for the interface are loaded through `next/font` (Google Fonts, OFL 1.1).
 
 ### Thread colour data
+- **Anchor and Madeira** colour schemes (`src/core/catalog/data/anchor.json`, `madeira.json`, built by
+  `scripts/catalog/import-kxstitch.py`) — from KXStitch (https://github.com/KDE/kxstitch, `schemes/`), part of KDE,
+  licensed under the GNU General Public License, version 2 or (at your option) any later version; used here under
+  its later-version terms, compatible with the AGPL.
+- **DMC ↔ Anchor equivalents** — from convertfloss by Luiz Flávio Felizardo (https://github.com/devfel/convertfloss),
+  under the MIT License:
+
+  > Copyright (c) 2021 Luiz Flávio Felizardo
+  >
+  > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+  > documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+  > the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+  > to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+  >
+  > The above copyright notice and this permission notice shall be included in all copies or substantial portions
+  > of the Software.
+  >
+  > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+  > THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  > AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+  > CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  > IN THE SOFTWARE.
 - **Mill Hill** bead codes, names and package counts — from Mill Hill's published bead inventory and DMC conversion
   chart; Treasures colours read off the maker's product photos.
 

@@ -84,7 +84,10 @@ describe("OXS with fractional stitches, knots and pattern info", () => {
     expect([...back.layers.partials.values()].flat().map((s) => `${s.kind}@${s.corner}`).sort()).toEqual(["petite@3", "quarter@1", "threeQuarter@0", "threeQuarter@2"]);
     expect(back.layers.knots).toEqual([{ x: 1.5, y: 1, k: expect.any(Number) }]);
     expect(back.layers.ambiguous.size).toBe(0);
-    expect(Object.values(back.customs).map((c) => c.code)).toEqual(["403"]);
+    // a thread of another brand goes out named with its brand, and comes back as that brand's catalogue colour
+    expect(xml).toContain('name="Anchor Black (half cross)"');
+    expect(Object.values(back.customs)).toEqual([]);
+    expect(back.key.some((e) => e?.src === "anchor:403")).toBe(true);
   });
 
   it("places quarters and petites on the half grid, so four in one cell stay in their corners", () => {

@@ -1,5 +1,7 @@
 import { makeColor, type ColorEntry } from "../color/colorEntry";
+import anchorData from "./data/anchor.json";
 import dmcData from "./data/dmc.json";
+import madeiraData from "./data/madeira.json";
 import millHillData from "./data/millhill.json";
 
 export const DMC: readonly ColorEntry[] = (dmcData as [string, string, string][]).map(([code, name, hex], order) =>
@@ -7,6 +9,19 @@ export const DMC: readonly ColorEntry[] = (dmcData as [string, string, string][]
 );
 
 export const DMC_BY_CODE = new Map(DMC.map((e) => [e.code, e]));
+
+/**
+ * Other thread brands, from open data (NOTICE.md; `scripts/catalog/import-kxstitch.py`): rows [code, name, hex,
+ * DMC equivalent if known].
+ */
+const brandCatalogue = (brand: string, prefix: string, rows: string[][]): readonly ColorEntry[] =>
+  rows.map(([code, name, hex, dmc], order) => makeColor({ id: `${prefix}:${code}`, kind: "thread", brand, code: code!, name: name!, hex: hex!, ...(dmc ? { dmc } : {}), order }));
+
+export const ANCHOR = brandCatalogue("Anchor", "anchor", anchorData as string[][]);
+export const MADEIRA = brandCatalogue("Madeira", "madeira", madeiraData as string[][]);
+
+/** Built-in thread catalogues by brand, in the order brands are offered (SPEC §15.28). */
+export const THREAD_CATALOGUES: Readonly<Record<string, readonly ColorEntry[]>> = { DMC, Anchor: ANCHOR, Madeira: MADEIRA };
 
 /**
  * Mill Hill, per series: beads per package, and the beads as [code, name, DMC equivalent, beads per package if not
@@ -23,9 +38,9 @@ export const BEADS: readonly ColorEntry[] = (millHillData as { series: string; p
 
 export const BEAD_SERIES: readonly string[] = [...new Set(BEADS.map((b) => b.series ?? ""))];
 
-const LIBRARY = new Map<string, ColorEntry>([...DMC, ...BEADS].map((e) => [e.id, e]));
+const LIBRARY = new Map<string, ColorEntry>([...DMC, ...ANCHOR, ...MADEIRA, ...BEADS].map((e) => [e.id, e]));
 
-/** Built-in thread or bead by id (`dmc:310`, `bead:00557`). */
+/** Built-in thread or bead by id (`dmc:310`, `anchor:403`, `madeira:2713`, `bead:00557`). */
 export const libraryColor = (id: string): ColorEntry | undefined => LIBRARY.get(id);
 
 /** Picker search (SPEC §8.1): code prefix, name substring, "dmc 310" for beads, or series. */
@@ -40,8 +55,11 @@ export function matchesQuery(e: ColorEntry, query: string): boolean {
   );
 }
 
-export const byNumber = (a: ColorEntry, b: ColorEntry) =>
-  (a.brand === "DMC" ? 0 : 1) - (b.brand === "DMC" ? 0 : 1) || a.order - b.order;
+const BRAND_ORDER = Object.keys(THREAD_CATALOGUES);
+const brandRank = (e: ColorEntry) => (BRAND_ORDER.indexOf(e.brand) + 1 || BRAND_ORDER.length + 1);
+
+/** Catalogue order: DMC, then the other built-in brands, then everything else, each in its own order. */
+export const byNumber = (a: ColorEntry, b: ColorEntry) => brandRank(a) - brandRank(b) || a.order - b.order;
 
 export const byHue = (a: ColorEntry, b: ColorEntry) => a.hue - b.hue;
 
