@@ -270,3 +270,12 @@ test("signed in, the account menu leads to My patterns", async ({ page }) => {
   await expect(page).toHaveURL(/\/en\/patterns$/);
   await expect(page.getByRole("heading", { name: /^All patterns/ })).toBeVisible();
 });
+
+test("Threads, next to Patterns: signed out it says what it's for and invites to sign in", async ({ page }) => {
+  await page.getByTestId("to-home").click();
+  await page.getByRole("link", { name: "Threads" }).click();
+  await expect(page).toHaveURL(/\/en\/threads$/);
+  await expect(page.getByTestId("threads-signed-out")).toContainText("lives only in its pattern");
+  await page.getByTestId("threads-signed-out").getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByTestId("sign-in-email")).toBeVisible();
+});

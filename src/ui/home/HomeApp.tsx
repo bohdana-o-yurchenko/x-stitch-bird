@@ -8,10 +8,9 @@ import { requestStart } from "@/editor/startRequest";
 import type { PatternSummary } from "@/editor/types";
 import { Link, useRouter } from "@/i18n/navigation";
 import { pickFile } from "@/platform/files";
-import { AccountMenu } from "../account/AccountButton";
 import { authClient } from "../account/authClient";
 import { Dropdown, Modal, cx, ui } from "../common/widgets";
-import { LanguageSwitch } from "../header/LanguageSwitch";
+import { HomeHeader } from "./HomeHeader";
 import s from "./home.module.css";
 
 type Current = NonNullable<Awaited<ReturnType<Library["current"]>>>;
@@ -67,20 +66,7 @@ export default function HomeApp() {
 
   return (
     <div className={s.page}>
-      <header className={s.top}>
-        <Link href="/patterns" className={s.brand}>
-          <Image src="/icon.svg" alt="" width={30} height={30} unoptimized priority />
-          <span>пташечка</span>
-        </Link>
-        <nav className={s.sections} aria-label={t("nav")}>
-          <Link href="/patterns" aria-current="page">{t("patterns")}</Link>
-        </nav>
-        <span className={s.spacer} />
-        <LanguageSwitch compact />
-        {!isPending && (
-          <AccountMenu user={user} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
-        )}
-      </header>
+      <HomeHeader section="patterns" user={user} pending={isPending} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
 
       <main className={s.main}>
         {current && (

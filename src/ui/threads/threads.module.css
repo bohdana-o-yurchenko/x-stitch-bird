@@ -67,3 +67,147 @@
   color: var(--muted);
   font-size: 13px;
 }
+
+/* the Threads page: brands on the left, your threads on the right */
+.layout {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+.brandList {
+  flex: none;
+  width: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: 70px;
+}
+.brandItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+button.brandItem,
+.brandPick {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.brandItem span,
+.brandPick span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.brandItem small {
+  color: var(--muted);
+}
+.brandItem.on {
+  background: var(--surface);
+  font-weight: 600;
+}
+/* rename / delete: over the row's end, only while pointing at it — the name gets the whole width otherwise */
+.brandItem {
+  position: relative;
+}
+.brandTools {
+  position: absolute;
+  right: 4px;
+  display: none;
+  background: var(--surface);
+  border-radius: 6px;
+}
+.brandItem:hover .brandTools,
+.brandItem:focus-within .brandTools {
+  display: flex;
+}
+.brandTools button {
+  padding: 4px 5px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+}
+.listSide {
+  flex: 1;
+  min-width: 0;
+}
+.threadGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+.thread {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.thread:hover {
+  border-color: var(--ink);
+}
+.swatch {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.threadText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 13px;
+}
+.threadText span,
+.threadText small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.threadText small {
+  color: var(--muted);
+}
+@media (max-width: 720px) {
+  .layout {
+    flex-direction: column;
+  }
+  .brandList {
+    position: static;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .brandItem {
+    width: auto;
+  }
+}

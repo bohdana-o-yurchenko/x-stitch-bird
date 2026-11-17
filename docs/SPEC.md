@@ -1719,13 +1719,18 @@ known brand or a new name), **×** removes one — only while no key entry uses 
 uses always shows. Built-in catalogues: DMC (Mill Hill for beads, with their own picker); more catalogues come only
 from openly available data — the stitchmate.app colour library may not be reused (its terms forbid copying it).
 
-**Your own threads** (built in patterns; the account inventory is next): one form — brand (picked from the
+**Your own threads** (built 2026-11-17: table `threads`, `/api/threads`, `editor/threads/inventory.ts`, the
+**Threads** page `/[locale]/threads` next to Patterns): one form — brand (picked from the
 pattern's and known brands, or a new one), code, name, colour — in the picker (+, and ✎ to change one; the key
 follows) and later on the Threads page. A thread can be your own in a built-in brand (a DMC shade not in the list)
 or in a brand of your own (Weeks Dye Works). Every pattern keeps a copy of the ones it uses, so shared files are
 whole. **Signed out**: they live in their pattern only. **Signed in**: an inventory in the account, in every
 pattern; on sign-in the ones in this browser's patterns join it (matched by brand + code). Deleting — only on the
 Threads page; patterns keep their copies. Brands of your own can be renamed or deleted there; built-in ones can't.
+The Threads page: brands on the left (with counts; ✎ rename and 🗑 delete for your own brands, while pointing at
+one), your threads and beads as swatches on the right; **+ Thread**, **+ Bead**, a click changes one (brand too) or
+deletes it (asks). Signed out the page explains and invites to sign in. In the editor, signed in, the picker lists
+the inventory's threads in their brand's tab, its brands under **+ Brand**; a picked one is copied into the pattern.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

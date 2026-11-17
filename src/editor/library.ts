@@ -1,7 +1,8 @@
 import { parsePattern } from "@/core/formats/json/parse";
 import { buildPalette } from "@/core/pattern/palette";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
-import { account, accountPatternApi, createPersistence, type Persistence, type PatternSummary } from "@/persistence";
+import type { CustomColor } from "@/core/pattern/types";
+import { account, accountPatternApi, accountThreadApi, createPersistence, type Persistence, type PatternSummary } from "@/persistence";
 import { renderChartImage } from "@/render/exportChart";
 import { defaultCanvasTheme } from "@/render/theme";
 import { keepForGood } from "./keepPattern";
@@ -45,6 +46,10 @@ export function createLibrary(persistence: Persistence = createPersistence()) {
       account.signedIn = on;
     },
     list: (): Promise<PatternSummary[]> => persistence.patterns.list(),
+    /** Your own threads and beads in the account (SPEC §15.28); null when it can't be reached. */
+    threads: (): Promise<CustomColor[] | null> => accountThreadApi.list(),
+    saveThread: (c: CustomColor): Promise<boolean> => accountThreadApi.save(c),
+    removeThread: (id: string): Promise<boolean> => accountThreadApi.remove(id),
     forgetAccountHere: () => forgetAccountHere(persistence),
     remove: (id: string) => persistence.patterns.remove(id),
 
