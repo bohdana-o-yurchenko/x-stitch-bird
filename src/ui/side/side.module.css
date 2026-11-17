@@ -337,3 +337,98 @@
   box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 35%, transparent);
   opacity: 0.55;
 }
+
+/* the side panel as tool windows (SPEC §15.32): content on the left, a strip of icons on the edge */
+.tools {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+}
+.toolMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+/* the key list shrinks first; everything else keeps its height */
+.toolMain > * {
+  flex-shrink: 0;
+}
+.toolMain > [data-shrink] {
+  flex-shrink: 1;
+  min-height: 140px;
+}
+.pane {
+  display: flex;
+  flex-direction: column;
+  max-height: 55%;
+  border-top: 1px solid var(--line2);
+  background: var(--panel);
+}
+.paneHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 8px 9px 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.paneHead h3 {
+  flex: 1;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 15px;
+}
+.paneClose {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.paneClose:hover {
+  background: var(--surface2);
+  color: var(--ink);
+}
+.paneBody {
+  overflow-y: auto;
+  min-height: 0;
+}
+.rail {
+  flex: none;
+  width: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  border-left: 1px solid var(--line);
+  background: var(--bg);
+}
+.railBtn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.railBtn:hover:not(:disabled) {
+  background: var(--surface2);
+  color: var(--ink);
+}
+.railBtn.on {
+  background: var(--sel);
+  color: var(--accent);
+}
+.railBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

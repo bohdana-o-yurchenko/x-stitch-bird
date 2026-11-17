@@ -1134,5 +1134,9 @@
     "onlyOne": "{brand} only",
     "noBeads": "no beads",
     "beadsList": "beads: {list}"
+  },
+  "side": {
+    "tools": "Tools",
+    "closeTool": "Close {tool}"
   }
 }

@@ -1134,5 +1134,9 @@
     "onlyOne": "лише {brand}",
     "noBeads": "без бісеру",
     "beadsList": "бісер: {list}"
+  },
+  "side": {
+    "tools": "Інструменти",
+    "closeTool": "Закрити «{tool}»"
   }
 }

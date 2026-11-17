@@ -177,13 +177,13 @@ test("tooltips appear quickly and the native one is suppressed", async ({ page }
   await expect(draw).toHaveAttribute("title", "Draw (P)");
 });
 
-test("the side panel scrolls when its sections don't fit", async ({ page }) => {
+test("on a short screen the open tool scrolls on its own, below the key", async ({ page }) => {
   await page.setViewportSize({ width: 1300, height: 640 });
-  await page.getByText("Fabric & size").click();
-  const side = page.locator("aside");
-  expect(await side.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
-  await page.getByText("toward each thread").scrollIntoViewIfNeeded();
-  await expect(page.getByText("toward each thread")).toBeInViewport();
+  const note = page.getByTestId("tool-totals").getByText("toward each thread");
+  await note.scrollIntoViewIfNeeded();
+  await expect(note).toBeInViewport();
+  // the key stays where it was
+  await expect(page.locator("[data-entry]").first()).toBeInViewport();
 });
 
 test("straightens a photo by its 4 corners and keeps it after a reload", async ({ page }) => {
@@ -690,19 +690,22 @@ test("a cut-out removes what is under it: filled circle, then a star cut out of 
   expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe("draw:S00cc;!O3399");
 });
 
-test("which side-panel sections are open is remembered after a reload", async ({ page }) => {
-  const section = (id: string) => page.locator(`[data-section=${id}]`);
-  await expect(section("totals")).toHaveAttribute("open", "");
-  await expect(section("fabric")).not.toHaveAttribute("open", "");
-  await section("totals").locator("summary").click();
-  await section("fabric").locator("summary").click();
-  await expect(section("totals")).not.toHaveAttribute("open", "");
-  // the browser reports a toggle a moment after the click
-  await expect.poll(() => page.evaluate(() => localStorage.getItem("stitchwork.sections"))).toBe('{"totals":false,"fabric":true}');
+test("the side panel's tools: one open below the key, picked from the strip on the edge, closed again; remembered after a reload", async ({ page }) => {
+  // Totals is open to start with
+  await expect(page.getByTestId("tool-totals")).toBeVisible();
+  await page.getByTestId("rail-fabric").click();
+  await expect(page.getByTestId("tool-fabric")).toBeVisible();
+  await expect(page.getByTestId("tool-totals")).toHaveCount(0);
+  await expect(page.getByTestId("rail-fabric")).toHaveAttribute("aria-pressed", "true");
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
-  await expect(section("totals")).not.toHaveAttribute("open", "");
-  await expect(section("fabric")).toHaveAttribute("open", "");
+  await expect(page.getByTestId("tool-fabric")).toBeVisible();
+  // the same icon again closes it, the key gets the room
+  await page.getByTestId("rail-fabric").click();
+  await expect(page.getByTestId("tool-fabric")).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await expect(page.locator("[data-testid^=tool-]")).toHaveCount(0);
 });
 
 test("chart checks are opt-in, run on demand, and their findings can be stepped through and ignored", async ({ page }) => {
@@ -711,8 +714,8 @@ test("chart checks are opt-in, run on demand, and their findings can be stepped 
     ed.doc.layers.stitches[25 * ed.doc.w + 27] = 0; // a hole inside the heart
     ed.changed();
   });
+  await page.getByTestId("rail-checks").click();
   const panel = page.getByTestId("checks-panel");
-  await panel.locator("summary").click();
   await expect(page.getByTestId("checks-run")).toBeDisabled();
   await panel.getByRole("checkbox", { name: "Empty cells" }).check();
   await page.getByTestId("checks-run").click();
@@ -1161,7 +1164,7 @@ test("threads & beads of a new pattern: one brand only — no brand tabs, your o
   await expect(page.getByTestId("fixed-brand")).toHaveText("DMC");
   await form.getByRole("button", { name: "Close" }).click();
   // the side panel: beads back on, a second thread brand — then the picker has tabs again
-  await page.getByText("Threads & beads").click();
+  await page.getByTestId("rail-materials").click();
   const panel = page.getByTestId("materials");
   await panel.getByLabel("This pattern has beads").check();
   await panel.getByTestId("materials-threads").getByLabel("Anchor").check();
@@ -1173,7 +1176,7 @@ test("threads & beads of a new pattern: one brand only — no brand tabs, your o
 
 test("New ▸ start with this pattern's key and settings: its threads & beads and fabric come along; what the key uses stays; unticking puts the rest back", async ({ page }) => {
   // the demo uses DMC and beads; give it a second thread brand and 16 ct
-  await page.getByText("Threads & beads").click();
+  await page.getByTestId("rail-materials").click();
   await page.getByTestId("materials").getByTestId("materials-threads").getByLabel("Anchor").check();
   await fileAction(page, "New", "Blank pattern…");
   const dialog = page.getByRole("dialog"), threads = dialog.getByTestId("materials-threads");
