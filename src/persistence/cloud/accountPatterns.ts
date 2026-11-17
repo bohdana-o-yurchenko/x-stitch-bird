@@ -45,6 +45,9 @@ export const accountPatternApi = {
   previewUrl: (id: string) => `/api/patterns/${encodeURIComponent(id)}/preview`,
 };
 
+/** Signed in, how many of the account's patterns this browser keeps as a cache (besides the open one). */
+export const CACHE_SIZE = 10;
+
 /** Browser and server clocks differ a little; a browser copy has to be this much newer to count as newer. */
 const CLOCK_SLACK = 5_000;
 
@@ -73,6 +76,18 @@ export function withAccount(local: PatternRepository): PatternRepository {
     async remove(id) {
       await local.remove(id);
       await accountPatternApi.remove(id);
+    },
+    async trimCache({ keep = [], all = false }) {
+      // without the account's list nothing is known to be safe there: nothing goes
+      const theirs = account.signedIn ? await accountPatternApi.list() : null;
+      if (!theirs) return [];
+      const there = new Map(theirs.map((c) => [c.id, c.updatedAt]));
+      // only copies the account has caught up with: a newer one here is work not uploaded yet
+      const safe = (p: PatternSummary) => there.has(p.id) && p.updatedAt <= there.get(p.id)! + CLOCK_SLACK;
+      const cached = (await local.list()).filter((p) => safe(p) && !keep.includes(p.id)).sort((a, b) => b.updatedAt - a.updatedAt);
+      const gone = cached.slice(all ? 0 : CACHE_SIZE).map((p) => p.id);
+      for (const id of gone) await local.remove(id);
+      return gone;
     },
     async catchUp() {
       const theirs = account.signedIn ? await accountPatternApi.list() : null;

@@ -3,7 +3,8 @@ import { serializePattern } from "@/core/formats/json/serialize";
 import { createPattern } from "@/core/pattern/createPattern";
 import { account } from "@/persistence";
 import { memoryPersistence } from "../../tests/support/memoryPersistence";
-import { createLibrary } from "./library";
+import { testEditor } from "../../tests/support/editorHarness";
+import { createLibrary, forgetAccountHere } from "./library";
 
 const store = new Map<string, string>();
 vi.stubGlobal("localStorage", { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v) });
@@ -38,5 +39,26 @@ describe("the patterns page's library (SPEC §15.26)", () => {
     const lib = createLibrary(memoryPersistence());
     expect(await lib.previewUrl({ id: "x", name: "X", w: 5, h: 5, updatedAt: 1, where: "both", hasPreview: true })).toBe("/api/patterns/x/preview");
     expect(await lib.previewUrl({ id: "y", name: "Y", w: 5, h: 5, updatedAt: 1, where: "account", hasPreview: false })).toBeNull();
+  });
+
+  it("signing out: the account's patterns leave this browser, the draft too when it's one of them", async () => {
+    const persistence = memoryPersistence();
+    let cleared = false;
+    persistence.patterns.trimCache = async ({ all }) => (all ? ["a", "b"] : []);
+    persistence.draft = { load: async () => serializePattern({ ...createPattern(5, 5, "A"), id: "a" }), save: () => {}, clear: async () => void (cleared = true) };
+    expect(await forgetAccountHere(persistence)).toEqual(["a", "b"]);
+    expect(cleared).toBe(true);
+  });
+
+  it("the editor shows the demo instead when the open pattern was the account's; otherwise it stays", async () => {
+    const { ed } = testEditor(5, 5);
+    const open = ed.doc.id;
+    ed.persistence.patterns.trimCache = async () => ["elsewhere"];
+    await ed.prepareSignOut();
+    expect(ed.doc.id).toBe(open);
+    ed.persistence.patterns.trimCache = async () => [open];
+    await ed.prepareSignOut();
+    expect(ed.doc.id).not.toBe(open);
+    expect(ed.doc.w).toBe(60);
   });
 });

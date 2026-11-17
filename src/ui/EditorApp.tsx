@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createEditor, type Editor } from "@/editor/createEditor";
+import { takeStartRequest } from "@/editor/startRequest";
 import { Toasts } from "./common/widgets";
 import { DialogHost } from "./dialogs/DialogHost";
 import { Header } from "./header/Header";
@@ -63,13 +64,16 @@ function useGlobalEvents(ed: Editor, setDragging: (on: boolean) => void) {
 }
 
 /**
- * Coming from the patterns page: `?open=<id>` opens that pattern, `?new=1` the New pattern dialog — once start-up has
+ * Coming from the patterns page: a picked picture or work file (`startRequest`), `?open=<id>` opens that pattern,
+ * `?new=1` the New pattern dialog — once start-up has
  * restored the draft and the session is known (an account's pattern needs it). The address is cleaned afterwards.
  */
 function useStartRequest(ed: Editor) {
   const ready = useEditorState((st) => st.ready && st.accountKnown);
   useEffect(() => {
     if (!ready) return;
+    const picked = takeStartRequest();
+    if (picked) return void ed.commands.run(picked.kind === "image" ? "image.open" : "file.load", picked.file);
     const url = new URL(window.location.href), open = url.searchParams.get("open"), make = url.searchParams.has("new");
     if (!open && !make) return;
     url.searchParams.delete("open");

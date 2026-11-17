@@ -70,6 +70,12 @@ export class Autosave {
     await run.finally(() => this.saving === run && (this.saving = null));
   }
 
+  /** Any changes go to the saved patterns now, and this waits until they're there (signing out). */
+  async settle() {
+    if (this.unsaved) await this.saveLibrary();
+    else if (this.saving) await this.saving.catch(() => {});
+  }
+
   flush() {
     this.flushDraft();
     void this.saveLibrary();

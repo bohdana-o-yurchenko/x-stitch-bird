@@ -15,6 +15,7 @@ import { demoPattern, loadPattern } from "./actions/pattern";
 import { Autosave } from "./autosave";
 import { CommandRegistry } from "./commands/registry";
 import { KeepPattern } from "./keepPattern";
+import { forgetAccountHere } from "./library";
 import { History } from "./history/history";
 import { ImageService } from "./images/ImageService";
 import { canMatch, PICKING } from "./matching/matching";
@@ -204,7 +205,23 @@ export class Editor {
     // signed in with work open ("Sign in to keep it"): it goes to the account now
     if (user && this.state.ready && this.keep.edited) void saveToLibrary(this, { quiet: true });
     // an upload cut off last time (tab closed mid-save): the browser copy is newer, so it goes up now
-    if (user) void this.persistence.patterns.catchUp?.().catch(() => {});
+    // then this browser keeps only the open pattern and the most recent few of the account's
+    if (user)
+      void (this.persistence.patterns.catchUp?.() ?? Promise.resolve())
+        .then(() => this.persistence.patterns.trimCache?.({ keep: [this.doc.id] }))
+        .catch(() => {});
+  }
+
+  /**
+   * Before signing out: changes reach the account, then its patterns leave this browser. When the open pattern was
+   * one of them, the demo takes its place — nothing of the account stays on screen.
+   */
+  async prepareSignOut() {
+    await this.autosave.settle();
+    const gone = await forgetAccountHere(this.persistence);
+    if (!gone.includes(this.doc.id)) return;
+    loadPattern(this, demoPattern(this.state.symbols));
+    this.autosave.markSaved();
   }
 
   /** Whether there are saved patterns besides the open one (Pattern ▸ Open is offered then). */

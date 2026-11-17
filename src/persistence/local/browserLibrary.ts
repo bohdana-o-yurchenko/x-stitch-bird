@@ -136,4 +136,10 @@ export const indexedDbDraftStore: DraftStore = {
       } catch {}
     }
   },
+  async clear() {
+    await run("drafts", "readwrite", (s) => s.delete(DRAFT_ID)).catch(() => {});
+    try {
+      localStorage.removeItem(LEGACY_DRAFT_KEY);
+    } catch {}
+  },
 };

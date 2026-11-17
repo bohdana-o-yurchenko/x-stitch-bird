@@ -39,6 +39,7 @@ export function AccountButton() {
         ed.flush();
         router.push("/patterns");
       }}
+      beforeSignOut={() => ed.prepareSignOut()}
       onSignedOut={() => {
         ed.setAccount(null);
         ed.toast("account.signedOut");
@@ -48,11 +49,13 @@ export function AccountButton() {
 }
 
 /** "Sign in", or signed in: the initial, with the email and Sign out. Shared by the editor and the patterns page. */
-export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, onSignedOut, onMyPatterns }: {
+export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, beforeSignOut, onSignedOut, onMyPatterns }: {
   user: { email: string; name?: string } | null;
   signInOpen: boolean;
   setSignInOpen: (on: boolean) => void;
   onSignedIn?: (email: string) => void;
+  /** Runs first (the account's patterns leave this browser). */
+  beforeSignOut?: () => Promise<unknown>;
   onSignedOut?: () => void;
   /** Leave for the My patterns page (not given on that page itself). */
   onMyPatterns?: () => void;
@@ -75,7 +78,7 @@ export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, onSig
           { label: user.email, hint: t("signedInHint"), onClick: () => {} },
           "-",
           ...(onMyPatterns ? [{ label: t("myPatterns"), onClick: onMyPatterns }, "-" as const] : []),
-          { label: t("signOut"), onClick: async () => { await authClient.signOut(); onSignedOut?.(); } },
+          { label: t("signOut"), onClick: async () => { await beforeSignOut?.(); await authClient.signOut(); onSignedOut?.(); } },
         ]}
       />
     </span>

@@ -73,3 +73,12 @@ export async function dragCells(page: Page, a: [number, number], b: [number, num
   await page.mouse.move(to.x, to.y, { steps: 5 });
   await page.mouse.up();
 }
+
+/**
+ * Signed in, as far as the editor knows (the account itself isn't reachable in tests) — after the real session check,
+ * which would otherwise answer "signed out" over it.
+ */
+export async function pretendSignedIn(page: Page, email = "e2e@example.com") {
+  await expect.poll(() => editorState<boolean>(page, "(ed) => ed.state.accountKnown")).toBe(true);
+  await page.evaluate((e) => (window as unknown as { __stitchwork: { setAccount(u: unknown): void } }).__stitchwork.setAccount({ id: "e2e", email: e }), email);
+}

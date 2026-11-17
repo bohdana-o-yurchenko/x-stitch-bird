@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
-import { cellPoint, dragCells, editorState, fileAction, fixture, gridPoint, loadFixture, openEditor, printAction } from "./helpers";
+import { cellPoint, dragCells, editorState, fileAction, fixture, gridPoint, loadFixture, openEditor, pretendSignedIn, printAction } from "./helpers";
 
 /*
  * The main things people do, start to finish: make a pattern, draw it, keep it, open it again, bring in pictures
@@ -93,8 +93,8 @@ test("signed out, replacing a pattern with work in it asks first: download it, s
 });
 
 test("signed in, a file opened from the computer is kept, even when another pattern is opened straight after", async ({ page }) => {
-  // signed in (the account itself isn't reachable here; this browser's copies are what's checked)
-  await page.evaluate(() => (window as unknown as { __stitchwork: { setAccount(u: unknown): void } }).__stitchwork.setAccount({ id: "e2e", email: "e2e@example.com" }));
+  // signed in (this browser's copies are what's checked)
+  await pretendSignedIn(page);
   await page.keyboard.press("ControlOrMeta+s");
   await loadFixture(page, "1.oxs");
   await expect(page.locator("[data-entry]")).toHaveCount(12);
@@ -227,7 +227,7 @@ test("exports a stitched preview: bigger cells than the flat one, with the foote
   expect(flat.w).toBeLessThan(stitched.w);
 });
 
-test("the logo leads to My patterns: cards with previews, open one in the editor, or start a new one", async ({ page }) => {
+test("the logo leads to My patterns: continue the open one, open another from its card, or start a new one", async ({ page }) => {
   // a pattern saved in this browser before the one-pattern rule
   await page.evaluate(() => {
     const doc = JSON.stringify({ app: "stitchwork", v: 4, xbird: 1, id: "roses", name: "Roses", w: 12, h: 8, count: 14, strands: 2, fabric: "#FFFFFF", pal: [{ t: "thread", src: "dmc:310", n: 2, st: "full", sym: "A" }], blends: {}, combos: {}, customs: {}, cells: "" });
@@ -237,26 +237,36 @@ test("the logo leads to My patterns: cards with previews, open one in the editor
   });
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
+  await page.getByRole("textbox", { name: "Pattern name" }).fill("Heart");
+  await page.keyboard.press("Enter");
   await page.getByTestId("to-home").click();
   await expect(page).toHaveURL(/\/en\/patterns$/);
-  await expect(page.getByRole("heading", { name: "My patterns" })).toBeVisible();
+  // the open one, to continue — with what it is, and the invitation to sign in
+  const current = page.getByTestId("home-continue");
+  await expect(current).toContainText("Heart");
+  await expect(current).toContainText("60 × 60 stitches · 10.9 × 10.9 cm on 14 ct");
+  await expect(current.locator("img")).toHaveAttribute("src", /^data:image\/png/);
   await expect(page.getByTestId("home-signed-out")).toBeVisible();
+  // the others as cards
   const roses = page.getByRole("link", { name: "Open “Roses”" });
-  await expect(roses).toContainText("12×8");
-  // the preview is drawn from the pattern itself
   await expect(roses.locator("img")).toHaveAttribute("src", /^data:image\/png/);
+  await expect(page.getByTestId("home-pattern")).toContainText("Roses");
   await roses.click();
   await expect(page).toHaveURL(/\/en$/);
+  // the open one has edits (its new name) and is only here: the question first
+  await page.getByRole("button", { name: "Replace it" }).click();
   await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Roses");
   await page.getByTestId("to-home").click();
-  await page.getByTestId("home-new").click();
+  await expect(page.getByTestId("home-continue")).toContainText("Roses");
+  await page.getByTestId("home-new").getByRole("button").click();
+  await page.getByRole("menuitem", { name: "Blank pattern" }).click();
   await expect(page.getByRole("dialog", { name: "New pattern" })).toBeVisible();
 });
 
 test("signed in, the account menu leads to My patterns", async ({ page }) => {
-  await page.evaluate(() => (window as unknown as { __stitchwork: { setAccount(u: unknown): void } }).__stitchwork.setAccount({ id: "e2e", email: "e2e@example.com" }));
+  await pretendSignedIn(page);
   await page.getByRole("button", { name: /e2e@example\.com/ }).click();
   await page.getByRole("menuitem", { name: "My patterns" }).click();
   await expect(page).toHaveURL(/\/en\/patterns$/);
-  await expect(page.getByRole("heading", { name: "My patterns" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^All patterns/ })).toBeVisible();
 });

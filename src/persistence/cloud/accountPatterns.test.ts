@@ -52,3 +52,29 @@ describe("patterns in the account", () => {
     expect(put).toEqual(["cut-off"]);
   });
 });
+
+describe("this browser as the account's cache", () => {
+  it("keeps the most recent few and the open one; signing out takes them all; never one newer than the account's", async () => {
+    account.signedIn = true;
+    const now = Date.now();
+    const here = Array.from({ length: 13 }, (_, i) => summary(`p${i}`, now - i * 60_000));
+    const removed: string[] = [];
+    const local = { ...localWith([...here, summary("only-here", now), summary("newer-here", now)]), remove: async (id: string) => void removed.push(id) };
+    serverWith([...here, summary("newer-here", now - 3_600_000)]);
+    const repo = withAccount(local);
+    expect(await repo.trimCache!({ keep: ["p12"] })).toEqual(["p10", "p11"]);
+    removed.length = 0;
+    expect(await repo.trimCache!({ all: true })).toHaveLength(13);
+    expect(removed).not.toContain("only-here");
+    expect(removed).not.toContain("newer-here");
+  });
+
+  it("removes nothing when the account can't be reached", async () => {
+    account.signedIn = true;
+    vi.stubGlobal("fetch", async () => new Response(null, { status: 500 }));
+    const removed: string[] = [];
+    const repo = withAccount({ ...localWith([summary("a", 1)]), remove: async (id: string) => void removed.push(id) });
+    expect(await repo.trimCache!({ all: true })).toEqual([]);
+    expect(removed).toEqual([]);
+  });
+});

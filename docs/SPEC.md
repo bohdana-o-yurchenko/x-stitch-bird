@@ -1674,17 +1674,28 @@ Never asked, never removed: signed in; patterns in this browser on the first sta
 account at once.
 **Next:** My patterns (§15.26).
 
-### 15.26 The main page: My patterns (built 2026-11-17)
-`/[locale]/patterns` (`ui/home`, `editor/library.ts`). The editor's logo and name lead here, and so does
-**My patterns** in the account menu (signed in) (the open pattern is
-saved first); the editor stays at `/[locale]`, so links in exported files keep working. A header (logo, languages,
-account, **Open the editor**), a left column of sections — only *Patterns* now; threads and the stash come later —
-and **My patterns**: a *New pattern* card (→ the editor's New dialog, `/?new=1`) and a card per saved pattern —
-preview, name, size, date, where it's kept (this browser · your account · both), delete (asks first). A card opens
-the pattern in the editor (`/?open=<id>`, after start-up and the session check; the one already open isn't
-reloaded). Previews: the account's picture when it has one, otherwise drawn from the pattern in this browser.
-Signed out: an invitation to sign in (one pattern at a time without it). Signed in, with patterns only in this
-browser: **Move to my account** — each goes up with its preview and is kept here for good.
+### 15.26 The main page: My patterns (built 2026-11-17, redesigned the same day)
+`/[locale]/patterns` (`ui/home`, `editor/library.ts`). The editor's logo and name lead here, and so does **My
+patterns** in the account menu; the open pattern is saved first. The editor stays at `/[locale]`, so links in
+exported files keep working.
+- **Header** like the editor's: logo, the sections as tabs (only *Patterns* now; threads and the stash later),
+  languages, account.
+- **Continue stitching**: the pattern last worked on (the editor's draft) — big preview, name, size in stitches and
+  in cm on its fabric, when it was edited, **Continue →**. Signed out, one line under it invites to sign in.
+- **All patterns** (the others) as cards: the preview fills the card (crisp, its size shown while pointing at it),
+  name, when it was edited ("3 days ago", in the page's language); ⋯ → Open · Delete… (asks). Signed in, a pattern
+  only in this browser says so (⚠); a banner offers **Move to my account**. **+ New ▾**: Blank pattern · From a
+  picture… · Open work file… (the file is picked here and handed to the editor, `editor/startRequest.ts`). Search and
+  sorting (recent, name) from 9 patterns on. Nothing yet: the bird, and the three ways to start.
+- A card opens the pattern in the editor (`/?open=<id>`, after start-up and the session check; the one already open
+  isn't reloaded). Previews: the account's picture when it has one, else drawn from the pattern in this browser.
+- Downloading a work file stays in the editor (it holds the photos and versions).
+
+**Signed in, the account is home** (2026-11-17): this browser keeps the open pattern and the 10 most recent of the
+account's as a cache (`trimCache`, on sign-in); never a copy newer than the account's. **Signing out** first lets
+changes reach the account, then takes the account's patterns out of this browser (shared computers) — and the draft
+when it's one of them; the editor then shows the demo. Patterns only here stay. Nothing is taken out when the
+account can't be reached.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

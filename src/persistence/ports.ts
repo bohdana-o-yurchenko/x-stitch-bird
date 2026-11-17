@@ -29,6 +29,11 @@ export interface PatternRepository {
   remove(id: string): Promise<void>;
   /** Signed in: patterns saved in this browser after their last copy reached the account (an upload cut off) go up now. */
   catchUp?(): Promise<void>;
+  /**
+   * Signed in: this browser keeps the account's patterns only as a cache — the `keep` ones and the most recent few.
+   * `all`: none (signing out). Patterns not in the account stay. Returns the ids taken out of this browser.
+   */
+  trimCache?(o: { keep?: string[]; all?: boolean }): Promise<string[]>;
 }
 
 /** A reference window (SPEC §11.1). `image` and `marks` are ids in the image store. */
@@ -80,6 +85,8 @@ export interface UnderlayRepository {
 export interface DraftStore {
   load(): Promise<PatternFile | null>;
   save(doc: PatternFile): void;
+  /** Forget it (signing out: an account's pattern doesn't stay behind). */
+  clear?(): Promise<void>;
 }
 
 export interface Snapshot {
