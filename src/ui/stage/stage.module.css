@@ -192,3 +192,20 @@
 .tipList li + li {
   margin-top: 3px;
 }
+/* another window edits the pattern (SPEC §15.34) */
+.liveBar {
+  align-items: center;
+  max-width: calc(100% - 32px);
+}
+.liveBar .barText {
+  white-space: normal;
+  color: var(--ink);
+}
+.liveNudge {
+  animation: liveNudge 0.45s ease;
+}
+@keyframes liveNudge {
+  0%, 100% { transform: translateX(-50%); }
+  25% { transform: translateX(calc(-50% - 6px)); }
+  75% { transform: translateX(calc(-50% + 6px)); }
+}

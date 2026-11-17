@@ -12,10 +12,11 @@ import { confirmLargePhoto } from "./images/largePhoto";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { chromeColours } from "@/platform/themeColours";
 import { createFromImage, saveToLibrary } from "./actions/importExport";
-import { demoPattern, loadPattern } from "./actions/pattern";
+import { demoPattern, loadPattern, replaceDoc } from "./actions/pattern";
 import { Autosave } from "./autosave";
 import { CommandRegistry } from "./commands/registry";
 import { KeepPattern } from "./keepPattern";
+import { LiveSync } from "./live/LiveSync";
 import { ThreadInventory } from "./threads/inventory";
 import { forgetAccountHere } from "./library";
 import { saveOpen, saveSections, savedOpen, savedSections } from "./panelSections";
@@ -62,6 +63,7 @@ export class Editor {
   readonly autosave: Autosave;
   readonly images: ImageService;
   readonly timer: WorkTimer;
+  readonly live: LiveSync;
   theme: CanvasTheme = defaultCanvasTheme;
   /** Translation for exported texts and labels built here; set by the UI for the current locale. */
   t: Translate = (key) => key;
@@ -87,8 +89,10 @@ export class Editor {
     this.references = new ReferenceService(this);
     this.underlay = new UnderlayService(this);
     this.snapshots = new SnapshotService(this);
-    this.autosave = new Autosave(persistence.draft, () => this.doc, () => saveToLibrary(this, { quiet: true }));
+    // another window follows this one: its changes go up within seconds (SPEC §15.34)
+    this.autosave = new Autosave(persistence.draft, () => this.doc, () => saveToLibrary(this, { quiet: true }), () => this.state.live.others > 0);
     this.timer = new WorkTimer(this);
+    this.live = new LiveSync(this);
   }
 
   get state(): EditorState {
@@ -130,11 +134,14 @@ export class Editor {
     loadPattern(this, pattern ?? demoPattern(symbols));
     // a restored draft is saved to the library once it's edited; the demo only then too
     this.autosave.markSaved();
+    // the draft may hold changes its saved copies don't
+    if (pattern) this.live.opened(pattern.id, { unsure: true });
     await this.keep.init();
     this.store.setState({ panelSections: savedSections(), openSection: savedOpen() });
     // what came back from an earlier visit is work if it was edited then; the demo isn't
     if (pattern) this.keep.restored();
     this.store.setState({ ready: true });
+    this.live.start();
     // the account's newer windows (or ones merged in from another device) replace the open pattern's on screen
     this.persistence.pictures?.onChange((id) => {
       if (id !== this.doc.id) return;
@@ -144,6 +151,11 @@ export class Editor {
     void this.refreshPatterns();
     // pictures no record uses any more (closed windows, replaced underlays, old marks)
     setTimeout(() => void this.persistence.images.collectGarbage().catch(() => {}), 10_000);
+  }
+
+  /** The same pattern as changed elsewhere, in place of this one: the view and tools stay (SPEC §15.34). */
+  replaceDoc(p: Pattern) {
+    replaceDoc(this, p);
   }
 
   /** Call after every document change. `keys`: key entries changed; `structural`: size changed. */

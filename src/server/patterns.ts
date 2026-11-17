@@ -22,9 +22,10 @@ export async function listPatterns(userId: string): Promise<CloudSummary[]> {
   return rows.map((r) => ({ id: r.id, name: r.name, w: r.w, h: r.h, ...(r.designer ? { designer: r.designer } : {}), updatedAt: new Date(r.updated_at).getTime(), hasPreview: !!r.preview_key }));
 }
 
-export async function getPattern(userId: string, id: string): Promise<PatternFile | null> {
-  const rows = await sql`select doc from patterns where user_id = ${userId} and id = ${id}`;
-  return (rows[0]?.doc as PatternFile | undefined) ?? null;
+/** The pattern file and its revision (how many saves it has had). */
+export async function getPattern(userId: string, id: string): Promise<{ doc: PatternFile; rev: number } | null> {
+  const rows = await sql`select doc, rev from patterns where user_id = ${userId} and id = ${id}`;
+  return rows[0] ? { doc: rows[0].doc as PatternFile, rev: rows[0].rev as number } : null;
 }
 
 /** A pattern file as the app writes it; anything else is refused. */
@@ -33,13 +34,26 @@ export function validPattern(v: unknown, id: string): v is PatternFile {
   return !!d && d.app === "stitchwork" && d.id === id && typeof d.name === "string" && Number.isInteger(d.w) && Number.isInteger(d.h) && JSON.stringify(d).length < MAX_DOC;
 }
 
-export async function putPattern(userId: string, doc: PatternFile): Promise<number> {
+export type PutResult = { ok: true; updatedAt: number; rev: number } | { ok: false; current: { doc: PatternFile; rev: number } };
+
+/**
+ * Saves the pattern over revision `base` (SPEC §15.34): refused, with the account's copy, when it has had another save
+ * since — a change made elsewhere is never replaced unseen. Without `base` (older app versions) it always saves.
+ * `windowId`: the window saving keeps (or takes) the editing.
+ */
+export async function putPattern(userId: string, doc: PatternFile, base?: number, windowId?: string): Promise<PutResult> {
   const rows = await sql`
-    insert into patterns (user_id, id, name, w, h, designer, doc, updated_at)
-    values (${userId}, ${doc.id}, ${doc.name}, ${doc.w}, ${doc.h}, ${doc.meta?.designer ?? null}, ${JSON.stringify(doc)}::jsonb, now())
-    on conflict (user_id, id) do update set name = excluded.name, w = excluded.w, h = excluded.h, designer = excluded.designer, doc = excluded.doc, updated_at = now()
-    returning updated_at`;
-  return new Date(rows[0]!.updated_at).getTime();
+    insert into patterns (user_id, id, name, w, h, designer, doc, updated_at, rev, editor, editor_at)
+    values (${userId}, ${doc.id}, ${doc.name}, ${doc.w}, ${doc.h}, ${doc.meta?.designer ?? null}, ${JSON.stringify(doc)}::jsonb, now(), 1, ${windowId ?? null}, ${windowId ? new Date() : null})
+    on conflict (user_id, id) do update set name = excluded.name, w = excluded.w, h = excluded.h, designer = excluded.designer, doc = excluded.doc,
+      updated_at = now(), rev = patterns.rev + 1,
+      editor = coalesce(excluded.editor, patterns.editor), editor_at = coalesce(excluded.editor_at, patterns.editor_at)
+    where ${base ?? null}::integer is null or patterns.rev = ${base ?? null}::integer
+    returning updated_at, rev`;
+  if (rows[0]) return { ok: true, updatedAt: new Date(rows[0].updated_at).getTime(), rev: rows[0].rev as number };
+  const current = await getPattern(userId, doc.id);
+  // gone in between: saved as new
+  return current ? { ok: false, current } : putPattern(userId, doc, undefined, windowId);
 }
 
 export async function deletePattern(userId: string, id: string): Promise<void> {

@@ -16,6 +16,9 @@ export function VersionsPanel() {
   const ed = useEditor();
   const id = useEditorState((st) => st.doc.id);
   const revision = useEditorState((st) => st.docRevision);
+  const arrived = useEditorState((st) => st.versionsRevision);
+  // signed in: the versions from other devices join these (SPEC §15.34)
+  useEffect(() => void ed.snapshots.sync(id), [ed, id]);
   const [snaps, setSnaps] = useState<SnapshotSummary[] | null>(null);
   // copies are taken before risky changes: look again when the pattern changes
   useEffect(() => {
@@ -24,7 +27,7 @@ export function VersionsPanel() {
     return () => {
       live = false;
     };
-  }, [ed, id, revision]);
+  }, [ed, id, revision, arrived]);
   return (
     <Section id="versions" title={t("side.versions")} defaultOpen testId="versions-panel">
       <div className={s.section}>

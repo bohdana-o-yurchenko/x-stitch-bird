@@ -147,6 +147,19 @@ export const COMMANDS: readonly Command[] = [
   { id: "snapshot.restore", run: (ed, time) => ed.snapshots.restore(time as number) },
 ];
 
+/**
+ * Commands that change the open pattern: not while another window edits it (SPEC §15.34). Opening or making another
+ * pattern, the view, the photos and exports stay free.
+ */
+const EDITS = new Set([
+  "history.undo", "history.redo", "key.add", "key.edit", "key.requestDelete", "key.delete",
+  "pattern.setInfo", "pattern.setGrid", "pattern.rename", "pattern.setBrands", "pattern.setMaterials", "pattern.setFabric", "pattern.requestResize", "pattern.resize",
+  "transform.apply", "transform.requestMirror", "transform.mirror", "transform.crop", "transform.requestExtend", "transform.extend",
+  "ambiguous.toggleAtHover", "ambiguous.clearAll",
+  "selection.clear", "selection.nudge", "selection.flipH", "selection.flipV", "selection.rotate", "selection.requestReplaceKey", "selection.replaceKey", "selection.crop",
+  "clipboard.cut", "clipboard.paste", "floating.commit", "match.accept", "match.decline", "snapshot.restore",
+]);
+
 export class CommandRegistry {
   private byId = new Map(COMMANDS.map((c) => [c.id, c]));
 
@@ -161,6 +174,7 @@ export class CommandRegistry {
   async run(id: string, args?: unknown, confirmed = false): Promise<void> {
     const c = this.byId.get(id);
     if (!c || !this.enabled(id)) return;
+    if (EDITS.has(id) && this.ed.live.readOnly) return this.ed.live.blocked();
     const keep = this.ed.keep;
     if (c.replacesPattern && !confirmed && keep.mustAsk) return this.ed.openDialog({ type: "keepPattern", then: { command: id, args } });
     if (c.destructive) this.ed.snapshots.before(c.destructive);

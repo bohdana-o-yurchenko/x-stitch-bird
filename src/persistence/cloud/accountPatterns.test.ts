@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PatternFile } from "@/core/formats/json/serialize";
 import type { PatternRepository, PatternSummary } from "../ports";
-import { account, withAccount } from "./accountPatterns";
+import { account, accountRevs, withAccount } from "./accountPatterns";
 
 const file = (id: string) => ({ app: "stitchwork", id, name: id }) as unknown as PatternFile;
 const summary = (id: string, updatedAt: number): PatternSummary => ({ id, name: id, w: 10, h: 10, updatedAt });
@@ -20,7 +20,7 @@ function serverWith(there: PatternSummary[], putOk = true) {
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (init?.method === "PUT") {
       put.push(decodeURIComponent(url.split("/").pop()!));
-      return new Response(null, { status: putOk ? 200 : 500 });
+      return new Response(putOk ? JSON.stringify({ rev: 1 }) : null, { status: putOk ? 200 : 500 });
     }
     return new Response(JSON.stringify(there), { status: 200 });
   });
@@ -40,7 +40,33 @@ describe("patterns in the account", () => {
     account.signedIn = true;
     expect(await repo.save(file("a"))).toEqual({ ok: true, account: false });
     serverWith([]);
-    expect(await repo.save(file("a"))).toEqual({ ok: true, account: true });
+    expect(await repo.save(file("a"))).toEqual({ ok: true, account: true, rev: 1 });
+  });
+
+  it("a save names the revision it was made over; refused when the account changed since, with the account's copy (SPEC §15.34)", async () => {
+    const store = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) });
+    account.signedIn = true;
+    let rev = 0;
+    const bases: (string | null)[] = [];
+    vi.stubGlobal("fetch", async (_url: string, init?: RequestInit) => {
+      const base = new Headers(init?.headers).get("x-base-rev");
+      bases.push(base);
+      if (base !== null && Number(base) !== rev) return new Response(JSON.stringify({ rev, doc: file("theirs") }), { status: 409 });
+      return new Response(JSON.stringify({ rev: ++rev }), { status: 200 });
+    });
+    const repo = withAccount(localWith([]));
+    expect(await repo.save(file("a"))).toMatchObject({ account: true, rev: 1 });
+    expect(await repo.save(file("a"))).toMatchObject({ account: true, rev: 2 });
+    // another device saved meanwhile
+    rev = 5;
+    const r = await repo.save(file("a"));
+    expect(r).toMatchObject({ ok: true, account: false, conflict: { rev: 5, doc: { id: "theirs" } } });
+    expect(bases).toEqual([null, "1", "2"]);
+    expect(accountRevs.get("a")).toEqual({ rev: 2, pending: true });
+    // the window that chose its version saves over the account's
+    expect(await repo.save(file("a"), { base: 5 })).toMatchObject({ account: true, rev: 6 });
+    expect(accountRevs.get("a")).toEqual({ rev: 6 });
   });
 
   it("catches up: browser copies clearly newer than the account's go up; browser-only patterns stay put", async () => {

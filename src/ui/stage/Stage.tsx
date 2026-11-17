@@ -7,6 +7,7 @@ import { Icon } from "../common/Icon";
 import { cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { ChartCanvas } from "./ChartCanvas";
+import { LiveBar } from "./LiveBar";
 import s from "./stage.module.css";
 
 /** Colour / Both / Symbols — how the chart is drawn; sits with the zoom. */
@@ -196,6 +197,7 @@ export function Stage() {
     <>
       <ChartCanvas />
       {hasSelection && !matching && <SelectionActions />}
+      <LiveBar />
       <MatchBar />
       <ZoomControls />
     </>

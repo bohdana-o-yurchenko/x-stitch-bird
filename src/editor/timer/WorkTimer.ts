@@ -17,6 +17,8 @@ export class WorkTimer {
   constructor(private ed: Editor, private now: () => number = () => Date.now()) {}
 
   activity() {
+    // following another window: the work is counted there
+    if (this.ed.live?.readOnly) return;
     const t = this.now(), doc = this.ed.doc;
     const gap = doc.id === this.docId ? workGap(this.last, t) : 0;
     this.docId = doc.id;

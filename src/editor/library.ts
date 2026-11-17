@@ -89,7 +89,7 @@ export function createLibrary(persistence: Persistence = createPersistence()) {
       let done = 0;
       for (const id of ids) {
         const doc = await persistence.patterns.load(id);
-        if (!doc || !(await accountPatternApi.save(doc))) continue;
+        if (!doc || !(await accountPatternApi.save(doc)).ok) continue;
         keepForGood(id);
         persistence.pictures?.push(id);
         const canvas = await drawPreview(id).catch(() => null);

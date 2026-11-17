@@ -20,5 +20,6 @@ export function createPersistence(): Persistence {
 }
 
 export type * from "./ports";
-export { account, accountPatternApi } from "./cloud/accountPatterns";
+export { account, accountPatternApi, accountRevs } from "./cloud/accountPatterns";
+export { liveApi, versionApi } from "./cloud/livePatterns";
 export { accountThreadApi } from "./cloud/accountThreads";

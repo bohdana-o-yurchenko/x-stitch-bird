@@ -10,6 +10,8 @@ import type { Viewport } from "@/render/ChartRenderer";
 import type { RefWindowData } from "@/persistence/ports";
 import type { Handle, UnderlayData } from "@/core/underlay/underlay";
 import type { ChecksState } from "../checks/checks";
+import type { LiveRole } from "../live/LiveSync";
+import type { PatternFile } from "@/core/formats/json/serialize";
 import type { MatchState } from "../matching/matching";
 
 export type ToolId = "pencil" | "line" | "rect" | "filledRect" | "fill" | "eraser" | "picker" | "pan" | "select" | "magicWand" | "partial" | "autofill";
@@ -39,7 +41,9 @@ export type DialogRequest =
   | { type: "patternKeeper"; issues: PkReport["issues"] }
   | { type: "textFallback"; ext: string; text: string }
   /** Signed out, before another pattern replaces one with work in it: download, sign in, or replace. */
-  | { type: "keepPattern"; then: { command: string; args?: unknown } };
+  | { type: "keepPattern"; then: { command: string; args?: unknown } }
+  /** Changed here and elsewhere since the same revision (SPEC §15.34): which version to go on with. */
+  | { type: "liveConflict"; theirs: { rev: number; doc: PatternFile } };
 
 export interface Overlay {
   hover: { x: number; y: number; size: number } | null;
@@ -140,6 +144,10 @@ export interface EditorState {
   matchPeek: boolean;
   /** Who is signed in (SPEC §15.23); null = nobody — everything stays in this browser. */
   account: { id: string; email: string; name?: string } | null;
+  /** The open pattern in other windows or devices (SPEC §15.34): this window's part, how many others; `nudge` counts tries to edit while following. */
+  live: { role: LiveRole; others: number; nudge?: number };
+  /** Bumped when versions arrive from elsewhere (the Versions list reads again). */
+  versionsRevision: number;
 }
 
 export const emptyOverlay: Overlay = { hover: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null };
@@ -197,6 +205,8 @@ export const createEditorStore = () =>
     matchView: null,
     matchPeek: false,
     account: null,
+    live: { role: "off", others: 0 },
+    versionsRevision: 0,
   }));
 
 export type EditorStore = ReturnType<typeof createEditorStore>;

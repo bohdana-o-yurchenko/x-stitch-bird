@@ -7,6 +7,8 @@ const DRAFT_DELAY = 600;
 export const LIBRARY_QUIET = 5_000;
 /** …and, while editing goes on, at least this often. */
 export const LIBRARY_EVERY = 30_000;
+/** While another window follows this one (SPEC §15.34): its changes show there within seconds. */
+const QUICK_QUIET = 1_200, QUICK_EVERY = 4_000;
 
 /**
  * Two kinds of automatic saving (SPEC §9.2): the open pattern as a draft shortly after each change (this browser),
@@ -22,7 +24,7 @@ export class Autosave {
   /** A save to the saved patterns is under way. */
   private saving: Promise<unknown> | null = null;
 
-  constructor(private draft: DraftStore, private doc: () => Pattern, private saveToLibrary: () => Promise<unknown>) {}
+  constructor(private draft: DraftStore, private doc: () => Pattern, private saveToLibrary: () => Promise<unknown>, private quick: () => boolean = () => false) {}
 
   schedule() {
     if (this.timer) clearTimeout(this.timer);
@@ -30,7 +32,8 @@ export class Autosave {
     if (!this.unsaved) this.since = Date.now();
     this.unsaved = true;
     if (this.libraryTimer) clearTimeout(this.libraryTimer);
-    const wait = Math.max(0, Math.min(LIBRARY_QUIET, this.since + LIBRARY_EVERY - Date.now()));
+    const [quiet, every] = this.quick() ? [QUICK_QUIET, QUICK_EVERY] : [LIBRARY_QUIET, LIBRARY_EVERY];
+    const wait = Math.max(0, Math.min(quiet, this.since + every - Date.now()));
     this.libraryTimer = setTimeout(() => void this.saveLibrary(), wait);
   }
 
@@ -74,6 +77,12 @@ export class Autosave {
   async settle() {
     if (this.unsaved) await this.saveLibrary();
     else if (this.saving) await this.saving.catch(() => {});
+  }
+
+  /** Saved now, changed or not (a version chosen over the account's goes up at once). */
+  saveNow() {
+    this.unsaved = true;
+    void this.saveLibrary();
   }
 
   flush() {

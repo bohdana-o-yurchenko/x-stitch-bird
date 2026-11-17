@@ -522,7 +522,9 @@
       "import": "Before loading a file",
       "image": "Before image → pattern",
       "restore": "Before restore",
-      "replaceKey": "Before replacing a key"
+      "replaceKey": "Before replacing a key",
+      "otherDevice": "The other version (not chosen)",
+      "thisDevice": "This window’s version (not chosen)"
     },
     "row": "{time} · {reason} · {w}×{h}"
   },
@@ -1160,5 +1162,16 @@
     "info": "Pattern info",
     "versions": "Versions",
     "resize": "Drag to resize · double-click for the default height"
+  },
+  "live": {
+    "following": "Being edited in another window. Its changes show here as they’re made.",
+    "editHere": "Edit here",
+    "takingOver": "Taking over… the other window is saving its last changes.",
+    "conflictTitle": "Changed in two places",
+    "conflictBody": "This pattern was changed here and, meanwhile, in another window or on another device. Which version do you want to go on with? The other one is kept in Versions — nothing is lost.",
+    "mine": "This window’s version",
+    "theirs": "The other version",
+    "keepMine": "Go on with this one",
+    "useTheirs": "Go on with that one"
   }
 }

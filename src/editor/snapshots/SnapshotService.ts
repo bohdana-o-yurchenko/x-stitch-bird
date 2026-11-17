@@ -1,14 +1,17 @@
 import { parsePattern } from "@/core/formats/json/parse";
-import { serializePattern, type FileVersion } from "@/core/formats/json/serialize";
+import { serializePattern, type FileVersion, type PatternFile } from "@/core/formats/json/serialize";
 import { buildPalette, type Palette } from "@/core/pattern/palette";
 import type { Pattern } from "@/core/pattern/types";
 import { snapshotsToDelete } from "@/core/snapshots/retention";
 import { renderChartImage } from "@/render/exportChart";
+import { versionApi } from "@/persistence";
 import type { Snapshot, SnapshotSummary } from "@/persistence/ports";
 import type { Editor } from "../createEditor";
 import { loadPattern } from "../actions/pattern";
 
 const EVERY = 5 * 60_000;
+/** Versions fetched from the account per request (each is a whole pattern). */
+const FETCH_AT_ONCE = 10;
 
 /** Automatic snapshots (SPEC §15.7): every 5 minutes while editing, and before destructive commands. */
 export class SnapshotService {
@@ -50,6 +53,47 @@ export class SnapshotService {
       await repo.add(snap).catch(() => {});
     }
     await this.prune(p.id).catch(() => {});
+    void this.sync(p.id);
+  }
+
+  /** A version of the pattern made elsewhere, kept here as it was (SPEC §15.34: the one not chosen in a conflict). */
+  async addVersion(doc: PatternFile, reason: string) {
+    const time = (this.lastTime = Math.max(Date.now(), this.lastTime + 1));
+    await this.importFile(doc.id, [{ time, reason, doc }]);
+    this.ed.store.setState({ versionsRevision: this.ed.state.versionsRevision + 1 });
+    void this.sync(doc.id);
+  }
+
+  /**
+   * Signed in, the pattern's versions from every device in one history (SPEC §15.34): this browser's go up, the
+   * account's come down — only those the history keeps (the same thinning everywhere, so nothing goes back and forth).
+   */
+  async sync(id = this.ed.doc.id) {
+    if (!this.ed.state.account) return;
+    const repo = this.ed.persistence.snapshots;
+    const remote = await versionApi.list(id).catch(() => null);
+    if (!remote) return;
+    const local = await repo.list(id).catch(() => [] as SnapshotSummary[]);
+    const there = new Set(remote.map((v) => v.time)), here = new Set(local.map((s) => s.time));
+    const all = [...new Set([...there, ...here])];
+    const dropped = new Set(snapshotsToDelete(all, Date.now()));
+    for (const s of local) {
+      if (there.has(s.time) || dropped.has(s.time)) continue;
+      const full = await repo.get(id, s.time).catch(() => null);
+      if (!full) continue;
+      try {
+        if (!(await versionApi.add(id, [{ time: full.time, reason: full.reason, doc: JSON.parse(full.data) as PatternFile }]))) return;
+      } catch {
+        return;
+      }
+    }
+    const wanted = remote.filter((v) => !here.has(v.time) && !dropped.has(v.time)).map((v) => v.time);
+    for (let i = 0; i < wanted.length; i += FETCH_AT_ONCE) {
+      const got = await versionApi.get(id, wanted.slice(i, i + FETCH_AT_ONCE)).catch(() => null);
+      if (!got) return;
+      await this.importFile(id, got);
+    }
+    if (wanted.length) this.ed.store.setState({ versionsRevision: this.ed.state.versionsRevision + 1 });
   }
 
   private thumb(p: Pattern, palette: Palette): string | null {

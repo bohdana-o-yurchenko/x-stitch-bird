@@ -1831,6 +1831,31 @@ made for, the photos' quality is the point — so they are kept **as they came, 
 - API: `/api/patterns/[id]/pictures` (GET; PUT `{ refs, underlay, base }`, 409 `{ current }` or `{ missing }`),
   `/api/pictures/[id]` (GET → short-lived link, POST → signed upload form, PUT → confirm).
 
+### 15.34 One pattern in several windows or devices (2026-11-18)
+Signed in, the same pattern can be open in several windows, browsers or devices. Nothing done in one is lost or
+replaced unseen by another.
+- **One window edits at a time; the others follow it.** A following window shows the editing window's changes within
+  a few seconds (while another window follows, the editing one saves to the account about a second after each change;
+  windows check in every 2 s with others around, every 6 s alone, not at all while hidden). It can look around (move,
+  zoom, the picker, photo windows, printing), but changing the pattern only makes the bar wave: "Being edited in another
+  window. Its changes show here as they're made. [Edit here]". **Edit here** takes over: the window that was editing
+  saves its last changes first ("Taking over…"), then follows in turn. A window that's gone (closed, asleep, offline)
+  is not waited for; when nobody edits, the first window to check in does.
+- **Revisions.** Every save names the account revision it was made over (`patterns.rev`); one made over an older
+  revision is refused and comes back with the account's copy. Then: the same content — nothing to do; nothing changed
+  here — the account's copy is shown; **changed in both places** (e.g. work done offline while another device went on)
+  — "Changed in two places": both versions side by side, *Go on with this one* / *Go on with that one*. The one not
+  chosen is kept in Versions ("The other version (not chosen)" / "This window's version (not chosen)"), so nothing is
+  lost either way; choosing this window's version makes it the account's (it takes over the editing first).
+- **Versions from every device in one history.** Versions are whole snapshots, so two histories join by time: each
+  browser's go up to the account (`pattern_versions`, gzip), the account's come down, and every place thins the joined
+  history the same way (§15.7). Opening the pattern or the Versions section brings them together.
+- **Offline**: changes are kept in this browser and marked; they go up when the connection is back, over the revision
+  they were made on — so they either simply go up or lead to the question above.
+- Signed out, or a pattern only in this browser: nothing changes.
+- API: `/api/patterns/[id]` PUT with `x-base-rev` / `x-window` (409 `{ rev, doc }`), GET answers `x-rev`;
+  `/api/patterns/[id]/live` (`checkIn`, `claim`, `release`); `/api/patterns/[id]/versions`. `db/migrations/004_live.sql`.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

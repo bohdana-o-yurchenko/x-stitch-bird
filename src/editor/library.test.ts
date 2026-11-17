@@ -24,7 +24,8 @@ describe("the patterns page's library (SPEC §15.26)", () => {
     const put: string[] = [];
     vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
       if (init?.method === "PUT" && !url.endsWith("/preview")) put.push(decodeURIComponent(url.split("/").pop()!));
-      return new Response(null, { status: 200 });
+      // a save answers with the pattern's new revision (SPEC §15.34)
+      return new Response(JSON.stringify({ rev: 1 }), { status: 200 });
     });
     const lib = createLibrary(persistence);
     lib.setSignedIn(true);

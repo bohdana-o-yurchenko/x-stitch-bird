@@ -19,13 +19,30 @@ export interface PatternSummary {
   hasPreview?: boolean;
 }
 
-/** `account`: while signed in, whether the account got it too (false: offline or refused — the browser copy has it). */
-export type SaveResult = { ok: true; account?: boolean } | { ok: false; reason: "quota" | "conflict" | "error" };
+/**
+ * `account`: while signed in, whether the account got it too (false: offline or refused — the browser copy has it).
+ * `rev`: the account's revision of it now. `conflict`: refused — the account's copy had another save since the one
+ * this change was made over (SPEC §15.34); here it is.
+ */
+export type SaveResult =
+  | { ok: true; account?: boolean; rev?: number; conflict?: { rev: number; doc: PatternFile } }
+  | { ok: false; reason: "quota" | "conflict" | "error" };
+
+/**
+ * `base`: the account revision the change was made over (null: not known — it saves regardless, as before revisions;
+ * absent: the one this browser last had). `window`: the window saving, which keeps the editing. `localOnly`: this
+ * browser only (a copy of what the account already has).
+ */
+export interface SaveOptions {
+  base?: number | null;
+  window?: string;
+  localOnly?: boolean;
+}
 
 export interface PatternRepository {
   list(): Promise<PatternSummary[]>;
   load(id: string): Promise<PatternFile | null>;
-  save(doc: PatternFile): Promise<SaveResult>;
+  save(doc: PatternFile, o?: SaveOptions): Promise<SaveResult>;
   remove(id: string): Promise<void>;
   /** Signed in: patterns saved in this browser after their last copy reached the account (an upload cut off) go up now. */
   catchUp?(): Promise<void>;

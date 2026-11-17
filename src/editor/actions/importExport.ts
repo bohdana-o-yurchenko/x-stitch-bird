@@ -191,10 +191,13 @@ export function createFromImage(ed: Editor, r: QuantizeResult, image: HTMLImageE
 
 /** Into the saved patterns (and the account, signed in). `quiet`: the automatic save — no toast unless it fails. */
 export async function saveToLibrary(ed: Editor, o: { quiet?: boolean } = {}) {
-  const doc = serializePattern(ed.doc);
+  const doc = serializePattern(ed.doc), revision = ed.state.docRevision;
   if (!o.quiet) ed.autosave.markSaved();
   ed.store.setState({ saveState: "saving" });
-  const r = await ed.persistence.patterns.save(doc);
+  // following another window: nothing of this one's goes to the account (SPEC §15.34)
+  const r = await ed.persistence.patterns.save(doc, ed.live.readOnly ? { localOnly: true } : ed.live.saveOptions());
+  if (r.ok && r.conflict && doc.id === ed.doc.id) ed.live.refused(r.conflict);
+  if (r.ok && r.rev !== undefined && doc.id === ed.doc.id) ed.live.saved(r.rev, revision);
   if (r.ok) {
     ed.store.setState({ savedAt: Date.now(), saveState: r.account === false ? "offline" : "saved" });
     // in the account: safe, never taken out of this browser by the one-pattern rule

@@ -26,6 +26,21 @@ export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null
   void ed.refreshPatterns();
   // signed in: its own threads join the inventory, its copies catch up
   void ed.inventory.withPattern(p);
+  ed.live.opened(p.id);
+}
+
+/**
+ * The open pattern as changed in another window or device (SPEC §15.34): its content replaced, the view, tool and
+ * windows kept; undo starts afresh (its steps were made on the old content). Nothing to save: the account has it.
+ */
+export function replaceDoc(ed: Editor, p: Pattern) {
+  invalidateColors(p);
+  ed.history.clear();
+  ed.tools.cancel();
+  const keep = ed.state.activeEntry && p.key[ed.state.activeEntry] ? ed.state.activeEntry : Math.max(0, p.key.findIndex((e, i) => i > 0 && e));
+  ed.store.setState({ doc: p, selection: null, floating: null, activeEntry: keep, keyForm: null });
+  ed.changed({ keys: true, structural: true });
+  ed.autosave.markSaved();
 }
 
 export function newPattern(ed: Editor, o: { name: string; w: number; h: number; count: number; keepKey: boolean; materials?: Materials }) {

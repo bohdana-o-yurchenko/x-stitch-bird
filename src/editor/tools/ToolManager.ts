@@ -8,6 +8,9 @@ import type { Tool, ToolPointer } from "./types";
  * Space or the Pan tool), then the active tool — or the backstitch / knot behaviour when the active entry
  * places lines or points.
  */
+/** Tools that only look: usable while another window edits the pattern. */
+const VIEW_TOOLS = new Set<string>(["pan", "picker", "select", "magicWand"]);
+
 export class ToolManager {
   private active: Tool | null = null;
   private panning = false;
@@ -54,6 +57,8 @@ export class ToolManager {
       if (ed.state.momentaryTool === "picker") ed.momentaryPicked = true;
       return;
     }
+    // following another window (SPEC §15.34): looking around only
+    if (ed.live.readOnly && !VIEW_TOOLS.has(this.resolve().id)) return ed.live.blocked();
     this.active = this.resolve();
     this.active.down(ed, p);
   }
