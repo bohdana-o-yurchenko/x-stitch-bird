@@ -304,7 +304,8 @@
     },
     "placement": "Placement",
     "placementCell": "In a cell",
-    "noBeadsHere": "This pattern has no beads — turn them on in Threads & beads"
+    "noBeadsHere": "This pattern has no beads.",
+    "turnBeadsOn": "Turn beads on"
   },
   "picker": {
     "searchThread": "Search DMC number or name",

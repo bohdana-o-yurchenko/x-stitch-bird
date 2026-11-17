@@ -1145,8 +1145,11 @@ test("threads & beads of a new pattern: one brand only — no brand tabs, your o
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   const form = page.getByTestId("key-form");
   await expect(page.getByTestId("brand-tabs")).toHaveCount(0);
-  await expect(form.getByRole("radio", { name: "Bead", exact: true })).toBeDisabled();
-  await expect(form.getByRole("radio", { name: /Floss \+ bead/ })).toBeDisabled();
+  // no Floss + bead at all; Bead says why, and turns beads on in one click
+  await expect(form.getByRole("radio", { name: /Floss \+ bead/ })).toHaveCount(0);
+  await form.getByRole("radio", { name: "Bead", exact: true }).click();
+  await expect(page.getByTestId("no-beads-note")).toContainText("This pattern has no beads.");
+  await expect(form.getByRole("radio", { name: "Cross stitch" })).toBeChecked();
   await page.getByRole("button", { name: "+ Custom thread" }).click();
   await expect(page.getByTestId("fixed-brand")).toHaveText("DMC");
   await form.getByRole("button", { name: "Close" }).click();
@@ -1157,7 +1160,19 @@ test("threads & beads of a new pattern: one brand only — no brand tabs, your o
   await panel.getByTestId("materials-threads").getByLabel("Anchor").check();
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   await expect(page.getByTestId("brand-tabs").getByRole("tab")).toHaveText(["DMC", "Anchor"]);
-  await expect(page.getByTestId("key-form").getByRole("radio", { name: "Bead", exact: true })).toBeEnabled();
+  await expect(page.getByTestId("key-form").getByRole("radio", { name: /Floss \+ bead/ })).toBeVisible();
+});
+
+test("a pattern without beads: Bead ▸ Turn beads on, and the form goes on with a bead", async ({ page }) => {
+  await fileAction(page, "New", "Blank pattern…");
+  await page.getByRole("dialog").getByLabel("This pattern has beads").uncheck();
+  await page.getByRole("dialog").getByRole("button", { name: "Create" }).click();
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form");
+  await form.getByRole("radio", { name: "Bead", exact: true }).click();
+  await page.getByTestId("no-beads-note").getByRole("button", { name: "Turn beads on" }).click();
+  await expect(form.getByRole("radio", { name: "Bead", exact: true })).toBeChecked();
+  await expect(form.getByRole("radio", { name: /Floss \+ bead/ })).toBeVisible();
 });
 
 

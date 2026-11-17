@@ -1767,7 +1767,8 @@ Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) in the **New dialog** and 
   brand, not a choice). Several, or "only" off → tabs, + Brand, × (removing only while unused), your own threads in
   any brand, new brands.
 - **Beads**: **This pattern has beads** (on by default), then the same: brands (all built-in by default), "only".
-  Off → the key form offers no Bead or Floss + bead. Beads can't be turned off while the key has some.
+  Off → the key form has no Floss + bead at all, and Bead (kept, for a clean look that still says why) shows "This
+  pattern has no beads" with **Turn beads on**, which turns them on and goes on with a bead. Beads can't be turned off while the key has some.
 - Adding a second brand ends "only one" (it applies again only when ticked). A brand the key uses can't be unticked.
   **Start with this pattern's key and settings** (New dialog) copies the key and fills in the open pattern's threads
   & beads and fabric exactly as they are; anything the key doesn't depend on can still change (its brands and beads
