@@ -1856,6 +1856,26 @@ replaced unseen by another.
 - API: `/api/patterns/[id]` PUT with `x-base-rev` / `x-window` (409 `{ rev, doc }`), GET answers `x-rev`;
   `/api/patterns/[id]/live` (`checkIn`, `claim`, `release`); `/api/patterns/[id]/versions`. `db/migrations/004_live.sql`.
 
+### 15.35 Limits per account (2026-11-18)
+Sized to the Neon free plan (1 GB Postgres for the whole project, production and `dev` together; 5 GB object storage;
+5 GB of network transfer a month). Signed out nothing is limited: everything stays in the user's own browser. Over a
+limit nothing is lost — the work stays in the browser, and the app says what to remove (`src/server/limits.ts`).
+- **20 patterns** in the account. Saving a 21st (a new pattern) is refused: it is saved in this browser, a toast says
+  so once ("Your account holds 20 patterns — … Delete a pattern to keep it in your account too"), and the status bar
+  reads "Saved in this browser — your account is full". Changes to the 20 always go. My patterns ▸ Move to my account
+  stops when the account fills ("…the rest stay in this browser").
+- **100 MB of photos**: photos, their marks, images behind the chart (and their straighten source) that the account's
+  patterns use, each counted once (the same photo in two patterns: once); pictures uploaded within the hour count too
+  (on their way). Old marks and removed photos don't. Signed in, adding a photo that doesn't fit is stopped before
+  it's added — "No room for this photo: … use 97 of 100 MB, and this one needs 12 MB. Remove a photo from a pattern …
+  or delete a pattern"; one that reaches the account without room anyway (made offline) stays in this browser, with
+  a notice. The account checks again on every upload (413 `{ error: "quota", used, max }`).
+- **Versions**: at most **30 per pattern** everywhere (was 50; latest 10, hourly for a day, daily for two weeks), and
+  at most **25 MB per account**: past it, the oldest versions of the least recently changed patterns go first.
+- The account menu shows the use: "Patterns: 3 of 20 · Photos: 42 of 100 MB" (`GET /api/usage`).
+- Room at the limits: about 26 accounts all at the maximum, a few hundred in realistic use; past that the Launch plan
+  (Postgres $0.35/GB-month, object storage $0.023/GB-month).
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

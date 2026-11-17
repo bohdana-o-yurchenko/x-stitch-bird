@@ -83,7 +83,8 @@
     "saving": "Saving…",
     "savedAccount": "✓ Saved to your account",
     "savedBrowser": "✓ Saved in this browser",
-    "offline": "Saved in this browser — your account gets it once you’re back online"
+    "offline": "Saved in this browser — your account gets it once you’re back online",
+    "accountFull": "Saved in this browser — your account is full (delete a pattern to make room)"
   },
   "key": {
     "heading": "Key",
@@ -454,7 +455,9 @@
     "stitches": "stitches",
     "finishedSize": "≈ {w} × {h} cm",
     "change": "Change ▾",
-    "done": "Done ▴"
+    "done": "Done ▴",
+    "photoRoomTitle": "No room for this photo",
+    "photoRoomBody": "Photos in your account use {used} of {max} MB, and this one needs {size} MB. To add it, remove a photo from a pattern (close its window, or remove the image behind the chart) or delete a pattern."
   },
   "meta": {
     "designer": "Author (designer)",
@@ -590,7 +593,9 @@
     "matchOffPhoto": "This block isn't on the image",
     "matchNoExamples": "Stitch a few cells first, so the app learns the symbols",
     "matchNothingEmpty": "No empty cells in this block",
-    "savedAccount": "Saved “{name}” in this browser and your account"
+    "savedAccount": "Saved “{name}” in this browser and your account",
+    "patternLimit": "Your account holds {max} patterns — this one is saved in this browser. Delete a pattern to keep it in your account too.",
+    "photosFull": "Photos stay in this browser: your account has {used} of {max} MB. Remove a photo or delete a pattern to make room."
   },
   "underlay": {
     "heading": "Image behind the chart",
@@ -1044,7 +1049,8 @@
     "signOut": "Sign out",
     "signedIn": "Signed in as {email}",
     "signedOut": "Signed out — patterns stay in this browser",
-    "myPatterns": "My patterns"
+    "myPatterns": "My patterns",
+    "usage": "Patterns: {patterns} of {maxPatterns} · Photos: {photos} of {maxPhotos} MB"
   },
   "keepPattern": {
     "title": "Keep this pattern?",
@@ -1094,7 +1100,8 @@
     "delete": "Delete…",
     "freeSoftware": "пташечка is free software (AGPL-3.0)",
     "source": "Source code",
-    "privacy": "Privacy policy"
+    "privacy": "Privacy policy",
+    "accountFull": "Your account holds {max} patterns — the rest stay in this browser. Delete a pattern to make room."
   },
   "threadForm": {
     "brand": "Brand",

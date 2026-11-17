@@ -25,7 +25,10 @@ export async function PUT(req: NextRequest, ctx: RouteContext<"/api/patterns/[id
   const baseHeader = req.headers.get("x-base-rev"), base = baseHeader === null ? undefined : Number(baseHeader);
   if (base !== undefined && !Number.isInteger(base)) return Response.json({ error: "Bad x-base-rev" }, { status: 400 });
   const r = await putPattern(user, doc, base, req.headers.get("x-window")?.slice(0, 64) || undefined);
-  return r.ok ? Response.json({ updatedAt: r.updatedAt, rev: r.rev }) : Response.json({ rev: r.current.rev, doc: r.current.doc }, { status: 409 });
+  if (r.ok) return Response.json({ updatedAt: r.updatedAt, rev: r.rev });
+  // the account is full (SPEC §15.35): the browser keeps it
+  if ("limit" in r) return Response.json({ error: "patternLimit", max: r.limit }, { status: 403 });
+  return Response.json({ rev: r.current.rev, doc: r.current.doc }, { status: 409 });
 }
 
 export async function DELETE(_req: NextRequest, ctx: RouteContext<"/api/patterns/[id]">) {

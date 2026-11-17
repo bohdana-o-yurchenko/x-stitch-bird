@@ -59,7 +59,7 @@ function SaveStatus() {
   const signedIn = useEditorState((st) => !!st.account);
   const state = useEditorState((st) => st.saveState);
   // signed out, the draft in this browser is written within a second of every change
-  const text = !signedIn ? "savedBrowser" : state === "saving" ? "saving" : state === "offline" ? "offline" : "savedAccount";
+  const text = !signedIn ? "savedBrowser" : state === "saving" ? "saving" : state === "offline" ? "offline" : state === "full" ? "accountFull" : "savedAccount";
   return <span data-guide="saved" data-testid="save-status">{t(text)}</span>;
 }
 

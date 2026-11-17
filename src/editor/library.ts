@@ -2,7 +2,7 @@ import { parsePattern } from "@/core/formats/json/parse";
 import { buildPalette } from "@/core/pattern/palette";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import type { CustomColor } from "@/core/pattern/types";
-import { account, accountPatternApi, accountThreadApi, createPersistence, type Persistence, type PatternSummary } from "@/persistence";
+import { account, accountPatternApi, accountThreadApi, accountUsageApi, createPersistence, type AccountUsage, type Persistence, type PatternSummary } from "@/persistence";
 import { renderChartImage } from "@/render/exportChart";
 import { defaultCanvasTheme } from "@/render/theme";
 import { keepForGood } from "./keepPattern";
@@ -11,6 +11,11 @@ import { keepForGood } from "./keepPattern";
  * Saved patterns outside the editor (SPEC §15.26, the My patterns page): this browser's and, signed in, the
  * account's — listed, previewed, deleted, and this browser's moved into the account.
  */
+
+export type { AccountUsage };
+
+/** What the signed-in account holds against its limits (SPEC §15.35); null signed out or offline. */
+export const accountUsage = (): Promise<AccountUsage | null> => accountUsageApi.get();
 
 /** Longest side of a preview picture, in pixels. */
 const PREVIEW_SIZE = 480;
@@ -84,19 +89,30 @@ export function createLibrary(persistence: Persistence = createPersistence()) {
       }
     },
 
-    /** Copies patterns kept only in this browser into the account, with their previews. Returns how many went. */
-    async moveToAccount(ids: string[], progress?: (done: number) => void): Promise<number> {
+    /** What the account holds against its limits (SPEC §15.35); null signed out or offline. */
+    usage: accountUsage,
+
+    /**
+     * Copies patterns kept only in this browser into the account, with their previews. How many went, and `limit`
+     * when the account filled up on the way (the rest stay in this browser, SPEC §15.35).
+     */
+    async moveToAccount(ids: string[], progress?: (done: number) => void): Promise<{ moved: number; limit?: number }> {
       let done = 0;
       for (const id of ids) {
         const doc = await persistence.patterns.load(id);
-        if (!doc || !(await accountPatternApi.save(doc)).ok) continue;
+        if (!doc) continue;
+        const up = await accountPatternApi.save(doc);
+        if (!up.ok && up.limit) return { moved: done, limit: up.limit };
+        if (!up.ok) continue;
         keepForGood(id);
         persistence.pictures?.push(id);
         const canvas = await drawPreview(id).catch(() => null);
         if (canvas) await new Promise<void>((ok) => canvas.toBlob((b) => void (b ? accountPatternApi.putPreview(id, b) : Promise.resolve()).finally(ok), "image/png"));
-        progress?.(++done);
+        // counted apart: `progress?.(++done)` skips the count when there's no progress callback
+        done++;
+        progress?.(done);
       }
-      return done;
+      return { moved: done };
     },
   };
 }

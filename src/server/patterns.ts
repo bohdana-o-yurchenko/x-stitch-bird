@@ -1,5 +1,6 @@
 import type { PatternFile } from "@/core/formats/json/serialize";
 import { sql } from "./db";
+import { MAX_PATTERNS } from "./limits";
 import { collectPictures } from "./pictures";
 import { assets } from "./storage";
 
@@ -34,7 +35,10 @@ export function validPattern(v: unknown, id: string): v is PatternFile {
   return !!d && d.app === "stitchwork" && d.id === id && typeof d.name === "string" && Number.isInteger(d.w) && Number.isInteger(d.h) && JSON.stringify(d).length < MAX_DOC;
 }
 
-export type PutResult = { ok: true; updatedAt: number; rev: number } | { ok: false; current: { doc: PatternFile; rev: number } };
+export type PutResult =
+  | { ok: true; updatedAt: number; rev: number }
+  | { ok: false; current: { doc: PatternFile; rev: number } }
+  | { ok: false; limit: number };
 
 /**
  * Saves the pattern over revision `base` (SPEC §15.34): refused, with the account's copy, when it has had another save
@@ -42,6 +46,11 @@ export type PutResult = { ok: true; updatedAt: number; rev: number } | { ok: fal
  * `windowId`: the window saving keeps (or takes) the editing.
  */
 export async function putPattern(userId: string, doc: PatternFile, base?: number, windowId?: string): Promise<PutResult> {
+  // a new pattern only while the account has room (SPEC §15.35); changes to the ones it has always go
+  const room = await sql`
+    select exists (select 1 from patterns where user_id = ${userId} and id = ${doc.id}) as has,
+      (select count(*)::int from patterns where user_id = ${userId}) as n`;
+  if (!room[0]!.has && (room[0]!.n as number) >= MAX_PATTERNS) return { ok: false, limit: MAX_PATTERNS };
   const rows = await sql`
     insert into patterns (user_id, id, name, w, h, designer, doc, updated_at, rev, editor, editor_at)
     values (${userId}, ${doc.id}, ${doc.name}, ${doc.w}, ${doc.h}, ${doc.meta?.designer ?? null}, ${JSON.stringify(doc)}::jsonb, now(), 1, ${windowId ?? null}, ${windowId ? new Date() : null})
@@ -54,6 +63,12 @@ export async function putPattern(userId: string, doc: PatternFile, base?: number
   const current = await getPattern(userId, doc.id);
   // gone in between: saved as new
   return current ? { ok: false, current } : putPattern(userId, doc, undefined, windowId);
+}
+
+/** What the account holds against its limits (SPEC §15.35). */
+export async function usage(userId: string): Promise<{ patterns: number; maxPatterns: number }> {
+  const rows = await sql`select count(*)::int as n from patterns where user_id = ${userId}`;
+  return { patterns: rows[0]!.n as number, maxPatterns: MAX_PATTERNS };
 }
 
 export async function deletePattern(userId: string, id: string): Promise<void> {

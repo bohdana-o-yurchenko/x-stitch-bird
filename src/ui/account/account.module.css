@@ -40,3 +40,10 @@
   flex-direction: column;
   gap: 10px;
 }
+/* the account's use of its limits (SPEC §15.35), under the email */
+.usage {
+  display: block;
+  padding: 2px 12px 8px;
+  font-size: 12px;
+  color: var(--muted);
+}

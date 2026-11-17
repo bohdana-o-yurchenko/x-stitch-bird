@@ -2,6 +2,7 @@ import { gunzipSync, gzipSync } from "node:zlib";
 import type { FileVersion, PatternFile } from "@/core/formats/json/serialize";
 import { snapshotsToDelete } from "@/core/snapshots/retention";
 import { sql } from "./db";
+import { VERSIONS_QUOTA } from "./limits";
 
 export type { FileVersion };
 
@@ -106,5 +107,15 @@ export async function addVersions(userId: string, patternId: string, versions: F
   const times = (await listVersions(userId, patternId)).map((v) => v.time);
   const drop = snapshotsToDelete(times, Date.now());
   if (drop.length) await sql`delete from pattern_versions where user_id = ${userId} and pattern_id = ${patternId} and time = any(${drop.map(String)}::bigint[])`;
+  // the account's room for versions (SPEC §15.35): newest first, most recently changed patterns first; the rest go
+  await sql`
+    with ranked as (
+      select v.pattern_id, v.time,
+        sum(octet_length(v.doc)) over (order by p.updated_at desc, v.time desc rows unbounded preceding) as running
+      from pattern_versions v join patterns p on p.user_id = v.user_id and p.id = v.pattern_id
+      where v.user_id = ${userId}
+    )
+    delete from pattern_versions d using ranked r
+    where d.user_id = ${userId} and d.pattern_id = r.pattern_id and d.time = r.time and r.running > ${VERSIONS_QUOTA}`;
   return true;
 }

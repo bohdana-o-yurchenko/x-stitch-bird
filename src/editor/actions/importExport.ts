@@ -23,6 +23,7 @@ import type { Ctx } from "@/render/primitives/cells";
 import { strokeLineStyle } from "@/render/primitives/lineStyles";
 import { downloadFile, isImageFile, isPatternFile, readText } from "@/platform/files";
 import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
+import { photoFits } from "../images/photoRoom";
 import { accountPatternApi } from "@/persistence";
 import type { Editor } from "../createEditor";
 import { loadPattern } from "./pattern";
@@ -185,8 +186,11 @@ export function createFromImage(ed: Editor, r: QuantizeResult, image: HTMLImageE
   ed.toast("toasts.imageCreated", { count: keys.size });
   if (keepReference)
     void (sourceFiles.has(image) ? Promise.resolve(sourceFiles.get(image)!) : downscaleToBlob(image, Infinity, 0.95))
+      // no room in the account for it: the pattern is made, the photo window isn't (SPEC §15.35)
+      .then(async (b) => ((await photoFits(ed, b)) ? b : Promise.reject(new Error("no room"))))
       .then((b) => ed.images.put(b))
-      .then((id) => ed.references.add({ image: id, name: ed.t("references.photo"), grid: true }));
+      .then((id) => ed.references.add({ image: id, name: ed.t("references.photo"), grid: true }))
+      .catch(() => {});
 }
 
 /** Into the saved patterns (and the account, signed in). `quiet`: the automatic save — no toast unless it fails. */
@@ -198,8 +202,13 @@ export async function saveToLibrary(ed: Editor, o: { quiet?: boolean } = {}) {
   const r = await ed.persistence.patterns.save(doc, ed.live.readOnly ? { localOnly: true } : ed.live.saveOptions());
   if (r.ok && r.conflict && doc.id === ed.doc.id) ed.live.refused(r.conflict);
   if (r.ok && r.rev !== undefined && doc.id === ed.doc.id) ed.live.saved(r.rev, revision);
+  // the account has its most patterns: this one stays in the browser; said once per pattern (SPEC §15.35)
+  if (r.ok && r.limit && !limitSaid.has(doc.id)) {
+    limitSaid.add(doc.id);
+    ed.toast("toasts.patternLimit", { max: r.limit });
+  }
   if (r.ok) {
-    ed.store.setState({ savedAt: Date.now(), saveState: r.account === false ? "offline" : "saved" });
+    ed.store.setState({ savedAt: Date.now(), saveState: r.limit ? "full" : r.account === false ? "offline" : "saved" });
     // in the account: safe, never taken out of this browser by the one-pattern rule
     if (r.account) ed.keep.keep(doc.id);
     if (!o.quiet) ed.toast(ed.state.account ? "toasts.savedAccount" : "toasts.savedLocal", { name: doc.name });
@@ -214,6 +223,9 @@ export async function saveToLibrary(ed: Editor, o: { quiet?: boolean } = {}) {
     ed.toast(r.reason === "quota" ? "toasts.tooLarge" : "toasts.saveFailed");
   }
 }
+
+/** Patterns already told they don't fit in the account. */
+const limitSaid = new Set<string>();
 
 /** The account's preview of a pattern is redrawn at most this often while it's being edited. */
 const PREVIEW_EVERY = 60_000;

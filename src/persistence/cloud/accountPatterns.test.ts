@@ -64,6 +64,13 @@ describe("patterns in the account", () => {
     expect(r).toMatchObject({ ok: true, account: false, conflict: { rev: 5, doc: { id: "theirs" } } });
     expect(bases).toEqual([null, "1", "2"]);
     expect(accountRevs.get("a")).toEqual({ rev: 2, pending: true });
+    // the account full: a new pattern is refused, kept in this browser (SPEC §15.35)
+    vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ error: "patternLimit", max: 20 }), { status: 403 }));
+    expect(await repo.save(file("new"))).toEqual({ ok: true, account: false, limit: 20 });
+    vi.stubGlobal("fetch", async (_url: string, init?: RequestInit) => {
+      const base = new Headers(init?.headers).get("x-base-rev");
+      return Number(base) !== rev ? new Response(JSON.stringify({ rev, doc: file("theirs") }), { status: 409 }) : new Response(JSON.stringify({ rev: ++rev }), { status: 200 });
+    });
     // the window that chose its version saves over the account's
     expect(await repo.save(file("a"), { base: 5 })).toMatchObject({ account: true, rev: 6 });
     expect(accountRevs.get("a")).toEqual({ rev: 6 });

@@ -20,12 +20,13 @@ export interface PatternSummary {
 }
 
 /**
+ * `limit`: refused — the account has its most patterns (SPEC §15.35); the browser keeps it.
  * `account`: while signed in, whether the account got it too (false: offline or refused — the browser copy has it).
  * `rev`: the account's revision of it now. `conflict`: refused — the account's copy had another save since the one
  * this change was made over (SPEC §15.34); here it is.
  */
 export type SaveResult =
-  | { ok: true; account?: boolean; rev?: number; conflict?: { rev: number; doc: PatternFile } }
+  | { ok: true; account?: boolean; rev?: number; conflict?: { rev: number; doc: PatternFile }; limit?: number }
   | { ok: false; reason: "quota" | "conflict" | "error" };
 
 /**
@@ -141,6 +142,8 @@ export interface PictureSync {
   forget(patternIds: string[]): Promise<void>;
   /** Called when the account's records replaced or joined this browser's. Returns unsubscribe. */
   onChange(fn: (patternId: string) => void): () => void;
+  /** Called when a picture didn't fit in the account's room for photos (SPEC §15.35); it stays in this browser. */
+  onFull(fn: (room: { used: number; max: number }) => void): () => void;
 }
 
 export interface Persistence {

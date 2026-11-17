@@ -30,10 +30,30 @@ describe("the patterns page's library (SPEC §15.26)", () => {
     const lib = createLibrary(persistence);
     lib.setSignedIn(true);
     const steps: number[] = [];
-    expect(await lib.moveToAccount(["a", "b", "gone"], (n) => steps.push(n))).toBe(2);
+    expect(await lib.moveToAccount(["a", "b", "gone"], (n) => steps.push(n))).toEqual({ moved: 2 });
     expect(put).toEqual(["a", "b"]);
     expect(steps).toEqual([1, 2]);
     expect(JSON.parse(store.get("stitchwork.keptPatterns")!)).toEqual(["a", "b"]);
+  });
+
+  it("stops when the account is full: the rest stay in this browser, and it says how many fit (SPEC §15.35)", async () => {
+    const docs = new Map(["a", "b", "c"].map((id) => [id, serializePattern({ ...createPattern(5, 5, id), id })]));
+    const persistence = memoryPersistence();
+    persistence.patterns.load = async (id) => docs.get(id) ?? null;
+    const put: string[] = [];
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
+      if (init?.method !== "PUT" || url.endsWith("/preview")) return new Response(JSON.stringify({ rev: 1 }), { status: 200 });
+      const id = decodeURIComponent(url.split("/").pop()!);
+      // room for one more
+      if (put.length >= 1) return new Response(JSON.stringify({ error: "patternLimit", max: 20 }), { status: 403 });
+      put.push(id);
+      return new Response(JSON.stringify({ rev: 1 }), { status: 200 });
+    });
+    const lib = createLibrary(persistence);
+    lib.setSignedIn(true);
+    expect(await lib.moveToAccount(["a", "b", "c"])).toEqual({ moved: 1, limit: 20 });
+    expect(put).toEqual(["a"]);
+    expect(JSON.parse(store.get("stitchwork.keptPatterns")!)).toEqual(["a"]);
   });
 
   it("uses the account's preview when there is one; nothing to show for an account pattern without one", async () => {

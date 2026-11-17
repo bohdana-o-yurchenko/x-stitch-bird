@@ -48,7 +48,27 @@ export const accountRevs = {
   },
 };
 
-export type AccountSave = { ok: true; rev: number } | { ok: false; conflict?: { rev: number; doc: PatternFile } };
+export type AccountSave = { ok: true; rev: number } | { ok: false; conflict?: { rev: number; doc: PatternFile }; limit?: number };
+
+/** What the account holds against its limits (SPEC §15.35). */
+export interface AccountUsage {
+  patterns: number;
+  maxPatterns: number;
+  photos: number;
+  maxPhotos: number;
+}
+
+export const accountUsageApi = {
+  async get(): Promise<AccountUsage | null> {
+    if (!account.signedIn) return null;
+    try {
+      const res = await fetch("/api/usage", { credentials: "same-origin" });
+      return res.ok ? ((await res.json()) as AccountUsage) : null;
+    } catch {
+      return null;
+    }
+  },
+};
 
 async function call(path: string, init?: RequestInit): Promise<Response | null> {
   if (!account.signedIn) return null;
@@ -95,6 +115,7 @@ export const accountPatternApi = {
         return { ok: true, rev };
       }
       accountRevs.markPending(doc.id);
+      if (res.status === 403) return { ok: false, limit: ((await res.json().catch(() => ({}))) as { max?: number }).max ?? 0 };
       return res.status === 409 ? { ok: false, conflict: (await res.json()) as { rev: number; doc: PatternFile } } : { ok: false };
     } catch {
       // offline: the browser copy carries on, and goes up later
@@ -139,7 +160,7 @@ export function withAccount(local: PatternRepository, pictures?: Pick<PictureSyn
       const up = await accountPatternApi.save(doc, o);
       if (up.ok) pictures?.push(doc.id);
       if (!r.ok) return r;
-      return up.ok ? { ...r, account: true, rev: up.rev } : { ...r, account: false, ...(up.conflict && { conflict: up.conflict }) };
+      return up.ok ? { ...r, account: true, rev: up.rev } : { ...r, account: false, ...(up.conflict && { conflict: up.conflict }), ...(up.limit && { limit: up.limit }) };
     },
     async remove(id) {
       await local.remove(id);

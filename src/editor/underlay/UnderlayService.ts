@@ -7,6 +7,7 @@ import type { Editor } from "../createEditor";
 import { PICKING } from "../matching/matching";
 
 import { confirmLargePhoto } from "../images/largePhoto";
+import { photoFits } from "../images/photoRoom";
 
 const SAVE_DELAY = 700;
 /** Grab distance for the image's own handles, in screen pixels. */
@@ -89,7 +90,7 @@ export class UnderlayService {
   async addFromFile(f: File, keepPlacement = false) {
     const img = await loadImage(f).catch(() => null);
     if (!img) return this.ed.toast("toasts.badImage");
-    if (!(await confirmLargePhoto(this.ed, img))) return;
+    if (!(await photoFits(this.ed, f)) || !(await confirmLargePhoto(this.ed, img))) return;
     const w = Math.max(1, img.naturalWidth), h = Math.max(1, img.naturalHeight);
     const fresh = newUnderlay(await this.ed.images.put(f), w, h, this.ed.doc);
     const old = this.data;

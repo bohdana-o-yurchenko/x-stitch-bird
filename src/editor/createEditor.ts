@@ -9,6 +9,7 @@ import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
 import { account, createPersistence, type Persistence } from "@/persistence";
 import { loadImage } from "@/platform/images";
 import { confirmLargePhoto } from "./images/largePhoto";
+import { photoFits } from "./images/photoRoom";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { chromeColours } from "@/platform/themeColours";
 import { createFromImage, saveToLibrary } from "./actions/importExport";
@@ -34,6 +35,8 @@ import { UnderlayService } from "./underlay/UnderlayService";
 import { ViewportService } from "./viewport/viewport";
 
 let toastId = 0;
+
+const mb = (bytes: number) => Math.ceil(bytes / 1048576);
 
 /** The canvas theme with the stage, rulers and accent taken from the interface theme. */
 function withChrome(theme: CanvasTheme): CanvasTheme {
@@ -74,6 +77,7 @@ export class Editor {
   /** Set when the held-Alt picker picked something (SPEC §6.2). */
   momentaryPicked = false;
   private initialising: Promise<void> | null = null;
+  private photosFullSaid = false;
 
   constructor(persistence = createPersistence(), readonly isMac = false) {
     this.persistence = persistence;
@@ -142,6 +146,12 @@ export class Editor {
     if (pattern) this.keep.restored();
     this.store.setState({ ready: true });
     this.live.start();
+    // a photo that didn't fit in the account stays here; say so once
+    this.persistence.pictures?.onFull((room) => {
+      if (this.photosFullSaid) return;
+      this.photosFullSaid = true;
+      this.toast("toasts.photosFull", { used: mb(room.used), max: mb(room.max) });
+    });
     // the account's newer windows (or ones merged in from another device) replace the open pattern's on screen
     this.persistence.pictures?.onChange((id) => {
       if (id !== this.doc.id) return;
@@ -336,7 +346,8 @@ export class Editor {
   async addReferenceFromFile(f: File) {
     try {
       // kept as it came, never scaled down (SPEC §15.33); a very large one after a word about freezes
-      if (!(await confirmLargePhoto(this, await loadImage(f)))) return;
+      const img = await loadImage(f);
+      if (!(await photoFits(this, f)) || !(await confirmLargePhoto(this, img))) return;
       const image = await this.images.put(f);
       this.references.add({ image, name: f.name.replace(/\.[^.]+$/, "") });
     } catch {

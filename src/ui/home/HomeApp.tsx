@@ -34,6 +34,8 @@ export default function HomeApp() {
   const [current, setCurrent] = useState<Current | null>(null);
   const [signInOpen, setSignInOpen] = useState(false);
   const [moving, setMoving] = useState<{ done: number; count: number } | null>(null);
+  /** The account filled up while moving: how many it holds at most. */
+  const [full, setFull] = useState<number | null>(null);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"recent" | "name">("recent");
   const router = useRouter();
@@ -50,7 +52,8 @@ export default function HomeApp() {
   const onlyHere = user ? (items ?? []).filter((p) => p.where === "browser") : [];
   const move = async () => {
     setMoving({ done: 0, count: onlyHere.length });
-    await lib.moveToAccount(onlyHere.map((p) => p.id), (done) => setMoving({ done, count: onlyHere.length }));
+    const r = await lib.moveToAccount(onlyHere.map((p) => p.id), (done) => setMoving({ done, count: onlyHere.length }));
+    setFull(r.limit ?? null);
     setMoving(null);
     refresh();
   };
@@ -97,7 +100,7 @@ export default function HomeApp() {
 
         {onlyHere.length > 0 && (
           <div className={s.banner} data-testid="home-move">
-            <p>{t("onlyHere", { count: onlyHere.length })}</p>
+            <p>{full ? t("accountFull", { max: full }) : t("onlyHere", { count: onlyHere.length })}</p>
             <button type="button" className={cx(ui.btn, ui.primary, ui.sm)} disabled={!!moving} onClick={() => void move()}>
               {moving ? t("moving", { done: moving.done, count: moving.count }) : t("move")}
             </button>

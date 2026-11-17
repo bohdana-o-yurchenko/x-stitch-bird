@@ -1,4 +1,5 @@
 import { sql } from "./db";
+import { PHOTO_QUOTA } from "./limits";
 import { assets } from "./storage";
 
 /*
@@ -7,8 +8,8 @@ import { assets } from "./storage";
  * uploads straight to the bucket through a signed form, so photo size isn't limited by the app's own server.
  */
 
-/** Largest picture taken (a photo straight from a camera is well under this). */
-export const MAX_PICTURE = 200_000_000;
+/** Largest picture taken: all the room an account has for photos (SPEC §15.35). */
+export const MAX_PICTURE = PHOTO_QUOTA;
 /** Pictures nothing uses are removed only after this long: their record may be on its way. */
 const GRACE = "1 day";
 const MAX_RECORDS = 1_000_000;
@@ -56,15 +57,48 @@ export async function missingPictures(userId: string, ids: string[]): Promise<st
   return ids.filter((id) => !have.has(id));
 }
 
+/**
+ * Bytes of photos the account holds for its patterns (SPEC §15.35): pictures a pattern uses, each once, and ones
+ * uploaded within the last hour that no record uses yet (on their way). Old marks and removed photos don't count.
+ */
+export async function photoUsage(userId: string, except?: string): Promise<number> {
+  const rows = await sql`
+    select coalesce(sum(i.size), 0)::bigint as used from pictures i
+    where i.user_id = ${userId} and i.id <> ${except ?? ""} and (
+      i.created_at > now() - interval '1 hour'
+      or exists (select 1 from patterns p where p.user_id = ${userId} and (coalesce(p.refs::text, '') || coalesce(p.underlay::text, '')) like '%' || i.id || '%')
+    )`;
+  return Number(rows[0]!.used);
+}
+
+export type Room = { ok: true } | { ok: false; used: number; max: number };
+
+/** Whether a picture of `size` bytes still fits in the account's room for photos. */
+export async function photoRoom(userId: string, size: number, except?: string): Promise<Room> {
+  const used = await photoUsage(userId, except);
+  return used + size <= PHOTO_QUOTA ? { ok: true } : { ok: false, used, max: PHOTO_QUOTA };
+}
+
 /** Where the browser sends a picture: a signed form, valid for a while, that takes at most MAX_PICTURE bytes. */
 export function pictureUploadTarget(userId: string, id: string, type: string) {
   return assets.signedUploadUrl(pictureKey(userId, id), { expiresIn: 3600, maxSize: MAX_PICTURE, contentType: type });
 }
 
-/** After an upload: the picture counts as in the account only once the bucket really has it. */
-export async function confirmPicture(userId: string, id: string): Promise<boolean> {
+/**
+ * After an upload: the picture counts as in the account only once the bucket really has it — and only if it fits;
+ * one that doesn't is taken out again (the browser keeps it).
+ */
+export async function confirmPicture(userId: string, id: string): Promise<true | false | Room> {
   const info = await assets.head(pictureKey(userId, id)).catch(() => null);
   if (!info || !info.size) return false;
+  const known = await sql`select 1 from pictures where user_id = ${userId} and id = ${id}`;
+  if (!known.length) {
+    const room = await photoRoom(userId, info.size, id);
+    if (!room.ok) {
+      await assets.delete(pictureKey(userId, id)).catch(() => {});
+      return room;
+    }
+  }
   await sql`insert into pictures (user_id, id, size, type) values (${userId}, ${id}, ${info.size}, ${info.contentType}) on conflict do nothing`;
   return true;
 }

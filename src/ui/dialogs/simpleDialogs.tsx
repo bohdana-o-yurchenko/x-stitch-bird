@@ -139,6 +139,18 @@ export function DropChoiceDialog({ file, onClose }: Close & { file: File }) {
   );
 }
 
+const mb = (bytes: number) => Math.max(1, Math.ceil(bytes / 1048576));
+
+/** Signed in, a photo that doesn't fit in the account's room for photos (SPEC §15.35): what to remove first. */
+export function PhotoRoomDialog({ used, max, size, onClose }: Close & { used: number; max: number; size: number }) {
+  const t = useTranslations("dialogs");
+  return (
+    <Modal title={t("photoRoomTitle")} onClose={onClose} buttons={[{ label: t("ok"), primary: true }]}>
+      <p className={ui.hint} data-testid="photo-room">{t("photoRoomBody", { used: mb(used), max: mb(max), size: mb(size) })}</p>
+    </Modal>
+  );
+}
+
 /** A very large photo (SPEC §15.33): kept at full quality, after a word that the app may pause with it. */
 export function LargePhotoDialog({ w, h, answer, onClose }: Close & { w: number; h: number; answer: (use: boolean) => void }) {
   const t = useTranslations("dialogs");

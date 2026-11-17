@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { accountUsage, type AccountUsage } from "@/editor/library";
 import { useTranslations } from "next-intl";
 import { cx, Dropdown, ui } from "../common/widgets";
 import { SignInDialog } from "./SignInDialog";
@@ -61,6 +62,16 @@ export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, befor
   onMyPatterns?: () => void;
 }) {
   const t = useTranslations("account");
+  const [usage, setUsage] = useState<AccountUsage | null>(null);
+  // what the account holds against its limits (SPEC §15.35): read on sign-in, and again as the menu opens
+  const email = user?.email;
+  const readUsage = () => void accountUsage().then(setUsage);
+  useEffect(() => {
+    if (!email) return;
+    let live = true;
+    void accountUsage().then((u) => live && setUsage(u));
+    return () => void (live = false);
+  }, [email]);
   if (!user)
     return (
       <>
@@ -73,9 +84,10 @@ export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, befor
     <span data-testid="account">
       <Dropdown
         className={s.avatarBtn}
-        label={<span className={s.avatar} title={user.email} aria-label={t("menu", { email: user.email })}>{initial}</span>}
+        label={<span className={s.avatar} title={user.email} aria-label={t("menu", { email: user.email })} onPointerDown={readUsage}>{initial}</span>}
         items={[
           { label: user.email, hint: t("signedInHint"), onClick: () => {} },
+          ...(usage ? [{ id: "usage", node: <span className={s.usage} data-testid="account-usage">{t("usage", { patterns: usage.patterns, maxPatterns: usage.maxPatterns, photos: Math.ceil(usage.photos / 1048576), maxPhotos: Math.round(usage.maxPhotos / 1048576) })}</span> }] : []),
           "-",
           ...(onMyPatterns ? [{ label: t("myPatterns"), onClick: onMyPatterns }, "-" as const] : []),
           { label: t("signOut"), onClick: async () => { await beforeSignOut?.(); await authClient.signOut(); onSignedOut?.(); } },

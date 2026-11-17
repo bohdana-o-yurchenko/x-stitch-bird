@@ -78,9 +78,13 @@ export const accountPictureApi = {
   put(patternId: string, body: { refs: RefWindowData[]; underlay: UnderlayData | null; base: number }) {
     return call(recordsUrl(patternId), { method: "PUT", ...json(body) });
   },
-  /** Sends one picture straight to storage, then has the account confirm it arrived. */
-  async upload(id: string, blob: Blob): Promise<boolean> {
+  /**
+   * Sends one picture straight to storage, then has the account confirm it arrived. `{ used, max }`: it doesn't fit
+   * in the account's room for photos (SPEC §15.35).
+   */
+  async upload(id: string, blob: Blob): Promise<boolean | { used: number; max: number }> {
     const res = await call(pictureUrl(id), { method: "POST", ...json({ type: blob.type || "application/octet-stream", size: blob.size }) });
+    if (res?.status === 413) return (await res.json()) as { used: number; max: number };
     if (!res?.ok) return false;
     const target = (await res.json()) as SignedUpload;
     try {
@@ -95,7 +99,13 @@ export const accountPictureApi = {
     } catch {
       return false;
     }
-    return !!(await call(pictureUrl(id), { method: "PUT" }))?.ok;
+    const done = await call(pictureUrl(id), { method: "PUT" });
+    if (done?.status === 413) return (await done.json()) as { used: number; max: number };
+    return !!done?.ok;
+  },
+  /** The account has this picture already. */
+  async has(id: string): Promise<boolean> {
+    return !!(await call(pictureUrl(id)))?.ok;
   },
   /** One picture from the account, checked against its id (the id is its content hash). */
   async download(id: string): Promise<Blob | null> {
@@ -143,6 +153,7 @@ export function accountPictures(local: { references: ReferenceRepository; underl
   const timers = new Map<string, ReturnType<typeof setTimeout>>();
   const pulls = new Map<string, Promise<boolean>>();
   const listeners = new Set<(patternId: string) => void>();
+  const fullListeners = new Set<(room: { used: number; max: number }) => void>();
   /** Saves into this browser under way: settling waits for them, as each marks a change to send. */
   const saving = new Set<Promise<unknown>>();
 
@@ -205,7 +216,11 @@ export function accountPictures(local: { references: ReferenceRepository; underl
       if (body.missing) {
         for (const pid of body.missing) {
           const blob = await local.images.get(pid);
-          if (!blob || !(await accountPictureApi.upload(pid, blob))) return;
+          if (!blob) return;
+          const sent = await accountPictureApi.upload(pid, blob);
+          // no room in the account: it stays here, marked, and goes up once there is (SPEC §15.35)
+          if (typeof sent === "object") return fullListeners.forEach((fn) => fn(sent));
+          if (!sent) return;
         }
       } else if (body.current) {
         // changed elsewhere since: keep both
@@ -325,6 +340,10 @@ export function accountPictures(local: { references: ReferenceRepository; underl
     onChange(fn) {
       listeners.add(fn);
       return () => void listeners.delete(fn);
+    },
+    onFull(fn) {
+      fullListeners.add(fn);
+      return () => void fullListeners.delete(fn);
     },
   };
 }

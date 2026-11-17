@@ -36,6 +36,8 @@ export type DialogRequest =
   | { type: "extendCanvas" }
   | { type: "replaceKey" }
   | { type: "dropChoice"; file: File }
+  /** Signed in, a photo that doesn't fit in the account's room for photos (SPEC §15.35). */
+  | { type: "photoRoom"; used: number; max: number; size: number }
   /** A photo above LARGE_PHOTO_PX: use it as it is (it may freeze the app for a moment), or not. */
   | { type: "largePhoto"; w: number; h: number; answer: (use: boolean) => void }
   | { type: "patternKeeper"; issues: PkReport["issues"] }
@@ -97,7 +99,8 @@ export interface EditorState {
   canRedo: boolean;
   savedAt: number | null;
   /** Saving to the saved patterns (and the account, signed in): under way, done, or the account didn't get it. */
-  saveState: "saving" | "saved" | "offline" | null;
+  /** `full`: saved in this browser only — the account has its most patterns (SPEC §15.35). */
+  saveState: "saving" | "saved" | "offline" | "full" | null;
   /** Saved patterns besides the open one exist (in this browser or the account): Pattern ▸ Open is offered. */
   hasOtherPatterns: boolean;
   /** Your own threads and beads in the account (SPEC §15.28); null signed out, or not loaded yet. */

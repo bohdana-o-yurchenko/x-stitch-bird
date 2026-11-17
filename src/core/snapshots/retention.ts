@@ -8,7 +8,7 @@ export interface RetentionPolicy {
   max: number;
 }
 
-export const DEFAULT_RETENTION: RetentionPolicy = { keepLatest: 10, hourlyFor: DAY, dailyFor: 14 * DAY, max: 50 };
+export const DEFAULT_RETENTION: RetentionPolicy = { keepLatest: 10, hourlyFor: DAY, dailyFor: 14 * DAY, max: 30 };
 
 /**
  * Which snapshot times to delete (SPEC §15.7): keep the newest N, then one per hour for a day,

@@ -9,7 +9,7 @@ import { KeepPatternDialog } from "./KeepPatternDialog";
 import { LiveConflictDialog } from "./LiveConflictDialog";
 import { NewPatternDialog } from "./NewPatternDialog";
 import {
-  DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, LargePhotoDialog, MirrorFromCentreDialog,
+  DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, LargePhotoDialog, MirrorFromCentreDialog, PhotoRoomDialog,
   PatternKeeperDialog, ReplaceKeyDialog, ResizeDialog, TextFallbackDialog,
 } from "./simpleDialogs";
 
@@ -35,6 +35,7 @@ export function DialogHost() {
     case "dropChoice": return <DropChoiceDialog file={d.file} onClose={close} />;
     case "patternKeeper": return <PatternKeeperDialog issues={d.issues} onClose={close} />;
     case "textFallback": return <TextFallbackDialog ext={d.ext} text={d.text} onClose={close} />;
+    case "photoRoom": return <PhotoRoomDialog used={d.used} max={d.max} size={d.size} onClose={close} />;
     case "largePhoto": return <LargePhotoDialog w={d.w} h={d.h} answer={d.answer} onClose={close} />;
     case "liveConflict": return <LiveConflictDialog theirs={d.theirs} />;
     case "keepPattern": return <KeepPatternDialog then={d.then} onClose={close} />;
