@@ -40,7 +40,7 @@ function savedTool(): ToolId | null {
 
 /**
  * The side panel (SPEC §15.32), like an IDE's tool windows: the key always, and one tool at a time below it, picked
- * from the strip of icons on the edge (again to close). Which one is open is remembered in this browser. While a key
+ * from the thin bar of icons along the bottom (again to close). Which one is open is remembered in this browser. While a key
  * entry is added or edited, its form takes the whole panel.
  */
 export function SidePanel() {

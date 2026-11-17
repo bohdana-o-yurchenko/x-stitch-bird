@@ -338,10 +338,11 @@
   opacity: 0.55;
 }
 
-/* the side panel as tool windows (SPEC §15.32): content on the left, a strip of icons on the edge */
+/* the side panel as tool windows (SPEC §15.32): content above, a thin bar of icons along the bottom */
 .tools {
   flex: 1 1 auto;
   display: flex;
+  flex-direction: column;
   min-height: 0;
 }
 .toolMain {
@@ -400,20 +401,18 @@
 }
 .rail {
   flex: none;
-  width: 40px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 0;
-  border-left: 1px solid var(--line);
+  gap: 2px;
+  padding: 3px 6px;
+  border-top: 1px solid var(--line2);
   background: var(--bg);
 }
 .railBtn {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 28px;
   border: 0;
   border-radius: 8px;
   background: none;

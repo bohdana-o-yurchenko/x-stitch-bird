@@ -1779,7 +1779,7 @@ unfolds the checkboxes. Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) th
 - Patterns from before (none of the fields): several thread brands as they were, every built-in bead brand.
 
 ### 15.32 The side panel as tool windows (2026-11-17)
-Like an IDE's tool windows (`ui/side/SidePanel.tsx`): a strip of icons on the panel's edge — **Totals & shopping
+Like an IDE's tool windows (`ui/side/SidePanel.tsx`): a thin bar of icons along the panel's bottom — **Totals & shopping
 list** (Σ), **Chart checks**, **Fabric & size**, **Threads & beads**, and **Image behind the chart** while there is
 one. "Drawing with" and the key always fill the panel; one tool at a time opens in a pane below the key (its title
 and ✕), the same icon again closes it and the key gets the room. Which one is open is remembered in this browser
