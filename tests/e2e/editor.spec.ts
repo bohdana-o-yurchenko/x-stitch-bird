@@ -1050,17 +1050,17 @@ test("patterns saved by an earlier version (in localStorage) are moved into Inde
   expect(await page.evaluate(() => !!localStorage.getItem("stitchwork.libraryMoved") && !!localStorage.getItem("stitchwork.library"))).toBe(true);
 });
 
-test("☰ ▸ Toolbar hides the shape tools and fractional stitches, and remembers it", async ({ page }) => {
+test("☰ ▸ Toolbar hides the line, rectangle and fill tools and fractional stitches, and remembers it", async ({ page }) => {
   const toolbar = page.getByTestId("toolbar");
   await expect(toolbar.getByRole("button", { name: "Line (L)", exact: true })).toBeVisible();
   await expect(toolbar.getByRole("group", { name: /^Partial stitches/ })).toBeVisible();
   await openAppMenu(page);
   const options = page.getByTestId("toolbar-options");
-  await options.getByLabel("Hide line and rectangle tools").check();
+  await options.getByLabel("Hide line, rectangle and fill tools").check();
   await options.getByLabel("Hide fractional stitches").check();
   await page.keyboard.press("Escape");
   await expect(toolbar.getByRole("button", { name: "Line (L)", exact: true })).toHaveCount(0);
-  await expect(toolbar.getByRole("button", { name: "Fill area (F)", exact: true })).toBeVisible();
+  await expect(toolbar.getByRole("button", { name: "Fill area (F)", exact: true })).toHaveCount(0);
   await expect(toolbar.getByRole("group", { name: /^Partial stitches/ })).toHaveCount(0);
   // the tools themselves still work from the keyboard
   await page.keyboard.press("l");
@@ -1069,7 +1069,7 @@ test("☰ ▸ Toolbar hides the shape tools and fractional stitches, and remembe
   await expect(page.locator("[data-entry]").first()).toBeVisible();
   await expect(toolbar.getByRole("button", { name: "Line (L)", exact: true })).toHaveCount(0);
   await openAppMenu(page);
-  await page.getByTestId("toolbar-options").getByLabel("Hide line and rectangle tools").uncheck();
+  await page.getByTestId("toolbar-options").getByLabel("Hide line, rectangle and fill tools").uncheck();
   await expect(toolbar.getByRole("button", { name: "Line (L)", exact: true })).toBeVisible();
 });
 
@@ -1160,3 +1160,23 @@ test("threads & beads of a new pattern: one brand only — no brand tabs, your o
   await expect(page.getByTestId("key-form").getByRole("radio", { name: "Bead", exact: true })).toBeEnabled();
 });
 
+
+test("New ▸ start with this pattern's key and settings: its threads & beads and fabric come along; what the key uses stays; unticking puts the rest back", async ({ page }) => {
+  // the demo uses DMC and beads; give it a second thread brand and 16 ct
+  await page.getByText("Threads & beads").click();
+  await page.getByTestId("materials").getByTestId("materials-threads").getByLabel("Anchor").check();
+  await fileAction(page, "New", "Blank pattern…");
+  const dialog = page.getByRole("dialog"), threads = dialog.getByTestId("materials-threads");
+  await expect(threads.getByLabel("Anchor")).not.toBeChecked();
+  await expect(threads.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
+  await dialog.getByLabel(/^Start with this pattern's key and settings/).check();
+  await expect(threads.getByLabel("Anchor")).toBeChecked();
+  await expect(threads.getByLabel("DMC")).toBeDisabled();
+  await expect(dialog.getByLabel("This pattern has beads")).toBeDisabled();
+  await expect(dialog.getByText("The key's own brands and beads stay ticked")).toBeVisible();
+  // what the key doesn't use can still change
+  await threads.getByLabel("Anchor").uncheck();
+  await dialog.getByLabel(/^Start with this pattern's key and settings/).uncheck();
+  await expect(threads.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
+  await expect(dialog.getByLabel("This pattern has beads")).toBeEnabled();
+});

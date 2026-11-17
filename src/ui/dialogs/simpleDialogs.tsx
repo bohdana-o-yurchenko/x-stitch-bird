@@ -9,7 +9,7 @@ import { symbolText } from "@/core/symbols/lineStyles";
 import type { PatternMeta } from "@/core/pattern/types";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { copyText } from "@/platform/files";
-import { NEW_MATERIALS, materialsOf, usedBeadBrands, usedThreadBrands, usesBeads } from "@/core/pattern/brands";
+import { NEW_MATERIALS, materialsOf, usedBeadBrands, usedThreadBrands, usesBeads, type Materials } from "@/core/pattern/brands";
 import { TimeSpent } from "../common/TimeSpent";
 import { MaterialsForm, brandChoices } from "../threads/MaterialsForm";
 import { ConfirmDelete, KeyIcon, Modal, cx, ui } from "../common/widgets";
@@ -44,10 +44,20 @@ export function NewPatternDialog({ onClose }: Close) {
   const doc = useEditorState((st) => st.doc);
   const inventory = useEditorState((st) => st.inventory);
   const [o, set] = useState({ name: "Untitled pattern", w: 80, h: 80, count: 14, keepKey: false, materials: NEW_MATERIALS });
-  const old = materialsOf(doc);
-  // keeping the key keeps what it uses: its brands, and beads if it has any
-  const keep = (on: boolean) => set({ ...o, keepKey: on, materials: on ? { ...o.materials, brands: [...new Set([...o.materials.brands, ...old.brands])], beadBrands: [...new Set([...o.materials.beadBrands, ...usedBeadBrands(doc)])], noBeads: o.materials.noBeads && !usesBeads(doc) } : o.materials });
+  /** What the settings were before "start with this pattern's…" filled them in: unticking puts them back. */
+  const [before, setBefore] = useState<{ count: number; materials: Materials } | null>(null);
+  // the key and the settings come together; what the key uses stays ticked, the rest can still change
+  const keep = (on: boolean) => {
+    if (on) {
+      setBefore({ count: o.count, materials: o.materials });
+      set({ ...o, keepKey: true, count: doc.count, materials: materialsOf(doc) });
+    } else {
+      set({ ...o, keepKey: false, ...(before ?? { count: 14, materials: NEW_MATERIALS }) });
+      setBefore(null);
+    }
+  };
   const locks = o.keepKey ? { threads: usedThreadBrands(doc), beads: usedBeadBrands(doc), beadsUsed: usesBeads(doc) } : undefined;
+  const counts = [11, 14, 16, 18, 20, 24, 31];
   const choices = brandChoices(doc, inventory);
   return (
     <Modal title={t("newTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("create"), primary: true, onClick: () => run("file.create", o) }]}>
@@ -56,14 +66,17 @@ export function NewPatternDialog({ onClose }: Close) {
         <label className={ui.field}>
           {t("fabric")}
           <select value={o.count} onChange={(e) => set({ ...o, count: Number(e.target.value) })}>
-            {[11, 14, 16, 18, 20, 24, 31].map((c) => <option key={c} value={c}>{tf(`ct${c}`)}</option>)}
+            {counts.map((c) => <option key={c} value={c}>{tf(`ct${c}`)}</option>)}
+            {/* the open pattern's fabric, when it's one no longer offered (28 / 32 ct over 2) */}
+            {!counts.includes(o.count) && <option value={o.count}>{tf(o.count === 14.01 ? "ct28o2" : o.count === 16.01 ? "ct32o2" : `ct${Math.floor(o.count)}`)}</option>}
           </select>
         </label>
         <label className={ui.field}>{t("width")}<input type="number" min={5} max={500} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} /></label>
         <label className={ui.field}>{t("height")}<input type="number" min={5} max={500} value={o.h} onChange={(e) => set({ ...o, h: Number(e.target.value) })} /></label>
       </div>
-      <MaterialsForm value={o.materials} threadChoices={choices.threads} beadChoices={choices.beads} locks={locks} onChange={(materials) => set({ ...o, materials })} />
       <label className={ui.chk}><input type="checkbox" checked={o.keepKey} onChange={(e) => keep(e.target.checked)} />{t("keepKey")}</label>
+      <MaterialsForm value={o.materials} threadChoices={choices.threads} beadChoices={choices.beads} locks={locks} onChange={(materials) => set({ ...o, materials })} />
+      {o.keepKey && <p className={ui.hint}>{t("keepKeyHint")}</p>}
       <p className={ui.hint}>{t(signedIn ? "newHint" : "newHintSignedOut")}</p>
     </Modal>
   );

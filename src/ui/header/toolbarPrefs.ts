@@ -5,7 +5,7 @@ import type { Editor } from "@/editor/createEditor";
  * buttons go; the tools and their shortcuts still work.
  */
 export interface ToolbarHide {
-  /** Line, rectangle outline, filled rectangle. */
+  /** Line, rectangle outline, filled rectangle, fill area. */
   shapes: boolean;
   /** Partial stitches and their kinds. */
   partials: boolean;

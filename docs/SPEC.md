@@ -1652,7 +1652,7 @@ read-only share links.
   Preview images (PNG) ›, Shopping list (CSV), Open Cross Stitch file (.oxs).
 - **☰** — Quick start guide, Keyboard shortcuts (the list that used to sit under the ⓘ button), What's new,
   Language (Українська · English), Theme, Privacy policy, Glory to Ukraine 🇺🇦.
-  **Toolbar** (2026-11-17): *Hide line and rectangle tools*, *Hide fractional stitches* — off by default, remembered
+  **Toolbar** (2026-11-17): *Hide line, rectangle and fill tools*, *Hide fractional stitches* — off by default, remembered
   in this browser (`stitchwork.toolbar`); only the buttons go, the tools and their shortcuts still work.
 - The guide holds the menu its step talks about open (`menuReveal: { menu, path }`).
 
@@ -1769,7 +1769,9 @@ Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) in the **New dialog** and 
 - **Beads**: **This pattern has beads** (on by default), then the same: brands (all built-in by default), "only".
   Off → the key form offers no Bead or Floss + bead. Beads can't be turned off while the key has some.
 - Adding a second brand ends "only one" (it applies again only when ticked). A brand the key uses can't be unticked.
-  "Start with the same key" keeps the brands the key uses, and beads if it has any.
+  **Start with this pattern's key and settings** (New dialog) copies the key and fills in the open pattern's threads
+  & beads and fabric exactly as they are; anything the key doesn't depend on can still change (its brands and beads
+  stay ticked). Unticking puts back what was there before.
 - Patterns from before (none of the fields): several thread brands as they were, every built-in bead brand.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)

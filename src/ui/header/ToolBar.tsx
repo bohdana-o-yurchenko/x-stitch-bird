@@ -61,8 +61,12 @@ export function ToolBar() {
         ))}
       </div>
       <span className={s.sep} />
-      {(hide.shapes ? (["fill"] as const) : (["line", "rect", "filledRect", "fill"] as const)).map(toolButton)}
-      <span className={s.sep} />
+      {!hide.shapes && (
+        <>
+          {(["line", "rect", "filledRect", "fill"] as const).map(toolButton)}
+          <span className={s.sep} />
+        </>
+      )}
       {!hide.partials && (
         <>
           {toolButton("partial")}
