@@ -374,3 +374,14 @@
   background: var(--accent2);
   vertical-align: 1px;
 }
+
+/* the time spent, as one small line (Totals) */
+.timeSpentSmall {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.timeSpentSmall b {
+  color: var(--ink);
+  font-weight: 600;
+}

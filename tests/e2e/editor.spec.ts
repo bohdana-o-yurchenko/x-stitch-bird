@@ -73,14 +73,17 @@ test("the edit and delete buttons of a key entry show their own names", async ({
   await expect(page.getByTestId("tooltip")).toHaveText("Delete entry");
 });
 
-test("Pattern info in the side panel: the time spent, read-only; fields saved as you leave them", async ({ page }) => {
+test("the time spent: in Versions, and small in Totals; read-only. Pattern info's fields are saved as you leave them", async ({ page }) => {
   await page.evaluate(() => void ((window as unknown as { __stitchwork: { doc: { spent: number } } }).__stitchwork.doc.spent = (2 * 60 + 5) * 60_000));
-  await page.getByTestId("rail-info").click();
-  const info = page.getByTestId("info-panel");
-  const time = info.getByTestId("time-spent");
+  await expect(page.getByTestId("totals").getByTestId("time-spent-small")).toContainText("Time spent: 2 h 5 min");
+  await page.getByTestId("rail-versions").click();
+  const time = page.getByTestId("versions-panel").getByTestId("time-spent");
   await expect(time).toContainText("Total time spent on this pattern");
   await expect(time).toContainText("2 h 5 min");
   await expect(time.locator("input")).toHaveCount(0);
+  await page.getByTestId("rail-info").click();
+  const info = page.getByTestId("info-panel");
+  await expect(info.getByTestId("time-spent")).toHaveCount(0);
   await info.getByLabel("Author (designer)").fill("A. Designer");
   await info.getByLabel("Author (designer)").press("Enter");
   await expect.poll(() => editorState<string>(page, "(ed) => ed.doc.meta.designer")).toBe("A. Designer");

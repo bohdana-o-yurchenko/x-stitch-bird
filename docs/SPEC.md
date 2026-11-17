@@ -1797,9 +1797,9 @@ pattern's state, to look at and tweak while working. Nothing is in two places.
   the image behind the chart: switches for Behind stitches and Show with the opacity, Move / Crop and the hint while
   editing, Adjust — rotation, Straighten, Fit, Reset crop, the exact position folded — then Autofill, Replace,
   Remove; or **Add an image…**), Chart checks, Fabric & size (groups Fabric · Grid size
-  — **Resize… · Extend canvas… · Crop to content** — · Numbering), Threads & beads, **Pattern info** (time spent,
-  the fields that go into OXS, then the app's own folded unless filled; saved as you leave each; the name is changed
-  in the header), **Versions** (Restore), Totals & shopping list (the counts as small tags, then what to buy, a line
+  — **Resize… · Extend canvas… · Crop to content** — · Numbering), Threads & beads, **Pattern info** (the fields that go into OXS, then the app's own folded unless filled; saved as you leave each; the name is changed
+  in the header), **Versions** (the time spent on the pattern, then the copies with Restore), Totals & shopping list (the time
+  spent as one small line, the counts as small tags, then what to buy, a line
   each). Adding a picture behind the chart, or asking for a section elsewhere (a guide step, `file.versions`,
   `pattern.editInfo`), brings it in unfolded. Resize and Extend canvas stay dialogs (they ask for numbers).
 

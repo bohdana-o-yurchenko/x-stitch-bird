@@ -926,7 +926,8 @@
     "m": "{m} min",
     "none": "under a minute",
     "running": "counting now",
-    "hint": "Counted automatically while you work on this pattern. Stops after 3 minutes without any action."
+    "hint": "Counted automatically while you work on this pattern. Stops after 3 minutes without any action.",
+    "spentShort": "Time spent:"
   },
   "changelog": {
     "title": "What’s new in пташечка",

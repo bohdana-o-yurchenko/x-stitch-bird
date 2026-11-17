@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { brandCode } from "@/core/catalog/catalog";
 import s from "./side.module.css";
 import { useUsage } from "./useUsage";
+import { TimeSpent } from "../common/TimeSpent";
 
 const OPTIONAL = ["quarter", "threeQuarter", "petite", "knots"] as const;
 
@@ -19,6 +20,7 @@ export function TotalsPanel() {
     <Section id="totals" title={t("totals.heading")} defaultOpen>
       <div data-testid="totals">
         <div className={s.group}>
+          <TimeSpent compact />
           <div className={s.stats}>
             <span>{t.rich("totals.full", { count: totals.full.toLocaleString(), b })}</span>
             <span>{t.rich("totals.half", { count: totals.half.toLocaleString(), b })}</span>

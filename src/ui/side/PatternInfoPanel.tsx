@@ -4,15 +4,14 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { META_FIELDS } from "@/core/pattern/meta";
 import type { PatternMeta } from "@/core/pattern/types";
-import { TimeSpent } from "../common/TimeSpent";
 import { ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
 import { Section } from "./Section";
 import s from "./side.module.css";
 
 /**
- * Pattern info (SPEC §15.1, §15.32): the time spent, then who made it and where it's from — the fields OXS carries
- * first, then the app's own. Each field is saved as you leave it. The name is changed in the header.
+ * Pattern info (SPEC §15.1, §15.32): who made it and where it's from — the fields OXS carries first, then the app's
+ * own. Each field is saved as you leave it. The name is changed in the header.
  */
 export function PatternInfoPanel() {
   const t = useTranslations();
@@ -44,9 +43,6 @@ function InfoFields({ save }: { save: (m: PatternMeta) => void }) {
   const own = META_FIELDS.filter((f) => !f.oxs);
   return (
     <>
-      <div className={s.group}>
-        <TimeSpent />
-      </div>
       <div className={s.group}>
         <h4 className={s.groupTitle}>{t("dialogs.infoOxs")}</h4>
         <p className={s.prowNote} style={{ margin: 0 }}>{t("dialogs.infoOxsHint")}</p>

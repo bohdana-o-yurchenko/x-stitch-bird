@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { SnapshotSummary } from "@/editor/types";
+import { TimeSpent } from "../common/TimeSpent";
 import { cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { Section } from "./Section";
 import s from "./side.module.css";
 
-/** Versions (SPEC §15.7, §15.32): the open pattern's automatic copies, newest first, each with Restore. */
+/** Versions (SPEC §15.7, §15.17, §15.32): the time spent on the pattern, then its automatic copies, newest first, each with Restore. */
 export function VersionsPanel() {
   const t = useTranslations();
   const run = useCommand();
@@ -27,6 +28,7 @@ export function VersionsPanel() {
   return (
     <Section id="versions" title={t("side.versions")} defaultOpen testId="versions-panel">
       <div className={s.section}>
+        <TimeSpent />
         <p className={ui.hint} style={{ margin: 0 }}>{t("dialogs.versionsHint")}</p>
         {!snaps && <p className={ui.hint}>{t("dialogs.loading")}</p>}
         {snaps && !snaps.length && <p className={ui.hint}>{t("dialogs.noHistory")}</p>}
