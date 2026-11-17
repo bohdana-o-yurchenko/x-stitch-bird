@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { beadShape } from "@/core/catalog/beadShapes";
 import { ENTRY_KINDS, entryKind } from "@/core/entryKinds/registry";
-import { materials, materialsOf } from "@/core/pattern/brands";
+import { materials } from "@/core/pattern/brands";
 import { formatLabel, keyLabelData, labelData } from "@/core/labels/keyLabel";
 import type { PaletteSlot } from "@/core/pattern/palette";
 import { blendStrands, resolveColor } from "@/core/pattern/resolve";
@@ -173,7 +173,6 @@ function LineInkPicker({ value, onPick }: { value: string; onPick: (hex: string)
  */
 export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
   const beadsOn = useEditorState((st) => materials(st.doc).beads.on);
-  const [beadsNote, setBeadsNote] = useState(false);
   const t = useTranslations("keyDialog");
   const tr = useTranslate();
   const ed = useEditor();
@@ -279,30 +278,16 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
       <div className={s.formBody}>
         <div className={s.pillTabs} role="radiogroup" aria-label={t("type")} data-testid="entry-type">
           {ENTRY_KINDS.map((k) => {
-            // a pattern without beads (SPEC §15.31): no Floss + bead at all; Bead stays, and says why it's off
+            // a pattern without beads (SPEC §15.31): no Floss + bead at all; Bead greyed out, its hint says where
+            // beads are turned on. Not `disabled`: a disabled button gets no pointer, so no hint either
             if (!beadsOn && k.id === "combo" && d.t !== "combo") return null;
             const off = !beadsOn && k.id === "bead" && d.t !== "bead";
             return (
-              <button key={k.id} type="button" role="radio" aria-checked={d.t === k.id} aria-label={t(`types.${k.id}`)} title={t(`types.${k.id}`)} className={cx(d.t === k.id && s.tabOn)} onClick={() => (off ? setBeadsNote(true) : setType(k.id))}>{t(`typesShort.${k.id}`)}</button>
+              <button key={k.id} type="button" role="radio" aria-checked={d.t === k.id} aria-disabled={off || undefined} aria-label={t(`types.${k.id}`)} title={off ? t("noBeadsHere") : t(`types.${k.id}`)} className={cx(d.t === k.id && s.tabOn, off && s.tabOff)} onClick={() => !off && setType(k.id)}>{t(`typesShort.${k.id}`)}</button>
             );
           })}
         </div>
-        {beadsNote && !beadsOn && (
-          <div className={cx(ui.warn, s.beadsNote)} role="status" data-testid="no-beads-note">
-            <span>{t("noBeadsHere")}</span>
-            <button
-              type="button"
-              className={cx(ui.btn, ui.sm)}
-              onClick={() => {
-                void ed.commands.run("pattern.setMaterials", { ...materialsOf(ed.doc), noBeads: false });
-                setBeadsNote(false);
-                setType("bead");
-              }}
-            >
-              {t("turnBeadsOn")}
-            </button>
-          </div>
-        )}
+
 
         <div className={s.group}>
           <div className={s.inline}>

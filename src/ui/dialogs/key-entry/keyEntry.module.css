@@ -527,14 +527,8 @@
   opacity: 1;
 }
 
-/* Bead clicked in a pattern without beads: why, and a way to turn them on */
-.beadsNote {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-size: 13px;
-}
-.beadsNote span {
-  flex: 1;
+/* Bead in a pattern without beads: greyed out; its hint says where beads are turned on */
+.pillTabs button.tabOff {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
