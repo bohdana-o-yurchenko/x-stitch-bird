@@ -39,7 +39,8 @@ export function drawReference(g: CanvasRenderingContext2D, width: number, height
     g.fill();
   }
   g.globalAlpha = 0.5;
-  g.drawImage(s.marks, 0, 0);
+  // the marks layer may be smaller than a big photo: it covers the whole photo
+  g.drawImage(s.marks, 0, 0, image.width, image.height);
   g.globalAlpha = 1;
   if (s.grid) {
     if (cw * v.s >= 4) {

@@ -1,5 +1,5 @@
 import type { PatternFile } from "@/core/formats/json/serialize";
-import type { PatternRepository, PatternSummary } from "../ports";
+import type { PatternRepository, PatternSummary, PictureSync } from "../ports";
 
 /*
  * Patterns in the signed-in user's account (SPEC §15.23), through the app's own API (/api/patterns). Local-first:
@@ -51,8 +51,8 @@ export const CACHE_SIZE = 10;
 /** Browser and server clocks differ a little; a browser copy has to be this much newer to count as newer. */
 const CLOCK_SLACK = 5_000;
 
-/** This browser's library, and the account's alongside it while signed in. */
-export function withAccount(local: PatternRepository): PatternRepository {
+/** This browser's library, and the account's alongside it while signed in; `pictures` follow each pattern up. */
+export function withAccount(local: PatternRepository, pictures?: Pick<PictureSync, "push" | "catchUp">): PatternRepository {
   return {
     async list() {
       const [mine, theirs] = await Promise.all([local.list(), account.signedIn ? accountPatternApi.list() : Promise.resolve(null)]);
@@ -71,6 +71,7 @@ export function withAccount(local: PatternRepository): PatternRepository {
       const r = await local.save(doc);
       if (!account.signedIn) return r;
       const up = await accountPatternApi.save(doc);
+      if (up) pictures?.push(doc.id);
       return r.ok ? { ...r, account: up } : r;
     },
     async remove(id) {
@@ -100,6 +101,7 @@ export function withAccount(local: PatternRepository): PatternRepository {
         const doc = await local.load(p.id);
         if (doc) await accountPatternApi.save(doc);
       }
+      await pictures?.catchUp();
     },
   };
 }

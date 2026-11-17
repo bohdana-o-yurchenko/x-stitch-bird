@@ -1611,7 +1611,7 @@ a private `assets` bucket.
   (PUT png, GET → short-lived signed link); every route checks the session and touches only that user's rows.
 - Signed out, nothing changes: everything stays in the browser.
 **Still to do:** the gallery page with previews; offering to upload this browser's patterns on first sign-in; custom
-threads in the account; pictures (photos behind the chart, photo windows) in the account; production setup (Vercel
+threads in the account; ~~pictures (photos behind the chart, photo windows) in the account~~ (§15.33); production setup (Vercel
 env vars, trusted domain, own SMTP, own Google OAuth app — see below).
 
 **Plan as discussed:**
@@ -1802,6 +1802,32 @@ pattern's state, to look at and tweak while working. Nothing is in two places.
   spent as one small line, the counts as small tags, then what to buy, a line
   each). Adding a picture behind the chart, or asking for a section elsewhere (a guide step, `file.versions`,
   `pattern.editInfo`), brings it in unfolded. Resize and Extend canvas stay dialogs (they ask for numbers).
+
+### 15.33 Pictures in the account: never lost (2026-11-17)
+The goal: a photo, a marking or the image behind the chart, once attached, is never lost. For the work the app is
+made for, the photos' quality is the point — so they are kept **as they came, never scaled down or re-encoded**.
+- **Photos as they came.** A photo window keeps the original file (before: a 1600 px JPEG). The marks layer over it
+  is at most 2400 px on its long side (each undo step holds a copy of it) and is stretched over the whole photo;
+  marks made over smaller photos keep their exact size. The image behind the chart keeps its earlier limit (6000 px).
+- **Into the account, while signed in.** Every change to a pattern's photo windows or underlay also goes up, a couple
+  of seconds after it settles: first the pictures (photo, marks, underlay, its straighten source), each once — its
+  id is its content hash — then the small records that use them. The browser sends a picture straight to storage
+  through a signed form (any size up to 200 MB; the app's own server takes only a few MB), and the account records it
+  only once storage really has it. The account refuses records that use a picture it doesn't have, so it never points
+  at a missing one. Storage: the `assets` bucket, `users/<id>/pictures/<hash>`; records on the pattern's row (`refs`,
+  `underlay`, `pictures_rev`; `db/migrations/003_pictures.sql`); table `pictures` lists what storage has.
+- **Nothing waits silently forever, nothing is overwritten unseen.** A change not sent yet (offline, signed out, the
+  tab closed) is remembered in this browser and goes up on the next change, on signing in or when the connection is
+  back. The account counts revisions: a change made over an older one (another device changed it since) is merged —
+  windows from both kept, this browser's version of one both have — never just replaced. Unsent changes here are never
+  replaced by the account's.
+- **On another device** opening the pattern brings its windows and underlay, with their pictures checked against
+  their ids, into that browser; it then works offline like any other.
+- **Signing out** takes a pattern's windows out of this browser only when the account surely has them.
+- **Clean-up**: pictures no pattern uses any more (old marks, replaced photos, deleted patterns) leave storage a day
+  after they were added at the earliest.
+- API: `/api/patterns/[id]/pictures` (GET; PUT `{ refs, underlay, base }`, 409 `{ current }` or `{ missing }`),
+  `/api/pictures/[id]` (GET → short-lived link, POST → signed upload form, PUT → confirm).
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

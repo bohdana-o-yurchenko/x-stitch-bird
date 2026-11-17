@@ -107,6 +107,25 @@ export interface SnapshotRepository {
   removeMany(keys: [projectId: string, time: number][]): Promise<void>;
 }
 
+/**
+ * Signed in: a pattern's photo windows and underlay in the account too (SPEC §15.33). Changes go up on their own;
+ * these are for the moments around them.
+ */
+export interface PictureSync {
+  /** Send the pattern's pictures and records soon (after the pattern itself reached the account). */
+  push(patternId: string): void;
+  /** Send everything not sent yet (signing in, back online). */
+  catchUp(): Promise<void>;
+  /** Fetch the account's newer records for the pattern; listeners hear when this browser's changed. */
+  refresh(patternId: string): Promise<void>;
+  /** Wait until changes waiting to go up have gone (or failed). */
+  settle(): Promise<void>;
+  /** Signing out: these patterns' windows leave this browser — only where the account surely has them. */
+  forget(patternIds: string[]): Promise<void>;
+  /** Called when the account's records replaced or joined this browser's. Returns unsubscribe. */
+  onChange(fn: (patternId: string) => void): () => void;
+}
+
 export interface Persistence {
   patterns: PatternRepository;
   references: ReferenceRepository;
@@ -114,4 +133,5 @@ export interface Persistence {
   draft: DraftStore;
   snapshots: SnapshotRepository;
   images: ImageRepository;
+  pictures?: PictureSync;
 }

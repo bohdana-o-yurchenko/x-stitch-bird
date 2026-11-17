@@ -7,7 +7,7 @@ import { ALL_SYMBOLS, isShapeSymbol } from "@/core/symbols/symbols";
 import { RULER_SIZE } from "@/render/ChartRenderer";
 import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
 import { account, createPersistence, type Persistence } from "@/persistence";
-import { downscaleToBlob, loadImage } from "@/platform/images";
+import { loadImage } from "@/platform/images";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { chromeColours } from "@/platform/themeColours";
 import { createFromImage, saveToLibrary } from "./actions/importExport";
@@ -134,6 +134,12 @@ export class Editor {
     // what came back from an earlier visit is work if it was edited then; the demo isn't
     if (pattern) this.keep.restored();
     this.store.setState({ ready: true });
+    // the account's newer windows (or ones merged in from another device) replace the open pattern's on screen
+    this.persistence.pictures?.onChange((id) => {
+      if (id !== this.doc.id) return;
+      void this.references.switchTo(id, null);
+      void this.underlay.switchTo(id, null);
+    });
     void this.refreshPatterns();
     // pictures no record uses any more (closed windows, replaced underlays, old marks)
     setTimeout(() => void this.persistence.images.collectGarbage().catch(() => {}), 10_000);
@@ -216,6 +222,8 @@ export class Editor {
     if (user)
       void (this.persistence.patterns.catchUp?.() ?? Promise.resolve())
         .then(() => this.persistence.patterns.trimCache?.({ keep: [this.doc.id] }))
+        // the open pattern's photo windows as the account has them (another device may have added some)
+        .then(() => this.persistence.pictures?.refresh(this.doc.id))
         .catch(() => {});
   }
 
@@ -225,6 +233,9 @@ export class Editor {
    */
   async prepareSignOut() {
     await this.autosave.settle();
+    this.references.flush();
+    this.underlay.flush();
+    await this.persistence.pictures?.settle();
     const gone = await forgetAccountHere(this.persistence);
     if (!gone.includes(this.doc.id)) return;
     loadPattern(this, demoPattern(this.state.symbols));
@@ -311,8 +322,9 @@ export class Editor {
 
   async addReferenceFromFile(f: File) {
     try {
-      const img = await loadImage(f);
-      const image = await this.images.put(await downscaleToBlob(img));
+      // only to check it is a picture the browser can show: it is kept as it came, never scaled down (SPEC §15.33)
+      await loadImage(f);
+      const image = await this.images.put(f);
       this.references.add({ image, name: f.name.replace(/\.[^.]+$/, "") });
     } catch {
       this.toast("toasts.badImage");

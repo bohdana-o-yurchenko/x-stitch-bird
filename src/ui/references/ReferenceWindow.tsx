@@ -12,6 +12,11 @@ import s from "./references.module.css";
 
 let topZ = 31;
 const MAX_UNDO = 6;
+/**
+ * Longest side of the marks layer. Photos are kept as they came (SPEC §15.33), however big; the marks over them need
+ * far less detail, and each undo step holds a copy of the layer. Marks from smaller photos keep their exact size.
+ */
+const MARKS_MAX = 2400;
 
 /** Keeps a window reachable after moves, resizes and browser-window resizes (SPEC §11.2). */
 const place = (r: RefWindowData) => {
@@ -75,11 +80,12 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
       if (!alive) return;
       image.current = img;
       const m = document.createElement("canvas");
-      m.width = img.width;
-      m.height = img.height;
+      const k = Math.min(1, MARKS_MAX / Math.max(img.width, img.height));
+      m.width = Math.max(1, Math.round(img.width * k));
+      m.height = Math.max(1, Math.round(img.height * k));
       if (data.marks) {
         const saved = await ed.images.load(data.marks).catch(() => null);
-        if (saved) m.getContext("2d")!.drawImage(saved, 0, 0);
+        if (saved) m.getContext("2d")!.drawImage(saved, 0, 0, m.width, m.height);
       }
       marks.current = m;
       setLoaded((n) => n + 1);
@@ -134,6 +140,8 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
   const stroke = (a: { x: number; y: number }, b: { x: number; y: number }) => {
     const g = marks.current!.getContext("2d")!;
     g.save();
+    // strokes are in photo pixels; the layer may be smaller
+    g.scale(marks.current!.width / image.current!.width, marks.current!.height / image.current!.height);
     g.globalCompositeOperation = data.tool === "eraser" ? "destination-out" : "source-over";
     g.strokeStyle = data.color;
     g.lineCap = "round";

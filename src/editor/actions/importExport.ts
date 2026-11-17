@@ -147,9 +147,14 @@ export async function loadFile(ed: Editor, file: File) {
   }
 }
 
+/** The file each opened photo came from: kept as the reference window's photo, as it came. */
+const sourceFiles = new WeakMap<HTMLImageElement, Blob>();
+
 export async function openImageDialog(ed: Editor, file: File) {
   try {
-    ed.openDialog({ type: "imageImport", image: await loadImage(file) });
+    const image = await loadImage(file);
+    sourceFiles.set(image, file);
+    ed.openDialog({ type: "imageImport", image });
   } catch {
     ed.toast("toasts.badImage");
   }
@@ -179,7 +184,7 @@ export function createFromImage(ed: Editor, r: QuantizeResult, image: HTMLImageE
   loadPattern(ed, p, []);
   ed.toast("toasts.imageCreated", { count: keys.size });
   if (keepReference)
-    void downscaleToBlob(image)
+    void (sourceFiles.has(image) ? Promise.resolve(sourceFiles.get(image)!) : downscaleToBlob(image, Infinity, 0.95))
       .then((b) => ed.images.put(b))
       .then((id) => ed.references.add({ image: id, name: ed.t("references.photo"), grid: true }));
 }

@@ -1,5 +1,6 @@
 import type { PatternFile } from "@/core/formats/json/serialize";
 import { sql } from "./db";
+import { collectPictures } from "./pictures";
 import { assets } from "./storage";
 
 /** One user's saved patterns in Postgres (SPEC §15.23). Every query is scoped to the user. */
@@ -45,6 +46,8 @@ export async function deletePattern(userId: string, id: string): Promise<void> {
   const rows = await sql`delete from patterns where user_id = ${userId} and id = ${id} returning preview_key`;
   const key = rows[0]?.preview_key as string | undefined;
   if (key) await assets.delete(key).catch(() => {});
+  // its photos and marks, unless another pattern uses them too
+  await collectPictures(userId).catch(() => {});
 }
 
 const previewKey = (userId: string, id: string) => `users/${userId}/previews/${encodeURIComponent(id)}.png`;

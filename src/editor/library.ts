@@ -21,6 +21,8 @@ const PREVIEW_SIZE = 480;
  */
 export async function forgetAccountHere(persistence: Persistence): Promise<string[]> {
   const gone = (await persistence.patterns.trimCache?.({ all: true }).catch(() => [])) ?? [];
+  // their photo windows too — those the account surely has
+  await persistence.pictures?.forget(gone).catch(() => {});
   const draft = await persistence.draft.load().catch(() => null);
   if (draft && gone.includes(draft.id)) await persistence.draft.clear?.();
   return gone;
@@ -89,6 +91,7 @@ export function createLibrary(persistence: Persistence = createPersistence()) {
         const doc = await persistence.patterns.load(id);
         if (!doc || !(await accountPatternApi.save(doc))) continue;
         keepForGood(id);
+        persistence.pictures?.push(id);
         const canvas = await drawPreview(id).catch(() => null);
         if (canvas) await new Promise<void>((ok) => canvas.toBlob((b) => void (b ? accountPatternApi.putPreview(id, b) : Promise.resolve()).finally(ok), "image/png"));
         progress?.(++done);
