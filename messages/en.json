@@ -321,7 +321,18 @@
     "add": "Add",
     "nothing": "Nothing matches.",
     "dmcEquivalent": " · ≈ DMC {code}",
-    "customDefault": "Custom"
+    "customDefault": "Custom",
+    "brands": "Thread brands",
+    "removeBrand": "Remove {brand} from this pattern",
+    "brandInUse": "{brand} is used by the key — it can't be removed",
+    "addBrand": "+ Brand",
+    "newBrand": "New brand…",
+    "newBrandName": "Brand name",
+    "searchIn": "Search {brand} number or name",
+    "yours": "yours",
+    "editCustom": "Change {code}",
+    "save": "Save",
+    "emptyBrand": "No {brand} threads yet — add one with +"
   },
   "dialogs": {
     "cancel": "Cancel",
@@ -340,6 +351,7 @@
     "newTitle": "New pattern",
     "name": "Name",
     "fabric": "Fabric",
+    "threadBrands": "Thread brands",
     "keepKey": "Start with the same key (threads, beads, symbols)",
     "newHint": "The pattern open now stays in your saved patterns, and Versions keeps a copy of it.",
     "newHintSignedOut": "Without signing in you work on one pattern at a time: if the open one has work in it, you’ll be asked how to keep it first.",
@@ -1044,5 +1056,21 @@
     "openIt": "Open",
     "more": "More for “{name}”",
     "delete": "Delete…"
+  },
+  "threadForm": {
+    "brand": "Brand",
+    "brandExample": "e.g. Weeks Dye Works",
+    "brandBeadExample": "e.g. Mill Hill",
+    "newBrand": "New brand…",
+    "code": "Code",
+    "name": "Name",
+    "optional": "optional",
+    "colour": "Colour",
+    "needBrand": "Enter the brand.",
+    "needCode": "Enter the code.",
+    "cancel": "Cancel",
+    "removeBrand": "Remove {brand}",
+    "brandName": "Brand name",
+    "addBrand": "+ Brand"
   }
 }

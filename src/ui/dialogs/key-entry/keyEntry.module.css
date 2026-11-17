@@ -466,3 +466,63 @@
   background: #fff;
   border-radius: 4px;
 }
+
+/* brand tabs over the thread list (SPEC §15.28) */
+.brandTabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.brandTab {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 12.5px;
+}
+.brandTab.on {
+  border-color: var(--ink);
+  font-weight: 600;
+}
+.brandTab button {
+  padding: 3px 8px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.brandTab .brandX {
+  padding: 3px 7px 3px 0;
+  color: var(--muted);
+}
+.brandTab .brandX:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.addBrand,
+.brandName {
+  height: 26px;
+  max-width: 150px;
+  font-size: 12.5px;
+  padding: 0 6px;
+  border: 1px dashed var(--line2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+.editCustom {
+  flex: none;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+}
+.item:hover .editCustom,
+.item.on .editCustom {
+  opacity: 1;
+}

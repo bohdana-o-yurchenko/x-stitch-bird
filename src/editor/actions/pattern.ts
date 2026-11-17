@@ -25,11 +25,12 @@ export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null
   void ed.refreshPatterns();
 }
 
-export function newPattern(ed: Editor, o: { name: string; w: number; h: number; count: number; keepKey: boolean }) {
+export function newPattern(ed: Editor, o: { name: string; w: number; h: number; count: number; keepKey: boolean; brands?: string[] }) {
   const old = ed.doc;
   const p = createPattern(clampSize(o.w), clampSize(o.h), o.name.trim() || "Untitled pattern");
   p.count = o.count;
   p.strands = old.strands;
+  if (o.brands?.length) p.brands = [...new Set(o.brands)];
   if (o.keepKey) {
     p.key = old.key.map((e) => (e ? { ...e } : null));
     p.blends = { ...old.blends };
@@ -54,13 +55,14 @@ export function resize(ed: Editor, w: number, h: number, anchor: "centre" | "top
   ed.viewport.fit();
 }
 
-export function setPatternSettings(ed: Editor, s: Partial<Pick<Pattern, "name" | "count" | "fabric">> & { meta?: PatternMeta; grid?: GridNumbering }) {
+export function setPatternSettings(ed: Editor, s: Partial<Pick<Pattern, "name" | "count" | "fabric" | "brands">> & { meta?: PatternMeta; grid?: GridNumbering }) {
   const p = ed.doc;
   if (s.name !== undefined) p.name = s.name.trim() || "Untitled pattern";
   if (s.count !== undefined) p.count = s.count;
   if (s.fabric !== undefined) p.fabric = s.fabric;
   if (s.meta) p.meta = cleanMeta(s.meta);
   if (s.grid) p.grid = s.grid;
+  if (s.brands) p.brands = [...new Set(s.brands)];
   ed.changed();
 }
 

@@ -155,9 +155,21 @@ export function deleteEntry(ed: Editor, i: KeyIndex) {
 export function addCustomColour(ed: Editor, c: Omit<CustomColor, "id">): string {
   const id = shortId("custom");
   ed.doc.customs[id] = { ...c, id };
+  if (c.kind === "thread" && ed.doc.brands && !ed.doc.brands.includes(c.brand)) ed.doc.brands = [...ed.doc.brands, c.brand];
   invalidateColors(ed.doc);
   ed.changed({ keys: true });
   return id;
+}
+
+/** Change a custom thread or bead (code, name, colour, brand): every entry using it follows. */
+export function updateCustomColour(ed: Editor, id: string, c: Partial<Omit<CustomColor, "id" | "kind">>) {
+  const old = ed.doc.customs[id];
+  if (!old) return;
+  ed.doc.customs[id] = { ...old, ...c, id };
+  // a thread moved to a brand the pattern doesn't list yet: the brand comes along
+  if (old.kind === "thread" && c.brand && ed.doc.brands && !ed.doc.brands.includes(c.brand)) ed.doc.brands = [...ed.doc.brands, c.brand];
+  invalidateColors(ed.doc);
+  ed.changed({ keys: true });
 }
 
 export const layerOfDraft = (d: KeyDraft) => entryLayer({ t: d.t, src: "", sym: "" });

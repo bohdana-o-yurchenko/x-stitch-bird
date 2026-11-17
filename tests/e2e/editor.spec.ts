@@ -1072,3 +1072,40 @@ test("☰ ▸ Toolbar hides the shape tools and fractional stitches, and remembe
   await page.getByTestId("toolbar-options").getByLabel("Hide line and rectangle tools").uncheck();
   await expect(toolbar.getByRole("button", { name: "Line (L)", exact: true })).toBeVisible();
 });
+
+test("thread brands: chosen for a new pattern, one tab each in the picker, your own threads added and changed there; a used brand stays", async ({ page }) => {
+  await fileAction(page, "New", "Blank pattern…");
+  const dialog = page.getByRole("dialog");
+  await dialog.getByTestId("brand-chips").getByRole("combobox").selectOption({ label: "New brand…" });
+  await dialog.getByPlaceholder("Brand name").fill("Kreinik");
+  await dialog.getByPlaceholder("Brand name").press("Enter");
+  await dialog.getByRole("button", { name: "Create" }).click();
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const tabs = page.getByTestId("brand-tabs");
+  await expect(tabs.getByRole("tab")).toHaveText(["DMC", "Kreinik"]);
+  await tabs.getByRole("tab", { name: "Kreinik" }).click();
+  await expect(page.getByText("No Kreinik threads yet")).toBeVisible();
+  // your own thread, in the brand of the tab
+  await page.getByRole("button", { name: "+ Custom thread" }).click();
+  const form = page.getByTestId("thread-form");
+  await expect(form.getByLabel("Brand")).toHaveValue("Kreinik");
+  await form.getByLabel("Code").fill("032");
+  await form.getByLabel("Name").fill("Pearl");
+  await form.getByRole("button", { name: "Add" }).click();
+  await page.getByTestId("key-form").getByRole("button", { name: "Add to key", exact: true }).click();
+  await expect(page.locator("[data-entry]")).toHaveCount(1);
+  await expect(page.locator("[data-entry]")).toContainText("Kreinik 032");
+  // changed from the picker: the key follows
+  await page.locator("[data-entry]").getByRole("button", { name: /^Edit/ }).click();
+  await page.locator("[data-id^='custom:']").hover();
+  await page.getByRole("button", { name: "Change 032" }).click();
+  await page.getByTestId("thread-form").getByLabel("Name").fill("Pearl gold");
+  await page.getByTestId("thread-form").getByRole("button", { name: "Save" }).click();
+  await expect(page.getByTestId("key-form")).toContainText(/Kreinik 032\s*Pearl gold/);
+  // Kreinik is used now: it can't be removed; DMC can
+  await expect(tabs.getByRole("button", { name: /Kreinik is used by the key/ })).toBeDisabled();
+  await tabs.getByRole("button", { name: "Remove DMC from this pattern" }).click();
+  await expect(tabs.getByRole("tab")).toHaveText(["Kreinik"]);
+  await page.getByTestId("key-form").getByRole("button", { name: "Close" }).click();
+  await expect(page.locator("[data-entry]")).toContainText("Pearl gold");
+});

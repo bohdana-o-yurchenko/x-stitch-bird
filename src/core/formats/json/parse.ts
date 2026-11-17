@@ -73,6 +73,8 @@ export function parsePattern(raw: unknown, symbols: readonly string[]): { patter
   p.combos = d.combos ?? {};
   p.customs = Object.fromEntries(Object.values(d.customs ?? {}).map((c: CustomColor) => [c.id, { ...c }]));
   p.meta = cleanMeta(d.meta);
+  const brands = Array.isArray(d.brands) ? [...new Set(d.brands.filter((b): b is string => typeof b === "string" && !!b.trim()).map((b) => b.trim()))] : [];
+  if (brands.length) p.brands = brands;
   p.grid = cleanGrid(d.grid);
   p.spent = Number.isFinite(d.spent) && d.spent! > 0 ? d.spent! * 1000 : 0;
   const samples = cleanSamples(d.samples);

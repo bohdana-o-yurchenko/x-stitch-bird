@@ -106,6 +106,8 @@ export interface Pattern {
   blends: Record<string, Blend>;
   combos: Record<string, Combo>;
   customs: Record<string, CustomColor>;
+  /** Thread brands, by name, in the picker's order (SPEC §15.28). Optional: absent means DMC (core/pattern/brands). */
+  brands?: string[];
   layers: Layers;
   /** Active work time in ms (SPEC §15.17). Counted by the editor, never edited by hand, not part of undo. */
   spent: number;

@@ -1711,6 +1711,22 @@ Idea: open other apps' files so пташечка also works as a converter — *
   real sample files for tests. Written from the format, not copied code (KXStitch is GPL).
 - Same rule as OXS import: what we can't represent is simplified and reported (`toasts.loadedReport`).
 
+### 15.28 Thread brands per pattern; your own threads (decided 2026-11-17)
+**Brands** (built): a pattern has thread brands, by name (`Pattern.brands`, optional in the file — absent means DMC;
+`core/pattern/brands.ts`). Usually one; some charts mix (Mirabilia: DMC + Kreinik). Chosen in the New dialog (chips;
+"Start with the same key" keeps the old brands too) and in the picker: one tab per brand, **+ Brand** adds one (a
+known brand or a new name), **×** removes one — only while no key entry uses it, never the last. A brand the key
+uses always shows. Built-in catalogues: DMC (Mill Hill for beads, with their own picker); more catalogues come only
+from openly available data — the stitchmate.app colour library may not be reused (its terms forbid copying it).
+
+**Your own threads** (built in patterns; the account inventory is next): one form — brand (picked from the
+pattern's and known brands, or a new one), code, name, colour — in the picker (+, and ✎ to change one; the key
+follows) and later on the Threads page. A thread can be your own in a built-in brand (a DMC shade not in the list)
+or in a brand of your own (Weeks Dye Works). Every pattern keeps a copy of the ones it uses, so shared files are
+whole. **Signed out**: they live in their pattern only. **Signed in**: an inventory in the account, in every
+pattern; on sign-in the ones in this browser's patterns join it (matched by brand + code). Deleting — only on the
+Threads page; patterns keep their copies. Brands of your own can be renamed or deleted there; built-in ones can't.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

@@ -321,7 +321,18 @@
     "add": "Додати",
     "nothing": "Нічого не знайдено.",
     "dmcEquivalent": " · ≈ DMC {code}",
-    "customDefault": "Своя"
+    "customDefault": "Своя",
+    "brands": "Бренди ниток",
+    "removeBrand": "Прибрати {brand} з цієї схеми",
+    "brandInUse": "{brand} використано в ключі — прибрати не можна",
+    "addBrand": "+ Бренд",
+    "newBrand": "Новий бренд…",
+    "newBrandName": "Назва бренду",
+    "searchIn": "Пошук за номером {brand} або назвою",
+    "yours": "ваша",
+    "editCustom": "Змінити {code}",
+    "save": "Зберегти",
+    "emptyBrand": "Ниток {brand} ще немає — додайте кнопкою +"
   },
   "dialogs": {
     "cancel": "Скасувати",
@@ -340,6 +351,7 @@
     "newTitle": "Нова схема",
     "name": "Назва",
     "fabric": "Тканина",
+    "threadBrands": "Бренди ниток",
     "keepKey": "Почати з того самого ключа (нитки, бісер, символи)",
     "newHint": "Відкрита зараз схема лишається серед збережених, а у Версіях буде її копія.",
     "newHintSignedOut": "Без входу ви працюєте з однією схемою: якщо у відкритій є робота, спершу запитаємо, як її зберегти.",
@@ -1044,5 +1056,21 @@
     "openIt": "Відкрити",
     "more": "Ще для «{name}»",
     "delete": "Видалити…"
+  },
+  "threadForm": {
+    "brand": "Бренд",
+    "brandExample": "напр. Weeks Dye Works",
+    "brandBeadExample": "напр. Mill Hill",
+    "newBrand": "Новий бренд…",
+    "code": "Номер",
+    "name": "Назва",
+    "optional": "необов’язково",
+    "colour": "Колір",
+    "needBrand": "Вкажіть бренд.",
+    "needCode": "Вкажіть номер.",
+    "cancel": "Скасувати",
+    "removeBrand": "Прибрати {brand}",
+    "brandName": "Назва бренду",
+    "addBrand": "+ Бренд"
   }
 }

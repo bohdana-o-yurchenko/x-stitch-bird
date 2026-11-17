@@ -3,47 +3,133 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BEADS, BEAD_SERIES, DMC, byHue, byNumber, matchesQuery } from "@/core/catalog/catalog";
+import type { ColorEntry } from "@/core/color/colorEntry";
+import { BUILT_IN_THREAD_BRANDS, canRemoveBrand, patternBrands } from "@/core/pattern/brands";
 import { resolveColor } from "@/core/pattern/resolve";
-import { addCustomColour } from "@/editor/actions/keyEntries";
+import { addCustomColour, updateCustomColour } from "@/editor/actions/keyEntries";
 import { Swatch, cx, ui } from "../../common/widgets";
-import { useEditor } from "../../hooks/editor";
+import { useCommand, useEditor, useEditorState } from "../../hooks/editor";
+import { ThreadForm, type ThreadFields } from "../../threads/ThreadForm";
 import s from "./keyEntry.module.css";
 
-/** Searchable list of threads or beads, with custom colours (SPEC §8.1). Enter in the search picks the top match. */
+/** The thread form: closed, adding one, or changing your own thread `id`. */
+type FormState = { mode: "closed" } | { mode: "add" } | { mode: "edit"; id: string };
+
+/**
+ * Searchable list of threads or beads, with your own colours (SPEC §8.1, §15.28). Threads come in one tab per brand of
+ * the pattern — a brand can be added here, and removed while no entry uses it. Enter in the search picks the top match.
+ */
 export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }: { kind: "thread" | "bead"; selected: string; onPick: (id: string) => void; height?: number; autoFocus?: boolean }) {
   const t = useTranslations("picker");
   const ed = useEditor();
+  const run = useCommand();
+  // brands and your own threads live in the pattern: redraw when it changes
+  const revision = useEditorState((st) => st.docRevision);
+  const doc = useEditorState((st) => st.doc);
+  const brands = kind === "thread" ? patternBrands(doc) : [];
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"num" | "hue">("num");
   const [series, setSeries] = useState("all");
-  const [custom, setCustom] = useState<{ open: boolean; brand: string; code: string; name: string; hex: string }>({ open: false, brand: kind === "bead" ? "Mill Hill" : "Anchor", code: "", name: "", hex: "#7A9CC6" });
-  const [, bump] = useState(0);
+  // the tab: the brand of what's picked, else the pattern's first
+  const [tab, setTab] = useState<string>(() => (kind === "thread" ? (resolveColor(doc, selected)?.brand ?? brands[0] ?? "DMC") : ""));
+  const brand = brands.includes(tab) ? tab : (brands[0] ?? "DMC");
+  const [form, setForm] = useState<FormState>({ mode: "closed" });
+  const [naming, setNaming] = useState(false);
   const list = useRef<HTMLDivElement>(null);
 
-  const customs = Object.values(ed.doc.customs).filter((c) => c.kind === kind).map((c) => resolveColor(ed.doc, c.id)!);
+  const customs = Object.values(doc.customs).filter((c) => c.kind === kind).map((c) => resolveColor(doc, c.id)!);
   const items = useMemo(() => {
-    let all = kind === "bead" ? (series === "mine" ? customs : [...BEADS, ...customs].filter((e) => series === "all" || e.series === series)) : [...DMC, ...customs];
+    let all: ColorEntry[];
+    if (kind === "bead") all = series === "mine" ? customs : [...BEADS, ...customs].filter((e) => series === "all" || e.series === series);
+    else all = [...(brand === "DMC" ? DMC : []), ...customs.filter((e) => e.brand === brand)];
     all = all.filter((e) => matchesQuery(e, query));
     return kind === "thread" ? [...all].sort(sort === "num" ? byNumber : byHue) : all;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kind, query, sort, series, customs.length]);
+  }, [kind, query, sort, series, brand, customs.length, revision]);
 
   useEffect(() => {
     if (!query) list.current?.querySelector("[data-on='true']")?.scrollIntoView({ block: "nearest" });
   }, [query, selected]);
 
-  const addCustom = () => {
-    if (!custom.code.trim()) return ed.toast("toasts.enterCode");
-    const id = addCustomColour(ed, { kind, brand: custom.brand.trim() || t("customDefault"), code: custom.code.trim(), name: custom.name.trim() || t("customDefault"), hex: custom.hex, series: kind === "bead" ? "Custom" : undefined });
-    setCustom({ ...custom, open: false, code: "", name: "" });
-    bump((n) => n + 1);
-    onPick(id);
+  const otherBrands = [...new Set([...BUILT_IN_THREAD_BRANDS, ...Object.values(doc.customs).filter((c) => c.kind === "thread").map((c) => c.brand)])].filter((b) => !brands.includes(b));
+  const addBrand = (b: string) => {
+    const name = b.trim();
+    if (!name) return;
+    if (!brands.includes(name)) run("pattern.setBrands", [...brands, name]);
+    setTab(name);
+    setNaming(false);
   };
+  const removeBrand = (b: string) => {
+    run("pattern.setBrands", brands.filter((x) => x !== b));
+    if (tab === b) setTab(brands.find((x) => x !== b) ?? "DMC");
+  };
+
+  const beadBrands = [...new Set(["Mill Hill", ...customs.map((c) => c.brand)])];
+  const save = (f: ThreadFields) => {
+    const name = f.name || t("customDefault");
+    if (form.mode === "edit") {
+      updateCustomColour(ed, form.id, { brand: f.brand, code: f.code, name, hex: f.hex });
+    } else {
+      const id = addCustomColour(ed, { kind, brand: f.brand, code: f.code, name, hex: f.hex, series: kind === "bead" ? "Custom" : undefined });
+      onPick(id);
+    }
+    if (kind === "thread") setTab(f.brand);
+    setForm({ mode: "closed" });
+  };
+  const editing = form.mode === "edit" ? doc.customs[form.id] : null;
 
   return (
     <div className={s.picker}>
+      {kind === "thread" && (
+        <div className={s.brandTabs} role="tablist" aria-label={t("brands")} data-testid="brand-tabs">
+          {brands.map((b) => {
+            const removable = canRemoveBrand(doc, b);
+            return (
+              <span key={b} className={cx(s.brandTab, b === brand && s.on)}>
+                <button type="button" role="tab" aria-selected={b === brand} onClick={() => setTab(b)}>{b}</button>
+                {brands.length > 1 && (
+                  <button
+                    type="button"
+                    className={s.brandX}
+                    disabled={!removable}
+                    title={removable ? t("removeBrand", { brand: b }) : t("brandInUse", { brand: b })}
+                    aria-label={removable ? t("removeBrand", { brand: b }) : t("brandInUse", { brand: b })}
+                    onClick={() => removeBrand(b)}
+                  >
+                    ×
+                  </button>
+                )}
+              </span>
+            );
+          })}
+          {naming ? (
+            <input
+              className={cx(ui.input, s.brandName)}
+              autoFocus
+              placeholder={t("newBrandName")}
+              aria-label={t("newBrandName")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addBrand(e.currentTarget.value);
+                } else if (e.key === "Escape") {
+                  e.stopPropagation();
+                  setNaming(false);
+                }
+              }}
+              onBlur={(e) => (e.currentTarget.value.trim() ? addBrand(e.currentTarget.value) : setNaming(false))}
+            />
+          ) : (
+            <select className={s.addBrand} aria-label={t("addBrand")} value="" onChange={(e) => (e.target.value === "\u0000new" ? setNaming(true) : addBrand(e.target.value))}>
+              <option value="">{t("addBrand")}</option>
+              {otherBrands.map((b) => <option key={b} value={b}>{b}</option>)}
+              <option value={"\u0000new"}>{t("newBrand")}</option>
+            </select>
+          )}
+        </div>
+      )}
       <div className={ui.row}>
-        <input className={cx(ui.input, s.search)} autoFocus={autoFocus} placeholder={kind === "bead" ? t("searchBead") : t("searchThread")} value={query} onChange={(e) => setQuery(e.target.value)}
+        <input className={cx(ui.input, s.search)} autoFocus={autoFocus} placeholder={kind === "bead" ? t("searchBead") : t("searchIn", { brand })} value={query} onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
             const q = query.trim().toLowerCase(), top = items.find((i) => i.code.toLowerCase() === q) ?? items[0];
             if (e.key !== "Enter" || !q || !top) return;
@@ -60,16 +146,18 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
         ) : (
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => setSort(sort === "num" ? "hue" : "num")}>{sort === "num" ? t("byNumber") : t("byColour")}</button>
         )}
-        <button type="button" className={cx(ui.btn, ui.sm)} title={kind === "bead" ? t("customBead") : t("customThread")} aria-label={kind === "bead" ? t("customBead") : t("customThread")} aria-pressed={custom.open} onClick={() => setCustom({ ...custom, open: !custom.open })}>+</button>
+        <button type="button" className={cx(ui.btn, ui.sm)} title={kind === "bead" ? t("customBead") : t("customThread")} aria-label={kind === "bead" ? t("customBead") : t("customThread")} aria-pressed={form.mode === "add"} onClick={() => setForm(form.mode === "add" ? { mode: "closed" } : { mode: "add" })}>+</button>
       </div>
-      {custom.open && (
-        <div className={ui.row}>
-          <input className={ui.input} style={{ maxWidth: 110 }} placeholder={t("brand")} value={custom.brand} onChange={(e) => setCustom({ ...custom, brand: e.target.value })} />
-          <input className={ui.input} style={{ maxWidth: 80 }} placeholder={t("code")} value={custom.code} onChange={(e) => setCustom({ ...custom, code: e.target.value })} />
-          <input className={ui.input} style={{ flex: 1 }} placeholder={t("name")} value={custom.name} onChange={(e) => setCustom({ ...custom, name: e.target.value })} />
-          <input type="color" value={custom.hex} onChange={(e) => setCustom({ ...custom, hex: e.target.value })} style={{ width: 36, height: 30 }} />
-          <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} onClick={addCustom}>{t("add")}</button>
-        </div>
+      {form.mode !== "closed" && (
+        <ThreadForm
+          key={form.mode === "edit" ? form.id : "add"}
+          kind={kind}
+          brands={kind === "thread" ? [brand, ...brands, ...otherBrands] : beadBrands}
+          initial={editing ? { brand: editing.brand, code: editing.code, name: editing.name, hex: editing.hex } : { brand: kind === "thread" ? brand : "Mill Hill", code: "", name: "", hex: "#7A9CC6" }}
+          saveLabel={form.mode === "edit" ? t("save") : t("add")}
+          onSave={save}
+          onCancel={() => setForm({ mode: "closed" })}
+        />
       )}
       <div ref={list} className={s.rows} style={{ height }} role="listbox">
         {items.map((e) => (
@@ -80,10 +168,24 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
               {e.name}
               {e.dmc && <span style={{ opacity: 0.7 }}>{t("dmcEquivalent", { code: e.dmc })}</span>}
             </span>
-            {e.series ? <span className={s.tag}>{e.series}</span> : e.brand !== "DMC" && <span className={s.tag}>{e.brand}</span>}
+            {e.series && e.series !== "Custom" ? <span className={s.tag}>{e.series}</span> : e.id.startsWith("custom:") && <span className={s.tag}>{t("yours")}</span>}
+            {e.id.startsWith("custom:") && (
+              <button
+                type="button"
+                className={s.editCustom}
+                title={t("editCustom", { code: e.code })}
+                aria-label={t("editCustom", { code: e.code })}
+                onClick={(ev) => {
+                  ev.stopPropagation();
+                  setForm({ mode: "edit", id: e.id });
+                }}
+              >
+                ✎
+              </button>
+            )}
           </div>
         ))}
-        {!items.length && <p className={ui.hint} style={{ padding: 10 }}>{t("nothing")}</p>}
+        {!items.length && <p className={ui.hint} style={{ padding: 10 }}>{kind === "thread" && !query && brand !== "DMC" ? t("emptyBrand", { brand }) : t("nothing")}</p>}
       </div>
     </div>
   );

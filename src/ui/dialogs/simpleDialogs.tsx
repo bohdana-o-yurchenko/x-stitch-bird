@@ -9,7 +9,9 @@ import { symbolText } from "@/core/symbols/lineStyles";
 import type { PatternMeta } from "@/core/pattern/types";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { copyText } from "@/platform/files";
+import { BUILT_IN_THREAD_BRANDS, patternBrands } from "@/core/pattern/brands";
 import { TimeSpent } from "../common/TimeSpent";
+import { BrandChips } from "../threads/BrandChips";
 import { ConfirmDelete, KeyIcon, Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
@@ -39,7 +41,11 @@ export function NewPatternDialog({ onClose }: Close) {
   const t = useTranslations("dialogs");
   const tf = useTranslations("fabric");
   const run = useCommand();
-  const [o, set] = useState({ name: "Untitled pattern", w: 80, h: 80, count: 14, keepKey: false });
+  const doc = useEditorState((st) => st.doc);
+  const [o, set] = useState({ name: "Untitled pattern", w: 80, h: 80, count: 14, keepKey: false, brands: ["DMC"] });
+  // keeping the key keeps its brands too
+  const keep = (on: boolean) => set({ ...o, keepKey: on, brands: on ? [...new Set([...o.brands, ...patternBrands(doc)])] : o.brands });
+  const known = [...new Set([...BUILT_IN_THREAD_BRANDS, ...patternBrands(doc)])];
   return (
     <Modal title={t("newTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("create"), primary: true, onClick: () => run("file.create", o) }]}>
       <div className={ui.grid2}>
@@ -53,7 +59,11 @@ export function NewPatternDialog({ onClose }: Close) {
         <label className={ui.field}>{t("width")}<input type="number" min={5} max={500} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} /></label>
         <label className={ui.field}>{t("height")}<input type="number" min={5} max={500} value={o.h} onChange={(e) => set({ ...o, h: Number(e.target.value) })} /></label>
       </div>
-      <label className={ui.chk}><input type="checkbox" checked={o.keepKey} onChange={(e) => set({ ...o, keepKey: e.target.checked })} />{t("keepKey")}</label>
+      <div className={ui.field}>
+        {t("threadBrands")}
+        <BrandChips value={o.brands} choices={known} onChange={(brands) => set({ ...o, brands })} />
+      </div>
+      <label className={ui.chk}><input type="checkbox" checked={o.keepKey} onChange={(e) => keep(e.target.checked)} />{t("keepKey")}</label>
       <p className={ui.hint}>{t(signedIn ? "newHint" : "newHintSignedOut")}</p>
     </Modal>
   );

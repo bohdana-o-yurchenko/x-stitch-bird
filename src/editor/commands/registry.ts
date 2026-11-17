@@ -85,6 +85,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "pattern.setInfo", run: (ed, meta) => setPatternSettings(ed, { meta: meta as PatternMeta }) },
   { id: "pattern.setGrid", run: (ed, g) => setPatternSettings(ed, { grid: g as GridNumbering }) },
   { id: "pattern.rename", run: (ed, name) => setPatternSettings(ed, { name: name as string }) },
+  { id: "pattern.setBrands", run: (ed, brands) => setPatternSettings(ed, { brands: brands as string[] }) },
   { id: "pattern.setFabric", run: (ed, o) => setPatternSettings(ed, o as { count?: number; fabric?: string }) },
   { id: "pattern.requestResize", run: (ed) => ed.openDialog({ type: "resize" }) },
   { id: "pattern.resize", run: (ed, a) => { const { w, h, anchor } = a as { w: number; h: number; anchor: "centre" | "topLeft" }; resize(ed, w, h, anchor); }, destructive: "resize" },
