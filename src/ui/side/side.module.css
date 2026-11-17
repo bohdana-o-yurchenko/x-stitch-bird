@@ -480,7 +480,6 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin: 8px 0 12px;
 }
 .version {
   display: flex;
@@ -514,7 +513,7 @@
   text-transform: uppercase;
   color: var(--muted);
 }
-.refPart + .refTitle {
+[data-testid="ref-windows"] + .refTitle {
   margin-top: 4px;
   padding-top: 10px;
   border-top: 1px solid var(--line);
@@ -531,4 +530,166 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 13.5px;
+}
+
+/* the sections' common layout (SPEC §15.32): groups with a small heading, rows of label + control */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+}
+.group + .group {
+  border-top: 1px solid var(--line);
+}
+.groupTitle {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.prow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  font-size: 13.5px;
+}
+.prowLabel {
+  flex: none;
+  width: 104px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.prow > select,
+.prow > input:not([type="checkbox"]):not([type="range"]):not([type="color"]),
+.prowGrow {
+  flex: 1;
+  min-width: 0;
+}
+.prow input[type="number"] {
+  max-width: 96px;
+}
+.prowNote {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.fold > summary {
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 13px;
+  list-style: none;
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary::before {
+  content: "▸ ";
+  color: var(--muted);
+}
+.fold[open] > summary::before {
+  content: "▾ ";
+}
+.fold[open] > summary {
+  margin-bottom: 8px;
+}
+/* a small on / off switch, as a checkbox */
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.switch input {
+  appearance: none;
+  flex: none;
+  position: relative;
+  width: 30px;
+  height: 17px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--line2);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.switch input::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s;
+}
+.switch input:checked {
+  background: var(--accent);
+}
+.switch input:checked::after {
+  transform: translateX(13px);
+}
+
+.colourSwatch {
+  width: 64px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid var(--line2);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+/* Totals: the counts as small tags, then what to buy, one line each */
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.stats > span {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.stats b {
+  color: var(--ink);
+}
+.buyList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13.5px;
+}
+.buyList li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.buyList li:last-child {
+  border-bottom: 0;
+}
+.buyQty {
+  flex: none;
+  color: var(--muted);
+}
+
+.railSep {
+  width: 1px;
+  height: 18px;
+  margin: 0 5px;
+  background: var(--line2);
 }

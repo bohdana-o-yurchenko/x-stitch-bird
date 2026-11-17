@@ -144,7 +144,8 @@
     "ct24": "24 ct over 1",
     "ct31": "31 ct over 1",
     "extend": "Extend canvas…",
-    "crop": "Crop to content"
+    "crop": "Crop to content",
+    "fabricGroup": "Fabric"
   },
   "totals": {
     "heading": "Totals & shopping list",
@@ -616,7 +617,9 @@
     "match": "Autofill",
     "matchHint": "Fill one 10 × 10 block at a time from the image (Shift+F)",
     "add": "Add an image…",
-    "addHint": "A photo or scan of the paper chart, lying under your stitches to trace over — and for Autofill to read."
+    "addHint": "A photo or scan of the paper chart, lying under your stitches to trace over — and for Autofill to read.",
+    "adjust": "Adjust",
+    "exactPosition": "Exact position and size"
   },
   "fileMenu": {
     "label": "Pattern ▾",

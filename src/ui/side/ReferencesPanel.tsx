@@ -8,8 +8,8 @@ import { UnderlayPanel } from "./UnderlayPanel";
 import s from "./side.module.css";
 
 /**
- * References (SPEC §15.15, §11.1, §15.32): the photos of the paper chart — the image behind the chart, and photos in
- * floating windows. Both are added from here; the windows are listed, shown or hidden, removed.
+ * References (SPEC §15.15, §11.1, §15.32): the photos of the paper chart — photos in floating windows first, then
+ * the image behind the chart. Both are added from here; the windows are listed, shown or hidden, removed.
  */
 export function ReferencesPanel() {
   const t = useTranslations("references");
@@ -19,8 +19,6 @@ export function ReferencesPanel() {
   const windows = useEditorState((st) => st.references);
   return (
     <Section id="references" title={t("heading")} defaultOpen testId="references-panel">
-      <h4 className={s.refTitle}>{tu("heading")}</h4>
-      <UnderlayPanel />
       <h4 className={s.refTitle}>{t("windows")}</h4>
       <div className={s.section} data-testid="ref-windows">
         {!windows.length && <p className={ui.hint} style={{ margin: 0 }}>{t("windowsHint")}</p>}
@@ -33,6 +31,8 @@ export function ReferencesPanel() {
         ))}
         <button type="button" className={cx(ui.btn, ui.sm)} style={{ alignSelf: "flex-start" }} onClick={() => run("reference.pick")} data-testid="ref-window-add">{t("addWindow")}</button>
       </div>
+      <h4 className={s.refTitle}>{tu("heading")}</h4>
+      <UnderlayPanel />
     </Section>
   );
 }

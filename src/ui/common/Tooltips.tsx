@@ -10,6 +10,7 @@ type Tip = { text: string; anchor: DOMRect };
 /**
  * App-wide tooltips for every element with a `title`, shown after DELAY_MS instead of the browser's long delay.
  * While hovered, the element's `title` is taken off (so the native tooltip stays away) and put back on leave.
+ * Icons whose meaning must be seen at once (`data-tip-instant`, the side panel's bar) show theirs straight away.
  */
 export function Tooltips() {
   const [tip, setTip] = useState<Tip | null>(null);
@@ -33,7 +34,9 @@ export function Tooltips() {
       if (!el || !title) return;
       el.removeAttribute("title");
       current = { el, title };
-      timer = setTimeout(() => setTip({ text: title, anchor: el.getBoundingClientRect() }), DELAY_MS);
+      const show = () => setTip({ text: title, anchor: el.getBoundingClientRect() });
+      if (el.hasAttribute("data-tip-instant")) show();
+      else timer = setTimeout(show, DELAY_MS);
     };
     const out = (e: PointerEvent) => {
       if (current && !current.el.contains(e.relatedTarget as Node | null)) hide();

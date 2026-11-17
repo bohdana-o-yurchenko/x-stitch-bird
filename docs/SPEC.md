@@ -1789,11 +1789,18 @@ pattern's state, to look at and tweak while working. Nothing is in two places.
   **one unfolded at a time**, at a height set with the **handle** above them (double-click: default 320 px); content
   that doesn't fit scrolls inside the section; the key list takes the rest and scrolls on its own; when room runs
   out the unfolded section gives way, so every header stays in view. An icon adds its section, unfolded — or takes
-  it away. Sections: **References** (the image behind the chart — its controls, or **Add an image…** — and photos
-  in floating windows: listed, shown / hidden, removed, **Add a photo window…**), Chart checks, Fabric & size (count,
-  colour, numbering, **Resize… · Extend canvas… · Crop to content**), Threads & beads, **Pattern info** (time spent,
-  the fields, saved as you leave each; the name is changed in the header), **Versions** (Restore), Totals & shopping
-  list. Adding a picture behind the chart, or asking for a section elsewhere (a guide step, `file.versions`,
+  it away; its name shows at once on pointing (`data-tip-instant`). The bar has two groups, a thin line between:
+  used while stitching (References, Chart checks, Totals) · about the pattern (Fabric & size, Threads & beads,
+  Pattern info, Versions); the panel follows the same order. Every section is laid out the same way: groups with a
+  small heading, rows of label and control, switches for on / off, rarely used details folded. Sections:
+  **References** (photos in floating windows first — listed, shown / hidden, removed, **Add a photo window…** — then
+  the image behind the chart: switches for Behind stitches and Show with the opacity, Move / Crop and the hint while
+  editing, Adjust — rotation, Straighten, Fit, Reset crop, the exact position folded — then Autofill, Replace,
+  Remove; or **Add an image…**), Chart checks, Fabric & size (groups Fabric · Grid size
+  — **Resize… · Extend canvas… · Crop to content** — · Numbering), Threads & beads, **Pattern info** (time spent,
+  the fields that go into OXS, then the app's own folded unless filled; saved as you leave each; the name is changed
+  in the header), **Versions** (Restore), Totals & shopping list (the counts as small tags, then what to buy, a line
+  each). Adding a picture behind the chart, or asking for a section elsewhere (a guide step, `file.versions`,
   `pattern.editInfo`), brings it in unfolded. Resize and Extend canvas stay dialogs (they ask for numbers).
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)

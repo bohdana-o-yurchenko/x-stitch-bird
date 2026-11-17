@@ -20,14 +20,16 @@ import { VersionsPanel } from "./VersionsPanel";
 import s from "./side.module.css";
 
 /** The sections, in the panel's (and the bar's) order: icon, title (message key), content. */
-const SECTIONS: { id: string; icon: string; title: string; panel: () => ReactNode }[] = [
-  { id: "references", icon: "image", title: "references.heading", panel: () => <ReferencesPanel /> },
-  { id: "checks", icon: "checks", title: "checks.heading", panel: () => <ChecksPanel /> },
-  { id: "fabric", icon: "fabric", title: "fabric.heading", panel: () => <FabricPanel /> },
-  { id: "materials", icon: "spool", title: "materials.heading", panel: () => <MaterialsPanel /> },
-  { id: "info", icon: "info", title: "side.info", panel: () => <PatternInfoPanel /> },
-  { id: "versions", icon: "history", title: "side.versions", panel: () => <VersionsPanel /> },
-  { id: "totals", icon: "totals", title: "totals.heading", panel: () => <TotalsPanel /> },
+const SECTIONS: { id: string; icon: string; title: string; group: "work" | "pattern"; panel: () => ReactNode }[] = [
+  // used while stitching
+  { id: "references", icon: "image", title: "references.heading", group: "work", panel: () => <ReferencesPanel /> },
+  { id: "checks", icon: "checks", title: "checks.heading", group: "work", panel: () => <ChecksPanel /> },
+  { id: "totals", icon: "totals", title: "totals.heading", group: "work", panel: () => <TotalsPanel /> },
+  // about the pattern, set now and then
+  { id: "fabric", icon: "fabric", title: "fabric.heading", group: "pattern", panel: () => <FabricPanel /> },
+  { id: "materials", icon: "spool", title: "materials.heading", group: "pattern", panel: () => <MaterialsPanel /> },
+  { id: "info", icon: "info", title: "side.info", group: "pattern", panel: () => <PatternInfoPanel /> },
+  { id: "versions", icon: "history", title: "side.versions", group: "pattern", panel: () => <VersionsPanel /> },
 ];
 
 /**
@@ -104,7 +106,9 @@ export function SidePanel() {
         )}
       </div>
       <nav className={s.rail} aria-label={t("side.tools")}>
-        {SECTIONS.map((x) => (
+        {SECTIONS.map((x, n) => [
+          // the two groups: used while stitching · about the pattern
+          n > 0 && SECTIONS[n - 1]!.group !== x.group && <span key={`${x.id}-sep`} className={s.railSep} aria-hidden />,
           <button
             key={x.id}
             type="button"
@@ -115,11 +119,12 @@ export function SidePanel() {
             disabled={!!form}
             data-testid={`rail-${x.id}`}
             data-guide={`side-${x.id}`}
+            data-tip-instant
             onClick={() => ed.toggleSection(x.id)}
           >
             <Icon name={x.icon} size={18} />
-          </button>
-        ))}
+          </button>,
+        ])}
       </nav>
     </div>
   );

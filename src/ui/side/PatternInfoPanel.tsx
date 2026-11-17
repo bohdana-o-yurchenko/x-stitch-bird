@@ -41,14 +41,25 @@ function InfoFields({ save }: { save: (m: PatternMeta) => void }) {
       )}
     </label>
   );
+  const own = META_FIELDS.filter((f) => !f.oxs);
   return (
-    <div className={s.section}>
-      <TimeSpent />
-      <p className={ui.hint} style={{ margin: "4px 0 0" }}>{t("dialogs.infoOxsHint")}</p>
-      <div className={s.infoFields}>{META_FIELDS.filter((f) => f.oxs).map(field)}</div>
-      <h4 className={ui.sectionTitle}>{t("dialogs.infoOwn")}</h4>
-      <p className={ui.hint} style={{ margin: 0 }}>{t("dialogs.infoOwnHint")}</p>
-      <div className={s.infoFields}>{META_FIELDS.filter((f) => !f.oxs).map(field)}</div>
-    </div>
+    <>
+      <div className={s.group}>
+        <TimeSpent />
+      </div>
+      <div className={s.group}>
+        <h4 className={s.groupTitle}>{t("dialogs.infoOxs")}</h4>
+        <p className={s.prowNote} style={{ margin: 0 }}>{t("dialogs.infoOxsHint")}</p>
+        <div className={s.infoFields}>{META_FIELDS.filter((f) => f.oxs).map(field)}</div>
+      </div>
+      <div className={s.group}>
+        {/* the app's own fields, folded unless something's in them */}
+        <details className={s.fold} open={own.some((f) => !!meta[f.id])}>
+          <summary>{t("dialogs.infoOwn")}</summary>
+          <p className={s.prowNote} style={{ margin: "0 0 4px" }}>{t("dialogs.infoOwnHint")}</p>
+          <div className={s.infoFields}>{own.map(field)}</div>
+        </details>
+      </div>
+    </>
   );
 }
