@@ -1697,6 +1697,20 @@ changes reach the account, then takes the account's patterns out of this browser
 when it's one of them; the editor then shows the demo. Patterns only here stay. Nothing is taken out when the
 account can't be reached.
 
+### 15.27 Importing other apps' patterns: Saga, Pattern Maker, PCStitch (backlog, assessed 2026-11-17)
+Idea: open other apps' files so пташечка also works as a converter — **import only, never write them**; out goes
+.xbird or OXS (open, documented). Already there: **OXS** import (Pattern ▸ Open work file…, and drag & drop).
+- **.saga (Cross Stitch Saga, iOS/Android)** — undocumented; no public spec or open-source parser; converters exist
+  only as closed services (e.g. crossstitch.diy, SAGA → XSD). Saga itself imports XSD, XSP, PAT, OXS, so its own
+  format holds the same things (full/half/quarter/petite/oblong, backstitch, long stitch, knots, beads). Needs real
+  sample files to study. **Check first:** designers sell patterns as .saga; if the files are encrypted or otherwise
+  protected, we don't break that (circumventing protection is a legal line, whatever the purpose) — only plain
+  files. Effort: unknown until a sample is looked at (M if plain and structured, out if protected).
+- **.xsd (Pattern Maker)** and **.pat (PCStitch)** — binary, but long since worked out by open-source projects
+  (KXStitch reads both); common in older purchased charts and what SAGA converters produce. Effort M each, with
+  real sample files for tests. Written from the format, not copied code (KXStitch is GPL).
+- Same rule as OXS import: what we can't represent is simplified and reported (`toasts.loadedReport`).
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with
