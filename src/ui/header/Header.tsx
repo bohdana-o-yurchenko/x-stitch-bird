@@ -15,6 +15,7 @@ import type { HeaderMenu } from "@/editor/store/editorStore";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
 import { savedToolbarHide, setToolbarHide } from "./toolbarPrefs";
+import { SOURCE_URL } from "../common/source";
 import s from "./header.module.css";
 
 function PatternName() {
@@ -145,6 +146,7 @@ function AppMenu() {
     { id: "toolbar", node: <ToolbarOptions /> },
     "-",
     { id: "privacy", label: t("privacy"), onClick: () => void window.open(`/${locale}/privacy`, "_blank", "noopener") },
+    { id: "source", label: t("source"), hint: t("sourceHint"), onClick: () => void window.open(SOURCE_URL, "_blank", "noopener") },
     "-",
     { id: "glory", node: <Glory /> },
   ];

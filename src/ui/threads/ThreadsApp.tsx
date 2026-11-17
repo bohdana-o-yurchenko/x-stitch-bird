@@ -8,7 +8,7 @@ import { createLibrary } from "@/editor/library";
 import { useRouter } from "@/i18n/navigation";
 import { authClient } from "../account/authClient";
 import { Modal, cx, ui } from "../common/widgets";
-import { HomeHeader } from "../home/HomeHeader";
+import { HomeFooter, HomeHeader } from "../home/HomeHeader";
 import home from "../home/home.module.css";
 import { ThreadForm, type ThreadFields } from "./ThreadForm";
 import s from "./threads.module.css";
@@ -141,6 +141,7 @@ export default function ThreadsApp() {
           </div>
         )}
       </main>
+      <HomeFooter />
 
       {editing && (
         <Modal title={editing.thread ? t("editTitle") : t(editing.kind === "bead" ? "newBead" : "newThread")} onClose={() => setEditing(null)} buttons={[]}>

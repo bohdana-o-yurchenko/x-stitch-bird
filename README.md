@@ -45,3 +45,10 @@ src/app/          Next.js routes; messages/ holds translations (en, uk)
 
 `index.html` stays the working single-file app until the new one replaces it. Data saved by the new app uses the same
 `localStorage` keys and IndexedDB database names, but lives under its own origin (e.g. `localhost:3000`).
+
+## Licence
+
+пташечка is free software under the **GNU Affero General Public License, version 3 or later**
+([`LICENSE`](LICENSE)): use it, study it, change it and share it — and whoever runs a changed version for others
+shares their changes too. Copyright © 2026 Bohdana Yurchenko. Fonts, colour data and libraries by others are listed
+with their licences in [`NOTICE.md`](NOTICE.md).

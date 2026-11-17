@@ -1732,6 +1732,14 @@ one), your threads and beads as swatches on the right; **+ Thread**, **+ Bead**,
 deletes it (asks). Signed out the page explains and invites to sign in. In the editor, signed in, the picker lists
 the inventory's threads in their brand's tab, its brands under **+ Brand**; a picked one is copied into the pattern.
 
+### 15.29 Free software: AGPL-3.0-or-later (2026-11-17)
+пташечка is licensed under the GNU Affero General Public License, version 3 or later (`LICENSE`; copyright Bohdana
+Yurchenko). Third-party fonts, colour data and libraries with their licences: `NOTICE.md`. As the licence asks of a
+program used over a network (§13), the app links to its source: ☰ ▸ **Source code** ("Free software · AGPL-3.0") and
+the main pages' footer. A paid subscription for the account (storage, sync) later is compatible: the code stays
+free, the hosted service is what's paid for. Outside contributions: decide on a contributor agreement first if the
+code might ever be offered under other terms too.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

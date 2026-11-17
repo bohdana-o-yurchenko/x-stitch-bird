@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
-import { cellPoint, dragCells, editorState, fileAction, fixture, gridPoint, loadFixture, openEditor, pretendSignedIn, printAction } from "./helpers";
+import { cellPoint, dragCells, editorState, fileAction, fixture, gridPoint, loadFixture, openAppMenu, openEditor, pretendSignedIn, printAction } from "./helpers";
 
 /*
  * The main things people do, start to finish: make a pattern, draw it, keep it, open it again, bring in pictures
@@ -278,4 +278,12 @@ test("Threads, next to Patterns: signed out it says what it's for and invites to
   await expect(page.getByTestId("threads-signed-out")).toContainText("lives only in its pattern");
   await page.getByTestId("threads-signed-out").getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByTestId("sign-in-email")).toBeVisible();
+});
+
+test("free software: ☰ ▸ Source code and the main pages' footer link to the source", async ({ page }) => {
+  await openAppMenu(page);
+  await expect(page.getByRole("menuitem", { name: /^Source code/ })).toContainText("AGPL-3.0");
+  await page.keyboard.press("Escape");
+  await page.getByTestId("to-home").click();
+  await expect(page.getByRole("contentinfo").getByRole("link", { name: "Source code" })).toHaveAttribute("href", "https://github.com/bohdana-o-yurchenko/x-stitch-bird");
 });

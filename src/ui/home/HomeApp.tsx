@@ -10,7 +10,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { pickFile } from "@/platform/files";
 import { authClient } from "../account/authClient";
 import { Dropdown, Modal, cx, ui } from "../common/widgets";
-import { HomeHeader } from "./HomeHeader";
+import { HomeFooter, HomeHeader } from "./HomeHeader";
 import s from "./home.module.css";
 
 type Current = NonNullable<Awaited<ReturnType<Library["current"]>>>;
@@ -150,6 +150,7 @@ export default function HomeApp() {
           </section>
         )}
       </main>
+      <HomeFooter />
     </div>
   );
 }

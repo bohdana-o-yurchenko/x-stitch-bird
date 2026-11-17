@@ -643,7 +643,9 @@
     "hidePartials": "Hide fractional stitches",
     "changelog": "What’s new",
     "changelogHint": "Version {version} — what changed",
-    "privacy": "Privacy policy"
+    "privacy": "Privacy policy",
+    "source": "Source code",
+    "sourceHint": "Free software · AGPL-3.0"
   },
   "toolNames": {
     "pencil": "Draw",
@@ -1056,7 +1058,10 @@
     "open": "Open “{name}”",
     "openIt": "Open",
     "more": "More for “{name}”",
-    "delete": "Delete…"
+    "delete": "Delete…",
+    "freeSoftware": "пташечка is free software (AGPL-3.0)",
+    "source": "Source code",
+    "privacy": "Privacy policy"
   },
   "threadForm": {
     "brand": "Brand",
