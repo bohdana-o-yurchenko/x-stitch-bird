@@ -1120,11 +1120,12 @@ test("bead brands: Mill Hill and Preciosa as tabs, a finish filter, your own bea
   await form.getByRole("combobox", { name: "All finishes" }).selectOption("Opaque - Matt");
   await expect(page.locator("[data-id='preciosa:13600/33139001']")).toBeVisible();
   await expect(page.locator("[data-id='preciosa:13600']")).toHaveCount(0);
-  // a bead of your own, in a brand of your own
-  await page.getByRole("button", { name: "+ Custom bead" }).click();
+  // a brand of your own, from + Brand: its tab, and the form for its first bead
+  await tabs.getByRole("combobox", { name: "+ Brand" }).selectOption({ label: "New brand…" });
+  await tabs.getByPlaceholder("Brand name").fill("Toho");
+  await tabs.getByPlaceholder("Brand name").press("Enter");
   const tf = page.getByTestId("thread-form");
-  await tf.getByLabel("Brand").selectOption({ label: "New brand…" });
-  await tf.getByLabel("Brand").fill("Toho");
+  await expect(tf.getByLabel("Brand")).toHaveValue("Toho");
   await tf.getByLabel("Code").fill("25");
   await tf.getByRole("button", { name: "Add" }).click();
   await expect(tabs.getByRole("tab")).toHaveText(["Mill Hill", "Preciosa", "Toho"]);

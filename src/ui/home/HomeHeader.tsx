@@ -12,7 +12,7 @@ type User = { email: string; name?: string } | null;
 
 /** The main pages' bar (SPEC §15.26): logo, the sections as tabs, languages, account — like the editor's. */
 export function HomeHeader({ section, user, pending, signInOpen, setSignInOpen, beforeSignOut, onSignedOut }: {
-  section: "patterns" | "threads";
+  section: "patterns" | "threads" | "beads";
   user: User;
   pending: boolean;
   signInOpen: boolean;
@@ -30,6 +30,7 @@ export function HomeHeader({ section, user, pending, signInOpen, setSignInOpen, 
       <nav className={s.sections} aria-label={t("nav")}>
         <Link href="/patterns" aria-current={section === "patterns" ? "page" : undefined}>{t("patterns")}</Link>
         <Link href="/threads" aria-current={section === "threads" ? "page" : undefined}>{t("threads")}</Link>
+        <Link href="/beads" aria-current={section === "beads" ? "page" : undefined}>{t("beads")}</Link>
       </nav>
       <span className={s.spacer} />
       <LanguageSwitch compact />

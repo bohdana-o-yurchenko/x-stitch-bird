@@ -32,7 +32,9 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   const inventory = useEditorState((st) => st.inventory);
   // threads: the pattern's brands; beads: the built-in bead brands, then your own
   const ownBeadBrands = [...Object.values(doc.customs), ...(inventory ?? [])].filter((c) => c.kind === "bead").map((c) => c.brand);
-  const brands = kind === "thread" ? patternBrands(doc) : [...new Set([...Object.keys(BEAD_CATALOGUES), ...ownBeadBrands])];
+  // a bead brand exists through its beads: a new one shows here until its first bead is saved
+  const [newBeadBrands, setNewBeadBrands] = useState<string[]>([]);
+  const brands = kind === "thread" ? patternBrands(doc) : [...new Set([...Object.keys(BEAD_CATALOGUES), ...ownBeadBrands, ...newBeadBrands])];
   // the tab: the brand of what's picked, else the first
   const [tab, setTab] = useState<string>(() => resolveColor(doc, selected)?.brand ?? brands[0] ?? "");
   const brand = brands.includes(tab) ? tab : (brands[0] ?? "");
@@ -72,10 +74,17 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   const otherBrands = [...new Set([...BUILT_IN_THREAD_BRANDS, ...[...Object.values(doc.customs), ...(inventory ?? [])].filter((c) => c.kind === "thread").map((c) => c.brand)])].filter((b) => !brands.includes(b));
   const addBrand = (b: string) => {
     const name = b.trim();
-    if (!name) return;
-    if (!brands.includes(name)) run("pattern.setBrands", [...brands, name]);
-    setTab(name);
     setNaming(false);
+    if (!name) return;
+    setTab(name);
+    if (kind === "thread") {
+      if (!brands.includes(name)) run("pattern.setBrands", [...brands, name]);
+      return;
+    }
+    // beads: the tab, and the form for its first bead
+    if (!brands.includes(name)) setNewBeadBrands((list) => [...list, name]);
+    setSeries("all");
+    setForm({ mode: "add" });
   };
   const removeBrand = (b: string) => {
     run("pattern.setBrands", brands.filter((x) => x !== b));
@@ -121,7 +130,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
               </span>
             );
           })}
-          {kind === "bead" ? null : naming ? (
+          {naming ? (
             <input
               className={cx(ui.input, s.brandName)}
               autoFocus
@@ -141,7 +150,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
           ) : (
             <select className={s.addBrand} aria-label={t("addBrand")} value="" onChange={(e) => (e.target.value === "\u0000new" ? setNaming(true) : addBrand(e.target.value))}>
               <option value="">{t("addBrand")}</option>
-              {otherBrands.map((b) => <option key={b} value={b}>{b}</option>)}
+              {kind === "thread" && otherBrands.map((b) => <option key={b} value={b}>{b}</option>)}
               <option value={"\u0000new"}>{t("newBrand")}</option>
             </select>
           )}
@@ -206,7 +215,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
             )}
           </div>
         ))}
-        {!items.length && <p className={ui.hint} style={{ padding: 10 }}>{kind === "thread" && !query && !THREAD_CATALOGUES[brand] ? t("emptyBrand", { brand }) : t("nothing")}</p>}
+        {!items.length && <p className={ui.hint} style={{ padding: 10 }}>{!query && !catalogue.length ? t(kind === "bead" ? "emptyBeadBrand" : "emptyBrand", { brand }) : t("nothing")}</p>}
       </div>
     </div>
   );

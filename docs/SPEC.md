@@ -1753,8 +1753,10 @@ measured off its printed bead strip (`scripts/catalog/import-preciosa.py`; credi
 several finishes (13600 plain, 13600 matt): the id carries the article number unless it's the plain one
 (`preciosa:13600`, `preciosa:13600/33139001`). No package count (sold by weight). **Toho**: no official colour chart
 found to build from (retailers' charts are theirs; Toho's site isn't ours to copy) — until one is, Toho beads are
-added as your own, in a brand "Toho". The Threads page has **Threads | Beads** sections, each with its brands;
-built-in brand names (DMC, Anchor, Madeira, Mill Hill, Preciosa) can't be renamed or deleted.
+added as your own, in a brand "Toho". Your own beads have a page of their own, **Beads** (`/[locale]/beads`), next to
+Patterns and Threads — the same page as Threads (brands, add, change, delete); built-in brand names (DMC, Anchor,
+Madeira, Mill Hill, Preciosa) can't be renamed or deleted. In the bead picker **+ Brand ▸ New brand…** shows the
+new brand's tab and opens the form for its first bead (a bead brand exists through its beads).
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

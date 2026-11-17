@@ -11,5 +11,5 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/threads"
 export default async function ThreadsPage({ params }: PageProps<"/[locale]/threads">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <ThreadsEntry />;
+  return <ThreadsEntry kind="thread" />;
 }

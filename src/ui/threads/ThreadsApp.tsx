@@ -25,7 +25,7 @@ const newId = () => `custom:${Math.random().toString(36).slice(2, 10)}`;
  * Threads (SPEC §15.28): your own threads and beads, signed in — by brand; add, change (also its brand), delete.
  * Your own brands can be renamed or deleted. Signed out there is no inventory: custom colours live in their pattern.
  */
-export default function ThreadsApp() {
+export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
   const t = useTranslations("threadsPage");
   const lib = useMemo(() => createLibrary(), []);
   const router = useRouter();
@@ -35,7 +35,6 @@ export default function ThreadsApp() {
   const [signInOpen, setSignInOpen] = useState(false);
   const [threads, setThreads] = useState<CustomColor[] | null>(null);
   const [failed, setFailed] = useState(false);
-  const [kind, setKind] = useState<"thread" | "bead">("thread");
   const [brand, setBrand] = useState<string | null>(null);
   const [editing, setEditing] = useState<Editing>(null);
   const [deleting, setDeleting] = useState<CustomColor | null>(null);
@@ -84,19 +83,15 @@ export default function ThreadsApp() {
 
   const builtIn = kind === "thread" ? BUILT_IN_THREAD_BRANDS : Object.keys(BEAD_CATALOGUES);
   const brandChoices = (k: "thread" | "bead") => [...new Set([...(brand && k === kind ? [brand] : []), ...(k === "thread" ? BUILT_IN_THREAD_BRANDS : Object.keys(BEAD_CATALOGUES)), ...(threads ?? []).filter((c) => c.kind === k).map((c) => c.brand)])];
-  const switchKind = (k: "thread" | "bead") => {
-    setKind(k);
-    setBrand(null);
-  };
 
   return (
     <div className={home.page}>
-      <HomeHeader section="threads" user={user} pending={isPending} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
+      <HomeHeader section={kind === "thread" ? "threads" : "beads"} user={user} pending={isPending} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
       <main className={home.main}>
         {!isPending && !user ? (
           <section className={home.empty} data-testid="threads-signed-out">
-            <h1>{t("title")}</h1>
-            <p className={ui.hint} style={{ maxWidth: 520 }}>{t("signedOut")}</p>
+            <h1>{t(kind === "thread" ? "title" : "titleBeads")}</h1>
+            <p className={ui.hint} style={{ maxWidth: 520 }}>{t(kind === "thread" ? "signedOut" : "signedOutBeads")}</p>
             <div className={home.emptyButtons}>
               <button type="button" className={cx(ui.btn, ui.primary)} onClick={() => setSignInOpen(true)}>{t("signIn")}</button>
             </div>
@@ -104,11 +99,6 @@ export default function ThreadsApp() {
         ) : (
           <div className={s.layout}>
             <nav className={s.brandList} aria-label={t("brands")} data-testid="thread-brands">
-              <div className={s.kinds} role="tablist" aria-label={t("kinds")}>
-                {(["thread", "bead"] as const).map((k) => (
-                  <button key={k} type="button" role="tab" aria-selected={kind === k} className={cx(kind === k && s.on)} onClick={() => switchKind(k)}>{t(k === "thread" ? "threadsTab" : "beadsTab")}</button>
-                ))}
-              </div>
               <button type="button" className={cx(s.brandItem, !brand && s.on)} onClick={() => setBrand(null)}>
                 <span>{t(kind === "thread" ? "all" : "allBeads")}</span>
                 <small>{threads ? mine.length : ""}</small>

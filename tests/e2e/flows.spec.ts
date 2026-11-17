@@ -278,6 +278,11 @@ test("Threads, next to Patterns: signed out it says what it's for and invites to
   await expect(page.getByTestId("threads-signed-out")).toContainText("lives only in its pattern");
   await page.getByTestId("threads-signed-out").getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByTestId("sign-in-email")).toBeVisible();
+  await page.keyboard.press("Escape");
+  // beads have a page of their own
+  await page.getByRole("link", { name: "Beads" }).click();
+  await expect(page).toHaveURL(/\/en\/beads$/);
+  await expect(page.getByTestId("threads-signed-out")).toContainText("Toho for instance");
 });
 
 test("free software: ☰ ▸ Source code and the main pages' footer link to the source", async ({ page }) => {

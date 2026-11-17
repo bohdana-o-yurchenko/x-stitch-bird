@@ -334,7 +334,8 @@
     "save": "Save",
     "emptyBrand": "No {brand} threads yet — add one with +",
     "beadBrands": "Bead brands",
-    "allFinishes": "All finishes"
+    "allFinishes": "All finishes",
+    "emptyBeadBrand": "No {brand} beads yet — add one with +"
   },
   "dialogs": {
     "cancel": "Cancel",
@@ -1030,6 +1031,7 @@
     "nav": "Sections",
     "patterns": "Patterns",
     "threads": "Threads",
+    "beads": "Beads",
     "continue": "Continue stitching",
     "continueTo": "Continue “{name}”",
     "continueButton": "Continue →",
@@ -1082,8 +1084,8 @@
     "addBrand": "+ Brand"
   },
   "threadsPage": {
-    "title": "My threads and beads",
-    "signedOut": "Your own threads and beads — the ones that aren't in the built-in lists — are kept in your account and offered in every pattern. Without signing in, one you add lives only in its pattern; sign in and those join yours.",
+    "title": "My threads",
+    "signedOut": "Your own threads — the ones that aren't in the built-in lists — are kept in your account and offered in every pattern. Without signing in, a thread you add lives only in its pattern; sign in and those join yours.",
     "signIn": "Sign in",
     "brands": "Brands",
     "all": "All threads",
@@ -1108,10 +1110,9 @@
     "deleteBrand": "Delete {brand}",
     "deleteBrandTitle": "Delete {brand}?",
     "deleteBrandBody": "{count, plural, one {Its # thread leaves} other {Its # threads leave}} your threads. Patterns that use them keep their copies.",
-    "kinds": "Threads or beads",
-    "threadsTab": "Threads",
-    "beadsTab": "Beads",
     "allBeads": "All beads",
-    "emptyBeads": "No beads of your own yet. Add one here, or with + in a pattern's bead list."
+    "emptyBeads": "No beads of your own yet. Add one here, or with + in a pattern's bead list.",
+    "titleBeads": "My beads",
+    "signedOutBeads": "Your own beads — the ones that aren't in the built-in lists, Toho for instance — are kept in your account and offered in every pattern. Without signing in, a bead you add lives only in its pattern; sign in and those join yours."
   }
 }

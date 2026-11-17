@@ -10,6 +10,7 @@ function Loading() {
 
 const ThreadsApp = dynamic(() => import("./ThreadsApp"), { ssr: false, loading: Loading });
 
-export function ThreadsEntry() {
-  return <ThreadsApp />;
+/** Your own threads (`/threads`) or beads (`/beads`) — one page, two kinds. */
+export function ThreadsEntry({ kind }: { kind: "thread" | "bead" }) {
+  return <ThreadsApp kind={kind} />;
 }
