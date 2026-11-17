@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BEAD_CATALOGUES, THREAD_CATALOGUES, byHue, byNumber, matchesQuery } from "@/core/catalog/catalog";
 import type { ColorEntry } from "@/core/color/colorEntry";
-import { BUILT_IN_THREAD_BRANDS, canRemoveBrand, patternBrands } from "@/core/pattern/brands";
+import { BUILT_IN_BEAD_BRANDS, BUILT_IN_THREAD_BRANDS, canRemoveBeadBrand, canRemoveBrand, materials, materialsOf } from "@/core/pattern/brands";
 import { customColor, resolveColor } from "@/core/pattern/resolve";
 import { addCustomColour, updateCustomColour } from "@/editor/actions/keyEntries";
 import { Swatch, cx, ui } from "../../common/widgets";
@@ -31,10 +31,9 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   const [series, setSeries] = useState("all");
   const inventory = useEditorState((st) => st.inventory);
   // threads: the pattern's brands; beads: the built-in bead brands, then your own
-  const ownBeadBrands = [...Object.values(doc.customs), ...(inventory ?? [])].filter((c) => c.kind === "bead").map((c) => c.brand);
-  // a bead brand exists through its beads: a new one shows here until its first bead is saved
-  const [newBeadBrands, setNewBeadBrands] = useState<string[]>([]);
-  const brands = kind === "thread" ? patternBrands(doc) : [...new Set([...Object.keys(BEAD_CATALOGUES), ...ownBeadBrands, ...newBeadBrands])];
+  // the pattern's brands for this kind (SPEC §15.31); just one brand: no tabs, and your own go into it
+  const m = materials(doc), own = kind === "thread" ? m.threads : m.beads;
+  const brands = own.brands, single = own.single;
   // the tab: the brand of what's picked, else the first
   const [tab, setTab] = useState<string>(() => resolveColor(doc, selected)?.brand ?? brands[0] ?? "");
   const brand = brands.includes(tab) ? tab : (brands[0] ?? "");
@@ -71,23 +70,21 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
     if (!query) list.current?.querySelector("[data-on='true']")?.scrollIntoView({ block: "nearest" });
   }, [query, selected]);
 
-  const otherBrands = [...new Set([...BUILT_IN_THREAD_BRANDS, ...[...Object.values(doc.customs), ...(inventory ?? [])].filter((c) => c.kind === "thread").map((c) => c.brand)])].filter((b) => !brands.includes(b));
+  const otherBrands = [...new Set([...(kind === "thread" ? BUILT_IN_THREAD_BRANDS : BUILT_IN_BEAD_BRANDS), ...[...Object.values(doc.customs), ...(inventory ?? [])].filter((c) => c.kind === kind).map((c) => c.brand)])].filter((b) => !brands.includes(b));
+  // the picker only shows tabs when it's not "only one": what it changes stays "several"
+  const setBrands = (list: string[]) => run("pattern.setMaterials", { ...materialsOf(doc), ...(kind === "thread" ? { brands: list, onlyBrand: false } : { beadBrands: list, onlyBeadBrand: false }) });
   const addBrand = (b: string) => {
     const name = b.trim();
     setNaming(false);
     if (!name) return;
     setTab(name);
-    if (kind === "thread") {
-      if (!brands.includes(name)) run("pattern.setBrands", [...brands, name]);
-      return;
-    }
-    // beads: the tab, and the form for its first bead
-    if (!brands.includes(name)) setNewBeadBrands((list) => [...list, name]);
     setSeries("all");
-    setForm({ mode: "add" });
+    if (!brands.includes(name)) setBrands([...brands, name]);
+    // a brand with nothing of yours in it yet, and no catalogue: straight to the form for its first one
+    if (!(kind === "thread" ? THREAD_CATALOGUES : BEAD_CATALOGUES)[name]) setForm({ mode: "add" });
   };
   const removeBrand = (b: string) => {
-    run("pattern.setBrands", brands.filter((x) => x !== b));
+    setBrands(brands.filter((x) => x !== b));
     if (tab === b) setTab(brands.find((x) => x !== b) ?? "DMC");
   };
 
@@ -107,15 +104,14 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
 
   return (
     <div className={s.picker}>
-      {(kind === "thread" || brands.length > 1) && (
+      {!single && (
         <div className={s.brandTabs} role="tablist" aria-label={t(kind === "bead" ? "beadBrands" : "brands")} data-testid="brand-tabs">
           {brands.map((b) => {
-            const removable = canRemoveBrand(doc, b);
+            const removable = kind === "thread" ? canRemoveBrand(doc, b) : canRemoveBeadBrand(doc, b);
             return (
               <span key={b} className={cx(s.brandTab, b === brand && s.on)}>
                 <button type="button" role="tab" aria-selected={b === brand} onClick={() => (setTab(b), setSeries("all"))}>{b}</button>
-                {/* a pattern chooses its thread brands; bead brands are all there */}
-                {kind === "thread" && brands.length > 1 && (
+                {brands.length > 1 && (
                   <button
                     type="button"
                     className={s.brandX}
@@ -150,7 +146,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
           ) : (
             <select className={s.addBrand} aria-label={t("addBrand")} value="" onChange={(e) => (e.target.value === "\u0000new" ? setNaming(true) : addBrand(e.target.value))}>
               <option value="">{t("addBrand")}</option>
-              {kind === "thread" && otherBrands.map((b) => <option key={b} value={b}>{b}</option>)}
+              {otherBrands.map((b) => <option key={b} value={b}>{b}</option>)}
               <option value={"\u0000new"}>{t("newBrand")}</option>
             </select>
           )}
@@ -181,7 +177,8 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
         <ThreadForm
           key={form.mode === "edit" ? form.id : "add"}
           kind={kind}
-          brands={kind === "thread" ? [brand, ...brands, ...otherBrands] : [brand, ...brands]}
+          brands={single ? [brand] : [brand, ...brands, ...otherBrands]}
+          fixedBrand={single}
           initial={editing ? { brand: editing.brand, code: editing.code, name: editing.name, hex: editing.hex } : { brand, code: "", name: "", hex: "#7A9CC6" }}
           saveLabel={form.mode === "edit" ? t("save") : t("add")}
           onSave={save}

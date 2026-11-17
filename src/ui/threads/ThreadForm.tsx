@@ -18,9 +18,11 @@ const NEW = "\u0000new";
  * Your own thread or bead (SPEC §15.28) — brand, code, name, colour. The same form in the key form's picker and on
  * the Threads page. The brand is picked from `brands` (the one in use comes first), or typed as a new one.
  */
-export function ThreadForm({ kind, brands, initial, saveLabel, onSave, onCancel }: {
+export function ThreadForm({ kind, brands, initial, saveLabel, onSave, onCancel, fixedBrand = false }: {
   kind: "thread" | "bead";
   brands: readonly string[];
+  /** The pattern keeps to one brand: shown, not chosen. */
+  fixedBrand?: boolean;
   initial: ThreadFields;
   saveLabel: string;
   onSave: (f: ThreadFields) => void;
@@ -48,7 +50,9 @@ export function ThreadForm({ kind, brands, initial, saveLabel, onSave, onCancel 
     >
       <label className={ui.field}>
         {t("brand")}
-        {typing ? (
+        {fixedBrand ? (
+          <span className={s.fixedBrand} data-testid="fixed-brand">{f.brand}</span>
+        ) : typing ? (
           <input className={ui.input} autoFocus placeholder={t(kind === "bead" ? "brandBeadExample" : "brandExample")} value={f.brand} onChange={(e) => set({ ...f, brand: e.target.value })} />
         ) : (
           <select

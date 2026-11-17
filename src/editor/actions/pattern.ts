@@ -1,3 +1,4 @@
+import { applyMaterials, type Materials } from "@/core/pattern/brands";
 import { clampSize, createPattern } from "@/core/pattern/createPattern";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { cleanMeta } from "@/core/pattern/meta";
@@ -27,18 +28,19 @@ export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null
   void ed.inventory.withPattern(p);
 }
 
-export function newPattern(ed: Editor, o: { name: string; w: number; h: number; count: number; keepKey: boolean; brands?: string[] }) {
+export function newPattern(ed: Editor, o: { name: string; w: number; h: number; count: number; keepKey: boolean; materials?: Materials }) {
   const old = ed.doc;
   const p = createPattern(clampSize(o.w), clampSize(o.h), o.name.trim() || "Untitled pattern");
   p.count = o.count;
   p.strands = old.strands;
-  if (o.brands?.length) p.brands = [...new Set(o.brands)];
+
   if (o.keepKey) {
     p.key = old.key.map((e) => (e ? { ...e } : null));
     p.blends = { ...old.blends };
     p.combos = { ...old.combos };
     p.customs = { ...old.customs };
   }
+  if (o.materials) applyMaterials(p, o.materials);
   loadPattern(ed, p);
 }
 
@@ -57,7 +59,7 @@ export function resize(ed: Editor, w: number, h: number, anchor: "centre" | "top
   ed.viewport.fit();
 }
 
-export function setPatternSettings(ed: Editor, s: Partial<Pick<Pattern, "name" | "count" | "fabric" | "brands">> & { meta?: PatternMeta; grid?: GridNumbering }) {
+export function setPatternSettings(ed: Editor, s: Partial<Pick<Pattern, "name" | "count" | "fabric" | "brands">> & { meta?: PatternMeta; grid?: GridNumbering; materials?: Materials }) {
   const p = ed.doc;
   if (s.name !== undefined) p.name = s.name.trim() || "Untitled pattern";
   if (s.count !== undefined) p.count = s.count;
@@ -65,6 +67,7 @@ export function setPatternSettings(ed: Editor, s: Partial<Pick<Pattern, "name" |
   if (s.meta) p.meta = cleanMeta(s.meta);
   if (s.grid) p.grid = s.grid;
   if (s.brands) p.brands = [...new Set(s.brands)];
+  if (s.materials) applyMaterials(p, s.materials);
   ed.changed();
 }
 

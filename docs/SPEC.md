@@ -1758,6 +1758,20 @@ Patterns and Threads — the same page as Threads (brands, add, change, delete);
 Madeira, Mill Hill, Preciosa) can't be renamed or deleted. In the bead picker **+ Brand ▸ New brand…** shows the
 new brand's tab and opens the form for its first bead (a bead brand exists through its beads).
 
+### 15.31 Threads & beads of a pattern (2026-11-17)
+Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) in the **New dialog** and in the side panel section
+**Threads & beads** — not in Pattern info, which is about the design and its author. Stored in the pattern:
+`brands`, `onlyBrand`, `beadBrands`, `onlyBeadBrand`, `noBeads` (all optional; `core/pattern/brands.ts` `materials`).
+- **Threads**: the brands ticked; with exactly one ticked, **Only <brand>** (on by default for a new pattern: DMC
+  only). Only one → the key form shows no brand tabs, and your own threads go into that brand (the form shows the
+  brand, not a choice). Several, or "only" off → tabs, + Brand, × (removing only while unused), your own threads in
+  any brand, new brands.
+- **Beads**: **This pattern has beads** (on by default), then the same: brands (all built-in by default), "only".
+  Off → the key form offers no Bead or Floss + bead. Beads can't be turned off while the key has some.
+- Adding a second brand ends "only one" (it applies again only when ticked). A brand the key uses can't be unticked.
+  "Start with the same key" keeps the brands the key uses, and beads if it has any.
+- Patterns from before (none of the fields): several thread brands as they were, every built-in bead brand.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

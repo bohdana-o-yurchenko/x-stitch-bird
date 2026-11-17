@@ -15,6 +15,7 @@ import { newPattern, resize, setPatternSettings } from "../actions/pattern";
 import { cropChart, extendChart, mirrorChart, transformChart } from "../actions/transforms";
 import type { Editor } from "../createEditor";
 import type { ToolId } from "../store/editorStore";
+import type { Materials } from "@/core/pattern/brands";
 import type { Command } from "./types";
 
 const hasSelection = (ed: Editor) => !!ed.state.selection || !!ed.state.floating;
@@ -86,6 +87,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "pattern.setGrid", run: (ed, g) => setPatternSettings(ed, { grid: g as GridNumbering }) },
   { id: "pattern.rename", run: (ed, name) => setPatternSettings(ed, { name: name as string }) },
   { id: "pattern.setBrands", run: (ed, brands) => setPatternSettings(ed, { brands: brands as string[] }) },
+  { id: "pattern.setMaterials", run: (ed, m) => setPatternSettings(ed, { materials: m as Materials }) },
   { id: "pattern.setFabric", run: (ed, o) => setPatternSettings(ed, o as { count?: number; fabric?: string }) },
   { id: "pattern.requestResize", run: (ed) => ed.openDialog({ type: "resize" }) },
   { id: "pattern.resize", run: (ed, a) => { const { w, h, anchor } = a as { w: number; h: number; anchor: "centre" | "topLeft" }; resize(ed, w, h, anchor); }, destructive: "resize" },

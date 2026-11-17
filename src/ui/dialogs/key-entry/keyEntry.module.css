@@ -526,3 +526,9 @@
 .item.on .editCustom {
   opacity: 1;
 }
+
+/* a kind this pattern doesn't offer (no beads): visibly off */
+.pillTabs button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

@@ -40,3 +40,30 @@ describe("a pattern's thread brands (SPEC §15.28)", () => {
     expect(parsePattern({ ...serializePattern(p), brands: ["DMC", "", 3, "DMC"] }, ALL_SYMBOLS).pattern.brands).toEqual(["DMC"]);
   });
 });
+
+describe("threads & beads of a pattern (SPEC §15.31)", () => {
+  it("one brand ticked as 'only' means a single brand — until the key uses another", async () => {
+    const { applyMaterials, materials, NEW_MATERIALS } = await import("./brands");
+    const p = createPattern(5, 5);
+    // a pattern that never chose: several brands, beads on with every built-in bead brand
+    expect(materials(p)).toMatchObject({ threads: { brands: ["DMC"], single: false }, beads: { on: true, brands: ["Mill Hill", "Preciosa"], single: false } });
+    applyMaterials(p, NEW_MATERIALS);
+    expect(materials(p).threads.single).toBe(true);
+    p.customs[kreinik.id] = kreinik;
+    addEntry(p, { t: "thread", src: kreinik.id, n: 1, st: "full" }, ALL_SYMBOLS);
+    expect(materials(p).threads).toEqual({ brands: ["DMC", "Kreinik"], single: false });
+  });
+
+  it("beads off: only while the key has none; kept in the file", async () => {
+    const { applyMaterials, materials, materialsOf } = await import("./brands");
+    const p = createPattern(5, 5);
+    applyMaterials(p, { ...materialsOf(p), noBeads: true, beadBrands: ["Preciosa"], onlyBeadBrand: true });
+    expect(materials(p).beads.on).toBe(false);
+    const back = parsePattern(JSON.parse(JSON.stringify(serializePattern(p))), ALL_SYMBOLS).pattern;
+    expect([back.noBeads, back.beadBrands, back.onlyBeadBrand]).toEqual([true, ["Preciosa"], true]);
+    addEntry(p, { t: "bead", src: "bead:00557" }, ALL_SYMBOLS);
+    expect(materials(p).beads).toMatchObject({ on: true, brands: ["Preciosa", "Mill Hill"], single: false });
+    applyMaterials(p, { ...materialsOf(p), noBeads: true });
+    expect(p.noBeads).toBeUndefined();
+  });
+});

@@ -3,6 +3,7 @@
 import { KeyEntryForm } from "../dialogs/key-entry/KeyEntryForm";
 import { useEditorState } from "../hooks/editor";
 import { FabricPanel } from "./FabricPanel";
+import { MaterialsPanel } from "./MaterialsPanel";
 import { KeyPanel } from "./KeyPanel";
 import { ChecksPanel } from "./ChecksPanel";
 import { CurrentTool } from "./CurrentTool";
@@ -20,6 +21,7 @@ export function SidePanel() {
       <UnderlayPanel />
       <ChecksPanel />
       <FabricPanel />
+      <MaterialsPanel />
       <TotalsPanel />
     </>
   );

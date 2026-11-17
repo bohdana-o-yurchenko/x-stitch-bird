@@ -1,4 +1,4 @@
-import { libraryColor, THREAD_CATALOGUES } from "../catalog/catalog";
+import { BEAD_CATALOGUES, libraryColor, THREAD_CATALOGUES } from "../catalog/catalog";
 import type { Pattern } from "./types";
 
 /*
@@ -48,3 +48,79 @@ export function patternBrands(p: Pattern): string[] {
 
 /** A brand can leave the pattern when no key entry uses it, and it isn't the last one. */
 export const canRemoveBrand = (p: Pattern, brand: string) => !usedThreadBrands(p).has(brand) && patternBrands(p).length > 1;
+
+/** Bead brands built into the app. */
+export const BUILT_IN_BEAD_BRANDS: readonly string[] = Object.keys(BEAD_CATALOGUES);
+
+/** Brands of the key's beads (beads and floss + bead). */
+export function usedBeadBrands(p: Pattern): Set<string> {
+  const used = new Set<string>();
+  const add = (id: string | undefined) => {
+    if (!id) return;
+    const b = id.startsWith("custom:") ? p.customs[id]?.brand : libraryColor(id)?.brand;
+    if (b) used.add(b);
+  };
+  for (const e of p.key) {
+    if (!e) continue;
+    if (e.t === "bead") add(e.src);
+    else if (e.src.startsWith("combo:")) add(p.combos[e.src]?.bead);
+  }
+  return used;
+}
+
+/** The key has beads (or floss + bead): beads can't be turned off. */
+export const usesBeads = (p: Pattern) => p.key.some((e) => !!e && (e.t === "bead" || e.t === "combo"));
+
+/** The pattern's bead brands: the chosen ones (all built-in when it never chose), and any the key uses. */
+export function patternBeadBrands(p: Pattern): string[] {
+  const out = [...(p.beadBrands?.length ? p.beadBrands : BUILT_IN_BEAD_BRANDS)];
+  for (const b of usedBeadBrands(p)) if (!out.includes(b)) out.push(b);
+  return out;
+}
+
+export const canRemoveBeadBrand = (p: Pattern, brand: string) => !usedBeadBrands(p).has(brand) && patternBeadBrands(p).length > 1;
+
+/**
+ * What the key form offers (SPEC §15.31): the thread brands, and whether it's just one — then no brand tabs and
+ * your own threads go into it; beads likewise, or none at all. "Only one" holds while exactly one brand is in use.
+ */
+export function materials(p: Pattern) {
+  const threads = patternBrands(p), beads = patternBeadBrands(p);
+  const beadsOn = !p.noBeads || usesBeads(p);
+  return {
+    threads: { brands: threads, single: !!p.onlyBrand && threads.length === 1 },
+    beads: { on: beadsOn, brands: beads, single: beadsOn && !!p.onlyBeadBrand && beads.length === 1 },
+  };
+}
+
+/** The settings, as a New dialog or the side panel edit them. */
+export interface Materials {
+  brands: string[];
+  onlyBrand: boolean;
+  beadBrands: string[];
+  onlyBeadBrand: boolean;
+  noBeads: boolean;
+}
+
+export const materialsOf = (p: Pattern): Materials => ({
+  brands: patternBrands(p),
+  onlyBrand: !!p.onlyBrand,
+  beadBrands: patternBeadBrands(p),
+  onlyBeadBrand: !!p.onlyBeadBrand,
+  noBeads: !!p.noBeads && !usesBeads(p),
+});
+
+/** A new pattern's: DMC only, beads on with the built-in brands. */
+export const NEW_MATERIALS: Materials = { brands: ["DMC"], onlyBrand: true, beadBrands: [...BUILT_IN_BEAD_BRANDS], onlyBeadBrand: false, noBeads: false };
+
+/** Sets them on a pattern (only what differs from a pattern that never chose is written). */
+export function applyMaterials(p: Pattern, m: Materials) {
+  p.brands = [...new Set(m.brands)];
+  p.beadBrands = [...new Set(m.beadBrands)];
+  if (m.onlyBrand) p.onlyBrand = true;
+  else delete p.onlyBrand;
+  if (m.onlyBeadBrand) p.onlyBeadBrand = true;
+  else delete p.onlyBeadBrand;
+  if (m.noBeads && !usesBeads(p)) p.noBeads = true;
+  else delete p.noBeads;
+}

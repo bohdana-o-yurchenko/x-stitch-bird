@@ -75,6 +75,11 @@ export function parsePattern(raw: unknown, symbols: readonly string[]): { patter
   p.meta = cleanMeta(d.meta);
   const brands = Array.isArray(d.brands) ? [...new Set(d.brands.filter((b): b is string => typeof b === "string" && !!b.trim()).map((b) => b.trim()))] : [];
   if (brands.length) p.brands = brands;
+  const beadBrands = Array.isArray(d.beadBrands) ? [...new Set(d.beadBrands.filter((b): b is string => typeof b === "string" && !!b.trim()).map((b) => b.trim()))] : [];
+  if (beadBrands.length) p.beadBrands = beadBrands;
+  if (d.onlyBrand === true) p.onlyBrand = true;
+  if (d.onlyBeadBrand === true) p.onlyBeadBrand = true;
+  if (d.noBeads === true) p.noBeads = true;
   p.grid = cleanGrid(d.grid);
   p.spent = Number.isFinite(d.spent) && d.spent! > 0 ? d.spent! * 1000 : 0;
   const samples = cleanSamples(d.samples);

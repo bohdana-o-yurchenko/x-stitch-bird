@@ -9,9 +9,9 @@ import { symbolText } from "@/core/symbols/lineStyles";
 import type { PatternMeta } from "@/core/pattern/types";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { copyText } from "@/platform/files";
-import { BUILT_IN_THREAD_BRANDS, patternBrands } from "@/core/pattern/brands";
+import { NEW_MATERIALS, materialsOf, usedBeadBrands, usedThreadBrands, usesBeads } from "@/core/pattern/brands";
 import { TimeSpent } from "../common/TimeSpent";
-import { BrandChips } from "../threads/BrandChips";
+import { MaterialsForm, brandChoices } from "../threads/MaterialsForm";
 import { ConfirmDelete, KeyIcon, Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
@@ -42,10 +42,13 @@ export function NewPatternDialog({ onClose }: Close) {
   const tf = useTranslations("fabric");
   const run = useCommand();
   const doc = useEditorState((st) => st.doc);
-  const [o, set] = useState({ name: "Untitled pattern", w: 80, h: 80, count: 14, keepKey: false, brands: ["DMC"] });
-  // keeping the key keeps its brands too
-  const keep = (on: boolean) => set({ ...o, keepKey: on, brands: on ? [...new Set([...o.brands, ...patternBrands(doc)])] : o.brands });
-  const known = [...new Set([...BUILT_IN_THREAD_BRANDS, ...patternBrands(doc)])];
+  const inventory = useEditorState((st) => st.inventory);
+  const [o, set] = useState({ name: "Untitled pattern", w: 80, h: 80, count: 14, keepKey: false, materials: NEW_MATERIALS });
+  const old = materialsOf(doc);
+  // keeping the key keeps what it uses: its brands, and beads if it has any
+  const keep = (on: boolean) => set({ ...o, keepKey: on, materials: on ? { ...o.materials, brands: [...new Set([...o.materials.brands, ...old.brands])], beadBrands: [...new Set([...o.materials.beadBrands, ...usedBeadBrands(doc)])], noBeads: o.materials.noBeads && !usesBeads(doc) } : o.materials });
+  const locks = o.keepKey ? { threads: usedThreadBrands(doc), beads: usedBeadBrands(doc), beadsUsed: usesBeads(doc) } : undefined;
+  const choices = brandChoices(doc, inventory);
   return (
     <Modal title={t("newTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("create"), primary: true, onClick: () => run("file.create", o) }]}>
       <div className={ui.grid2}>
@@ -59,10 +62,7 @@ export function NewPatternDialog({ onClose }: Close) {
         <label className={ui.field}>{t("width")}<input type="number" min={5} max={500} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} /></label>
         <label className={ui.field}>{t("height")}<input type="number" min={5} max={500} value={o.h} onChange={(e) => set({ ...o, h: Number(e.target.value) })} /></label>
       </div>
-      <div className={ui.field}>
-        {t("threadBrands")}
-        <BrandChips value={o.brands} choices={known} onChange={(brands) => set({ ...o, brands })} />
-      </div>
+      <MaterialsForm value={o.materials} threadChoices={choices.threads} beadChoices={choices.beads} locks={locks} onChange={(materials) => set({ ...o, materials })} />
       <label className={ui.chk}><input type="checkbox" checked={o.keepKey} onChange={(e) => keep(e.target.checked)} />{t("keepKey")}</label>
       <p className={ui.hint}>{t(signedIn ? "newHint" : "newHintSignedOut")}</p>
     </Modal>

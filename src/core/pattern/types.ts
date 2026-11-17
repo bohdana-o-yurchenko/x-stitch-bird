@@ -108,6 +108,14 @@ export interface Pattern {
   customs: Record<string, CustomColor>;
   /** Thread brands, by name, in the picker's order (SPEC §15.28). Optional: absent means DMC (core/pattern/brands). */
   brands?: string[];
+  /** Only its one thread brand: the key form offers no other (SPEC §15.31). */
+  onlyBrand?: boolean;
+  /** Bead brands, by name (SPEC §15.31). Absent: all built-in ones. */
+  beadBrands?: string[];
+  /** Only its one bead brand. */
+  onlyBeadBrand?: boolean;
+  /** No beads in this pattern: the key form offers no bead or floss + bead. */
+  noBeads?: boolean;
   layers: Layers;
   /** Active work time in ms (SPEC §15.17). Counted by the editor, never edited by hand, not part of undo. */
   spent: number;

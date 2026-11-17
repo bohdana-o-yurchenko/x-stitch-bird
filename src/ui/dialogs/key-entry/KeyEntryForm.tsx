@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { beadShape } from "@/core/catalog/beadShapes";
 import { ENTRY_KINDS, entryKind } from "@/core/entryKinds/registry";
+import { materials } from "@/core/pattern/brands";
 import { formatLabel, keyLabelData, labelData } from "@/core/labels/keyLabel";
 import type { PaletteSlot } from "@/core/pattern/palette";
 import { blendStrands, resolveColor } from "@/core/pattern/resolve";
@@ -171,6 +172,7 @@ function LineInkPicker({ value, onPick }: { value: string; onPick: (hex: string)
  * strands; the one searchable list below fills the highlighted line. The rules live in editor/actions/keyEntries.
  */
 export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
+  const beadsOn = useEditorState((st) => materials(st.doc).beads.on);
   const t = useTranslations("keyDialog");
   const tr = useTranslate();
   const ed = useEditor();
@@ -275,9 +277,13 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
 
       <div className={s.formBody}>
         <div className={s.pillTabs} role="radiogroup" aria-label={t("type")} data-testid="entry-type">
-          {ENTRY_KINDS.map((k) => (
-            <button key={k.id} type="button" role="radio" aria-checked={d.t === k.id} aria-label={t(`types.${k.id}`)} title={t(`types.${k.id}`)} className={cx(d.t === k.id && s.tabOn)} onClick={() => setType(k.id)}>{t(`typesShort.${k.id}`)}</button>
-          ))}
+          {ENTRY_KINDS.map((k) => {
+            // a pattern without beads offers no bead kinds (SPEC §15.31)
+            const off = !beadsOn && (k.id === "bead" || k.id === "combo") && d.t !== k.id;
+            return (
+              <button key={k.id} type="button" role="radio" aria-checked={d.t === k.id} aria-label={t(`types.${k.id}`)} title={off ? t("noBeadsHere") : t(`types.${k.id}`)} disabled={off} className={cx(d.t === k.id && s.tabOn)} onClick={() => setType(k.id)}>{t(`typesShort.${k.id}`)}</button>
+            );
+          })}
         </div>
 
         <div className={s.group}>

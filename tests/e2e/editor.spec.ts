@@ -1076,9 +1076,12 @@ test("☰ ▸ Toolbar hides the shape tools and fractional stitches, and remembe
 test("thread brands: chosen for a new pattern, one tab each in the picker, your own threads added and changed there; a used brand stays", async ({ page }) => {
   await fileAction(page, "New", "Blank pattern…");
   const dialog = page.getByRole("dialog");
-  await dialog.getByTestId("brand-chips").getByRole("combobox").selectOption({ label: "New brand…" });
-  await dialog.getByPlaceholder("Brand name").fill("Kreinik");
-  await dialog.getByPlaceholder("Brand name").press("Enter");
+  const threads = dialog.getByTestId("materials-threads");
+  await threads.getByRole("button", { name: "+ New brand" }).click();
+  await threads.getByPlaceholder("Brand name").fill("Kreinik");
+  await threads.getByPlaceholder("Brand name").press("Enter");
+  // two brands: "only one" doesn't apply
+  await expect(threads.getByText(/^Only /)).toHaveCount(0);
   await dialog.getByRole("button", { name: "Create" }).click();
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   const tabs = page.getByTestId("brand-tabs");
@@ -1132,3 +1135,28 @@ test("bead brands: Mill Hill and Preciosa as tabs, a finish filter, your own bea
   await form.getByRole("button", { name: "Add to key", exact: true }).click();
   await expect(page.locator("[data-entry]").last()).toContainText("Toho 25");
 });
+
+test("threads & beads of a new pattern: one brand only — no brand tabs, your own threads go into it; beads off — no bead kinds; changed later in the side panel", async ({ page }) => {
+  await fileAction(page, "New", "Blank pattern…");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
+  await dialog.getByLabel("This pattern has beads").uncheck();
+  await dialog.getByRole("button", { name: "Create" }).click();
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form");
+  await expect(page.getByTestId("brand-tabs")).toHaveCount(0);
+  await expect(form.getByRole("radio", { name: "Bead", exact: true })).toBeDisabled();
+  await expect(form.getByRole("radio", { name: /Floss \+ bead/ })).toBeDisabled();
+  await page.getByRole("button", { name: "+ Custom thread" }).click();
+  await expect(page.getByTestId("fixed-brand")).toHaveText("DMC");
+  await form.getByRole("button", { name: "Close" }).click();
+  // the side panel: beads back on, a second thread brand — then the picker has tabs again
+  await page.getByText("Threads & beads").click();
+  const panel = page.getByTestId("materials");
+  await panel.getByLabel("This pattern has beads").check();
+  await panel.getByTestId("materials-threads").getByLabel("Anchor").check();
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  await expect(page.getByTestId("brand-tabs").getByRole("tab")).toHaveText(["DMC", "Anchor"]);
+  await expect(page.getByTestId("key-form").getByRole("radio", { name: "Bead", exact: true })).toBeEnabled();
+});
+

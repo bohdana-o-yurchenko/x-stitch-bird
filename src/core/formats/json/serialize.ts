@@ -27,6 +27,11 @@ export interface PatternFile {
   meta?: Pattern["meta"];
   /** Thread brands chosen for the pattern (SPEC §15.28); absent = DMC. */
   brands?: string[];
+  onlyBrand?: boolean;
+  /** Bead brands chosen for the pattern (SPEC §15.31); absent = all built-in. */
+  beadBrands?: string[];
+  onlyBeadBrand?: boolean;
+  noBeads?: boolean;
   grid?: Pattern["grid"];
   part?: unknown[];
   knots?: number[][];
@@ -99,6 +104,10 @@ export function serializePattern(p: Pattern): PatternFile {
   };
   if (Object.keys(p.meta).length) doc.meta = p.meta;
   if (p.brands?.length && !(p.brands.length === 1 && p.brands[0] === "DMC")) doc.brands = [...p.brands];
+  if (p.onlyBrand) doc.onlyBrand = true;
+  if (p.beadBrands?.length) doc.beadBrands = [...p.beadBrands];
+  if (p.onlyBeadBrand) doc.onlyBeadBrand = true;
+  if (p.noBeads) doc.noBeads = true;
   if (JSON.stringify(p.grid) !== JSON.stringify(DEFAULT_GRID)) doc.grid = p.grid;
   if (p.spent >= 1000) doc.spent = Math.round(p.spent / 1000);
   if (p.samples && Object.keys(p.samples).length) doc.samples = p.samples;

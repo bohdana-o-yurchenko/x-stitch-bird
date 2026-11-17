@@ -303,7 +303,8 @@
       "own": "Own colour"
     },
     "placement": "Placement",
-    "placementCell": "In a cell"
+    "placementCell": "In a cell",
+    "noBeadsHere": "This pattern has no beads — turn them on in Threads & beads"
   },
   "picker": {
     "searchThread": "Search DMC number or name",
@@ -354,7 +355,6 @@
     "newTitle": "New pattern",
     "name": "Name",
     "fabric": "Fabric",
-    "threadBrands": "Thread brands",
     "keepKey": "Start with the same key (threads, beads, symbols)",
     "newHint": "The pattern open now stays in your saved patterns, and Versions keeps a copy of it.",
     "newHintSignedOut": "Without signing in you work on one pattern at a time: if the open one has work in it, you’ll be asked how to keep it first.",
@@ -1078,10 +1078,7 @@
     "colour": "Colour",
     "needBrand": "Enter the brand.",
     "needCode": "Enter the code.",
-    "cancel": "Cancel",
-    "removeBrand": "Remove {brand}",
-    "brandName": "Brand name",
-    "addBrand": "+ Brand"
+    "cancel": "Cancel"
   },
   "threadsPage": {
     "title": "My threads",
@@ -1114,5 +1111,17 @@
     "emptyBeads": "No beads of your own yet. Add one here, or with + in a pattern's bead list.",
     "titleBeads": "My beads",
     "signedOutBeads": "Your own beads — the ones that aren't in the built-in lists, Toho for instance — are kept in your account and offered in every pattern. Without signing in, a bead you add lives only in its pattern; sign in and those join yours."
+  },
+  "materials": {
+    "threads": "Threads",
+    "beads": "Beads",
+    "hasBeads": "This pattern has beads",
+    "beadsUsed": "The key has beads — remove them first to turn beads off",
+    "brandUsed": "{brand} is used by the key",
+    "brandName": "Brand name",
+    "newBrand": "+ New brand",
+    "onlyThreads": "Only {brand} — no other thread brands in this pattern",
+    "onlyBeads": "Only {brand} — no other bead brands in this pattern",
+    "heading": "Threads & beads"
   }
 }
