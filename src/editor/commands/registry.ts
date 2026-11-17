@@ -67,7 +67,6 @@ export const COMMANDS: readonly Command[] = [
   // pattern & files
   { id: "file.new", run: (ed) => ed.openDialog({ type: "newPattern" }) },
   { id: "file.create", run: (ed, o) => newPattern(ed, o as Parameters<typeof newPattern>[1]), destructive: "new", replacesPattern: true },
-  { id: "file.open", run: (ed) => ed.openDialog({ type: "open" }) },
   { id: "file.openSaved", run: (ed, id) => openFromLibrary(ed, id as string), destructive: "open", replacesPattern: true },
   { id: "file.save", run: (ed) => saveToLibrary(ed) },
   { id: "file.versions", run: (ed) => ed.showSection("versions") },

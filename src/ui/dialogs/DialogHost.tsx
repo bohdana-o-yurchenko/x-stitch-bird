@@ -2,7 +2,6 @@
 
 import { useEditor, useEditorState } from "../hooks/editor";
 import { ImageImportDialog } from "./ImageImportDialog";
-import { OpenPatternDialog } from "./OpenPatternDialog";
 import { ChangelogDialog } from "./ChangelogDialog";
 import { StraightenDialog } from "./StraightenDialog";
 import { KeepPatternDialog } from "./KeepPatternDialog";
@@ -23,7 +22,6 @@ export function DialogHost() {
   switch (d.type) {
     case "deleteEntry": return <DeleteEntryDialog index={d.index} count={d.count} onClose={close} />;
     case "newPattern": return <NewPatternDialog onClose={close} />;
-    case "open": return <OpenPatternDialog onClose={close} />;
     case "resize": return <ResizeDialog onClose={close} />;
     case "changelog": return <ChangelogDialog since={d.since} onClose={close} />;
     case "straighten": return <StraightenDialog onClose={close} />;

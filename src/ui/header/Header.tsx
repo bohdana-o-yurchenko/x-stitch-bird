@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
 import { Icon } from "../common/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
@@ -72,7 +72,14 @@ function PatternMenu() {
   const run = useCommand();
   const go = (command: string, args?: unknown) => () => void run(command, args);
   const reveal = useReveal("pattern");
+  const ed = useEditor();
+  const router = useRouter();
   const signedIn = useEditorState((st) => !!st.account);
+  // Open: the patterns page (SPEC §15.36) — changes so far go to the library first
+  const openPatterns = () => {
+    ed.flush();
+    router.push("/patterns");
+  };
   // signed out, Open only matters when patterns were saved in this browser before
   const canOpen = useEditorState((st) => !!st.account || st.hasOtherPatterns);
   const items: MenuItem[] = [
@@ -80,7 +87,7 @@ function PatternMenu() {
       { id: "newBlank", label: t("newBlank"), hint: t("newBlankHint"), onClick: go("file.new") },
       { label: t("newFromImage"), hint: t("newFromImageHint"), onClick: go("image.pick") },
     ] },
-    ...(canOpen ? [{ id: "open", label: t("open"), hint: t(signedIn ? "openHintAccount" : "openHint"), onClick: go("file.open") }] : []),
+    ...(canOpen ? [{ id: "open", label: t("open"), hint: t(signedIn ? "openHintAccount" : "openHint"), onClick: openPatterns }] : []),
     "-",
     { id: "download", label: t("download"), hint: t("downloadHint"), onClick: go("file.export", "pattern") },
     { id: "loadFile", label: t("loadFile"), hint: t("loadFileHint"), onClick: go("file.pickToLoad") },

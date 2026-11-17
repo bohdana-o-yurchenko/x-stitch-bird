@@ -170,7 +170,7 @@ describe("commands", () => {
   it("opens dialogs and the key form, switches views, picks entries by number", async () => {
     const { ed, red, entry } = t;
     const blue = entry({ t: "thread", src: "dmc:797", n: 2, st: "full" });
-    for (const [command, type] of [["file.new", "newPattern"], ["file.open", "open"], ["view.goToCell", "goToCell"], ["pattern.requestResize", "resize"], ["transform.requestMirror", "mirrorFromCentre"], ["transform.requestExtend", "extendCanvas"], ["selection.requestReplaceKey", "replaceKey"], ["help.changelog", "changelog"]] as const) {
+    for (const [command, type] of [["file.new", "newPattern"], ["view.goToCell", "goToCell"], ["pattern.requestResize", "resize"], ["transform.requestMirror", "mirrorFromCentre"], ["transform.requestExtend", "extendCanvas"], ["selection.requestReplaceKey", "replaceKey"], ["help.changelog", "changelog"]] as const) {
       await ed.commands.run(command);
       expect(ed.state.dialog?.type).toBe(type);
     }

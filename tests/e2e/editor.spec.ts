@@ -243,7 +243,7 @@ test("highlighting fades every entry except the selected one", async ({ page }) 
   expect(await editorState<boolean>(page, "(ed) => ed.state.highlight")).toBe(false);
 });
 
-test("Open is only offered when there is another saved pattern; deleting one asks first", async ({ page }) => {
+test("Open is only offered when there is another saved pattern, and leads to the patterns page; deleting one asks first", async ({ page }) => {
   await page.keyboard.press("ControlOrMeta+s");
   // only the open pattern is saved: nothing else to open
   await page.getByRole("button", { name: /^Pattern ▾$/ }).click();
@@ -260,16 +260,21 @@ test("Open is only offered when there is another saved pattern; deleting one ask
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
   await fileAction(page, "Open…");
-  const trash = page.getByRole("button", { name: /^Delete “Kept/ });
-  await expect(trash).toHaveCount(2);
-  await trash.first().click();
-  const confirm = page.getByTestId("confirm-delete");
-  await expect(confirm).toContainText("can’t be undone");
-  await confirm.getByRole("button", { name: "Cancel" }).click();
-  await expect(trash).toHaveCount(2);
-  await trash.first().click();
-  await page.getByTestId("confirm-delete").getByRole("button", { name: "Delete" }).click();
-  await expect(trash).toHaveCount(1);
+  // the patterns page (SPEC §15.36), not a dialog
+  await expect(page).toHaveURL(/\/patterns$/);
+  const kept = page.getByTestId("home-pattern").filter({ hasText: "Kept" });
+  await expect(kept).toHaveCount(2);
+  const askDelete = async () => {
+    await kept.first().getByTitle(/^More for “Kept/).click();
+    await page.getByRole("menuitem", { name: "Delete…" }).click();
+  };
+  await askDelete();
+  await expect(page.getByTestId("confirm-delete")).toContainText("can’t be undone");
+  await page.getByRole("dialog").getByRole("button", { name: "Cancel" }).click();
+  await expect(kept).toHaveCount(2);
+  await askDelete();
+  await page.getByRole("dialog").getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(kept).toHaveCount(1);
 });
 
 test("the quick-start guide opens on the first visit only, highlights what it explains, and reopens from the menu", async ({ page }) => {
@@ -1071,7 +1076,7 @@ test("patterns saved by an earlier version (in localStorage) are moved into Inde
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
   await fileAction(page, "Open…");
-  await page.getByRole("dialog").getByRole("button", { name: /Saved before 12×8/ }).click();
+  await page.getByTestId("home-pattern").getByRole("link", { name: "Saved before", exact: true }).click();
   await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Saved before");
   // copied, and the old copy kept as a backup
   expect(await page.evaluate(() => !!localStorage.getItem("stitchwork.libraryMoved") && !!localStorage.getItem("stitchwork.library"))).toBe(true);

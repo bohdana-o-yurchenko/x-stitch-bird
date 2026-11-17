@@ -98,15 +98,16 @@ test("signed in, a file opened from the computer is kept, even when another patt
   await page.keyboard.press("ControlOrMeta+s");
   await loadFixture(page, "1.oxs");
   await expect(page.locator("[data-entry]")).toHaveCount(12);
-  // straight away, another pattern
-  await fileAction(page, "Open…");
-  const dialog = page.getByRole("dialog");
-  // both are called "Untitled pattern": told apart by size (the demo is 60 × 60, the file 72 × 72)
-  await dialog.getByRole("button", { name: /Untitled pattern 60×60/ }).click();
+  // straight away, another pattern (as the patterns page opens one); both are called "Untitled pattern": told apart
+  // by size (the demo is 60 × 60, the file 72 × 72)
+  const open = async (w: number) => {
+    const id = await editorState<string>(page, `(ed) => ed.persistence.patterns.list().then((l) => l.find((p) => p.w === ${w}).id)`);
+    await editorState(page, `(ed) => ed.commands.run("file.openSaved", ${JSON.stringify(id)})`);
+  };
+  await open(60);
   await expect(page.locator("[data-entry]")).toHaveCount(8);
   // the imported one is in the library, whole
-  await fileAction(page, "Open…");
-  await dialog.getByRole("button", { name: /Untitled pattern 72×72/ }).click();
+  await open(72);
   await expect(page.locator("[data-entry]")).toHaveCount(12);
   await expect(page.getByTestId("totals")).toContainText("138 half");
 });
@@ -293,4 +294,14 @@ test("free software: ☰ ▸ Source code and the main pages' footer link to the 
   await page.keyboard.press("Escape");
   await page.getByTestId("to-home").click();
   await expect(page.getByRole("contentinfo").getByRole("link", { name: "Source code" })).toHaveAttribute("href", "https://github.com/bohdana-o-yurchenko/x-stitch-bird");
+});
+
+test("Pattern ▸ Open… leads to the patterns page, and Continue there back to the editor (SPEC §15.36)", async ({ page }) => {
+  await pretendSignedIn(page);
+  await page.keyboard.press("ControlOrMeta+s");
+  await fileAction(page, "Open…");
+  await expect(page).toHaveURL(/\/patterns$/);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.getByTestId("home-continue").getByRole("link").first().click();
+  await expect(page.getByTestId("chart")).toBeVisible();
 });

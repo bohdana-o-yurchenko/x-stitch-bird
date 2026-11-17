@@ -1,4 +1,7 @@
+import { parsePattern } from "@/core/formats/json/parse";
 import type { PatternFile } from "@/core/formats/json/serialize";
+import { patternStats, type PatternDetails, type PatternStats } from "@/core/pattern/stats";
+import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import { sql } from "./db";
 import { MAX_PATTERNS } from "./limits";
 import { collectPictures } from "./pictures";
@@ -14,13 +17,39 @@ export interface CloudSummary {
   designer?: string;
   updatedAt: number;
   hasPreview: boolean;
+  /** The patterns list's figures (SPEC §15.36). */
+  details?: PatternDetails;
+}
+
+/** The figures of a pattern file; null when it can't be read. */
+function statsOf(doc: unknown): PatternStats | null {
+  try {
+    return patternStats(parsePattern(doc, ALL_SYMBOLS).pattern);
+  } catch {
+    return null;
+  }
 }
 
 const MAX_DOC = 20_000_000;
 
 export async function listPatterns(userId: string): Promise<CloudSummary[]> {
-  const rows = await sql`select id, name, w, h, designer, preview_key, updated_at from patterns where user_id = ${userId} order by updated_at desc`;
-  return rows.map((r) => ({ id: r.id, name: r.name, w: r.w, h: r.h, ...(r.designer ? { designer: r.designer } : {}), updatedAt: new Date(r.updated_at).getTime(), hasPreview: !!r.preview_key }));
+  const rows = await sql`
+    select p.id, p.name, p.w, p.h, p.designer, p.preview_key, p.updated_at, p.stats, octet_length(p.doc::text) as bytes,
+      coalesce(jsonb_array_length(p.refs), 0) + (case when p.underlay is null then 0 else 1 end) as photo_count,
+      (select coalesce(sum(i.size), 0)::bigint from pictures i
+        where i.user_id = p.user_id and (coalesce(p.refs::text, '') || coalesce(p.underlay::text, '')) like '%' || i.id || '%') as photo_bytes,
+      (select count(*)::int from pattern_versions v where v.user_id = p.user_id and v.pattern_id = p.id) as versions
+    from patterns p where p.user_id = ${userId} order by p.updated_at desc`;
+  // saved before the figures were kept: worked out once, now
+  for (const r of rows.filter((r) => !r.stats)) {
+    const doc = (await sql`select doc from patterns where user_id = ${userId} and id = ${r.id}`)[0]?.doc;
+    r.stats = statsOf(doc);
+    if (r.stats) await sql`update patterns set stats = ${JSON.stringify(r.stats)}::jsonb where user_id = ${userId} and id = ${r.id}`;
+  }
+  return rows.map((r) => ({
+    id: r.id, name: r.name, w: r.w, h: r.h, ...(r.designer ? { designer: r.designer } : {}), updatedAt: new Date(r.updated_at).getTime(), hasPreview: !!r.preview_key,
+    ...(r.stats && { details: { ...(r.stats as PatternStats), bytes: Number(r.bytes), photos: { count: Number(r.photo_count), bytes: Number(r.photo_bytes) }, versions: r.versions as number } }),
+  }));
 }
 
 /** The pattern file and its revision (how many saves it has had). */
@@ -51,10 +80,11 @@ export async function putPattern(userId: string, doc: PatternFile, base?: number
     select exists (select 1 from patterns where user_id = ${userId} and id = ${doc.id}) as has,
       (select count(*)::int from patterns where user_id = ${userId}) as n`;
   if (!room[0]!.has && (room[0]!.n as number) >= MAX_PATTERNS) return { ok: false, limit: MAX_PATTERNS };
+  const stats = statsOf(doc);
   const rows = await sql`
-    insert into patterns (user_id, id, name, w, h, designer, doc, updated_at, rev, editor, editor_at)
-    values (${userId}, ${doc.id}, ${doc.name}, ${doc.w}, ${doc.h}, ${doc.meta?.designer ?? null}, ${JSON.stringify(doc)}::jsonb, now(), 1, ${windowId ?? null}, ${windowId ? new Date() : null})
-    on conflict (user_id, id) do update set name = excluded.name, w = excluded.w, h = excluded.h, designer = excluded.designer, doc = excluded.doc,
+    insert into patterns (user_id, id, name, w, h, designer, doc, updated_at, rev, editor, editor_at, stats)
+    values (${userId}, ${doc.id}, ${doc.name}, ${doc.w}, ${doc.h}, ${doc.meta?.designer ?? null}, ${JSON.stringify(doc)}::jsonb, now(), 1, ${windowId ?? null}, ${windowId ? new Date() : null}, ${stats ? JSON.stringify(stats) : null}::jsonb)
+    on conflict (user_id, id) do update set name = excluded.name, w = excluded.w, h = excluded.h, designer = excluded.designer, doc = excluded.doc, stats = excluded.stats,
       updated_at = now(), rev = patterns.rev + 1,
       editor = coalesce(excluded.editor, patterns.editor), editor_at = coalesce(excluded.editor_at, patterns.editor_at)
     where ${base ?? null}::integer is null or patterns.rev = ${base ?? null}::integer

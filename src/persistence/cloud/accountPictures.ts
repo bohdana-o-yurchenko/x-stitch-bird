@@ -341,6 +341,9 @@ export function accountPictures(local: { references: ReferenceRepository; underl
       listeners.add(fn);
       return () => void listeners.delete(fn);
     },
+    async localRecords(id) {
+      return { refs: await local.references.load(id), underlay: await local.underlays.load(id) };
+    },
     onFull(fn) {
       fullListeners.add(fn);
       return () => void fullListeners.delete(fn);

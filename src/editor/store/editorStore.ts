@@ -26,7 +26,6 @@ export interface Toast {
 export type DialogRequest =
   | { type: "deleteEntry"; index: KeyIndex; count: number }
   | { type: "newPattern" }
-  | { type: "open" }
   | { type: "resize" }
   | { type: "straighten" }
   | { type: "changelog"; since?: string | null }

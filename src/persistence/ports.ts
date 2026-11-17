@@ -1,5 +1,6 @@
 import type { PatternFile } from "@/core/formats/json/serialize";
 import type { UnderlayData } from "@/core/underlay/underlay";
+import type { PatternDetails } from "@/core/pattern/stats";
 
 /*
  * Storage interfaces (ARCHITECTURE §13). The editor only knows these; `persistence/index.ts` picks the
@@ -17,6 +18,8 @@ export interface PatternSummary {
   where?: "browser" | "account" | "both";
   /** The account has a preview picture of it. */
   hasPreview?: boolean;
+  /** The account's figures for it (SPEC §15.36); patterns here get theirs worked out in the browser. */
+  details?: PatternDetails;
 }
 
 /**
@@ -142,6 +145,8 @@ export interface PictureSync {
   forget(patternIds: string[]): Promise<void>;
   /** Called when the account's records replaced or joined this browser's. Returns unsubscribe. */
   onChange(fn: (patternId: string) => void): () => void;
+  /** This browser's windows and underlay of a pattern, as they are here (nothing fetched). */
+  localRecords(patternId: string): Promise<{ refs: RefWindowData[]; underlay: UnderlayData | null }>;
   /** Called when a picture didn't fit in the account's room for photos (SPEC §15.35); it stays in this browser. */
   onFull(fn: (room: { used: number; max: number }) => void): () => void;
 }

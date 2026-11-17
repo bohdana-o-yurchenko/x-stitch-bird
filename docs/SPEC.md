@@ -1876,6 +1876,23 @@ limit nothing is lost — the work stays in the browser, and the app says what t
 - Room at the limits: about 26 accounts all at the maximum, a few hundred in realistic use; past that the Launch plan
   (Postgres $0.35/GB-month, object storage $0.023/GB-month).
 
+### 15.36 The patterns page: Open leads there; gallery and list (2026-11-18)
+- **Pattern ▾ ▸ Open…** goes to the patterns page (My patterns) instead of a dialog; the editor's changes are saved
+  first. The Open dialog is gone.
+- **The footer** of the Patterns, Threads and Beads pages stays at the bottom of the window (the page scrolls above
+  it), half as tall as before.
+- **Gallery | List**, remembered in this browser:
+  - *Gallery* — as before: the picture, the name, when it was changed.
+  - *List* — one row per pattern: the picture; the name, designer and where it's kept; **Size** (stitches, and cm on
+    its fabric count); **Stitches** (colours, stitches, beads and backstitch lines); **Time spent** (and the last
+    change); **Takes up** (the pattern file in KB, its photos — how many, MB with their marks — and versions).
+  - A compact list was considered and left out: with at most 20 patterns in an account, gallery and list cover it.
+- Signed in, the heading says what the account holds: "2 of 20 patterns · 0.1 of 100 MB of photos in your account".
+- The figures: one function for browser and account (`core/pattern/stats.ts`). Patterns in this browser are counted
+  here (their photos and versions here); for those only in the account the server keeps the figures, worked out at
+  every save (`patterns.stats`, `db/migrations/005_stats.sql`; older rows filled in when first listed), so the list
+  never downloads whole patterns.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

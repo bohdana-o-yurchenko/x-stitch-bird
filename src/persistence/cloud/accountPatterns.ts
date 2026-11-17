@@ -147,7 +147,7 @@ export function withAccount(local: PatternRepository, pictures?: Pick<PictureSyn
       const byId = new Map<string, PatternSummary>(mine.map((p) => [p.id, { ...p, where: "browser" }]));
       for (const c of theirs) {
         const here = byId.get(c.id);
-        byId.set(c.id, here ? { ...(here.updatedAt >= c.updatedAt ? here : c), where: "both", hasPreview: c.hasPreview } : { ...c, where: "account" });
+        byId.set(c.id, here ? { ...(here.updatedAt >= c.updatedAt ? here : c), where: "both", hasPreview: c.hasPreview, ...(c.details && { details: c.details }) } : { ...c, where: "account" });
       }
       return [...byId.values()].sort((a, b) => b.updatedAt - a.updatedAt);
     },

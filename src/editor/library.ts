@@ -1,4 +1,5 @@
 import { parsePattern } from "@/core/formats/json/parse";
+import { patternStats, type PatternDetails } from "@/core/pattern/stats";
 import { buildPalette } from "@/core/pattern/palette";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import type { CustomColor } from "@/core/pattern/types";
@@ -75,6 +76,34 @@ export function createLibrary(persistence: Persistence = createPersistence()) {
         return { id: pattern.id, name: pattern.name, w: pattern.w, h: pattern.h, count: pattern.count, preview };
       } catch {
         return null;
+      }
+    },
+
+    /**
+     * A pattern's figures for the patterns list (SPEC §15.36): worked out here from this browser's copy (its photos
+     * and versions here), or the account's for a pattern only there. Null when unknown.
+     */
+    async details(p: PatternSummary): Promise<PatternDetails | null> {
+      if (p.where === "account") return p.details ?? null;
+      const doc = await persistence.patterns.load(p.id).catch(() => null);
+      if (!doc) return p.details ?? null;
+      try {
+        const stats = patternStats(parsePattern(doc, ALL_SYMBOLS).pattern);
+        const records = (await persistence.pictures?.localRecords(p.id).catch(() => null)) ?? { refs: [], underlay: null };
+        const ids = new Set<string>();
+        for (const r of records.refs) [r.image, r.marks].forEach((id) => id && ids.add(id));
+        [records.underlay?.image, records.underlay?.straighten?.source].forEach((id) => id && ids.add(id));
+        let photoBytes = 0;
+        for (const id of ids) photoBytes += (await persistence.images.get(id).catch(() => null))?.size ?? 0;
+        const versions = (await persistence.snapshots.list(p.id).catch(() => [])).length;
+        return {
+          ...stats,
+          bytes: new Blob([JSON.stringify(doc)]).size,
+          photos: { count: records.refs.length + (records.underlay ? 1 : 0), bytes: photoBytes },
+          versions: Math.max(versions, p.details?.versions ?? 0),
+        };
+      } catch {
+        return p.details ?? null;
       }
     },
 
