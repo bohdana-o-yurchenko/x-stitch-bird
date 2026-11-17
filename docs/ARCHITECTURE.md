@@ -1160,4 +1160,5 @@ patterns (every query scoped by user id). Env: `DATABASE_URL(_UNPOOLED)`, `NEON_
 `NEON_AUTH_COOKIE_SECRET` (app secret, not from Neon), `AWS_*` (storage) — `neon deploy` / `neon env pull` write them
 to `.env.local`. Browser side: `ui/account` (auth client, account button), `persistence/cloud/accountPatterns.ts`
 (`withAccount(local)`: local-first, also to the account while signed in; `account.signedIn` set by
-`Editor.setAccount`). Schema changes: `db/migrations/*.sql`, applied by `node scripts/db/migrate.mjs`.
+`Editor.setAccount`). Schema changes: `db/migrations/*.sql`, applied by `node scripts/db/migrate.mjs --target <host>` (it refuses without the host
+it would change). Locally `.env.local` points at the Neon `dev` branch — `.env.example` lists what goes there.

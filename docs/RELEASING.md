@@ -24,6 +24,10 @@ for people who used an older version; brand-new users get the quick-start guide 
    (YYYY-MM-DD), and short user-facing lines in **both** `uk` and `en` (same number of lines). Write for stitchers —
    what they can do now — not how it was built. A unit test fails if the newest entry doesn't match `package.json`.
 4. Commit: `git commit -am "Release v1.1.0"`.
+   New database migrations (`db/migrations/*.sql`) go to production **before** the push: with the production
+   connection string from Vercel in the environment (never in a file),
+   `DATABASE_URL_UNPOOLED='…' node scripts/db/migrate.mjs` — it names the host, then rerun with `--target <that host>`.
+   Day to day, `.env.local` holds the Neon `dev` branch only (`.env.example`).
 5. Publish:
    ```sh
    git push origin dev:DEV
