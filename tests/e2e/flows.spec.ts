@@ -30,7 +30,7 @@ test("a blank pattern: build the key, draw with line, rectangles and fill, save,
   await dialog.getByLabel("Width (stitches)").fill("30");
   await dialog.getByLabel("Height (stitches)").fill("20");
   // a new pattern starts with an empty key unless asked
-  await expect(dialog.getByLabel(/Start with the same key/)).not.toBeChecked();
+  await expect(dialog.getByLabel(/^Start with this pattern's key and settings/)).not.toBeChecked();
   await dialog.getByRole("button", { name: "Create" }).click();
   await expect(page.getByText("Your key is empty.")).toBeVisible();
   expect(await editorState<string>(page, "(ed) => `${ed.doc.w}×${ed.doc.h}`")).toBe("30×20");
