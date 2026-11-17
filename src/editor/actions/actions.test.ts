@@ -170,10 +170,17 @@ describe("commands", () => {
   it("opens dialogs and the key form, switches views, picks entries by number", async () => {
     const { ed, red, entry } = t;
     const blue = entry({ t: "thread", src: "dmc:797", n: 2, st: "full" });
-    for (const [command, type] of [["file.new", "newPattern"], ["file.open", "open"], ["file.versions", "versions"], ["view.goToCell", "goToCell"], ["pattern.editInfo", "patternInfo"], ["pattern.requestResize", "resize"], ["transform.requestMirror", "mirrorFromCentre"], ["transform.requestExtend", "extendCanvas"], ["selection.requestReplaceKey", "replaceKey"], ["help.changelog", "changelog"]] as const) {
+    for (const [command, type] of [["file.new", "newPattern"], ["file.open", "open"], ["view.goToCell", "goToCell"], ["pattern.requestResize", "resize"], ["transform.requestMirror", "mirrorFromCentre"], ["transform.requestExtend", "extendCanvas"], ["selection.requestReplaceKey", "replaceKey"], ["help.changelog", "changelog"]] as const) {
       await ed.commands.run(command);
       expect(ed.state.dialog?.type).toBe(type);
     }
+    // Versions and Pattern info are side-panel sections: brought in, not dialogs (SPEC §15.32)
+    ed.closeDialog();
+    await ed.commands.run("file.versions");
+    await ed.commands.run("pattern.editInfo");
+    expect(ed.state.panelSections).toEqual(expect.arrayContaining(["versions", "info"]));
+    expect(ed.state.sectionShown?.id).toBe("info");
+    expect(ed.state.dialog).toBeNull();
     await ed.commands.run("key.requestDelete", blue);
     expect(ed.state.dialog).toEqual({ type: "deleteEntry", index: blue, count: 0 });
     ed.closeDialog();
