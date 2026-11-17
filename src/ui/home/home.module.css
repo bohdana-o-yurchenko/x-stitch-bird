@@ -67,6 +67,7 @@
   align-items: center;
 }
 .continuePreview {
+  position: relative;
   display: grid;
   place-items: center;
   aspect-ratio: 4 / 3;
@@ -75,11 +76,16 @@
   border: 1px solid var(--line2);
   overflow: hidden;
 }
-/* the picture fits the box whatever its shape; crisp stitches */
+/*
+ * The picture fits inside the box whatever either's shape — whole, centred both ways, crisp stitches. Placed
+ * absolutely: a percentage height doesn't resolve in a box sized by its aspect ratio, and the picture would overflow.
+ */
 .continuePreview img,
 .preview img {
-  width: 88%;
-  height: 88%;
+  position: absolute;
+  inset: 7%;
+  width: 86%;
+  height: 86%;
   object-fit: contain;
   image-rendering: pixelated;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.16));
