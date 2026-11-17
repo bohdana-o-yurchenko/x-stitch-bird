@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { BEADS, BEAD_SERIES, DMC, byHue, byNumber, matchesQuery } from "@/core/catalog/catalog";
 import type { ColorEntry } from "@/core/color/colorEntry";
 import { BUILT_IN_THREAD_BRANDS, canRemoveBrand, patternBrands } from "@/core/pattern/brands";
-import { resolveColor } from "@/core/pattern/resolve";
+import { customColor, resolveColor } from "@/core/pattern/resolve";
 import { addCustomColour, updateCustomColour } from "@/editor/actions/keyEntries";
 import { Swatch, cx, ui } from "../../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../../hooks/editor";
@@ -37,7 +37,21 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   const [naming, setNaming] = useState(false);
   const list = useRef<HTMLDivElement>(null);
 
-  const customs = Object.values(doc.customs).filter((c) => c.kind === kind).map((c) => resolveColor(doc, c.id)!);
+  // your own: the pattern's, and (signed in) the rest of your inventory
+  const inventory = useEditorState((st) => st.inventory);
+  const extra = (inventory ?? []).filter((c) => c.kind === kind && !doc.customs[c.id]);
+  const customs = [...Object.values(doc.customs).filter((c) => c.kind === kind).map((c) => resolveColor(doc, c.id)!), ...extra.map(customColor)];
+  /** Picking one of your inventory's threads: the pattern takes a copy first. */
+  const take = (id: string) => {
+    if (id.startsWith("custom:") && !doc.customs[id]) {
+      ed.inventory.useIn(doc, id);
+      ed.changed({ keys: true });
+    }
+  };
+  const pick = (id: string) => {
+    take(id);
+    onPick(id);
+  };
   const items = useMemo(() => {
     let all: ColorEntry[];
     if (kind === "bead") all = series === "mine" ? customs : [...BEADS, ...customs].filter((e) => series === "all" || e.series === series);
@@ -45,13 +59,13 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
     all = all.filter((e) => matchesQuery(e, query));
     return kind === "thread" ? [...all].sort(sort === "num" ? byNumber : byHue) : all;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kind, query, sort, series, brand, customs.length, revision]);
+  }, [kind, query, sort, series, brand, customs.length, revision, inventory]);
 
   useEffect(() => {
     if (!query) list.current?.querySelector("[data-on='true']")?.scrollIntoView({ block: "nearest" });
   }, [query, selected]);
 
-  const otherBrands = [...new Set([...BUILT_IN_THREAD_BRANDS, ...Object.values(doc.customs).filter((c) => c.kind === "thread").map((c) => c.brand)])].filter((b) => !brands.includes(b));
+  const otherBrands = [...new Set([...BUILT_IN_THREAD_BRANDS, ...[...Object.values(doc.customs), ...(inventory ?? [])].filter((c) => c.kind === "thread").map((c) => c.brand)])].filter((b) => !brands.includes(b));
   const addBrand = (b: string) => {
     const name = b.trim();
     if (!name) return;
@@ -134,7 +148,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
             const q = query.trim().toLowerCase(), top = items.find((i) => i.code.toLowerCase() === q) ?? items[0];
             if (e.key !== "Enter" || !q || !top) return;
             e.preventDefault();
-            onPick(top.id);
+            pick(top.id);
             setQuery("");
           }} />
         {kind === "bead" ? (
@@ -161,7 +175,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
       )}
       <div ref={list} className={s.rows} style={{ height }} role="listbox">
         {items.map((e) => (
-          <div key={e.id} role="option" aria-selected={e.id === selected} data-on={e.id === selected} data-id={e.id} className={cx(s.item, e.id === selected && s.on)} onClick={() => onPick(e.id)}>
+          <div key={e.id} role="option" aria-selected={e.id === selected} data-on={e.id === selected} data-id={e.id} className={cx(s.item, e.id === selected && s.on)} onClick={() => pick(e.id)}>
             <Swatch entry={e} />
             <span className={s.code}>{e.code}</span>
             <span className={s.name}>
@@ -177,6 +191,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
                 aria-label={t("editCustom", { code: e.code })}
                 onClick={(ev) => {
                   ev.stopPropagation();
+                  take(e.id);
                   setForm({ mode: "edit", id: e.id });
                 }}
               >

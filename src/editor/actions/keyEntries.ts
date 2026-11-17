@@ -155,6 +155,7 @@ export function deleteEntry(ed: Editor, i: KeyIndex) {
 export function addCustomColour(ed: Editor, c: Omit<CustomColor, "id">): string {
   const id = shortId("custom");
   ed.doc.customs[id] = { ...c, id };
+  void ed.inventory.save(ed.doc.customs[id]);
   if (c.kind === "thread" && ed.doc.brands && !ed.doc.brands.includes(c.brand)) ed.doc.brands = [...ed.doc.brands, c.brand];
   invalidateColors(ed.doc);
   ed.changed({ keys: true });
@@ -166,6 +167,7 @@ export function updateCustomColour(ed: Editor, id: string, c: Partial<Omit<Custo
   const old = ed.doc.customs[id];
   if (!old) return;
   ed.doc.customs[id] = { ...old, ...c, id };
+  void ed.inventory.save(ed.doc.customs[id]);
   // a thread moved to a brand the pattern doesn't list yet: the brand comes along
   if (old.kind === "thread" && c.brand && ed.doc.brands && !ed.doc.brands.includes(c.brand)) ed.doc.brands = [...ed.doc.brands, c.brand];
   invalidateColors(ed.doc);

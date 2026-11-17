@@ -3,7 +3,7 @@ import type { PkReport } from "@/core/formats/pdf/patternKeeper";
 import type { Fragment } from "@/core/pattern/fragment";
 import type { Palette } from "@/core/pattern/palette";
 import { createPattern } from "@/core/pattern/createPattern";
-import type { KeyIndex, PartialKindId, PartialStitch, Pattern, Point, Rect, Segment } from "@/core/pattern/types";
+import type { KeyIndex, PartialKindId, PartialStitch, Pattern, Point, Rect, Segment, CustomColor } from "@/core/pattern/types";
 import type { MirrorMode } from "@/core/transform/mirror";
 import type { ChartView } from "@/render/chart";
 import type { Viewport } from "@/render/ChartRenderer";
@@ -96,6 +96,8 @@ export interface EditorState {
   saveState: "saving" | "saved" | "offline" | null;
   /** Saved patterns besides the open one exist (in this browser or the account): Pattern ▸ Open is offered. */
   hasOtherPatterns: boolean;
+  /** Your own threads and beads in the account (SPEC §15.28); null signed out, or not loaded yet. */
+  inventory: CustomColor[] | null;
   /** The session has been checked (signed in or not): the account's patterns can be asked for. */
   accountKnown: boolean;
   /** The sign-in dialog is open (from the header, or "Sign in to keep it"). */
@@ -169,6 +171,7 @@ export const createEditorStore = () =>
     shortcutsOpen: false,
     signInOpen: false,
     accountKnown: false,
+    inventory: null,
     toolbarHide: { shapes: false, partials: false },
     dialog: null,
     keyForm: null,

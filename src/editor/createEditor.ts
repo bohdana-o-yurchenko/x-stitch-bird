@@ -15,6 +15,7 @@ import { demoPattern, loadPattern } from "./actions/pattern";
 import { Autosave } from "./autosave";
 import { CommandRegistry } from "./commands/registry";
 import { KeepPattern } from "./keepPattern";
+import { ThreadInventory } from "./threads/inventory";
 import { forgetAccountHere } from "./library";
 import { History } from "./history/history";
 import { ImageService } from "./images/ImageService";
@@ -50,6 +51,7 @@ export class Editor {
   readonly tools: ToolManager;
   readonly commands: CommandRegistry;
   readonly keep: KeepPattern;
+  readonly inventory: ThreadInventory;
   readonly shortcuts: ShortcutManager;
   readonly selection: SelectionService;
   readonly references: ReferenceService;
@@ -77,6 +79,7 @@ export class Editor {
     this.tools = new ToolManager(this);
     this.commands = new CommandRegistry(this);
     this.keep = new KeepPattern(this);
+    this.inventory = new ThreadInventory(this);
     this.shortcuts = new ShortcutManager(this, isMac);
     this.selection = new SelectionService(this);
     this.references = new ReferenceService(this);
@@ -200,7 +203,9 @@ export class Editor {
     account.signedIn = !!user;
     if (!this.state.accountKnown) this.store.setState({ accountKnown: true });
     if (this.state.account?.id === user?.id) return;
-    this.store.setState({ account: user, saveState: null, ...(user ? { signInOpen: false } : {}) });
+    this.store.setState({ account: user, saveState: null, inventory: null, ...(user ? { signInOpen: false } : {}) });
+    // your own threads: the account's, and the open pattern's join them
+    if (user) void this.inventory.load();
     void this.refreshPatterns();
     // signed in with work open ("Sign in to keep it"): it goes to the account now
     if (user && this.state.ready && this.keep.edited) void saveToLibrary(this, { quiet: true });
