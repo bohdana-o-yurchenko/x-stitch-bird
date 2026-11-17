@@ -1,14 +1,14 @@
 import type { Point, Rect } from "@/core/pattern/types";
 import { defaultCorners, dragUnderlay, fitToChart, frameHandleAt, frameNeeded, handleAt, imageToGrid, newUnderlay, resetCrop, resizeRect, rotateUnderlay, ROTATION_STEP, straightenedSize, toLocal, turnedBounds, type Handle, type Straighten, type UnderlayData } from "@/core/underlay/underlay";
-import { downscaleToBlob, loadImage } from "@/platform/images";
+import { loadImage } from "@/platform/images";
 import { RULER_SIZE } from "@/render/ChartRenderer";
 import { runStraighten } from "../heavy";
 import type { Editor } from "../createEditor";
 import { PICKING } from "../matching/matching";
 
+import { confirmLargePhoto } from "../images/largePhoto";
+
 const SAVE_DELAY = 700;
-/** Photos larger than this (longer side, px) are scaled down once when added; others are stored untouched. */
-const MAX_SIDE = 6000;
 /** Grab distance for the image's own handles, in screen pixels. */
 const GRAB_PX = 8;
 /**
@@ -83,17 +83,15 @@ export class UnderlayService {
   }
 
   /**
-   * Stores the photo as it is (only very large ones are scaled down), fits it to the chart in edit mode and opens
+   * Stores the photo as it is, however large (SPEC §15.33: a very large one after a word about freezes), fits it to the chart in edit mode and opens
    * the straighten dialog. `keepPlacement`: replacing keeps where the old one was.
    */
   async addFromFile(f: File, keepPlacement = false) {
     const img = await loadImage(f).catch(() => null);
     if (!img) return this.ed.toast("toasts.badImage");
-    const big = Math.max(img.naturalWidth, img.naturalHeight) > MAX_SIDE;
-    const blob = big ? await downscaleToBlob(img, MAX_SIDE, 0.92) : f;
-    const k = big ? MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight) : 1;
-    const w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
-    const fresh = newUnderlay(await this.ed.images.put(blob), w, h, this.ed.doc);
+    if (!(await confirmLargePhoto(this.ed, img))) return;
+    const w = Math.max(1, img.naturalWidth), h = Math.max(1, img.naturalHeight);
+    const fresh = newUnderlay(await this.ed.images.put(f), w, h, this.ed.doc);
     const old = this.data;
     const u = keepPlacement && old ? { ...fresh, rect: { ...old.rect, h: (old.rect.w * h) / w }, opacity: old.opacity } : fresh;
     await this.show(u);

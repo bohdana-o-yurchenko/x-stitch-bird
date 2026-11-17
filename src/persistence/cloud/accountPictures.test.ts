@@ -115,7 +115,8 @@ describe("pictures in the account", () => {
   });
 
   it("opening on another device brings the windows and their pictures, checked against their ids", async () => {
-    const first = browser(), server = account_(["p"]);
+    const first = browser();
+    account_(["p"]);
     const one = accountPictures(first.local);
     const img = await first.local.images.put(photo("chart scan"));
     await one.references.save("p", [win("w1", img)]);

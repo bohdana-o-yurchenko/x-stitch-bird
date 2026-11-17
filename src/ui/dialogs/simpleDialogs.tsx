@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { parseCellRef } from "@/core/grid/numbering";
 import { symbolText } from "@/core/symbols/lineStyles";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
+import { stopAskingLargePhoto } from "@/editor/images/largePhoto";
 import { copyText } from "@/platform/files";
 import { ConfirmDelete, KeyIcon, Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
@@ -134,6 +135,29 @@ export function DropChoiceDialog({ file, onClose }: Close & { file: File }) {
   return (
     <Modal title={t("dropChoiceTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("openAsReference"), onClick: () => run("reference.open", file) }, { label: t("putBehind"), onClick: () => run("underlay.open", file) }, { label: t("turnIntoPattern"), primary: true, onClick: () => run("image.open", file) }]}>
       <p className={ui.hint}>“{file.name}”</p>
+    </Modal>
+  );
+}
+
+/** A very large photo (SPEC §15.33): kept at full quality, after a word that the app may pause with it. */
+export function LargePhotoDialog({ w, h, answer, onClose }: Close & { w: number; h: number; answer: (use: boolean) => void }) {
+  const t = useTranslations("dialogs");
+  const [noAsk, setNoAsk] = useState(false);
+  // closing any other way (Esc, outside, Cancel) is a no
+  const close = () => {
+    answer(false);
+    onClose();
+  };
+  const use = () => {
+    if (noAsk) stopAskingLargePhoto();
+    answer(true);
+    onClose();
+    return false;
+  };
+  return (
+    <Modal title={t("largePhotoTitle")} onClose={close} buttons={[{ label: t("cancel") }, { label: t("largePhotoUse"), primary: true, onClick: use }]}>
+      <p className={ui.hint}>{t("largePhotoBody", { w, h, mp: Math.round((w * h) / 1e6) })}</p>
+      <label className={ui.chk} data-testid="large-photo-no-ask"><input type="checkbox" checked={noAsk} onChange={(e) => setNoAsk(e.target.checked)} />{t("largePhotoNoAsk")}</label>
     </Modal>
   );
 }

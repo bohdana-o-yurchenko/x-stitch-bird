@@ -34,6 +34,8 @@ export type DialogRequest =
   | { type: "extendCanvas" }
   | { type: "replaceKey" }
   | { type: "dropChoice"; file: File }
+  /** A photo above LARGE_PHOTO_PX: use it as it is (it may freeze the app for a moment), or not. */
+  | { type: "largePhoto"; w: number; h: number; answer: (use: boolean) => void }
   | { type: "patternKeeper"; issues: PkReport["issues"] }
   | { type: "textFallback"; ext: string; text: string }
   /** Signed out, before another pattern replaces one with work in it: download, sign in, or replace. */

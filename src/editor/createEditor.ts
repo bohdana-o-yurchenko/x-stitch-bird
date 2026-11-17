@@ -8,6 +8,7 @@ import { RULER_SIZE } from "@/render/ChartRenderer";
 import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
 import { account, createPersistence, type Persistence } from "@/persistence";
 import { loadImage } from "@/platform/images";
+import { confirmLargePhoto } from "./images/largePhoto";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { chromeColours } from "@/platform/themeColours";
 import { createFromImage, saveToLibrary } from "./actions/importExport";
@@ -322,8 +323,8 @@ export class Editor {
 
   async addReferenceFromFile(f: File) {
     try {
-      // only to check it is a picture the browser can show: it is kept as it came, never scaled down (SPEC §15.33)
-      await loadImage(f);
+      // kept as it came, never scaled down (SPEC §15.33); a very large one after a word about freezes
+      if (!(await confirmLargePhoto(this, await loadImage(f)))) return;
       const image = await this.images.put(f);
       this.references.add({ image, name: f.name.replace(/\.[^.]+$/, "") });
     } catch {

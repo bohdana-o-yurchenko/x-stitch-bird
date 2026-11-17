@@ -1218,3 +1218,31 @@ test("New ▸ start with this pattern's key and settings: its threads & beads an
   await expect(threads.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
   await expect(dialog.getByLabel("This pattern has beads")).toBeEnabled();
 });
+
+test("a very large photo is kept as it is, after a word that the app may pause; “don’t ask again” is remembered", async ({ page }) => {
+  const add = () =>
+    page.evaluate(async () => {
+      const c = document.createElement("canvas");
+      c.width = 6200;
+      c.height = 4000;
+      c.getContext("2d")!.fillRect(0, 0, 10, 10);
+      const blob = await new Promise<Blob>((r) => c.toBlob((b) => r(b!), "image/png"));
+      const ed = (window as unknown as { __stitchwork: { underlay: { addFromFile(f: File): Promise<void> } } }).__stitchwork;
+      void ed.underlay.addFromFile(new File([blob], "big.png", { type: "image/png" }));
+    });
+  await add();
+  const ask = page.getByRole("dialog", { name: "A very large photo" });
+  await expect(ask).toContainText("6200 × 4000 px (25 megapixels)");
+  await ask.getByRole("button", { name: "Cancel" }).click();
+  await expect(ask).toHaveCount(0);
+  expect(await editorState(page, "(ed) => ed.state.underlay")).toBeNull();
+  await add();
+  await ask.getByTestId("large-photo-no-ask").click();
+  await ask.getByRole("button", { name: "Use it" }).click();
+  // stored at full size
+  await expect.poll(() => editorState<number | undefined>(page, "(ed) => ed.state.underlay?.imageW")).toBe(6200);
+  await page.getByTestId("straighten").getByRole("button", { name: "Use as it is" }).click();
+  await add();
+  await expect(page.getByTestId("straighten")).toBeVisible();
+  await expect(ask).toHaveCount(0);
+});

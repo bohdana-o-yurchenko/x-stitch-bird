@@ -1808,7 +1808,9 @@ The goal: a photo, a marking or the image behind the chart, once attached, is ne
 made for, the photos' quality is the point — so they are kept **as they came, never scaled down or re-encoded**.
 - **Photos as they came.** A photo window keeps the original file (before: a 1600 px JPEG). The marks layer over it
   is at most 2400 px on its long side (each undo step holds a copy of it) and is stretched over the whole photo;
-  marks made over smaller photos keep their exact size. The image behind the chart keeps its earlier limit (6000 px).
+  marks made over smaller photos keep their exact size. The image behind the chart is kept as it came too (before:
+  scaled to 6000 px). A photo over 24 megapixels is used after a word that the app may pause for a few seconds with
+  it, longer on a tablet or phone (Cancel / Use it, with "Don't ask again").
 - **Into the account, while signed in.** Every change to a pattern's photo windows or underlay also goes up, a couple
   of seconds after it settles: first the pictures (photo, marks, underlay, its straighten source), each once — its
   id is its content hash — then the small records that use them. The browser sends a picture straight to storage
