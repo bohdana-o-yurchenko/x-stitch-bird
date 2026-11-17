@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { BEADS, BEAD_SERIES, THREAD_CATALOGUES, byHue, byNumber, matchesQuery } from "@/core/catalog/catalog";
+import { BEAD_CATALOGUES, THREAD_CATALOGUES, byHue, byNumber, matchesQuery } from "@/core/catalog/catalog";
 import type { ColorEntry } from "@/core/color/colorEntry";
 import { BUILT_IN_THREAD_BRANDS, canRemoveBrand, patternBrands } from "@/core/pattern/brands";
 import { customColor, resolveColor } from "@/core/pattern/resolve";
@@ -26,19 +26,23 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   // brands and your own threads live in the pattern: redraw when it changes
   const revision = useEditorState((st) => st.docRevision);
   const doc = useEditorState((st) => st.doc);
-  const brands = kind === "thread" ? patternBrands(doc) : [];
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"num" | "hue">("num");
   const [series, setSeries] = useState("all");
-  // the tab: the brand of what's picked, else the pattern's first
-  const [tab, setTab] = useState<string>(() => (kind === "thread" ? (resolveColor(doc, selected)?.brand ?? brands[0] ?? "DMC") : ""));
-  const brand = brands.includes(tab) ? tab : (brands[0] ?? "DMC");
+  const inventory = useEditorState((st) => st.inventory);
+  // threads: the pattern's brands; beads: the built-in bead brands, then your own
+  const ownBeadBrands = [...Object.values(doc.customs), ...(inventory ?? [])].filter((c) => c.kind === "bead").map((c) => c.brand);
+  const brands = kind === "thread" ? patternBrands(doc) : [...new Set([...Object.keys(BEAD_CATALOGUES), ...ownBeadBrands])];
+  // the tab: the brand of what's picked, else the first
+  const [tab, setTab] = useState<string>(() => resolveColor(doc, selected)?.brand ?? brands[0] ?? "");
+  const brand = brands.includes(tab) ? tab : (brands[0] ?? "");
+  const catalogue = (kind === "thread" ? THREAD_CATALOGUES : BEAD_CATALOGUES)[brand] ?? [];
+  const seriesList = kind === "bead" ? [...new Set(catalogue.map((e) => e.series ?? "").filter(Boolean))] : [];
   const [form, setForm] = useState<FormState>({ mode: "closed" });
   const [naming, setNaming] = useState(false);
   const list = useRef<HTMLDivElement>(null);
 
   // your own: the pattern's, and (signed in) the rest of your inventory
-  const inventory = useEditorState((st) => st.inventory);
   const extra = (inventory ?? []).filter((c) => c.kind === kind && !doc.customs[c.id]);
   const customs = [...Object.values(doc.customs).filter((c) => c.kind === kind).map((c) => resolveColor(doc, c.id)!), ...extra.map(customColor)];
   /** Picking one of your inventory's threads: the pattern takes a copy first. */
@@ -54,8 +58,8 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   };
   const items = useMemo(() => {
     let all: ColorEntry[];
-    if (kind === "bead") all = series === "mine" ? customs : [...BEADS, ...customs].filter((e) => series === "all" || e.series === series);
-    else all = [...(THREAD_CATALOGUES[brand] ?? []), ...customs.filter((e) => e.brand === brand)];
+    all = [...catalogue, ...customs.filter((e) => e.brand === brand)];
+    if (kind === "bead" && series !== "all") all = all.filter((e) => e.series === series);
     all = all.filter((e) => matchesQuery(e, query));
     return kind === "thread" ? [...all].sort(sort === "num" ? byNumber : byHue) : all;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,7 +82,6 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
     if (tab === b) setTab(brands.find((x) => x !== b) ?? "DMC");
   };
 
-  const beadBrands = [...new Set(["Mill Hill", ...customs.map((c) => c.brand)])];
   const save = (f: ThreadFields) => {
     const name = f.name || t("customDefault");
     if (form.mode === "edit") {
@@ -87,21 +90,23 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
       const id = addCustomColour(ed, { kind, brand: f.brand, code: f.code, name, hex: f.hex, series: kind === "bead" ? "Custom" : undefined });
       onPick(id);
     }
-    if (kind === "thread") setTab(f.brand);
+    setTab(f.brand);
+    setSeries("all");
     setForm({ mode: "closed" });
   };
   const editing = form.mode === "edit" ? doc.customs[form.id] : null;
 
   return (
     <div className={s.picker}>
-      {kind === "thread" && (
-        <div className={s.brandTabs} role="tablist" aria-label={t("brands")} data-testid="brand-tabs">
+      {(kind === "thread" || brands.length > 1) && (
+        <div className={s.brandTabs} role="tablist" aria-label={t(kind === "bead" ? "beadBrands" : "brands")} data-testid="brand-tabs">
           {brands.map((b) => {
             const removable = canRemoveBrand(doc, b);
             return (
               <span key={b} className={cx(s.brandTab, b === brand && s.on)}>
-                <button type="button" role="tab" aria-selected={b === brand} onClick={() => setTab(b)}>{b}</button>
-                {brands.length > 1 && (
+                <button type="button" role="tab" aria-selected={b === brand} onClick={() => (setTab(b), setSeries("all"))}>{b}</button>
+                {/* a pattern chooses its thread brands; bead brands are all there */}
+                {kind === "thread" && brands.length > 1 && (
                   <button
                     type="button"
                     className={s.brandX}
@@ -116,7 +121,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
               </span>
             );
           })}
-          {naming ? (
+          {kind === "bead" ? null : naming ? (
             <input
               className={cx(ui.input, s.brandName)}
               autoFocus
@@ -143,7 +148,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
         </div>
       )}
       <div className={ui.row}>
-        <input className={cx(ui.input, s.search)} autoFocus={autoFocus} placeholder={kind === "bead" ? t("searchBead") : t("searchIn", { brand })} value={query} onChange={(e) => setQuery(e.target.value)}
+        <input className={cx(ui.input, s.search)} autoFocus={autoFocus} placeholder={kind === "bead" && brand === "Mill Hill" ? t("searchBead") : t("searchIn", { brand })} value={query} onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
             const q = query.trim().toLowerCase(), top = items.find((i) => i.code.toLowerCase() === q) ?? items[0];
             if (e.key !== "Enter" || !q || !top) return;
@@ -152,11 +157,12 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
             setQuery("");
           }} />
         {kind === "bead" ? (
-          <select className={ui.input} value={series} onChange={(e) => setSeries(e.target.value)} style={{ maxWidth: 160 }}>
-            <option value="all">{t("allSeries")}</option>
-            {BEAD_SERIES.map((sr) => <option key={sr} value={sr}>{t("series", { name: sr, count: BEADS.filter((b) => b.series === sr).length })}</option>)}
-            <option value="mine">{t("myBeads")}</option>
-          </select>
+          seriesList.length > 1 && (
+            <select className={ui.input} aria-label={t(brand === "Mill Hill" ? "allSeries" : "allFinishes")} value={series} onChange={(e) => setSeries(e.target.value)} style={{ maxWidth: 160 }}>
+              <option value="all">{t(brand === "Mill Hill" ? "allSeries" : "allFinishes")}</option>
+              {seriesList.map((sr) => <option key={sr} value={sr}>{t("series", { name: sr, count: catalogue.filter((b) => b.series === sr).length })}</option>)}
+            </select>
+          )
         ) : (
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => setSort(sort === "num" ? "hue" : "num")}>{sort === "num" ? t("byNumber") : t("byColour")}</button>
         )}
@@ -166,8 +172,8 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
         <ThreadForm
           key={form.mode === "edit" ? form.id : "add"}
           kind={kind}
-          brands={kind === "thread" ? [brand, ...brands, ...otherBrands] : beadBrands}
-          initial={editing ? { brand: editing.brand, code: editing.code, name: editing.name, hex: editing.hex } : { brand: kind === "thread" ? brand : "Mill Hill", code: "", name: "", hex: "#7A9CC6" }}
+          brands={kind === "thread" ? [brand, ...brands, ...otherBrands] : [brand, ...brands]}
+          initial={editing ? { brand: editing.brand, code: editing.code, name: editing.name, hex: editing.hex } : { brand, code: "", name: "", hex: "#7A9CC6" }}
           saveLabel={form.mode === "edit" ? t("save") : t("add")}
           onSave={save}
           onCancel={() => setForm({ mode: "closed" })}
@@ -182,7 +188,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
               {e.name}
               {e.dmc && <span style={{ opacity: 0.7 }}>{t("dmcEquivalent", { code: e.dmc })}</span>}
             </span>
-            {e.series && e.series !== "Custom" ? <span className={s.tag}>{e.series}</span> : e.id.startsWith("custom:") && <span className={s.tag}>{t("yours")}</span>}
+            {e.series && e.series !== "Custom" && e.series !== e.name ? <span className={s.tag}>{e.series}</span> : e.id.startsWith("custom:") && <span className={s.tag}>{t("yours")}</span>}
             {e.id.startsWith("custom:") && (
               <button
                 type="button"

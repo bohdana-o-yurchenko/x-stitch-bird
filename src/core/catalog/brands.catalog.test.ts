@@ -25,3 +25,15 @@ describe("Anchor and Madeira catalogues (open data, NOTICE.md)", () => {
     expect(pattern.key.filter(Boolean).map((e) => e!.src).sort()).toEqual(["anchor:403", "madeira:2713"]);
   });
 });
+
+describe("Preciosa Rocailles (from Preciosa's sample cards)", () => {
+  it("a second bead brand: codes with their finish; the same code in another finish is its own colour", async () => {
+    const { BEAD_CATALOGUES, PRECIOSA } = await import("./catalog");
+    expect(Object.keys(BEAD_CATALOGUES)).toEqual(["Mill Hill", "Preciosa"]);
+    expect(PRECIOSA.length).toBeGreaterThan(600);
+    expect(new Set(PRECIOSA.map((e) => e.id)).size).toBe(PRECIOSA.length);
+    const plain = libraryColor("preciosa:13600")!, matt = libraryColor("preciosa:13600/33139001")!;
+    expect([brandCode(plain), plain.name, matt.name]).toEqual(["Preciosa 13600", "Natural Opaque", "Opaque - Matt"]);
+    expect(plain.kind).toBe("bead");
+  });
+});

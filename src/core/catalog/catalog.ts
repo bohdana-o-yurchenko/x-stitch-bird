@@ -3,6 +3,7 @@ import anchorData from "./data/anchor.json";
 import dmcData from "./data/dmc.json";
 import madeiraData from "./data/madeira.json";
 import millHillData from "./data/millhill.json";
+import preciosaData from "./data/preciosa.json";
 
 export const DMC: readonly ColorEntry[] = (dmcData as [string, string, string][]).map(([code, name, hex], order) =>
   makeColor({ id: `dmc:${code}`, kind: "thread", brand: "DMC", code, name, hex, order }),
@@ -38,9 +39,23 @@ export const BEADS: readonly ColorEntry[] = (millHillData as { series: string; p
 
 export const BEAD_SERIES: readonly string[] = [...new Set(BEADS.map((b) => b.series ?? ""))];
 
-const LIBRARY = new Map<string, ColorEntry>([...DMC, ...ANCHOR, ...MADEIRA, ...BEADS].map((e) => [e.id, e]));
+/**
+ * Preciosa Rocailles (SPEC §15.30) from Preciosa's own sample cards (`scripts/catalog/import-preciosa.py`): rows
+ * [code, finish, colour, article number]. A code comes in several finishes (13600 plain, 13600 matt), told apart by
+ * the article number — so the id carries it unless it's the plain one (311 19 001). The finish is the name and the
+ * series; there's no package count (sold by weight).
+ */
+const PLAIN_ART = "311 19 001";
+export const PRECIOSA: readonly ColorEntry[] = (preciosaData as [string, string, string, string][]).map(([code, finish, hex, art], order) =>
+  makeColor({ id: `preciosa:${code}${art === PLAIN_ART ? "" : "/" + art.replace(/\s/g, "")}`, kind: "bead", brand: "Preciosa", code, name: finish, series: finish, hex, order }),
+);
 
-/** Built-in thread or bead by id (`dmc:310`, `anchor:403`, `madeira:2713`, `bead:00557`). */
+/** Built-in bead catalogues by brand, in the order they're offered. */
+export const BEAD_CATALOGUES: Readonly<Record<string, readonly ColorEntry[]>> = { "Mill Hill": BEADS, Preciosa: PRECIOSA };
+
+const LIBRARY = new Map<string, ColorEntry>([...DMC, ...ANCHOR, ...MADEIRA, ...BEADS, ...PRECIOSA].map((e) => [e.id, e]));
+
+/** Built-in thread or bead by id (`dmc:310`, `anchor:403`, `madeira:2713`, `bead:00557`, `preciosa:13600`). */
 export const libraryColor = (id: string): ColorEntry | undefined => LIBRARY.get(id);
 
 /** Picker search (SPEC §8.1): code prefix, name substring, "dmc 310" for beads, or series. */

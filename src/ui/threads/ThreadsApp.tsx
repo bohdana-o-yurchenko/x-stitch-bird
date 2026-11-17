@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { BEAD_CATALOGUES } from "@/core/catalog/catalog";
 import { BUILT_IN_THREAD_BRANDS } from "@/core/pattern/brands";
 import type { CustomColor } from "@/core/pattern/types";
 import { createLibrary } from "@/editor/library";
@@ -13,8 +14,8 @@ import home from "../home/home.module.css";
 import { ThreadForm, type ThreadFields } from "./ThreadForm";
 import s from "./threads.module.css";
 
-/** Built-in brands: your threads can be added to them, but they can't be renamed or deleted. */
-const BUILT_IN = new Set([...BUILT_IN_THREAD_BRANDS, "Mill Hill"]);
+/** Built-in brands: your threads and beads can be added to them, but they can't be renamed or deleted. */
+const BUILT_IN = new Set([...BUILT_IN_THREAD_BRANDS, ...Object.keys(BEAD_CATALOGUES)]);
 
 type Editing = { kind: "thread" | "bead"; thread?: CustomColor; brand?: string } | null;
 
@@ -34,6 +35,7 @@ export default function ThreadsApp() {
   const [signInOpen, setSignInOpen] = useState(false);
   const [threads, setThreads] = useState<CustomColor[] | null>(null);
   const [failed, setFailed] = useState(false);
+  const [kind, setKind] = useState<"thread" | "bead">("thread");
   const [brand, setBrand] = useState<string | null>(null);
   const [editing, setEditing] = useState<Editing>(null);
   const [deleting, setDeleting] = useState<CustomColor | null>(null);
@@ -49,10 +51,11 @@ export default function ThreadsApp() {
 
   const brands = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const c of threads ?? []) counts.set(c.brand, (counts.get(c.brand) ?? 0) + 1);
+    for (const c of threads ?? []) if (c.kind === kind) counts.set(c.brand, (counts.get(c.brand) ?? 0) + 1);
     return [...counts].sort(([a], [b]) => a.localeCompare(b));
-  }, [threads]);
-  const shown = (threads ?? []).filter((c) => !brand || c.brand === brand).sort((a, b) => a.brand.localeCompare(b.brand) || a.code.localeCompare(b.code, undefined, { numeric: true }));
+  }, [threads, kind]);
+  const mine = (threads ?? []).filter((c) => c.kind === kind);
+  const shown = mine.filter((c) => !brand || c.brand === brand).sort((a, b) => a.brand.localeCompare(b.brand) || a.code.localeCompare(b.code, undefined, { numeric: true }));
 
   const save = async (f: ThreadFields) => {
     if (!editing) return;
@@ -68,18 +71,23 @@ export default function ThreadsApp() {
   const renameBrand = async (from: string, to: string) => {
     const name = to.trim();
     if (!name || name === from) return;
-    const moved = (threads ?? []).filter((c) => c.brand === from).map((c) => ({ ...c, brand: name }));
+    const moved = mine.filter((c) => c.brand === from).map((c) => ({ ...c, brand: name }));
     for (const c of moved) await lib.saveThread(c);
-    setThreads((list) => (list ?? []).map((c) => (c.brand === from ? { ...c, brand: name } : c)));
+    setThreads((list) => (list ?? []).map((c) => (c.kind === kind && c.brand === from ? { ...c, brand: name } : c)));
     if (brand === from) setBrand(name);
   };
   const deleteBrand = async (b: string) => {
-    for (const c of (threads ?? []).filter((x) => x.brand === b)) await lib.removeThread(c.id);
-    setThreads((list) => (list ?? []).filter((c) => c.brand !== b));
+    for (const c of mine.filter((x) => x.brand === b)) await lib.removeThread(c.id);
+    setThreads((list) => (list ?? []).filter((c) => !(c.kind === kind && c.brand === b)));
     if (brand === b) setBrand(null);
   };
 
-  const brandChoices = [...new Set([...(brand ? [brand] : []), ...BUILT_IN_THREAD_BRANDS, ...brands.map(([b]) => b)])];
+  const builtIn = kind === "thread" ? BUILT_IN_THREAD_BRANDS : Object.keys(BEAD_CATALOGUES);
+  const brandChoices = (k: "thread" | "bead") => [...new Set([...(brand && k === kind ? [brand] : []), ...(k === "thread" ? BUILT_IN_THREAD_BRANDS : Object.keys(BEAD_CATALOGUES)), ...(threads ?? []).filter((c) => c.kind === k).map((c) => c.brand)])];
+  const switchKind = (k: "thread" | "bead") => {
+    setKind(k);
+    setBrand(null);
+  };
 
   return (
     <div className={home.page}>
@@ -96,9 +104,14 @@ export default function ThreadsApp() {
         ) : (
           <div className={s.layout}>
             <nav className={s.brandList} aria-label={t("brands")} data-testid="thread-brands">
+              <div className={s.kinds} role="tablist" aria-label={t("kinds")}>
+                {(["thread", "bead"] as const).map((k) => (
+                  <button key={k} type="button" role="tab" aria-selected={kind === k} className={cx(kind === k && s.on)} onClick={() => switchKind(k)}>{t(k === "thread" ? "threadsTab" : "beadsTab")}</button>
+                ))}
+              </div>
               <button type="button" className={cx(s.brandItem, !brand && s.on)} onClick={() => setBrand(null)}>
-                <span>{t("all")}</span>
-                <small>{threads?.length ?? ""}</small>
+                <span>{t(kind === "thread" ? "all" : "allBeads")}</span>
+                <small>{threads ? mine.length : ""}</small>
               </button>
               {brands.map(([b, n]) => (
                 <div key={b} className={cx(s.brandItem, brand === b && s.on)}>
@@ -117,14 +130,13 @@ export default function ThreadsApp() {
             </nav>
             <section className={s.listSide}>
               <div className={home.listHead}>
-                <h2>{brand ?? t("all")}</h2>
+                <h2>{brand ?? t(kind === "thread" ? "all" : "allBeads")}</h2>
                 <span className={home.spacer} />
-                <button type="button" className={ui.btn} onClick={() => setEditing({ kind: "bead", brand: brand ?? "Mill Hill" })}>{t("addBead")}</button>
-                <button type="button" className={cx(ui.btn, ui.primary)} onClick={() => setEditing({ kind: "thread", brand: brand ?? undefined })}>{t("addThread")}</button>
+                <button type="button" className={cx(ui.btn, ui.primary)} onClick={() => setEditing({ kind, brand: brand ?? builtIn[0] })}>{t(kind === "thread" ? "addThread" : "addBead")}</button>
               </div>
               {failed && <p className={ui.warn}>{t("unreachable")}</p>}
               {!threads && !failed && <p className={ui.hint}>{t("loading")}</p>}
-              {threads && !threads.length && <p className={ui.hint}>{t("empty")}</p>}
+              {threads && !mine.length && <p className={ui.hint}>{t(kind === "thread" ? "empty" : "emptyBeads")}</p>}
               <div className={s.threadGrid} data-testid="thread-list">
                 {shown.map((c) => (
                   <button key={c.id} type="button" className={s.thread} onClick={() => setEditing({ kind: c.kind, thread: c })} aria-label={t("edit", { brand: c.brand, code: c.code })}>
@@ -132,7 +144,7 @@ export default function ThreadsApp() {
                     <span className={s.threadText}>
                       <b>{c.code}</b>
                       <span>{c.name !== c.code ? c.name : ""}</span>
-                      <small>{c.kind === "bead" ? t("beadOf", { brand: c.brand }) : c.brand}</small>
+                      <small>{c.brand}</small>
                     </span>
                   </button>
                 ))}
@@ -147,8 +159,8 @@ export default function ThreadsApp() {
         <Modal title={editing.thread ? t("editTitle") : t(editing.kind === "bead" ? "newBead" : "newThread")} onClose={() => setEditing(null)} buttons={[]}>
           <ThreadForm
             kind={editing.kind}
-            brands={brandChoices}
-            initial={editing.thread ? { brand: editing.thread.brand, code: editing.thread.code, name: editing.thread.name, hex: editing.thread.hex } : { brand: editing.brand ?? brandChoices[0] ?? "DMC", code: "", name: "", hex: "#7A9CC6" }}
+            brands={brandChoices(editing.kind)}
+            initial={editing.thread ? { brand: editing.thread.brand, code: editing.thread.code, name: editing.thread.name, hex: editing.thread.hex } : { brand: editing.brand ?? brandChoices(editing.kind)[0] ?? "", code: "", name: "", hex: "#7A9CC6" }}
             saveLabel={editing.thread ? t("save") : t("add")}
             onSave={(f) => void save(f)}
             onCancel={() => setEditing(null)}
@@ -169,7 +181,7 @@ export default function ThreadsApp() {
       {brandAction?.kind === "rename" && <RenameBrand from={brandAction.brand} onClose={() => setBrandAction(null)} onRename={(to) => renameBrand(brandAction.brand, to)} />}
       {brandAction?.kind === "delete" && (
         <Modal title={t("deleteBrandTitle", { brand: brandAction.brand })} onClose={() => setBrandAction(null)} buttons={[{ label: t("cancel") }, { label: t("delete"), danger: true, onClick: () => deleteBrand(brandAction.brand) }]}>
-          <p>{t("deleteBrandBody", { count: (threads ?? []).filter((c) => c.brand === brandAction.brand).length })}</p>
+          <p>{t("deleteBrandBody", { count: mine.filter((c) => c.brand === brandAction.brand).length })}</p>
         </Modal>
       )}
     </div>

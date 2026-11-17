@@ -1745,6 +1745,17 @@ the main pages' footer. A paid subscription for the account (storage, sync) late
 free, the hosted service is what's paid for. Outside contributions: decide on a contributor agreement first if the
 code might ever be offered under other terms too.
 
+### 15.30 Bead brands: Mill Hill, Preciosa; your own (2026-11-17)
+Beads come in brand tabs like threads, but all of them always (no per-pattern choice): **Mill Hill** (series filter),
+**Preciosa** Rocailles (finish filter), then bead brands of your own. **Preciosa**: 619 colours / 565 codes in 56
+finishes from Preciosa Ornela's own sample cards — codes, finishes and article numbers read from the PDF, each colour
+measured off its printed bead strip (`scripts/catalog/import-preciosa.py`; credit in NOTICE.md). A code comes in
+several finishes (13600 plain, 13600 matt): the id carries the article number unless it's the plain one
+(`preciosa:13600`, `preciosa:13600/33139001`). No package count (sold by weight). **Toho**: no official colour chart
+found to build from (retailers' charts are theirs; Toho's site isn't ours to copy) — until one is, Toho beads are
+added as your own, in a brand "Toho". The Threads page has **Threads | Beads** sections, each with its brands;
+built-in brand names (DMC, Anchor, Madeira, Mill Hill, Preciosa) can't be renamed or deleted.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

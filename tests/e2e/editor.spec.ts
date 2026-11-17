@@ -1109,3 +1109,25 @@ test("thread brands: chosen for a new pattern, one tab each in the picker, your 
   await page.getByTestId("key-form").getByRole("button", { name: "Close" }).click();
   await expect(page.locator("[data-entry]")).toContainText("Pearl gold");
 });
+
+test("bead brands: Mill Hill and Preciosa as tabs, a finish filter, your own bead brand gets its own tab", async ({ page }) => {
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form");
+  await form.getByRole("radio", { name: "Bead", exact: true }).click();
+  const tabs = page.getByTestId("brand-tabs");
+  await expect(tabs.getByRole("tab")).toHaveText(["Mill Hill", "Preciosa"]);
+  await tabs.getByRole("tab", { name: "Preciosa" }).click();
+  await form.getByRole("combobox", { name: "All finishes" }).selectOption("Opaque - Matt");
+  await expect(page.locator("[data-id='preciosa:13600/33139001']")).toBeVisible();
+  await expect(page.locator("[data-id='preciosa:13600']")).toHaveCount(0);
+  // a bead of your own, in a brand of your own
+  await page.getByRole("button", { name: "+ Custom bead" }).click();
+  const tf = page.getByTestId("thread-form");
+  await tf.getByLabel("Brand").selectOption({ label: "New brand…" });
+  await tf.getByLabel("Brand").fill("Toho");
+  await tf.getByLabel("Code").fill("25");
+  await tf.getByRole("button", { name: "Add" }).click();
+  await expect(tabs.getByRole("tab")).toHaveText(["Mill Hill", "Preciosa", "Toho"]);
+  await form.getByRole("button", { name: "Add to key", exact: true }).click();
+  await expect(page.locator("[data-entry]").last()).toContainText("Toho 25");
+});

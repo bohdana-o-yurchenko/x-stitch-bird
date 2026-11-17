@@ -49,6 +49,9 @@ Source code: <https://github.com/bohdana-o-yurchenko/x-stitch-bird> — linked f
   > AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
   > CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   > IN THE SOFTWARE.
+- **Preciosa** Rocailles bead codes, finishes and article numbers — from Preciosa Ornela's published sample cards
+  (https://www.preciosa-ornela.com/content/files/downloads/Rocailles-Sample-Cards.pdf); the colours were measured
+  off the cards' bead photos by `scripts/catalog/import-preciosa.py` and, like any screen colour, are approximations.
 - **Mill Hill** bead codes, names and package counts — from Mill Hill's published bead inventory and DMC conversion
   chart; Treasures colours read off the maker's product photos.
 

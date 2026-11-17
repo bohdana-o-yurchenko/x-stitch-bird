@@ -332,7 +332,9 @@
     "yours": "yours",
     "editCustom": "Change {code}",
     "save": "Save",
-    "emptyBrand": "No {brand} threads yet — add one with +"
+    "emptyBrand": "No {brand} threads yet — add one with +",
+    "beadBrands": "Bead brands",
+    "allFinishes": "All finishes"
   },
   "dialogs": {
     "cancel": "Cancel",
@@ -1080,8 +1082,8 @@
     "addBrand": "+ Brand"
   },
   "threadsPage": {
-    "title": "My threads",
-    "signedOut": "Your own threads and beads — the ones that aren't in the built-in lists — are kept in your account and offered in every pattern. Without signing in, a thread you add lives only in its pattern; sign in and those join your threads.",
+    "title": "My threads and beads",
+    "signedOut": "Your own threads and beads — the ones that aren't in the built-in lists — are kept in your account and offered in every pattern. Without signing in, one you add lives only in its pattern; sign in and those join yours.",
     "signIn": "Sign in",
     "brands": "Brands",
     "all": "All threads",
@@ -1098,7 +1100,6 @@
     "add": "Add",
     "delete": "Delete…",
     "cancel": "Cancel",
-    "beadOf": "{brand} · bead",
     "deleteTitle": "Delete {brand} {code}?",
     "deleteBody": "It leaves your threads. Patterns that use it keep their copy, so nothing on a chart changes.",
     "renameBrand": "Rename {brand}",
@@ -1106,6 +1107,11 @@
     "renameBody": "Every thread of this brand moves to the new name. Patterns keep the name they have until they're opened again.",
     "deleteBrand": "Delete {brand}",
     "deleteBrandTitle": "Delete {brand}?",
-    "deleteBrandBody": "{count, plural, one {Its # thread leaves} other {Its # threads leave}} your threads. Patterns that use them keep their copies."
+    "deleteBrandBody": "{count, plural, one {Its # thread leaves} other {Its # threads leave}} your threads. Patterns that use them keep their copies.",
+    "kinds": "Threads or beads",
+    "threadsTab": "Threads",
+    "beadsTab": "Beads",
+    "allBeads": "All beads",
+    "emptyBeads": "No beads of your own yet. Add one here, or with + in a pattern's bead list."
   }
 }
