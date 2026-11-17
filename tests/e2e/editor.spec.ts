@@ -696,34 +696,35 @@ test("a cut-out removes what is under it: filled circle, then a star cut out of 
   expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe("draw:S00cc;!O3399");
 });
 
-test("the side panel's bar adds and removes sections below the key; one unfolded at a time, at a height set with the handle; all remembered", async ({ page }) => {
+test("the side panel's bar: one section at a time below the key, folding under its header, its height set with the handle; remembered", async ({ page }) => {
   const head = (id: string) => page.getByTestId(`section-${id}`);
   // Totals is there to start with, unfolded
   await expect(head("totals")).toHaveAttribute("aria-expanded", "true");
-  // added: shown and unfolded — the other one folds
+  // another icon: its section takes Totals' place
   await page.getByTestId("rail-fabric").click();
   await expect(head("fabric")).toHaveAttribute("aria-expanded", "true");
-  await expect(head("totals")).toHaveAttribute("aria-expanded", "false");
+  await expect(head("totals")).toHaveCount(0);
   await expect(page.getByTestId("rail-fabric")).toHaveAttribute("aria-pressed", "true");
-  // a header unfolds its section
-  await head("totals").click();
-  await expect(head("totals")).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByTestId("rail-totals")).toHaveAttribute("aria-pressed", "false");
+  // the header folds it, and unfolds it
+  await head("fabric").click();
   await expect(head("fabric")).toHaveAttribute("aria-expanded", "false");
+  await head("fabric").click();
+  await expect(head("fabric")).toHaveAttribute("aria-expanded", "true");
   // the handle sets the height; it's kept
   const handle = (await page.getByTestId("section-resizer").boundingBox())!;
   await page.mouse.move(handle.x + handle.width / 2, handle.y + 3);
   await page.mouse.down();
   await page.mouse.move(handle.x + handle.width / 2, handle.y - 60, { steps: 4 });
   await page.mouse.up();
-  const tall = await page.locator("[data-section=totals]").evaluate((el) => el.parentElement!.getBoundingClientRect().height);
-  // taken away
-  await page.getByTestId("rail-fabric").click();
-  await expect(head("fabric")).toHaveCount(0);
+  const tall = await page.locator("[data-section=fabric]").evaluate((el) => el.parentElement!.getBoundingClientRect().height);
   await page.reload();
   await expect(page.locator("[data-entry]").first()).toBeVisible();
-  await expect(head("fabric")).toHaveCount(0);
-  await expect(head("totals")).toHaveAttribute("aria-expanded", "true");
-  expect(await page.locator("[data-section=totals]").evaluate((el) => el.parentElement!.getBoundingClientRect().height)).toBeCloseTo(tall, 0);
+  await expect(head("fabric")).toHaveAttribute("aria-expanded", "true");
+  expect(await page.locator("[data-section=fabric]").evaluate((el) => el.parentElement!.getBoundingClientRect().height)).toBeCloseTo(tall, 0);
+  // its icon again: no section, the key has the panel
+  await page.getByTestId("rail-fabric").click();
+  await expect(page.locator("[data-testid^=section-]")).toHaveCount(0);
 });
 
 test("chart checks are opt-in, run on demand, and their findings can be stepped through and ignored", async ({ page }) => {

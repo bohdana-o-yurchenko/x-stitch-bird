@@ -12,7 +12,7 @@ import s from "./side.module.css";
 const round = (v: number) => Math.round(v * 100) / 100;
 
 /** The chart underlay (SPEC §15.15), in References: its controls — or, when the pattern has none, the way to add one. */
-export function UnderlayPanel() {
+export function UnderlayPanel({ title }: { title: string }) {
   const t = useTranslations("underlay");
   const run = useCommand();
   const u = useEditorState((st) => st.underlay);
@@ -21,7 +21,8 @@ export function UnderlayPanel() {
   if (!u)
     return (
       <div className={s.refPart} data-testid="underlay-panel">
-        <div className={s.section}>
+        <div className={s.group}>
+          <h4 className={s.groupTitle}>{title}</h4>
           <p className={ui.hint} style={{ margin: 0 }}>{t("addHint")}</p>
           <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} style={{ alignSelf: "flex-start" }} onClick={() => run("underlay.pick")} data-testid="underlay-add">{t("add")}</button>
         </div>
@@ -40,6 +41,7 @@ export function UnderlayPanel() {
   return (
     <div className={s.refPart} data-testid="underlay-panel">
       <div className={s.group}>
+        <h4 className={s.groupTitle}>{title}</h4>
         <label className={s.switch}>
           <input type="checkbox" role="switch" checked={u.behind} onChange={(e) => run("underlay.update", { behind: e.target.checked, visible: true })} />
           <b>{t("behind")}</b>

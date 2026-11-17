@@ -1784,12 +1784,12 @@ Beads heading. Chosen as checkboxes (`ui/threads/MaterialsForm.tsx`) there and i
 pattern's state, to look at and tweak while working. Nothing is in two places.
 - **Pattern ▾** — the pattern as a file: New ›, Open…, Download work file, Open work file….
 - **Transform ▾** — the chart's orientation: flips, rotations, Mirror from centre.
-- **Side panel** — "Drawing with" and the key, then the **sections chosen in the bar along the bottom**
-  (`ui/side/SidePanel.tsx`; editor state + `editor/panelSections.ts`, remembered per browser): their headers in a row,
-  **one unfolded at a time**, at a height set with the **handle** above them (double-click: default 320 px); content
-  that doesn't fit scrolls inside the section; the key list takes the rest and scrolls on its own; when room runs
-  out the unfolded section gives way, so every header stays in view. An icon adds its section, unfolded — or takes
-  it away; its name shows at once on pointing (`data-tip-instant`). The bar has two groups, a thin line between:
+- **Side panel** — "Drawing with" and the key, then **one section**, chosen in the bar along the bottom
+  (`ui/side/SidePanel.tsx`; editor state + `editor/panelSections.ts`, remembered per browser) — one at a time, so
+  the key keeps plenty of room: an icon puts its section in place of the one there; the shown one's icon takes it
+  away. The section folds under its header; unfolded, its height is set with the **handle** above it (double-click:
+  default 320 px) and content that doesn't fit scrolls inside; the key list takes the rest and scrolls on its own;
+  when room runs out the section gives way first. Every section starts with the same space under its header; its name shows at once on pointing (`data-tip-instant`). The bar has two groups, a thin line between:
   used while stitching (References, Chart checks, Totals) · about the pattern (Fabric & size, Threads & beads,
   Pattern info, Versions); the panel follows the same order. Every section is laid out the same way: groups with a
   small heading, rows of label and control, switches for on / off, rarely used details folded. Sections:

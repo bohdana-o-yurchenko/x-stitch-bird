@@ -33,10 +33,10 @@ const SECTIONS: { id: string; icon: string; title: string; group: "work" | "patt
 ];
 
 /**
- * The side panel (SPEC §15.32): "Drawing with" and the key, then the sections chosen in the bar along the bottom —
- * their headers in a row, one unfolded at a time, at a height set with the handle above them (its content scrolls
- * inside). The key list takes the rest. Which ones are shown, which is unfolded and its height are remembered in
- * this browser. While a key entry is added or edited, its form takes the panel.
+ * The side panel (SPEC §15.32): "Drawing with" and the key, then one section, chosen in the bar along the bottom —
+ * the key keeps plenty of room. The section folds under its header; unfolded, its height is set with the handle
+ * above it and its content scrolls inside. The key list takes the rest. Which section, folded or not, and its height
+ * are remembered in this browser. While a key entry is added or edited, its form takes the panel.
  */
 export function SidePanel() {
   const t = useTranslations();

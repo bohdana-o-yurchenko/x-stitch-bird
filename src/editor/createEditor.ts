@@ -231,21 +231,22 @@ export class Editor {
     this.autosave.markSaved();
   }
 
-  /** Bring a side-panel section into the panel, unfolded (Pattern info, Versions, References…). */
+  /**
+   * Bring a side-panel section into the panel, unfolded (Pattern info, Versions, References…). One section at a time
+   * (SPEC §15.32): the key keeps plenty of room — it takes the place of the one there.
+   */
   showSection(id: string) {
-    const list = this.state.panelSections.includes(id) ? this.state.panelSections : [...this.state.panelSections, id];
-    saveSections(list);
+    saveSections([id]);
     this.unfoldSection(id);
-    this.store.setState({ panelSections: list, panelCollapsed: false });
+    this.store.setState({ panelSections: [id], panelCollapsed: false });
   }
 
-  /** The bar's icon: a section in, unfolded — or out. */
+  /** The bar's icon: its section in the panel (in place of the one there), or — the one shown — out. */
   toggleSection(id: string) {
     if (!this.state.panelSections.includes(id)) return this.showSection(id);
-    const list = this.state.panelSections.filter((x) => x !== id);
-    saveSections(list);
-    this.store.setState({ panelSections: list });
-    if (this.state.openSection === id) this.unfoldSection(null);
+    saveSections([]);
+    this.store.setState({ panelSections: [] });
+    this.unfoldSection(null);
   }
 
   /** One section unfolded at a time; null folds them all. */

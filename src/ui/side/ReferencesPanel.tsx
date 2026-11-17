@@ -19,9 +19,9 @@ export function ReferencesPanel() {
   const windows = useEditorState((st) => st.references);
   return (
     <Section id="references" title={t("heading")} defaultOpen testId="references-panel">
-      <h4 className={s.refTitle}>{t("windows")}</h4>
-      <div className={s.section} data-testid="ref-windows">
-        {!windows.length && <p className={ui.hint} style={{ margin: 0 }}>{t("windowsHint")}</p>}
+      <div className={s.group} data-testid="ref-windows">
+        <h4 className={s.groupTitle}>{t("windows")}</h4>
+        {!windows.length && <p className={s.prowNote} style={{ margin: 0 }}>{t("windowsHint")}</p>}
         {windows.map((w) => (
           <div key={w.id} className={s.refRow}>
             <span className={s.refName}>{w.name}</span>
@@ -31,8 +31,7 @@ export function ReferencesPanel() {
         ))}
         <button type="button" className={cx(ui.btn, ui.sm)} style={{ alignSelf: "flex-start" }} onClick={() => run("reference.pick")} data-testid="ref-window-add">{t("addWindow")}</button>
       </div>
-      <h4 className={s.refTitle}>{tu("heading")}</h4>
-      <UnderlayPanel />
+      <UnderlayPanel title={tu("heading")} />
     </Section>
   );
 }

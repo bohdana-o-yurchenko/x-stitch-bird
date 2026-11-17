@@ -178,7 +178,8 @@ describe("commands", () => {
     ed.closeDialog();
     await ed.commands.run("file.versions");
     await ed.commands.run("pattern.editInfo");
-    expect(ed.state.panelSections).toEqual(expect.arrayContaining(["versions", "info"]));
+    // one section at a time: Pattern info took Versions' place
+    expect(ed.state.panelSections).toEqual(["info"]);
     expect(ed.state.openSection).toBe("info");
     expect(ed.state.dialog).toBeNull();
     await ed.commands.run("key.requestDelete", blue);
