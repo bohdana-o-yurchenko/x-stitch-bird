@@ -67,7 +67,10 @@ function useReveal(menu: HeaderMenu) {
   return useEditorState((st) => (st.menuReveal?.menu === menu ? st.menuReveal.path : null));
 }
 
-/** Pattern ▾ — the pattern as a file: new, open, the work file. Its state lives in the side panel. */
+/**
+ * Pattern ▾ — the pattern as a file: new, open, the work file, and Export ▸ — the finished chart, to stitch from or for
+ * other apps. Its state lives in the side panel.
+ */
 function PatternMenu() {
   const t = useTranslations("fileMenu");
   const run = useCommand();
@@ -90,42 +93,31 @@ function PatternMenu() {
     ] },
     ...(canOpen ? [{ id: "open", label: t("open"), hint: t(signedIn ? "openHintAccount" : "openHint"), onClick: openPatterns }] : []),
     "-",
-    { id: "download", label: t("download"), hint: t("downloadHint"), onClick: go("file.export", "pattern") },
+    // the work file and the .oxs are easy to mix up: either asks first, saying which is which (SPEC §15.45)
+    { id: "download", label: t("download"), hint: t("downloadHint"), onClick: go("file.chooseFile", "xbird") },
     { id: "loadFile", label: t("loadFile"), hint: t("loadFileHint"), onClick: go("file.pickToLoad") },
+    "-",
+    { id: "export", label: t("export"), items: [
+      { id: "pdfChart", label: t("pdfChart"), hint: t("pdfChartHint"), onClick: go("file.exportChartPdf") },
+      { id: "pdfPk", label: t("pdfPk"), hint: t("pdfPkHint"), onClick: go("file.exportPatternKeeper") },
+      "-",
+      { id: "pngCharts", label: t("pngCharts"), items: [
+        { label: t("pngBoth"), onClick: go("file.export", "png-both") },
+        { label: t("pngSymbols"), onClick: go("file.export", "png-symbols") },
+        { label: t("pngSymbolsInk"), hint: t("pngSymbolsInkHint"), onClick: go("file.export", "png-symbols-ink") },
+      ] },
+      { id: "pngPreviews", label: t("pngPreviews"), items: [
+        { label: t("pngColor"), onClick: go("file.export", "png-color") },
+        { label: t("pngStitched"), onClick: go("file.export", "png-stitched") },
+      ] },
+      "-",
+      { id: "csv", label: t("csv"), onClick: go("file.export", "csv") },
+      { id: "oxs", label: t("oxs"), hint: t("oxsHint"), onClick: go("file.chooseFile", "oxs") },
+    ] },
   ];
   return (
     <span data-guide="menu">
       <Dropdown className={cx(ui.btn, ui.ghost)} label={t("label")} items={items} reveal={reveal} />
-    </span>
-  );
-}
-
-/** 🖨 Print & share — the finished chart, to stitch from or for other apps. */
-function PrintMenu() {
-  const t = useTranslations("fileMenu");
-  const run = useCommand();
-  const go = (command: string, args?: unknown) => () => void run(command, args);
-  const reveal = useReveal("print");
-  const items: MenuItem[] = [
-    { id: "pdfChart", label: t("pdfChart"), hint: t("pdfChartHint"), onClick: go("file.exportChartPdf") },
-    { id: "pdfPk", label: t("pdfPk"), hint: t("pdfPkHint"), onClick: go("file.exportPatternKeeper") },
-    "-",
-    { id: "pngCharts", label: t("pngCharts"), items: [
-      { label: t("pngBoth"), onClick: go("file.export", "png-both") },
-      { label: t("pngSymbols"), onClick: go("file.export", "png-symbols") },
-      { label: t("pngSymbolsInk"), hint: t("pngSymbolsInkHint"), onClick: go("file.export", "png-symbols-ink") },
-    ] },
-    { id: "pngPreviews", label: t("pngPreviews"), items: [
-      { label: t("pngColor"), onClick: go("file.export", "png-color") },
-      { label: t("pngStitched"), onClick: go("file.export", "png-stitched") },
-    ] },
-    "-",
-    { id: "csv", label: t("csv"), onClick: go("file.export", "csv") },
-    { id: "oxs", label: t("oxs"), hint: t("oxsHint"), onClick: go("file.export", "oxs") },
-  ];
-  return (
-    <span data-guide="print-menu">
-      <Dropdown className={ui.tool} title={t("print")} label={<Icon name="print" size={18} />} items={items} reveal={reveal} />
     </span>
   );
 }
@@ -225,7 +217,6 @@ export function Header() {
         </div>
       </div>
       <div className={s.spacer} data-slot="spacer" />
-      <PrintMenu />
       <AppMenu />
       <AccountButton />
       <PanelToggle />

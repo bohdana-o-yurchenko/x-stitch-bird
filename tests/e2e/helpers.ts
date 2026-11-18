@@ -39,9 +39,9 @@ export const editorState = <T>(page: Page, fn: string): Promise<T> =>
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const MENU_BUTTONS = { pattern: /^(Pattern|Схема) ▾$/, print: /^(Print & share|Друк і експорт)$/, app: /^(More|Ще)$/ };
+const MENU_BUTTONS = { pattern: /^(Pattern|Схема) ▾$/, app: /^(More|Ще)$/ };
 
-/** Click through a header menu: `menuAction(page, "print", "Preview images (PNG)", "Preview image — stitched")`. Items match by label start. */
+/** Click through a header menu: `menuAction(page, "pattern", "Export", "Preview images (PNG)", "Preview image — stitched")`. Items match by label start. */
 export async function menuAction(page: Page, menu: keyof typeof MENU_BUTTONS, ...path: string[]) {
   await page.getByRole("button", { name: MENU_BUTTONS[menu] }).click();
   for (const name of path) await page.getByRole("menuitem", { name: new RegExp(`^${escape(name)}`) }).click();
@@ -50,8 +50,15 @@ export async function menuAction(page: Page, menu: keyof typeof MENU_BUTTONS, ..
 /** Pattern ▾: `fileAction(page, "New", "Blank pattern…")`. */
 export const fileAction = (page: Page, ...path: string[]) => menuAction(page, "pattern", ...path);
 
-/** 🖨 Print & share: `printAction(page, "Shopping list (CSV)")`. */
-export const printAction = (page: Page, ...path: string[]) => menuAction(page, "print", ...path);
+/** Pattern ▾ ▸ Export: `exportAction(page, "Shopping list (CSV)")`. */
+export const exportAction = (page: Page, ...path: string[]) => menuAction(page, "pattern", "Export", ...path);
+
+/** The work file or the .oxs: the menu item, then the button in the dialog saying which is which (SPEC §15.45). */
+export async function saveFile(page: Page, kind: "xbird" | "oxs") {
+  if (kind === "xbird") await fileAction(page, "Download work file (.xbird)");
+  else await exportAction(page, "Open Cross Stitch file (.oxs)");
+  await page.getByRole("dialog").getByRole("button", { name: `Save .${kind}` }).click();
+}
 
 /** Opens ☰ (language, theme, help). */
 export const openAppMenu = (page: Page) => page.getByRole("button", { name: MENU_BUTTONS.app }).click();

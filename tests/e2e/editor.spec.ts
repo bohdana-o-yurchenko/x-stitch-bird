@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
-import { cellPoint, editorState, fileAction, fixtureDataUrl, gridPoint, loadFixture, menuAction, openAppMenu, openEditor, printAction } from "./helpers";
+import { cellPoint, editorState, fileAction, fixtureDataUrl, gridPoint, loadFixture, menuAction, openAppMenu, openEditor, exportAction, saveFile } from "./helpers";
 
 test.beforeEach(async ({ page }) => openEditor(page));
 
@@ -105,11 +105,32 @@ test("holding Alt picks an entry from the chart and returns to the previous tool
 
 test("downloads a .xbird pattern file that loads back", async ({ page }) => {
   const download = page.waitForEvent("download");
-  await fileAction(page, "Download work file (.xbird)");
+  await saveFile(page, "xbird");
   expect((await download).suggestedFilename()).toMatch(/\.xbird$/);
   const file = await (await download).path();
   const doc = JSON.parse(readFileSync(file, "utf8"));
   expect(doc).toMatchObject({ app: "stitchwork", v: 4, w: 60, h: 60 });
+});
+
+test("the work file and the .oxs ask first, saying which is which and where the PDFs are; export lives in Pattern ▾ (SPEC §15.45)", async ({ page }) => {
+  await expect(page.getByRole("button", { name: /^Print & share$/ })).toHaveCount(0);
+  let downloads = 0;
+  page.on("download", () => downloads++);
+  const dialog = page.getByRole("dialog");
+  // the item asked for is the main button; Cancel saves nothing
+  await fileAction(page, "Download work file (.xbird)");
+  await expect(dialog.getByTestId("file-choice")).toContainText("Pattern ▾ → Export");
+  await expect(dialog.getByTestId("file-choice")).toContainText("PDF for Pattern Keeper");
+  await expect(dialog.locator("button[class*=primary]")).toHaveText("Save .xbird");
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await exportAction(page, "Open Cross Stitch file (.oxs)");
+  await expect(dialog.locator("button[class*=primary]")).toHaveText("Save .oxs");
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  expect(downloads).toBe(0);
+  // the PDFs are a submenu away
+  await menuAction(page, "pattern", "Export");
+  await expect(page.getByRole("menuitem", { name: /^PDF chart to print/ })).toBeVisible();
 });
 
 test("loads a .json with a reference window that survives a reload", async ({ page }) => {
@@ -153,13 +174,13 @@ test("switches to Ukrainian", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("lang", "uk");
 });
 
-test("the print menu opens above the chart, with submenus", async ({ page }) => {
+test("Pattern ▾ › Export opens above the chart, with submenus", async ({ page }) => {
   await page.setViewportSize({ width: 1000, height: 800 });
   const chooser = page.waitForEvent("filechooser");
   await fileAction(page, "Open work file…");
   await (await chooser).setFiles("tests/fixtures/1.oxs");
   await expect(page.locator("[data-entry]")).toHaveCount(12);
-  await page.getByRole("button", { name: "Print & share" }).click();
+  await menuAction(page, "pattern", "Export");
   await page.getByRole("menuitem", { name: /^Chart images/ }).hover();
   await expect(page.getByRole("menuitem", { name: "Chart image — symbols only, for printing (PNG)" })).toBeInViewport();
   await expect(page.getByRole("menuitem", { name: "Shopping list (CSV)" })).toBeInViewport();
@@ -389,7 +410,7 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   await page.reload();
   await expect(page.getByTestId("underlay-panel").getByLabel("Behind stitches")).toBeChecked();
   const download = page.waitForEvent("download");
-  await fileAction(page, "Download work file (.xbird)");
+  await saveFile(page, "xbird");
   const doc = JSON.parse(readFileSync(await (await download).path(), "utf8"));
   expect(doc.underlay).toMatchObject({ behind: true, imageW: 40, imageH: 20 });
   // the edit toggle by the zoom; zoomed in, the edit frame stretches the photo with one side pinned
@@ -523,7 +544,7 @@ test("the key form picks a symbol from the quick row or from All…, by group", 
 });
 
 test("exports a PDF for Pattern Keeper after explaining what it can't track", async ({ page }) => {
-  await printAction(page, "PDF for Pattern Keeper");
+  await exportAction(page, "PDF for Pattern Keeper");
   // the demo has half crosses, a floss + bead entry, beads, backstitch
   await expect(page.getByTestId("pk-issues").locator("li")).toHaveText([/Half crosses: \d+/, /Floss \+ bead stitches: \d+/, /Beads: \d+/, /Backstitch lines: \d+/]);
   const download = page.waitForEvent("download");
@@ -541,7 +562,7 @@ test("exports a PDF for Pattern Keeper after explaining what it can't track", as
 
 test("exports a PDF chart to print: cover, symbols, symbols on colour, colour with backstitch, key", async ({ page }) => {
   const download = page.waitForEvent("download");
-  await printAction(page, "PDF chart to print");
+  await exportAction(page, "PDF chart to print");
   const file = await download;
   expect(file.suggestedFilename()).toBe("Untitled-pattern-chart.pdf");
   const pdf = readFileSync((await file.path())!).toString("latin1");
@@ -629,7 +650,7 @@ test("a symbol can be drawn by hand from a few shapes, is kept in the file, and 
   expect(await editorState<string>(page, "(ed) => ed.doc.key[1].sym")).toBe(sym);
   // it travels in the pattern file and comes back
   const download = page.waitForEvent("download");
-  await fileAction(page, "Download work file (.xbird)");
+  await saveFile(page, "xbird");
   const doc = JSON.parse(readFileSync((await (await download).path())!, "utf8"));
   expect(doc.pal[0].sym).toBe(sym);
   await page.reload();
@@ -1285,7 +1306,7 @@ test("a PDF behind the chart: its pages one at a time, each where it was placed;
 
   // the work file carries the PDFs, their pages and placements
   const file = page.waitForEvent("download");
-  await fileAction(page, "Download work file (.xbird)");
+  await saveFile(page, "xbird");
   const path = await (await file).path();
   const saved = JSON.parse(readFileSync(path, "utf8")) as { underlay: { pdf: { src: string; page: number; pages: number } }; refs: { pdf: { src: string; pages: number } }[] };
   expect(saved.underlay.pdf).toMatchObject({ page: 2, pages: 3 });

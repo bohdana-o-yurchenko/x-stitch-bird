@@ -1,7 +1,7 @@
 "use client";
 
 import type { PkReport } from "@/core/formats/pdf/patternKeeper";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { parseCellRef } from "@/core/grid/numbering";
 import { symbolText } from "@/core/symbols/lineStyles";
@@ -194,6 +194,33 @@ export function SamePatternDialog({ name, age, answer, onClose }: Close & { name
     <Modal title={t("samePatternTitle")} onClose={close} buttons={[{ label: t("cancel") }, { label: t("samePatternReplace"), onClick: choose({ kind: "replace" }) }, { label: t("samePatternNew"), primary: true, onClick: choose({ kind: "new", name: t("samePatternNewName", { name }) }) }]}>
       <p className={ui.hint} data-testid="same-pattern">{t(`samePattern_${age}`, { name })}</p>
       <p className={ui.hint}>{t("samePatternKept")}</p>
+    </Modal>
+  );
+}
+
+/**
+ * Before a work file or an .oxs is saved (SPEC §15.45): which is which — the two are easy to mix up — and where the
+ * files to print or stitch from are. `prefer`: the one asked for, the main button.
+ */
+export function FileChoiceDialog({ prefer, onClose }: Close & { prefer: "xbird" | "oxs" }) {
+  const t = useTranslations("dialogs");
+  const run = useCommand();
+  const b = (c: ReactNode) => <b>{c}</b>;
+  const save = (format: "pattern" | "oxs") => () => {
+    // closed first: saving may ask something of its own (copying the text where downloads are blocked)
+    onClose();
+    void run("file.export", format);
+    return false as const;
+  };
+  const xbird = { label: t("fileChoiceXbird"), primary: prefer === "xbird", onClick: save("pattern") };
+  const oxs = { label: t("fileChoiceOxs"), primary: prefer === "oxs", onClick: save("oxs") };
+  return (
+    <Modal title={t("fileChoiceTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, ...(prefer === "xbird" ? [oxs, xbird] : [xbird, oxs])]}>
+      <div data-testid="file-choice">
+        <p>{t.rich("fileChoiceXbirdText", { b })}</p>
+        <p>{t.rich("fileChoiceOxsText", { b })}</p>
+        <p className={ui.hint}>{t.rich("fileChoicePrint", { b })}</p>
+      </div>
     </Modal>
   );
 }

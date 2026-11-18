@@ -26,7 +26,7 @@ export const TOURS: Record<string, Step[]> = {
     { id: "tools", targets: ["toolbar", "override", "menu:shortcuts"], menu: "app", reveal: [], tip: true },
     { id: "save", targets: ["saved", "menu:download"], reveal: [] },
     { id: "versions", targets: ["side-versions"] },
-    { id: "finish", targets: ["side-info", "print-menu", "menu:pdfChart", "menu:oxs"], menu: "print", reveal: [] },
+    { id: "finish", targets: ["side-info", "menu", "menu:export", "menu:pdfChart", "menu:oxs"], reveal: ["export"] },
     { id: "done", targets: [] },
   ],
   underlay: [{ id: "underlayTip", targets: ["underlay-edit"] }],

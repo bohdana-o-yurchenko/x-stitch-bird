@@ -73,6 +73,8 @@ export const COMMANDS: readonly Command[] = [
   { id: "file.export", run: (ed, f) => exportAs(ed, f as ExportFormat) },
   { id: "file.exportPatternKeeper", run: (ed, confirmed) => exportPatternKeeper(ed, confirmed === true) },
   { id: "file.exportChartPdf", run: (ed) => exportChartPdf(ed) },
+  // a work file or an .oxs: which is which, said before either is saved (SPEC §15.45)
+  { id: "file.chooseFile", run: (ed, prefer) => ed.openDialog({ type: "fileChoice", prefer: prefer === "oxs" ? "oxs" : "xbird" }) },
   { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird,.oxs,.json,.xml"); if (f) await ed.commands.run("file.load", f); } },
   { id: "file.load", run: (ed, f) => loadFile(ed, f as File), destructive: "import", replacesPattern: true },
   { id: "file.drop", run: (ed, files) => handleDrop(ed, files as File[]) },

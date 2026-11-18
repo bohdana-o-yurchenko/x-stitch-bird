@@ -389,6 +389,12 @@
     "pdfPageNoPreview": "The previews can’t be shown, but any page can still be picked.",
     "pdfPageAlign": "Line up page {page}",
     "pdfPageOpen": "Show page {page}",
+    "fileChoiceTitle": "Work file or .oxs?",
+    "fileChoiceXbirdText": "<b>Work file (.xbird)</b> — for пташечка: to carry on later, on another computer, or to keep a copy. Everything is in it: the key with your own threads and beads, the chart, photos and PDFs.",
+    "fileChoiceOxsText": "<b>Open Cross Stitch (.oxs)</b> — for other cross-stitch apps: Хрестики, Ruta Stitch and others. The key and the chart only.",
+    "fileChoicePrint": "Neither is for printing. To print or stitch from: <b>PDF chart to print</b>; for the Pattern Keeper app: <b>PDF for Pattern Keeper</b>. Both, with the images and the shopping list, are in <b>Pattern ▾ → Export</b>.",
+    "fileChoiceXbird": "Save .xbird",
+    "fileChoiceOxs": "Save .oxs",
     "samePatternTitle": "You already have this pattern",
     "samePattern_older": "This file is an older version of “{name}”.",
     "samePattern_newer": "This file is a newer version of “{name}”.",
@@ -662,7 +668,7 @@
     "open": "Open…",
     "openHint": "Patterns saved in this browser before",
     "openHintAccount": "Your patterns — in your account and in this browser",
-    "download": "Download work file (.xbird)",
+    "download": "Download work file (.xbird)…",
     "downloadHint": "To carry on later or on another computer — not for printing. Key, chart, photos: everything",
     "loadFile": "Open work file…",
     "loadFileHint": "A .xbird from your computer — or an .oxs from another app",
@@ -674,7 +680,7 @@
     "refUnderlayHint": "Lies under your stitches, aligned to the grid, to trace over",
     "refWindow": "Photo in a floating window…",
     "refWindowHint": "A movable window next to the chart, with progress marks",
-    "print": "Print & share",
+    "export": "Export",
     "pdfChart": "PDF chart to print",
     "pdfChartHint": "Symbols, symbols on colour, colour with backstitch, and the key",
     "pdfPk": "PDF for Pattern Keeper",
@@ -688,7 +694,7 @@
     "pngColor": "Preview image — colour blocks (PNG)",
     "pngStitched": "Preview image — stitched (PNG)",
     "csv": "Shopping list (CSV)",
-    "oxs": "Open Cross Stitch file (.oxs)",
+    "oxs": "Open Cross Stitch file (.oxs)…",
     "oxsHint": "Opens in Хрестики and Ruta Stitch",
     "more": "More",
     "guide": "Quick start guide",
@@ -867,7 +873,7 @@
       "title": "9. Export",
       "points": {
         "1": "In <hl>Pattern info</hl> (ⓘ at the bottom of the side panel) fill in the <hl>name</hl> and <hl>author</hl> — Хрестики show them.",
-        "2": "Finished? The <hl>printer button</hl>: a <hl>PDF chart to print</hl>, Pattern Keeper, images — and an <hl>Open Cross Stitch file (.oxs)</hl> for Хрестики and Ruta Stitch."
+        "2": "Finished? <hl>Pattern ▾ → Export</hl>: a <hl>PDF chart to print</hl>, Pattern Keeper, images — and an <hl>Open Cross Stitch file (.oxs)</hl> for Хрестики and Ruta Stitch."
       }
     },
     "done": {

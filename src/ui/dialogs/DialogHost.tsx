@@ -9,7 +9,7 @@ import { LiveConflictDialog } from "./LiveConflictDialog";
 import { PdfPageDialog } from "./PdfPageDialog";
 import { NewPatternDialog } from "./NewPatternDialog";
 import {
-  DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, LargePhotoDialog, SamePatternDialog, MirrorFromCentreDialog, PhotoRoomDialog,
+  DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, LargePhotoDialog, SamePatternDialog, FileChoiceDialog, MirrorFromCentreDialog, PhotoRoomDialog,
   PatternKeeperDialog, ReplaceKeyDialog, ResizeDialog, TextFallbackDialog,
 } from "./simpleDialogs";
 
@@ -37,6 +37,7 @@ export function DialogHost() {
     case "photoRoom": return <PhotoRoomDialog used={d.used} max={d.max} size={d.size} onClose={close} />;
     case "largePhoto": return <LargePhotoDialog w={d.w} h={d.h} answer={d.answer} onClose={close} />;
     case "pdfPage": return <PdfPageDialog source={d.source} pages={d.pages} name={d.name} to={d.to} answer={d.answer} onClose={close} />;
+    case "fileChoice": return <FileChoiceDialog prefer={d.prefer} onClose={close} />;
     case "samePattern": return <SamePatternDialog name={d.name} age={d.age} answer={d.answer} onClose={close} />;
     case "liveConflict": return <LiveConflictDialog theirs={d.theirs} />;
     case "keepPattern": return <KeepPatternDialog then={d.then} onClose={close} />;

@@ -1661,7 +1661,8 @@ read-only share links.
   Download work file (.xbird), Open work file…, Versions…, Pattern info…, Image behind the chart…, Photo in a
   floating window…. No "Save": saving is automatic (Ctrl/⌘+S still saves at once).
 - **🖨 Print & share** — the finished chart: PDF chart to print, PDF for Pattern Keeper, Chart images (PNG) ›,
-  Preview images (PNG) ›, Shopping list (CSV), Open Cross Stitch file (.oxs).
+  Preview images (PNG) ›, Shopping list (CSV), Open Cross Stitch file (.oxs). *Since 2026-11-18 (§15.45) these are
+  Pattern ▾ › Export; the 🖨 button is gone.*
 - **☰** — Quick start guide, Keyboard shortcuts (the list that used to sit under the ⓘ button), What's new,
   Language (Українська · English), Theme, Privacy policy, Glory to Ukraine 🇺🇦.
   **Toolbar** (2026-11-17): *Hide line, rectangle and fill tools*, *Hide fractional stitches* — off by default, remembered
@@ -2062,6 +2063,16 @@ Adding a PDF (behind the chart or in a photo window, also by dropping it):
 3. **Line up page N** (behind the chart) → that page drawn sharp, then the straighten dialog; **Show page N** (a
    window) → the window on that page. **Cancel** (Esc, outside): nothing is added.
 Only the page picked is drawn at full size (§15.41); previews are never stored.
+
+### 15.45 Export back in Pattern ▾; the work file and the .oxs say which is which (2026-11-18)
+- **Pattern ▾**: New ›, Open…, — Download work file (.xbird)…, Open work file…, — **Export ›**: PDF chart to print,
+  PDF for Pattern Keeper, — Chart images (PNG) ›, Preview images (PNG) ›, — Shopping list (CSV), Open Cross Stitch
+  file (.oxs)…. The 🖨 button is gone; the guide's last step opens Pattern ▾ › Export.
+- **Download work file (.xbird)…** and **Open Cross Stitch file (.oxs)…** both open "Work file or .oxs?": what each
+  is for (.xbird: this app, everything in it; .oxs: other cross-stitch apps, key and chart only), that neither is
+  for printing — *PDF chart to print* and *PDF for Pattern Keeper* are in Pattern ▾ › Export. Buttons: Cancel ·
+  Save .oxs · Save .xbird, the one asked for the main one. "Keep this pattern? — Download it" saves the .xbird
+  straight away (it's already said there).
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
