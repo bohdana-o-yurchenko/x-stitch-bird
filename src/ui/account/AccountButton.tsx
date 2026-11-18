@@ -19,7 +19,6 @@ export function AccountButton() {
   const ed = useEditor();
   const { data: session, isPending } = authClient.useSession();
   const user = useEditorState((st) => st.account);
-  const router = useRouter();
   const open = useEditorState((st) => st.signInOpen);
   const setOpen = (on: boolean) => ed.store.setState({ signInOpen: on });
 
@@ -36,14 +35,7 @@ export function AccountButton() {
       signInOpen={open}
       setSignInOpen={setOpen}
       onSignedIn={(email) => ed.toast("account.signedIn", { email })}
-      onMyPatterns={() => {
-        ed.flush();
-        router.push("/patterns");
-      }}
-      onAccount={() => {
-        ed.flush();
-        router.push("/account");
-      }}
+      beforeLeave={() => ed.flush()}
       beforeSignOut={() => ed.prepareSignOut()}
       onSignedOut={() => {
         ed.setAccount(null);
@@ -53,8 +45,10 @@ export function AccountButton() {
   );
 }
 
+const PAGE_LABEL = { patterns: "myPatterns", threads: "myThreads", beads: "myBeads", account: "account" } as const;
+
 /** "Sign in", or signed in: the initial, with the email and Sign out. Shared by the editor and the patterns page. */
-export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, beforeSignOut, onSignedOut, onMyPatterns, onAccount }: {
+export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, beforeSignOut, onSignedOut, beforeLeave }: {
   user: { email: string; name?: string } | null;
   signInOpen: boolean;
   setSignInOpen: (on: boolean) => void;
@@ -62,13 +56,15 @@ export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, befor
   /** Runs first (the account's patterns leave this browser). */
   beforeSignOut?: () => Promise<unknown>;
   onSignedOut?: () => void;
-  /** Leave for the My patterns page (not given on that page itself). */
-  onMyPatterns?: () => void;
-  /** Leave for the account page (SPEC §15.38); a plain link when not given. */
-  onAccount?: () => void;
+  /** Runs before leaving for another page (the editor saves first). */
+  beforeLeave?: () => void;
 }) {
   const t = useTranslations("account");
   const router = useRouter();
+  const go = (page: string) => {
+    beforeLeave?.();
+    router.push(`/${page}`);
+  };
   const [usage, setUsage] = useState<AccountUsage | null>(null);
   // what the account holds against its limits (SPEC §15.35): read on sign-in, and again as the menu opens
   const email = user?.email;
@@ -96,8 +92,8 @@ export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, befor
           { label: user.email, hint: t("signedInHint"), onClick: () => {} },
           ...(usage ? [{ id: "usage", node: <span className={s.usage} data-testid="account-usage">{t("usage", { patterns: usage.patterns, maxPatterns: usage.maxPatterns, photos: Math.ceil(usage.photos / 1048576), maxPhotos: Math.round(usage.maxPhotos / 1048576) })}</span> }] : []),
           "-",
-          ...(onMyPatterns ? [{ label: t("myPatterns"), onClick: onMyPatterns }] : []),
-          { label: t("account"), onClick: onAccount ?? (() => router.push("/account")) },
+          // the account's pages (SPEC §15.39)
+          ...(["patterns", "threads", "beads", "account"] as const).map((page) => ({ label: t(PAGE_LABEL[page]), onClick: () => go(page) })),
           "-",
           { label: t("signOut"), onClick: async () => { await beforeSignOut?.(); await authClient.signOut(); onSignedOut?.(); } },
         ]}

@@ -10,7 +10,8 @@ import { requestStart } from "@/editor/startRequest";
 import type { PatternSummary } from "@/editor/types";
 import { Link, useRouter } from "@/i18n/navigation";
 import { pickFile } from "@/platform/files";
-import { authClient } from "../account/authClient";
+import { useSignedInOnly } from "../account/useSignedInOnly";
+import { PageLoading } from "../common/AppBrand";
 import { Dropdown, Modal, cx, ui, type MenuItem } from "../common/widgets";
 import { HomeFooter, HomeHeader } from "./HomeHeader";
 import s from "./home.module.css";
@@ -21,15 +22,14 @@ type Current = NonNullable<Awaited<ReturnType<Library["current"]>>>;
 const MANY = 8;
 
 /**
- * The main page (SPEC §15.26, §15.37): the logo leads here from the editor. At the top, the pattern last worked on —
- * Continue, with its figures and the same actions as every pattern. Signed out that's all there is (one pattern),
- * with a line inviting to sign in. Signed in, below it every pattern of the account (and of this browser) as a
- * gallery or a list, with New ▾, and search and sorting once there are many.
+ * The main page (SPEC §15.26, §15.37), signed in only (§15.39): the logo leads here from the editor. At the top, the
+ * pattern last worked on — Continue, with its figures and the same actions as every pattern; below, every pattern of
+ * the account (and of this browser) as a gallery or a list, with New ▾, and search and sorting once there are many.
  */
 export default function HomeApp() {
   const t = useTranslations("home");
   const lib = useMemo(() => createLibrary(), []);
-  const { data: session, isPending } = authClient.useSession();
+  const { session, isPending, allowed } = useSignedInOnly();
   const u = session?.user;
   const user = u ? { id: u.id, email: u.email, ...(u.name ? { name: u.name } : {}) } : null;
   const signedIn = !!user;
@@ -80,6 +80,8 @@ export default function HomeApp() {
   const nothing = !!items && !current && !others.length;
   const actions = { lib, signedIn, onChanged: refresh, onNotice: setNotice };
 
+  // signed out there is only the editor (SPEC §15.39)
+  if (!allowed) return <PageLoading />;
   return (
     <div className={s.page}>
       <HomeHeader section="patterns" user={user} pending={isPending} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
@@ -100,12 +102,6 @@ export default function HomeApp() {
                 <Link href="/" className={cx(ui.btn, ui.primary, s.go)}>{t("continueButton")}</Link>
                 <PatternMenu p={currentItem} onlyHere={signedIn && currentItem.where === "browser"} isCurrent {...actions} />
               </div>
-              {!isPending && !signedIn && (
-                <p className={s.signedOut} data-testid="home-signed-out">
-                  {t("signedOut")}{" "}
-                  <button type="button" className={s.linkBtn} onClick={() => setSignInOpen(true)}>{t("signIn")}</button>
-                </p>
-              )}
             </div>
           </section>
         )}
@@ -132,14 +128,8 @@ export default function HomeApp() {
             <h1>{t("emptyTitle")}</h1>
             <p className={ui.hint}>{t("emptyHint")}</p>
             <NewButtons />
-            {!isPending && !signedIn && (
-              <p className={s.signedOut}>
-                {t("signedOut")}{" "}
-                <button type="button" className={s.linkBtn} onClick={() => setSignInOpen(true)}>{t("signIn")}</button>
-              </p>
-            )}
           </section>
-        ) : signedIn ? (
+        ) : (
           <section>
             <div className={s.listHead}>
               <h2>
@@ -175,10 +165,6 @@ export default function HomeApp() {
               </div>
             )}
             {q && !shown.length && <p className={ui.hint}>{t("noMatch")}</p>}
-          </section>
-        ) : (
-          <section className={s.newOnly}>
-            <NewMenu />
           </section>
         )}
       </main>

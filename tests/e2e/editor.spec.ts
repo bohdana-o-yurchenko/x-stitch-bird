@@ -1072,7 +1072,8 @@ test("thread brands: chosen for a new pattern, one tab each in the picker, your 
   await dialog.getByRole("button", { name: "Create" }).click();
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   const tabs = page.getByTestId("brand-tabs");
-  await expect(tabs.getByRole("tab")).toHaveText(["DMC", "Kreinik"]);
+  // every brand the app has, as a new pattern starts (SPEC §15.39), and the one added
+  await expect(tabs.getByRole("tab")).toHaveText(["DMC", "Anchor", "Madeira", "Kreinik"]);
   await tabs.getByRole("tab", { name: "Kreinik" }).click();
   await expect(page.getByText("No Kreinik threads yet")).toBeVisible();
   // your own thread, in the brand of the tab
@@ -1095,7 +1096,7 @@ test("thread brands: chosen for a new pattern, one tab each in the picker, your 
   // Kreinik is used now: it can't be removed; DMC can
   await expect(tabs.getByRole("button", { name: /Kreinik is used by the key/ })).toBeDisabled();
   await tabs.getByRole("button", { name: "Remove DMC from this pattern" }).click();
-  await expect(tabs.getByRole("tab")).toHaveText(["Kreinik"]);
+  await expect(tabs.getByRole("tab")).toHaveText(["Anchor", "Madeira", "Kreinik"]);
   await page.getByTestId("key-form").getByRole("button", { name: "Close" }).click();
   await expect(page.locator("[data-entry]")).toContainText("Pearl gold");
 });
@@ -1126,9 +1127,12 @@ test("bead brands: Mill Hill and Preciosa as tabs, a finish filter, your own bea
 test("threads & beads of a new pattern: one brand only — no brand tabs, your own threads go into it; beads off — no bead kinds; changed later in the side panel", async ({ page }) => {
   await fileAction(page, "New", "Blank pattern…");
   const dialog = page.getByRole("dialog");
-  await expect(dialog.getByTestId("materials-summary")).toHaveText("DMC only · beads: Mill Hill");
+  // a new pattern starts with every brand there is (SPEC §15.39); this one keeps to DMC
+  await expect(dialog.getByTestId("materials-summary")).toHaveText("DMC, Anchor, Madeira · beads: Mill Hill, Preciosa");
   await dialog.getByRole("button", { name: "Change ▾" }).click();
-  await expect(dialog.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
+  await dialog.getByTestId("materials-threads").getByLabel("Anchor").uncheck();
+  await dialog.getByTestId("materials-threads").getByLabel("Madeira").uncheck();
+  await dialog.getByLabel("Only DMC — no other thread brands in this pattern").check();
   await dialog.getByLabel("This pattern has beads").uncheck();
   await expect(dialog.getByTestId("materials-summary")).toHaveText("DMC only · no beads");
   await dialog.getByRole("button", { name: "Create" }).click();
@@ -1157,15 +1161,16 @@ test("threads & beads of a new pattern: one brand only — no brand tabs, your o
 });
 
 test("New ▸ start with this pattern's key and settings: its threads & beads and fabric come along; what the key uses stays; unticking puts the rest back", async ({ page }) => {
-  // the demo uses DMC and beads; give it a second thread brand and 16 ct
+  // the demo has every brand (SPEC §15.39) and uses DMC and beads; this one leaves Madeira out
   await page.getByTestId("rail-materials").click();
-  await page.getByTestId("materials").getByTestId("materials-threads").getByLabel("Anchor").check();
+  await page.getByTestId("materials").getByTestId("materials-threads").getByLabel("Madeira").uncheck();
   await fileAction(page, "New", "Blank pattern…");
   const dialog = page.getByRole("dialog"), threads = dialog.getByTestId("materials-threads");
   await dialog.getByRole("button", { name: "Change ▾" }).click();
-  await expect(threads.getByLabel("Anchor")).not.toBeChecked();
-  await expect(threads.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
+  // a blank key: every brand, as a new pattern starts
+  await expect(threads.getByLabel("Madeira")).toBeChecked();
   await dialog.getByRole("radio", { name: "This pattern's key & settings" }).click();
+  await expect(threads.getByLabel("Madeira")).not.toBeChecked();
   await expect(threads.getByLabel("Anchor")).toBeChecked();
   await expect(threads.getByLabel("DMC")).toBeDisabled();
   await expect(dialog.getByLabel("This pattern has beads")).toBeDisabled();
@@ -1173,7 +1178,7 @@ test("New ▸ start with this pattern's key and settings: its threads & beads an
   // what the key doesn't use can still change
   await threads.getByLabel("Anchor").uncheck();
   await dialog.getByRole("radio", { name: "A blank key" }).click();
-  await expect(threads.getByLabel("Only DMC — no other thread brands in this pattern")).toBeChecked();
+  await expect(threads.getByLabel("Madeira")).toBeChecked();
   await expect(dialog.getByLabel("This pattern has beads")).toBeEnabled();
 });
 
@@ -1203,4 +1208,18 @@ test("a very large photo is kept as it is, after a word that the app may pause; 
   await add();
   await expect(page.getByTestId("straighten")).toBeVisible();
   await expect(ask).toHaveCount(0);
+});
+
+test("signed out, the first own thread: a tip on where it's kept, and what an account adds (SPEC §15.39)", async ({ page }) => {
+  await page.evaluate(() => localStorage.removeItem("stitchwork.tipSeen.ownColours"));
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  await page.getByRole("button", { name: "+ Custom thread" }).click();
+  const guide = page.getByTestId("guide");
+  await expect(guide).toContainText("Threads and beads of your own");
+  await expect(guide).toContainText("inside this pattern");
+  await guide.getByRole("button", { name: "Got it" }).click();
+  // once only
+  await page.getByRole("button", { name: "+ Custom thread" }).click();
+  await page.getByRole("button", { name: "+ Custom thread" }).click();
+  await expect(guide).toHaveCount(0);
 });

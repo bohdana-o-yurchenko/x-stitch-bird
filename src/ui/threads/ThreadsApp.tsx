@@ -7,7 +7,8 @@ import { BUILT_IN_THREAD_BRANDS } from "@/core/pattern/brands";
 import type { CustomColor } from "@/core/pattern/types";
 import { createLibrary } from "@/editor/library";
 import { useRouter } from "@/i18n/navigation";
-import { authClient } from "../account/authClient";
+import { useSignedInOnly } from "../account/useSignedInOnly";
+import { PageLoading } from "../common/AppBrand";
 import { Modal, cx, ui } from "../common/widgets";
 import { HomeFooter, HomeHeader } from "../home/HomeHeader";
 import home from "../home/home.module.css";
@@ -29,7 +30,7 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
   const t = useTranslations("threadsPage");
   const lib = useMemo(() => createLibrary(), []);
   const router = useRouter();
-  const { data: session, isPending } = authClient.useSession();
+  const { session, isPending, allowed } = useSignedInOnly();
   const u = session?.user;
   const user = u ? { email: u.email, ...(u.name ? { name: u.name } : {}) } : null;
   const [signInOpen, setSignInOpen] = useState(false);
@@ -84,19 +85,12 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
   const builtIn = kind === "thread" ? BUILT_IN_THREAD_BRANDS : Object.keys(BEAD_CATALOGUES);
   const brandChoices = (k: "thread" | "bead") => [...new Set([...(brand && k === kind ? [brand] : []), ...(k === "thread" ? BUILT_IN_THREAD_BRANDS : Object.keys(BEAD_CATALOGUES)), ...(threads ?? []).filter((c) => c.kind === k).map((c) => c.brand)])];
 
+  // signed out there is only the editor (SPEC §15.39)
+  if (!allowed) return <PageLoading />;
   return (
     <div className={home.page}>
       <HomeHeader section={kind === "thread" ? "threads" : "beads"} user={user} pending={isPending} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
       <main className={home.main}>
-        {!isPending && !user ? (
-          <section className={home.empty} data-testid="threads-signed-out">
-            <h1>{t(kind === "thread" ? "title" : "titleBeads")}</h1>
-            <p className={ui.hint} style={{ maxWidth: 520 }}>{t(kind === "thread" ? "signedOut" : "signedOutBeads")}</p>
-            <div className={home.emptyButtons}>
-              <button type="button" className={cx(ui.btn, ui.primary)} onClick={() => setSignInOpen(true)}>{t("signIn")}</button>
-            </div>
-          </section>
-        ) : (
           <div className={s.layout}>
             <nav className={s.brandList} aria-label={t("brands")} data-testid="thread-brands">
               <button type="button" className={cx(s.brandItem, !brand && s.on)} onClick={() => setBrand(null)}>
@@ -141,7 +135,6 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
               </div>
             </section>
           </div>
-        )}
       </main>
       <HomeFooter />
 

@@ -40,6 +40,11 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   const catalogue = (kind === "thread" ? THREAD_CATALOGUES : BEAD_CATALOGUES)[brand] ?? [];
   const seriesList = kind === "bead" ? [...new Set(catalogue.map((e) => e.series ?? "").filter(Boolean))] : [];
   const [form, setForm] = useState<FormState>({ mode: "closed" });
+  // signed out, the first time a thread or bead of your own is being made: where it's kept, and what an account adds
+  const signedIn = useEditorState((st) => !!st.account);
+  useEffect(() => {
+    if (form.mode === "add" && !signedIn) ed.store.setState({ pendingTip: "ownColours" });
+  }, [ed, form.mode, signedIn]);
   const [naming, setNaming] = useState(false);
   const list = useRef<HTMLDivElement>(null);
 
@@ -174,16 +179,18 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
         <button type="button" className={cx(ui.btn, ui.sm)} title={kind === "bead" ? t("customBead") : t("customThread")} aria-label={kind === "bead" ? t("customBead") : t("customThread")} aria-pressed={form.mode === "add"} onClick={() => setForm(form.mode === "add" ? { mode: "closed" } : { mode: "add" })}>+</button>
       </div>
       {form.mode !== "closed" && (
-        <ThreadForm
-          key={form.mode === "edit" ? form.id : "add"}
-          kind={kind}
-          brands={single ? [brand] : [brand, ...brands, ...otherBrands]}
-          fixedBrand={single}
-          initial={editing ? { brand: editing.brand, code: editing.code, name: editing.name, hex: editing.hex } : { brand, code: "", name: "", hex: "#7A9CC6" }}
-          saveLabel={form.mode === "edit" ? t("save") : t("add")}
-          onSave={save}
-          onCancel={() => setForm({ mode: "closed" })}
-        />
+        <div data-guide="own-colour">
+          <ThreadForm
+            key={form.mode === "edit" ? form.id : "add"}
+            kind={kind}
+            brands={single ? [brand] : [brand, ...brands, ...otherBrands]}
+            fixedBrand={single}
+            initial={editing ? { brand: editing.brand, code: editing.code, name: editing.name, hex: editing.hex } : { brand, code: "", name: "", hex: "#7A9CC6" }}
+            saveLabel={form.mode === "edit" ? t("save") : t("add")}
+            onSave={save}
+            onCancel={() => setForm({ mode: "closed" })}
+          />
+        </div>
       )}
       <div ref={list} className={s.rows} style={{ height }} role="listbox">
         {items.map((e) => (

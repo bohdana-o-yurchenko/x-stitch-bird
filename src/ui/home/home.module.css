@@ -105,21 +105,6 @@
   padding: 9px 20px;
   font-size: 15px;
 }
-.signedOut {
-  margin-top: 18px !important;
-  font-size: 13.5px;
-  color: var(--muted);
-}
-.linkBtn {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-}
 
 .banner {
   display: flex;
@@ -361,10 +346,6 @@
 }
 .continueButtons .go {
   margin-top: 0;
-}
-.newOnly {
-  display: flex;
-  justify-content: flex-end;
 }
 
 /* Photos… — each with its picture, size and Remove */

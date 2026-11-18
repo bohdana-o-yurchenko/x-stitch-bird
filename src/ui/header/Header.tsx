@@ -200,10 +200,12 @@ export function Header() {
   const btn = cx(ui.btn, ui.ghost);
   const bar = useRef<HTMLElement>(null);
   const stacked = useStacked(bar);
+  const signedIn = useEditorState((st) => !!st.account);
   return (
     <header ref={bar} className={cx(appBar.bar, s.bar, stacked && s.stacked)}>
-      {/* the logo leads to the main page, My patterns (the open pattern is saved first) */}
-      <AppBrand compact title={t("home.title")} testId="to-home" onClick={() => ed.flush()} />
+      {/* signed in, the logo leads to the main page, My patterns (the open pattern is saved first); signed out it's
+          just the logo — there is only the editor (SPEC §15.39) */}
+      <AppBrand compact link={signedIn} title={t("home.title")} testId="to-home" onClick={() => ed.flush()} />
       <PatternMenu />
       <PatternName />
       <div className={s.spacer} data-slot="spacer" />

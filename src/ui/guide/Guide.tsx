@@ -34,6 +34,8 @@ export const TOURS: Record<string, Step[]> = {
     { id: "referenceTip", targets: ["ref-window"] },
     { id: "referenceMarks", targets: ["ref-marker", "ref-done"] },
   ],
+  // signed out, the first time a thread or bead of your own is being made (SPEC §15.39)
+  ownColours: [{ id: "ownColoursTip", targets: ["own-colour"] }],
   // the first time an entry is being added to the key: symbols, and drawing your own
   keyEntry: [{ id: "keySymbolTip", targets: ["symbol-quick", "symbol-draw"] }],
   // the first time Autofill is picked: what it needs, lining up, and that it isn't perfect

@@ -6,7 +6,9 @@ import { createLibrary } from "@/editor/library";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Modal, cx, ui } from "../common/widgets";
 import { HomeFooter, HomeHeader } from "../home/HomeHeader";
+import { PageLoading } from "../common/AppBrand";
 import { authClient } from "./authClient";
+import { useSignedInOnly } from "./useSignedInOnly";
 import home from "../home/home.module.css";
 import s from "./accountPage.module.css";
 
@@ -23,16 +25,18 @@ export default function AccountApp() {
   const locale = useLocale();
   const router = useRouter();
   const lib = useMemo(() => createLibrary(), []);
-  const { data: session, isPending } = authClient.useSession();
+  const [deleted, setDeleted] = useState(false);
+  // signed out there is only the editor (SPEC §15.39) — except right after deleting the account, to say so
+  const { session, isPending, allowed } = useSignedInOnly(deleted);
   const u = session?.user;
   const user = u ? { id: u.id, email: u.email, ...(u.name ? { name: u.name } : {}) } : null;
   const [signInOpen, setSignInOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const [deleted, setDeleted] = useState(false);
   const signedIn = !!u;
   useEffect(() => lib.setSignedIn(signedIn), [lib, signedIn]);
   const since = u?.createdAt ? new Date(u.createdAt).toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" }) : null;
 
+  if (!allowed && !deleted) return <PageLoading />;
   return (
     <div className={home.page}>
       <HomeHeader section="account" user={user} pending={isPending} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
@@ -47,14 +51,9 @@ export default function AccountApp() {
           {deleted ? (
             <section className={s.card} data-testid="account-deleted">
               <p>{t("deleted")}</p>
-              <Link href="/patterns" className={cx(ui.btn, ui.primary, s.linkBtn)}>{t("toPatterns")}</Link>
+              <Link href="/" className={cx(ui.btn, ui.primary, s.linkBtn)}>{t("toEditor")}</Link>
             </section>
-          ) : isPending ? null : !user ? (
-            <section className={s.card}>
-              <p>{t("signedOut")}</p>
-              <button type="button" className={cx(ui.btn, ui.primary)} style={{ alignSelf: "flex-start" }} onClick={() => setSignInOpen(true)}>{t("signIn")}</button>
-            </section>
-          ) : (
+          ) : !user ? null : (
             <>
               <section className={s.card}>
                 <h2>{t("signedInAs")}</h2>

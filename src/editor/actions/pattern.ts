@@ -1,4 +1,4 @@
-import { applyMaterials, type Materials } from "@/core/pattern/brands";
+import { applyMaterials, NEW_MATERIALS, type Materials } from "@/core/pattern/brands";
 import { clampSize, createPattern } from "@/core/pattern/createPattern";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { cleanMeta } from "@/core/pattern/meta";
@@ -88,6 +88,8 @@ export function setPatternSettings(ed: Editor, s: Partial<Pick<Pattern, "name" |
 /** The demo heart shown on first start (SPEC §9.2). */
 export function demoPattern(symbols: readonly string[]): Pattern {
   const p = createPattern(60, 60, "Untitled pattern");
+  // every thread and bead brand, as a new pattern (SPEC §15.39)
+  applyMaterials(p, NEW_MATERIALS);
   const add = (e: Parameters<typeof addEntry>[1]) => addEntry(p, e, symbols);
   const red = add({ t: "thread", src: "dmc:321", n: 2, st: "full" });
   const dark = add({ t: "thread", src: "dmc:498", n: 3, st: "full" });

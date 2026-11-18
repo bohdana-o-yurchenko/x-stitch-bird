@@ -1931,6 +1931,20 @@ limit nothing is lost — the work stays in the browser, and the app says what t
   then the page says it's done and offers My patterns, signed out.
 - Signed out, the page invites to sign in. The privacy policy names both ways to delete (here, at once; or by email).
 
+### 15.39 Signed out: the editor only; every brand from the start (2026-11-18)
+- **Signed out there is only the editor.** My patterns, Threads, Beads and Account are for signed-in users: signed
+  out they give way to the editor (`ui/account/useSignedInOnly.ts`; nothing of them shows meanwhile), and the logo is
+  just the logo. The privacy page stays open to all. Your own threads and beads live in their pattern then; seeing
+  the pages they get once signed in is part of the reason to sign in.
+- **The account menu** (signed in): My patterns · My threads · My beads · Account, then Sign out — the same in the
+  editor (which saves first) and on the other pages.
+- **Every brand from the start**: a new pattern — and the demo — has every thread brand (DMC, Anchor, Madeira) and
+  every bead brand (Mill Hill, Preciosa), so the picker shows how much is there; fewer can be chosen in the New dialog
+  or in the side panel (Threads & beads). Patterns made before keep theirs.
+- **A tip, signed out, the first time a thread or bead of your own is being made** (`ownColours`): it's kept inside
+  this pattern — and in its .xbird file; with an account it's kept for good, in every pattern, on every device, with
+  pages of its own (My threads, My beads).
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

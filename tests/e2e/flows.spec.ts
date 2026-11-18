@@ -230,62 +230,33 @@ test("exports a stitched preview: bigger cells than the flat one, with the foote
   expect(flat.w).toBeLessThan(stitched.w);
 });
 
-test("the logo leads to My patterns: signed out, the one pattern to continue, with what it is; or start a new one", async ({ page }) => {
-  await page.getByRole("textbox", { name: "Pattern name" }).fill("Heart");
-  await page.keyboard.press("Enter");
-  await page.getByTestId("to-home").click();
-  await expect(page).toHaveURL(/\/en\/patterns$/);
-  // the open one, to continue — with what it is, and the invitation to sign in; nothing else is listed (SPEC §15.37)
-  const current = page.getByTestId("home-continue");
-  await expect(current).toContainText("Heart");
-  await expect(current).toContainText("60 × 60 stitches · 10.9 × 10.9 cm on 14 ct");
-  await expect(current.locator("img")).toHaveAttribute("src", /^data:image\/png/);
-  await expect(page.getByTestId("home-signed-out")).toBeVisible();
-  await expect(page.getByTestId("home-pattern")).toHaveCount(0);
-  await current.getByRole("link", { name: "Continue →" }).click();
-  await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Heart");
-  await page.getByTestId("to-home").click();
-  await page.getByTestId("home-new").getByRole("button").click();
-  await page.getByRole("menuitem", { name: "Blank pattern" }).click();
-  await expect(page.getByRole("dialog", { name: "New pattern" })).toBeVisible();
+test("signed out there is only the editor: the logo is just the logo; My patterns, Threads, Beads and Account lead back (SPEC §15.39)", async ({ page }) => {
+  await expect(page.getByTestId("to-home")).not.toHaveAttribute("href");
+  for (const path of ["patterns", "threads", "beads", "account"]) {
+    await page.goto(`/en/${path}`);
+    await expect(page).toHaveURL(/\/en$/);
+    await expect(page.getByTestId("chart")).toBeVisible();
+  }
 });
 
-test("signed in, the account menu leads to My patterns", async ({ page }) => {
+test("signed in, the account menu leads to My patterns, My threads, My beads and Account", async ({ page }) => {
   await pretendSignedIn(page);
   await page.getByRole("button", { name: /e2e@example\.com/ }).click();
-  await page.getByRole("menuitem", { name: "My patterns" }).click();
-  await expect(page).toHaveURL(/\/en\/patterns$/);
-  await expect(page.getByTestId("home-continue")).toBeVisible();
+  for (const name of ["My patterns", "My threads", "My beads", "Account"]) await expect(page.getByRole("menuitem", { name, exact: true })).toBeVisible();
+  await page.getByRole("menuitem", { name: "My threads", exact: true }).click();
+  // (only pretended signed in here: the page itself knows better, and gives way to the editor)
+  await page.waitForURL(/\/en\/threads$/);
 });
 
-test("Threads, next to Patterns: signed out it says what it's for and invites to sign in", async ({ page }) => {
-  await page.getByTestId("to-home").click();
-  await page.getByRole("link", { name: "Threads" }).click();
-  await expect(page).toHaveURL(/\/en\/threads$/);
-  await expect(page.getByTestId("threads-signed-out")).toContainText("lives only in its pattern");
-  await page.getByTestId("threads-signed-out").getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByTestId("sign-in-email")).toBeVisible();
-  await page.keyboard.press("Escape");
-  // beads have a page of their own
-  await page.getByRole("link", { name: "Beads" }).click();
-  await expect(page).toHaveURL(/\/en\/beads$/);
-  await expect(page.getByTestId("threads-signed-out")).toContainText("Toho for instance");
-});
-
-test("free software: ☰ ▸ Source code and the main pages' footer link to the source", async ({ page }) => {
+test("free software: ☰ ▸ Source code links to the source", async ({ page }) => {
   await openAppMenu(page);
   await expect(page.getByRole("menuitem", { name: /^Source code/ })).toContainText("AGPL-3.0");
-  await page.keyboard.press("Escape");
-  await page.getByTestId("to-home").click();
-  await expect(page.getByRole("contentinfo").getByRole("link", { name: "Source code" })).toHaveAttribute("href", "https://github.com/bohdana-o-yurchenko/x-stitch-bird");
 });
 
-test("Pattern ▸ Open… leads to the patterns page, and Continue there back to the editor (SPEC §15.36)", async ({ page }) => {
+test("Pattern ▸ Open… leads to the patterns page (SPEC §15.36)", async ({ page }) => {
   await pretendSignedIn(page);
   await page.keyboard.press("ControlOrMeta+s");
   await fileAction(page, "Open…");
-  await expect(page).toHaveURL(/\/patterns$/);
+  await page.waitForURL(/\/patterns$/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.getByTestId("home-continue").getByRole("link").first().click();
-  await expect(page.getByTestId("chart")).toBeVisible();
 });

@@ -110,8 +110,11 @@ export const materialsOf = (p: Pattern): Materials => ({
   noBeads: !!p.noBeads && !usesBeads(p),
 });
 
-/** A new pattern's: DMC only; beads on, Mill Hill (more brands can be ticked). */
-export const NEW_MATERIALS: Materials = { brands: ["DMC"], onlyBrand: true, beadBrands: ["Mill Hill"], onlyBeadBrand: false, noBeads: false };
+/**
+ * A new pattern's (and the demo's): every brand the app knows, threads and beads (SPEC §15.39) — so the picker shows
+ * how much is there; fewer can be chosen in the New dialog or the side panel.
+ */
+export const NEW_MATERIALS: Materials = { brands: [...BUILT_IN_THREAD_BRANDS], onlyBrand: false, beadBrands: Object.keys(BEAD_CATALOGUES), onlyBeadBrand: false, noBeads: false };
 
 /** Sets them on a pattern (only what differs from a pattern that never chose is written). */
 export function applyMaterials(p: Pattern, m: Materials) {
