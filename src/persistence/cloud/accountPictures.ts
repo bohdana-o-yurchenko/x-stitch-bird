@@ -123,15 +123,24 @@ export const accountPictureApi = {
   },
 };
 
-/** Every picture the records use. */
+/**
+ * Every picture the records use — that the account keeps. A PDF's pages are drawn from the PDF wherever they're
+ * shown, so for a PDF it's the PDF (and the marks of its pages), not the drawn page (SPEC §15.41).
+ */
 export function pictureIdsOf(refs: RefWindowData[], underlay: UnderlayData | null): string[] {
   const ids = new Set<string>();
   for (const r of refs) {
-    if (r.image) ids.add(r.image);
+    if (r.pdf) {
+      ids.add(r.pdf.source);
+      Object.values(r.pdf.marks ?? {}).forEach((m) => ids.add(m));
+    } else if (r.image) ids.add(r.image);
     if (r.marks) ids.add(r.marks);
   }
-  if (underlay?.image) ids.add(underlay.image);
-  if (underlay?.straighten?.source) ids.add(underlay.straighten.source);
+  if (underlay?.pdf) ids.add(underlay.pdf.source);
+  else {
+    if (underlay?.image) ids.add(underlay.image);
+    if (underlay?.straighten?.source) ids.add(underlay.straighten.source);
+  }
   return [...ids].filter((id) => id.startsWith("img:"));
 }
 

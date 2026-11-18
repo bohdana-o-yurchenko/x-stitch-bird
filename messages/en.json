@@ -490,7 +490,11 @@
     "addWindow": "Add a photo window…",
     "show": "Show",
     "hide": "Hide",
-    "removeWindow": "Remove “{name}”"
+    "removeWindow": "Remove “{name}”",
+    "page": "Page",
+    "pageOf": "Page {page} of {pages}",
+    "prevPage": "Previous page",
+    "nextPage": "Next page"
   },
   "selection": {
     "flipH": "Flip horizontal",
@@ -589,7 +593,8 @@
     "matchNothingEmpty": "No empty cells in this block",
     "savedAccount": "Saved “{name}” in this browser and your account",
     "patternLimit": "Your account holds {max} patterns — this one is saved in this browser. Delete a pattern to keep it in your account too.",
-    "photosFull": "Photos stay in this browser: your account has {used} of {max} MB. Remove a photo or delete a pattern to make room."
+    "photosFull": "Photos stay in this browser: your account has {used} of {max} MB. Remove a photo or delete a pattern to make room.",
+    "badPdf": "This PDF couldn’t be read."
   },
   "underlay": {
     "heading": "Image behind the chart",
@@ -622,9 +627,14 @@
     "match": "Autofill",
     "matchHint": "Fill one 10 × 10 block at a time from the image (Shift+F)",
     "add": "Add an image…",
-    "addHint": "A photo or scan of the paper chart, lying under your stitches to trace over — and for Autofill to read.",
+    "addHint": "A photo, scan or PDF of the paper chart, lying under your stitches to trace over — and for Autofill to read. A PDF’s pages are shown one at a time.",
     "adjust": "Adjust",
-    "exactPosition": "Exact position and size"
+    "exactPosition": "Exact position and size",
+    "page": "Page",
+    "pageOf": "Page {page} of {pages}",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "drawingPage": "Drawing the page…"
   },
   "fileMenu": {
     "label": "Pattern ▾",

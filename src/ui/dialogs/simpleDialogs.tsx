@@ -7,7 +7,7 @@ import { parseCellRef } from "@/core/grid/numbering";
 import { symbolText } from "@/core/symbols/lineStyles";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { stopAskingLargePhoto } from "@/editor/images/largePhoto";
-import { copyText } from "@/platform/files";
+import { copyText, isPdfFile } from "@/platform/files";
 import { ConfirmDelete, KeyIcon, Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
@@ -132,8 +132,10 @@ export function ReplaceKeyDialog({ onClose }: Close) {
 export function DropChoiceDialog({ file, onClose }: Close & { file: File }) {
   const t = useTranslations("dialogs");
   const run = useCommand();
+  // a PDF is a reference only (SPEC §15.41): there's no picture to turn into a pattern
+  const pdf = isPdfFile(file);
   return (
-    <Modal title={t("dropChoiceTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("openAsReference"), onClick: () => run("reference.open", file) }, { label: t("putBehind"), onClick: () => run("underlay.open", file) }, { label: t("turnIntoPattern"), primary: true, onClick: () => run("image.open", file) }]}>
+    <Modal title={t("dropChoiceTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("openAsReference"), onClick: () => run("reference.open", file) }, { label: t("putBehind"), primary: pdf, onClick: () => run("underlay.open", file) }, ...(pdf ? [] : [{ label: t("turnIntoPattern"), primary: true, onClick: () => run("image.open", file) }])]}>
       <p className={ui.hint}>“{file.name}”</p>
     </Modal>
   );

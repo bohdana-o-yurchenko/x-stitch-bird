@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, frameHandleAt, frameNeeded, gridToImage, imageToGrid, pinImagePoint, resetCrop, resizeRect, rotateUnderlay, ROTATION_STEP, straightenedSize, turnedBounds } from "./underlay";
+import { cleanPdfPages, placeOf, cleanUnderlay, dragUnderlay, fitToChart, handleAt, newUnderlay, frameHandleAt, frameNeeded, gridToImage, imageToGrid, pinImagePoint, resetCrop, resizeRect, rotateUnderlay, ROTATION_STEP, straightenedSize, turnedBounds } from "./underlay";
 
 // image 200×100 px placed over a 40×40 chart
 const base = () => ({ ...newUnderlay("data:image/jpeg;base64,x", 200, 100, { w: 40, h: 40 }) });
@@ -107,5 +107,30 @@ describe("chart underlay geometry (SPEC §15.15)", () => {
     expect(legacy!.straighten).toBeUndefined();
     expect(cleanUnderlay({ ...base(), rotation: 80 })!.rotation).toBe(45);
     expect(cleanUnderlay(base())).toMatchObject({ opacity: 0.5, behind: false, tool: "move" });
+  });
+});
+
+describe("a PDF behind the chart (SPEC §15.41)", () => {
+  const corners = [{ x: 0, y: 0 }, { x: 9, y: 0 }, { x: 9, y: 9 }, { x: 0, y: 9 }];
+  const place = { imageW: 10, imageH: 20, crop: { x: 0, y: 0, w: 10, h: 20 }, rect: { x: 1, y: 2, w: 3, h: 6 } };
+
+  it("keeps the PDF, its page (within its pages) and the places of pages placed before", () => {
+    expect(cleanPdfPages({ source: "img:p", page: 2, pages: 5, places: { "3": place } })).toEqual({ source: "img:p", page: 2, pages: 5, places: { "3": place } });
+    // files name the PDF src; a page out of range is brought in; places outside the pages, or broken, are dropped
+    expect(cleanPdfPages({ src: "data:application/pdf;base64,x", page: 9, pages: 3, places: { "7": place, "2": { rect: 1 } } })).toEqual({ source: "data:application/pdf;base64,x", page: 3, pages: 3 });
+    for (const bad of [null, {}, { source: "img:p" }, { source: "", pages: 2 }, { source: "img:p", pages: 0 }]) expect(cleanPdfPages(bad)).toBeUndefined();
+  });
+
+  it("a page's place leaves out the drawn picture (it's drawn again), not how it was straightened", () => {
+    const u = { ...newUnderlay("img:drawn", 10, 20, { w: 30, h: 30 }), rotation: 1.2, straighten: { source: "img:page", sourceW: 10, sourceH: 20, corners: corners as never, cols: 5, rows: 5, at: { x: 0, y: 0 } } };
+    const p = placeOf(u);
+    expect(p).toMatchObject({ imageW: 10, imageH: 20, rotation: 1.2, straighten: { cols: 5, rows: 5 } });
+    expect(JSON.stringify(p)).not.toContain("img:");
+  });
+
+  it("an underlay that's a page of a PDF may come without its picture (drawn when shown); a photo may not", () => {
+    const base = { imageW: 10, imageH: 20, crop: place.crop, rect: place.rect };
+    expect(cleanUnderlay({ ...base, image: "", pdf: { source: "img:p", page: 1, pages: 2 } })).toMatchObject({ image: "", pdf: { source: "img:p", page: 1, pages: 2 } });
+    expect(cleanUnderlay({ ...base, image: "" })).toBeNull();
   });
 });

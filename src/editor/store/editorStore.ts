@@ -146,6 +146,8 @@ export interface EditorState {
   account: { id: string; email: string; name?: string } | null;
   /** The open pattern in other windows or devices (SPEC §15.34): this window's part, how many others; `nudge` counts tries to edit while following. */
   live: { role: LiveRole; others: number; nudge?: number };
+  /** A PDF page behind the chart is being drawn (SPEC §15.41). */
+  underlayPageBusy?: boolean;
   /** Bumped when versions arrive from elsewhere (the Versions list reads again). */
   versionsRevision: number;
 }

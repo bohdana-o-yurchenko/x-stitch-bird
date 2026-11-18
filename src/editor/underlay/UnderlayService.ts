@@ -1,12 +1,14 @@
 import type { Point, Rect } from "@/core/pattern/types";
-import { defaultCorners, dragUnderlay, fitToChart, frameHandleAt, frameNeeded, handleAt, imageToGrid, newUnderlay, resetCrop, resizeRect, rotateUnderlay, ROTATION_STEP, straightenedSize, toLocal, turnedBounds, type Handle, type Straighten, type UnderlayData } from "@/core/underlay/underlay";
+import { defaultCorners, dragUnderlay, fitToChart, frameHandleAt, frameNeeded, handleAt, imageToGrid, newUnderlay, placeOf, resetCrop, resizeRect, rotateUnderlay, ROTATION_STEP, straightenedSize, toLocal, turnedBounds, type Handle, type PagePlace, type Straighten, type UnderlayData } from "@/core/underlay/underlay";
 import { loadImage } from "@/platform/images";
+import { isPdf } from "@/platform/pdf";
 import { RULER_SIZE } from "@/render/ChartRenderer";
 import { runStraighten } from "../heavy";
 import type { Editor } from "../createEditor";
 import { PICKING } from "../matching/matching";
 
 import { confirmLargePhoto } from "../images/largePhoto";
+import { addPdf, drawPdfPage, type DrawnPage } from "../images/pdfPages";
 import { photoFits } from "../images/photoRoom";
 
 const SAVE_DELAY = 700;
@@ -63,11 +65,63 @@ export class UnderlayService {
     if (save) this.save();
   }
 
-  private async show(u: UnderlayData | null) {
+  private async show(u: UnderlayData | null): Promise<void> {
     this.ed.store.setState({ underlay: u, underlayImage: null });
     if (!u) return;
     const img = await this.ed.images.load(u.image).catch(() => null);
+    // a page of a PDF this browser hasn't drawn (opened on another device, or from a file): drawn now
+    if (!img && u.pdf && this.data === u) {
+      const drawn = await drawPdfPage(this.ed, u.pdf.source, u.pdf.page);
+      const again = drawn && this.data === u ? await this.asPlaced(u, drawn) : null;
+      if (!again || this.data !== u) return;
+      this.ed.store.setState({ underlay: again });
+      this.save();
+      return this.show(again);
+    }
     if (this.data?.image === u.image) this.ed.store.setState({ underlayImage: img });
+  }
+
+  /** A drawn page as `u` places it — straightened again the same way when it was (SPEC §15.41). */
+  private async asPlaced(u: UnderlayData, page: DrawnPage): Promise<UnderlayData | null> {
+    if (!u.straighten) return { ...u, image: page.image, imageW: page.w, imageH: page.h };
+    const blob = await this.ed.images.blob(page.image);
+    if (!blob) return null;
+    const size = straightenedSize(u.straighten);
+    const out = await runStraighten({ blob, corners: u.straighten.corners, w: size.w, h: size.h });
+    return { ...u, image: await this.ed.images.put(out), imageW: size.w, imageH: size.h, straighten: { ...u.straighten, source: page.image, sourceW: page.w, sourceH: page.h } };
+  }
+
+  /**
+   * Shows page `n` of the PDF (SPEC §15.41): the page shown keeps its placement for when it's back; a page placed
+   * before comes back where it was (straightened again), a new one fits the chart.
+   */
+  async showPage(n: number) {
+    const u = this.data;
+    if (!u?.pdf) return;
+    const page = Math.min(u.pdf.pages, Math.max(1, Math.round(n)));
+    if (page === u.pdf.page) return;
+    this.ed.store.setState({ underlayPageBusy: true });
+    try {
+      const drawn = await drawPdfPage(this.ed, u.pdf.source, page);
+      if (!drawn || this.data !== u) return void (drawn || this.ed.toast("toasts.badPdf"));
+      const places: Record<string, PagePlace> = { ...u.pdf.places, [u.pdf.page]: placeOf(u) };
+      const kept = places[page];
+      delete places[page];
+      const pdf = { ...u.pdf, page, ...(Object.keys(places).length ? { places } : {}) };
+      if (!Object.keys(places).length) delete pdf.places;
+      const base: UnderlayData = { ...u, pdf, straighten: undefined, rotation: undefined };
+      delete base.straighten;
+      delete base.rotation;
+      const next = kept
+        ? await this.asPlaced({ ...base, ...kept, straighten: kept.straighten && { ...kept.straighten, source: drawn.image } } as UnderlayData, drawn)
+        : { ...newUnderlay(drawn.image, drawn.w, drawn.h, this.ed.doc), opacity: u.opacity, behind: u.behind, visible: true, tool: u.tool, pdf };
+      if (!next || this.data !== u) return;
+      this.undoStack = [];
+      await this.show(next);
+      this.save();
+    } finally {
+      this.ed.store.setState({ underlayPageBusy: false });
+    }
   }
 
   /** `incoming`: the underlay from a loaded .json file (pictures as data URLs). */
@@ -88,6 +142,7 @@ export class UnderlayService {
    * the straighten dialog. `keepPlacement`: replacing keeps where the old one was.
    */
   async addFromFile(f: File, keepPlacement = false) {
+    if (isPdf(f)) return this.addPdfFile(f);
     const img = await loadImage(f).catch(() => null);
     if (!img) return this.ed.toast("toasts.badImage");
     if (!(await photoFits(this.ed, f)) || !(await confirmLargePhoto(this.ed, img))) return;
@@ -101,6 +156,18 @@ export class UnderlayService {
     // the first time: once the straighten dialog is closed, point at the quick edit toggle
     this.ed.store.setState({ pendingTip: "underlay" });
     // its controls come into the side panel
+    this.ed.showSection("references");
+  }
+
+  /** A PDF behind the chart (SPEC §15.41): its first page, fitted to the chart, then straightened like a photo. */
+  private async addPdfFile(f: File) {
+    const added = await addPdf(this.ed, f);
+    if (!added) return;
+    const u: UnderlayData = { ...newUnderlay(added.first.image, added.first.w, added.first.h, this.ed.doc), pdf: { source: added.source, page: 1, pages: added.pages } };
+    await this.show(u);
+    this.save();
+    this.ed.openDialog({ type: "straighten" });
+    this.ed.store.setState({ pendingTip: "underlay" });
     this.ed.showSection("references");
   }
 

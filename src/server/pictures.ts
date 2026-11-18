@@ -17,7 +17,7 @@ const MAX_WINDOWS = 100;
 
 const ID = /^img:[0-9a-f]{32}$/;
 export const isPictureId = (v: unknown): v is string => typeof v === "string" && ID.test(v);
-export const isPictureType = (v: unknown): v is string => typeof v === "string" && /^(image\/[a-z0-9.+-]+|application\/octet-stream)$/.test(v);
+export const isPictureType = (v: unknown): v is string => typeof v === "string" && /^(image\/[a-z0-9.+-]+|application\/pdf|application\/octet-stream)$/.test(v);
 
 const pictureKey = (userId: string, id: string) => `users/${userId}/pictures/${id.slice(4)}`;
 
@@ -27,25 +27,38 @@ export interface PatternPictures {
   rev: number;
 }
 
-/** Every picture id the records use: window photos and marks, the underlay and its straighten source. */
+/**
+ * Every picture id the records use that the account must have: window photos and marks, the underlay and its
+ * straighten source — for a PDF, the PDF and its pages' marks (the page shown is drawn from it, SPEC §15.41).
+ */
 export function pictureIds(refs: unknown[], underlay: unknown): string[] {
   const ids = new Set<string>();
-  for (const r of refs as { image?: unknown; marks?: unknown }[]) {
-    if (isPictureId(r?.image)) ids.add(r.image);
+  type Pdf = { source?: unknown; marks?: Record<string, unknown> };
+  for (const r of refs as { image?: unknown; marks?: unknown; pdf?: Pdf }[]) {
+    if (r?.pdf) {
+      if (isPictureId(r.pdf.source)) ids.add(r.pdf.source);
+      Object.values(r.pdf.marks ?? {}).forEach((m) => isPictureId(m) && ids.add(m));
+    } else if (isPictureId(r?.image)) ids.add(r.image);
     if (isPictureId(r?.marks)) ids.add(r.marks);
   }
-  const u = underlay as { image?: unknown; straighten?: { source?: unknown } } | null;
-  if (isPictureId(u?.image)) ids.add(u.image);
-  if (isPictureId(u?.straighten?.source)) ids.add(u.straighten.source);
+  const u = underlay as { image?: unknown; straighten?: { source?: unknown }; pdf?: Pdf } | null;
+  if (u?.pdf) {
+    if (isPictureId(u.pdf.source)) ids.add(u.pdf.source);
+  } else {
+    if (isPictureId(u?.image)) ids.add(u.image);
+    if (isPictureId(u?.straighten?.source)) ids.add(u.straighten.source);
+  }
   return [...ids];
 }
 
 /** Records as the app writes them: windows each with a stored photo, an underlay with its picture, or none. */
 export function validPictures(refs: unknown, underlay: unknown): refs is unknown[] {
   if (!Array.isArray(refs) || refs.length > MAX_WINDOWS) return false;
-  const ok = refs.every((r) => r && typeof r === "object" && isPictureId((r as { image?: unknown }).image) && ((r as { marks?: unknown }).marks == null || isPictureId((r as { marks?: unknown }).marks)));
-  const u = underlay as { image?: unknown; straighten?: { source?: unknown } } | null;
-  const okUnderlay = u === null || (typeof u === "object" && isPictureId(u.image) && (u.straighten == null || isPictureId(u.straighten.source)));
+  // a PDF's page shown is drawn from the PDF (SPEC §15.41): the PDF is what must be a stored picture
+  type Rec = { image?: unknown; marks?: unknown; pdf?: { source?: unknown } };
+  const ok = refs.every((r) => r && typeof r === "object" && (isPictureId((r as Rec).image) || isPictureId((r as Rec).pdf?.source)) && ((r as Rec).marks == null || isPictureId((r as Rec).marks)));
+  const u = underlay as { image?: unknown; straighten?: { source?: unknown }; pdf?: { source?: unknown } } | null;
+  const okUnderlay = u === null || (typeof u === "object" && (u.pdf ? isPictureId(u.pdf.source) : isPictureId(u.image) && (u.straighten == null || isPictureId(u.straighten.source))));
   return ok && okUnderlay && JSON.stringify([refs, underlay]).length < MAX_RECORDS;
 }
 

@@ -77,8 +77,8 @@ describe("picture ids and types", () => {
       expect(isPictureId(bad)).toBe(false);
   });
 
-  it("a type is an image or plain bytes", () => {
-    for (const t of ["image/png", "image/jpeg", "image/svg+xml", "application/octet-stream"]) expect(isPictureType(t)).toBe(true);
+  it("a type is an image, a PDF (SPEC §15.41) or plain bytes", () => {
+    for (const t of ["image/png", "image/jpeg", "image/svg+xml", "application/pdf", "application/octet-stream"]) expect(isPictureType(t)).toBe(true);
     for (const t of ["text/html", "application/json", "image/", "IMAGE/PNG", "", 1, undefined]) expect(isPictureType(t)).toBe(false);
   });
 });
@@ -92,6 +92,12 @@ describe("pictureIds: every picture the records use", () => {
 
   it("ignores things that aren't picture ids, and no underlay", () => {
     expect(pictureIds([{ image: "data:image/png;base64,xx", marks: null }, null as never], null)).toEqual([]);
+  });
+
+  it("a PDF: the PDF and its pages' marks — not the page drawn from it (SPEC §15.41)", () => {
+    const refs = [{ image: ID3, marks: ID2, pdf: { source: ID, marks: { "2": `img:${"d".repeat(32)}` } } }];
+    expect(pictureIds(refs, null).sort()).toEqual([ID, ID2, `img:${"d".repeat(32)}`].sort());
+    expect(pictureIds([], { image: ID3, straighten: { source: ID2 }, pdf: { source: ID } })).toEqual([ID]);
   });
 });
 
@@ -113,6 +119,13 @@ describe("validPictures: windows and underlay as the app writes them", () => {
     ["an underlay that isn't an object", [], "x"],
   ])("refuses %s", (_what, refs, underlay) => {
     expect(validPictures(refs, underlay)).toBe(false);
+  });
+
+  it("a PDF window or underlay may wait for its page to be drawn: the PDF is what must be stored (SPEC §15.41)", () => {
+    expect(validPictures([{ image: "", pdf: { source: ID } }], null)).toBe(true);
+    expect(validPictures([], { image: "", pdf: { source: ID } })).toBe(true);
+    expect(validPictures([{ image: "", pdf: { source: "x" } }], null)).toBe(false);
+    expect(validPictures([], { image: ID, pdf: { source: "x" } })).toBe(false);
   });
 
   it("refuses more than 100 windows, and records that are far too big", () => {

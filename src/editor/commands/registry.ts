@@ -79,7 +79,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "image.pick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await openImageDialog(ed, f); } },
   { id: "image.open", run: (ed, f) => openImageDialog(ed, f as File) },
   { id: "image.create", run: (ed, a) => { const { result, image, keepReference } = a as never; ed.createFromImage(result, image, keepReference); }, destructive: "image", replacesPattern: true },
-  { id: "reference.pick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await ed.addReferenceFromFile(f); } },
+  { id: "reference.pick", run: async (ed) => { const f = await pickFile(PICTURES); if (f) await ed.addReferenceFromFile(f); } },
   { id: "reference.open", run: (ed, f) => ed.addReferenceFromFile(f as File) },
   { id: "pattern.editInfo", run: (ed) => ed.showSection("info") },
   { id: "pattern.setInfo", run: (ed, meta) => setPatternSettings(ed, { meta: meta as PatternMeta }) },
@@ -118,8 +118,9 @@ export const COMMANDS: readonly Command[] = [
   { id: "floating.commit", run: (ed) => ed.selection.commitFloating() },
   { id: "floating.cancel", run: (ed) => ed.selection.cancelFloating() },
   // chart underlay (SPEC §15.15)
-  { id: "underlay.pick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await ed.underlay.addFromFile(f); } },
-  { id: "underlay.replacePick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await ed.underlay.addFromFile(f, true); } },
+  { id: "underlay.pick", run: async (ed) => { const f = await pickFile(PICTURES); if (f) await ed.underlay.addFromFile(f); } },
+  { id: "underlay.replacePick", run: async (ed) => { const f = await pickFile(PICTURES); if (f) await ed.underlay.addFromFile(f, true); } },
+  { id: "underlay.page", run: (ed, n) => ed.underlay.showPage(Number(n)) },
   { id: "underlay.open", run: (ed, f) => ed.underlay.addFromFile(f as File) },
   { id: "underlay.toggleBehind", run: (ed) => ed.underlay.data && ed.underlay.setBehind(!ed.underlay.data.behind) },
   { id: "underlay.update", run: (ed, patch) => ed.underlay.update(patch as never) },
@@ -150,6 +151,9 @@ export const COMMANDS: readonly Command[] = [
  * Commands that change the open pattern: not while another window edits it (SPEC §15.34). Opening or making another
  * pattern, the view, the photos and exports stay free.
  */
+/** What a reference can be: a photo, or a PDF (SPEC §15.41). */
+const PICTURES = "image/*,application/pdf,.pdf";
+
 const EDITS = new Set([
   "history.undo", "history.redo", "key.add", "key.edit", "key.requestDelete", "key.delete",
   "pattern.setInfo", "pattern.setGrid", "pattern.rename", "pattern.setBrands", "pattern.setMaterials", "pattern.setFabric", "pattern.requestResize", "pattern.resize",

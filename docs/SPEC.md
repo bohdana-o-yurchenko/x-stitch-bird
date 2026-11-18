@@ -1711,6 +1711,11 @@ Idea: open other apps' files so пташечка also works as a converter — *
   real sample files for tests. Written from the format, not copied code (KXStitch is GPL).
 - Same rule as OXS import: what we can't represent is simplified and reported (`toasts.loadedReport`).
 
+**Assessed again 2026-11-18 (backlog, ranked):** Pattern Maker `.xsd` import first — the most used commercial format,
+with an open reader to learn from (KXStitch, GPL-2.0-or-later, compatible); then an SVG chart export (vector, sharp
+at any size); then PCStitch `.pat` import (older, more reverse engineering). JPEG export and copying the key as text
+are trivial but of little use. First comes a proper `.oxs` round trip (brands kept, see the open design).
+
 ### 15.28 Thread brands per pattern; your own threads (decided 2026-11-17)
 **Brands** (built): a pattern has thread brands, by name (`Pattern.brands`, optional in the file — absent means DMC;
 `core/pattern/brands.ts`). Usually one; some charts mix (Mirabilia: DMC + Kreinik). Chosen in the New dialog (chips;
@@ -1963,6 +1968,24 @@ limit nothing is lost — the work stays in the browser, and the app says what t
 - **"Being edited in another window"** (§15.34) is a banner across the top of the chart, hard to miss: an amber card,
   an icon, a bold title, the line under it and **Edit here**. Taking over shows a spinning wheel: "Taking over… The
   other window is saving its last changes."
+
+### 15.41 PDFs as references, page by page (2026-11-18)
+A chart often comes as a PDF of several pages. A PDF can be added wherever a photo can — behind the chart
+(References ▸ Add, or dropped on the editor ▸ Put behind) or as a photo window — and its pages are gone through one
+at a time.
+- **Pages**: "‹ Page 3 of 12 ›" — in References for the image behind the chart, in the window's own bar for a photo
+  window. Drawn in the browser by PDF.js (Apache-2.0, NOTICE.md; loaded only when a PDF is opened) at 4600 px on the
+  page's long side (about 400 dpi on A4), "Drawing the page…" meanwhile.
+- **Each page where it was**: behind the chart, every page keeps its own placement — position, crop, turn and
+  straightening; going back to a page puts it exactly where it was left (straightened again the same way). A new page
+  starts fitted to the chart. In a window, every page keeps its own marks.
+- **Stored**: the PDF itself — as it came, counted toward the photos' 100 MB, synced to the account (its pages'
+  marks too). The page shown is drawn from it: kept in this browser only, drawn again wherever it's missing (another
+  device, a work file).
+- **Work files (.xbird)**: a PDF travels inside (`pdf.src`), with its pages' places and marks; the page shown goes
+  along as an ordinary picture, so older versions still show that page.
+- Straightening, Autofill and the rest work on the page shown. A PDF can't be turned into a pattern (drop ▸ no such
+  choice).
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

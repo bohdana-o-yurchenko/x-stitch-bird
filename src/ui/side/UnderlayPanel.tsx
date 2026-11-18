@@ -16,6 +16,7 @@ export function UnderlayPanel({ title }: { title: string }) {
   const t = useTranslations("underlay");
   const run = useCommand();
   const u = useEditorState((st) => st.underlay);
+  const pageBusy = useEditorState((st) => !!st.underlayPageBusy);
   const [confirm, setConfirm] = useState(false);
   // none yet: the section is where one is added (SPEC §15.32)
   if (!u)
@@ -42,6 +43,17 @@ export function UnderlayPanel({ title }: { title: string }) {
     <div className={s.refPart} data-testid="underlay-panel">
       <div className={s.group}>
         <h4 className={s.groupTitle}>{title}</h4>
+        {/* a PDF: its pages, one at a time behind the chart, each where it was placed (SPEC §15.41) */}
+        {u.pdf && u.pdf.pages > 1 && (
+          <div className={s.prow} data-testid="underlay-pages">
+            <button type="button" className={cx(ui.btn, ui.sm)} disabled={pageBusy || u.pdf.page <= 1} title={t("prevPage")} aria-label={t("prevPage")} onClick={() => run("underlay.page", u.pdf!.page - 1)}>‹</button>
+            <select className={cx(ui.input, s.prowGrow)} aria-label={t("page")} value={u.pdf.page} disabled={pageBusy} onChange={(e) => run("underlay.page", Number(e.target.value))} data-testid="underlay-page">
+              {Array.from({ length: u.pdf.pages }, (_, i) => <option key={i} value={i + 1}>{t("pageOf", { page: i + 1, pages: u.pdf!.pages })}</option>)}
+            </select>
+            <button type="button" className={cx(ui.btn, ui.sm)} disabled={pageBusy || u.pdf.page >= u.pdf.pages} title={t("nextPage")} aria-label={t("nextPage")} onClick={() => run("underlay.page", u.pdf!.page + 1)}>›</button>
+          </div>
+        )}
+        {pageBusy && <p className={s.prowNote} style={{ margin: 0 }} role="status">{t("drawingPage")}</p>}
         <label className={s.switch}>
           <input type="checkbox" role="switch" checked={u.behind} onChange={(e) => run("underlay.update", { behind: e.target.checked, visible: true })} />
           <b>{t("behind")}</b>

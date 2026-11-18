@@ -21,7 +21,7 @@ import { renderChartImage, type ImageView, type KeyLine } from "@/render/exportC
 import { defaultCanvasTheme } from "@/render/theme";
 import type { Ctx } from "@/render/primitives/cells";
 import { strokeLineStyle } from "@/render/primitives/lineStyles";
-import { downloadFile, isImageFile, isPatternFile, readText } from "@/platform/files";
+import { downloadFile, isImageFile, isPatternFile, isPdfFile, readText } from "@/platform/files";
 import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import { photoFits } from "../images/photoRoom";
 import { accountPatternApi } from "@/persistence";
@@ -162,7 +162,7 @@ export async function openImageDialog(ed: Editor, file: File) {
 }
 
 export function handleDrop(ed: Editor, files: File[]) {
-  const pattern = files.find(isPatternFile), image = files.find(isImageFile);
+  const pattern = files.find(isPatternFile), image = files.find((f) => isImageFile(f) || isPdfFile(f));
   if (pattern) return void ed.commands.run("file.load", pattern);
   if (image) return ed.openDialog({ type: "dropChoice", file: image });
   ed.toast("toasts.dropHint");

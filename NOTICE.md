@@ -57,7 +57,9 @@ Source code: <https://github.com/bohdana-o-yurchenko/x-stitch-bird> — linked f
 
 ### Libraries
 Installed from npm under their own licences (MIT, Apache-2.0, BSD, ISC, and LGPL-3.0 for the image library used by
-the build) — `pnpm licenses list` shows each.
+the build) — `pnpm licenses list` shows each. Among them:
+- **PDF.js** (`pdfjs-dist`) — Copyright Mozilla Foundation and contributors (https://github.com/mozilla/pdf.js),
+  Apache License 2.0. Draws the pages of PDFs added as references; its worker is served with the app.
 
 ## Trademarks
 DMC, Anchor, Madeira, Mill Hill, Kreinik, Pattern Keeper and the other brand and product names are trademarks of

@@ -114,3 +114,36 @@ describe("pictures travelling in a .xbird as data URLs", () => {
     expect(await svc.underlayFromFile({ image: 5 } as never)).toBeNull();
   });
 });
+
+describe("a PDF in a .xbird (SPEC §15.41)", () => {
+  it("a PDF window carries the PDF and its pages' marks, and the page shown for older versions — and comes back", async () => {
+    blobs.set("img:pdf", new Blob(["%PDF"], { type: "application/pdf" }));
+    blobs.set("img:page", new Blob(["p"], { type: "image/png" }));
+    blobs.set("img:m1", new Blob(["m"], { type: "image/png" }));
+    const [file] = await svc.refsToFile([{ ...win("img:page"), pdf: { source: "img:pdf", page: 2, pages: 3, marks: { "1": "img:m1" } } }]);
+    expect(file!.src).toMatch(/^data:image\/png/);
+    expect(file!.pdf).toMatchObject({ page: 2, pages: 3 });
+    expect(file!.pdf!.src).toMatch(/^data:application\/pdf/);
+    expect(file!.pdf!.marks!["1"]).toMatch(/^data:image\/png/);
+    const [back] = await svc.refsFromFile([file]);
+    expect(back!.pdf).toEqual({ source: expect.stringMatching(/^img:/), page: 2, pages: 3, marks: { "1": expect.stringMatching(/^img:/) } });
+  });
+
+  it("a PDF window without its page drawn still travels, and comes back to be drawn", async () => {
+    blobs.set("img:pdf", new Blob(["%PDF"], { type: "application/pdf" }));
+    const [file] = await svc.refsToFile([{ ...win("img:not-here"), pdf: { source: "img:pdf", page: 1, pages: 2 } }]);
+    expect(file!.src).toBe("");
+    const [back] = await svc.refsFromFile([file]);
+    expect(back).toMatchObject({ image: "", pdf: { page: 1, pages: 2 } });
+  });
+
+  it("an underlay that's a page of a PDF carries the PDF as pdf.src, and back", async () => {
+    blobs.set("img:pdf", new Blob(["%PDF"], { type: "application/pdf" }));
+    blobs.set("img:a", new Blob(["a"], { type: "image/png" }));
+    const file = (await svc.underlayToFile({ ...under("img:a"), pdf: { source: "img:pdf", page: 3, pages: 4 } })) as { pdf: { src: string; page: number } };
+    expect(file.pdf.src).toMatch(/^data:application\/pdf/);
+    expect(file.pdf).not.toHaveProperty("source");
+    const back = await svc.underlayFromFile(file as never);
+    expect(back!.pdf).toEqual({ source: expect.stringMatching(/^img:/), page: 3, pages: 4 });
+  });
+});

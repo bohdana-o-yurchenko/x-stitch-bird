@@ -3,7 +3,7 @@ import type { UnderlayData } from "@/core/underlay/underlay";
 import { imageId } from "../blobs";
 import type { ImageRepository, RefWindowData } from "../ports";
 import { account } from "./accountPatterns";
-import { accountPictures, mergePictures } from "./accountPictures";
+import { accountPictures, mergePictures, pictureIdsOf } from "./accountPictures";
 
 const win = (id: string, image: string, marks: string | null = null) => ({ id, name: id, image, marks }) as RefWindowData;
 
@@ -185,5 +185,14 @@ describe("merging", () => {
     const m = mergePictures({ refs: [win("a", "img:1", "img:m2")], underlay: null }, { refs: [win("a", "img:1", "img:m1"), win("b", "img:2")], underlay: { image: "img:u" } as UnderlayData, rev: 2 });
     expect(m.refs.map((w) => [w.id, w.marks])).toEqual([["a", "img:m2"], ["b", null]]);
     expect(m.underlay?.image).toBe("img:u");
+  });
+});
+
+describe("what the account keeps of a PDF (SPEC §15.41)", () => {
+  it("the PDF and its pages' marks; the page drawn from it stays in this browser", () => {
+    const pdfWin = { ...win("w", "img:page2", "img:m2"), pdf: { source: "img:pdf", page: 2, pages: 3, marks: { "1": "img:m1" } } };
+    expect(pictureIdsOf([pdfWin], null).sort()).toEqual(["img:m1", "img:m2", "img:pdf"]);
+    const u = { image: "img:drawn", straighten: { source: "img:page" }, pdf: { source: "img:pdf2", page: 1, pages: 2 } } as unknown as UnderlayData;
+    expect(pictureIdsOf([], u)).toEqual(["img:pdf2"]);
   });
 });

@@ -1,6 +1,7 @@
 import type { RefWindowData, RefWindowFile } from "@/persistence/ports";
 import { canvasToBlob } from "@/platform/images";
 import type { Editor } from "../createEditor";
+import { drawPdfPage } from "../images/pdfPages";
 
 const SAVE_DELAY = 700;
 
@@ -38,7 +39,8 @@ export class ReferenceService {
     const data = incoming ? (incoming.length ? await this.ed.images.refsFromFile(incoming) : []) : await this.ed.persistence.references.load(patternId);
     if (this.patternId !== patternId) return;
     this.ready = true;
-    this.setList((data ?? []).filter((d) => d && d.image));
+    // a PDF window may wait for its page to be drawn (SPEC §15.41)
+    this.setList((data ?? []).filter((d) => d && (d.image || d.pdf)));
     // windows that came inside a loaded file are stored right away
     if (incoming) this.save();
   }
@@ -66,6 +68,36 @@ export class ReferenceService {
     this.marksVersion.delete(id);
     this.setList(this.list.filter((r) => r.id !== id));
     this.save();
+  }
+
+  /**
+   * Shows page `n` of a PDF window (SPEC §15.41): the page shown keeps its marks for when it's back; the new page
+   * comes with its own (or none).
+   */
+  async showPage(id: string, n: number) {
+    const r = this.list.find((x) => x.id === id);
+    if (!r?.pdf) return;
+    const page = Math.min(r.pdf.pages, Math.max(1, Math.round(n)));
+    if (page === r.pdf.page) return;
+    const drawn = await drawPdfPage(this.ed, r.pdf.source, page);
+    if (!drawn) return this.ed.toast("toasts.badPdf");
+    const now = this.list.find((x) => x.id === id);
+    if (!now?.pdf || now.pdf.page !== r.pdf.page) return;
+    const marks: Record<string, string> = { ...now.pdf.marks };
+    if (now.marks) marks[now.pdf.page] = now.marks;
+    else delete marks[now.pdf.page];
+    const next = marks[page] ?? null;
+    delete marks[page];
+    this.marksVersion.delete(id);
+    this.update(id, { image: drawn.image, marks: next, view: null, pdf: { ...now.pdf, page, ...(Object.keys(marks).length ? { marks } : { marks: undefined }) } });
+  }
+
+  /** A PDF window whose page this browser hasn't drawn (opened on another device, or from a file): drawn now. */
+  async redrawPage(id: string) {
+    const r = this.list.find((x) => x.id === id);
+    if (!r?.pdf) return;
+    const drawn = await drawPdfPage(this.ed, r.pdf.source, r.pdf.page);
+    if (drawn && this.list.some((x) => x.id === id && x.image === r.image)) this.update(id, { image: drawn.image });
   }
 
   /** Stores the window's marks after a stroke, undo or clear; `null` = no marks. */

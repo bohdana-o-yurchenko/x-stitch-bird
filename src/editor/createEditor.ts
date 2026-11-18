@@ -10,6 +10,8 @@ import { account, createPersistence, type Persistence } from "@/persistence";
 import { loadImage } from "@/platform/images";
 import { confirmLargePhoto } from "./images/largePhoto";
 import { photoFits } from "./images/photoRoom";
+import { addPdf } from "./images/pdfPages";
+import { isPdf } from "@/platform/pdf";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { chromeColours } from "@/platform/themeColours";
 import { createFromImage, loadFile, saveToLibrary } from "./actions/importExport";
@@ -397,6 +399,12 @@ export class Editor {
   }
 
   async addReferenceFromFile(f: File) {
+    // a PDF: its first page, its pages a click away in the window (SPEC §15.41)
+    if (isPdf(f)) {
+      const added = await addPdf(this, f);
+      if (added) this.references.add({ image: added.first.image, name: f.name.replace(/\.[^.]+$/, ""), pdf: { source: added.source, page: 1, pages: added.pages } });
+      return;
+    }
     try {
       // kept as it came, never scaled down (SPEC §15.33); a very large one after a word about freezes
       const img = await loadImage(f);

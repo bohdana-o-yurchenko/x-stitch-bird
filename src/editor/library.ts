@@ -5,6 +5,7 @@ import { patternStats, type PatternDetails } from "@/core/pattern/stats";
 import { buildPalette } from "@/core/pattern/palette";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import type { CustomColor } from "@/core/pattern/types";
+import { pictureIdsOf } from "@/persistence";
 import { account, accountApi, accountPatternApi, accountThreadApi, accountUsageApi, createPersistence, versionApi, type AccountUsage, type Persistence, type PatternSummary } from "@/persistence";
 import { downloadFile } from "@/platform/files";
 import { PATTERN_EXT, safeName } from "./actions/importExport";
@@ -182,8 +183,9 @@ export function createLibrary(persistence: Persistence = createPersistence()) {
         return b ? URL.createObjectURL(b) : null;
       };
       const list: AttachedPhoto[] = [];
-      for (const r of refs) list.push({ key: r.id, kind: "window", name: r.name, bytes: await bytesOf([r.image, r.marks]), url: await url(r.image) });
-      if (underlay) list.push({ key: "underlay", kind: "underlay", name: "", bytes: await bytesOf([underlay.image, underlay.straighten?.source]), url: await url(underlay.image) });
+      // a PDF counts as the PDF (and its pages' marks), shown by its page drawn here (SPEC §15.41)
+      for (const r of refs) list.push({ key: r.id, kind: "window", name: r.name, bytes: await bytesOf(pictureIdsOf([r], null)), url: await url(r.image) });
+      if (underlay) list.push({ key: "underlay", kind: "underlay", name: "", bytes: await bytesOf(pictureIdsOf([], underlay)), url: await url(underlay.image) });
       return list;
     },
 
@@ -223,11 +225,8 @@ export function createLibrary(persistence: Persistence = createPersistence()) {
       try {
         const stats = patternStats(parsePattern(doc, ALL_SYMBOLS).pattern);
         const records = (await persistence.pictures?.localRecords(p.id).catch(() => null)) ?? { refs: [], underlay: null };
-        const ids = new Set<string>();
-        for (const r of records.refs) [r.image, r.marks].forEach((id) => id && ids.add(id));
-        [records.underlay?.image, records.underlay?.straighten?.source].forEach((id) => id && ids.add(id));
-        let photoBytes = 0;
-        for (const id of ids) photoBytes += (await persistence.images.get(id).catch(() => null))?.size ?? 0;
+        // what the account keeps (a PDF, not its drawn pages, SPEC §15.41)
+        const photoBytes = await bytesOf(pictureIdsOf(records.refs, records.underlay));
         const versions = (await persistence.snapshots.list(p.id).catch(() => [])).length;
         return {
           ...stats,

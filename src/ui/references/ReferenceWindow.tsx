@@ -76,7 +76,15 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
   // load the photo and the saved marks (marks are stored again only when they change)
   useEffect(() => {
     let alive = true;
-    void ed.images.load(data.image).then(async (img) => {
+    // another page (or another photo): its own marks, its own undo
+    undo.current = [];
+    hasMarks.current = !!data.marks;
+    view.current = data.view;
+    void ed.images.load(data.image).catch(() => {
+      // a PDF page this browser hasn't drawn yet (SPEC §15.41): drawn, and this runs again with it
+      if (alive && data.pdf) void ed.references.redrawPage(data.id);
+      return Promise.reject(new Error("not here"));
+    }).then(async (img) => {
       if (!alive) return;
       image.current = img;
       const m = document.createElement("canvas");
@@ -89,7 +97,7 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
       }
       marks.current = m;
       setLoaded((n) => n + 1);
-    });
+    }).catch(() => {});
     return () => void (alive = false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.image]);
@@ -266,6 +274,15 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
       </div>
       {!data.min && (
         <>
+          {data.pdf && data.pdf.pages > 1 && (
+            <div className={s.pages} data-testid="ref-pages">
+              <button type="button" className={s.hbtn} disabled={data.pdf.page <= 1} title={t("references.prevPage")} aria-label={t("references.prevPage")} onClick={() => void ed.references.showPage(data.id, data.pdf!.page - 1)}>‹</button>
+              <select className={s.pageSelect} aria-label={t("references.page")} value={data.pdf.page} onChange={(e) => void ed.references.showPage(data.id, Number(e.target.value))}>
+                {Array.from({ length: data.pdf.pages }, (_, i) => <option key={i} value={i + 1}>{t("references.pageOf", { page: i + 1, pages: data.pdf!.pages })}</option>)}
+              </select>
+              <button type="button" className={s.hbtn} disabled={data.pdf.page >= data.pdf.pages} title={t("references.nextPage")} aria-label={t("references.nextPage")} onClick={() => void ed.references.showPage(data.id, data.pdf!.page + 1)}>›</button>
+            </div>
+          )}
           <div className={s.bar}>
             <Tb name="pan" title={t("references.pan")} on={data.tool === "pan"} onClick={() => update({ tool: "pan" })} />
             <Tb name="marker" guide="ref-marker" title={t("references.marker")} on={data.tool === "marker"} onClick={() => update({ tool: "marker" })} />

@@ -31,6 +31,8 @@ export const readText = async (f: File) => (await f.text()).replace(/^﻿/, "").
 
 export const isPatternFile = (f: File) => /\.(xbird|json|oxs|xml)$/i.test(f.name) || /json|xml/.test(f.type);
 export const isImageFile = (f: File) => f.type.startsWith("image/");
+/** A PDF — a reference too (SPEC §15.41), but never a picture to turn into a pattern. */
+export const isPdfFile = (f: File) => f.type === "application/pdf" || /\.pdf$/i.test(f.name);
 
 export async function copyText(text: string): Promise<boolean> {
   try {

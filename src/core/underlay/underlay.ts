@@ -17,6 +17,30 @@ export interface Straighten {
   at: Point;
 }
 
+/** A page's own placement, kept while another page of the PDF is shown (SPEC §15.41). */
+export interface PagePlace {
+  imageW: number;
+  imageH: number;
+  crop: Rect;
+  rect: Rect;
+  rotation?: number;
+  /** Straightened: how (the page is drawn again, then straightened the same way). */
+  straighten?: Omit<Straighten, "source">;
+}
+
+/**
+ * The underlay is a page of a PDF (SPEC §15.41). The PDF (`source`) is the stored picture; the page shown (`image`,
+ * and `straighten.source`) is drawn from it — kept in this browser only, drawn again wherever it's missing.
+ * Pages count from 1.
+ */
+export interface PdfPages {
+  source: string;
+  page: number;
+  pages: number;
+  /** Pages placed before, by page number (the page shown is in the underlay itself). */
+  places?: Record<string, PagePlace>;
+}
+
 /**
  * A reference image placed on the chart (SPEC §15.15). `crop` is in image pixels, `rect` in grid units.
  * `image` (and `straighten.source`) refer to stored pictures — ids in the browser, data URLs inside a .json file.
@@ -35,6 +59,15 @@ export interface UnderlayData {
   straighten?: Straighten;
   /** Small clockwise turn in degrees around the middle of `rect`, for slightly tilted scans (±ROTATION_MAX). */
   rotation?: number;
+  /** A page of a PDF (SPEC §15.41). */
+  pdf?: PdfPages;
+}
+
+/** The placement of the page shown, to keep while another page is (SPEC §15.41). */
+export function placeOf(u: UnderlayData): PagePlace {
+  const { imageW, imageH, crop, rect, rotation, straighten } = u;
+  const s = straighten && { sourceW: straighten.sourceW, sourceH: straighten.sourceH, corners: straighten.corners, cols: straighten.cols, rows: straighten.rows, at: straighten.at };
+  return { imageW, imageH, crop, rect, ...(rotation ? { rotation } : {}), ...(s ? { straighten: s } : {}) };
 }
 
 /** One click of a rotate button, in degrees; and the most an underlay may be turned. */
@@ -235,16 +268,44 @@ function cleanStraighten(raw: unknown): Straighten | undefined {
   return { source, sourceW: Number(s.sourceW), sourceH: Number(s.sourceH), corners: s.corners as Quad, cols: Math.round(Number(s.cols)), rows: Math.round(Number(s.rows)), at: s.at };
 }
 
+function cleanPlace(raw: unknown): PagePlace | null {
+  const p = raw as Partial<PagePlace> | null;
+  if (!p || !isRect(p.rect) || !isRect(p.crop) || !(Number(p.imageW) > 0) || !(Number(p.imageH) > 0)) return null;
+  const s = p.straighten && cleanStraighten({ ...p.straighten, source: "-" });
+  return {
+    imageW: Number(p.imageW), imageH: Number(p.imageH), crop: p.crop, rect: p.rect,
+    ...(Number.isFinite(p.rotation) && p.rotation ? { rotation: clamp(Number(p.rotation), -ROTATION_MAX, ROTATION_MAX) } : {}),
+    ...(s ? { straighten: { sourceW: s.sourceW, sourceH: s.sourceH, corners: s.corners, cols: s.cols, rows: s.rows, at: s.at } } : {}),
+  };
+}
+
+/** A PDF's pages as stored, or undefined. Files name the PDF `src` (a data URL). */
+export function cleanPdfPages(raw: unknown): PdfPages | undefined {
+  const d = raw as (Partial<PdfPages> & { src?: string }) | null;
+  const source = d?.source ?? d?.src;
+  const pages = Math.round(Number(d?.pages));
+  if (!d || typeof source !== "string" || !source || !(pages >= 1)) return undefined;
+  const places: Record<string, PagePlace> = {};
+  for (const [k, v] of Object.entries(d.places ?? {})) {
+    const p = cleanPlace(v);
+    if (p && Number(k) >= 1 && Number(k) <= pages) places[k] = p;
+  }
+  return { source, page: Math.min(pages, Math.max(1, Math.round(Number(d.page)) || 1)), pages, ...(Object.keys(places).length ? { places } : {}) };
+}
+
 /** Validates an underlay read from a file or storage. Files (and older storage) name the picture `src`. */
 export function cleanUnderlay(raw: unknown): UnderlayData | null {
   const u = raw as (Partial<UnderlayData> & { src?: string }) | null;
   const image = u?.image ?? u?.src;
-  if (!u || typeof image !== "string" || !image || !isRect(u.rect) || !isRect(u.crop) || !(Number(u.imageW) > 0) || !(Number(u.imageH) > 0)) return null;
+  const pdf = cleanPdfPages(u?.pdf);
+  // a page of a PDF may come without its picture: it's drawn when shown (SPEC §15.41)
+  if (!u || typeof image !== "string" || (!image && !pdf) || !isRect(u.rect) || !isRect(u.crop) || !(Number(u.imageW) > 0) || !(Number(u.imageH) > 0)) return null;
   const straighten = cleanStraighten(u.straighten);
   return {
     image, imageW: Number(u.imageW), imageH: Number(u.imageH), crop: u.crop, rect: u.rect,
     opacity: clamp(Number(u.opacity) || 0.5, 0.1, 1), behind: !!u.behind, visible: u.visible !== false, tool: u.tool === "crop" ? "crop" : "move",
     ...(straighten && { straighten }),
     ...(Number.isFinite(u.rotation) && u.rotation && { rotation: clamp(Number(u.rotation), -ROTATION_MAX, ROTATION_MAX) }),
+    ...(pdf ? { pdf } : {}),
   };
 }

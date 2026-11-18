@@ -75,10 +75,23 @@ export interface RefWindowData {
   grid: boolean;
   showSt: boolean;
   marks: string | null;
+  /**
+   * A page of a PDF (SPEC §15.41): the PDF (`source`) is the stored picture; `image` is the page shown, drawn from
+   * it (this browser only, drawn again where missing). `marks` are the page shown's; the other pages' are kept here.
+   */
+  pdf?: { source: string; page: number; pages: number; marks?: Record<string, string> };
 }
 
 /** A reference window inside a .json file: the pictures travel along as data URLs. */
-export type RefWindowFile = Omit<RefWindowData, "image" | "marks"> & { src: string; marks: string | null };
+export type RefWindowFile = Omit<RefWindowData, "image" | "marks" | "pdf"> & { src: string; marks: string | null; pdf?: PdfFile };
+
+/** A PDF inside a .xbird file (SPEC §15.41): the PDF and its pages' marks as data URLs. */
+export interface PdfFile {
+  src: string;
+  page: number;
+  pages: number;
+  marks?: Record<string, string>;
+}
 
 /**
  * Pictures (photos, marks, chart underlays), stored once as binary and referred to by id from the small records
