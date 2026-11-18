@@ -1,0 +1,168 @@
+/* the three views of your threads / beads: .gallery, .compact, .large */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.item {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.item:hover {
+  border-color: var(--ink);
+}
+.item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.swatch {
+  flex: none;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+}
+.swatch.round {
+  border-radius: 50%;
+}
+.text {
+  display: flex;
+  min-width: 0;
+  font-size: 13.5px;
+}
+.text > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.name {
+  color: var(--ink);
+}
+.brand,
+.hex {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.hex {
+  margin-left: auto;
+  align-self: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* gallery: big swatches in a grid, the text under each */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+.gallery .item {
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+.gallery .swatch {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+.gallery .swatch.round {
+  width: 72%;
+  align-self: center;
+  aspect-ratio: 1;
+}
+.gallery .text {
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* compact list: a thin row — swatch, code, name, brand */
+.compact {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.compact li + li {
+  border-top: 1px solid var(--line2);
+}
+.compact .item {
+  align-items: center;
+  gap: 12px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.compact .item:hover {
+  background: var(--sel);
+}
+.compact .swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+.compact .swatch.round {
+  border-radius: 50%;
+}
+.compact .text {
+  flex: 1;
+  align-items: baseline;
+  gap: 14px;
+}
+.compact .text b {
+  flex: none;
+  min-width: 84px;
+}
+.compact .name {
+  flex: 1;
+}
+.compact .brand {
+  flex: none;
+  margin-left: auto;
+}
+
+/* large list: a big swatch, code and name over the brand, the colour at the end */
+.large {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.large .item {
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px 10px 10px;
+}
+.large .swatch {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+}
+.large .swatch.round {
+  border-radius: 50%;
+}
+.large .text {
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 15px;
+}
+
+@media (max-width: 560px) {
+  .gallery {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+  }
+  .compact .brand {
+    display: none;
+  }
+  .large .hex {
+    display: none;
+  }
+}
