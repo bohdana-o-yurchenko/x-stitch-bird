@@ -310,6 +310,28 @@ describe("autosave", () => {
     vi.useRealTimers();
   });
 
+  it("the demo (or an empty start) isn't kept — no draft, no saved pattern — however long it's looked at; once edited, it is (SPEC §15.37)", async () => {
+    vi.useFakeTimers();
+    const saved: string[] = [], drafts: string[] = [];
+    ed.persistence.patterns.save = async (d) => (saved.push(d.id), { ok: true });
+    ed.persistence.draft.save = (d) => void drafts.push(d.id);
+    ed.store.setState({ ready: true });
+    ed.autosave.untouched();
+    ed.timer.activity();
+    vi.advanceTimersByTime(60_000);
+    ed.timer.activity();
+    await vi.advanceTimersByTimeAsync(LIBRARY_EVERY);
+    ed.flush();
+    expect([drafts, saved, ed.autosave.pending]).toEqual([[], [], false]);
+    // a stitch: from now on it's a pattern of its own
+    ed.tools.down(at(1, 1));
+    ed.tools.up(at(1, 1));
+    await vi.advanceTimersByTimeAsync(LIBRARY_QUIET);
+    expect(drafts.at(-1)).toBe(ed.doc.id);
+    expect(saved).toEqual([ed.doc.id]);
+    vi.useRealTimers();
+  });
+
   it("doesn't save the blank placeholder over the draft when the page closes before start-up finished", () => {
     const drafts: string[] = [];
     const early = new Editor({ ...memoryPersistence([]), draft: { load: async () => null, save: (d) => void drafts.push(d.name) } }, false);

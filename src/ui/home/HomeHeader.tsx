@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AccountMenu } from "../account/AccountButton";
-import { LanguageSwitch } from "../header/LanguageSwitch";
+import { PagesMenu } from "../header/PagesMenu";
 import { SOURCE_URL } from "../common/source";
 import { AppBrand } from "../common/AppBrand";
 import appBar from "../common/appBar.module.css";
@@ -12,7 +12,7 @@ import s from "./home.module.css";
 
 type User = { email: string; name?: string } | null;
 
-/** The main pages' bar (SPEC §15.26): logo, the sections as tabs, languages, account — like the editor's. */
+/** The main pages' bar (SPEC §15.26): logo, the sections as tabs, ☰ (language, theme, help — SPEC §15.49), account — like the editor's. */
 export function HomeHeader({ section, user, pending, signInOpen, setSignInOpen, beforeSignOut, onSignedOut }: {
   /** The tab shown as current; the account page has none. */
   section: "patterns" | "threads" | "beads" | "account";
@@ -33,7 +33,7 @@ export function HomeHeader({ section, user, pending, signInOpen, setSignInOpen, 
         <Link href="/beads" aria-current={section === "beads" ? "page" : undefined}>{t("beads")}</Link>
       </nav>
       <span className={s.spacer} />
-      <LanguageSwitch compact />
+      <PagesMenu />
       {!pending && <AccountMenu user={user} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={beforeSignOut} onSignedOut={onSignedOut} />}
     </header>
   );

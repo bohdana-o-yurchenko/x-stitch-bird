@@ -2171,7 +2171,18 @@ chart whose picture can't be loaded is drawn again once, not over and over.
   several pages: pick one, switch later) and say a scan beats a photo — it lines up exactly and Autofill reads it far
   better; Autofill's tip and its "before you start" ask for a scan or PDF; the photo-window tip is "A photo, scan or
   PDF in its own window", with its pages turned by ‹ › in the window's bar.
-- **Release 2.0.0**: notes in `src/core/release/changelog.ts`, `package.json` 2.0.0.
+- **Release 2.0.0**: notes in `src/core/release/changelog.ts` (grouped, short: big features in a line each, the small
+  ones as "many smaller improvements and bug fixes"), `package.json` 2.0.0.
+- **☰ on the other pages** (My patterns, threads, beads, account): the editor's ☰ without what is the editor's only
+  (guide, What's new, toolbar) — language, theme, Something went wrong?, privacy, source code, Glory to Ukraine; the
+  language picker is no longer in their bar. My patterns' empty state offers *From a PDF chart…* too.
+- **Placeholders aren't kept** (fixes "a default heart pattern gets created"): the demo, and the empty pattern a new
+  one starts from, are placeholders — nothing of them is kept, no draft and no saved pattern, however long they're
+  looked at (time spent on them isn't counted), until they're edited — a stitch, or a picture added behind the chart
+  or in a photo window. Before, looking around the demo for a few
+  seconds drafted it (My patterns then offered it as *Continue stitching*) and saved it to the account. Starting
+  something new (`?new=…`, a picture or file handed over) with nothing worked on here starts from an empty pattern —
+  no key, no stitches — not the demo.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

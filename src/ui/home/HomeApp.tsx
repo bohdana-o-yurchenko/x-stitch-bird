@@ -270,6 +270,7 @@ function NewButtons() {
     <div className={s.emptyButtons}>
       <button type="button" className={cx(ui.btn, ui.primary)} onClick={go.blank}>{t("newBlank")}</button>
       <button type="button" className={ui.btn} onClick={() => void go.picture()}>{t("newPicture")}</button>
+      <button type="button" className={ui.btn} onClick={go.pdf}>{t("newPdf")}</button>
       <button type="button" className={cx(ui.btn, ui.ghost)} onClick={() => void go.file()}>{t("openFile")}</button>
     </div>
   );

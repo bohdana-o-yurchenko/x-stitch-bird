@@ -16,7 +16,7 @@ import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { chromeColours } from "@/platform/themeColours";
 import { alreadyHere, createFromImage, loadFile, saveToLibrary } from "./actions/importExport";
 import type { StartIntent } from "./startRequest";
-import { demoPattern, loadPattern, replaceDoc } from "./actions/pattern";
+import { demoPattern, emptyPattern, loadPattern, replaceDoc } from "./actions/pattern";
 import { Autosave } from "./autosave";
 import { CommandRegistry } from "./commands/registry";
 import { KeepPattern } from "./keepPattern";
@@ -153,9 +153,13 @@ export class Editor {
     // the pattern asked for, straight away: the one worked on last isn't shown first (SPEC §15.37)
     const first = await this.openFirst(intent, pattern);
     if (!first) {
-      loadPattern(this, pattern ?? demoPattern(symbols));
-      // a restored draft is saved to the library once it's edited; the demo only then too
-      this.autosave.markSaved();
+      // nothing worked on here yet: the demo — unless something new is being started (from a PDF, a picture, a file,
+      // blank), which starts from nothing, not from the demo's heart
+      const starting = intent.kind === "new" || intent.kind === "image" || intent.kind === "file";
+      loadPattern(this, pattern ?? (starting ? emptyPattern() : demoPattern(symbols)));
+      // a restored draft is saved to the library once it's edited; the demo (or the empty start) not even drafted till then
+      if (pattern) this.autosave.markSaved();
+      else this.autosave.untouched();
       // the draft may hold changes its saved copies don't
       if (pattern) this.live.opened(pattern.id, { unsure: true });
     }
@@ -325,7 +329,7 @@ export class Editor {
     const gone = await forgetAccountHere(this.persistence);
     if (!gone.includes(this.doc.id)) return;
     loadPattern(this, demoPattern(this.state.symbols));
-    this.autosave.markSaved();
+    this.autosave.untouched();
   }
 
   /**

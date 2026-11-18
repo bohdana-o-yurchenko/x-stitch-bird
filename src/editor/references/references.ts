@@ -115,6 +115,8 @@ export class ReferenceService {
 
   save() {
     this.dirty = true;
+    // a picture added to the demo (or an empty start) makes it a pattern worth keeping
+    this.ed.autosave.adopt();
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => this.saveNow(), SAVE_DELAY);
   }

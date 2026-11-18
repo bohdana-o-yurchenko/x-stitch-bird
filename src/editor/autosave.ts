@@ -25,10 +25,16 @@ export class Autosave {
   private since = 0;
   /** A save to the saved patterns is under way. */
   private saving: Promise<unknown> | null = null;
+  /**
+   * The open pattern is a placeholder — the demo, or the empty pattern a new one starts from: nothing of it is kept
+   * (no draft, no saved pattern, however long it's looked at) until it's edited (SPEC §15.37).
+   */
+  private placeholder = false;
 
   constructor(private draft: DraftStore, private doc: () => Pattern, private saveToLibrary: () => Promise<unknown>, private quick: () => boolean = () => false) {}
 
   schedule() {
+    this.placeholder = false;
     if (!this.unsaved && !this.timeUnsaved) this.since = Date.now();
     this.unsaved = true;
     this.later();
@@ -39,6 +45,7 @@ export class Autosave {
    * the next save, but on its own it never makes the page ask before leaving, nor is it rushed up as the page closes.
    */
   scheduleTime() {
+    if (this.placeholder) return;
     if (!this.unsaved && !this.timeUnsaved) this.since = Date.now();
     this.timeUnsaved = true;
     this.later();
@@ -58,6 +65,17 @@ export class Autosave {
     return this.unsaved || !!this.saving;
   }
 
+  /** The pattern just opened is a placeholder (the demo, an empty start): kept only once it's edited. */
+  untouched() {
+    this.markSaved();
+    this.placeholder = true;
+  }
+
+  /** Something of the pattern's own was added (a picture behind the chart, a photo window): a placeholder is kept from now. */
+  adopt() {
+    if (this.placeholder) this.schedule();
+  }
+
   /** The library already has this exact pattern (just opened from it, or just saved). */
   markSaved() {
     this.unsaved = false;
@@ -73,11 +91,14 @@ export class Autosave {
   saveBeforeSwitch() {
     // the pattern is serialised right away, before the call returns
     if (this.unsaved || this.timeUnsaved) void this.saveLibrary();
+    // the next one is a pattern of its own, unless said otherwise (`untouched`)
+    this.placeholder = false;
   }
 
   private flushDraft() {
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;
+    if (this.placeholder) return;
     this.draft.save(serializePattern(this.doc()));
   }
 

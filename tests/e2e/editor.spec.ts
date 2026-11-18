@@ -247,6 +247,10 @@ test("straightens a photo by its 4 corners and keeps it after a reload", async (
 });
 
 test("moves pictures stored the old way (inline data URLs) into the image store", async ({ page }) => {
+  // a stitch: the demo becomes a pattern of its own, kept over a reload
+  const cell = await cellPoint(page, 2, 2);
+  await page.mouse.click(cell.x, cell.y);
+  await page.waitForTimeout(800);
   const id = await editorState<string>(page, "(ed) => ed.doc.id");
   const png = fixtureDataUrl("underlay.png");
   await page.evaluate(async ([pid, src]) => {
@@ -701,11 +705,19 @@ test("New ▸ has a blank pattern, a photo, an .oxs and a PDF chart; My patterns
   await fileAction(page, "New");
   await expect(page.getByRole("menuitem")).toContainText(["Blank pattern…", "From a photo…", "From an .oxs file…", "From a PDF chart…"]);
   await page.keyboard.press("Escape");
+  // nothing worked on here yet (as from My patterns): an empty pattern behind it, not the demo's heart. The draft
+  // cleared away from the editor (leaving, it would save one)
+  await page.goto("/en/privacy");
+  await page.evaluate(async () => {
+    localStorage.removeItem("stitchwork.current");
+    await new Promise((r) => { const q = indexedDB.deleteDatabase("stitchwork"); q.onsuccess = q.onerror = q.onblocked = r; });
+  });
   await page.goto("/en?new=pdf");
   await expect(page.getByTestId("pdf-pattern-intro")).toBeVisible();
   await page.getByRole("button", { name: "Cancel" }).click();
   await expect(page.getByTestId("pdf-pattern-intro")).toHaveCount(0);
   expect(new URL(page.url()).search).toBe("");
+  expect(await editorState(page, "(ed) => ({ key: ed.doc.key.filter(Boolean).length, stitches: [...ed.doc.layers.stitches].filter(Boolean).length, beads: [...ed.doc.layers.beads].filter(Boolean).length, lines: ed.doc.layers.segments.length })")).toEqual({ key: 0, stitches: 0, beads: 0, lines: 0 });
 });
 
 test("the selection bar can deselect without changing anything, and clears cells by name", async ({ page }) => {

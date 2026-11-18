@@ -1152,7 +1152,7 @@
     "noOthers": "No other patterns yet.",
     "noMatch": "Nothing matches.",
     "emptyTitle": "No patterns yet",
-    "emptyHint": "Start a blank one, turn a picture into a pattern, or open a work file.",
+    "emptyHint": "Start a blank one, turn a picture into a pattern, read one from a PDF chart, or open a work file.",
     "open": "Open “{name}”",
     "openIt": "Open",
     "more": "More for “{name}”",

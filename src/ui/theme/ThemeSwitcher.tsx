@@ -3,19 +3,20 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { cx } from "../common/widgets";
-import { useEditor } from "../hooks/editor";
 import { applyTheme, savedTheme, THEMES, type ThemeId } from "./appTheme";
 import s from "./theme.module.css";
 
-/** A row of colour dots inside the menu; picking one keeps the menu open so themes can be compared. */
-export function ThemeSwitcher() {
+/**
+ * A row of colour dots inside the menu; picking one keeps the menu open so themes can be compared. `onChange`: after a
+ * pick (the editor repaints the canvas around its chart).
+ */
+export function ThemeSwitcher({ onChange }: { onChange?: () => void }) {
   const t = useTranslations("theme");
-  const ed = useEditor();
   const [current, setCurrent] = useState<ThemeId>(savedTheme);
   const pick = (id: ThemeId) => {
     applyTheme(id);
     setCurrent(id);
-    ed.refreshChrome();
+    onChange?.();
   };
   return (
     <div className={s.row} role="radiogroup" aria-label={t("label")} data-testid="theme-switcher">

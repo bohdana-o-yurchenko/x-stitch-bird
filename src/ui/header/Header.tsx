@@ -16,6 +16,7 @@ import { ThemeSwitcher } from "../theme/ThemeSwitcher";
 import { savedToolbarHide, setToolbarHide } from "./toolbarPrefs";
 import { SOURCE_URL } from "../common/source";
 import { AppBrand } from "../common/AppBrand";
+import { Glory } from "./Glory";
 import appBar from "../common/appBar.module.css";
 import s from "./header.module.css";
 
@@ -29,17 +30,6 @@ function PatternNameInput({ name }: { name: string }) {
   const run = useCommand();
   const [value, setValue] = useState(name);
   return <input className={s.name} aria-label={t("patternName")} value={value} onChange={(e) => setValue(e.target.value)} onBlur={() => run("pattern.rename", value)} onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()} />;
-}
-
-/** "Glory to Ukraine" at the bottom of ☰: just words, not a command. The flag is drawn (Windows has no flag emoji). */
-function Glory() {
-  const t = useTranslations("app");
-  return (
-    <div className={s.glory} data-testid="glory">
-      {t("glory")}
-      <span className={s.flag} aria-hidden />
-    </div>
-  );
 }
 
 /** ☰ ▸ Toolbar: hide the groups this person never uses. */
@@ -137,7 +127,7 @@ function AppMenu() {
     { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
     "-",
     { id: "language", node: <LanguageSwitch before={() => ed.flush()} /> },
-    { id: "theme", node: <ThemeSwitcher /> },
+    { id: "theme", node: <ThemeSwitcher onChange={() => ed.refreshChrome()} /> },
     { id: "toolbar", node: <ToolbarOptions /> },
     "-",
     { id: "support", label: t("support"), hint: t("supportHint"), onClick: () => void window.open(`/${locale}/support`, "_blank", "noopener") },

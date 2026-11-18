@@ -86,6 +86,13 @@ export function setPatternSettings(ed: Editor, s: Partial<Pick<Pattern, "name" |
 }
 
 /** The demo heart shown on first start (SPEC §9.2). */
+/** Nothing in it — no key, no stitches: what's shown while a new pattern is being started (SPEC §15.37). */
+export function emptyPattern(): Pattern {
+  const p = createPattern(60, 60, "Untitled pattern");
+  applyMaterials(p, NEW_MATERIALS);
+  return p;
+}
+
 export function demoPattern(symbols: readonly string[]): Pattern {
   const p = createPattern(60, 60, "Untitled pattern");
   // every thread and bead brand, as a new pattern (SPEC §15.39)
