@@ -53,8 +53,9 @@ describe("parity with the single-file app", () => {
     expect(anySymbols(serializePattern(load1()))).toEqual(withLineStyles({ ...fixtureJson<object>("legacy/serialize1json.json"), v: 4 }));
   });
 
-  it("exports the same OXS", () => {
-    expect(exportOxs(load1())).toBe(fixtureText("legacy/oxsFrom1json.oxs"));
+  it("exports the same OXS — what other apps read; this app's own details (SPEC §15.42) aside", () => {
+    const ours = / stitchwork(_\w+)?="[^"]*"/g;
+    expect(exportOxs(load1()).replace(ours, "")).toBe(fixtureText("legacy/oxsFrom1json.oxs"));
   });
 
   it("imports OXS into the same pattern", () => {
@@ -63,9 +64,22 @@ describe("parity with the single-file app", () => {
     expect(normaliseIds(anySymbols(serializePattern(pattern)))).toEqual(normaliseIds(withLineStyles({ ...fixtureJson<object>("legacy/serialize1oxs.json"), v: 4 })));
   });
 
-  it("round-trips its own OXS export like the old app", () => {
-    const { pattern } = importOxs(exportOxs(load1()), ALL_SYMBOLS);
-    expect(normaliseIds(anySymbols(serializePattern(pattern)))).toEqual(normaliseIds(withLineStyles({ ...fixtureJson<object>("legacy/serializeOxsRoundtrip.json"), v: 4 })));
+  it("reads its own OXS export back as the same pattern — key, symbols and all; only the id is new (SPEC §15.42)", () => {
+    const original = load1();
+    const { pattern } = importOxs(exportOxs(original), ALL_SYMBOLS);
+    expect(pattern.id).not.toBe(original.id);
+    // the key entries the chart doesn't use aren't in an OXS
+    const used = new Set([...original.layers.stitches, ...original.layers.beads, ...original.layers.segments.map((s) => s.k), ...original.layers.knots.map((k) => k.k)]);
+    expect(pattern.key.filter(Boolean)).toEqual(original.key.filter((e, i) => e && used.has(i)));
+    // the colours they're made of (blends, floss + bead, one's own) — those the chart uses
+    const srcs = new Set(original.key.filter((e, i) => e && used.has(i)).map((e) => e!.src));
+    const only = <T,>(m: Record<string, T>) => Object.fromEntries(Object.entries(m).filter(([id]) => srcs.has(id)));
+    const chart = (p: typeof original) => ({ w: p.w, h: p.h, name: p.name, count: p.count, fabric: p.fabric, meta: p.meta, customs: only(p.customs), blends: only(p.blends), combos: only(p.combos) });
+    expect(chart(pattern)).toEqual(chart(original));
+    // every cell holds the same entry (stitches and beads)
+    const cells = (p: typeof original, layer: "stitches" | "beads") => Array.from(p.layers[layer], (k) => (k ? p.key[k] : null));
+    expect(cells(pattern, "stitches")).toEqual(cells(original, "stitches"));
+    expect(cells(pattern, "beads")).toEqual(cells(original, "beads"));
   });
 
   it("computes the same shopping list", () => {

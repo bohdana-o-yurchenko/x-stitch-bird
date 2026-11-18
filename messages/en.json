@@ -594,7 +594,8 @@
     "savedAccount": "Saved “{name}” in this browser and your account",
     "patternLimit": "Your account holds {max} patterns — this one is saved in this browser. Delete a pattern to keep it in your account too.",
     "photosFull": "Photos stay in this browser: your account has {used} of {max} MB. Remove a photo or delete a pattern to make room.",
-    "badPdf": "This PDF couldn’t be read."
+    "badPdf": "This PDF couldn’t be read.",
+    "ownAdded": "{count, plural, one {Added to your own threads & beads: {names}} other {# added to your own threads & beads: {names}}}"
   },
   "underlay": {
     "heading": "Image behind the chart",

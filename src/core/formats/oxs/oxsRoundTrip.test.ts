@@ -49,8 +49,91 @@ describe("OXS round trip", () => {
     expect(xml).toContain('<backstitch x1="1.5" y1="2.5" x2="2.5" y2="1.5" palindex="1" objecttype="backstitch"');
     expect(xml).toContain('<backstitch x1="0" y1="3.5" x2="0.5" y2="2.5" palindex="1" objecttype="backstitch"');
     // a plain bead: a bead at its point; only the real knot is a knot
-    expect(xml).toMatch(/<object x1="4" y1="4" palindex="\d+" objecttype="bead"\/>/);
+    expect(xml).toMatch(/<object x1="4" y1="4" palindex="\d+" objecttype="bead"[^>]*\/>/);
     expect(xml.match(/objecttype="knot"/g)).toHaveLength(1);
   });
 });
 
+
+describe("OXS: this app's own file comes back as it was (SPEC §15.42)", () => {
+  const kreinik = { id: "custom:kr", kind: "thread" as const, brand: "Kreinik", code: "032", name: "Pearl", hex: "#EEE8D5" };
+  const ownBead = { id: "custom:bd", kind: "bead" as const, brand: "Toho", code: "11-21", name: "Silver lined", hex: "#C0C0C0" };
+
+  /** Every brand and kind of thing at once: threads of three brands, beads of three, blends, floss + bead, … */
+  function everything() {
+    const p = createPattern(8, 6, "Every kind");
+    p.count = 16;
+    p.fabric = "#EFE6D2";
+    p.meta = { ...p.meta, designer: "A. Designer", copyright: "2026", instructions: "Start in the middle" };
+    p.customs[kreinik.id] = kreinik;
+    p.customs[ownBead.id] = ownBead;
+    p.blends["blend:k"] = { parts: [{ id: "dmc:310", n: 1 }, { id: kreinik.id, n: 1 }] };
+    p.combos["combo:p"] = { thread: "anchor:403", bead: "preciosa:00050" };
+    const k = (e: Parameters<typeof addEntry>[1]) => addEntry(p, e, ALL_SYMBOLS);
+    const dmc = k({ t: "thread", src: "dmc:310", n: 2, st: "full", sym: "sym:star" });
+    const anchor = k({ t: "thread", src: "anchor:403", n: 2, st: "half" });
+    const own = k({ t: "thread", src: kreinik.id, n: 1, st: "full" });
+    const blend = k({ t: "thread", src: "blend:k", n: null, st: "full" });
+    const combo = k({ t: "combo", src: "combo:p", n: 2, st: "full" });
+    const mh = k({ t: "bead", src: "bead:00557" });
+    const prec = k({ t: "bead", src: "preciosa:00050" });
+    const toho = k({ t: "bead", src: ownBead.id });
+    const point = k({ t: "bead", src: "bead:02011", st: "point" });
+    const tacked = k({ t: "combo", src: "combo:p", n: 1, st: "point" });
+    const back = k({ t: "back", src: kreinik.id, n: 1 });
+    const knot = k({ t: "knot", src: "dmc:310", n: 2 });
+    p.layers.stitches.set([dmc, anchor, own, blend, combo]);
+    p.layers.beads[8] = mh;
+    p.layers.beads[9] = prec;
+    p.layers.beads[10] = toho;
+    p.layers.knots.push({ x: 3, y: 3, k: point }, { x: 5, y: 2, k: tacked }, { x: 6.5, y: 4, k: knot });
+    p.layers.segments.push({ x1: 0, y1: 5, x2: 4, y2: 5, k: back });
+    p.layers.partials.set(20, [{ kind: "threeQuarter", corner: 0, k: dmc }, { kind: "petite", corner: 3, k: own }]);
+    p.brands = ["DMC", "Anchor", "Kreinik"];
+    p.beadBrands = ["Mill Hill", "Preciosa", "Toho"];
+    return p;
+  }
+
+  it("the same pattern: size, fabric, info, brands, key with its symbols, own colours, every stitch, bead and knot — a new pattern", () => {
+    const p = everything();
+    const { pattern: q, report } = importOxs(exportOxs(p), ALL_SYMBOLS);
+    expect(report.simplified).toBe(0);
+    expect(q.id).not.toBe(p.id);
+    expect({ w: q.w, h: q.h, name: q.name, count: q.count, fabric: q.fabric, meta: q.meta, brands: q.brands, beadBrands: q.beadBrands }).toEqual({ w: p.w, h: p.h, name: p.name, count: p.count, fabric: p.fabric, meta: p.meta, brands: p.brands, beadBrands: p.beadBrands });
+    expect(q.key).toEqual(p.key);
+    expect([q.customs, q.blends, q.combos]).toEqual([p.customs, p.blends, p.combos]);
+    expect([...q.layers.stitches]).toEqual([...p.layers.stitches]);
+    expect([...q.layers.beads]).toEqual([...p.layers.beads]);
+    expect([...q.layers.partials]).toEqual([...p.layers.partials]);
+    expect(q.layers.segments).toEqual(p.layers.segments);
+    expect([...q.layers.knots].sort((a, b) => a.x - b.x)).toEqual([...p.layers.knots].sort((a, b) => a.x - b.x));
+  });
+
+  it("names colours by brand when the pattern has several, or one other apps don't assume; by code alone otherwise", () => {
+    const xml = exportOxs(everything());
+    expect(xml).toContain('number="DMC 310"');
+    expect(xml).toContain('number="ANC 403"');
+    expect(xml).toContain('number="Kreinik 032"');
+    expect(xml).toContain('number="DMC 310+Kreinik 032"');
+    expect(xml).toContain('number="MH 00557"');
+    expect(xml).toContain('number="PREC 00050"');
+    expect(xml).toContain('number="Toho 11-21"');
+    // one brand: DMC threads go by code alone; Anchor alone still says so
+    const dmcOnly = createPattern(2, 1, "DMC");
+    dmcOnly.layers.stitches[0] = addEntry(dmcOnly, { t: "thread", src: "dmc:310", n: 2, st: "full" }, ALL_SYMBOLS);
+    expect(exportOxs(dmcOnly)).toContain('number="310"');
+    const anchorOnly = createPattern(2, 1, "Anchor");
+    anchorOnly.layers.stitches[0] = addEntry(anchorOnly, { t: "thread", src: "anchor:403", n: 2, st: "full" }, ALL_SYMBOLS);
+    expect(exportOxs(anchorOnly)).toContain('number="ANC 403"');
+  });
+
+  it("another app's file (no details of this app's): brands read off the numbers; an unknown brand becomes one's own", () => {
+    const theirs = exportOxs(everything()).replace(/ stitchwork(_\w+)?="[^"]*"/g, "");
+    const { pattern: q } = importOxs(theirs, ALL_SYMBOLS);
+    const srcs = q.key.filter(Boolean).map((e) => e!.src);
+    expect(srcs).toEqual(expect.arrayContaining(["dmc:310", "anchor:403", "bead:00557", "preciosa:00050"]));
+    // "Kreinik 032" is never DMC 32: it's one's own Kreinik thread
+    expect(srcs).not.toContain("dmc:32");
+    expect(Object.values(q.customs).map((c) => `${c.kind}:${c.brand} ${c.code}`)).toEqual(expect.arrayContaining(["thread:Kreinik 032", "bead:Toho 11-21"]));
+  });
+});

@@ -62,6 +62,8 @@ export class ThreadInventory {
     const saved: CustomColor[] = [];
     for (const c of join) if (await accountThreadApi.save(c)) saved.push(c);
     this.set([...(this.list ?? []), ...saved]);
+    // a file brought threads or beads of its own: they're in the account now, and the user is told (SPEC §15.42)
+    if (saved.length) this.ed.toast("toasts.ownAdded", { count: saved.length, names: saved.map((c) => `${c.brand} ${c.code}`).join(", ") });
   }
 
   /** Created or changed in the editor: the inventory gets it too (signed in). */

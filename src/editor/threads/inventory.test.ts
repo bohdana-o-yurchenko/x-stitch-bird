@@ -32,6 +32,8 @@ describe("your own threads in the account (SPEC §15.28)", () => {
     ed.setAccount({ id: "u", email: "u@x" });
     await vi.waitFor(() => expect(ed.state.inventory?.map((c) => c.id).sort()).toEqual(["custom:a", "custom:x"]));
     expect(saved.map((c) => c.id)).toEqual(["custom:a"]);
+    // and the user is told what joined (SPEC §15.42)
+    expect(ed.state.toasts.map((t) => [t.key, t.values])).toContainEqual(["toasts.ownAdded", { count: 1, names: "Kreinik 032" }]);
   });
 
   it("a pattern's copy catches up with the inventory; picking a thread gives the pattern a copy, brand too", async () => {

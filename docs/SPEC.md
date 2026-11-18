@@ -1987,6 +1987,23 @@ at a time.
 - Straightening, Autofill and the rest work on the page shown. A PDF can't be turned into a pattern (drop ▸ no such
   choice).
 
+### 15.42 .oxs: brands named, and this app's own files read back exactly (2026-11-18)
+- **Brands in numbers**: a pattern that keeps to the brand other apps assume — DMC threads, Mill Hill beads — names
+  colours by code alone ("310"). Otherwise (several brands, or a single other one) every colour's number starts with
+  its brand, threads and beads apart: DMC 310 · ANC 403 · MAD 2400 · MH 00557 · PREC 00050 — a brand of one's own in
+  full ("Kreinik 032"); blends and floss + bead name each part so ("DMC 310+Kreinik 032"). The colour's name is its
+  name alone.
+- **This app's own details**, which other apps ignore: each palette item says exactly what it stands for (its key
+  entries with their symbols, the colours of one's own, blends and floss + bead it uses — `stitchwork`), a bead
+  between cells says where it is (`stitchwork_x/_y`), the chart its brands (`stitchwork_materials`). Read back, the
+  pattern is the same: size, fabric, info, brands, the key in its order with its symbols, own colours, every stitch,
+  bead, knot and line. Key entries the chart doesn't use aren't in an OXS. **Always a new pattern** (a new id).
+- **Other apps' files** (or ours edited elsewhere): brands read off the numbers — "ANC 403"/"Anchor 403",
+  "MAD …", "MH 00557", "PREC 00050"; a number naming a brand the app doesn't know ("Kreinik 032") is a thread of
+  one's own of that brand — never DMC 32; a bare number is DMC (Mill Hill for beads), as every app takes it.
+- **Own threads and beads from a file** join the account's (signed in) as before — now with a word: "Added to your
+  own threads & beads: Kreinik 032, Toho 11-21".
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

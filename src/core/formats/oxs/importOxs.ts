@@ -1,4 +1,5 @@
 import { DMC_BY_CODE, DMC, libraryColor } from "../../catalog/catalog";
+import { applyMaterials, type Materials } from "../../pattern/brands";
 import { createPattern, MAX_SIZE, shortId } from "../../pattern/createPattern";
 import { keyFor } from "../../pattern/keyEntries";
 import type { Corner, CustomColor, KeyEntry, KeyIndex, Pattern, StitchTypeId } from "../../pattern/types";
@@ -23,29 +24,59 @@ const OTHER_BRANDS = [
   { prefix: "madeira", re: /^(madeira|mad)\s*[-:#]?\s*/i },
 ];
 
-/** OXS colour number → library id, or a new custom colour (SPEC §12.2). */
+/** A number this app writes for a brand of your own (SPEC §15.42): "Kreinik 032" — a brand, then a code. */
+const OWN_BRAND = /^([\p{L}][\p{L}\p{N} .&'’-]*?)\s+([\p{L}\p{N}][\p{L}\p{N}.\/-]*)$/u;
+
+/** OXS colour number → library id, or a new custom colour (SPEC §12.2, §15.42). */
 function resolveCode(number: string | undefined, name: string | undefined, color: string | undefined, asBead: boolean, customs: Record<string, CustomColor>): string {
+  const num = (number ?? "").trim();
   // another brand, named in the number ("Anchor 403", "ANC-403") or the name ("Madeira Black")
-  const other = OTHER_BRANDS.find((b) => b.re.test((number ?? "").trim()) || b.re.test((name ?? "").trim()));
+  const other = OTHER_BRANDS.find((b) => b.re.test(num) || b.re.test((name ?? "").trim()));
   if (other && !asBead) {
-    const raw = (number ?? "").trim().replace(other.re, "").trim().replace(/^0+(?=\d)/, "");
+    const raw = num.replace(other.re, "").trim().replace(/^0+(?=\d)/, "");
     const hit = libraryColor(`${other.prefix}:${raw}`) ?? libraryColor(`${other.prefix}:${raw.padStart(4, "0")}`);
     if (hit) return hit.id;
   }
-  const code = (number ?? "").trim().replace(/^(dmc|mill\s*hill|mh)\s*[-:#]?\s*/i, "").trim();
+  // Preciosa beads, "PREC 17050"
+  const prec = /^(prec|preciosa)\s*[-:#]?\s*(.+)$/i.exec(num);
+  if (prec && asBead) {
+    const hit = libraryColor(`preciosa:${prec[2]!.trim()}`);
+    if (hit) return hit.id;
+  }
+  const code = num.replace(/^(dmc|mill\s*hill|mh)\s*[-:#]?\s*/i, "").trim();
   if (asBead) {
     const c = /^\d+$/.test(code) ? code.padStart(5, "0") : code;
     if (libraryColor(`bead:${c}`)) return `bead:${c}`;
-  } else {
+  } else if (code === num || /^dmc/i.test(num)) {
+    // a bare number (or DMC's): a DMC colour, as every app takes it
     const e = DMC_LC.get(code.toLowerCase().replace(/^0+(?=\d)/, "")) ?? DMC_LC.get(code.toLowerCase());
     if (e) return e.id;
   }
+  // not one of the app's: a colour of one's own — under its brand when the number names one ("Kreinik 032")
+  const own = !other && !prec && !/^(dmc|mill\s*hill|mh)\b/i.test(num) ? OWN_BRAND.exec(num) : null;
   const id = shortId("custom");
   customs[id] = {
-    id, kind: asBead ? "bead" : "thread", brand: asBead ? "Bead" : "Thread",
-    code: code || "?", name: name || code || "Colour", hex: "#" + (color && /^[0-9a-f]{6}$/i.test(color) ? color : "999999"),
+    id, kind: asBead ? "bead" : "thread", brand: own ? own[1]!.trim() : asBead ? "Bead" : "Thread",
+    code: (own ? own[2]! : code) || "?", name: name || code || "Colour", hex: "#" + (color && /^[0-9a-f]{6}$/i.test(color) ? color : "999999"),
   };
   return id;
+}
+
+/** What a palette item of this app's own stands for (SPEC §15.42), or null for anyone else's. */
+interface Exact {
+  entries: Omit<KeyEntry, "sym">[] & { sym?: string }[];
+  customs?: Record<string, CustomColor>;
+  blends?: Pattern["blends"];
+  combos?: Pattern["combos"];
+}
+function exactOf(raw: string | undefined): Exact | null {
+  if (!raw) return null;
+  try {
+    const v = JSON.parse(raw) as Exact;
+    return Array.isArray(v?.entries) && v.entries.every((e) => e && typeof e.t === "string" && typeof e.src === "string") ? v : null;
+  } catch {
+    return null;
+  }
 }
 
 const isBeadCode = (c: string) => /^\d{5}$/.test(c.trim().replace(/^(mill\s*hill|mh)\s*/i, ""));
@@ -57,6 +88,8 @@ interface ItemRecord {
   bs: number;
   combo?: string;
   bead?: string;
+  /** This app's own file: the exact key entries (SPEC §15.42). */
+  exact?: Exact;
 }
 
 export function importOxs(text: string, symbols: readonly string[]): { pattern: Pattern; report: OxsImportReport } {
@@ -73,6 +106,13 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
   if (pr.attrs.author) p.meta.designer = pr.attrs.author;
   if (pr.attrs.copyright) p.meta.copyright = pr.attrs.copyright;
   if (pr.attrs.instructions) p.meta.instructions = pr.attrs.instructions;
+  // this app's own: the pattern's brands (SPEC §15.42)
+  try {
+    const m = pr.attrs.stitchwork_materials ? (JSON.parse(pr.attrs.stitchwork_materials) as Materials) : null;
+    if (m && Array.isArray(m.brands) && Array.isArray(m.beadBrands)) applyMaterials(p, m);
+  } catch {
+    // someone else's file, or broken: the brands the colours have
+  }
 
   const objects = pick("object", "ornaments_inc_knots_and_beads");
   const beadIndexes = new Set(objects.filter((o) => /^bead/i.test(o.attrs.objecttype ?? "")).map((o) => o.attrs.palindex));
@@ -84,6 +124,15 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
       continue;
     }
     const strands = clamp(Number(it.attrs.strands), 1, 6, 2), bs = clamp(Number(it.attrs.bsstrands), 1, 6, 1);
+    // this app's own file: exactly what it was — its own colours, blends and floss + bead under their ids
+    const exact = exactOf(it.attrs.stitchwork);
+    if (exact) {
+      Object.assign(p.customs, exact.customs ?? {});
+      Object.assign(p.blends, exact.blends ?? {});
+      Object.assign(p.combos, exact.combos ?? {});
+      items.set(index, { thread: "", strands, bs, exact });
+      continue;
+    }
     const blends = it.children.filter((c: XmlElement) => c.name === "blend");
     const parts = blends.length
       ? blends.map((b) => ({ number: b.attrs.number ?? "", name: b.attrs.name, color: b.attrs.color, n: Number(b.attrs.strands) || 1 }))
@@ -104,13 +153,24 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
     items.set(index, rec);
   }
 
-  type Use = StitchTypeId | "bead" | "back" | "knot";
+  // this app's own file: the key as it was, in its order — before the chart puts anything in it
+  for (const r of items.values()) r.exact?.entries.forEach((e) => keyFor(p, e as KeyEntry, symbols));
+
+  type Use = StitchTypeId | "bead" | "back" | "knot" | "pointBead";
+  /** This app's own file: the entry the item stood for, used as `use` — created once, its symbol as it was. */
+  const exactKey = (x: Exact, use: Use): KeyIndex => {
+    const fits = (e: Exact["entries"][number]) =>
+      use === "back" ? e.t === "back" : use === "knot" ? e.t === "knot" : use === "bead" ? e.t === "bead" && e.st !== "point" : use === "pointBead" ? e.st === "point" : (e.t === "thread" || e.t === "combo") && (e.st ?? "full") === use;
+    const e = x.entries.find(fits) ?? x.entries[0];
+    return e ? keyFor(p, e as KeyEntry, symbols) : 0;
+  };
   const key = (index: string | undefined, use: Use): KeyIndex => {
     const r = items.get(index ?? "");
     if (!r) return 0;
+    if (r.exact) return exactKey(r.exact, use);
     const blend = r.thread.startsWith("blend:");
     const k = (e: Omit<KeyEntry, "sym">) => keyFor(p, e, symbols);
-    if (use === "bead") return r.bead ? k({ t: "bead", src: r.bead }) : 0;
+    if (use === "bead" || use === "pointBead") return r.bead ? k({ t: "bead", src: r.bead, ...(use === "pointBead" && { st: "point" as StitchTypeId }) }) : 0;
     if (use === "back") return k({ t: "back", src: r.thread, n: blend ? null : r.bs });
     if (use === "knot") return k({ t: "knot", src: r.thread, n: blend ? null : r.strands });
     if (r.combo) return k({ t: "combo", src: r.combo, n: r.strands, st: use });
@@ -152,6 +212,13 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
       if (v && Number.isFinite(fx) && Number.isFinite(fy)) knots.push({ ...pt, k: v });
       continue;
     }
+    // this app's own bead between cells (SPEC §15.42)
+    const px = Number(o.attrs.stitchwork_x), py = Number(o.attrs.stitchwork_y);
+    if (t.startsWith("bead") && Number.isFinite(px) && Number.isFinite(py)) {
+      const v = key(o.attrs.palindex, "pointBead");
+      if (v) knots.push({ ...snapHalf({ x: px, y: py }, { w, h }), k: v });
+      continue;
+    }
     if (i < 0) continue;
     if (t.startsWith("bead")) {
       const v = key(o.attrs.palindex, "bead");
@@ -173,6 +240,13 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
     const c = ["x1", "y1", "x2", "y2"].map((a) => Number(b.attrs[a]));
     if (t !== "backstitch" || c.some(Number.isNaN)) {
       simplified++;
+      continue;
+    }
+    // this app's own floss + bead between cells, written as its tacking stitch (SPEC §15.42)
+    const px = Number(b.attrs.stitchwork_x), py = Number(b.attrs.stitchwork_y);
+    if (Number.isFinite(px) && Number.isFinite(py) && items.get(b.attrs.palindex ?? "")?.exact) {
+      const v = key(b.attrs.palindex, "pointBead");
+      if (v) knots.push({ ...snapHalf({ x: px, y: py }, { w, h }), k: v });
       continue;
     }
     const v = key(b.attrs.palindex, "back");

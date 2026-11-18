@@ -84,10 +84,14 @@ describe("OXS with fractional stitches, knots and pattern info", () => {
     expect([...back.layers.partials.values()].flat().map((s) => `${s.kind}@${s.corner}`).sort()).toEqual(["petite@3", "quarter@1", "threeQuarter@0", "threeQuarter@2"]);
     expect(back.layers.knots).toEqual([{ x: 1.5, y: 1, k: expect.any(Number) }]);
     expect(back.layers.ambiguous.size).toBe(0);
-    // a thread of another brand goes out named with its brand, and comes back as that brand's catalogue colour
-    expect(xml).toContain('name="Anchor Black (half cross)"');
-    expect(Object.values(back.customs)).toEqual([]);
-    expect(back.key.some((e) => e?.src === "anchor:403")).toBe(true);
+    // a thread of another brand goes out with its brand in the number (SPEC §15.42)…
+    expect(xml).toContain('number="ANC 403" name="Black (half cross)"');
+    // …this app reads its own file back exactly: the thread of one's own stays what it was
+    expect(Object.values(back.customs)).toEqual(Object.values(p.customs));
+    // …and any other app's file (no details of this app's) names the brand's catalogue colour
+    const { pattern: theirs } = importOxs(xml.replace(/ stitchwork(_\w+)?="[^"]*"/g, ""), ALL_SYMBOLS);
+    expect(Object.values(theirs.customs)).toEqual([]);
+    expect(theirs.key.some((e) => e?.src === "anchor:403")).toBe(true);
   });
 
   it("places quarters and petites on the half grid, so four in one cell stay in their corners", () => {
