@@ -3,7 +3,7 @@ import type { GridNumbering, Layers, Pattern } from "./types";
 export const DEFAULT_FABRIC = "#F7F4EC";
 export const DEFAULT_GRID: GridNumbering = { x0: 1, y0: 1, label: 10, fromCentre: false };
 export const MIN_SIZE = 5;
-export const MAX_SIZE = 500;
+export const MAX_SIZE = 1000;
 
 export const newPatternId = (): string =>
   typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : "p" + Date.now().toString(36);

@@ -29,6 +29,11 @@
 .num {
   width: 72px;
 }
+.axis {
+  margin-left: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
 .times,
 .unit {
   color: var(--muted);

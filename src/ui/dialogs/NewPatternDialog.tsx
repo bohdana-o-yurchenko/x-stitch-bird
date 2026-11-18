@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { NEW_MATERIALS, materialsOf, usedBeadBrands, usedThreadBrands, usesBeads, type Materials } from "@/core/pattern/brands";
+import { clampSize, MAX_SIZE, MIN_SIZE } from "@/core/pattern/createPattern";
 import type { CustomColor, Pattern } from "@/core/pattern/types";
 import type { NewPatternOptions } from "@/editor/actions/pattern";
 import { Modal, cx, ui } from "../common/widgets";
@@ -81,9 +82,11 @@ export function NewPatternForm({ doc, inventory, signedIn, onCreate, onClose }: 
         <div className={s.row}>
           <span className={s.label}>{t("size")}</span>
           <div className={s.sizeLine}>
-            <input className={cx(ui.input, s.num)} type="number" min={5} max={500} aria-label={t("width")} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} />
+            <span className={s.axis} aria-hidden>{t("w")}</span>
+            <input className={cx(ui.input, s.num)} type="number" min={MIN_SIZE} max={MAX_SIZE} aria-label={t("width")} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} onBlur={() => set({ ...o, w: clampSize(o.w) })} />
             <span className={s.times}>×</span>
-            <input className={cx(ui.input, s.num)} type="number" min={5} max={500} aria-label={t("height")} value={o.h} onChange={(e) => set({ ...o, h: Number(e.target.value) })} />
+            <span className={s.axis} aria-hidden>{t("h")}</span>
+            <input className={cx(ui.input, s.num)} type="number" min={MIN_SIZE} max={MAX_SIZE} aria-label={t("height")} value={o.h} onChange={(e) => set({ ...o, h: Number(e.target.value) })} onBlur={() => set({ ...o, h: clampSize(o.h) })} />
             <span className={s.unit}>{t("stitches")}</span>
             <select className={ui.input} aria-label={t("fabric")} value={o.count} onChange={(e) => set({ ...o, count: Number(e.target.value) })}>
               {COUNTS.map((c) => <option key={c} value={c}>{tf(`ct${c}`)}</option>)}
@@ -92,7 +95,7 @@ export function NewPatternForm({ doc, inventory, signedIn, onCreate, onClose }: 
             </select>
           </div>
         </div>
-        <p className={cx(ui.hint, s.under)}>{t("finishedSize", { w: cm(o.w), h: cm(o.h) })}</p>
+        <p className={cx(ui.hint, s.under)}>{t("finishedSize", { w: cm(clampSize(o.w)), h: cm(clampSize(o.h)) })} · {t("sizeRange", { min: MIN_SIZE, max: MAX_SIZE })}</p>
 
         <div className={s.materials}>
           <div className={s.row}>

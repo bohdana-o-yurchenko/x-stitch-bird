@@ -58,13 +58,13 @@ describe("opening an OXS file", () => {
     expect(() => read(`<chart><properties chartwidth="5"/></chart>`)).toThrow(OxsFormatError);
   });
 
-  it("refuses a chart bigger than the app makes (500 × 500) before allocating anything, and takes exactly that", () => {
+  it("refuses a chart bigger than the app makes (1000 × 1000) before allocating anything, and takes exactly that", () => {
     const sized = (w: number, h: number) => `<chart><properties chartwidth="${w}" chartheight="${h}"/></chart>`;
-    expect(() => read(sized(501, 10))).toThrow(OxsFormatError);
-    expect(() => read(sized(10, 501))).toThrow(OxsFormatError);
+    expect(() => read(sized(1001, 10))).toThrow(OxsFormatError);
+    expect(() => read(sized(10, 1001))).toThrow(OxsFormatError);
     expect(() => read(sized(60000, 60000))).toThrow(OxsFormatError);
     expect(() => read(sized(1e9, 1e9))).toThrow(OxsFormatError);
-    expect(read(sized(500, 500)).pattern.layers.stitches).toHaveLength(250_000);
+    expect(read(sized(1000, 1000)).pattern.layers.stitches).toHaveLength(1_000_000);
   });
 
   it("takes the title, size, fabric colour, designer info and the fabric count when it is one we know", () => {

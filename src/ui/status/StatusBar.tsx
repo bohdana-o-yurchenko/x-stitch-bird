@@ -90,7 +90,7 @@ export function StatusBar() {
       <span className={s.spacer} />
       <AmbiguousStatus />
       {underlayEditing && <span className={s.hint}>{t("underlayHint")}</span>}
-      <span>{`${p.w}×${p.h}`}</span>
+      <span>{t("size", { w: p.w, h: p.h })}</span>
       <SaveStatus />
     </div>
   );

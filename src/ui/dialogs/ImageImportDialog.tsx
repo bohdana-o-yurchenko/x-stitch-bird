@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
-import { clampSize } from "@/core/pattern/createPattern";
+import { clampSize, MAX_SIZE } from "@/core/pattern/createPattern";
 import { resolveColor } from "@/core/pattern/resolve";
 import { runImageToPattern } from "@/editor/heavy";
 import { scaledPixels } from "@/platform/images";
@@ -15,16 +15,18 @@ export function ImageImportDialog({ image, onClose }: { image: HTMLImageElement;
   const t = useTranslations("dialogs");
   const run = useCommand();
   const ed = useEditor();
-  const [o, set] = useState({ w: Math.min(100, image.width), k: 20, blends: false, skip: false, keepRef: true });
+  /** As wide as a pattern can be, narrower for a tall picture so its height fits too. */
+  const maxW = Math.max(10, Math.min(MAX_SIZE, Math.floor((MAX_SIZE * image.width) / image.height)));
+  const [o, set] = useState({ w: Math.min(100, image.width, maxW), k: 20, blends: false, skip: false, keepRef: true });
   const [result, setResult] = useState<QuantizeResult | null>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     let current = true;
-    const w = clampSize(o.w, 10, 400);
+    const w = clampSize(o.w, 10, maxW);
     void runImageToPattern({ pixels: scaledPixels(image, w), maxColours: clampSize(o.k, 2, 60), skipLightest: o.skip, blends: o.blends ? ed.doc.blends : null }).then((r) => current && setResult(r));
     return () => void (current = false);
-  }, [o.w, o.k, o.blends, o.skip, image, ed]);
+  }, [o.w, o.k, o.blends, o.skip, image, ed, maxW]);
 
   useEffect(() => {
     const c = canvas.current;
@@ -52,7 +54,7 @@ export function ImageImportDialog({ image, onClose }: { image: HTMLImageElement;
       ]}
     >
       <div className={ui.grid2}>
-        <label className={ui.field}>{t("width")}<input type="number" min={10} max={400} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} /></label>
+        <label className={ui.field}>{t("width")}<input type="number" min={10} max={maxW} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} onBlur={() => set({ ...o, w: clampSize(o.w, 10, maxW) })} /></label>
         <label className={ui.field}>{t("maxColours")}<input type="number" min={2} max={60} value={o.k} onChange={(e) => set({ ...o, k: Number(e.target.value) })} /></label>
         <label className={ui.field}>
           {t("use")}
@@ -69,7 +71,7 @@ export function ImageImportDialog({ image, onClose }: { image: HTMLImageElement;
           </select>
         </label>
       </div>
-      <p className={ui.hint}>{t("imageHint", { n: ed.doc.strands || 2 })}</p>
+      <p className={ui.hint}>{t("widthRange", { min: 10, max: maxW })} {t("imageHint", { n: ed.doc.strands || 2 })}</p>
       <label className={ui.chk}><input type="checkbox" checked={o.keepRef} onChange={(e) => set({ ...o, keepRef: e.target.checked })} />{t("keepReference")}</label>
       <canvas ref={canvas} style={{ maxWidth: "100%", imageRendering: "pixelated", border: "1px solid var(--line2)", borderRadius: 6, background: "#fff", alignSelf: "center" }} />
       {result && <p className={ui.hint} style={{ textAlign: "center" }}>{t("imageInfo", { w: result.w, h: result.h, count: result.used })}</p>}

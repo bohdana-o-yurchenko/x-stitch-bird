@@ -683,7 +683,7 @@ const readDoc = (page: Page) =>
 
 test("New ▸ From a PDF chart… reads another app's chart: nothing to settle — \"Pattern read\", then the pattern with the PDF behind it, lined up (SPEC §15.47, §15.48)", async ({ page }) => {
   await readPdfChart(page, "other-app-chart.pdf");
-  await expect(page.getByTestId("pdf-chart-summary")).toHaveText("Snowy Owl: 30 × 20 stitches, 3 colours, 2 backstitch lines.");
+  await expect(page.getByTestId("pdf-chart-summary")).toHaveText("Snowy Owl: W 30 × H 20 stitches, 3 colours, 2 backstitch lines.");
   // always kept: said, not asked
   await expect(page.getByTestId("pdf-chart-keep")).toBeChecked();
   await expect(page.getByTestId("pdf-chart-keep")).toBeDisabled();
@@ -703,11 +703,11 @@ test("a chart with things to settle: the grids (not the size stated), faded cell
   await readPdfChart(page, "other-app-chart-messy.pdf");
   const dialog = page.getByRole("dialog"), next = dialog.getByRole("button", { name: "Next", exact: true });
   // the grids: the PDF says 31 × 20, the grids make 30 × 20; leaving out the second page makes 16 × 20
-  await expect(page.getByTestId("pdf-chart-grids")).toContainText("The PDF says 31 × 20; the grids make 30 × 20.");
+  await expect(page.getByTestId("pdf-chart-grids")).toContainText("The PDF says W 31 × H 20; the grids make W 30 × H 20.");
   const grids = page.getByTestId("pdf-chart-grids").getByRole("checkbox");
   await expect(grids).toHaveCount(2);
   await grids.nth(1).uncheck();
-  await expect(page.getByTestId("pdf-chart-size")).toHaveText("Together they make 16 × 20 stitches.");
+  await expect(page.getByTestId("pdf-chart-size")).toHaveText("Together they make W 16 × H 20 stitches.");
   await grids.nth(1).check();
   await next.click();
   // faded cells: stitched like the rest this time
@@ -1410,7 +1410,7 @@ test("a very large photo is kept as it is, after a word that the app may pause; 
     });
   await add();
   const ask = page.getByRole("dialog", { name: "A very large photo" });
-  await expect(ask).toContainText("6200 × 4000 px (25 megapixels)");
+  await expect(ask).toContainText("W 6200 × H 4000 px (25 megapixels)");
   await ask.getByRole("button", { name: "Cancel" }).click();
   await expect(ask).toHaveCount(0);
   expect(await editorState(page, "(ed) => ed.state.underlay")).toBeNull();

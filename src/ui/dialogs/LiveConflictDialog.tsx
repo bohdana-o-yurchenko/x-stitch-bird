@@ -58,8 +58,8 @@ export function LiveConflictDialog({ theirs }: { theirs: { rev: number; doc: Pat
         <div className={s.modalBody}>
           <p className={ui.hint} style={{ marginTop: 0 }}>{t("conflictBody")}</p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            {card(pics.mine, t("mine"), `${mine.w}×${mine.h}`, t("keepMine"), () => void ed.live.keepMine(theirs), "live-keep-mine")}
-            {card(pics.other, t("theirs"), other ? `${other.w}×${other.h}` : "", t("useTheirs"), () => void ed.live.useTheirs(theirs), "live-use-theirs")}
+            {card(pics.mine, t("mine"), t("size", { w: mine.w, h: mine.h }), t("keepMine"), () => void ed.live.keepMine(theirs), "live-keep-mine")}
+            {card(pics.other, t("theirs"), other ? t("size", { w: other.w, h: other.h }) : "", t("useTheirs"), () => void ed.live.useTheirs(theirs), "live-use-theirs")}
           </div>
         </div>
       </div>

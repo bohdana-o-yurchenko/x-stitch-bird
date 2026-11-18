@@ -30,14 +30,14 @@ describe(".xbird files stay readable", () => {
 // tag), with every kind of content. 2.0 must open it and keep every part of it. Never regenerate or edit it.
 describe("a chart bigger than the app makes is refused", () => {
   const big = (w: number, h: number) => ({ ...v1(), w, h });
-  it("whatever else the file says, over 500 either way is refused with its own message", () => {
-    expect(() => parsePattern(big(501, 60), ALL_SYMBOLS)).toThrow(/larger than 500/);
-    expect(() => parsePattern(big(60, 501), ALL_SYMBOLS)).toThrow(/larger than 500/);
-    expect(() => parsePattern(big(1e9, 1e9), ALL_SYMBOLS)).toThrow(/larger than 500/);
+  it("whatever else the file says, over 1000 either way is refused with its own message", () => {
+    expect(() => parsePattern(big(1001, 60), ALL_SYMBOLS)).toThrow(/larger than 1000/);
+    expect(() => parsePattern(big(60, 1001), ALL_SYMBOLS)).toThrow(/larger than 1000/);
+    expect(() => parsePattern(big(1e9, 1e9), ALL_SYMBOLS)).toThrow(/larger than 1000/);
   });
 
-  it("500 × 500 still opens, and a too-big version inside a file is skipped, not opened later", () => {
-    expect(parsePattern({ ...big(500, 500), s: "0*250000" }, ALL_SYMBOLS).pattern.w).toBe(500);
+  it("1000 × 1000 still opens, and a too-big version inside a file is skipped, not opened later", () => {
+    expect(parsePattern({ ...big(1000, 1000), s: "0*1000000" }, ALL_SYMBOLS).pattern.w).toBe(1000);
     const withVersions = { ...v1(), versions: [{ time: 1, reason: "timer", doc: big(9000, 9000) }, { time: 2, reason: "timer", doc: v1() }] };
     expect(parsePattern(withVersions, ALL_SYMBOLS).versions.map((v) => v.time)).toEqual([2]);
   });

@@ -119,7 +119,7 @@ test("a picture becomes a pattern with the chosen size and number of colours", a
   const dialog = page.getByRole("dialog", { name: "Turn a picture into a pattern" });
   await dialog.getByLabel("Width (stitches)").fill("20");
   await dialog.getByLabel("Max colours").fill("4");
-  await expect(dialog.getByText(/^20 × 10 stitches/)).toBeVisible();
+  await expect(dialog.getByText(/^W 20 × H 10 stitches/)).toBeVisible();
   await dialog.getByRole("button", { name: "Create pattern" }).click();
   await expect(page.getByText(/^Pattern created — \d colours/)).toBeVisible();
   expect(await editorState<string>(page, "(ed) => `${ed.doc.w}×${ed.doc.h}`")).toBe("20×10");

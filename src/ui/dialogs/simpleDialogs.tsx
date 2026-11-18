@@ -4,6 +4,7 @@ import type { PkReport } from "@/core/formats/pdf/patternKeeper";
 import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { parseCellRef } from "@/core/grid/numbering";
+import { clampSize, MAX_SIZE, MIN_SIZE } from "@/core/pattern/createPattern";
 import { symbolText } from "@/core/symbols/lineStyles";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { stopAskingLargePhoto } from "@/editor/images/largePhoto";
@@ -42,8 +43,8 @@ export function ResizeDialog({ onClose }: Close) {
   return (
     <Modal title={t("resizeTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("resize"), primary: true, onClick: () => run("pattern.resize", o) }]}>
       <div className={ui.grid2}>
-        <label className={ui.field}>{t("width")}<input type="number" min={5} max={500} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} /></label>
-        <label className={ui.field}>{t("height")}<input type="number" min={5} max={500} value={o.h} onChange={(e) => set({ ...o, h: Number(e.target.value) })} /></label>
+        <label className={ui.field}>{t("width")}<input type="number" min={MIN_SIZE} max={MAX_SIZE} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} onBlur={() => set({ ...o, w: clampSize(o.w) })} /></label>
+        <label className={ui.field}>{t("height")}<input type="number" min={MIN_SIZE} max={MAX_SIZE} value={o.h} onChange={(e) => set({ ...o, h: Number(e.target.value) })} onBlur={() => set({ ...o, h: clampSize(o.h) })} /></label>
         <label className={ui.field}>
           {t("anchor")}
           <select value={o.anchor} onChange={(e) => set({ ...o, anchor: e.target.value as "centre" | "topLeft" })}>
@@ -52,7 +53,7 @@ export function ResizeDialog({ onClose }: Close) {
           </select>
         </label>
       </div>
-      <p className={ui.hint}>{t("resizeHint")}</p>
+      <p className={ui.hint}>{t("sizeRange", { min: MIN_SIZE, max: MAX_SIZE })} · {t("resizeHint")}</p>
     </Modal>
   );
 }

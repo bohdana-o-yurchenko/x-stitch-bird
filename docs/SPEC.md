@@ -197,7 +197,7 @@ dash-dash-dot · double · thick-thin · ticks · wave · zigzag · scallop · c
 P = {
   id:      'p' + Date.now().toString(36),     // stable identity, used as library key & refs key
   name:    'Untitled pattern',
-  w, h:    integers 5..500 (grid size in stitches)
+  w, h:    integers 5..1000 (grid size in stitches)
   count:   fabric count: 11 | 14 | 16 | 18 | 14.01 ("28 ct over 2") | 16.01 ("32 ct over 2")
   strands: default strands for new cross entries (2); updated to last strands chosen when adding
   fabric:  '#F7F4EC' (hex)
@@ -507,7 +507,7 @@ clears undo history, deselects if active, toast "Entry deleted".
 - Fabric count change → `P.count`, re-render key, autosave. Fabric colour → `P.fabric`, re-render chart & key.
 - Size info: `Grid W × H` · `Finished a″ × b″ (c × d cm)` with `a = w / floor(count)` (1 decimal) ·
   `Cut fabric ≈ (a+6)″ × (b+6)″` (rounded).
-- **Resize…** modal: width, height (5..500), anchor "Keep design centred" (offset `floor((new-old)/2)`) or
+- **Resize…** modal: width, height (5..1000; a number outside is put back in range when the field is left), anchor "Keep design centred" (offset `floor((new-old)/2)`) or
   "Keep top-left". Cells outside are cropped; backstitch is shifted and segments with any endpoint outside
   are dropped. Clears undo history, then fits view.
 
@@ -666,7 +666,7 @@ File ▸ Save) still saves at once, with a toast.
   "Couldn’t reach your saved patterns right now.") merged with local items (local only if id not in cloud),
   sorted newest first. Each row: name, `W×H · <locale date time>` (+ ` · this browser` for local), delete 🗑
   (no confirmation; toast "Deleted"). Click → load, toast "Opened “name”". Empty: "No saved patterns yet. Use Save to keep your work."
-- **New** modal: Name, Fabric (11/14/16/18 ct), Width, Height (80×80 default, 5..500), checkbox
+- **New** modal: Name, Fabric (11/14/16/18 ct), Width, Height (80×80 default, 5..1000; a number outside is put back in range when the field is left; W and H letters before the fields), checkbox
   "Start with the same key (threads, beads, symbols)" (unchecked by default) — copies `pal`, `blends`, `combos`, `customs`.
   Warning "Unsaved changes to the current pattern will be lost — save first if you want to keep it."
   New project gets a new id; `strands` carried over.
@@ -923,7 +923,7 @@ an .oxs". Then autosave.
 ### 12.3 Image → pattern (`importDialog` / `convertImage`, `index.html:2120-2154`)
 Modal "Turn a picture into a pattern" with live preview canvas (pixelated, scaled ≤ 500×300) and
 `W × H stitches · N colours`. Inputs (recompute on change):
-- Width (stitches) 10–400, default `min(100, imageWidth)`; height = `round(imgH/imgW × width)`.
+- Width (stitches) 10 up to 1000, less for a tall picture so the height stays within 1000; default `min(100, imageWidth)`; height = `round(imgH/imgW × width)`.
 - Max colours 2–60, default 20.
 - Use: *DMC threads* | *DMC + my blends* (blends already in the current project are candidates).
 - Background: *Stitch everything* | *Leave lightest colour unstitched*.

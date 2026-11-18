@@ -32,10 +32,10 @@ describe("validPattern: what the account accepts as a pattern file", () => {
     expect(validPattern(v, "p1")).toBe(false);
   });
 
-  it("refuses a chart bigger than 500 either way, and takes 500", () => {
-    expect(validPattern({ ...ok, w: 501 }, "p1")).toBe(false);
-    expect(validPattern({ ...ok, h: 501 }, "p1")).toBe(false);
-    expect(validPattern({ ...ok, w: 500, h: 500 }, "p1")).toBe(true);
+  it("refuses a chart bigger than 1000 either way, and takes 1000", () => {
+    expect(validPattern({ ...ok, w: 1001 }, "p1")).toBe(false);
+    expect(validPattern({ ...ok, h: 1001 }, "p1")).toBe(false);
+    expect(validPattern({ ...ok, w: 1000, h: 1000 }, "p1")).toBe(true);
   });
 
   it("refuses a file bigger than the limit", () => {
