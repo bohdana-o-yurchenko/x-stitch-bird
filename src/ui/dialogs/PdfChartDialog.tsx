@@ -1,0 +1,353 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { BEAD_CATALOGUES, THREAD_CATALOGUES, byNumber, libraryColor, matchesQuery } from "@/core/catalog/catalog";
+import type { ColorEntry } from "@/core/color/colorEntry";
+import type { PdfContent } from "@/core/formats/pdfChart/content";
+import type { KeyThread } from "@/core/formats/pdfChart/key";
+import { readChart, type ChartRead, type SampleBox } from "@/core/formats/pdfChart/read";
+import { allSettled, settledRead, type ChartChoice } from "@/editor/actions/pdfChart";
+import { renderPdfPage } from "@/platform/pdf";
+import { Modal, cx, ui } from "../common/widgets";
+import { useCommand } from "../hooks/editor";
+import s from "./pdfChart.module.css";
+
+/*
+ * Another app's PDF chart, read (SPEC §15.48): the steps settle what the reader couldn't — which grids make up the
+ * chart, faded cells, the key — then the pattern opens. Each step only when there's something to settle; with
+ * nothing, straight to "Pattern read".
+ */
+
+type Step = "grids" | "faded" | "key" | "done";
+
+const hexOf = (id: string | undefined) => (id ? libraryColor(id)?.hex : undefined);
+const label = (e: ColorEntry | undefined) => (e ? `${e.brand} ${e.code}` : "?");
+const threadLabel = (t: KeyThread) => t.ids.map((id) => label(libraryColor(id))).join(" + ");
+const threadName = (t: KeyThread) => t.ids.map((id) => libraryColor(id)?.name ?? "").join(" + ");
+const threadHex = (t: KeyThread | null) => (t ? hexOf(t.ids[0]) : undefined);
+
+/** The grids' read needs a word: they don't add up — conflicts, grids without numbers, another size than stated. */
+const gridsNeedWord = (r: ChartRead) => r.issues.conflicts > 0 || r.issues.unplaced > 0 || (!!r.stated && (r.stated.w !== r.w || r.stated.h !== r.h));
+const fadedCount = (r: ChartRead) => r.faded.reduce((n, v, i) => n + (v && r.cells[i]! >= 0 ? 1 : 0), 0);
+
+/** Pictures of parts of pages: each page drawn once, at `side`, the boxes cut out of it with a margin of `pad` (of their size). */
+function useCuts(file: File, boxes: { key: string; box: SampleBox }[], sizes: PdfContent["pages"], side: number, pad = 0.12) {
+  const [cuts, setCuts] = useState<Record<string, string>>({});
+  const wanted = boxes.map((b) => b.key).join("|");
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      const byPage = new Map<number, { key: string; box: SampleBox }[]>();
+      for (const b of boxes) (byPage.get(b.box.page) ?? byPage.set(b.box.page, []).get(b.box.page)!).push(b);
+      for (const [page, list] of byPage) {
+        try {
+          const r = await renderPdfPage(file, page + 1, side);
+          const bmp = await createImageBitmap(r.blob);
+          const size = sizes[page]!, k = r.w / size.w;
+          const out: Record<string, string> = {};
+          for (const { key, box } of list) {
+            const m = Math.max(box.w, box.h) * pad, c = document.createElement("canvas");
+            const sx = (box.x - m) * k, sy = (box.y - m) * k, sw = (box.w + 2 * m) * k, sh = (box.h + 2 * m) * k;
+            c.width = Math.max(1, Math.round(sw));
+            c.height = Math.max(1, Math.round(sh));
+            c.getContext("2d")!.drawImage(bmp, sx, sy, sw, sh, 0, 0, c.width, c.height);
+            out[key] = c.toDataURL();
+          }
+          bmp.close();
+          if (!alive) return;
+          setCuts((was) => ({ ...was, ...out }));
+        } catch {
+          // a page that can't be drawn: no pictures from it
+        }
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the boxes as listed by `wanted`
+  }, [file, wanted, side, pad]);
+  return cuts;
+}
+
+export function PdfChartDialog({ file, content, read: first, onClose }: { file: File; content: PdfContent; read: ChartRead; onClose: () => void }) {
+  const t = useTranslations("pdfChart");
+  const run = useCommand();
+  const [use, setUse] = useState<boolean[]>(() => first.grids.map((g) => g.use));
+  const read = useMemo(() => (use.every((u, i) => u === first.grids[i]!.use) ? first : readChart(content, { use })), [use, first, content]);
+  const [symbols, setSymbols] = useState<Record<string, ChartChoice<KeyThread>>>({});
+  const [lines, setLines] = useState<Record<number, ChartChoice<string>>>({});
+  const [fadedEmpty, setFadedEmpty] = useState(true);
+  const [keepReference, setKeepReference] = useState(true);
+  const settled = allSettled({ read, symbols, lines });
+  // the steps taken: each only when there is something to settle in it — asked again after each, as the grids
+  // chosen change what there is
+  const after = (from: Step): Step => {
+    const order: Step[] = ["grids", "faded", "key", "done"];
+    for (const st of order.slice(order.indexOf(from) + 1))
+      if (st === "done" || (st === "faded" && fadedCount(read)) || (st === "key" && (!settled || keySeen))) return st;
+    return "done";
+  };
+  const [trail, setTrail] = useState<Step[]>(() => [gridsNeedWord(first) ? "grids" : fadedCount(first) ? "faded" : !allSettled({ read: first, symbols: {}, lines: {} }) ? "key" : "done"]);
+  const step = trail[trail.length - 1]!;
+  // the key, once shown, stays a step: going back and on again shows it to look over
+  const [keySeen, setKeySeen] = useState(step === "key");
+  const next = () => {
+    const to = after(step);
+    if (to === "key") setKeySeen(true);
+    setTrail([...trail, to]);
+  };
+  const open = () => {
+    onClose();
+    void run("file.openReadChart", { file, content, read, symbols, lines, fadedEmpty, keepReference });
+    return false as const;
+  };
+
+  const back = trail.length > 1 ? [{ label: t("back"), onClick: () => (setTrail(trail.slice(0, -1)), false as const) }] : [];
+  const buttons =
+    step === "done"
+      ? [...back, { label: t("cancel") }, { label: t("open"), primary: true, onClick: open }]
+      : [...back, { label: t("cancel") }, { label: t("next"), primary: true, disabled: step === "key" ? !settled : !read.symbols.length, onClick: () => (next(), false as const) }];
+
+  return (
+    <Modal wide title={t(`title_${step}`)} onClose={onClose} buttons={buttons}>
+      <div data-testid={`pdf-chart-${step}`}>
+        {step === "grids" && <GridsStep file={file} content={content} read={read} use={use} setUse={setUse} />}
+        {step === "faded" && <FadedStep count={fadedCount(read)} fadedEmpty={fadedEmpty} setFadedEmpty={setFadedEmpty} />}
+        {step === "key" && <KeyStep file={file} content={content} read={read} symbols={symbols} setSymbols={setSymbols} lines={lines} setLines={setLines} fadedEmpty={fadedEmpty} />}
+        {step === "done" && (
+          <>
+            <p data-testid="pdf-chart-summary">{t("done", { name: read.name, w: read.w, h: read.h, colours: settledRead({ read, symbols, lines }).symbols.filter((x) => x.thread).length, lines: read.lines.length })}</p>
+            {read.issues.partials > 0 && <p className={ui.hint}>{t("partialsLeft", { count: read.issues.partials })}</p>}
+            <label className={s.check}>
+              <input type="checkbox" checked={keepReference} onChange={(e) => setKeepReference(e.target.checked)} data-testid="pdf-chart-keep" />
+              <span>
+                {t("keepReference")}
+                <small className={ui.hint}>{t("keepReferenceHint")}</small>
+              </span>
+            </label>
+          </>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+function GridsStep({ file, content, read, use, setUse }: { file: File; content: PdfContent; read: ChartRead; use: boolean[]; setUse: (u: boolean[]) => void }) {
+  const t = useTranslations("pdfChart");
+  const pages = [...new Set(read.grids.map((g) => g.page))];
+  const sheets = useCuts(file, pages.map((page) => ({ key: String(page), box: { page, x: 0, y: 0, w: content.pages[page]!.w, h: content.pages[page]!.h } })), content.pages, 520, 0);
+  const notes: ReactNode[] = [];
+  if (read.stated && (read.stated.w !== read.w || read.stated.h !== read.h)) notes.push(t("gridsSize", { w: read.w, h: read.h, sw: read.stated.w, sh: read.stated.h }));
+  if (read.issues.conflicts) notes.push(t("gridsConflicts", { count: read.issues.conflicts }));
+  if (read.issues.unplaced) notes.push(t("gridsUnplaced", { count: read.issues.unplaced }));
+  return (
+    <>
+      <p className={ui.hint}>{t("gridsHint")}</p>
+      {notes.map((n, i) => <p key={i} className={s.warn}>{n}</p>)}
+      <p data-testid="pdf-chart-size">{t("gridsMake", { w: read.w, h: read.h })}</p>
+      <div className={s.pages}>
+        {pages.map((page) => {
+          const size = content.pages[page]!;
+          return (
+            <figure key={page} className={s.page}>
+              <div className={s.sheet} style={{ aspectRatio: `${size.w} / ${size.h}` }}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- a page drawn here, as a data URL */}
+                {sheets[String(page)] ? <img src={sheets[String(page)]} alt="" /> : <span className={s.loading} />}
+                {read.grids.map((g, i) => g.page === page && (
+                  <span key={i} className={cx(s.box, !use[i] && s.off, !g.at && s.unplaced)} style={{ left: `${((g.x0 + 2) / size.w) * 100}%`, top: `${((g.y0 + 2) / size.h) * 100}%`, width: `${((g.cols * g.pitch - 4) / size.w) * 100}%`, height: `${((g.rows * g.pitch - 4) / size.h) * 100}%` }} />
+                ))}
+              </div>
+              <figcaption>
+                {read.grids.map((g, i) => g.page === page && (
+                  <label key={i} className={s.check}>
+                    <input type="checkbox" disabled={!g.at} checked={use[i]} onChange={(e) => setUse(use.map((u, j) => (j === i ? e.target.checked : u)))} />
+                    <span>
+                      {t("gridOnPage", { page: page + 1 })}
+                      <small className={ui.hint}>{g.at ? t("gridAt", { c1: g.at.col - read.origin.col + 1, c2: g.at.col - read.origin.col + g.cols, r1: g.at.row - read.origin.row + 1, r2: g.at.row - read.origin.row + g.rows }) : t("gridNoNumbers")}</small>
+                    </span>
+                  </label>
+                ))}
+              </figcaption>
+            </figure>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+function FadedStep({ count, fadedEmpty, setFadedEmpty }: { count: number; fadedEmpty: boolean; setFadedEmpty: (v: boolean) => void }) {
+  const t = useTranslations("pdfChart");
+  return (
+    <>
+      <p>{t("fadedText", { count })}</p>
+      <p className={ui.hint}>{t("fadedHint")}</p>
+      <label className={s.check}>
+        <input type="radio" name="faded" checked={fadedEmpty} onChange={() => setFadedEmpty(true)} />
+        <span>{t("fadedEmpty")}</span>
+      </label>
+      <label className={s.check}>
+        <input type="radio" name="faded" checked={!fadedEmpty} onChange={() => setFadedEmpty(false)} />
+        <span>{t("fadedStitch")}</span>
+      </label>
+    </>
+  );
+}
+
+/** The chart as it will be: each cell its thread's colour, white while unsettled; the symbol being set up stands out. */
+function ChartPreview({ read, colours, lineColours, picked, fadedEmpty }: { read: ChartRead; colours: (string | null)[]; lineColours: (string | null)[]; picked: number | null; fadedEmpty: boolean }) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = canvas.current!, cell = Math.max(1, Math.floor(Math.min(420 / read.w, 420 / read.h)));
+    c.width = read.w * cell;
+    c.height = read.h * cell;
+    const g = c.getContext("2d")!;
+    g.fillStyle = "#fff";
+    g.fillRect(0, 0, c.width, c.height);
+    read.cells.forEach((v, i) => {
+      if (v < 0 || (fadedEmpty && read.faded[i])) return;
+      const x = (i % read.w) * cell, y = Math.floor(i / read.w) * cell;
+      const hex = colours[v];
+      g.globalAlpha = picked === null || picked === v ? 1 : 0.25;
+      g.fillStyle = hex ?? "#fff";
+      g.fillRect(x, y, cell, cell);
+      if (!hex) {
+        // not settled: a dot, so the cell shows on white
+        g.fillStyle = picked === v ? "#d62828" : "#9aa0a6";
+        g.fillRect(x + cell / 3, y + cell / 3, Math.max(1, cell / 3), Math.max(1, cell / 3));
+      }
+    });
+    g.globalAlpha = picked === null ? 1 : 0.4;
+    g.lineWidth = Math.max(1, cell / 4);
+    for (const l of read.lines) {
+      g.strokeStyle = lineColours[l.style] ?? "#d62828";
+      g.beginPath();
+      g.moveTo(l.x1 * cell, l.y1 * cell);
+      g.lineTo(l.x2 * cell, l.y2 * cell);
+      g.stroke();
+    }
+  }, [read, colours, lineColours, picked, fadedEmpty]);
+  return <canvas ref={canvas} className={s.preview} data-testid="pdf-chart-preview" />;
+}
+
+/** Threads or beads to choose from: a brand's catalogue, searched by number or name. */
+function ThreadSearch({ kinds, near, onPick }: { kinds: ("thread" | "bead")[]; near: string | null; onPick: (t: KeyThread) => void }) {
+  const t = useTranslations("pdfChart");
+  const [kind, setKind] = useState(kinds[0]!);
+  const catalogues = kind === "thread" ? THREAD_CATALOGUES : BEAD_CATALOGUES;
+  const [brand, setBrand] = useState(Object.keys(catalogues)[0]!);
+  const list = catalogues[brand] ?? catalogues[Object.keys(catalogues)[0]!]!;
+  const [query, setQuery] = useState("");
+  const shown = useMemo(() => [...list].filter((e) => !query.trim() || matchesQuery(e, query.trim())).sort(byNumber).slice(0, 80), [list, query]);
+  // the colour the PDF fills its cells with: the nearest of the brand's
+  const closest = useMemo(() => {
+    if (!near) return null;
+    const rgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    const [r, g, b] = rgb(near);
+    return list.reduce<{ e: ColorEntry; d: number } | null>((best, e) => {
+      const [r2, g2, b2] = rgb(e.hex);
+      const d = (r! - r2!) ** 2 + (g! - g2!) ** 2 + (b! - b2!) ** 2;
+      return !best || d < best.d ? { e, d } : best;
+    }, null)?.e;
+  }, [near, list]);
+  const pick = (e: ColorEntry) => onPick({ kind: e.kind === "bead" ? "bead" : "thread", ids: [e.id] });
+  return (
+    <div className={s.search} data-testid="pdf-chart-search">
+      <div className={s.tabs}>
+        {kinds.length > 1 && kinds.map((k) => (
+          <button key={k} type="button" className={cx(s.tab, k === kind && s.on)} onClick={() => { setKind(k); setBrand(Object.keys(k === "thread" ? THREAD_CATALOGUES : BEAD_CATALOGUES)[0]!); }}>{t(k)}</button>
+        ))}
+        {kinds.length > 1 && <span className={s.sep} />}
+        {Object.keys(catalogues).map((b) => (
+          <button key={b} type="button" className={cx(s.tab, b === brand && s.on)} onClick={() => setBrand(b)}>{b}</button>
+        ))}
+      </div>
+      <input className={ui.input} autoFocus placeholder={t("searchPlaceholder")} value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && shown[0] && pick(shown[0])} aria-label={t("searchPlaceholder")} />
+      {closest && (
+        <button type="button" className={s.closest} onClick={() => pick(closest)}>
+          <i style={{ background: near! }} /> {t("closest")} <i style={{ background: closest.hex }} /> <b>{label(closest)}</b> {closest.name}
+        </button>
+      )}
+      <div className={s.results} role="listbox">
+        {shown.map((e) => (
+          <button key={e.id} type="button" role="option" aria-selected={false} className={s.result} onClick={() => pick(e)}>
+            <i style={{ background: e.hex }} /> <b>{label(e)}</b> <span>{e.name}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function KeyStep({ file, content, read, symbols, setSymbols, lines, setLines, fadedEmpty }: {
+  file: File; content: PdfContent; read: ChartRead; fadedEmpty: boolean;
+  symbols: Record<string, ChartChoice<KeyThread>>; setSymbols: (v: Record<string, ChartChoice<KeyThread>>) => void;
+  lines: Record<number, ChartChoice<string>>; setLines: (v: Record<number, ChartChoice<string>>) => void;
+}) {
+  const t = useTranslations("pdfChart");
+  const [open, setOpen] = useState<string | null>(() => read.symbols.find((x) => !x.thread)?.id ?? (read.lineStyles.some((x) => !x.thread) ? `line:${read.lineStyles.findIndex((x) => !x.thread)}` : null));
+  const samples = useCuts(file, read.symbols.flatMap((x) => (x.sample ? [{ key: x.id, box: x.sample }] : [])), content.pages, 2400);
+  const settled = settledRead({ read, symbols, lines });
+  const colours = settled.symbols.map((x) => threadHex(x.thread) ?? null);
+  const lineColours = settled.lineStyles.map((x) => hexOf(x.thread ?? undefined) ?? null);
+  const picked = open && !open.startsWith("line:") ? read.symbols.findIndex((x) => x.id === open) : null;
+  const known = read.symbols.filter((x) => x.thread).length;
+  const choiceOf = (id: string) => symbols[id];
+  return (
+    <div className={s.keyStep}>
+      <ChartPreview read={read} colours={colours} lineColours={lineColours} picked={picked} fadedEmpty={fadedEmpty} />
+      <div className={s.keyList}>
+        <p className={ui.hint}>{known === read.symbols.length && read.lineStyles.every((x) => x.thread) ? t("keyAllRead") : t("keyHint", { read: known, total: read.symbols.length })}</p>
+        {read.symbols.map((x, i) => {
+          const c = choiceOf(x.id), thread = settled.symbols[i]!.thread, ok = !!thread || c === "skip";
+          return (
+            <div key={x.id} className={cx(s.row, !ok && s.unset, open === x.id && s.openRow)} data-testid="pdf-chart-row">
+              <button type="button" className={s.rowHead} onClick={() => setOpen(open === x.id ? null : x.id)}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- the symbol as the PDF draws it */}
+                <span className={s.sample}>{samples[x.id] ? <img src={samples[x.id]} alt="" /> : null}</span>
+                <span className={s.rowText}>
+                  <span className={s.chosen}>
+                    {thread ? <><i style={{ background: threadHex(thread) }} /><b>{threadLabel(thread)}</b> {threadName(thread)}</> : c === "skip" ? <em>{t("leftOut")}</em> : <em className={s.warnText}>{t("notRead")}</em>}
+                  </span>
+                  <small className={ui.hint}>{x.keyText ? t("inKey", { text: x.keyText }) : t("notInKey")} · {t("cells", { count: x.count })}</small>
+                </span>
+                <span className={s.change}>{ok ? t("change") : t("choose")}</span>
+              </button>
+              {open === x.id && (
+                <div className={s.rowBody}>
+                  <ThreadSearch kinds={["thread", "bead"]} near={x.fill} onPick={(th) => { setSymbols({ ...symbols, [x.id]: th }); setOpen(null); }} />
+                  <button type="button" className={cx(ui.btn, ui.ghost)} onClick={() => { setSymbols({ ...symbols, [x.id]: "skip" }); setOpen(null); }}>{t("leaveOut")}</button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {read.lineStyles.length > 0 && <h4 className={s.subhead}>{t("lines")}</h4>}
+        {read.lineStyles.map((x, i) => {
+          const key = `line:${i}`, c = lines[i], thread = settled.lineStyles[i]!.thread, ok = !!thread || c === "skip";
+          return (
+            <div key={key} className={cx(s.row, !ok && s.unset, open === key && s.openRow)} data-testid="pdf-chart-line">
+              <button type="button" className={s.rowHead} onClick={() => setOpen(open === key ? null : key)}>
+                <span className={s.sample}><i className={s.lineSample} style={{ background: x.ink }} /></span>
+                <span className={s.rowText}>
+                  <span className={s.chosen}>
+                    {thread ? <><i style={{ background: hexOf(thread) }} /><b>{label(libraryColor(thread))}</b> {libraryColor(thread)?.name}</> : c === "skip" ? <em>{t("leftOut")}</em> : <em className={s.warnText}>{t("lineNotRead")}</em>}
+                  </span>
+                  <small className={ui.hint}>{t("lineCount", { count: x.count })}</small>
+                </span>
+                <span className={s.change}>{ok ? t("change") : t("choose")}</span>
+              </button>
+              {open === key && (
+                <div className={s.rowBody}>
+                  <ThreadSearch kinds={["thread"]} near={null} onPick={(th) => { setLines({ ...lines, [i]: th.ids[0]! }); setOpen(null); }} />
+                  <button type="button" className={cx(ui.btn, ui.ghost)} onClick={() => { setLines({ ...lines, [i]: "skip" }); setOpen(null); }}>{t("leaveOutLines")}</button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

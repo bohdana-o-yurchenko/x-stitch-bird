@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { contentOf, FONTS, OTHER_H, OTHER_W, otherAppChart, otherCell } from "../../../../tests/support/otherAppChart";
+import { contentOf, FADED_FROM, FONTS, OTHER_H, OTHER_W, otherAppChart, otherCell } from "../../../../tests/support/otherAppChart";
 import { translateEn } from "../../../../tests/support/fixtures";
 import { createPattern } from "../../pattern/createPattern";
 import { addEntry } from "../../pattern/keyEntries";
@@ -8,7 +8,7 @@ import { ALL_SYMBOLS } from "../../symbols/symbols";
 import { chartPdf } from "../pdf/chartPdf";
 import { checkPatternKeeper, patternKeeperPdf } from "../pdf/patternKeeper";
 import { threadOf } from "./key";
-import { chartComplete, chartToPattern, readChart } from "./read";
+import { chartComplete, chartToPattern, linedUpPages, readChart } from "./read";
 
 describe("a key row's thread", () => {
   it.each([
@@ -76,6 +76,41 @@ describe("another app's PDF chart (SPEC §15.47)", () => {
     const src = (pat: typeof p, i: number) => (pat.layers.stitches[i] ? pat.key[pat.layers.stitches[i]!]!.src : null);
     const blend = (pat: typeof p, s: string | null) => (s?.startsWith("blend:") ? pat.blends[s]!.parts.map((x) => x.id).sort().join("+") : s);
     for (let i = 0; i < p.w * p.h; i++) expect(blend(q, src(q, i)), String(i)).toBe(blend(p, src(p, i)));
+  });
+
+  it("what the steps settle (SPEC §15.48): a size other than stated, cells only shown faded, a thread not read; where each symbol is drawn", async () => {
+    const pdf = await otherAppChart({ messy: true });
+    // the browser test's file (tests/fixtures/other-app-chart-messy.pdf): OTHER_MESSY_PDF_OUT=… writes it
+    if (process.env.OTHER_MESSY_PDF_OUT) writeFileSync(process.env.OTHER_MESSY_PDF_OUT, pdf);
+    const r = readChart(await contentOf(pdf));
+    expect([r.w, r.h, r.stated]).toEqual([30, 20, { w: 31, h: 20 }]);
+    let faded = 0;
+    r.cells.forEach((v, i) => {
+      if (v >= 0 && r.faded[i]) {
+        faded++;
+        expect(i % r.w).toBeGreaterThanOrEqual(FADED_FROM);
+      }
+    });
+    expect(faded).toBe([...Array(OTHER_H * 2)].filter((_, i) => otherCell(FADED_FROM + (i % 2), Math.floor(i / 2))).length);
+    const white = r.symbols.find((x) => !x.thread)!;
+    expect(white.keyText).toBe("Kreinik 032 Pearl");
+    // its picture is in the key, on the last page
+    expect(white.sample).toMatchObject({ page: 2 });
+    expect(chartComplete(r)).toBe(false);
+    const p = chartToPattern(r, ALL_SYMBOLS, { fadedEmpty: true });
+    expect([...p.layers.stitches].slice(0, 30).every((k, x) => !k || x < FADED_FROM)).toBe(true);
+  });
+
+  it("the grids chosen make the chart; each chart page's place behind it, lined up cell for cell", async () => {
+    const c = await contentOf(await otherAppChart());
+    const r = readChart(c);
+    const left = readChart(c, { use: [true, false] });
+    expect([left.w, left.h]).toEqual([16, 20]);
+    const places = linedUpPages(r, c.pages, 1000);
+    const k = 1000 / 842;
+    expect(places.get(0)).toEqual({ imageW: Math.round(595 * k), imageH: 1000, crop: { x: 60 * k, y: 80 * k, w: 16 * 12 * k, h: 20 * 12 * k }, rect: { x: 0, y: 0, w: 16, h: 20 } });
+    expect(places.get(1)!.rect).toEqual({ x: 14, y: 0, w: 16, h: 20 });
+    expect(places.has(2)).toBe(false);
   });
 
   it("a page with no chart on it: nothing read", async () => {

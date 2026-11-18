@@ -7,6 +7,7 @@ import { StraightenDialog } from "./StraightenDialog";
 import { KeepPatternDialog } from "./KeepPatternDialog";
 import { LiveConflictDialog } from "./LiveConflictDialog";
 import { PdfPageDialog } from "./PdfPageDialog";
+import { PdfChartDialog } from "./PdfChartDialog";
 import { NewPatternDialog } from "./NewPatternDialog";
 import {
   DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, LargePhotoDialog, SamePatternDialog, FileChoiceDialog, PdfPatternIntroDialog, PdfUnreadableDialog, MirrorFromCentreDialog, PhotoRoomDialog,
@@ -37,6 +38,7 @@ export function DialogHost() {
     case "photoRoom": return <PhotoRoomDialog used={d.used} max={d.max} size={d.size} onClose={close} />;
     case "largePhoto": return <LargePhotoDialog w={d.w} h={d.h} answer={d.answer} onClose={close} />;
     case "pdfPage": return <PdfPageDialog source={d.source} pages={d.pages} name={d.name} to={d.to} answer={d.answer} onClose={close} />;
+    case "pdfChart": return <PdfChartDialog file={d.file} content={d.content} read={d.read} onClose={close} />;
     case "pdfPatternIntro": return <PdfPatternIntroDialog onClose={close} />;
     case "pdfUnreadable": return <PdfUnreadableDialog name={d.name} onClose={close} />;
     case "fileChoice": return <FileChoiceDialog prefer={d.prefer} onClose={close} />;

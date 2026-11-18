@@ -24,7 +24,7 @@ import type { Ctx } from "@/render/primitives/cells";
 import { strokeLineStyle } from "@/render/primitives/lineStyles";
 import { downloadFile, isImageFile, isPatternFile, isPdfFile, readText } from "@/platform/files";
 import { pdfAttachments, pdfContent } from "@/platform/pdf";
-import { chartComplete, chartToPattern, readChart } from "@/core/formats/pdfChart/read";
+import { readChart } from "@/core/formats/pdfChart/read";
 import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import { photoFits } from "../images/photoRoom";
 import { accountPatternApi } from "@/persistence";
@@ -194,20 +194,20 @@ export async function loadFile(ed: Editor, file: File) {
 }
 
 /**
- * New ▸ From a PDF chart… (SPEC §15.46, §15.47). A PDF this app made carries its pattern: it comes back exactly. Another
- * app's chart is read — its grids, symbols and key; when everything is settled it opens (settling the rest by hand is
- * next). Either way a new pattern. Nothing read: said, with the way to trace it instead.
+ * New ▸ From a PDF chart… (SPEC §15.46–§15.48). A PDF this app made carries its pattern: it comes back exactly. Another
+ * app's chart is read — its grids, symbols and key — and the steps settle the rest (`pdfChart`). Either way a new
+ * pattern. Nothing read: said, with the way to trace it instead.
  */
 export async function loadPdfPattern(ed: Editor, file: File) {
   let pattern: Pattern;
   try {
     const doc = patternFromAttachments(await pdfAttachments(file));
-    if (doc) pattern = parsePattern(doc, ed.state.symbols).pattern;
-    else {
-      const read = readChart(await pdfContent(file));
-      if (!read.symbols.length || !chartComplete(read) || read.issues.conflicts || read.issues.unplaced) return ed.openDialog({ type: "pdfUnreadable", name: file.name });
-      pattern = chartToPattern(read, ed.state.symbols, { strands: ed.doc.strands || 2 });
+    if (!doc) {
+      ed.toast("toasts.readingPdf");
+      const content = await pdfContent(file), read = readChart(content);
+      return ed.openDialog(read.symbols.length ? { type: "pdfChart", file, content, read } : { type: "pdfUnreadable", name: file.name });
     }
+    pattern = parsePattern(doc, ed.state.symbols).pattern;
   } catch (e) {
     console.error(e);
     if (e instanceof NewerFileError) return ed.toast("toasts.newerFile");

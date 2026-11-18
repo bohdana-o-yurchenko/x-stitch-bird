@@ -2087,9 +2087,8 @@ Only the page picked is drawn at full size (§15.41); previews are never stored.
   `<name>.xbird` — the pattern without photos and without learned photo examples. Viewers list it; chart apps
   ignore it. Read back, the very same pattern: own threads and beads, blends, symbols, every stitch, bead, knot and
   line — **always a new pattern** (a new id), as with an .oxs.
-- **Any other PDF**: read as another app's chart (§15.47). Nothing read, or (until the steps below are built) not
-  everything settled: "No pattern could be read" — it may be a scan, made from photos, or from an app not read yet —
-  and the way to trace it.
+- **Any other PDF**: read as another app's chart (§15.47), then its steps (§15.48). Nothing read: "No pattern could be
+  read" — it may be a scan, made from photos, or from an app not read yet — and the way to trace it.
 - **Next** (approved 2026-11-18): reading other apps' PDFs — symbols as text (Pattern Maker, WinStitch, MacStitch,
   PK-ready files, this app's older PDFs), as stamped pictures (FlossCross) or drawn shapes; pages placed by their
   edge numbers; the key's rows matched to the symbols. Then the steps: the grids found (untick the ones that don't
@@ -2120,12 +2119,31 @@ stamped picture with a key of its pixels, straight strokes, filled upright recta
   ink and width. Its thread: the only thread a key lists without a symbol; else the nearest key thread by colour —
   not when printed plain black or grey (many charts print every line so).
 - **Result**: name (the PDF's title, else the biggest line on page one), size, fabric count ("Aida 14", "14 count"),
-  whole crosses and beads, backstitch. Complete — every symbol and line style with a thread, nothing unplaced or
-  conflicting — it opens as a new pattern; the rest waits for the steps of §15.46 (grids, faded cells, key).
+  whole crosses and beads, backstitch; then the steps (§15.48).
 - Read so far: Pattern Maker (symbols as characters on colour-filled cells; its black backstitch needs its thread
   set), FlossCross (symbols as pictures, an overview page), this app's own PDFs made before they carried the pattern.
   Tests: a chart made by the tests in another app's manner (`tests/support/otherAppChart.ts`, also
   `tests/fixtures/other-app-chart.pdf`); other people's charts only in `tests/fixtures/private` (not committed).
+
+### 15.48 A PDF chart's steps; the PDF kept behind the chart, lined up (2026-11-18)
+"Reading the PDF…", then one dialog (`PdfChartDialog`), each step only when there is something in it to settle —
+nothing: straight to *Pattern read*. Back goes to the step before; Cancel adds nothing.
+1. **The grids found** — when they don't add up: cells shown differently, grids without numbers (left out, can't be
+   ticked), or another size than the PDF states. Every page with a grid, drawn, the grids outlined; per grid a tick,
+   "Page 2 · columns 15–30, rows 1–20"; unticking puts the chart together again ("Together they make 16 × 20").
+2. **Faded cells** — when cells are shown only faded: "Leave them empty" (default) · "Stitch them like the rest".
+3. **The key** — when a symbol or a line style has no thread. The chart as it will be (each cell its thread's colour,
+   unsettled ones a dot on white, the symbol being set up standing out); per symbol its picture as the PDF draws it,
+   its key row's text, its cells, its thread. Choose…: Thread / Bead, a brand's catalogue searched by number or name
+   (Enter takes the first), "Closest to its colour in the PDF" when the chart fills cells; or leave the symbol out
+   (its cells empty). Backstitch line styles alike (threads). **Next** only once every one is set or left out; once
+   shown, the key stays a step.
+4. **Pattern read** — "Snowy Owl: 30 × 20 stitches, 3 colours, 2 backstitch lines."; part stitches left out are
+   said. ☑ **Keep the PDF behind the chart, lined up** (ticked): the PDF stored as the underlay (§15.41), behind the
+   stitches, each chart page placed over the cells it shows (its grid cut out, no straightening — `linedUpPages`),
+   the page with the biggest cells shown first. **Open in the editor**: a new pattern.
+Own threads (brands the app doesn't know) are set up in the editor afterwards. Fixed on the way: a PDF page behind the
+chart whose picture can't be loaded is drawn again once, not over and over.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

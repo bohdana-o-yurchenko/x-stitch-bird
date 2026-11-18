@@ -49,6 +49,8 @@ export class UnderlayService {
   /** Whether the edit frame was shown when a drag began: it stays so until the drag ends, so it never flickers. */
   private frameHeld: boolean | null = null;
   private undoStack: UnderlayData[] = [];
+  /** The pattern's own underlay being loaded (`switchTo`). */
+  private switching: Promise<void> = Promise.resolve();
 
   constructor(private ed: Editor) {}
 
@@ -67,18 +69,19 @@ export class UnderlayService {
     if (save) this.save();
   }
 
-  private async show(u: UnderlayData | null): Promise<void> {
+  /** `redraw`: a PDF page whose picture can't be loaded is drawn again — once (drawn and still not loading: as is). */
+  private async show(u: UnderlayData | null, redraw = true): Promise<void> {
     this.ed.store.setState({ underlay: u, underlayImage: null });
     if (!u) return;
     const img = await this.ed.images.load(u.image).catch(() => null);
     // a page of a PDF this browser hasn't drawn (opened on another device, or from a file): drawn now
-    if (!img && u.pdf && this.data === u) {
+    if (!img && u.pdf && redraw && this.data === u) {
       const drawn = await drawPdfPage(this.ed, u.pdf.source, u.pdf.page);
       const again = drawn && this.data === u ? await this.asPlaced(u, drawn) : null;
       if (!again || this.data !== u) return;
       this.ed.store.setState({ underlay: again });
       this.save();
-      return this.show(again);
+      return this.show(again, false);
     }
     if (this.data?.image === u.image) this.ed.store.setState({ underlayImage: img });
   }
@@ -127,7 +130,11 @@ export class UnderlayService {
   }
 
   /** `incoming`: the underlay from a loaded .json file (pictures as data URLs). */
-  async switchTo(patternId: string, incoming: UnderlayData | null) {
+  switchTo(patternId: string, incoming: UnderlayData | null): Promise<void> {
+    return (this.switching = this.load(patternId, incoming));
+  }
+
+  private async load(patternId: string, incoming: UnderlayData | null) {
     if (this.dirty) this.saveNow();
     this.patternId = patternId;
     this.ready = false;
@@ -159,6 +166,18 @@ export class UnderlayService {
     this.ed.store.setState({ pendingTip: "underlay" });
     // its controls come into the side panel
     this.ed.showSection("references");
+  }
+
+  /**
+   * A ready-made underlay for the pattern just opened — a PDF chart's pages, lined up (SPEC §15.48) — once that
+   * pattern's own (none) has loaded.
+   */
+  async put(patternId: string, u: UnderlayData) {
+    await this.switching;
+    if (this.patternId !== patternId) return;
+    this.undoStack = [];
+    await this.show(u);
+    this.save();
   }
 
   /** A PDF behind the chart (SPEC §15.41, §15.44): the page picked, fitted to the chart, then straightened like a photo. */

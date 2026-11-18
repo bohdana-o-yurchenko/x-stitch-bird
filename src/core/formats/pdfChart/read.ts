@@ -1,7 +1,7 @@
 import { libraryColor } from "../../catalog/catalog";
 import { createPattern, MAX_SIZE } from "../../pattern/createPattern";
 import { addEntry } from "../../pattern/keyEntries";
-import type { KeyIndex, Pattern } from "../../pattern/types";
+import type { KeyIndex, Pattern, Rect } from "../../pattern/types";
 import { centre, type PdfContent, type Word } from "./content";
 import { findGrids, type MarkId, type PageGrid } from "./grids";
 import { brandWord, threadOf, type KeyThread } from "./key";
@@ -23,6 +23,16 @@ export interface ChartSymbol {
   thread: KeyThread | null;
   /** The colour cells with this symbol are filled with, when the chart fills them (a hint for setting it up). */
   fill: string | null;
+  /** Where it is drawn — in the key, else in the chart — to show it as the PDF does: page (from 0) and box in points. */
+  sample: SampleBox | null;
+}
+
+export interface SampleBox {
+  page: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 export interface ChartLineStyle {
@@ -37,6 +47,8 @@ export interface ChartRead {
   name: string;
   w: number;
   h: number;
+  /** The whole chart's first column and row in the PDF's numbering: grid `at` minus this is where it goes. */
+  origin: { col: number; row: number };
   /** Every grid found, placed or not; `use: false` — left out (by the reader or the user). */
   grids: (PageGrid & { use: boolean })[];
   symbols: ChartSymbol[];
@@ -88,25 +100,26 @@ function nameOf(c: PdfContent): string {
  * thread; also rows naming a thread without a symbol (backstitch lists).
  */
 function readKey(c: PdfContent, grids: PageGrid[], ids: Set<MarkId>) {
-  const found = new Map<MarkId, { text: string; thread: KeyThread | null }>();
+  const found = new Map<MarkId, { text: string; thread: KeyThread | null; at: SampleBox }>();
   const loose: KeyThread[] = [];
   c.pages.forEach((page, n) => {
     const inGrid = (x: number, y: number) => grids.some((g) => g.page === n && x >= g.x0 && y >= g.y0 && x <= g.x0 + g.cols * g.pitch && y <= g.y0 + g.rows * g.pitch);
     // symbols as they appear in the key: characters standing alone, or stamped pictures
-    const marks: { id: MarkId; x: number; y: number; h: number }[] = [];
+    const marks: { id: MarkId; x: number; y: number; h: number; box: SampleBox }[] = [];
     for (const w of page.words) {
       const id = `g:${w.text}`;
-      if (w.upright && w.glyphs.length === 1 && ids.has(id) && !inGrid(...(Object.values(centre(w)) as [number, number]))) marks.push({ id, ...centre(w), h: w.h });
+      if (w.upright && w.glyphs.length === 1 && ids.has(id) && !inGrid(...(Object.values(centre(w)) as [number, number]))) marks.push({ id, ...centre(w), h: w.h, box: { page: n, x: w.x, y: w.y, w: w.w, h: w.h } });
     }
     page.stamps.forEach((s) => {
       const id = `s:${s.key}`, at = centre(s);
-      if (ids.has(id) && !inGrid(at.x, at.y)) marks.push({ id, ...at, h: s.h });
+      if (ids.has(id) && !inGrid(at.x, at.y)) marks.push({ id, ...at, h: s.h, box: { page: n, x: s.x, y: s.y, w: s.w, h: s.h } });
     });
     const words = page.words.filter((w) => w.upright);
     const rowOf = (x: number, y: number, h: number, until: number) =>
       words.filter((w) => Math.abs(centre(w).y - y) < Math.max(h, w.h) * 0.6 && w.x > x && w.x < until).sort((a, b) => a.x - b.x);
-    // a brand as a column heading: rows below it may give the number alone
-    const headings = words.flatMap((w) => (brandWord(w.text) ? [w] : []));
+    // a brand as a column heading — its own line naming no thread: rows below it may give the number alone
+    const lineText = (w: Word) => words.filter((o) => Math.abs(centre(o).y - centre(w).y) < Math.max(o.h, w.h) * 0.6).sort((a, b) => a.x - b.x).map((o) => o.text).join(" ");
+    const headings = words.flatMap((w) => (brandWord(w.text) && !threadOf(lineText(w)) ? [w] : []));
     const brandAbove = (row: Word[]) => headings.find((hd) => row.some((w) => w.y > hd.y && w.x < hd.x + hd.w && w.x + w.w > hd.x && !brandWord(w.text)))?.text;
     for (const m of marks) {
       if (found.get(m.id)?.thread) continue;
@@ -114,7 +127,7 @@ function readKey(c: PdfContent, grids: PageGrid[], ids: Set<MarkId>) {
       const row = rowOf(m.x, m.y, m.h, next);
       const text = row.map((w) => w.text).join(" ");
       const thread = threadOf(text, brandAbove(row));
-      if (thread || !found.has(m.id)) found.set(m.id, { text, thread });
+      if (thread || !found.has(m.id)) found.set(m.id, { text, thread, at: m.box });
     }
     // lines naming a thread with no symbol before them
     const lines = new Map<number, Word[]>();
@@ -142,19 +155,24 @@ const distance = (a: string, b: string) => {
   return Math.hypot(r1 - r2, g1 - g2, b1 - b2);
 };
 
-export function readChart(c: PdfContent): ChartRead {
-  const grids = c.pages.flatMap((p, n) => findGrids(p, n)).map((g) => ({ ...g, use: true }));
+/**
+ * Reads the chart. `use`: the grids to put it together from, by index into `grids` as first read (the user's choice);
+ * by default every grid placed by its numbers.
+ */
+export function readChart(c: PdfContent, o: { use?: readonly boolean[] } = {}): ChartRead {
+  const grids = c.pages.flatMap((p, n) => findGrids(p, n)).map((g, i) => ({ ...g, use: o.use?.[i] ?? true }));
   const text = allWords(c).map((w) => w.text).join(" ");
   const issues = { conflicts: 0, unplaced: 0, partials: grids.reduce((n, g) => n + g.small, 0) };
 
   // placing: by the numbers; a single grid without them is the chart
   const placed = grids.filter((g) => g.at);
   if (!placed.length && grids.length) {
-    const biggest = grids.reduce((a, b) => (b.cols * b.rows > a.cols * a.rows ? b : a));
-    biggest.at = { col: 0, row: 0 };
-    for (const g of grids) if (g !== biggest) g.use = false;
+    // the one chosen, else the biggest
+    const chosen = o.use ? grids.find((g) => g.use) : grids.reduce((a, b) => (b.cols * b.rows > a.cols * a.rows ? b : a));
+    if (chosen) chosen.at = { col: 0, row: 0 };
+    for (const g of grids) if (g !== chosen) g.use = false;
   }
-  for (const g of grids) if (!g.at && g.use) {
+  for (const g of grids) if (!g.at) {
     g.use = false;
     issues.unplaced++;
   }
@@ -196,7 +214,7 @@ export function readChart(c: PdfContent): ChartRead {
       let s = ids.get(id);
       if (s === undefined) {
         ids.set(id, (s = symbols.length));
-        symbols.push({ id, count: 0, keyText: null, thread: null, fill: null });
+        symbols.push({ id, count: 0, keyText: null, thread: null, fill: null, sample: { page: g.page, x: g.x0 + (i % g.cols) * g.pitch, y: g.y0 + Math.floor(i / g.cols) * g.pitch, w: g.pitch, h: g.pitch } });
       }
       const at = y * w + x;
       // a faded cell gives way to the same cell shown in full on another page
@@ -222,7 +240,7 @@ export function readChart(c: PdfContent): ChartRead {
   const { found, loose } = readKey(c, grids, new Set(ids.keys()));
   for (const s of symbols) {
     const k = found.get(s.id);
-    if (k) Object.assign(s, { keyText: k.text, thread: k.thread });
+    if (k) Object.assign(s, { keyText: k.text, thread: k.thread, sample: k.at });
   }
 
   // backstitch: one style per ink and width; its thread by colour among the key's threads, else to be set up
@@ -260,7 +278,7 @@ export function readChart(c: PdfContent): ChartRead {
     if (best && best.d < 40 && !grey) s.thread = best.id;
   }
 
-  return { name: nameOf(c), w, h, grids, symbols, cells, faded, lines, lineStyles, stated, count: fabricCount(text), issues };
+  return { name: nameOf(c), w, h, origin: { col: minCol, row: minRow }, grids, symbols, cells, faded, lines, lineStyles, stated, count: fabricCount(text), issues };
 }
 
 /** Every symbol and line style has its thread: the pattern can be made. */
@@ -297,4 +315,33 @@ export function chartToPattern(r: ChartRead, symbols: readonly string[], o: { fa
     if (k != null) p.layers.segments.push({ x1: l.x1, y1: l.y1, x2: l.x2, y2: l.y2, k });
   }
   return p;
+}
+
+/** A page drawn `imageW` × `imageH`, its grid (`crop`, image pixels) over the chart's cells `rect`. */
+export interface LinedUpPage {
+  imageW: number;
+  imageH: number;
+  crop: Rect;
+  rect: Rect;
+}
+
+/**
+ * Where each chart page goes behind the chart, lined up cell for cell (SPEC §15.48): by page (from 0), the page drawn
+ * `side` pixels on its long side, cropped to its grid, over the cells it shows. The grid with the biggest cells per page.
+ */
+export function linedUpPages(r: ChartRead, sizes: readonly { w: number; h: number }[], side: number): Map<number, LinedUpPage> {
+  const out = new Map<number, LinedUpPage>();
+  const best = new Map<number, PageGrid>();
+  for (const g of r.grids) if (g.use && g.at && (best.get(g.page)?.pitch ?? 0) < g.pitch) best.set(g.page, g);
+  for (const [page, g] of best) {
+    const size = sizes[page];
+    if (!size) continue;
+    const k = side / Math.max(size.w, size.h);
+    out.set(page, {
+      imageW: Math.round(size.w * k), imageH: Math.round(size.h * k),
+      crop: { x: g.x0 * k, y: g.y0 * k, w: g.cols * g.pitch * k, h: g.rows * g.pitch * k },
+      rect: { x: g.at!.col - r.origin.col, y: g.at!.row - r.origin.row, w: g.cols, h: g.rows },
+    });
+  }
+  return out;
 }

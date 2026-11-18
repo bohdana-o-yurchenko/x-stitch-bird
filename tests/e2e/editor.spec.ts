@@ -602,16 +602,69 @@ test("New ▸ From a PDF chart… says first what it is; this app's PDF comes ba
   await expect(unreadable).toHaveCount(0);
 });
 
-test("New ▸ From a PDF chart… reads another app's chart: symbols stamped over two pages, its key, a bead, a backstitch (SPEC §15.47)", async ({ page }) => {
+/** New ▸ From a PDF chart…, the explanation passed, `name` from the fixtures picked. */
+async function readPdfChart(page: Page, name: string) {
   await fileAction(page, "New", "From a PDF chart…");
   const chooser = page.waitForEvent("filechooser");
   await page.getByRole("button", { name: "Choose a PDF…" }).click();
-  await (await chooser).setFiles(fixture("other-app-chart.pdf"));
+  await (await chooser).setFiles(fixture(name));
+}
+const readDoc = (page: Page) =>
+  editorState<{ name: string; w: number; h: number; count: number; key: string[]; beads: number; lines: number; right: number }>(page,
+    "(ed) => ({ name: ed.doc.name, w: ed.doc.w, h: ed.doc.h, count: ed.doc.count, key: ed.doc.key.filter(Boolean).map((e) => `${e.t}:${e.src}`).sort(), beads: [...ed.doc.layers.beads].filter(Boolean).length, lines: ed.doc.layers.segments.length, right: [...ed.doc.layers.stitches].filter((k, i) => k && i % ed.doc.w >= 28).length })");
+
+test("New ▸ From a PDF chart… reads another app's chart: nothing to settle — \"Pattern read\", then the pattern with the PDF behind it, lined up (SPEC §15.47, §15.48)", async ({ page }) => {
+  await readPdfChart(page, "other-app-chart.pdf");
+  await expect(page.getByTestId("pdf-chart-summary")).toHaveText("Snowy Owl: 30 × 20 stitches, 3 colours, 2 backstitch lines.");
+  await expect(page.getByTestId("pdf-chart-keep")).toBeChecked();
+  await page.getByRole("button", { name: "Open in the editor" }).click();
   await expect(page.getByText(/^Loaded /)).toBeVisible();
-  const doc = await editorState<{ name: string; w: number; h: number; count: number; key: string[]; beads: number; lines: number }>(page,
-    "(ed) => ({ name: ed.doc.name, w: ed.doc.w, h: ed.doc.h, count: ed.doc.count, key: ed.doc.key.filter(Boolean).map((e) => `${e.t}:${e.src}`).sort(), beads: [...ed.doc.layers.beads].filter(Boolean).length, lines: ed.doc.layers.segments.length })");
+  const doc = await readDoc(page);
   expect(doc).toMatchObject({ name: "Snowy Owl", w: 30, h: 20, count: 16, key: ["back:dmc:321", "bead:bead:00557", "thread:dmc:310", "thread:dmc:3865"], lines: 2 });
   expect(doc.beads).toBeGreaterThan(0);
+  // the first page behind the chart over columns 1–16, the second's place kept for when it's shown
+  await expect.poll(() => editorState(page, "(ed) => ed.state.underlay && { behind: ed.state.underlay.behind, rect: ed.state.underlay.rect, page: ed.state.underlay.pdf.page, pages: ed.state.underlay.pdf.pages, second: ed.state.underlay.pdf.places['2'].rect }")).toEqual({ behind: true, rect: { x: 0, y: 0, w: 16, h: 20 }, page: 1, pages: 3, second: { x: 14, y: 0, w: 16, h: 20 } });
+  await expect.poll(() => editorState(page, "(ed) => !!ed.state.underlayImage")).toBe(true);
+});
+
+test("a chart with things to settle: the grids (not the size stated), faded cells, a thread not read — Open only once all is set (SPEC §15.48)", async ({ page }) => {
+  await readPdfChart(page, "other-app-chart-messy.pdf");
+  const dialog = page.getByRole("dialog"), next = dialog.getByRole("button", { name: "Next", exact: true });
+  // the grids: the PDF says 31 × 20, the grids make 30 × 20; leaving out the second page makes 16 × 20
+  await expect(page.getByTestId("pdf-chart-grids")).toContainText("The PDF says 31 × 20; the grids make 30 × 20.");
+  const grids = page.getByTestId("pdf-chart-grids").getByRole("checkbox");
+  await expect(grids).toHaveCount(2);
+  await grids.nth(1).uncheck();
+  await expect(page.getByTestId("pdf-chart-size")).toHaveText("Together they make 16 × 20 stitches.");
+  await grids.nth(1).check();
+  await next.click();
+  // faded cells: stitched like the rest this time
+  await expect(page.getByTestId("pdf-chart-faded")).toContainText("printed faded");
+  await page.getByLabel("Stitch them like the rest").check();
+  await next.click();
+  // the key: the white thread wasn't read; Next waits for it
+  const key = page.getByTestId("pdf-chart-key");
+  await expect(key.getByTestId("pdf-chart-row")).toHaveCount(3);
+  await expect(key.getByTestId("pdf-chart-row").filter({ hasText: "Not read" })).toContainText("Key: Kreinik 032 Pearl");
+  await expect(next).toBeDisabled();
+  await key.getByPlaceholder("Number or name").fill("3865");
+  await page.keyboard.press("Enter");
+  await expect(key.getByTestId("pdf-chart-row").filter({ hasText: "Not read" })).toHaveCount(0);
+  await expect(key.getByTestId("pdf-chart-row").filter({ hasText: "Winter White" })).toHaveCount(1);
+  // Back and on again keeps the choice
+  await dialog.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(page.getByTestId("pdf-chart-faded")).toBeVisible();
+  await next.click();
+  await expect(next).toBeEnabled();
+  await next.click();
+  await page.getByTestId("pdf-chart-keep").uncheck();
+  await dialog.getByRole("button", { name: "Open in the editor" }).click();
+  await expect(page.getByText(/^Loaded /)).toBeVisible();
+  const doc = await readDoc(page);
+  expect(doc).toMatchObject({ w: 30, h: 20, key: ["back:dmc:321", "bead:bead:00557", "thread:dmc:310", "thread:dmc:3865"] });
+  // the faded columns stitched
+  expect(doc.right).toBeGreaterThan(0);
+  expect(await editorState(page, "(ed) => ed.state.underlay")).toBeNull();
 });
 
 test("New ▸ has a blank pattern, a photo, an .oxs and a PDF chart; My patterns' From a PDF chart… opens on the same explanation (SPEC §15.46)", async ({ page }) => {

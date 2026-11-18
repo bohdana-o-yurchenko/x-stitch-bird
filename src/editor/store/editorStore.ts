@@ -1,4 +1,6 @@
 import { createStore } from "zustand/vanilla";
+import type { PdfContent } from "@/core/formats/pdfChart/content";
+import type { ChartRead } from "@/core/formats/pdfChart/read";
 import type { PkReport } from "@/core/formats/pdf/patternKeeper";
 import type { Fragment } from "@/core/pattern/fragment";
 import type { Palette } from "@/core/pattern/palette";
@@ -46,6 +48,7 @@ export type DialogRequest =
   | { type: "fileChoice"; prefer: "xbird" | "oxs" }
   | { type: "pdfPatternIntro" }
   | { type: "pdfUnreadable"; name: string }
+  | { type: "pdfChart"; file: File; content: PdfContent; read: ChartRead }
   | { type: "samePattern"; name: string; age: "older" | "newer" | "other"; answer: (choice: SamePatternChoice) => void }
   | { type: "patternKeeper"; issues: PkReport["issues"] }
   | { type: "textFallback"; ext: string; text: string }

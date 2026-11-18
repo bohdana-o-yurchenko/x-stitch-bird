@@ -8,7 +8,8 @@ import type { PdfContent } from "../../src/core/formats/pdfChart/content";
  * A chart as another app would print it (SPEC §15.47), made here so tests needn't carry anyone's design: symbols
  * stamped as small pictures, the chart over two pages that share two columns, numbers every ten along the edges,
  * a red backstitch, and a key — each symbol followed by its thread, a bead among them, a backstitch thread listed
- * without a symbol.
+ * without a symbol. `messy`: what needs the steps (SPEC §15.48) — a size that doesn't match the grids (31 × 20), the
+ * last two columns printed faded, the white thread a brand the app doesn't know.
  */
 
 const font = (name: string) => new Uint8Array(readFileSync(new URL(`../../public/fonts/${name}.ttf`, import.meta.url)));
@@ -28,7 +29,10 @@ function symbolPicture(kind: number): Raster {
   return { w: 8, h: 8, rgb };
 }
 
-export async function otherAppChart(): Promise<Uint8Array> {
+/** The columns printed faded in the messy chart. */
+export const FADED_FROM = 28;
+
+export async function otherAppChart(o: { messy?: boolean } = {}): Promise<Uint8Array> {
   const pdf = new PdfWriter();
   await pdf.embedTextFonts(FONTS);
   const pictures = [0, await pdf.image(symbolPicture(1)), await pdf.image(symbolPicture(2)), await pdf.image(symbolPicture(3))];
@@ -38,8 +42,14 @@ export async function otherAppChart(): Promise<Uint8Array> {
     const page = new PdfPage(595, 842), cols = to - from;
     page.text("bold", 14, L, 40, "Snowy Owl");
     for (let x = from; x < to; x++) for (let y = 0; y < OTHER_H; y++) {
-      const k = otherCell(x, y);
-      if (k) page.image(pictures[k]!, L + (x - from) * P + 1.5, T + y * P + 1.5, P - 3, P - 3);
+      const k = otherCell(x, y), faded = o.messy && x >= FADED_FROM;
+      if (!k) continue;
+      if (faded) {
+        page.save();
+        page.opacity(0.35);
+      }
+      page.image(pictures[k]!, L + (x - from) * P + 1.5, T + y * P + 1.5, P - 3, P - 3);
+      if (faded) page.restore();
     }
     const thin: [number, number, number, number][] = [], bold: [number, number, number, number][] = [];
     for (let i = 0; i <= cols; i++) ((from + i) % 10 ? thin : bold).push([L + i * P, T, L + i * P, T + OTHER_H * P]);
@@ -54,9 +64,9 @@ export async function otherAppChart(): Promise<Uint8Array> {
     await pdf.addPage(page);
   }
   const key = new PdfPage(595, 842);
-  key.text("regular", 10, L, 50, "Design size: 30 x 20 stitches, Aida 16");
+  key.text("regular", 10, L, 50, `Design size: ${o.messy ? 31 : 30} x 20 stitches, Aida 16`);
   key.text("bold", 10, L, 80, "Symbol    Thread");
-  ["DMC 310 Black", "DMC 3865 Winter White", "Mill Hill 00557 Gold"].forEach((row, i) => {
+  ["DMC 310 Black", o.messy ? "Kreinik 032 Pearl" : "DMC 3865 Winter White", "Mill Hill 00557 Gold"].forEach((row, i) => {
     key.image(pictures[i + 1]!, L, 92 + i * 20, 12, 12);
     key.text("regular", 10, L + 40, 102 + i * 20, row);
   });

@@ -1,4 +1,5 @@
 import { PARTIAL_KINDS } from "@/core/stitches/partialKinds";
+import { openReadChart, type ReadChartOpen } from "../actions/pdfChart";
 import type { CheckOptions } from "@/core/checks/checks";
 import { acceptMatching, declineBlock } from "../matching/matching";
 import { closeChecks, goToFinding, ignoreFinding, runChartChecks, stepFinding } from "../checks/checks";
@@ -82,6 +83,8 @@ export const COMMANDS: readonly Command[] = [
   { id: "file.newFromPdf", run: (ed) => ed.openDialog({ type: "pdfPatternIntro" }) },
   { id: "file.pickPdfPattern", run: async (ed) => { const f = await pickFile(".pdf,application/pdf"); if (f) await ed.commands.run("file.loadPdf", f); } },
   { id: "file.loadPdf", run: (ed, f) => loadPdfPattern(ed, f as File), destructive: "import", replacesPattern: true },
+  // the read chart, settled in its steps (SPEC §15.48); replacing the open pattern was asked about before reading
+  { id: "file.openReadChart", run: (ed, o) => openReadChart(ed, o as ReadChartOpen) },
   { id: "file.drop", run: (ed, files) => handleDrop(ed, files as File[]) },
   { id: "image.pick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await openImageDialog(ed, f); } },
   { id: "image.open", run: (ed, f) => openImageDialog(ed, f as File) },
