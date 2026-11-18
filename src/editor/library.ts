@@ -5,7 +5,7 @@ import { patternStats, type PatternDetails } from "@/core/pattern/stats";
 import { buildPalette } from "@/core/pattern/palette";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import type { CustomColor } from "@/core/pattern/types";
-import { account, accountPatternApi, accountThreadApi, accountUsageApi, createPersistence, versionApi, type AccountUsage, type Persistence, type PatternSummary } from "@/persistence";
+import { account, accountApi, accountPatternApi, accountThreadApi, accountUsageApi, createPersistence, versionApi, type AccountUsage, type Persistence, type PatternSummary } from "@/persistence";
 import { downloadFile } from "@/platform/files";
 import { PATTERN_EXT, safeName } from "./actions/importExport";
 import { ImageService } from "./images/ImageService";
@@ -98,6 +98,19 @@ export function createLibrary(persistence: Persistence = createPersistence()) {
     saveThread: (c: CustomColor): Promise<boolean> => accountThreadApi.save(c),
     removeThread: (id: string): Promise<boolean> => accountThreadApi.remove(id),
     forgetAccountHere: () => forgetAccountHere(persistence),
+
+    /**
+     * Deletes the account and everything in it (SPEC §15.38), `email` typed to confirm; then this browser's copies
+     * of its patterns go too (patterns only in this browser stay). False when it wasn't deleted.
+     */
+    async deleteAccount(email: string): Promise<boolean> {
+      const theirs = (await persistence.patterns.list().catch(() => [])).filter((p) => p.where !== "browser").map((p) => p.id);
+      if (!(await accountApi.remove(email))) return false;
+      for (const id of theirs) await persistence.patterns.remove(id).catch(() => {});
+      const draft = await persistence.draft.load().catch(() => null);
+      if (draft && theirs.includes(draft.id)) await persistence.draft.clear?.();
+      return true;
+    },
 
     /** Deleted here and from the account; when it's the pattern last worked on, the editor starts afresh. */
     async remove(id: string) {

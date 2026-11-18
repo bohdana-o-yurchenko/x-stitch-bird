@@ -14,7 +14,8 @@ type User = { email: string; name?: string } | null;
 
 /** The main pages' bar (SPEC §15.26): logo, the sections as tabs, languages, account — like the editor's. */
 export function HomeHeader({ section, user, pending, signInOpen, setSignInOpen, beforeSignOut, onSignedOut }: {
-  section: "patterns" | "threads" | "beads";
+  /** The tab shown as current; the account page has none. */
+  section: "patterns" | "threads" | "beads" | "account";
   user: User;
   pending: boolean;
   signInOpen: boolean;

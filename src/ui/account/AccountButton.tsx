@@ -40,6 +40,10 @@ export function AccountButton() {
         ed.flush();
         router.push("/patterns");
       }}
+      onAccount={() => {
+        ed.flush();
+        router.push("/account");
+      }}
       beforeSignOut={() => ed.prepareSignOut()}
       onSignedOut={() => {
         ed.setAccount(null);
@@ -50,7 +54,7 @@ export function AccountButton() {
 }
 
 /** "Sign in", or signed in: the initial, with the email and Sign out. Shared by the editor and the patterns page. */
-export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, beforeSignOut, onSignedOut, onMyPatterns }: {
+export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, beforeSignOut, onSignedOut, onMyPatterns, onAccount }: {
   user: { email: string; name?: string } | null;
   signInOpen: boolean;
   setSignInOpen: (on: boolean) => void;
@@ -60,8 +64,11 @@ export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, befor
   onSignedOut?: () => void;
   /** Leave for the My patterns page (not given on that page itself). */
   onMyPatterns?: () => void;
+  /** Leave for the account page (SPEC §15.38); a plain link when not given. */
+  onAccount?: () => void;
 }) {
   const t = useTranslations("account");
+  const router = useRouter();
   const [usage, setUsage] = useState<AccountUsage | null>(null);
   // what the account holds against its limits (SPEC §15.35): read on sign-in, and again as the menu opens
   const email = user?.email;
@@ -89,7 +96,9 @@ export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, befor
           { label: user.email, hint: t("signedInHint"), onClick: () => {} },
           ...(usage ? [{ id: "usage", node: <span className={s.usage} data-testid="account-usage">{t("usage", { patterns: usage.patterns, maxPatterns: usage.maxPatterns, photos: Math.ceil(usage.photos / 1048576), maxPhotos: Math.round(usage.maxPhotos / 1048576) })}</span> }] : []),
           "-",
-          ...(onMyPatterns ? [{ label: t("myPatterns"), onClick: onMyPatterns }, "-" as const] : []),
+          ...(onMyPatterns ? [{ label: t("myPatterns"), onClick: onMyPatterns }] : []),
+          { label: t("account"), onClick: onAccount ?? (() => router.push("/account")) },
+          "-",
           { label: t("signOut"), onClick: async () => { await beforeSignOut?.(); await authClient.signOut(); onSignedOut?.(); } },
         ]}
       />

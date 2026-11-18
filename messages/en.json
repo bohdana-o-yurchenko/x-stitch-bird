@@ -1044,7 +1044,8 @@
     "signedIn": "Signed in as {email}",
     "signedOut": "Signed out — patterns stay in this browser",
     "myPatterns": "My patterns",
-    "usage": "Patterns: {patterns} of {maxPatterns} · Photos: {photos} of {maxPhotos} MB"
+    "usage": "Patterns: {patterns} of {maxPatterns} · Photos: {photos} of {maxPhotos} MB",
+    "account": "Account"
   },
   "keepPattern": {
     "title": "Keep this pattern?",
@@ -1215,5 +1216,26 @@
     "theirs": "The other version",
     "keepMine": "Go on with this one",
     "useTheirs": "Go on with that one"
+  },
+  "accountPage": {
+    "nav": "Settings",
+    "account": "Account",
+    "signedInAs": "Signed in as",
+    "email": "Email",
+    "name": "Name",
+    "since": "Member since",
+    "deleteTitle": "Delete account",
+    "deleteHint": "Deletes your account and everything in it — your patterns, their photos and versions, your own threads and beads — on every device. This can’t be undone. Download what you want to keep first (My patterns ▸ ⋯ ▸ Download .xbird). Patterns kept only in this browser stay here.",
+    "deleteButton": "Delete account…",
+    "confirmTitle": "Delete your account?",
+    "confirmBody": "This can’t be undone. To confirm, type your email: <b>{email}</b>",
+    "confirmLabel": "Your email",
+    "confirmButton": "Delete my account",
+    "deleting": "Deleting…",
+    "failed": "The account wasn’t deleted — check the email, or try again.",
+    "deleted": "Your account and everything in it are deleted.",
+    "toPatterns": "To My patterns",
+    "signedOut": "Sign in to see your account.",
+    "signIn": "Sign in"
   }
 }

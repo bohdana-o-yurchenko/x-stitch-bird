@@ -58,6 +58,20 @@ export interface AccountUsage {
   maxPhotos: number;
 }
 
+/** The account itself (SPEC §15.38). */
+export const accountApi = {
+  /** Deletes the account and everything in it; `email` typed to confirm. False when refused or unreachable. */
+  async remove(email: string): Promise<boolean> {
+    try {
+      const res = await fetch("/api/account", { method: "DELETE", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+      if (res.ok) account.signedIn = false;
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+};
+
 export const accountUsageApi = {
   async get(): Promise<AccountUsage | null> {
     if (!account.signedIn) return null;

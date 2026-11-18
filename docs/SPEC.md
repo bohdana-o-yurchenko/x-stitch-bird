@@ -1917,6 +1917,20 @@ limit nothing is lost — the work stays in the browser, and the app says what t
   lines — Size (stitches · cm on its count) · Stitches (colours · stitches · beads · backstitch lines) · Time (spent ·
   edited …) · Space (pattern KB · photos MB · versions). The Continue card shows the same lines.
 
+### 15.38 The account page (2026-11-18)
+- `/account`, reached from the account menu (Account, under My patterns): like most apps' settings — the sections in
+  a navigation on the left (on a phone, a row on top), the chosen one on the right. For now one section, **Account**;
+  more to come (preferences, a profile picture, password…).
+- **Account**: who is signed in (email, name, member since), and **Delete account** — what it deletes (the
+  patterns, their photos and versions, your own threads and beads, on every device), that it can't be undone, to
+  download what to keep first, and that patterns kept only in this browser stay. Deleting asks first: the account's
+  email typed to confirm (any case) — Delete my account stays off until it matches.
+- Deleting (`DELETE /api/account` `{ email }`, checked against the session): the account's files in storage
+  (`users/<id>/`: photos, marks, previews), then the user — and with it, by the database's cascades, its sessions,
+  patterns, versions, pictures and windows, threads and beads. This browser's copies of the account's patterns go too;
+  then the page says it's done and offers My patterns, signed out.
+- Signed out, the page invites to sign in. The privacy policy names both ways to delete (here, at once; or by email).
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

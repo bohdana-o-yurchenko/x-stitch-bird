@@ -1,6 +1,6 @@
 /** The privacy policy's text (SPEC §15.23): one entry per language, the same sections in the same order. */
 export const CONTACT_EMAIL = "bohdana.o.yurchenko@gmail.com";
-export const POLICY_UPDATED = "2026-11-16";
+export const POLICY_UPDATED = "2026-11-18";
 
 export type Section = { title: string; body: string[] };
 export interface Policy {
@@ -59,8 +59,8 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "How long we keep data, and how to delete it",
         body: [
-          "Your account and saved patterns are kept while you have the account. You can delete any saved pattern yourself, at any time (Pattern ▸ Open…, then the bin icon); this also removes it from your account.",
-          `To delete your account and everything stored with it, email ${CONTACT_EMAIL} from the address you sign in with. We delete it within 30 days. Signing out does not delete anything.`,
+          "Your account and saved patterns are kept while you have the account. You can delete any saved pattern yourself, at any time (My patterns ▸ ⋯ ▸ Delete); this also removes it from your account. Photos attached to a pattern can be removed the same way (My patterns ▸ ⋯ ▸ Photos).",
+          `You can delete your account and everything stored with it yourself, at once (account menu ▸ Account ▸ Delete account). You can also email ${CONTACT_EMAIL} from the address you sign in with, and we delete it within 30 days. Signing out does not delete anything.`,
           "Data kept only in your browser stays there until you clear it (for example by clearing the site's data in your browser settings).",
         ],
       },
@@ -131,8 +131,8 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "Скільки зберігаються дані й як їх видалити",
         body: [
-          "Обліковий запис і збережені схеми зберігаються, доки існує обліковий запис. Будь-яку збережену схему можна видалити самостійно будь-коли (Схема ▸ Відкрити…, потім значок кошика); вона зникає й з облікового запису.",
-          `Щоб видалити обліковий запис і все, що з ним збережено, напишіть на ${CONTACT_EMAIL} з адреси, якою ви входите. Ми видалимо все протягом 30 днів. Вихід нічого не видаляє.`,
+          "Обліковий запис і збережені схеми зберігаються, доки існує обліковий запис. Будь-яку збережену схему можна видалити самостійно будь-коли (Мої схеми ▸ ⋯ ▸ Видалити); вона зникає й з облікового запису. Так само можна прибрати фото, додані до схеми (Мої схеми ▸ ⋯ ▸ Фото).",
+          `Обліковий запис і все, що з ним збережено, можна видалити самостійно, одразу (меню облікового запису ▸ Обліковий запис ▸ Видалити обліковий запис). Або напишіть на ${CONTACT_EMAIL} з адреси, якою ви входите, — ми видалимо все протягом 30 днів. Вихід нічого не видаляє.`,
           "Дані, що зберігаються лише в браузері, лишаються там, доки ви їх не очистите (наприклад, очистивши дані сайту в налаштуваннях браузера).",
         ],
       },

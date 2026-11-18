@@ -1,0 +1,98 @@
+/* The account page (SPEC §15.38): the sections on the left, the chosen one on the right */
+.layout {
+  flex: 1 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+.nav {
+  position: sticky;
+  top: 78px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.navItem {
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+}
+.navItem:hover {
+  background: var(--surface);
+}
+.navItem[aria-current="page"] {
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  font-weight: 600;
+}
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 640px;
+}
+.title {
+  font-family: var(--font-serif), serif;
+  font-size: 28px;
+  margin: 0 0 4px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.card h2 {
+  font-size: 16px;
+  margin: 0;
+}
+.card p {
+  margin: 0;
+}
+.facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 6px 18px;
+  margin: 0;
+  font-size: 14px;
+}
+.facts dt {
+  color: var(--muted);
+}
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+/* what can't be undone */
+.danger {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--line2));
+}
+.dangerBtn {
+  align-self: flex-start;
+}
+.linkBtn {
+  align-self: flex-start;
+  text-decoration: none;
+}
+@media (max-width: 720px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .nav {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+}

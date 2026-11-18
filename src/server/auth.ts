@@ -11,3 +11,9 @@ export async function currentUserId(): Promise<string | null> {
   const { data } = await auth.getSession();
   return data?.user?.id ?? null;
 }
+
+/** The signed-in user (id and email), or null. */
+export async function currentUser(): Promise<{ id: string; email: string } | null> {
+  const { data } = await auth.getSession();
+  return data?.user ? { id: data.user.id, email: data.user.email } : null;
+}
