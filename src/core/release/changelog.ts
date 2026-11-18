@@ -12,6 +12,18 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "2.0.1",
+    date: "2026-11-19",
+    uk: [
+      "Схема може мати до 1000 × 1000 стібків. Розмір поза межами виправляється одразу в полі, а не мовчки.",
+      "Біля розмірів — Ш і В: видно, де ширина, а де висота.",
+    ],
+    en: [
+      "Patterns can be up to 1000 × 1000 stitches. A size out of range is corrected right in the field, not silently.",
+      "W and H next to sizes, so you can tell width from height.",
+    ],
+  },
+  {
     version: "2.0.0",
     date: "2026-11-19",
     uk: [
