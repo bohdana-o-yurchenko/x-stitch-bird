@@ -161,11 +161,12 @@ export class UnderlayService {
     this.ed.showSection("references");
   }
 
-  /** A PDF behind the chart (SPEC §15.41): its first page, fitted to the chart, then straightened like a photo. */
+  /** A PDF behind the chart (SPEC §15.41, §15.44): the page picked, fitted to the chart, then straightened like a photo. */
   private async addPdfFile(f: File) {
-    const added = await addPdf(this.ed, f);
+    const added = await addPdf(this.ed, f, "underlay");
     if (!added) return;
-    const u: UnderlayData = { ...newUnderlay(added.first.image, added.first.w, added.first.h, this.ed.doc), pdf: { source: added.source, page: 1, pages: added.pages } };
+    const { drawn, source, page, pages } = added;
+    const u: UnderlayData = { ...newUnderlay(drawn.image, drawn.w, drawn.h, this.ed.doc), pdf: { source, page, pages } };
     await this.show(u);
     this.save();
     this.ed.openDialog({ type: "straighten" });

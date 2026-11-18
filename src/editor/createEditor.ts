@@ -401,10 +401,10 @@ export class Editor {
   }
 
   async addReferenceFromFile(f: File) {
-    // a PDF: its first page, its pages a click away in the window (SPEC §15.41)
+    // a PDF: the page picked (SPEC §15.44), the others a click away in the window (§15.41)
     if (isPdf(f)) {
-      const added = await addPdf(this, f);
-      if (added) this.references.add({ image: added.first.image, name: f.name.replace(/\.[^.]+$/, ""), pdf: { source: added.source, page: 1, pages: added.pages } });
+      const added = await addPdf(this, f, "window");
+      if (added) this.references.add({ image: added.drawn.image, name: f.name.replace(/\.[^.]+$/, ""), pdf: { source: added.source, page: added.page, pages: added.pages } });
       return;
     }
     try {

@@ -2042,6 +2042,19 @@ are and move, paste and mirror together.
 **Edit frame** (§15.15): shown also when a corner of the image is in view, as long as a side's middle handle or the
 rotate buttons are out of reach.
 
+### 15.44 A PDF of several pages: picking the page to start with (2026-11-18)
+
+Adding a PDF (behind the chart or in a photo window, also by dropping it):
+1. it is read; **one page** → as before: behind the chart its corners are lined up straight away (the straighten
+   dialog), in a window it shows;
+2. **several pages** → "Which page to start with?": every page as a mid-sized preview (drawn as they scroll into view,
+   a spinner until then), page 1 picked; click picks, double-click picks and goes on. The note says the pages can be
+   switched any time later — "in References (‹ Page 2 of 12 ›); each page keeps its own placement" behind the chart,
+   "in the window's bar …; each page keeps its own marks" for a window;
+3. **Line up page N** (behind the chart) → that page drawn sharp, then the straighten dialog; **Show page N** (a
+   window) → the window on that page. **Cancel** (Esc, outside): nothing is added.
+Only the page picked is drawn at full size (§15.41); previews are never stored.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

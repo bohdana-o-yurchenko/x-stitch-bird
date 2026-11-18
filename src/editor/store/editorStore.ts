@@ -42,6 +42,7 @@ export type DialogRequest =
   | { type: "photoRoom"; used: number; max: number; size: number }
   /** A photo above LARGE_PHOTO_PX: use it as it is (it may freeze the app for a moment), or not. */
   | { type: "largePhoto"; w: number; h: number; answer: (use: boolean) => void }
+  | { type: "pdfPage"; source: string; pages: number; name: string; to: "underlay" | "window"; answer: (page: number | null) => void }
   | { type: "samePattern"; name: string; age: "older" | "newer" | "other"; answer: (choice: SamePatternChoice) => void }
   | { type: "patternKeeper"; issues: PkReport["issues"] }
   | { type: "textFallback"; ext: string; text: string }

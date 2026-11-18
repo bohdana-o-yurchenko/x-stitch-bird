@@ -1228,30 +1228,45 @@ test("signed out, the first own thread: a tip on where it's kept, and what an ac
   await expect(guide).toHaveCount(0);
 });
 
-test("a PDF behind the chart: its pages one at a time, each where it was placed; a PDF window keeps each page's marks; both survive the work file (SPEC §15.41)", async ({ page }) => {
-  // behind the chart
+test("a PDF behind the chart: its pages one at a time, each where it was placed; a PDF window keeps each page's marks; both survive the work file (SPEC §15.41, §15.44)", async ({ page }) => {
+  // behind the chart: several pages — every page shown to pick from, with a word that pages can be switched later
   let chooser = page.waitForEvent("filechooser");
   await page.getByTestId("rail-references").click();
   await page.getByTestId("underlay-add").click();
   await (await chooser).setFiles("tests/fixtures/pages.pdf");
+  const pages = page.getByTestId("pdf-pages");
+  await expect(pages.getByRole("option")).toHaveCount(3);
+  await expect(pages.locator("img")).toHaveCount(3);
+  await expect(page.getByTestId("pdf-page-hint")).toContainText("switch pages any time later");
+  // put aside: nothing is added
+  await page.getByRole("dialog").getByRole("button", { name: "Cancel" }).click();
+  await expect(pages).toBeHidden();
+  expect(await editorState(page, "(ed) => ed.underlay.data")).toBeNull();
+  chooser = page.waitForEvent("filechooser");
+  await page.getByTestId("underlay-add").click();
+  await (await chooser).setFiles("tests/fixtures/pages.pdf");
+  await pages.getByRole("option", { name: "2" }).click();
+  await page.getByRole("button", { name: "Line up page 2" }).click();
   await page.getByTestId("straighten").getByRole("button", { name: "Use as it is" }).click();
   const select = page.getByTestId("underlay-page");
-  await expect(select.locator("option:checked")).toHaveText("Page 1 of 3");
+  await expect(select.locator("option:checked")).toHaveText("Page 2 of 3");
   const underlay = () => editorState<{ page: number; rect: { x: number; y: number } } | null>(page, "(ed) => ed.underlay.data && { page: ed.underlay.data.pdf.page, rect: ed.underlay.data.rect }");
   // the page is drawn sharp: 4600 px on its long side
   expect(await editorState<number>(page, "(ed) => ed.underlay.data.imageH")).toBe(4600);
   await editorState(page, "(ed) => ed.commands.run('underlay.update', { rect: { ...ed.underlay.data.rect, x: 7, y: 5 } })");
-  await select.selectOption("2");
-  await expect.poll(async () => (await underlay())?.page).toBe(2);
+  await select.selectOption("3");
+  await expect.poll(async () => (await underlay())?.page).toBe(3);
   expect((await underlay())!.rect.x).not.toBe(7);
   await page.getByTestId("underlay-pages").getByRole("button", { name: "Previous page" }).click();
-  await expect.poll(async () => (await underlay())?.page).toBe(1);
+  await expect.poll(async () => (await underlay())?.page).toBe(2);
   expect((await underlay())!.rect).toMatchObject({ x: 7, y: 5 });
 
   // in a window: marks per page
   chooser = page.waitForEvent("filechooser");
   await page.getByTestId("ref-window-add").click();
   await (await chooser).setFiles("tests/fixtures/pages.pdf");
+  await expect(page.getByTestId("pdf-page-hint")).toContainText("window’s bar");
+  await page.getByRole("button", { name: "Show page 1" }).click();
   const win = page.getByTestId("reference-window");
   await expect(win.getByTestId("ref-pages")).toBeVisible();
   const box = (await win.locator("canvas").boundingBox())!;
@@ -1273,13 +1288,13 @@ test("a PDF behind the chart: its pages one at a time, each where it was placed;
   await fileAction(page, "Download work file (.xbird)");
   const path = await (await file).path();
   const saved = JSON.parse(readFileSync(path, "utf8")) as { underlay: { pdf: { src: string; page: number; pages: number } }; refs: { pdf: { src: string; pages: number } }[] };
-  expect(saved.underlay.pdf).toMatchObject({ page: 1, pages: 3 });
+  expect(saved.underlay.pdf).toMatchObject({ page: 2, pages: 3 });
   expect(saved.underlay.pdf.src).toMatch(/^data:application\/pdf/);
   expect(saved.refs[0]!.pdf).toMatchObject({ pages: 3 });
   chooser = page.waitForEvent("filechooser");
   await fileAction(page, "Open work file…");
   await (await chooser).setFiles(path);
   await expect(page.getByText(/^Loaded /)).toBeVisible();
-  await expect(select.locator("option:checked")).toHaveText("Page 1 of 3");
+  await expect(select.locator("option:checked")).toHaveText("Page 2 of 3");
   await expect(page.getByTestId("reference-window").getByTestId("ref-pages")).toBeVisible();
 });

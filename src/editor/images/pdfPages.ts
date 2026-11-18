@@ -32,10 +32,11 @@ export async function drawPdfPage(ed: Editor, source: string, page: number): Pro
 }
 
 /**
- * A PDF being added (SPEC §15.41): asked about room in the account first, stored as it came, its first page drawn.
- * Null (said why) when it doesn't fit or can't be read.
+ * A PDF being added (SPEC §15.41): asked about room in the account first, stored as it came; with several pages the
+ * user picks the one to start with (§15.44), which is drawn. `to`: behind the chart, or a photo window. Null (said why,
+ * or no page picked) when it doesn't fit, can't be read or is put aside.
  */
-export async function addPdf(ed: Editor, f: File): Promise<{ source: string; pages: number; first: DrawnPage } | null> {
+export async function addPdf(ed: Editor, f: File, to: "underlay" | "window"): Promise<{ source: string; pages: number; page: number; drawn: DrawnPage } | null> {
   if (!(await photoFits(ed, f))) return null;
   let pages: number;
   try {
@@ -45,10 +46,12 @@ export async function addPdf(ed: Editor, f: File): Promise<{ source: string; pag
     return null;
   }
   const source = await ed.images.put(f);
-  const first = await drawPdfPage(ed, source, 1);
-  if (!first) {
+  const page = pages > 1 ? await new Promise<number | null>((answer) => ed.openDialog({ type: "pdfPage", source, pages, name: f.name, to, answer })) : 1;
+  if (!page) return null;
+  const drawn = await drawPdfPage(ed, source, page);
+  if (!drawn) {
     ed.toast("toasts.badPdf");
     return null;
   }
-  return { source, pages, first };
+  return { source, pages, page, drawn };
 }
