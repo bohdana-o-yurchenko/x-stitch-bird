@@ -1114,7 +1114,6 @@
     "view": "Вигляд",
     "viewGallery": "Галерея",
     "viewList": "Список",
-    "usage": "{patterns} з {maxPatterns} схем · {photos} з {maxPhotos} МБ фото в обліковому записі",
     "whereAccount": "В обліковому записі",
     "whereBoth": "В обліковому записі й цьому браузері",
     "factSize": "Розмір",
@@ -1151,7 +1150,9 @@
     "photosRemoveAll": "Прибрати всі ({mb} МБ)",
     "deleteDownload": "Завантажити .xbird і видалити",
     "deleteBody": "Видалити <b>{name}</b> з цього браузера й облікового запису? Цього не скасувати. Спершу завантажте файл .xbird, щоб відкрити схему згодом.",
-    "factEdited": "змінено {when}"
+    "factEdited": "змінено {when}",
+    "storage": "Сховище облікового запису: {percent}%",
+    "storageHint": "Схеми {patterns} з {maxPatterns} · фото {photos} з {maxPhotos} МБ — рахується те, що заповнене більше. Подробиці — в обліковому записі."
   },
   "threadForm": {
     "brand": "Бренд",

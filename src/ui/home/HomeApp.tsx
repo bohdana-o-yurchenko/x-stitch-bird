@@ -133,9 +133,9 @@ export default function HomeApp() {
           <section>
             <div className={s.listHead}>
               <h2>
-                {t("all")} {items && <span className={s.count}>{others.length}</span>}
+                {t("all")}
               </h2>
-              {usage && <span className={s.usage} data-testid="home-usage">{t("usage", { patterns: usage.patterns, maxPatterns: usage.maxPatterns, photos: mb(usage.photos), maxPhotos: Math.round(usage.maxPhotos / 1048576) })}</span>}
+              {usage && <StorageButton usage={usage} />}
               <span className={s.spacer} />
               <div className={cx(ui.seg, s.viewSwitch)} role="group" aria-label={t("view")}>
                 <button type="button" className={cx(view === "gallery" && ui.on)} aria-pressed={view === "gallery"} onClick={() => setView("gallery")}>{t("viewGallery")}</button>
@@ -516,5 +516,23 @@ function PatternRow(props: ItemProps) {
         <PatternFacts p={p} lib={lib} />
       </div>
     </div>
+  );
+}
+
+/**
+ * The account's storage in one number (SPEC §15.40): how full its closer-to-full limit is — patterns or photos,
+ * whichever is nearer its end (that's the one that stops you). A small bar, amber from 80 %, red when full; the
+ * details on hover; it leads to the Account page with both limits.
+ */
+function StorageButton({ usage }: { usage: AccountUsage }) {
+  const t = useTranslations("home");
+  const share = Math.min(1, Math.max(usage.patterns / usage.maxPatterns, usage.photos / usage.maxPhotos));
+  const level = share >= 1 ? "full" : share >= 0.8 ? "high" : "ok";
+  const details = t("storageHint", { patterns: usage.patterns, maxPatterns: usage.maxPatterns, photos: mb(usage.photos), maxPhotos: Math.round(usage.maxPhotos / 1048576) });
+  return (
+    <Link href="/account" className={s.storage} data-level={level} title={details} aria-label={`${t("storage", { percent: Math.round(share * 100) })} — ${details}`} data-testid="home-usage">
+      <span className={s.storageBar}><span style={{ width: `${Math.max(share * 100, 3)}%` }} /></span>
+      {t("storage", { percent: Math.round(share * 100) })}
+    </Link>
   );
 }

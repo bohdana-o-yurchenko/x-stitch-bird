@@ -1956,6 +1956,10 @@ limit nothing is lost — the work stays in the browser, and the app says what t
   digits are in (typed or pasted), Sign in under it, Use another email · Send a new code (after 30 s). No buttons at
   the bottom: ✕, Esc or a click outside closes. A wrong code: said under the field, the field cleared for another
   try; nothing ever stays stuck on "Signing in…".
+- **My patterns ▸ "Account storage: 35%"**, by the heading (the pattern count beside it is gone — it didn't match
+  the account's): one number for how full the account is — its closer-to-full limit, patterns or photos, as that one
+  is what stops you — with a small bar, amber from 80 %, red when full; both limits on hover; it opens the Account
+  page.
 - **"Being edited in another window"** (§15.34) is a banner across the top of the chart, hard to miss: an amber card,
   an icon, a bold title, the line under it and **Edit here**. Taking over shows a spinning wheel: "Taking over… The
   other window is saving its last changes."

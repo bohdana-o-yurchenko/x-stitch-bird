@@ -1114,7 +1114,6 @@
     "view": "View",
     "viewGallery": "Gallery",
     "viewList": "List",
-    "usage": "{patterns} of {maxPatterns} patterns · {photos} of {maxPhotos} MB of photos in your account",
     "whereAccount": "In your account",
     "whereBoth": "In your account and this browser",
     "factSize": "Size",
@@ -1151,7 +1150,9 @@
     "photosRemoveAll": "Remove all ({mb} MB)",
     "deleteDownload": "Download .xbird, then delete",
     "deleteBody": "Delete <b>{name}</b> from this browser and your account? This can’t be undone. Download its .xbird file first to load it later.",
-    "factEdited": "edited {when}"
+    "factEdited": "edited {when}",
+    "storage": "Account storage: {percent}%",
+    "storageHint": "Patterns {patterns} of {maxPatterns} · photos {photos} of {maxPhotos} MB — the fuller of the two counts. Open your account for details."
   },
   "threadForm": {
     "brand": "Brand",
