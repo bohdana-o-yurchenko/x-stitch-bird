@@ -722,6 +722,18 @@
     "source": "Source code",
     "sourceHint": "Free software · AGPL-3.0"
   },
+  "install": {
+    "menu": "Install the app…",
+    "menuHint": "пташечка in a window of its own",
+    "title": "Install пташечка",
+    "what": "пташечка gets a window of its own and an icon in the Dock or taskbar — no browser bar, more room for the chart. Your patterns and account stay as they are.",
+    "internet": "<b>It still needs the internet to open.</b>",
+    "install": "Install",
+    "safari": "In Safari: <b>File ▸ Add to Dock…</b>",
+    "chromium": "Use the install button at the right end of the address bar, or the browser menu ▸ <b>Install…</b>",
+    "shortcutNew": "New pattern",
+    "shortcutPatterns": "My patterns"
+  },
   "toolNames": {
     "pencil": "Draw",
     "line": "Line",

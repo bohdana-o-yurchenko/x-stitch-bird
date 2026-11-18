@@ -968,6 +968,7 @@ All toasts/modals listed in the sections above should be kept verbatim; they are
 | More thread brands (§15.8) | M code, L data | new `src` id namespaces | not started |
 | Not yet discussed (§15.12): keyboard entry, specialty stitches, proofread tracking, second-screen window | — | — | ideas |
 | Stash management (§16) | XL | needs a server | future phase |
+| The installed app opens without the internet (§15.50, phase 2): service worker, editor files saved ahead, "new version — reload" | M–L | none (browser cache only) | backlog, added 2026-11-18 |
 
 Implemented: §15.24 Mill Hill Treasures and bead packages, §15.11 symbol matching in a block, §15.4 chart checks (empty cells, lone stitches, near symmetry), §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.5 ambiguous
 marks, §15.6 selection, §15.7 snapshots, §15.10 / §15.10b PDFs, §15.13 fractional stitches, §15.14 French knots,
@@ -2183,6 +2184,25 @@ chart whose picture can't be loaded is drawn again once, not over and over.
   seconds drafted it (My patterns then offered it as *Continue stitching*) and saved it to the account. Starting
   something new (`?new=…`, a picture or file handed over) with nothing worked on here starts from an empty pattern —
   no key, no stitches — not the demo.
+
+### 15.50 Installing пташечка as an app, on laptops (2026-11-18)
+- **Manifest per language**: `/[locale]/manifest.webmanifest` (`src/ui/install/manifest.ts`), linked from the
+  layout's metadata. One app (`id: "/"`) whichever it was installed from; it opens in that language (`start_url`
+  `/uk` or `/en` — `/` would always be Ukrainian). Own window (`standalone`), the terracotta background, icons
+  192 / 512 and a maskable 512 (the bird smaller, on the background — the plain one's beak and tail reach the edges),
+  `src/app/apple-icon.png` for Safari; drawn from `src/app/icon.svg` by `scripts/app-icons.mjs`. Shortcuts on the
+  app icon: New pattern (`?new=1`), My patterns.
+- **Title bar follows the theme**: `applyTheme` sets `<meta name="theme-color">` to the theme's `--bg`.
+- **☰ ▸ Install the app…** (editor and the other pages), only on laptops (fine pointer, hover, ≥ 1024 px wide) and
+  not in the app's own window: Chrome / Edge with their prompt kept (an inline head script catches it — it comes once,
+  maybe before ☰ exists) — the dialog's **Install** shows it; without it (used already), the dialog points at the
+  browser's install button; Safari 17+ on a Mac: **File ▸ Add to Dock…**; Firefox and phones / tablets: no item. The
+  dialog says what it gives (a window and an icon of its own, the same patterns and account) and that **it still
+  needs the internet to open**.
+- **Not yet** (backlog, §15.0): opening without the internet — a service worker, the editor's lazily loaded files
+  (PDF chart dialog, pdf.js and its worker, photo tools) saved ahead, a "new version — reload" prompt, a start that
+  doesn't wait for the sign-in check, calm offline account pages. Possible extras, undecided: opening .xbird / .oxs
+  files from the computer (file handlers).
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

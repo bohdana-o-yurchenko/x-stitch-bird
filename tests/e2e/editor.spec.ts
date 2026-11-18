@@ -401,6 +401,49 @@ test("☰ ▸ Something went wrong? — where to write, what helps, the terms of
   await expect(support.getByTestId("support-mail")).toHaveAttribute("href", /^mailto:bohdana\.o\.yurchenko@gmail\.com\?subject=/);
 });
 
+test("the installed app: each language's manifest opens in that language, with its icons; the page names it (SPEC §15.50)", async ({ page }) => {
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute("href", "/en/manifest.webmanifest");
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute("content", "#f4efe6");
+  for (const locale of ["en", "uk"]) {
+    const res = await page.request.get(`/${locale}/manifest.webmanifest`);
+    expect(res.headers()["content-type"]).toContain("application/manifest+json");
+    const m = (await res.json()) as { id: string; name: string; start_url: string; icons: { src: string }[] };
+    expect([m.id, m.name, m.start_url]).toEqual(["/", "пташечка", `/${locale}`]);
+    for (const icon of m.icons) expect((await page.request.get(icon.src)).headers()["content-type"]).toBe("image/png");
+  }
+});
+
+test("☰ ▸ Install the app… on a laptop: what it gives, that it still needs the internet; Install shows the browser's prompt — none on a narrow screen (SPEC §15.50)", async ({ page }) => {
+  const install = page.getByRole("menuitem", { name: /^Install the app…/ });
+  const dialog = page.getByTestId("install-app");
+  // Chrome before it offers its prompt: its own install button
+  await openAppMenu(page);
+  await install.click();
+  await expect(dialog).toContainText("It still needs the internet to open.");
+  await expect(dialog).toContainText("install button at the right end of the address bar");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+
+  // the prompt offered (as Chrome does, once): Install shows it
+  await page.evaluate(() => {
+    const e = Object.assign(new Event("beforeinstallprompt", { cancelable: true }), {
+      prompt: async () => void ((window as unknown as { prompted: boolean }).prompted = true),
+      userChoice: Promise.resolve({ outcome: "accepted" }),
+    });
+    window.dispatchEvent(e);
+  });
+  await openAppMenu(page);
+  await install.click();
+  await expect(dialog).not.toContainText("address bar");
+  await page.getByRole("button", { name: "Install", exact: true }).click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { prompted?: boolean }).prompted)).toBe(true);
+  await expect(dialog).toHaveCount(0);
+
+  await page.setViewportSize({ width: 900, height: 900 });
+  await openAppMenu(page);
+  await expect(page.getByRole("menuitem", { name: /^Source code/ })).toBeVisible();
+  await expect(install).toHaveCount(0);
+});
+
 test("the status bar shows the colour being drawn with; the view switch sits with the zoom", async ({ page }) => {
   await expect(page.getByTestId("status-entry")).toContainText("DMC 321");
   await page.keyboard.press("2");

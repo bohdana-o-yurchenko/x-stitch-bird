@@ -22,15 +22,30 @@ export function savedTheme(): ThemeId {
   }
 }
 
-/** Sets the theme on <html> (the default has no attribute) and remembers it in this browser. */
+/**
+ * Sets the theme on <html> (the default has no attribute) and remembers it in this browser. The browser's colour for
+ * the page (the installed app's title bar, SPEC §15.50) follows: the theme's background.
+ */
 export function applyTheme(id: ThemeId) {
   if (id === "terracotta") delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = id;
+  themeColour(getComputedStyle(document.documentElement).getPropertyValue("--bg").trim());
   try {
     localStorage.setItem(THEME_KEY, id);
   } catch {
     // private mode: the theme just isn't remembered
   }
+}
+
+function themeColour(colour: string) {
+  if (!colour) return;
+  let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.name = "theme-color";
+    document.head.append(meta);
+  }
+  meta.content = colour;
 }
 
 /** Runs before the first paint (inlined in the page head) so a dark theme never flashes light. */

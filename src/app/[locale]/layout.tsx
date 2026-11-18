@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { INSTALL_BOOT_SCRIPT } from "@/ui/install/install";
 import { THEME_BOOT_SCRIPT } from "@/ui/theme/appTheme";
 import { ThemeSync } from "@/ui/theme/ThemeSync";
 import "../globals.css";
@@ -22,7 +23,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "app" });
-  return { title: t("title"), description: t("description") };
+  // the installed app (SPEC §15.50): its manifest in this language; Safari's Add to Dock names it from appleWebApp
+  return { title: t("title"), description: t("description"), manifest: `/${locale}/manifest.webmanifest`, appleWebApp: { title: "пташечка" } };
 }
 
 export default async function LocaleLayout({ children, params }: LayoutProps<"/[locale]">) {
@@ -33,6 +35,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
     <html lang={locale} className={`${dmSans.variable} ${fraunces.variable} ${nunito.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: INSTALL_BOOT_SCRIPT }} />
       </head>
       <body>
         <ThemeSync />

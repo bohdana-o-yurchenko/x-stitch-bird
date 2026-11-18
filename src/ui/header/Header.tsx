@@ -13,6 +13,7 @@ import { ToolBar } from "./ToolBar";
 import type { HeaderMenu } from "@/editor/store/editorStore";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
+import { useInstallApp } from "../install/InstallApp";
 import { savedToolbarHide, setToolbarHide } from "./toolbarPrefs";
 import { SOURCE_URL } from "../common/source";
 import { AppBrand } from "../common/AppBrand";
@@ -114,7 +115,7 @@ function PatternMenu() {
   );
 }
 
-/** ☰ — what isn't needed while stitching: help, language, theme, support, privacy. */
+/** ☰ — what isn't needed while stitching: help, language, theme, installing the app, support, privacy. */
 function AppMenu() {
   const t = useTranslations("fileMenu");
   const run = useCommand();
@@ -122,6 +123,7 @@ function AppMenu() {
   const go = (command: string, args?: unknown) => () => void run(command, args);
   const reveal = useReveal("app");
   const locale = useLocale();
+  const [install, installDialog] = useInstallApp();
   const items: MenuItem[] = [
     { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
     { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
@@ -129,6 +131,7 @@ function AppMenu() {
     { id: "language", node: <LanguageSwitch before={() => ed.flush()} /> },
     { id: "theme", node: <ThemeSwitcher onChange={() => ed.refreshChrome()} /> },
     { id: "toolbar", node: <ToolbarOptions /> },
+    ...(install ? [install] : []),
     "-",
     { id: "support", label: t("support"), hint: t("supportHint"), onClick: () => void window.open(`/${locale}/support`, "_blank", "noopener") },
     { id: "privacy", label: t("privacy"), onClick: () => void window.open(`/${locale}/privacy`, "_blank", "noopener") },
@@ -139,6 +142,7 @@ function AppMenu() {
   return (
     <span data-guide="app-menu">
       <Dropdown className={ui.tool} title={t("more")} label={<Icon name="menu" size={18} />} items={items} reveal={reveal} />
+      {installDialog}
     </span>
   );
 }
