@@ -19,12 +19,24 @@ const CALM = 6_000;
 
 const randomId = () => (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID().replace(/-/g, "") : Math.random().toString(36).slice(2) + Date.now().toString(36)).slice(0, 24);
 
-/** The pattern's content, leaving out the time spent (it grows on its own in every window). */
-function content(doc: PatternFile | Pattern): string {
-  const file = ("layers" in doc ? serializePattern(doc as Pattern) : doc) as PatternFile & { spent?: number };
-  const copy: Record<string, unknown> = { ...file };
+/** An object with its keys in one order: the account's database keeps a pattern's keys in an order of its own. */
+const sortedKeys = (_k: string, v: unknown) =>
+  v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : v;
+
+/**
+ * The pattern's content, leaving out the time spent (it grows on its own in every window) — the same text for the same
+ * pattern, whether it's this window's, this browser's or the account's copy: a file is read as the editor reads it
+ * (empty fields dropped, older forms brought up to date) and its keys put in one order.
+ */
+function content(doc: PatternFile | Pattern, symbols: readonly string[]): string {
+  let p: Pattern | null = "layers" in doc ? (doc as Pattern) : null;
+  if (!p)
+    try {
+      p = parsePattern(doc, symbols).pattern;
+    } catch {}
+  const copy: Record<string, unknown> = { ...(p ? serializePattern(p) : doc) };
   delete copy.spent;
-  return JSON.stringify(copy);
+  return JSON.stringify(copy, sortedKeys);
 }
 
 /**
@@ -74,7 +86,7 @@ export class LiveSync {
    * still on its way — that save keeps the editing for this window; it then counts as gone after a while.
    */
   private onPageHide = () => {
-    if (this.patternId && this.ed.state.account && this.role !== "off" && !this.ed.autosave.pending) void liveApi.leave(this.patternId, this.windowId, true);
+    if (this.patternId && this.ed.state.account && !this.ed.autosave.pending) void liveApi.leave(this.patternId, this.windowId, true);
   };
 
   start() {
@@ -101,8 +113,9 @@ export class LiveSync {
     window.removeEventListener("online", this.onOnline);
     window.removeEventListener("pagehide", this.onPageHide);
     const id = this.patternId;
-    if (!id || !this.ed.state.account || this.role === "off") return;
-    void this.ed.autosave.settle().then(() => liveApi.leave(id, this.windowId));
+    // even before its first check-in: its saves may have made it the editor already
+    if (!id || !this.ed.state.account) return;
+    void this.ed.autosave.settle().catch(() => {}).then(() => liveApi.leave(id, this.windowId));
   }
 
   /**
@@ -118,7 +131,7 @@ export class LiveSync {
     if (o.unsure && this.syncedAt >= 0) {
       const at = this.syncedAt;
       void this.ed.persistence.patterns.load(id).then((lib) => {
-        if (this.patternId === id && this.syncedAt === at && (!lib || content(lib) !== content(this.ed.doc))) this.syncedAt = -1;
+        if (this.patternId === id && this.syncedAt === at && (!lib || content(lib, this.ed.state.symbols) !== content(this.ed.doc, this.ed.state.symbols))) this.syncedAt = -1;
       });
     }
     this.schedule(0);
@@ -248,7 +261,7 @@ export class LiveSync {
   /** The account has `theirs`: the same as here, newer with nothing changed here, or both changed — then ask. */
   private async resolve(theirs: { rev: number; doc: PatternFile }) {
     const ed = this.ed;
-    if (content(theirs.doc) === content(ed.doc)) {
+    if (content(theirs.doc, ed.state.symbols) === content(ed.doc, ed.state.symbols)) {
       this.base = theirs.rev;
       this.syncedAt = ed.state.docRevision;
       accountRevs.set(this.patternId!, { rev: theirs.rev });

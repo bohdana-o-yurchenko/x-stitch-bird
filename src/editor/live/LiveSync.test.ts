@@ -312,6 +312,46 @@ describe("checking in", () => {
     expect(ed.doc.name).toBe("Mine");
   });
 
+  it("the account's copy is the same pattern with its keys in another order (as its database keeps them): nothing to choose", async () => {
+    const mine = pattern("Mine", 3);
+    const { ed, s } = opened(mine);
+    ed.state.docRevision = 2; // counted as changed here, as after a reload
+    const reorder = (v: unknown): unknown => (v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).reverse().map(([k, x]) => [k, reorder(x)])) : v);
+    const theirs = reorder({ ...file(mine), spent: 999 }) as PatternFile;
+    expect(JSON.stringify(theirs)).not.toBe(JSON.stringify(file(mine)));
+    api.live.checkIn.mockResolvedValue(state({ rev: 5, editor: "me" }));
+    api.patterns.get.mockResolvedValue({ rev: 5, doc: theirs });
+    await check(s);
+    expect(ed.state.dialog).toBeNull();
+    expect(ed.replaceDoc).not.toHaveBeenCalled();
+    expect([s.saveOptions().base, s.changedHere]).toEqual([5, false]);
+  });
+
+  it("the account's copy written in an older form (empty info fields kept) is the same pattern too", async () => {
+    const mine = pattern("Mine", 2);
+    mine.meta = { designer: "Me" } as never;
+    const { ed, s } = opened(mine);
+    ed.state.docRevision = 2;
+    api.live.checkIn.mockResolvedValue(state({ rev: 3, editor: "me" }));
+    api.patterns.get.mockResolvedValue({ rev: 3, doc: { ...file(mine), meta: { designer: "Me", copyright: "", instructions: "" } } });
+    await check(s);
+    expect(ed.state.dialog).toBeNull();
+    expect(s.changedHere).toBe(false);
+  });
+
+  it("restored at start-up: the browser's copy the same but for the order of its keys counts as unchanged", async () => {
+    const mine = pattern("Mine", 3);
+    const ed = fakeEditor(mine);
+    const reversed = Object.fromEntries(Object.entries(file(mine)).reverse()) as PatternFile;
+    (ed.persistence.patterns as unknown as { load: () => Promise<PatternFile> }).load = async () => reversed;
+    const s = make(ed);
+    api.revs.set("p", { rev: 1 });
+    s.opened("p", { unsure: true });
+    await vi.waitFor(() => Promise.resolve());
+    await new Promise((r) => setTimeout(r, 0));
+    expect(s.changedHere).toBe(false);
+  });
+
   it("an own save under way: its answer brings the revision, nothing is fetched", async () => {
     const { ed, s } = opened();
     ed.autosave.pending = true;
@@ -419,6 +459,18 @@ describe("the window going: the editor left for another page, or the page closin
     await vi.advanceTimersByTimeAsync(60_000);
     expect(api.live.checkIn.mock.calls.length).toBe(calls);
     expect(listeners.size).toBe(0);
+  });
+
+  it("left before its first check-in (its save may have made it the editor already): it still goes", async () => {
+    const ed = fakeEditor(pattern("A"));
+    const s = make(ed);
+    api.live.checkIn.mockReturnValue(new Promise(() => {}));
+    s.opened("p");
+    s.start();
+    expect(ed.state.live.role).toBe("off");
+    s.stop();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(api.live.leave).toHaveBeenCalledWith("p", s.windowId);
   });
 
   it("a check-in under way when it is left doesn't take the editing afterwards", async () => {

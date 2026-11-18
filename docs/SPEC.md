@@ -1857,7 +1857,11 @@ replaced unseen by another.
 - **A window says when it goes**: leaving the editor for another page in the tab (My patterns, Account), it stops
   checking in and — once its last save is in — tells the account it has gone; closing or reloading the tab says so
   too (unless a save is still on its way). So the editor opened next, or the page reloaded, edits at once; without
-  this the window left behind went on "editing" unseen. One that can't say so counts as gone after 15 s.
+  this the window left behind went on "editing" unseen. One that can't say so counts as gone after 15 s. It says so
+  even before its first check-in (its first save may already have made it the editor).
+- **The same pattern is the same, however it's written**: copies are compared as the editor reads them, with their
+  keys in one order (the account's database keeps its own order; older copies keep empty info fields) and the time
+  spent left out. So a reload, or the account's copy coming back unchanged, never asks which version to keep.
 - **Revisions.** Every save names the account revision it was made over (`patterns.rev`); one made over an older
   revision is refused and comes back with the account's copy. Then: the same content — nothing to do; nothing changed
   here — the account's copy is shown; **changed in both places** (e.g. work done offline while another device went on)
