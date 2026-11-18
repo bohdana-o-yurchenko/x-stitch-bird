@@ -3,6 +3,9 @@
  * NOTICE.md). Loaded only when a PDF is opened; its worker keeps the drawing off the page.
  */
 
+import type { PageContent, PdfContent } from "@/core/formats/pdfChart/content";
+import { extractPage, type PdfJsLib, type PdfPageLike } from "@/core/formats/pdfChart/extract";
+
 type PdfJs = typeof import("pdfjs-dist");
 type PdfDocument = Awaited<ReturnType<PdfJs["getDocument"]>["promise"]>;
 
@@ -66,4 +69,40 @@ export async function pdfAttachments(blob: Blob): Promise<Uint8Array[]> {
     if (content) out.push(content);
   }
   return out;
+}
+
+/**
+ * What every page draws, for reading a chart from it (SPEC §15.47). A document of its own: pictures come as pixels
+ * (not bitmaps), so the same picture gives the same key.
+ */
+export async function pdfContent(blob: Blob): Promise<PdfContent> {
+  const m = await pdfjs();
+  const task = m.getDocument({ data: new Uint8Array(await blob.arrayBuffer()), isOffscreenCanvasSupported: false });
+  try {
+    const doc = await task.promise;
+    const pages: PageContent[] = [];
+    for (let n = 1; n <= doc.numPages; n++) {
+      const page = await doc.getPage(n);
+      pages.push(await extractPage(page as unknown as PdfPageLike, m as unknown as PdfJsLib, { readBitmap }));
+      page.cleanup();
+    }
+    const info = (await doc.getMetadata().catch(() => null))?.info as { Title?: unknown } | undefined;
+    return { title: typeof info?.Title === "string" ? info.Title : "", pages };
+  } finally {
+    void task.destroy();
+  }
+}
+
+/** A picture's pixels, when pdf.js hands it over drawn (some browsers). */
+function readBitmap(bitmap: unknown, w: number, h: number): Uint8ClampedArray | null {
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const g = canvas.getContext("2d")!;
+    g.drawImage(bitmap as CanvasImageSource, 0, 0);
+    return g.getImageData(0, 0, w, h).data;
+  } catch {
+    return null;
+  }
 }

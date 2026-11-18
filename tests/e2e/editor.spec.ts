@@ -602,6 +602,18 @@ test("New ▸ From a PDF chart… says first what it is; this app's PDF comes ba
   await expect(unreadable).toHaveCount(0);
 });
 
+test("New ▸ From a PDF chart… reads another app's chart: symbols stamped over two pages, its key, a bead, a backstitch (SPEC §15.47)", async ({ page }) => {
+  await fileAction(page, "New", "From a PDF chart…");
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Choose a PDF…" }).click();
+  await (await chooser).setFiles(fixture("other-app-chart.pdf"));
+  await expect(page.getByText(/^Loaded /)).toBeVisible();
+  const doc = await editorState<{ name: string; w: number; h: number; count: number; key: string[]; beads: number; lines: number }>(page,
+    "(ed) => ({ name: ed.doc.name, w: ed.doc.w, h: ed.doc.h, count: ed.doc.count, key: ed.doc.key.filter(Boolean).map((e) => `${e.t}:${e.src}`).sort(), beads: [...ed.doc.layers.beads].filter(Boolean).length, lines: ed.doc.layers.segments.length })");
+  expect(doc).toMatchObject({ name: "Snowy Owl", w: 30, h: 20, count: 16, key: ["back:dmc:321", "bead:bead:00557", "thread:dmc:310", "thread:dmc:3865"], lines: 2 });
+  expect(doc.beads).toBeGreaterThan(0);
+});
+
 test("New ▸ has a blank pattern, a photo, an .oxs and a PDF chart; My patterns' From a PDF chart… opens on the same explanation (SPEC §15.46)", async ({ page }) => {
   await fileAction(page, "New");
   await expect(page.getByRole("menuitem")).toContainText(["Blank pattern…", "From a photo…", "From an .oxs file…", "From a PDF chart…"]);

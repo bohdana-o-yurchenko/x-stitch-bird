@@ -2087,8 +2087,9 @@ Only the page picked is drawn at full size (§15.41); previews are never stored.
   `<name>.xbird` — the pattern without photos and without learned photo examples. Viewers list it; chart apps
   ignore it. Read back, the very same pattern: own threads and beads, blends, symbols, every stitch, bead, knot and
   line — **always a new pattern** (a new id), as with an .oxs.
-- **Any other PDF** (for now — reading other apps' charts is next, see the plan below): "No pattern could be read" —
-  it may be a scan, made from photos, or from an app not read yet — and the way to trace it.
+- **Any other PDF**: read as another app's chart (§15.47). Nothing read, or (until the steps below are built) not
+  everything settled: "No pattern could be read" — it may be a scan, made from photos, or from an app not read yet —
+  and the way to trace it.
 - **Next** (approved 2026-11-18): reading other apps' PDFs — symbols as text (Pattern Maker, WinStitch, MacStitch,
   PK-ready files, this app's older PDFs), as stamped pictures (FlossCross) or drawn shapes; pages placed by their
   edge numbers; the key's rows matched to the symbols. Then the steps: the grids found (untick the ones that don't
@@ -2096,6 +2097,35 @@ Only the page picked is drawn at full size (§15.41); previews are never stored.
   set up by hand; Open in the editor only once every symbol has a valid entry), success — with *Keep the PDF as a
   reference* (behind the chart, already lined up), ticked. Half and quarter stitches, knots and beads of other apps
   later. Test PDFs of other people's designs stay out of the repository.
+
+### 15.47 Reading another app's PDF chart (2026-11-18)
+`core/formats/pdfChart`: what each page draws (`extract.ts`, from pdf.js: every character with its box, every
+stamped picture with a key of its pixels, straight strokes, filled upright rectangles), then:
+- **Grids**: symbols — characters of one font and size, or pictures of one size — on a square lattice (the same
+  step across and down, most of them on it). The grid's own lines, where drawn, give its edges and cell boundaries;
+  else its symbols do. Symbols much smaller than the rest (part stitches) are counted and left out for now.
+- **Placing**: the numbers along a grid's edges — the row of numbers nearest each edge (a page heading further out
+  isn't numbering; a number by a corner belongs to the edge it is further out from), over the middle of a cell or on
+  the line after it — say which columns and rows of the whole chart it shows. A single grid without numbers is the
+  chart; more than one: those without numbers aren't placed. Grids showing the same cells (overlaps, an overview
+  page) agree or count as conflicts; a faded cell gives way to the same cell shown in full.
+- **Size**: the grids' extent; when the PDF states a size ("125 x 125 stitches", "89w X 119h") up to three less and
+  every symbol fits, that size (frames often take in an empty row or column).
+- **Key**: a symbol drawn outside the grids, alone, followed on its line by a thread: a brand and number (DMC, ANC /
+  Anchor, MAD / Madeira, MH / Mill Hill beads, PREC / Preciosa; "DMC310"; BLANC); a number the catalogue lacks is
+  settled by the colour's name ("DMC 1 White"); a brand as a column heading covers rows giving the number alone;
+  two threads joined by + a blend. Brands the app doesn't know aren't guessed.
+- **Backstitch**: strokes over a grid thicker than its lines (an eighth of a cell or more), ends on cell corners or
+  halves, not in a style the grid itself is drawn in (three or more lines across half the grid); one line style per
+  ink and width. Its thread: the only thread a key lists without a symbol; else the nearest key thread by colour —
+  not when printed plain black or grey (many charts print every line so).
+- **Result**: name (the PDF's title, else the biggest line on page one), size, fabric count ("Aida 14", "14 count"),
+  whole crosses and beads, backstitch. Complete — every symbol and line style with a thread, nothing unplaced or
+  conflicting — it opens as a new pattern; the rest waits for the steps of §15.46 (grids, faded cells, key).
+- Read so far: Pattern Maker (symbols as characters on colour-filled cells; its black backstitch needs its thread
+  set), FlossCross (symbols as pictures, an overview page), this app's own PDFs made before they carried the pattern.
+  Tests: a chart made by the tests in another app's manner (`tests/support/otherAppChart.ts`, also
+  `tests/fixtures/other-app-chart.pdf`); other people's charts only in `tests/fixtures/private` (not committed).
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

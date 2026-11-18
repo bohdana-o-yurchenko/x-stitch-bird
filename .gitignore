@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+# other people's charts, for reading tests on this computer only (SPEC §15.47)
+/tests/fixtures/private/
 
 # next.js
 /.next/

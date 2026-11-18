@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { testEditor } from "../../../tests/support/editorHarness";
 
+// a PDF's page drawn as a picture named after it; "pdf:gone" can't be drawn
+vi.mock("../images/pdfPages", () => ({
+  drawPdfPage: vi.fn(async (_ed: unknown, source: string, page: number) => (source === "pdf:gone" ? null : { image: `img:${source}#${page}`, w: 100, h: 140 })),
+}));
+
 let ed: ReturnType<typeof testEditor>["ed"];
 
 beforeEach(async () => {
@@ -66,5 +71,29 @@ describe("reference photo windows (SPEC §11)", () => {
     expect(ed.state.references[0]!.marks).toBeNull();
     await ed.references.setMarks("gone", null); // a closed window: ignored
     expect(ed.state.references).toHaveLength(1);
+  });
+
+  it("a PDF window goes page by page, each page keeping its own marks; a page that can't be drawn is said (SPEC §15.41)", async () => {
+    ed.references.add({ image: "img:pdf:a#1", name: "Chart", pdf: { source: "pdf:a", page: 1, pages: 3 } });
+    const id = ed.state.references[0]!.id, win = () => ed.state.references[0]!;
+    ed.references.update(id, { marks: "marks:1" });
+    await ed.references.showPage(id, 2);
+    expect(win()).toMatchObject({ image: "img:pdf:a#2", marks: null, pdf: { page: 2, marks: { 1: "marks:1" } } });
+    ed.references.update(id, { marks: "marks:2" });
+    // past the last page: the last; the page shown again: nothing to do
+    await ed.references.showPage(id, 9);
+    expect(win()).toMatchObject({ image: "img:pdf:a#3", marks: null, pdf: { page: 3, marks: { 1: "marks:1", 2: "marks:2" } } });
+    await ed.references.showPage(id, 3);
+    await ed.references.showPage(id, 1);
+    expect(win()).toMatchObject({ image: "img:pdf:a#1", marks: "marks:1", pdf: { page: 1, marks: { 2: "marks:2" } } });
+    // drawn again where this browser hasn't the picture
+    ed.references.update(id, { image: "img:elsewhere" });
+    await ed.references.redrawPage(id);
+    expect(win().image).toBe("img:pdf:a#1");
+
+    ed.references.add({ image: "img:x", name: "Gone", pdf: { source: "pdf:gone", page: 1, pages: 2 } });
+    await ed.references.showPage(ed.state.references[1]!.id, 2);
+    expect(ed.state.references[1]!.pdf!.page).toBe(1);
+    expect(ed.state.toasts.some((t) => t.key === "toasts.badPdf")).toBe(true);
   });
 });
