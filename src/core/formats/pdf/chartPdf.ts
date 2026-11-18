@@ -12,6 +12,7 @@ import { shapeSymbol } from "../../symbols/shapes";
 import { SYMBOL_FONT, SYMBOL_GLYPHS } from "../../symbols/symbolFont";
 import type { PdfFonts } from "./patternKeeper";
 import { drawFooter, drawGrid, drawRulers, PAGE, type Tile } from "./pdfLayout";
+import { attachPattern } from "./patternAttachment";
 import { PdfPage, PdfWriter, textWidth } from "./pdfWriter";
 import { PdfCanvas, type CanvasLike } from "./pdfCanvas";
 import { SYMBOL_INKS, symbolColours, type SymbolColour } from "./symbolColours";
@@ -460,5 +461,7 @@ export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Arr
       symbols.add(s.sym, cx, cy, s.st === "full" ? S : S * 0.75, s.st === "full" ? s.ink : INK);
     }
   });
+  // the pattern itself, to read back exactly (SPEC §15.46)
+  await attachPattern(pdf, p);
   return pdf.build({ title: name, producer: "ptashechka" });
 }

@@ -56,3 +56,14 @@ export async function renderPdfPage(blob: Blob, page: number, side = PDF_PAGE_SI
   const png = await new Promise<Blob>((done, fail) => canvas.toBlob((b) => (b ? done(b) : fail(new Error("png"))), "image/png"));
   return { blob: png, w: canvas.width, h: canvas.height };
 }
+
+/** The files carried inside the PDF (its attachments); throws when it isn't a PDF that can be read. */
+export async function pdfAttachments(blob: Blob): Promise<Uint8Array[]> {
+  const doc = await documentOf(blob), files = await doc.getAttachments();
+  const out: Uint8Array[] = [];
+  for (const [id, f] of files ?? []) {
+    const content = f.content ?? (await doc.getAttachmentContent(id));
+    if (content) out.push(content);
+  }
+  return out;
+}

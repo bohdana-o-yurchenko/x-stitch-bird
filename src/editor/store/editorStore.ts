@@ -44,6 +44,8 @@ export type DialogRequest =
   | { type: "largePhoto"; w: number; h: number; answer: (use: boolean) => void }
   | { type: "pdfPage"; source: string; pages: number; name: string; to: "underlay" | "window"; answer: (page: number | null) => void }
   | { type: "fileChoice"; prefer: "xbird" | "oxs" }
+  | { type: "pdfPatternIntro" }
+  | { type: "pdfUnreadable"; name: string }
   | { type: "samePattern"; name: string; age: "older" | "newer" | "other"; answer: (choice: SamePatternChoice) => void }
   | { type: "patternKeeper"; issues: PkReport["issues"] }
   | { type: "textFallback"; ext: string; text: string }

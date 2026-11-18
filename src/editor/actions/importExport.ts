@@ -6,6 +6,7 @@ import { serializePattern, XBIRD_VERSION, type FileVersion, type PatternFile } f
 import { exportOxs } from "@/core/formats/oxs/exportOxs";
 import { chartPdf } from "@/core/formats/pdf/chartPdf";
 import { checkPatternKeeper, patternKeeperPdf, type PdfFonts } from "@/core/formats/pdf/patternKeeper";
+import { patternFromAttachments } from "@/core/formats/pdf/patternAttachment";
 import { SYMBOL_INKS, symbolColours } from "@/core/formats/pdf/symbolColours";
 import { TEXT_FONTS } from "@/core/formats/pdf/textFonts";
 import { importOxs } from "@/core/formats/oxs/importOxs";
@@ -22,6 +23,7 @@ import { defaultCanvasTheme } from "@/render/theme";
 import type { Ctx } from "@/render/primitives/cells";
 import { strokeLineStyle } from "@/render/primitives/lineStyles";
 import { downloadFile, isImageFile, isPatternFile, isPdfFile, readText } from "@/platform/files";
+import { pdfAttachments } from "@/platform/pdf";
 import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import { photoFits } from "../images/photoRoom";
 import { accountPatternApi } from "@/persistence";
@@ -188,6 +190,29 @@ export async function loadFile(ed: Editor, file: File) {
     console.error(e);
     ed.toast(e instanceof NewerFileError ? "toasts.newerFile" : "toasts.badFile");
   }
+}
+
+/**
+ * New ▸ From a PDF chart… (SPEC §15.46). A PDF this app made carries its pattern: it comes back exactly, as a new
+ * pattern. Anything else: not read (yet) — said, with the way to trace it instead.
+ */
+export async function loadPdfPattern(ed: Editor, file: File) {
+  let pattern: Pattern;
+  try {
+    const doc = patternFromAttachments(await pdfAttachments(file));
+    if (!doc) return ed.openDialog({ type: "pdfUnreadable", name: file.name });
+    pattern = parsePattern(doc, ed.state.symbols).pattern;
+  } catch (e) {
+    console.error(e);
+    if (e instanceof NewerFileError) return ed.toast("toasts.newerFile");
+    return ed.openDialog({ type: "pdfUnreadable", name: file.name });
+  }
+  // like an .oxs: always a pattern of its own
+  pattern.id = newPatternId();
+  loadPattern(ed, pattern);
+  ed.autosave.markSaved();
+  void saveToLibrary(ed, { quiet: true });
+  ed.toast("toasts.loaded", { name: file.name });
 }
 
 /** The file each opened photo came from: kept as the reference window's photo, as it came. */

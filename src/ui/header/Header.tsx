@@ -90,6 +90,8 @@ function PatternMenu() {
     { id: "new", label: t("new"), items: [
       { id: "newBlank", label: t("newBlank"), hint: t("newBlankHint"), onClick: go("file.new") },
       { label: t("newFromImage"), hint: t("newFromImageHint"), onClick: go("image.pick") },
+      { id: "newFromOxs", label: t("newFromOxs"), hint: t("newFromOxsHint"), onClick: go("file.newFromOxs") },
+      { id: "newFromPdf", label: t("newFromPdf"), hint: t("newFromPdfHint"), onClick: go("file.newFromPdf") },
     ] },
     ...(canOpen ? [{ id: "open", label: t("open"), hint: t(signedIn ? "openHintAccount" : "openHint"), onClick: openPatterns }] : []),
     "-",

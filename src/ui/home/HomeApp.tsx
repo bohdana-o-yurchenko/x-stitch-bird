@@ -214,11 +214,19 @@ function useAgo(time: number): string {
   return rtf.format(0, "minute");
 }
 
-/** Start something new: a blank pattern, from a picture, or a work file — then on to the editor. */
+/** Start something new: a blank pattern, from a photo, an .oxs or a PDF chart, or a work file — then on to the editor. */
 function useStarts() {
   const router = useRouter();
   return {
     blank: () => router.push({ pathname: "/", query: { new: "1" } }),
+    // the editor says first what this is (SPEC §15.46), then the PDF is picked
+    pdf: () => router.push({ pathname: "/", query: { new: "pdf" } }),
+    oxs: async () => {
+      const f = await pickFile(".oxs");
+      if (!f) return;
+      requestStart({ kind: "file", file: f });
+      router.push("/");
+    },
     picture: async () => {
       const f = await pickFile("image/*");
       if (!f) return;
@@ -245,6 +253,8 @@ function NewMenu() {
         items={[
           { label: t("newBlank"), onClick: go.blank },
           { label: t("newPicture"), onClick: () => void go.picture() },
+          { label: t("newOxs"), onClick: () => void go.oxs() },
+          { label: t("newPdf"), onClick: go.pdf },
           "-",
           { label: t("openFile"), hint: t("openFileHint"), onClick: () => void go.file() },
         ]}

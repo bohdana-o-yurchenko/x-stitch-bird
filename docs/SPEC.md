@@ -2074,6 +2074,29 @@ Only the page picked is drawn at full size (§15.41); previews are never stored.
   Save .oxs · Save .xbird, the one asked for the main one. "Keep this pattern? — Download it" saves the .xbird
   straight away (it's already said there).
 
+### 15.46 New ▸ from an .oxs or a PDF chart; this app's PDFs carry the pattern (2026-11-18)
+- **New ›** (Pattern ▾, and My patterns' + New ▾): Blank pattern…, From a photo…, From an .oxs file… (the file
+  picker shows .oxs only; read as in §15.42), From a PDF chart…. My patterns' PDF item opens the editor on
+  `?new=pdf`, which starts with the explanation below.
+- **From a PDF chart…** first says what it is: *not* adding a PDF as a reference to trace — it reads the pattern
+  itself, the chart and the key; it needs a PDF Pattern Keeper can read or one made by a cross-stitch app; a scan or
+  a PDF made from photos won't work; if it doesn't: a blank pattern, the PDF in a floating window for the key and
+  behind the chart to trace, then Autofill. Cancel · **Choose a PDF…**. Replacing the open pattern asks first like
+  any other (§15.25, "Keep this pattern?").
+- **This app's PDFs** (PDF chart to print, PDF for Pattern Keeper) carry the pattern as an attachment,
+  `<name>.xbird` — the pattern without photos and without learned photo examples. Viewers list it; chart apps
+  ignore it. Read back, the very same pattern: own threads and beads, blends, symbols, every stitch, bead, knot and
+  line — **always a new pattern** (a new id), as with an .oxs.
+- **Any other PDF** (for now — reading other apps' charts is next, see the plan below): "No pattern could be read" —
+  it may be a scan, made from photos, or from an app not read yet — and the way to trace it.
+- **Next** (approved 2026-11-18): reading other apps' PDFs — symbols as text (Pattern Maker, WinStitch, MacStitch,
+  PK-ready files, this app's older PDFs), as stamped pictures (FlossCross) or drawn shapes; pages placed by their
+  edge numbers; the key's rows matched to the symbols. Then the steps: the grids found (untick the ones that don't
+  fit — only when the size or overlaps don't add up), faded cells (asked only when found), the key (rows not matched
+  set up by hand; Open in the editor only once every symbol has a valid entry), success — with *Keep the PDF as a
+  reference* (behind the chart, already lined up), ticked. Half and quarter stitches, knots and beads of other apps
+  later. Test PDFs of other people's designs stay out of the repository.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

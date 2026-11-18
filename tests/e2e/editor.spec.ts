@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
-import { cellPoint, editorState, fileAction, fixtureDataUrl, gridPoint, loadFixture, menuAction, openAppMenu, openEditor, exportAction, saveFile } from "./helpers";
+import { cellPoint, editorState, fileAction, fixture, fixtureDataUrl, gridPoint, loadFixture, menuAction, openAppMenu, openEditor, exportAction, saveFile } from "./helpers";
 
 test.beforeEach(async ({ page }) => openEditor(page));
 
@@ -571,6 +571,46 @@ test("exports a PDF chart to print: cover, symbols, symbols on colour, colour wi
   expect(pdf.match(/\/Type \/Page /g)).toHaveLength(15);
   expect(pdf).not.toContain("/Subtype /Image");
   if (process.env.CHART_PDF_OUT) await file.saveAs(process.env.CHART_PDF_OUT);
+});
+
+test("New ▸ From a PDF chart… says first what it is; this app's PDF comes back as the same pattern, a new one; another PDF can't be read (SPEC §15.46)", async ({ page }) => {
+  const download = page.waitForEvent("download");
+  await exportAction(page, "PDF chart to print");
+  const pdf = (await (await download).path())!;
+  const content = "(ed) => JSON.stringify({ name: ed.doc.name, key: ed.doc.key, customs: ed.doc.customs, stitches: [...ed.doc.layers.stitches], beads: [...ed.doc.layers.beads], lines: ed.doc.layers.segments })";
+  const before = await editorState<string>(page, content), id = await editorState<string>(page, "(ed) => ed.doc.id");
+  const intro = page.getByTestId("pdf-pattern-intro");
+  const pick = async (file: string) => {
+    await fileAction(page, "New", "From a PDF chart…");
+    await expect(intro).toContainText("not adding a PDF as a reference");
+    await expect(intro).toContainText("A scanned PDF or one made from photos won’t work");
+    await expect(intro).toContainText("Autofill");
+    const chooser = page.waitForEvent("filechooser");
+    await page.getByRole("button", { name: "Choose a PDF…" }).click();
+    await (await chooser).setFiles(file);
+  };
+  await pick(pdf);
+  await expect(page.getByText(/^Loaded /)).toBeVisible();
+  expect(await editorState<string>(page, "(ed) => ed.doc.id")).not.toBe(id);
+  expect(await editorState<string>(page, content)).toBe(before);
+  // a PDF of pages without a pattern in it: said, with the way to trace it instead
+  await pick(fixture("pages.pdf"));
+  const unreadable = page.getByTestId("pdf-unreadable");
+  await expect(unreadable).toContainText("“pages.pdf” has no chart this app can read");
+  await expect(unreadable).toContainText("floating window");
+  await page.getByRole("button", { name: "Close" }).click();
+  await expect(unreadable).toHaveCount(0);
+});
+
+test("New ▸ has a blank pattern, a photo, an .oxs and a PDF chart; My patterns' From a PDF chart… opens on the same explanation (SPEC §15.46)", async ({ page }) => {
+  await fileAction(page, "New");
+  await expect(page.getByRole("menuitem")).toContainText(["Blank pattern…", "From a photo…", "From an .oxs file…", "From a PDF chart…"]);
+  await page.keyboard.press("Escape");
+  await page.goto("/en?new=pdf");
+  await expect(page.getByTestId("pdf-pattern-intro")).toBeVisible();
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByTestId("pdf-pattern-intro")).toHaveCount(0);
+  expect(new URL(page.url()).search).toBe("");
 });
 
 test("the selection bar can deselect without changing anything, and clears cells by name", async ({ page }) => {

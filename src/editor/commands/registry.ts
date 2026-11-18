@@ -9,7 +9,7 @@ import type { GridNumbering, KeyIndex, PatternMeta } from "@/core/pattern/types"
 import type { ChartView } from "@/render/chart";
 import { pickFile } from "@/platform/files";
 import { clearAmbiguous, nextAmbiguous, toggleAmbiguous } from "../actions/ambiguous";
-import { exportAs, exportChartPdf, exportPatternKeeper, handleDrop, loadFile, openFromLibrary, openImageDialog, saveToLibrary, type ExportFormat } from "../actions/importExport";
+import { exportAs, exportChartPdf, exportPatternKeeper, handleDrop, loadFile, loadPdfPattern, openFromLibrary, openImageDialog, saveToLibrary, type ExportFormat } from "../actions/importExport";
 import { deleteEntry, usageCount } from "../actions/keyEntries";
 import { newPattern, resize, setPatternSettings } from "../actions/pattern";
 import { cropChart, extendChart, mirrorChart, transformChart } from "../actions/transforms";
@@ -77,6 +77,11 @@ export const COMMANDS: readonly Command[] = [
   { id: "file.chooseFile", run: (ed, prefer) => ed.openDialog({ type: "fileChoice", prefer: prefer === "oxs" ? "oxs" : "xbird" }) },
   { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird,.oxs,.json,.xml"); if (f) await ed.commands.run("file.load", f); } },
   { id: "file.load", run: (ed, f) => loadFile(ed, f as File), destructive: "import", replacesPattern: true },
+  // New ▸ From an .oxs file… / From a PDF chart… (SPEC §15.46): the PDF one says first what it is — and isn't
+  { id: "file.newFromOxs", run: async (ed) => { const f = await pickFile(".oxs"); if (f) await ed.commands.run("file.load", f); } },
+  { id: "file.newFromPdf", run: (ed) => ed.openDialog({ type: "pdfPatternIntro" }) },
+  { id: "file.pickPdfPattern", run: async (ed) => { const f = await pickFile(".pdf,application/pdf"); if (f) await ed.commands.run("file.loadPdf", f); } },
+  { id: "file.loadPdf", run: (ed, f) => loadPdfPattern(ed, f as File), destructive: "import", replacesPattern: true },
   { id: "file.drop", run: (ed, files) => handleDrop(ed, files as File[]) },
   { id: "image.pick", run: async (ed) => { const f = await pickFile("image/*"); if (f) await openImageDialog(ed, f); } },
   { id: "image.open", run: (ed, f) => openImageDialog(ed, f as File) },

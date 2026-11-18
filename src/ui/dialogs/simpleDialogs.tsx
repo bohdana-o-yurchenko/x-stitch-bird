@@ -225,6 +225,41 @@ export function FileChoiceDialog({ prefer, onClose }: Close & { prefer: "xbird" 
   );
 }
 
+/** New ▸ From a PDF chart…: what this is — reading the pattern itself, not a reference to trace — before the PDF is picked. */
+export function PdfPatternIntroDialog({ onClose }: Close) {
+  const t = useTranslations("dialogs");
+  const run = useCommand();
+  const b = (c: ReactNode) => <b>{c}</b>;
+  const pick = () => {
+    onClose();
+    void run("file.pickPdfPattern");
+    return false as const;
+  };
+  return (
+    <Modal title={t("pdfPatternTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("pdfPatternPick"), primary: true, onClick: pick }]}>
+      <div data-testid="pdf-pattern-intro">
+        <p>{t.rich("pdfPatternWhat", { b })}</p>
+        <p>{t.rich("pdfPatternWhich", { b })}</p>
+        <p className={ui.hint}>{t.rich("pdfPatternElse", { b })}</p>
+      </div>
+    </Modal>
+  );
+}
+
+/** No pattern could be read from the PDF: the way to trace it instead. */
+export function PdfUnreadableDialog({ name, onClose }: Close & { name: string }) {
+  const t = useTranslations("dialogs");
+  const b = (c: ReactNode) => <b>{c}</b>;
+  return (
+    <Modal title={t("pdfUnreadableTitle")} onClose={onClose} buttons={[{ label: t("close"), primary: true }]}>
+      <div data-testid="pdf-unreadable">
+        <p>{t("pdfUnreadableWhy", { name })}</p>
+        <p>{t.rich("pdfPatternElse", { b })}</p>
+      </div>
+    </Modal>
+  );
+}
+
 export function TextFallbackDialog({ ext, text, onClose }: Close & { ext: string; text: string }) {
   const t = useTranslations();
   const ed = useEditor();

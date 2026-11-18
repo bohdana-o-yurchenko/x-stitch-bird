@@ -68,6 +68,9 @@ export function textWidth(text: string, size: number, font: "regular" | "bold" =
 
 const hex4 = (n: number) => n.toString(16).padStart(4, "0");
 
+/** A PDF text string in UTF-16 with a byte-order mark: any language. */
+const utf16 = (t: string) => `<FEFF${[...t].flatMap((ch) => { const c = ch.codePointAt(0)!; return c > 0xffff ? [0xd800 + ((c - 0x10000) >> 10), 0xdc00 + ((c - 0x10000) & 0x3ff)] : [c]; }).map(hex4).join("")}>`;
+
 export type FontName = "regular" | "bold" | "symbols";
 const FONT_KEY = { regular: "F1", bold: "F2", symbols: "F3", cyrRegular: "F4", cyrBold: "F5" } as const;
 
@@ -215,6 +218,7 @@ export class PdfWriter {
   private readonly pageRefs: Ref[] = [];
   private readonly pagesRef = this.reserve();
   private readonly fonts: Record<string, Ref> = {};
+  private readonly files: { name: string; ref: Ref }[] = [];
 
   private reserve(): Ref {
     this.bodies.push(null);
@@ -291,15 +295,20 @@ export class PdfWriter {
     this.pageRefs.push(this.add(`<< /Type /Page /Parent ${this.pagesRef} 0 R /MediaBox [0 0 ${num(page.width)} ${num(page.height)}] /Resources << /Font << ${fonts} >>${images}${states} >>${links} /Contents ${contents} 0 R >>`));
   }
 
+  /** A file carried inside the PDF (an attachment: viewers list it, chart apps ignore it). */
+  async attach(name: string, data: Uint8Array, mime: string, description: string) {
+    const file = await this.stream(`/Type /EmbeddedFile /Subtype /${mime.replace("/", "#2F")} /Params << /Size ${data.length} >>`, data);
+    this.files.push({ name, ref: this.add(`<< /Type /Filespec /F ${utf16(name)} /UF ${utf16(name)} /Desc ${utf16(description)} /EF << /F ${file} 0 R /UF ${file} 0 R >> >>`) });
+  }
+
   get pageCount() {
     return this.pageRefs.length;
   }
 
   build(info: { title: string; producer: string }): Uint8Array {
     this.put(this.pagesRef, `<< /Type /Pages /Count ${this.pageRefs.length} /Kids [${this.pageRefs.map((r) => `${r} 0 R`).join(" ")}] >>`);
-    const catalog = this.add(`<< /Type /Catalog /Pages ${this.pagesRef} 0 R >>`);
-    // UTF-16 with a byte-order mark: any language in the title
-    const utf16 = (t: string) => `<FEFF${[...t].flatMap((ch) => { const c = ch.codePointAt(0)!; return c > 0xffff ? [0xd800 + ((c - 0x10000) >> 10), 0xdc00 + ((c - 0x10000) & 0x3ff)] : [c]; }).map(hex4).join("")}>`;
+    const files = this.files.length ? ` /Names << /EmbeddedFiles << /Names [${this.files.map((f) => `${utf16(f.name)} ${f.ref} 0 R`).join(" ")}] >> >>` : "";
+    const catalog = this.add(`<< /Type /Catalog /Pages ${this.pagesRef} 0 R${files} >>`);
     const infoRef = this.add(`<< /Title ${utf16(info.title)} /Producer ${utf16(info.producer)} >>`);
     // the second line marks the file as binary
     const parts: Uint8Array[] = [ascii("%PDF-1.7\n%\xE2\xE3\xCF\xD3\n")];

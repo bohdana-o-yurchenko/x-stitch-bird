@@ -222,7 +222,7 @@ export class Editor {
   private async afterStart(intent: StartIntent, opened: boolean) {
     if (intent.kind === "resume" || intent.kind === "open" || opened) return;
     await this.sessionKnown();
-    if (intent.kind === "new") void this.commands.run("file.new");
+    if (intent.kind === "new") void this.commands.run(intent.from === "pdf" ? "file.newFromPdf" : "file.new");
     else void this.commands.run(intent.kind === "image" ? "image.open" : "file.load", intent.file);
   }
 

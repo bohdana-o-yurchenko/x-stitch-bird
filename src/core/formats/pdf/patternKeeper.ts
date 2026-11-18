@@ -4,6 +4,7 @@ import { resolveColor } from "../../pattern/resolve";
 import type { KeyEntry, KeyIndex, Pattern } from "../../pattern/types";
 import { SYMBOL_FONT, SYMBOL_GLYPHS } from "../../symbols/symbolFont";
 import { APP_URL_EN, drawFooter, drawGrid, drawRulers, PAGE, type Tile } from "./pdfLayout";
+import { attachPattern } from "./patternAttachment";
 import { PdfPage, PdfWriter, textWidth } from "./pdfWriter";
 
 /*
@@ -231,5 +232,7 @@ export async function patternKeeperPdf(p: Pattern, report: PkReport, o: PkPdfOpt
     await pdf.addPage(page);
   }
 
+  // the pattern itself, to read back exactly (SPEC §15.46)
+  await attachPattern(pdf, p);
   return pdf.build({ title: p.name || "Pattern", producer: "ptashechka" });
 }

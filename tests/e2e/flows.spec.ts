@@ -114,7 +114,7 @@ test("signed in, a file opened from the computer is kept, even when another patt
 
 test("a picture becomes a pattern with the chosen size and number of colours", async ({ page }) => {
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "New", "From a picture…");
+  await fileAction(page, "New", "From a photo…");
   await (await chooser).setFiles(fixture("underlay.png"));
   const dialog = page.getByRole("dialog", { name: "Turn a picture into a pattern" });
   await dialog.getByLabel("Width (stitches)").fill("20");

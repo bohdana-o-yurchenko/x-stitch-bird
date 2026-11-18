@@ -75,6 +75,12 @@ describe("what the editor opens on arrival (SPEC §15.37)", () => {
     expect(replaced).toEqual(["https://x/uk"]);
   });
 
+  it("?new=pdf starts one from a PDF chart (SPEC §15.46)", () => {
+    const replaced = at("https://x/uk?new=pdf");
+    expect(takeStartIntent()).toEqual({ kind: "new", from: "pdf" });
+    expect(replaced).toEqual(["https://x/uk"]);
+  });
+
   it("a file picked on the patterns page wins over the address, and is handed over once", () => {
     at("https://x/uk?open=abc");
     const file = new File(["x"], "a.xbird");
