@@ -18,7 +18,7 @@ type Step = { id: string; targets: string[]; menu?: HeaderMenu; reveal?: string[
 export const TOURS: Record<string, Step[]> = {
   intro: [
     { id: "welcome", targets: [] },
-    { id: "create", targets: ["menu", "menu:newBlank"], reveal: ["new"] },
+    { id: "create", targets: ["menu", "menu:newBlank", "menu:newFromOxs", "menu:newFromPdf"], reveal: ["new"], tip: true },
     { id: "key", targets: ["add-key", "side-references"], tip: true },
     { id: "trace", targets: ["side-references"], tip: true },
     { id: "autofill", targets: ["tool-autofill"], tip: true },

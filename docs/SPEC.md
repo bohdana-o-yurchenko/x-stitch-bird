@@ -2166,6 +2166,12 @@ chart whose picture can't be loaded is drawn again once, not over and over.
 - **Keyboard shortcuts**: a ⌨ button in the header, left of ☰ (no longer in ☰); the panel opens under it, wider and
   airier (each row's keys beside it, dashed row lines); ⌨ again, Esc or a click outside closes it. The guide's
   tools step points at it.
+- **Guides for 2.0**: *New pattern* gets a tip — a PDF from a cross-stitch app or an .oxs: New ▸ From a PDF chart /
+  From an .oxs file (both highlighted); *The key* and *Chart behind the stitches* take a photo, scan or PDF (a PDF of
+  several pages: pick one, switch later) and say a scan beats a photo — it lines up exactly and Autofill reads it far
+  better; Autofill's tip and its "before you start" ask for a scan or PDF; the photo-window tip is "A photo, scan or
+  PDF in its own window", with its pages turned by ‹ › in the window's bar.
+- **Release 2.0.0**: notes in `src/core/release/changelog.ts`, `package.json` 2.0.0.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

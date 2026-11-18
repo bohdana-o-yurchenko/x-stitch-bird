@@ -310,7 +310,7 @@ test("feature tips: once after the first image behind the chart, and for the fir
   chooser = page.waitForEvent("filechooser");
   await page.getByTestId("ref-window-add").click();
   await (await chooser).setFiles("tests/fixtures/underlay.png");
-  await expect(guide).toContainText("A photo in its own window");
+  await expect(guide).toContainText("A photo, scan or PDF in its own window");
   await guide.getByRole("button", { name: "Next" }).click();
   await expect(guide).toContainText("Mark what’s already done");
   await guide.getByRole("button", { name: "Got it" }).click();

@@ -819,10 +819,11 @@
     "create": {
       "title": "1. New pattern",
       "points": {
-        "1": "Open <hl>Pattern ▸ New ▸ Blank pattern</hl>.",
+        "1": "Open <hl>Pattern ▾ ▸ New ▸ Blank pattern</hl>.",
         "2": "Enter the size in stitches — as on the paper chart.",
         "3": "Pick the fabric."
-      }
+      },
+      "tip": "Have the chart as a PDF made by a cross-stitch app, or as an .oxs file? <hl>New ▸ From a PDF chart</hl> or <hl>From an .oxs file</hl> — the pattern is read for you, key and all."
     },
     "key": {
       "title": "2. The key",
@@ -830,14 +831,15 @@
         "1": "Every line of the paper key: <hl>+ Add to key</hl>.",
         "2": "Floss, beads, blends, floss + bead."
       },
-      "tip": "Keep the key in view: <hl>References ▸ Open in a window</hl> (the picture icon at the bottom of the side panel). Tick off added lines with its <hl>marker</hl>."
+      "tip": "Keep the key in view: a photo, scan or PDF of it in <hl>References ▸ Open in a window…</hl> (the picture icon at the bottom of the side panel). Tick off added lines with its <hl>marker</hl>."
     },
     "trace": {
       "title": "3. Chart behind the stitches",
       "points": {
-        "1": "Add the chart photo: <hl>References ▸ Image behind the chart</hl> — the picture icon at the bottom of the side panel.",
+        "1": "Add the chart — a scan, photo or PDF: <hl>References ▸ Put behind the chart…</hl>, the picture icon at the bottom of the side panel. A PDF of several pages: pick one, switch later.",
         "2": "Drag the <hl>4 corners</hl> onto the grid corners — the photo lies flat.",
-        "3": "Trace the symbols with the key entries."
+        "3": "Trace the symbols with the key entries.",
+        "4": "<hl>A scan beats a photo</hl>: flat and sharp, it lines up exactly — and Autofill reads it far better."
       },
       "tip": "Photo not perfect? Zoom in and press the <hl>edit image</hl> button by the zoom (or U): a <hl>frame</hl> appears — drag its side and the photo under it follows, the photo’s opposite side stays in place."
     },
@@ -849,7 +851,7 @@
         "3": "It shows what it found — <hl>Accept</hl> or <hl>Decline</hl>, then on to the next block.",
         "4": "Works best when every key symbol looks exactly like the paper chart’s — draw your own where needed."
       },
-      "tip": "It only fills cells it’s sure about. Check the result — it gets better the more you mark."
+      "tip": "It only fills cells it’s sure about — best on a <hl>scan or PDF</hl>; a photo’s shadows and tilt get in its way. Check the result — it gets better the more you mark."
     },
     "views": {
       "title": "5. Views",
@@ -908,11 +910,12 @@
       }
     },
     "referenceTip": {
-      "title": "A photo in its own window",
+      "title": "A photo, scan or PDF in its own window",
       "points": {
         "1": "Put the paper chart’s <hl>key</hl> here to keep it in view.",
         "2": "Or the <hl>chart scan</hl> — if you’d rather not put it behind the stitches.",
-        "3": "Drag the window, resize it, change its opacity."
+        "3": "Drag the window, resize it, change its opacity.",
+        "4": "A PDF: turn its pages with <hl>‹ ›</hl> in the window’s bar — each page keeps its own marks."
       }
     },
     "referenceMarks": {
@@ -926,7 +929,7 @@
       "title": "Autofill: before you start",
       "points": {
         "1": "Make the <hl>key</hl> first — Autofill fills cells with its entries.",
-        "2": "Put the chart under the stitches: <hl>Image behind the chart</hl>.",
+        "2": "Put the chart under the stitches: <hl>Image behind the chart</hl> — a <hl>scan or PDF</hl> rather than a photo, if you can.",
         "3": "<hl>Stitch a few cells of each symbol by hand.</hl> Autofill only sees the symbols it has already learned from your stitches."
       },
       "tip": "Make every key symbol look exactly like the paper chart’s — draw your own where there’s no match. Autofill works best that way."
