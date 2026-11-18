@@ -616,7 +616,9 @@ const readDoc = (page: Page) =>
 test("New ▸ From a PDF chart… reads another app's chart: nothing to settle — \"Pattern read\", then the pattern with the PDF behind it, lined up (SPEC §15.47, §15.48)", async ({ page }) => {
   await readPdfChart(page, "other-app-chart.pdf");
   await expect(page.getByTestId("pdf-chart-summary")).toHaveText("Snowy Owl: 30 × 20 stitches, 3 colours, 2 backstitch lines.");
+  // always kept: said, not asked
   await expect(page.getByTestId("pdf-chart-keep")).toBeChecked();
+  await expect(page.getByTestId("pdf-chart-keep")).toBeDisabled();
   await page.getByRole("button", { name: "Open in the editor" }).click();
   await expect(page.getByText(/^Loaded /)).toBeVisible();
   const doc = await readDoc(page);
@@ -625,6 +627,8 @@ test("New ▸ From a PDF chart… reads another app's chart: nothing to settle �
   // the first page behind the chart over columns 1–16, the second's place kept for when it's shown
   await expect.poll(() => editorState(page, "(ed) => ed.state.underlay && { behind: ed.state.underlay.behind, rect: ed.state.underlay.rect, page: ed.state.underlay.pdf.page, pages: ed.state.underlay.pdf.pages, second: ed.state.underlay.pdf.places['2'].rect }")).toEqual({ behind: true, rect: { x: 0, y: 0, w: 16, h: 20 }, page: 1, pages: 3, second: { x: 14, y: 0, w: 16, h: 20 } });
   await expect.poll(() => editorState(page, "(ed) => !!ed.state.underlayImage")).toBe(true);
+  // and in a floating window, on the key's page
+  await expect.poll(() => editorState(page, "(ed) => ed.state.references.map((r) => ({ name: r.name, page: r.pdf.page, pages: r.pdf.pages }))")).toEqual([{ name: "other-app-chart", page: 3, pages: 3 }]);
 });
 
 test("a chart with things to settle: the grids (not the size stated), faded cells, a thread not read — Open only once all is set (SPEC §15.48)", async ({ page }) => {
@@ -642,8 +646,14 @@ test("a chart with things to settle: the grids (not the size stated), faded cell
   await expect(page.getByTestId("pdf-chart-faded")).toContainText("printed faded");
   await page.getByLabel("Stitch them like the rest").check();
   await next.click();
-  // the key: the white thread wasn't read; Next waits for it
+  // the key: the white thread wasn't read; Next waits for it. The PDF beside it, at that symbol's row of the key
   const key = page.getByTestId("pdf-chart-key");
+  await expect(key.getByTestId("pdf-viewer-page")).toHaveValue("2");
+  await expect(key.getByTestId("pdf-viewer-mark")).toBeVisible();
+  await expect(key.getByTestId("pdf-viewer-zoom")).toHaveText("200%");
+  await key.getByRole("tab", { name: "Chart" }).click();
+  await expect(key.getByTestId("pdf-chart-preview")).toBeVisible();
+  await key.getByRole("tab", { name: "PDF" }).click();
   await expect(key.getByTestId("pdf-chart-row")).toHaveCount(3);
   await expect(key.getByTestId("pdf-chart-row").filter({ hasText: "Not read" })).toContainText("Key: Kreinik 032 Pearl");
   await expect(next).toBeDisabled();
@@ -657,14 +667,13 @@ test("a chart with things to settle: the grids (not the size stated), faded cell
   await next.click();
   await expect(next).toBeEnabled();
   await next.click();
-  await page.getByTestId("pdf-chart-keep").uncheck();
   await dialog.getByRole("button", { name: "Open in the editor" }).click();
   await expect(page.getByText(/^Loaded /)).toBeVisible();
   const doc = await readDoc(page);
   expect(doc).toMatchObject({ w: 30, h: 20, key: ["back:dmc:321", "bead:bead:00557", "thread:dmc:310", "thread:dmc:3865"] });
   // the faded columns stitched
   expect(doc.right).toBeGreaterThan(0);
-  expect(await editorState(page, "(ed) => ed.state.underlay")).toBeNull();
+  await expect.poll(() => editorState(page, "(ed) => [!!ed.state.underlay, ed.state.references.length]")).toEqual([true, 1]);
 });
 
 test("New ▸ has a blank pattern, a photo, an .oxs and a PDF chart; My patterns' From a PDF chart… opens on the same explanation (SPEC §15.46)", async ({ page }) => {

@@ -3,11 +3,12 @@ import { contentOf, FADED_FROM, otherAppChart, otherCell } from "../../../tests/
 import { testEditor } from "../../../tests/support/editorHarness";
 import { readChart } from "@/core/formats/pdfChart/read";
 import { drawPdfPage } from "../images/pdfPages";
+import { photoFits } from "../images/photoRoom";
 import { allSettled, openReadChart, settledRead } from "./pdfChart";
 
 // pages drawn as pictures named after them, 1000 px on the long side (the app draws them bigger: scaled to match)
 vi.mock("../images/pdfPages", () => ({ drawPdfPage: vi.fn(async (_ed: unknown, source: string, page: number) => ({ image: `img:${source}#${page}`, w: 707, h: 1000 })) }));
-vi.mock("../images/photoRoom", () => ({ photoFits: async () => true }));
+vi.mock("../images/photoRoom", () => ({ photoFits: vi.fn(async () => true) }));
 
 const read = async (messy: boolean) => {
   const content = await contentOf(await otherAppChart({ messy }));
@@ -26,11 +27,11 @@ describe("another app's chart, settled, opens (SPEC §15.48)", () => {
     expect(settledRead({ read: r, symbols: {}, lines: { 0: "skip" } }).lineStyles[0]!.thread).toBeNull();
   });
 
-  it("a new pattern from the choices — faded cells left empty — with the PDF behind it, each chart page over its cells", async () => {
+  it("a new pattern from the choices — faded cells left empty — with its PDF in a floating window on the key and behind it, each chart page over its cells", async () => {
     const { ed } = testEditor();
     const before = ed.doc.id, { content, read: r, file } = await read(true);
     const white = r.symbols.find((s) => !s.thread)!;
-    await openReadChart(ed, { file, content, read: r, symbols: { [white.id]: { kind: "thread", ids: ["dmc:3865"] } }, lines: {}, fadedEmpty: true, keepReference: true });
+    await openReadChart(ed, { file, content, read: r, symbols: { [white.id]: { kind: "thread", ids: ["dmc:3865"] } }, lines: {}, fadedEmpty: true });
     const p = ed.doc;
     expect([p.id === before, p.name, p.w, p.h]).toEqual([false, "Snowy Owl", 30, 20]);
     const src = (x: number, y: number) => {
@@ -40,22 +41,27 @@ describe("another app's chart, settled, opens (SPEC §15.48)", () => {
     for (let y = 0; y < 20; y++) for (let x = 0; x < 30; x++) expect(src(x, y), `${x},${y}`).toBe(x >= FADED_FROM ? null : [null, "dmc:310", "dmc:3865", "bead:00557"][otherCell(x, y)]);
     expect(ed.state.toasts.some((t) => t.key === "toasts.loaded")).toBe(true);
 
+    // the window: the key's page (the third), the PDF stored once for both
+    const win = ed.state.references[0]!;
+    expect(win).toMatchObject({ name: "owl", image: `img:${win.pdf!.source}#3`, pdf: { page: 3, pages: 3 } });
     const u = ed.state.underlay!;
+    expect(u.pdf!.source).toBe(win.pdf!.source);
     // page 1 shown, over columns 1–16; its grid cut out of the page drawn 707 × 1000 (the place reckoned at 4600)
     const k = 1000 / 842;
     expect(u).toMatchObject({ image: "img:" + u.pdf!.source + "#1", behind: true, rect: { x: 0, y: 0, w: 16, h: 20 }, pdf: { page: 1, pages: 3 } });
     expect(u.crop.x).toBeCloseTo(60 * k, 0);
     expect(u.crop.w).toBeCloseTo(16 * 12 * k, 0);
     expect(u.pdf!.places!["2"]!.rect).toEqual({ x: 14, y: 0, w: 16, h: 20 });
-    // its picture can't be loaded here (no browser): drawn again once, not over and over
-    expect(vi.mocked(drawPdfPage)).toHaveBeenCalledTimes(2);
+    // the window's page, the underlay's — whose picture can't be loaded here (no browser): drawn again once, not over and over
+    expect(vi.mocked(drawPdfPage)).toHaveBeenCalledTimes(3);
   });
 
-  it("without the reference: no picture behind the chart", async () => {
+  it("no room in the account for the PDF: the pattern opens all the same, without it", async () => {
+    vi.mocked(photoFits).mockResolvedValueOnce(false);
     const { ed } = testEditor();
     const { content, read: r, file } = await read(false);
-    await openReadChart(ed, { file, content, read: r, symbols: {}, lines: {}, fadedEmpty: false, keepReference: false });
+    await openReadChart(ed, { file, content, read: r, symbols: {}, lines: {}, fadedEmpty: false });
     expect(ed.doc.name).toBe("Snowy Owl");
-    expect(ed.state.underlay).toBeNull();
+    expect([ed.state.underlay, ed.state.references]).toEqual([null, []]);
   });
 });

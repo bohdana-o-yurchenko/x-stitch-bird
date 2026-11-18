@@ -1346,7 +1346,17 @@
     "closest": "Closest to its colour in the PDF:",
     "done": "{name}: {w} × {h} stitches, {colours, plural, one {# colour} other {# colours}}{lines, plural, =0 {} one {, # backstitch line} other {, # backstitch lines}}.",
     "partialsLeft": "{count, plural, one {# half or quarter stitch was} other {# half and quarter stitches were}} left out — add them in the editor.",
-    "keepReference": "Keep the PDF behind the chart, lined up",
-    "keepReferenceHint": "To check the pattern against it, page by page. It can be removed in References."
+    "keepReference": "The PDF goes behind the chart, lined up, and into a floating window",
+    "keepReferenceHint": "To check the pattern and its key against it, page by page.",
+    "viewPdf": "PDF",
+    "viewChart": "Chart",
+    "page": "Page",
+    "pageOf": "Page {page} of {pages}",
+    "pagePrev": "Previous page",
+    "pageNext": "Next page",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomFit": "Fit the width",
+    "pageFailed": "This page can’t be shown."
   }
 }

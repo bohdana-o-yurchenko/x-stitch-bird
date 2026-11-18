@@ -41,6 +41,10 @@ export interface ChartLineStyle {
   count: number;
   /** The thread it is, when the key and the colour tell; null: to be set up by hand. */
   thread: string | null;
+  /** Where to look for it: the key's first thread listed without a symbol (a backstitch list), else a line of it. */
+  sample: SampleBox | null;
+  /** `sample` is a row of the key (not a line in the chart). */
+  listed: boolean;
 }
 
 export interface ChartRead {
@@ -101,7 +105,7 @@ function nameOf(c: PdfContent): string {
  */
 function readKey(c: PdfContent, grids: PageGrid[], ids: Set<MarkId>) {
   const found = new Map<MarkId, { text: string; thread: KeyThread | null; at: SampleBox }>();
-  const loose: KeyThread[] = [];
+  const loose: (KeyThread & { at: SampleBox })[] = [];
   c.pages.forEach((page, n) => {
     const inGrid = (x: number, y: number) => grids.some((g) => g.page === n && x >= g.x0 && y >= g.y0 && x <= g.x0 + g.cols * g.pitch && y <= g.y0 + g.rows * g.pitch);
     // symbols as they appear in the key: characters standing alone, or stamped pictures
@@ -140,7 +144,8 @@ function readKey(c: PdfContent, grids: PageGrid[], ids: Set<MarkId>) {
       const y = centre(row[0]!).y;
       if (marks.some((m) => Math.abs(m.y - y) < m.h * 0.6) || inGrid(row[0]!.x, y)) continue;
       const t = threadOf(row.map((w) => w.text).join(" "), brandAbove(row));
-      if (t?.kind === "thread") loose.push(t);
+      const x = row[0]!.x, top = Math.min(...row.map((w) => w.y));
+      if (t?.kind === "thread") loose.push({ ...t, at: { page: n, x, y: top, w: Math.max(...row.map((w) => w.x + w.w)) - x, h: Math.max(...row.map((w) => w.y + w.h)) - top } });
     }
   });
   return { found, loose };
@@ -255,11 +260,17 @@ export function readChart(c: PdfContent, o: { use?: readonly boolean[] } = {}): 
       if (seen.has(key)) continue;
       seen.add(key);
       let style = lineStyles.findIndex((s) => s.ink === l.ink && Math.abs(s.width - l.width) < 0.3);
-      if (style < 0) style = lineStyles.push({ ink: l.ink, width: l.width, count: 0, thread: null }) - 1;
+      if (style < 0) {
+        const at = { page: g.page, x: g.x0 + Math.min(l.x1, l.x2) * g.pitch, y: g.y0 + Math.min(l.y1, l.y2) * g.pitch };
+        const sample = { ...at, w: Math.max(1, Math.abs(l.x2 - l.x1)) * g.pitch, h: Math.max(1, Math.abs(l.y2 - l.y1)) * g.pitch };
+        style = lineStyles.push({ ink: l.ink, width: l.width, count: 0, thread: null, sample, listed: false }) - 1;
+      }
       lineStyles[style]!.count++;
       lines.push({ ...seg, style });
     }
   }
+  // a backstitch list in the key: where to look for every line style's thread
+  if (loose[0]) for (const st of lineStyles) Object.assign(st, { sample: loose[0].at, listed: true });
   const candidates = [...loose, ...symbols.flatMap((s) => (s.thread?.kind === "thread" && s.thread.ids.length === 1 ? [s.thread] : []))];
   for (const s of lineStyles) {
     // only one thread listed for lines: that one

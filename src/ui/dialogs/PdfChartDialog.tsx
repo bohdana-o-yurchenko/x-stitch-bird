@@ -11,6 +11,7 @@ import { allSettled, settledRead, type ChartChoice } from "@/editor/actions/pdfC
 import { renderPdfPage } from "@/platform/pdf";
 import { Modal, cx, ui } from "../common/widgets";
 import { useCommand } from "../hooks/editor";
+import { PdfViewer } from "./PdfViewer";
 import s from "./pdfChart.module.css";
 
 /*
@@ -78,7 +79,6 @@ export function PdfChartDialog({ file, content, read: first, onClose }: { file: 
   const [symbols, setSymbols] = useState<Record<string, ChartChoice<KeyThread>>>({});
   const [lines, setLines] = useState<Record<number, ChartChoice<string>>>({});
   const [fadedEmpty, setFadedEmpty] = useState(true);
-  const [keepReference, setKeepReference] = useState(true);
   const settled = allSettled({ read, symbols, lines });
   // the steps taken: each only when there is something to settle in it — asked again after each, as the grids
   // chosen change what there is
@@ -99,7 +99,7 @@ export function PdfChartDialog({ file, content, read: first, onClose }: { file: 
   };
   const open = () => {
     onClose();
-    void run("file.openReadChart", { file, content, read, symbols, lines, fadedEmpty, keepReference });
+    void run("file.openReadChart", { file, content, read, symbols, lines, fadedEmpty });
     return false as const;
   };
 
@@ -110,7 +110,7 @@ export function PdfChartDialog({ file, content, read: first, onClose }: { file: 
       : [...back, { label: t("cancel") }, { label: t("next"), primary: true, disabled: step === "key" ? !settled : !read.symbols.length, onClick: () => (next(), false as const) }];
 
   return (
-    <Modal wide title={t(`title_${step}`)} onClose={onClose} buttons={buttons}>
+    <Modal wide full={step === "key"} title={t(`title_${step}`)} onClose={onClose} buttons={buttons}>
       <div data-testid={`pdf-chart-${step}`}>
         {step === "grids" && <GridsStep file={file} content={content} read={read} use={use} setUse={setUse} />}
         {step === "faded" && <FadedStep count={fadedCount(read)} fadedEmpty={fadedEmpty} setFadedEmpty={setFadedEmpty} />}
@@ -119,8 +119,9 @@ export function PdfChartDialog({ file, content, read: first, onClose }: { file: 
           <>
             <p data-testid="pdf-chart-summary">{t("done", { name: read.name, w: read.w, h: read.h, colours: settledRead({ read, symbols, lines }).symbols.filter((x) => x.thread).length, lines: read.lines.length })}</p>
             {read.issues.partials > 0 && <p className={ui.hint}>{t("partialsLeft", { count: read.issues.partials })}</p>}
+            {/* always: the pattern is checked against its PDF (SPEC §15.48) — shown so it's known, not a choice */}
             <label className={s.check}>
-              <input type="checkbox" checked={keepReference} onChange={(e) => setKeepReference(e.target.checked)} data-testid="pdf-chart-keep" />
+              <input type="checkbox" checked disabled readOnly data-testid="pdf-chart-keep" />
               <span>
                 {t("keepReference")}
                 <small className={ui.hint}>{t("keepReferenceHint")}</small>
@@ -294,9 +295,25 @@ function KeyStep({ file, content, read, symbols, setSymbols, lines, setLines, fa
   const picked = open && !open.startsWith("line:") ? read.symbols.findIndex((x) => x.id === open) : null;
   const known = read.symbols.filter((x) => x.thread).length;
   const choiceOf = (id: string) => symbols[id];
+  // the PDF to read the key from, at the place of the row being set up; the chart as it will be, a tab away
+  const [view, setView] = useState<"pdf" | "chart">("pdf");
+  const openSymbol = open && !open.startsWith("line:") ? read.symbols.find((x) => x.id === open) : null;
+  const openLine = open?.startsWith("line:") ? read.lineStyles[Number(open.slice(5))] : null;
+  const focus = openSymbol?.sample ?? openLine?.sample ?? null;
+  const keyPage = read.symbols.find((x) => x.keyText && x.sample)?.sample ?? null;
   return (
     <div className={s.keyStep}>
-      <ChartPreview read={read} colours={colours} lineColours={lineColours} picked={picked} fadedEmpty={fadedEmpty} />
+      <div className={s.left}>
+        <div className={s.tabs} role="tablist">
+          <button type="button" role="tab" aria-selected={view === "pdf"} className={cx(s.tab, view === "pdf" && s.on)} onClick={() => setView("pdf")}>{t("viewPdf")}</button>
+          <button type="button" role="tab" aria-selected={view === "chart"} className={cx(s.tab, view === "chart" && s.on)} onClick={() => setView("chart")}>{t("viewChart")}</button>
+        </div>
+        {view === "pdf" ? (
+          <PdfViewer file={file} sizes={content.pages} start={keyPage?.page ?? 0} focus={focus} row={!!openSymbol?.keyText || !!openLine?.listed} />
+        ) : (
+          <ChartPreview read={read} colours={colours} lineColours={lineColours} picked={picked} fadedEmpty={fadedEmpty} />
+        )}
+      </div>
       <div className={s.keyList}>
         <p className={ui.hint}>{known === read.symbols.length && read.lineStyles.every((x) => x.thread) ? t("keyAllRead") : t("keyHint", { read: known, total: read.symbols.length })}</p>
         {read.symbols.map((x, i) => {

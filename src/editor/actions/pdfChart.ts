@@ -21,7 +21,6 @@ export interface ReadChartOpen {
   /** By line style index. */
   lines: Record<number, ChartChoice<string>>;
   fadedEmpty: boolean;
-  keepReference: boolean;
 }
 
 /** The read chart with the user's choices in it; "skip" leaves a symbol or line out. */
@@ -45,25 +44,36 @@ export const allSettled = (o: Pick<ReadChartOpen, "read" | "symbols" | "lines">)
   o.read.symbols.every((s) => s.thread || o.symbols[s.id]) && o.read.lineStyles.every((s, i) => s.thread || o.lines[i]);
 
 /**
- * The chart read from another app's PDF, settled, opens as a new pattern (SPEC §15.48); with `keepReference` the PDF
- * goes behind the chart, each chart page lined up over the cells it shows.
+ * The chart read from another app's PDF, settled, opens as a new pattern (SPEC §15.48) — always with its PDF, to check
+ * it against: behind the chart, each chart page lined up over the cells it shows, and in a floating window on the key.
  */
 export async function openReadChart(ed: Editor, o: ReadChartOpen) {
   const pattern = chartToPattern(settledRead(o), ed.state.symbols, { fadedEmpty: o.fadedEmpty, strands: ed.doc.strands || 2 });
-  loadPattern(ed, pattern);
+  // no windows of its own to wait for: the one added below isn't overwritten
+  loadPattern(ed, pattern, []);
   ed.autosave.markSaved();
   void saveToLibrary(ed, { quiet: true });
   ed.toast("toasts.loaded", { name: o.file.name });
-  if (o.keepReference) await lineUp(ed, pattern.id, o);
+  // stored once, for both (no room in the account: said, and neither)
+  if (!(await photoFits(ed, o.file))) return;
+  const source = await ed.images.put(o.file);
+  await inWindow(ed, source, o);
+  await lineUp(ed, pattern.id, source, o);
 }
 
-async function lineUp(ed: Editor, patternId: string, o: ReadChartOpen) {
+/** The PDF in a floating window, on its key's page. */
+async function inWindow(ed: Editor, source: string, o: ReadChartOpen) {
+  const page = (o.read.symbols.find((s) => s.keyText && s.sample)?.sample?.page ?? 0) + 1;
+  const drawn = await drawPdfPage(ed, source, page);
+  if (drawn) ed.references.add({ image: drawn.image, name: o.file.name.replace(/\.[^.]+$/, ""), pdf: { source, page, pages: o.content.pages.length } });
+}
+
+async function lineUp(ed: Editor, patternId: string, source: string, o: ReadChartOpen) {
   const places = linedUpPages(o.read, o.content.pages, PDF_PAGE_SIDE);
-  if (!places.size || !(await photoFits(ed, o.file))) return;
+  if (!places.size) return;
   // first the page with the biggest cells (not an overview), the earliest of those
   const pitch = (page: number) => places.get(page)!.crop.w / places.get(page)!.rect.w;
   const first = [...places.keys()].sort((a, b) => pitch(b) - pitch(a) || a - b)[0]!;
-  const source = await ed.images.put(o.file);
   const drawn = await drawPdfPage(ed, source, first + 1);
   if (!drawn) return ed.toast("toasts.badPdf");
   const shown = places.get(first)!, k = drawn.w / shown.imageW;

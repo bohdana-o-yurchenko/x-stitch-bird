@@ -2132,16 +2132,22 @@ nothing: straight to *Pattern read*. Back goes to the step before; Cancel adds n
    ticked), or another size than the PDF states. Every page with a grid, drawn, the grids outlined; per grid a tick,
    "Page 2 · columns 15–30, rows 1–20"; unticking puts the chart together again ("Together they make 16 × 20").
 2. **Faded cells** — when cells are shown only faded: "Leave them empty" (default) · "Stitch them like the rest".
-3. **The key** — when a symbol or a line style has no thread. The chart as it will be (each cell its thread's colour,
-   unsettled ones a dot on white, the symbol being set up standing out); per symbol its picture as the PDF draws it,
+3. **The key** — when a symbol or a line style has no thread. A wider dialog: on the left **PDF | Chart** (PDF first) —
+   the PDF itself, to read the key from: ‹ Page 5 of 6 ›, − 200% + (the percentage: back to the page's width); opening
+   a row goes to that symbol's row of the key (or, not in the key, its cell in the chart; a line style: the key's list
+   of threads without symbols, else one of its lines), zoomed to 200%, scrolled to it and marked — a key row as a band
+   across the page from its symbol. *Chart*: the chart as it will be (each cell its thread's colour,
+   unsettled ones a dot on white, the symbol being set up standing out). On the right, per symbol its picture as the PDF draws it,
    its key row's text, its cells, its thread. Choose…: Thread / Bead, a brand's catalogue searched by number or name
    (Enter takes the first), "Closest to its colour in the PDF" when the chart fills cells; or leave the symbol out
    (its cells empty). Backstitch line styles alike (threads). **Next** only once every one is set or left out; once
    shown, the key stays a step.
 4. **Pattern read** — "Snowy Owl: 30 × 20 stitches, 3 colours, 2 backstitch lines."; part stitches left out are
-   said. ☑ **Keep the PDF behind the chart, lined up** (ticked): the PDF stored as the underlay (§15.41), behind the
-   stitches, each chart page placed over the cells it shows (its grid cut out, no straightening — `linedUpPages`),
-   the page with the biggest cells shown first. **Open in the editor**: a new pattern.
+   said. ☑ **The PDF goes behind the chart, lined up, and into a floating window** — always (ticked and greyed: said,
+   not a choice; updated 2026-11-18): the PDF stored once, as the underlay (§15.41), behind the stitches, each chart
+   page placed over the cells it shows (its grid cut out, no straightening — `linedUpPages`), the page with the
+   biggest cells shown first; and as a floating window (§15.41) on the key's page. No room in the account for it:
+   said (§15.35), the pattern opens without it. **Open in the editor**: a new pattern.
 Own threads (brands the app doesn't know) are set up in the editor afterwards. Fixed on the way: a PDF page behind the
 chart whose picture can't be loaded is drawn again once, not over and over.
 

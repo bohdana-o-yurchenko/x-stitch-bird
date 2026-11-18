@@ -258,6 +258,10 @@
 .modal.wide {
   width: min(820px, 100%);
 }
+/* as wide as the screen allows: a document beside a list (a PDF chart's key) */
+.modal.full {
+  width: min(1240px, 100%);
+}
 .modal h2 {
   font-family: var(--font-heading);
   font-weight: 600;

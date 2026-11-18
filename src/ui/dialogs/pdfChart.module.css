@@ -92,7 +92,7 @@
 /* the key */
 .keyStep {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
   gap: 16px;
   align-items: start;
 }
@@ -100,6 +100,12 @@
   .keyStep {
     grid-template-columns: 1fr;
   }
+}
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 .preview {
   width: 100%;
@@ -110,7 +116,7 @@
   background: #fff;
 }
 .keyList {
-  max-height: min(60vh, 620px);
+  max-height: min(66vh, 700px);
   overflow-y: auto;
   padding-right: 4px;
 }

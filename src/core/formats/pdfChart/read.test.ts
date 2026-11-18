@@ -41,7 +41,7 @@ describe("another app's PDF chart (SPEC §15.47)", () => {
     expect({ name: r.name, w: r.w, h: r.h, stated: r.stated, count: r.count, issues: r.issues }).toEqual({ name: "Snowy Owl", w: OTHER_W, h: OTHER_H, stated: { w: 30, h: 20 }, count: 16, issues: { conflicts: 0, unplaced: 0, partials: 0 } });
     expect(r.grids.map((g) => g.at)).toEqual([{ col: 0, row: 0 }, { col: 14, row: 0 }]);
     expect(r.symbols.map((s) => s.thread).sort((a, b) => a!.ids[0]!.localeCompare(b!.ids[0]!))).toEqual([{ kind: "bead", ids: ["bead:00557"] }, { kind: "thread", ids: ["dmc:310"] }, { kind: "thread", ids: ["dmc:3865"] }]);
-    expect(r.lineStyles).toMatchObject([{ ink: "#c72b3b", thread: "dmc:321", count: 2 }]);
+    expect(r.lineStyles).toMatchObject([{ ink: "#c72b3b", thread: "dmc:321", count: 2, listed: true, sample: { page: 2 } }]);
     expect(chartComplete(r)).toBe(true);
 
     const p = chartToPattern(r, ALL_SYMBOLS);
@@ -133,7 +133,8 @@ describe("real charts from other apps (only where the files are)", () => {
     expect(r.symbols.every((s) => s.thread)).toBe(true);
     // the app's own totals (its page 6): 2761 crosses of white
     expect(r.symbols.find((s) => s.thread!.ids[0] === "dmc:White")!.count).toBe(2761);
-    expect(r.lineStyles).toMatchObject([{ thread: null }]);
+    // looked up in its list, "Floss Used for Back Stitches" (page 5)
+    expect(r.lineStyles).toMatchObject([{ thread: null, listed: true, sample: { page: 4 } }]);
   }, 60_000);
 
   it.skipIf(!existsSync(fc))("FlossCross: symbols as pictures, 125 × 125, every one matched with its key row", async () => {

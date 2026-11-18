@@ -23,7 +23,7 @@ export interface ModalButton {
   onClick?: () => unknown;
 }
 
-export function Modal({ title, wide, children, buttons, onClose }: { title: string; wide?: boolean; children: ReactNode; buttons: ModalButton[]; onClose: () => void }) {
+export function Modal({ title, wide, full, children, buttons, onClose }: { title: string; wide?: boolean; full?: boolean; children: ReactNode; buttons: ModalButton[]; onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -31,7 +31,7 @@ export function Modal({ title, wide, children, buttons, onClose }: { title: stri
   }, [onClose]);
   return (
     <div className={s.backdrop} onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={cx(s.modal, wide && s.wide)} role="dialog" aria-modal="true" aria-label={title}>
+      <div className={cx(s.modal, wide && s.wide, full && s.full)} role="dialog" aria-modal="true" aria-label={title}>
         <h2>{title}</h2>
         <div className={s.modalBody}>{children}</div>
         <div className={s.modalFoot}>
