@@ -43,6 +43,10 @@ export const liveApi = {
   async release(id: string, window: string): Promise<void> {
     await call(live(id), json({ window, action: "release" }));
   },
+  /** This window has gone. `closing`: the page is closing — the request goes even so. */
+  async leave(id: string, window: string, closing = false): Promise<void> {
+    await call(live(id), { ...json({ window, action: "leave" }), ...(closing && { keepalive: true }) });
+  },
 };
 
 export const versionApi = {

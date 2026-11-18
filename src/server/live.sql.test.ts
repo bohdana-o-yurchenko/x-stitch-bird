@@ -119,6 +119,28 @@ describe("taking over the editing", () => {
   });
 });
 
+describe("a window that has gone (closed, reloaded, the editor left)", () => {
+  it("the editor leaving: nobody edits and it isn't counted, so the next window edits at once", async () => {
+    await live.claim(u1, "a", W1);
+    await live.checkIn(u1, "a", W1, true);
+    expect(await live.checkIn(u1, "a", W2, false)).toMatchObject({ editor: "other", others: 1 });
+    await live.leave(u1, "a", W1);
+    expect(await live.checkIn(u1, "a", W2, false)).toMatchObject({ editor: null, others: 0 });
+    expect(await live.claim(u1, "a", W2)).toEqual({ waiting: false });
+  });
+
+  it("another window leaving changes nobody's editing; one asked to hand over leaving lets the new one go on", async () => {
+    await live.claim(u1, "a", W1);
+    await live.checkIn(u1, "a", W1, true);
+    await live.leave(u1, "a", W3);
+    await live.leave(u2, "a", W1);
+    expect(await live.checkIn(u1, "a", W2, false)).toMatchObject({ editor: "other" });
+    await live.claim(u1, "a", W2);
+    await live.leave(u1, "a", W1);
+    expect(await live.checkIn(u1, "a", W2, true)).toMatchObject({ editor: "me", waiting: false });
+  });
+});
+
 describe("versions from every device", () => {
   const v = (time: number, reason = "timer", name = "v") => ({ time, reason, doc: file("a", name) });
 

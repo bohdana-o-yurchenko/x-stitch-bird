@@ -102,7 +102,11 @@ export default function EditorApp() {
   useEffect(() => {
     // what to open is read once, before anything shows: the address's ?open= / ?new=, or a file picked
     void ed.init(takeStartIntent()).then(() => ed.snapshots.start());
-    return () => ed.snapshots.stop();
+    // left for another page in this tab: the editor stops checking in as the window editing the pattern
+    return () => {
+      ed.snapshots.stop();
+      ed.live.stop();
+    };
   }, [ed]);
   return (
     <EditorContext.Provider value={ed}>

@@ -81,6 +81,22 @@ export async function release(userId: string, patternId: string, windowId: strin
   await sql`update patterns set handoff_from = null where user_id = ${userId} and id = ${patternId} and handoff_from = ${windowId}`;
 }
 
+/**
+ * The window has gone — closed, reloaded, or the editor left for another page: it no longer edits or has the pattern
+ * open, so the next window edits at once instead of waiting for it to count as gone.
+ */
+export async function leave(userId: string, patternId: string, windowId: string): Promise<void> {
+  await sql`
+    with gone as (
+      delete from pattern_windows where user_id = ${userId} and pattern_id = ${patternId} and window_id = ${windowId}
+    )
+    update patterns set
+      editor = case when editor = ${windowId} then null else editor end,
+      editor_at = case when editor = ${windowId} then null else editor_at end,
+      handoff_from = case when handoff_from = ${windowId} then null else handoff_from end
+    where user_id = ${userId} and id = ${patternId} and (editor = ${windowId} or handoff_from = ${windowId})`;
+}
+
 /** The pattern's versions in the account: times and reasons, oldest first. */
 export async function listVersions(userId: string, patternId: string): Promise<{ time: number; reason: string }[]> {
   const rows = await sql`select time, reason from pattern_versions where user_id = ${userId} and pattern_id = ${patternId} order by time`;

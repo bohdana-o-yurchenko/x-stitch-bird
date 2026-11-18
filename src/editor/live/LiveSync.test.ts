@@ -10,7 +10,7 @@ import type { Pattern } from "@/core/pattern/types";
  * work done here is never thrown away without the user choosing. The account and the editor are replaced.
  */
 const api = vi.hoisted(() => ({
-  live: { checkIn: vi.fn(), claim: vi.fn(), release: vi.fn(async () => {}) },
+  live: { checkIn: vi.fn(), claim: vi.fn(), release: vi.fn(async () => {}), leave: vi.fn(async () => {}) },
   patterns: { get: vi.fn() },
   revs: new Map<string, { rev: number; pending?: boolean }>(),
 }));
@@ -382,5 +382,63 @@ describe("taking over by hand, and being told no", () => {
     s.blocked();
     s.blocked();
     expect(ed.state.live.nudge).toBe(2);
+  });
+});
+
+describe("the window going: the editor left for another page, or the page closing", () => {
+  const listeners = new Map<string, () => void>();
+  beforeEach(() => {
+    listeners.clear();
+    const target = { addEventListener: (n: string, f: () => void) => listeners.set(n, f), removeEventListener: (n: string) => listeners.delete(n) };
+    vi.stubGlobal("document", { visibilityState: "visible", ...target });
+    vi.stubGlobal("window", target);
+    vi.useFakeTimers();
+  });
+
+  async function editing() {
+    const ed = fakeEditor(pattern("A"));
+    const s = make(ed);
+    api.live.checkIn.mockResolvedValue(state());
+    s.opened("p");
+    s.start();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(ed.state.live.role).toBe("editing");
+    return { ed, s };
+  }
+
+  it("left for another page: no more checking in, and once its last save is in, this window goes", async () => {
+    const { ed, s } = await editing();
+    const order: string[] = [];
+    ed.autosave.settle.mockImplementation(async () => void order.push("settled"));
+    api.live.leave.mockImplementation(async () => void order.push("left"));
+    s.stop();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(order).toEqual(["settled", "left"]);
+    expect(api.live.leave).toHaveBeenCalledWith("p", s.windowId);
+    const calls = api.live.checkIn.mock.calls.length;
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(api.live.checkIn.mock.calls.length).toBe(calls);
+    expect(listeners.size).toBe(0);
+  });
+
+  it("a check-in under way when it is left doesn't take the editing afterwards", async () => {
+    const { s } = await editing();
+    let answer!: (v: unknown) => void;
+    api.live.checkIn.mockReturnValue(new Promise((r) => (answer = r)));
+    const running = check(s);
+    s.stop();
+    answer(state({ editor: null }));
+    await running;
+    expect(api.live.claim).not.toHaveBeenCalled();
+  });
+
+  it("the page closing: goes at once — unless a save is still on its way (that save keeps the editing)", async () => {
+    const { ed, s } = await editing();
+    listeners.get("pagehide")!();
+    expect(api.live.leave).toHaveBeenCalledWith("p", s.windowId, true);
+    api.live.leave.mockClear();
+    ed.autosave.pending = true;
+    listeners.get("pagehide")!();
+    expect(api.live.leave).not.toHaveBeenCalled();
   });
 });

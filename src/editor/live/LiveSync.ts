@@ -44,6 +44,8 @@ export class LiveSync {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private ticking = false;
   private started = false;
+  /** Left for another page (`stop`): a check-in still under way doesn't take the editing afterwards. */
+  private stopped = false;
   /** Versions are brought together once per opened pattern (SPEC §15.34). */
   private versionsSynced: string | null = null;
   /** This window's version was chosen over the account's: it goes up once this window edits. */
@@ -65,12 +67,42 @@ export class LiveSync {
     return this.ed.state.docRevision !== this.syncedAt;
   }
 
+  private onVisible = () => document.visibilityState === "visible" && this.schedule(0);
+  private onOnline = () => this.schedule(0);
+  /**
+   * The page closing or reloading: this window goes at once, so the next one edits without waiting. Not with a save
+   * still on its way — that save keeps the editing for this window; it then counts as gone after a while.
+   */
+  private onPageHide = () => {
+    if (this.patternId && this.ed.state.account && this.role !== "off" && !this.ed.autosave.pending) void liveApi.leave(this.patternId, this.windowId, true);
+  };
+
   start() {
     if (this.started || typeof document === "undefined") return;
     this.started = true;
-    document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && this.schedule(0));
-    window.addEventListener("online", () => this.schedule(0));
+    this.stopped = false;
+    document.addEventListener("visibilitychange", this.onVisible);
+    window.addEventListener("online", this.onOnline);
+    window.addEventListener("pagehide", this.onPageHide);
     this.schedule(0);
+  }
+
+  /**
+   * The editor is left for another page in this tab: no more checking in (a window left running would go on editing
+   * unseen, and the editor opened next would only follow it). Once its last save is in, this window goes.
+   */
+  stop() {
+    if (!this.started) return;
+    this.started = false;
+    this.stopped = true;
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = null;
+    document.removeEventListener("visibilitychange", this.onVisible);
+    window.removeEventListener("online", this.onOnline);
+    window.removeEventListener("pagehide", this.onPageHide);
+    const id = this.patternId;
+    if (!id || !this.ed.state.account || this.role === "off") return;
+    void this.ed.autosave.settle().then(() => liveApi.leave(id, this.windowId));
   }
 
   /**
@@ -176,7 +208,7 @@ export class LiveSync {
     if (!id || !ed.state.account || !ed.state.ready) return this.setRole("off", 0);
     if (document.visibilityState === "hidden") return;
     let st = await liveApi.checkIn(id, this.windowId, this.role === "editing");
-    if (id !== this.patternId || st === undefined) return;
+    if (this.stopped || id !== this.patternId || st === undefined) return;
     // not in the account (yet): its first save puts it there, with this window editing
     if (st === null) return this.setRole("off", 0);
     if (this.versionsSynced !== id) {
@@ -192,7 +224,7 @@ export class LiveSync {
     if (st.editor === null) {
       // nobody edits: this window does
       const c = await liveApi.claim(id, this.windowId);
-      if (!c || id !== this.patternId) return;
+      if (!c || this.stopped || id !== this.patternId) return;
       st = { ...st, editor: "me", waiting: c.waiting };
     }
     const role: LiveRole = st.editor === "me" ? (st.waiting ? "takingOver" : "editing") : "following";

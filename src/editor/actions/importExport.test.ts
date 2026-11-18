@@ -190,7 +190,7 @@ describe("opening a file", () => {
       expect(answer({ kind: "replace" })).toBe("newer");
       await loading;
       expect([ed.doc.id, ed.doc.layers.stitches[5]]).toEqual([mine.id, copy.layers.stitches[0]]);
-      expect((await ed.snapshots.list(mine.id)).map((v) => v.reason)).toContain("import");
+      expect((await ed.snapshots.list()).map((v) => v.reason)).toContain("import");
     });
 
     it("not at all (Cancel), or a file without a date (another version)", async () => {
