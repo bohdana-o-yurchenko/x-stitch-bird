@@ -123,7 +123,9 @@ export function mirrorFromCentre(p: Pattern, dir: MirrorFromCentre): TransformRe
   const { source, target } = mirrorHalves(dir, size);
   const pieces = LAYERS.map((l) => l.extract(l.get(p.layers), source, size, all));
   LAYERS.forEach((l) => l.clearMask(l.get(p.layers), target, size));
-  for (const t of MIRROR_TRANSFORMS[dir])
-    LAYERS.forEach((l, i) => l.insert(l.get(p.layers), l.transform(pieces[i], t, size, ctx), size, { x: 0, y: 0 }, size, { pattern: p, override: true }));
+  for (const t of MIRROR_TRANSFORMS[dir]) {
+    const placed = new Set<number>();
+    LAYERS.forEach((l, i) => l.insert(l.get(p.layers), l.transform(pieces[i], t, size, ctx), size, { x: 0, y: 0 }, size, { pattern: p, override: true, placed }));
+  }
   return report;
 }

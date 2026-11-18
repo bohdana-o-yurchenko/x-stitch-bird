@@ -124,6 +124,31 @@ describe("pasting", () => {
     expect(dst.layers.stitches[3 * 10 + 4]).not.toBe(other);
   });
 
+  it("a cross and a bead sharing a cell (an older chart) move together; a pasted bead never lands on a cross already there", () => {
+    const p = createPattern(6, 2, "Old");
+    const cross = addEntry(p, { t: "thread", src: "dmc:310", n: 2, st: "full" }, ALL_SYMBOLS);
+    const bead = addEntry(p, { t: "bead", src: "bead:02011" }, ALL_SYMBOLS);
+    p.layers.stitches[0] = cross;
+    p.layers.beads[0] = bead;
+    const mask = new Uint8Array(12);
+    mask[0] = 1;
+    const f = extractFragment(p, mask)!;
+    clearMask(p, mask);
+    insertFragment(p, f, { x: 2, y: 0 }, false, ALL_SYMBOLS);
+    expect([p.layers.stitches[2], p.layers.beads[2]]).toEqual([cross, bead]);
+    // only the bead, onto a cross: not without override; with it, the cross goes
+    const only = createPattern(6, 2, "Bead");
+    const mask2 = new Uint8Array(12);
+    mask2[0] = 1;
+    only.layers.beads[0] = addEntry(only, { t: "bead", src: "bead:02011" }, ALL_SYMBOLS);
+    const g = extractFragment(only, mask2)!;
+    p.layers.stitches[4] = cross;
+    insertFragment(p, g, { x: 4, y: 0 }, false, ALL_SYMBOLS);
+    expect([p.layers.stitches[4], p.layers.beads[4]]).toEqual([cross, 0]);
+    insertFragment(p, g, { x: 4, y: 0 }, true, ALL_SYMBOLS);
+    expect([p.layers.stitches[4], p.layers.beads[4]]).toEqual([0, bead]);
+  });
+
   it("a symbol the destination already uses is not reused for another entry", () => {
     const { p, mask } = rich();
     const f = extractFragment(p, mask)!;

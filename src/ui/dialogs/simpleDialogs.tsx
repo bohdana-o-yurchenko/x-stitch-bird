@@ -7,6 +7,7 @@ import { parseCellRef } from "@/core/grid/numbering";
 import { symbolText } from "@/core/symbols/lineStyles";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { stopAskingLargePhoto } from "@/editor/images/largePhoto";
+import type { SamePatternChoice } from "@/editor/store/editorStore";
 import { copyText, isPdfFile } from "@/platform/files";
 import { ConfirmDelete, KeyIcon, Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
@@ -172,6 +173,27 @@ export function LargePhotoDialog({ w, h, answer, onClose }: Close & { w: number;
     <Modal title={t("largePhotoTitle")} onClose={close} buttons={[{ label: t("cancel") }, { label: t("largePhotoUse"), primary: true, onClick: use }]}>
       <p className={ui.hint}>{t("largePhotoBody", { w, h, mp: Math.round((w * h) / 1e6) })}</p>
       <label className={ui.chk} data-testid="large-photo-no-ask"><input type="checkbox" checked={noAsk} onChange={(e) => setNoAsk(e.target.checked)} />{t("largePhotoNoAsk")}</label>
+    </Modal>
+  );
+}
+
+/** A .xbird of a pattern one already has (SPEC §15.43): replace one's own (kept in Versions), add as new, or not. */
+export function SamePatternDialog({ name, age, answer, onClose }: Close & { name: string; age: "older" | "newer" | "other"; answer: (choice: SamePatternChoice) => void }) {
+  const t = useTranslations("dialogs");
+  // closing any other way (Esc, outside, Cancel) loads nothing
+  const close = () => {
+    answer(null);
+    onClose();
+  };
+  const choose = (choice: SamePatternChoice) => () => {
+    answer(choice);
+    onClose();
+    return false;
+  };
+  return (
+    <Modal title={t("samePatternTitle")} onClose={close} buttons={[{ label: t("cancel") }, { label: t("samePatternReplace"), onClick: choose({ kind: "replace" }) }, { label: t("samePatternNew"), primary: true, onClick: choose({ kind: "new", name: t("samePatternNewName", { name }) }) }]}>
+      <p className={ui.hint} data-testid="same-pattern">{t(`samePattern_${age}`, { name })}</p>
+      <p className={ui.hint}>{t("samePatternKept")}</p>
     </Modal>
   );
 }

@@ -423,10 +423,15 @@ All painting requires an active key entry; otherwise toast:
 around `x = w/2`; eraser also erases mirrored backstitch.
 
 **Override** (`occupied` rules, `index.html:1581`). With override **off**, only "empty" cells take paint:
-- bead entry: cell is occupied if it already has a bead **or** its stitch is a combo.
+- bead entry (in a cell): occupied if it has any bead, stitch or partial stitch — a bead in a cell takes the whole
+  cell. *New app (2.0):* the old app let a bead sit on a stitch; it no longer does.
 - combo entry: occupied if it has any stitch **or** any bead.
-- thread entry: occupied if it has any stitch (beads don't block).
-With override **on**, everything is painted. Painting a combo always clears the bead layer in that cell.
+- thread entry (crosses and partials): occupied if it has any stitch, the partial rules (§15.13), **or a bead** —
+  nothing is stitched behind a bead.
+- A bead **between cells** (§15.14) is a point, not a cell: it goes on top of anything in the cells around it.
+With override **on**, everything is painted and replaces what is in the way: a bead clears the stitches under it, a
+stitch clears the bead. Painting a combo always clears the bead layer in that cell. A cross and a bead that already
+share a cell (older charts, other apps' files) stay as they are, and stay together when moved, pasted or mirrored.
 Flood fill also respects occupancy. Toggling shows a toast explaining the mode.
 
 ### 6.3 Backstitch drawing
@@ -1357,7 +1362,7 @@ Combinations that must fit into one cell:
    the kind belong to the key entry?
 4. **Coexistence with full and half crosses.** Proposal: a cell holds **either** a full or half cross **or**
    partials, except that a half cross + quarter is allowed. With override off, partials only go into free corners;
-   with override on, they replace what is there. Beads can sit on top as today.
+   with override on, they replace what is there. *2.0:* a bead in a cell takes the whole cell (§6.2).
 5. **Erase / pick / fill.** Proposal: the eraser removes the partial under the pointer's corner (brush > 1 clears
    whole cells), the picker selects its entry, and fill ignores partials.
 6. **Rendering.**
@@ -1448,10 +1453,13 @@ box's bottom row — on the far side from "fit to screen", which it was confused
 has an image behind the chart. Pressed = edit mode; same as `U` and the "Behind stitches"
 checkbox. No setting to switch it on.
 
-**Zoomed-in edit frame** — in edit mode, Move & resize sub-tool, when the image covers the middle of the view and at
-least 3 of its 4 sides are outside the view (so its own handles can't be reached), a frame is drawn in the middle of
+**Zoomed-in edit frame** — in edit mode, Move & resize sub-tool, when the image covers the middle of the view and any
+control a corner can't stand in for is out of reach — the middle handle of any of its 4 sides, or its ↺ ↻, off screen
+or under the rulers (a corner in view isn't enough: it stretches both ways at once) — a frame is drawn in the middle of
 the view: 320 × 220 screen px, dashed accent outline, 8 handles, transparent inside. It is a screen tool: panning
-slides the photo under it. Not shown when zoomed out (the image's own handles are visible) or in Crop.
+slides the photo under it. The image's own handles in view keep working beside it (↺ ↻ first, then the frame, then
+the image's handles). While a drag is under way the frame stays shown or hidden as it was when the drag began. Not
+shown when the whole image is in view, when it isn't under the middle of the view, or in Crop.
 - **Stretch**: drag a side (anywhere along it) or a corner; the frame follows the pointer and the photo under the
   dragged side moves exactly with it. It works like pulling the photo's own side: the **photo's** opposite side (or
   corner) stays where it is, not the frame's (fixed 2026-11-15 — it used to scale around the frame's opposite side,
@@ -2003,6 +2011,32 @@ at a time.
   one's own of that brand — never DMC 32; a bare number is DMC (Mill Hill for beads), as every app takes it.
 - **Own threads and beads from a file** join the account's (signed in) as before — now with a word: "Added to your
   own threads & beads: Kreinik 032, Toho 11-21".
+
+### 15.43 A .xbird of a pattern one already has; beads in a cell take the cell (2026-11-18)
+
+**.xbird of a pattern already here.** A .xbird keeps its pattern's id. Signed in, opening one whose pattern is in My
+patterns (this browser or the account) never replaces it silently:
+- **Just as it is here** (same content): that pattern opens — "“Rose” is already here, just as in the file — opened it".
+- **Otherwise** a dialog: "You already have this pattern" — "This file is an **older** / **newer** / **another**
+  version of “Rose”." — buttons **Cancel** · **Replace mine** · **Add as a new pattern** (default).
+  - Older / newer: the file's `saved` time (ms; written into every .xbird since 2.0 — the download time from the
+    editor, the pattern's last save from My patterns) against when one's own was last saved. A file without it:
+    "another version". Older apps ignore the field; the .xbird format version stays 1.
+  - **Replace mine**: one's own goes into its Versions first ("Before loading a file"), then the file's content takes
+    its place under the same id (the file's versions join the history).
+  - **Add as a new pattern**: a new id, named "Rose (from file)"; one's own stays as it was.
+  - **Cancel** (Esc, outside): nothing is loaded.
+- Opened from My patterns' "Open file": the editor shows first, then asks (Cancel leaves the pattern shown).
+- Signed out there is one pattern; opening a file replaces it as before. .oxs files always come in as a new
+  pattern (§15.42).
+
+**Beads in a cell take the cell** (§6.2): with override off a cross, half cross or partial stitch isn't put under a
+bead in a cell, and such a bead isn't put on a stitch; with it on, the new one replaces the other. A bead **between
+cells** still goes on top of anything. Cells that already hold both (older charts, other apps' files) stay as they
+are and move, paste and mirror together.
+
+**Edit frame** (§15.15): shown also when a corner of the image is in view, as long as a side's middle handle or the
+rotate buttons are out of reach.
 
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 

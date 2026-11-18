@@ -1,7 +1,7 @@
 import { brushCells, floodRegion, snapHalf } from "@/core/geometry/geometry";
 import { LAYERS, PICK_ORDER } from "@/core/layers/registry";
 import { segmentDistance } from "@/core/layers/maskGeometry";
-import { clearPartialsUnder, canPlacePartial, clearForPartial, isOccupied } from "@/core/pattern/occupancy";
+import { canPlacePartial, clearForPartial, clearUnder, isOccupied } from "@/core/pattern/occupancy";
 import type { Corner, KeyEntry, KeyIndex, Point, Segment } from "@/core/pattern/types";
 import { mirrorCells, mirrorPoints, mirrorTransforms } from "@/core/transform/mirror";
 import type { Editor } from "../createEditor";
@@ -28,11 +28,8 @@ export function paintCells(ed: Editor, cells: Point[], k: KeyIndex): void {
       const i = m.y * p.w + m.x;
       if (!e || (!override && isOccupied(p, i, e))) continue;
       if (e.t === "bead") p.layers.beads[i] = key;
-      else {
-        p.layers.stitches[i] = key;
-        if (e.t === "combo") p.layers.beads[i] = 0;
-        clearPartialsUnder(p, i, e);
-      }
+      else p.layers.stitches[i] = key;
+      clearUnder(p, i, e);
     }
 }
 
@@ -79,8 +76,7 @@ export function fillAt(ed: Editor, cell: Point, k: KeyIndex, e: KeyEntry): void 
   if (target === k || (!override && isOccupied(p, start, e))) return;
   for (const i of floodRegion(start, size, (i) => layer[i] === target && (override || !isOccupied(p, i, e)))) {
     layer[i] = k;
-    if (e.t === "combo") p.layers.beads[i] = 0;
-    if (e.t !== "bead") clearPartialsUnder(p, i, e);
+    clearUnder(p, i, e);
   }
 }
 

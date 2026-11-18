@@ -1,5 +1,5 @@
 import { rle, unrle } from "../formats/json/rle";
-import { clearPartialsUnder, isOccupied } from "../pattern/occupancy";
+import { clearUnder, isOccupied } from "../pattern/occupancy";
 import type { Layers } from "../pattern/types";
 import { cellIndexMap } from "../transform/cellTransform";
 import { inBounds } from "./maskGeometry";
@@ -48,18 +48,17 @@ function denseLayer(id: "stitches" | "beads", pickPriority: number): LayerHandle
         }
       return out;
     },
-    insert(v, piece, ps, at, size, { pattern, override }) {
+    insert(v, piece, ps, at, size, { pattern, override, placed }) {
       for (let y = 0; y < ps.h; y++)
         for (let x = 0; x < ps.w; x++) {
           const k = piece[y * ps.w + x] ?? 0, tx = x + at.x, ty = y + at.y;
           if (!k || !inBounds(tx, ty, size)) continue;
           const i = ty * size.w + tx, e = pattern.key[k];
-          if (!e || (!override && isOccupied(pattern, i, e))) continue;
+          const together = !!placed?.has(i);
+          if (!e || (!override && isOccupied(pattern, i, e, together))) continue;
           v[i] = k;
-          if (id === "stitches") {
-            if (e.t === "combo") pattern.layers.beads[i] = 0;
-            clearPartialsUnder(pattern, i, e);
-          }
+          clearUnder(pattern, i, e, together);
+          placed?.add(i);
         }
     },
     clearMask(v, mask) {

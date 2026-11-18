@@ -46,6 +46,8 @@ export class UnderlayService {
   private dirty = false;
   private drag: { handle: Handle; from: Point; start: UnderlayData } | null = null;
   private frameDrag: { handle: Exclude<Handle, "inside">; from: Point; frame: Rect; start: UnderlayData } | null = null;
+  /** Whether the edit frame was shown when a drag began: it stays so until the drag ends, so it never flickers. */
+  private frameHeld: boolean | null = null;
   private undoStack: UnderlayData[] = [];
 
   constructor(private ed: Editor) {}
@@ -235,10 +237,18 @@ export class UnderlayService {
   /** The zoomed-in edit frame (SPEC §15.15), in canvas pixels; null when the image's own handles are reachable. */
   frame(): Rect | null {
     const u = this.data;
-    if (!u || !this.editing || u.tool !== "move" || !frameNeeded(turnedBounds(u), this.ed.viewport.visibleGrid())) return null;
+    if (!u || !this.editing || u.tool !== "move" || !(this.frameHeld ?? this.frameNeeded(u))) return null;
     if (this.ed.state.underlayFrame) return this.ed.state.underlayFrame;
     const c = this.ed.viewport.centreOnScreen();
     return { x: c.x - FRAME.w / 2, y: c.y - FRAME.h / 2, ...FRAME };
+  }
+
+  /** The image covers the middle of the view and a side's middle handle or a rotate button is out of reach. */
+  private frameNeeded(u: UnderlayData): boolean {
+    const v = this.ed.viewport, c = u.crop;
+    const sides = [{ x: c.x + c.w / 2, y: c.y }, { x: c.x + c.w, y: c.y + c.h / 2 }, { x: c.x + c.w / 2, y: c.y + c.h }, { x: c.x, y: c.y + c.h / 2 }].map((p) => imageToGrid(u, p));
+    const buttons = this.imageRotateButtons(u).map((b) => v.toGrid(b.x, b.y));
+    return frameNeeded(turnedBounds(u), v.visibleGrid(), [...sides, ...buttons]);
   }
 
   /** Undo inside edit mode: the image's placement before the last change. */
@@ -271,15 +281,16 @@ export class UnderlayService {
       const pivot = v.toGrid(f.x + f.w / 2, f.y + f.h / 2), y = f.y - ROT_GAP;
       out.push({ x: f.x + f.w / 2 - ROT_SPREAD, y, dir: -1, pivot }, { x: f.x + f.w / 2 + ROT_SPREAD, y, dir: 1, pivot });
     }
-    // above the middle of the image's top edge, along the image's own (turned) axes
-    const a = ((u.rotation ?? 0) * Math.PI) / 180, top = v.toScreen(imageToGrid(u, { x: u.crop.x + u.crop.w / 2, y: u.crop.y }));
+    for (const b of this.imageRotateButtons(u)) if (b.x > RULER_SIZE && b.y > RULER_SIZE && b.x < v.width && b.y < v.height) out.push(b);
+    return out;
+  }
+
+  /** The image's own ↺ ↻, above the middle of its top edge along its own (turned) axes, on screen or not. */
+  private imageRotateButtons(u: UnderlayData): RotateButton[] {
+    const v = this.ed.viewport, a = ((u.rotation ?? 0) * Math.PI) / 180, top = v.toScreen(imageToGrid(u, { x: u.crop.x + u.crop.w / 2, y: u.crop.y }));
     const pivot = imageToGrid(u, { x: u.crop.x + u.crop.w / 2, y: u.crop.y + u.crop.h / 2 });
     const up = { x: Math.sin(a), y: -Math.cos(a) }, along = { x: Math.cos(a), y: Math.sin(a) };
-    for (const dir of [-1, 1] as const) {
-      const b = { x: top.x + up.x * ROT_GAP + along.x * dir * ROT_SPREAD, y: top.y + up.y * ROT_GAP + along.y * dir * ROT_SPREAD, dir, pivot };
-      if (b.x > RULER_SIZE && b.y > RULER_SIZE && b.x < v.width && b.y < v.height) out.push(b);
-    }
-    return out;
+    return ([-1, 1] as const).map((dir) => ({ x: top.x + up.x * ROT_GAP + along.x * dir * ROT_SPREAD, y: top.y + up.y * ROT_GAP + along.y * dir * ROT_SPREAD, dir, pivot }));
   }
 
   /** Turn by one small step (↺ = -1, ↻ = 1) around a grid point (default: the middle of the view). */
@@ -338,6 +349,7 @@ export class UnderlayService {
     const fh = this.frameHandle(s);
     if (fh) {
       this.remember();
+      this.frameHeld = true;
       this.frameDrag = { handle: fh, from: s, frame: this.frame()!, start: u };
       this.setHot(fh);
       return;
@@ -345,6 +357,7 @@ export class UnderlayService {
     const handle = handleAt(u.rect, toLocal(u, p), this.grabTolerance());
     if (handle) {
       this.remember();
+      this.frameHeld = !!this.frame();
       this.drag = { handle, from: p, start: u };
     }
   }
@@ -380,6 +393,7 @@ export class UnderlayService {
     if (!this.drag && !this.frameDrag) return;
     this.drag = null;
     this.frameDrag = null;
+    this.frameHeld = null;
     this.save();
   }
 

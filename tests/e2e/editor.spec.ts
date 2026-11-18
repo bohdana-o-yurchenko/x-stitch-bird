@@ -440,6 +440,10 @@ test("puts a reference image behind the chart and keeps it after a reload", asyn
   expect(await editorState<number>(page, "(ed) => ed.state.underlay.rotation")).toBeCloseTo(-1.5, 6);
   await page.getByRole("button", { name: "0°" }).click();
   expect(await editorState<number>(page, "(ed) => ed.state.underlay.rotation")).toBe(0);
+  // the photo's top-left corner in view, the rest beyond: its side handles are out of reach, so the frame is there
+  const u = await editorState<{ x: number; y: number }>(page, "(ed) => ed.state.underlay.rect");
+  await page.evaluate(([x, y]) => (window as unknown as { __stitchwork: { store: { setState(s: object): void } } }).__stitchwork.store.setState({ viewport: { zoom: 40, offX: 40 - x! * 40, offY: 40 - y! * 40 } }), [u.x, u.y]);
+  expect(await editorState(page, "(ed) => ed.underlay.frame()")).not.toBeNull();
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
 });

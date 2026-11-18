@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { ALL_SYMBOLS } from "../symbols/symbols";
 import { createPattern } from "./createPattern";
 import { addEntry } from "./keyEntries";
-import { canPlacePartial, clearForPartial, clearPartialsUnder, isOccupied } from "./occupancy";
+import { canPlacePartial, clearForPartial, clearUnder, isOccupied } from "./occupancy";
 import type { Pattern } from "./types";
 
 let p: Pattern, full: number, half: number, bead: number, combo: number;
@@ -19,13 +19,40 @@ beforeEach(() => {
 const entry = (k: number) => p.key[k]!;
 
 describe("what may share a cell (SPEC §6.2)", () => {
-  it("lets a bead sit on a plain stitch but not on another bead or on floss + bead", () => {
-    p.layers.stitches[0] = full;
+  it("a bead in a cell takes the whole cell: not on a stitch, a bead or floss + bead, and nothing stitched under it", () => {
     expect(isOccupied(p, 0, entry(bead))).toBe(false);
-    p.layers.beads[0] = bead;
+    p.layers.stitches[0] = full;
     expect(isOccupied(p, 0, entry(bead))).toBe(true);
-    p.layers.stitches[1] = combo;
+    p.layers.partials.set(1, [{ kind: "quarter", corner: 0, k: full }]);
     expect(isOccupied(p, 1, entry(bead))).toBe(true);
+    p.layers.stitches[2] = combo;
+    expect(isOccupied(p, 2, entry(bead))).toBe(true);
+    p.layers.beads[3] = bead;
+    expect([isOccupied(p, 3, entry(bead)), isOccupied(p, 3, entry(full)), isOccupied(p, 3, entry(half)), canPlacePartial(p, 3, "quarter", 0)]).toEqual([true, true, true, false]);
+  });
+
+  it("a stitch and a bead that came along together (a paste, older charts) stay together", () => {
+    p.layers.stitches[0] = full;
+    expect(isOccupied(p, 0, entry(bead), true)).toBe(false);
+    clearUnder(p, 0, entry(bead), true);
+    expect(p.layers.stitches[0]).toBe(full);
+    p.layers.beads[1] = bead;
+    expect([isOccupied(p, 1, entry(full), true), canPlacePartial(p, 1, "quarter", 0, p.layers.partials, true)]).toEqual([false, true]);
+    clearUnder(p, 1, entry(full), true);
+    expect(p.layers.beads[1]).toBe(bead);
+  });
+
+  it("override: a bead clears the stitches under it; a stitch clears the bead", () => {
+    p.layers.stitches[0] = full;
+    p.layers.partials.set(1, [{ kind: "quarter", corner: 0, k: full }]);
+    clearUnder(p, 0, entry(bead));
+    clearUnder(p, 1, entry(bead));
+    expect([p.layers.stitches[0], p.layers.partials.has(1)]).toEqual([0, false]);
+    p.layers.beads[2] = bead;
+    p.layers.beads[3] = bead;
+    clearUnder(p, 2, entry(half));
+    clearForPartial(p, 3, "quarter", 0);
+    expect([p.layers.beads[2], p.layers.beads[3]]).toEqual([0, 0]);
   });
 
   it("gives floss + bead only a completely empty cell", () => {
@@ -77,12 +104,12 @@ describe("what may share a cell (SPEC §6.2)", () => {
   it("after painting a stitch, drops the partials it covers: all under a full cross, only petites under a half", () => {
     const list = () => [{ kind: "quarter" as const, corner: 0 as const, k: full }, { kind: "petite" as const, corner: 2 as const, k: full }];
     p.layers.partials.set(0, list());
-    clearPartialsUnder(p, 0, entry(half));
+    clearUnder(p, 0, entry(half));
     expect(p.layers.partials.get(0)).toEqual([list()[0]]);
     p.layers.partials.set(1, list());
-    clearPartialsUnder(p, 1, entry(full));
+    clearUnder(p, 1, entry(full));
     expect(p.layers.partials.has(1)).toBe(false);
-    clearPartialsUnder(p, 3, entry(full)); // nothing there: no-op
+    clearUnder(p, 3, entry(full)); // nothing there: no-op
     expect(p.layers.partials.has(3)).toBe(false);
   });
 });

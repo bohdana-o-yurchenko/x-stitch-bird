@@ -12,7 +12,7 @@ import { importOxs } from "@/core/formats/oxs/importOxs";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
 import { formatLabel, keyLabelData } from "@/core/labels/keyLabel";
 import { addEntry } from "@/core/pattern/keyEntries";
-import { createPattern } from "@/core/pattern/createPattern";
+import { createPattern, newPatternId } from "@/core/pattern/createPattern";
 import { type Palette, type PaletteSlot } from "@/core/pattern/palette";
 import { SYMBOL_FONT } from "@/core/symbols/symbolFont";
 import type { Pattern } from "@/core/pattern/types";
@@ -26,6 +26,7 @@ import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import { photoFits } from "../images/photoRoom";
 import { accountPatternApi } from "@/persistence";
 import type { Editor } from "../createEditor";
+import type { SamePatternChoice } from "../store/editorStore";
 import { loadPattern } from "./pattern";
 
 /** "pattern": our own file — the pattern, key, reference windows and underlay, as text in a `.xbird` file. */
@@ -120,22 +121,63 @@ export async function exportChartPdf(ed: Editor) {
 export async function patternFile(ed: Editor): Promise<PatternFile> {
   const underlay = ed.underlay.data ? await ed.images.underlayToFile(ed.underlay.data) : undefined;
   const versions = await ed.snapshots.exportFile();
-  return { ...serializePattern(ed.doc), xbird: XBIRD_VERSION, refs: await ed.references.exportFile(), underlay, ...(versions.length ? { versions } : {}) };
+  return { ...serializePattern(ed.doc), xbird: XBIRD_VERSION, refs: await ed.references.exportFile(), underlay, ...(versions.length ? { versions } : {}), saved: Date.now() };
 }
 
 /** Read a .xbird (or older .json) or .oxs file into a pattern — told apart by content; throws on anything else. */
-export async function readPatternFile(ed: Editor, file: File): Promise<{ pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; versions: FileVersion[]; simplified: number }> {
+export async function readPatternFile(ed: Editor, file: File): Promise<{ pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; versions: FileVersion[]; simplified: number; saved?: number; xbird?: boolean }> {
   const text = await readText(file);
   if (text.startsWith("<")) {
     const { pattern, report } = importOxs(text, ed.state.symbols);
     return { pattern, refs: null, underlay: null, versions: [], simplified: report.simplified };
   }
-  return { ...parsePattern(JSON.parse(text), ed.state.symbols), simplified: 0 };
+  const raw = JSON.parse(text) as PatternFile;
+  const saved = Number(raw?.saved);
+  return { ...parsePattern(raw, ed.state.symbols), simplified: 0, xbird: true, ...(saved > 0 ? { saved } : {}) };
+}
+
+/**
+ * Signed in, a .xbird of a pattern already here (SPEC §15.43). Just as it is here: that one opens. Otherwise the user
+ * says: the file replaces theirs (theirs kept in its Versions), comes in as a new pattern, or doesn't. False: stop.
+ */
+async function settleSamePattern(ed: Editor, pattern: Pattern, saved: number | undefined): Promise<boolean> {
+  const mine = (await ed.persistence.patterns.list().catch(() => [])).find((s) => s.id === pattern.id);
+  if (!mine) return true;
+  const stored = await ed.persistence.patterns.load(pattern.id).catch(() => null);
+  const current = ed.doc.id === pattern.id ? serializePattern(ed.doc) : stored;
+  let same = false;
+  try {
+    same = !!current && JSON.stringify(serializePattern(parsePattern(current, ed.state.symbols).pattern)) === JSON.stringify(serializePattern(pattern));
+  } catch {}
+  if (same) {
+    if (ed.doc.id !== pattern.id) await openFromLibrary(ed, pattern.id, false);
+    ed.toast("toasts.alreadyHave", { name: mine.name });
+    return false;
+  }
+  const age = saved === undefined ? "other" : mine.updatedAt > saved ? "older" : "newer";
+  const choice = await new Promise<SamePatternChoice>((answer) => ed.openDialog({ type: "samePattern", name: mine.name, age, answer }));
+  if (!choice) return false;
+  if (choice.kind === "new") {
+    pattern.id = newPatternId();
+    pattern.name = choice.name;
+  } else if (current) await ed.snapshots.addVersion(current, "import");
+  return true;
+}
+
+/** A .xbird of a pattern already here (asked about once the editor shows, when it's how the editor was opened). */
+export async function alreadyHere(ed: Editor, file: File): Promise<boolean> {
+  try {
+    const { pattern, xbird } = await readPatternFile(ed, file);
+    return !!xbird && (await ed.persistence.patterns.list()).some((s) => s.id === pattern.id);
+  } catch {
+    return false;
+  }
 }
 
 export async function loadFile(ed: Editor, file: File) {
   try {
-    const { pattern, refs, underlay, versions, simplified } = await readPatternFile(ed, file);
+    const { pattern, refs, underlay, versions, simplified, saved, xbird } = await readPatternFile(ed, file);
+    if (xbird && ed.state.account && !(await settleSamePattern(ed, pattern, saved))) return;
     loadPattern(ed, pattern, refs as never, underlay);
     // straight into the library, like a pattern opened from it: listed under Open saved right away
     ed.autosave.markSaved();
@@ -235,14 +277,14 @@ async function uploadPreview(ed: Editor) {
   await accountPatternApi.putPreview(p.id, await canvasToBlob(canvas));
 }
 
-export async function openFromLibrary(ed: Editor, id: string) {
+export async function openFromLibrary(ed: Editor, id: string, say = true) {
   const doc = await ed.persistence.patterns.load(id);
   if (!doc) return ed.toast("toasts.openFailed");
   try {
     const { pattern } = parsePattern(doc, ed.state.symbols);
     loadPattern(ed, pattern);
     ed.autosave.markSaved();
-    ed.toast("toasts.opened", { name: pattern.name });
+    if (say) ed.toast("toasts.opened", { name: pattern.name });
   } catch {
     ed.toast("toasts.openFailed");
   }

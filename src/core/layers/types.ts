@@ -14,6 +14,8 @@ export interface TransformContext {
 export interface InsertContext {
   pattern: Pattern;
   override: boolean;
+  /** Cells this same insert (all its layers) has already put something in: what came along together stays together. */
+  placed?: Set<number>;
 }
 
 /** What the eraser covers: whole cells (brush) and/or a point with a radius (grid units). */

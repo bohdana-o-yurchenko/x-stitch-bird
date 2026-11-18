@@ -132,6 +132,77 @@ describe("opening a file", () => {
     expect((await ed.snapshots.list()).map((s) => s.reason)).toEqual(["timer"]);
   });
 
+  describe("signed in, a .xbird of a pattern already here (SPEC §15.43)", () => {
+    const signIn = () => ed.store.setState({ account: { id: "u1", email: "a@b.c" } });
+    // the saved patterns: kept here, each with the time it was saved
+    beforeEach(() => {
+      const saved = new Map<string, { doc: PatternFile; at: number }>();
+      ed.persistence.patterns = {
+        list: async () => [...saved.values()].map(({ doc, at }) => ({ id: doc.id, name: doc.name, w: doc.w, h: doc.h, updatedAt: at })),
+        load: async (id) => saved.get(id)?.doc ?? null,
+        save: async (doc) => (saved.set(doc.id, { doc, at: Date.now() }), { ok: true }),
+        remove: async (id) => void saved.delete(id),
+      };
+    });
+    const xbird = (p: ReturnType<typeof seeded>, saved?: number) => file(JSON.stringify({ ...serializePattern(p), xbird: XBIRD_VERSION, ...(saved ? { saved } : {}) }));
+    /** The open pattern saved, then another one opened; the file: the first one, changed. */
+    async function changedCopy() {
+      signIn();
+      const mine = ed.doc;
+      await io.saveToLibrary(ed, { quiet: true });
+      const updatedAt = (await ed.persistence.patterns.list()).find((s) => s.id === mine.id)!.updatedAt;
+      loadPattern(ed, seeded("Elsewhere"));
+      const theirs = structuredClone(serializePattern(mine));
+      const copy = (await import("@/core/formats/json/parse")).parsePattern(theirs, ALL_SYMBOLS).pattern;
+      copy.layers.stitches[5] = copy.layers.stitches[0]!;
+      return { mine, copy, updatedAt };
+    }
+    const answer = (choice: unknown) => {
+      const d = ed.state.dialog as { type: string; age: string; answer(c: unknown): void };
+      expect(d.type).toBe("samePattern");
+      d.answer(choice);
+      return d.age;
+    };
+
+    it("just as it is here: that one opens, nothing is asked", async () => {
+      signIn();
+      await io.saveToLibrary(ed, { quiet: true });
+      await io.loadFile(ed, xbird(ed.doc));
+      expect(ed.state.dialog).toBeNull();
+      expect(toasts()).toContain("toasts.alreadyHave");
+    });
+
+    it("as a new pattern: its own id and a name that says so; one's own stays as it was", async () => {
+      const { mine, copy, updatedAt } = await changedCopy();
+      const loading = io.loadFile(ed, xbird(copy, updatedAt - 1000));
+      await vi.waitFor(() => expect(ed.state.dialog).not.toBeNull());
+      expect(answer({ kind: "new", name: "Bird (from file)" })).toBe("older");
+      await loading;
+      expect([ed.doc.id === mine.id, ed.doc.name, ed.doc.layers.stitches[5]]).toEqual([false, "Bird (from file)", copy.layers.stitches[0]]);
+      const kept = (await ed.persistence.patterns.load(mine.id))!;
+      expect(kept.s).toBe(serializePattern(mine).s);
+    });
+
+    it("replacing: the file's content under the same id, one's own kept in Versions; a newer file says so", async () => {
+      const { mine, copy, updatedAt } = await changedCopy();
+      const loading = io.loadFile(ed, xbird(copy, updatedAt + 1000));
+      await vi.waitFor(() => expect(ed.state.dialog).not.toBeNull());
+      expect(answer({ kind: "replace" })).toBe("newer");
+      await loading;
+      expect([ed.doc.id, ed.doc.layers.stitches[5]]).toEqual([mine.id, copy.layers.stitches[0]]);
+      expect((await ed.snapshots.list(mine.id)).map((v) => v.reason)).toContain("import");
+    });
+
+    it("not at all (Cancel), or a file without a date (another version)", async () => {
+      const { copy } = await changedCopy();
+      const loading = io.loadFile(ed, xbird(copy));
+      await vi.waitFor(() => expect(ed.state.dialog).not.toBeNull());
+      expect(answer(null)).toBe("other");
+      await loading;
+      expect(ed.doc.name).toBe("Elsewhere");
+    });
+  });
+
   it("an older .json opens the same way", async () => {
     await io.loadFile(ed, file(JSON.stringify(serializePattern(createPattern(2, 2, "Old"))), "old.json"));
     expect(ed.doc.name).toBe("Old");

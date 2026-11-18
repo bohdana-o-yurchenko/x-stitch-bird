@@ -87,13 +87,13 @@ export function insertFragment(p: Pattern, f: Fragment, at: Point, override: boo
     const same = f.sourceId === p.id && sameKey(p.key[k], e);
     map.set(k, same ? k : keyFor(p, { ...e, sym: e.sym && !p.key.some((o) => o?.sym === e.sym) ? e.sym : undefined }, symbols));
   }
-  const size = { w: p.w, h: p.h };
+  const size = { w: p.w, h: p.h }, placed = new Set<number>();
   for (const l of LAYERS) {
     const piece = f.layers[l.id];
     if (piece === undefined) continue;
     const copy = l.clone(piece);
     l.remapKeys(copy, (k) => map.get(k) ?? 0);
-    l.insert(l.get(p.layers), copy, f.size, at, size, { pattern: p, override });
+    l.insert(l.get(p.layers), copy, f.size, at, size, { pattern: p, override, placed });
   }
 }
 

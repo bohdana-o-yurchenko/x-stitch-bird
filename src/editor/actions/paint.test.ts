@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { at, point, testEditor } from "../../../tests/support/editorHarness";
+import { placeKnot } from "./paint";
 
 let t: ReturnType<typeof testEditor>;
 beforeEach(() => {
@@ -20,12 +21,15 @@ describe("painting rules (SPEC §6.2)", () => {
     expect(stitch(1, 0)).toBe(blue);
   });
 
-  it("a bead sits on a stitch; floss + bead takes an empty cell and replaces a loose bead under override", () => {
+  it("a bead in a cell takes the cell: not on a stitch, no stitch under it; floss + bead takes an empty cell; override replaces", () => {
     const { ed, red, entry, drag, stitch } = t;
     drag([0, 0]);
     const bead = entry({ t: "bead", src: "bead:00557" });
     drag([0, 0], [1, 0]);
-    expect([stitch(0, 0), ed.doc.layers.beads[0], ed.doc.layers.beads[1]]).toEqual([red, bead, bead]);
+    expect([stitch(0, 0), ed.doc.layers.beads[0], ed.doc.layers.beads[1]]).toEqual([red, 0, bead]);
+    ed.setActiveEntry(red);
+    drag([1, 0]);
+    expect(stitch(1, 0)).toBe(0); // no cross behind the bead
     ed.doc.combos["combo:a"] = { thread: "dmc:310", bead: "bead:02011" };
     const combo = entry({ t: "combo", src: "combo:a", n: 2, st: "full" });
     drag([1, 0], [2, 0]);
@@ -33,6 +37,21 @@ describe("painting rules (SPEC §6.2)", () => {
     ed.store.setState({ override: true });
     drag([1, 0]);
     expect([stitch(1, 0), ed.doc.layers.beads[1]]).toEqual([combo, 0]);
+    ed.setActiveEntry(bead);
+    drag([0, 0]);
+    expect([stitch(0, 0), ed.doc.layers.beads[0]]).toEqual([0, bead]);
+  });
+
+  it("a bead between cells goes on top of a cross or a bead (SPEC §6.2)", () => {
+    const { ed, entry, drag } = t;
+    drag([0, 0]);
+    const inCell = entry({ t: "bead", src: "bead:00557" });
+    drag([1, 0]);
+    const between = entry({ t: "bead", src: "bead:02011", st: "point" });
+    placeKnot(ed, { x: 0.5, y: 0.5 }, between);
+    placeKnot(ed, { x: 1.5, y: 0.5 }, between);
+    expect(ed.doc.layers.knots.map((o) => [o.x, o.y])).toEqual([[0.5, 0.5], [1.5, 0.5]]);
+    expect(ed.doc.layers.beads[1]).toBe(inCell);
   });
 
   it("paints with a bigger brush", () => {

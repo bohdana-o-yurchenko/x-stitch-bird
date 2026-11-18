@@ -14,7 +14,7 @@ import { addPdf } from "./images/pdfPages";
 import { isPdf } from "@/platform/pdf";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { chromeColours } from "@/platform/themeColours";
-import { createFromImage, loadFile, saveToLibrary } from "./actions/importExport";
+import { alreadyHere, createFromImage, loadFile, saveToLibrary } from "./actions/importExport";
 import type { StartIntent } from "./startRequest";
 import { demoPattern, loadPattern, replaceDoc } from "./actions/pattern";
 import { Autosave } from "./autosave";
@@ -209,6 +209,8 @@ export class Editor {
     if (intent.kind === "file") {
       await this.sessionKnown();
       if (!this.state.account) return false;
+      // one already here: what to do with it is asked once the editor shows (afterStart)
+      if (await alreadyHere(this, intent.file)) return false;
       const placeholder = this.doc.id;
       await loadFile(this, intent.file);
       return this.doc.id !== placeholder;
@@ -216,7 +218,7 @@ export class Editor {
     return false;
   }
 
-  /** What's left of `intent` once the first pattern shows: a dialog for a new one or a picture, a file signed out. */
+  /** What's left of `intent` once the first pattern shows: a dialog for a new one or a picture, a file signed out or already here. */
   private async afterStart(intent: StartIntent, opened: boolean) {
     if (intent.kind === "resume" || intent.kind === "open" || opened) return;
     await this.sessionKnown();

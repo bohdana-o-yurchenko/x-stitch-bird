@@ -314,3 +314,39 @@ describe("straightening a photo by its four corners (SPEC §15.15)", () => {
     expect(straightened.calls).toHaveLength(0);
   });
 });
+
+describe("the edit frame, when zoomed in (SPEC §15.15)", () => {
+  // 800 × 600 canvas, rulers of 26 px; offsets 0, so the view starts at grid 0, 0
+  const at = async (rect: UnderlayData["rect"], zoom: number) => {
+    const t = setup();
+    await ready(t, stored({ rect, behind: false }));
+    t.ed.store.setState({ viewport: { zoom, offX: 0, offY: 0 } });
+    return t;
+  };
+
+  it("not shown when the whole image is in view, nor when it is off to one side", async () => {
+    expect((await at({ x: 100, y: 60, w: 180, h: 160 }, 2)).ed.underlay.frame()).toBeNull();
+    expect((await at({ x: 0, y: 0, w: 10, h: 10 }, 20)).ed.underlay.frame()).toBeNull();
+  });
+
+  it("shown when the image is under the middle with one of its corners in view: the sides' handles are out of reach", async () => {
+    expect((await at({ x: 10, y: 10, w: 100, h: 80 }, 20)).ed.underlay.frame()).not.toBeNull();
+  });
+
+  it("shown when only one side is cut off: that side's handle is out of reach", async () => {
+    const t = await at({ x: 5, y: 5, w: 50, h: 20 }, 20);
+    expect(t.ed.underlay.frame()).not.toBeNull();
+    // its own rotate buttons and the other handles are still there, beside the frame's
+    expect(t.ed.underlay.rotateButtons()).toHaveLength(4);
+  });
+
+  it("stays as it was while a drag is under way, so it never flickers", async () => {
+    const t = await at({ x: 100, y: 60, w: 180, h: 160 }, 2);
+    t.ed.underlay.pointerDown({ x: 280, y: 140 }, { x: 586, y: 306 });
+    t.ed.underlay.pointerMove({ x: 400, y: 140 }, { x: 826, y: 306 }, false);
+    expect(t.ed.state.underlay!.rect.w).toBeGreaterThan(180);
+    expect(t.ed.underlay.frame()).toBeNull();
+    t.ed.underlay.pointerUp();
+    expect(t.ed.underlay.frame()).not.toBeNull();
+  });
+});

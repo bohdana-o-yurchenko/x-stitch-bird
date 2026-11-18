@@ -238,14 +238,14 @@ export function turnedBounds(u: UnderlayData): Rect {
 }
 
 /**
- * The zoomed-in edit frame is needed when the image covers the middle of the view and at least 3 of its 4 sides
- * are outside it — so its own handles can't be reached. `view` is the visible chart area in grid units.
+ * The zoomed-in edit frame is needed when the image covers the middle of the view and any control a corner can't
+ * stand in for — a side's middle handle, a rotate button — is out of reach. `view` is the visible chart area and
+ * `controls` those controls' places, in grid units.
  */
-export function frameNeeded(img: Rect, view: Rect): boolean {
+export function frameNeeded(img: Rect, view: Rect, controls: Point[]): boolean {
   const cx = view.x + view.w / 2, cy = view.y + view.h / 2;
   if (cx < img.x || cx > img.x + img.w || cy < img.y || cy > img.y + img.h) return false;
-  const outside = [img.x <= view.x, img.x + img.w >= view.x + view.w, img.y <= view.y, img.y + img.h >= view.y + view.h];
-  return outside.filter(Boolean).length >= 3;
+  return controls.some((p) => !(p.x > view.x && p.x < view.x + view.w && p.y > view.y && p.y < view.y + view.h));
 }
 
 /** Show the whole image again; the part that was visible stays exactly where it was. */

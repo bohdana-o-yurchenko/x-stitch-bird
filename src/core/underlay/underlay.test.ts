@@ -63,13 +63,14 @@ describe("chart underlay geometry (SPEC §15.15)", () => {
   });
 
 
-  it("asks for the edit frame only when the image covers the view and 3+ of its sides are off-screen", () => {
-    const img = { x: 0, y: 0, w: 100, h: 80 };
-    expect(frameNeeded(img, { x: 40, y: 30, w: 10, h: 8 })).toBe(true);
-    expect(frameNeeded(img, { x: -5, y: 30, w: 10, h: 8 })).toBe(true);
-    expect(frameNeeded(img, { x: -5, y: -5, w: 10, h: 8 })).toBe(false);
-    expect(frameNeeded(img, { x: -10, y: -10, w: 120, h: 100 })).toBe(false);
-    expect(frameNeeded(img, { x: 200, y: 200, w: 10, h: 8 })).toBe(false);
+  it("asks for the edit frame when the image covers the middle of the view and a control is out of reach", () => {
+    const img = { x: 0, y: 0, w: 100, h: 80 }, view = { x: 40, y: 30, w: 10, h: 8 };
+    expect(frameNeeded(img, view, [{ x: 45, y: 34 }, { x: 100, y: 40 }])).toBe(true);
+    expect(frameNeeded(img, view, [{ x: 45, y: 34 }, { x: 41, y: 31 }])).toBe(false);
+    // on the view's very edge (under the rulers) is out of reach too
+    expect(frameNeeded(img, view, [{ x: 40, y: 34 }])).toBe(true);
+    // not when the image isn't under the middle, whatever is out of reach
+    expect(frameNeeded(img, { x: 200, y: 200, w: 10, h: 8 }, [{ x: 0, y: 40 }])).toBe(false);
   });
 
   it("lets the edit frame be grabbed anywhere along a side, corners first", () => {

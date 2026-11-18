@@ -144,6 +144,7 @@ export function createLibrary(persistence: Persistence = createPersistence()) {
         refs: await images.refsToFile(refs),
         ...(underlay ? { underlay: await images.underlayToFile(underlay) } : {}),
         ...(versions.length ? { versions } : {}),
+        saved: p.updatedAt,
       };
       downloadFile(`${safeName(doc)}.${PATTERN_EXT}`, new Blob([JSON.stringify(file)], { type: "application/json" }));
       return true;

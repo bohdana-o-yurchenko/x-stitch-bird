@@ -41,15 +41,16 @@ export const partialsLayer: LayerHandler<Partials> = {
     }
     return out;
   },
-  insert(v, piece, ps, at, size, { pattern, override }) {
+  insert(v, piece, ps, at, size, { pattern, override, placed }) {
     for (const [pi, list] of piece) {
       const tx = (pi % ps.w) + at.x, ty = ((pi / ps.w) | 0) + at.y;
       if (!inBounds(tx, ty, size)) continue;
-      const i = ty * size.w + tx;
+      const i = ty * size.w + tx, together = !!placed?.has(i);
       for (const s of list) {
-        if (!override && !canPlacePartial(pattern, i, s.kind, s.corner, v)) continue;
-        clearForPartial(pattern, i, s.kind, s.corner, v);
+        if (!override && !canPlacePartial(pattern, i, s.kind, s.corner, v, together)) continue;
+        clearForPartial(pattern, i, s.kind, s.corner, v, together);
         v.set(i, [...(v.get(i) ?? []), { ...s }]);
+        placed?.add(i);
       }
     }
   },

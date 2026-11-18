@@ -14,6 +14,9 @@ import type { LiveRole } from "../live/LiveSync";
 import type { PatternFile } from "@/core/formats/json/serialize";
 import type { MatchState } from "../matching/matching";
 
+/** A .xbird of a pattern one already has (SPEC §15.43): it replaces one's own, comes in as a new one, or not at all. */
+export type SamePatternChoice = { kind: "replace" } | { kind: "new"; name: string } | null;
+
 export type ToolId = "pencil" | "line" | "rect" | "filledRect" | "fill" | "eraser" | "picker" | "pan" | "select" | "magicWand" | "partial" | "autofill";
 
 export interface Toast {
@@ -39,6 +42,7 @@ export type DialogRequest =
   | { type: "photoRoom"; used: number; max: number; size: number }
   /** A photo above LARGE_PHOTO_PX: use it as it is (it may freeze the app for a moment), or not. */
   | { type: "largePhoto"; w: number; h: number; answer: (use: boolean) => void }
+  | { type: "samePattern"; name: string; age: "older" | "newer" | "other"; answer: (choice: SamePatternChoice) => void }
   | { type: "patternKeeper"; issues: PkReport["issues"] }
   | { type: "textFallback"; ext: string; text: string }
   /** Signed out, before another pattern replaces one with work in it: download, sign in, or replace. */

@@ -44,6 +44,8 @@ export interface PatternFile {
   samples?: Record<string, string[]>;
   /** The pattern's versions (automatic snapshots), oldest first; only in .xbird files. */
   versions?: FileVersion[];
+  /** When a .xbird was made (ms): tells an older copy of a pattern one has from a newer one (SPEC §15.43). */
+  saved?: number;
 }
 
 /** A version inside a .xbird file: the pattern as it was then, without pictures or nested versions. */
