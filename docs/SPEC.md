@@ -1854,6 +1854,10 @@ replaced unseen by another.
   window. Its changes show here as they're made. [Edit here]". **Edit here** takes over: the window that was editing
   saves its last changes first ("Taking over…"), then follows in turn. A window that's gone (closed, asleep, offline)
   is not waited for; when nobody edits, the first window to check in does.
+- **A window says when it goes**: leaving the editor for another page in the tab (My patterns, Account), it stops
+  checking in and — once its last save is in — tells the account it has gone; closing or reloading the tab says so
+  too (unless a save is still on its way). So the editor opened next, or the page reloaded, edits at once; without
+  this the window left behind went on "editing" unseen. One that can't say so counts as gone after 15 s.
 - **Revisions.** Every save names the account revision it was made over (`patterns.rev`); one made over an older
   revision is refused and comes back with the account's copy. Then: the same content — nothing to do; nothing changed
   here — the account's copy is shown; **changed in both places** (e.g. work done offline while another device went on)
