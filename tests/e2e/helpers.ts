@@ -11,6 +11,9 @@ const APP_VERSION = (JSON.parse(readFileSync(resolve(process.cwd(), "package.jso
 
 export async function openEditor(page: Page, locale = "en", o: { firstVisit?: boolean } = {}) {
   await page.goto(`/${locale}`);
+  // started up before storage is cleared: a page still starting would take the clearing for a first visit, open the
+  // guide and mark it seen — and the page after the reload wouldn't show it
+  await page.waitForFunction(() => (window as unknown as { __stitchwork?: { state: { ready: boolean } } }).__stitchwork?.state.ready === true);
   await page.evaluate(async ([first, version]) => {
     localStorage.clear();
     // the quick-start guide, feature tips and "What's new" appear on their own; tests start past them unless they ask

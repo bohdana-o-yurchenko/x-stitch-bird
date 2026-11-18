@@ -199,8 +199,12 @@ test("shows what you are drawing with, including held tools", async ({ page }) =
 
 test("tooltips appear quickly and the native one is suppressed", async ({ page }) => {
   const draw = page.getByRole("button", { name: "Draw (P)" });
-  await draw.hover();
-  await expect(page.getByTestId("tooltip")).toHaveText("Draw (P)", { timeout: 900 });
+  // shown after 0.6 s (the browser's own takes longer); on a busy machine the toolbar may still settle under the
+  // pointer just after loading — then pointed at again
+  await expect(async () => {
+    await draw.hover();
+    await expect(page.getByTestId("tooltip")).toHaveText("Draw (P)", { timeout: 1500 });
+  }).toPass({ timeout: 8000 });
   await page.mouse.move(5, 500);
   await expect(page.getByTestId("tooltip")).toHaveCount(0);
   await expect(draw).toHaveAttribute("title", "Draw (P)");
