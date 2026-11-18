@@ -37,7 +37,6 @@ export const BEADS: readonly ColorEntry[] = (millHillData as { series: string; p
   makeColor({ id: `bead:${code}`, kind: "bead", brand: "Mill Hill", code, name, ...(dmc ? { dmc } : {}), series, pack, order, hex: hex ?? DMC_BY_CODE.get(dmc)?.hex ?? "#B0B0B0" }),
 );
 
-export const BEAD_SERIES: readonly string[] = [...new Set(BEADS.map((b) => b.series ?? ""))];
 
 /**
  * Preciosa Rocailles (SPEC §15.30) from Preciosa's own sample cards (`scripts/catalog/import-preciosa.py`): rows

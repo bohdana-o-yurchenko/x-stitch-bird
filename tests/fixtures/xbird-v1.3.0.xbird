@@ -1,0 +1,176 @@
+{
+ "app": "stitchwork",
+ "v": 4,
+ "id": "1713b5b0-acc1-4bc0-95c6-565aa158d0c4",
+ "name": "Bird 1.3.0",
+ "w": 12,
+ "h": 8,
+ "count": 14,
+ "strands": 2,
+ "fabric": "#F7F4EC",
+ "pal": [
+  {
+   "t": "thread",
+   "src": "dmc:310",
+   "sym": "sym:circle",
+   "n": 2,
+   "st": "full"
+  },
+  {
+   "t": "thread",
+   "src": "custom:a",
+   "sym": "sym:square",
+   "n": 1,
+   "st": "halfb"
+  },
+  {
+   "t": "thread",
+   "src": "blend:a",
+   "sym": "sym:triangle",
+   "n": null,
+   "st": "full"
+  },
+  {
+   "t": "combo",
+   "src": "combo:a",
+   "sym": "sym:diamond",
+   "n": 2,
+   "st": "full"
+  },
+  {
+   "t": "bead",
+   "src": "bead:02011",
+   "sym": "sym:star"
+  },
+  {
+   "t": "back",
+   "src": "dmc:321",
+   "sym": "line:solid",
+   "n": 1
+  },
+  {
+   "t": "knot",
+   "src": "dmc:321",
+   "sym": "sym:heart",
+   "n": 2,
+   "wraps": 2
+  }
+ ],
+ "blends": {
+  "blend:a": {
+   "parts": [
+    {
+     "id": "dmc:310",
+     "n": 1
+    },
+    {
+     "id": "dmc:321",
+     "n": 1
+    }
+   ]
+  }
+ },
+ "combos": {
+  "combo:a": {
+   "thread": "dmc:321",
+   "bead": "bead:00557"
+  }
+ },
+ "customs": {
+  "custom:a": {
+   "id": "custom:a",
+   "kind": "thread",
+   "brand": "Anchor",
+   "code": "403",
+   "name": "Black",
+   "hex": "#111111"
+  }
+ },
+ "s": "1,2,3,4,1*2,0*90",
+ "b": "0*20,5,0*75",
+ "back": [
+  [
+   0,
+   2,
+   3,
+   2,
+   6
+  ]
+ ],
+ "meta": {
+  "designer": "A. Designer",
+  "copyright": "2026",
+  "instructions": "Start in the centre"
+ },
+ "spent": 4321,
+ "part": [
+  [
+   30,
+   "t",
+   0,
+   1
+  ],
+  [
+   30,
+   "t",
+   2,
+   2
+  ],
+  [
+   31,
+   "q",
+   1,
+   1
+  ],
+  [
+   31,
+   "p",
+   3,
+   2
+  ]
+ ],
+ "knots": [
+  [
+   1.5,
+   1,
+   7
+  ]
+ ],
+ "amb": [
+  7
+ ],
+ "refs": [
+  {
+   "image": "data:image/png;base64,iVBORw0KGgo=",
+   "marks": null,
+   "x": 10,
+   "y": 20,
+   "w": 300,
+   "h": 200
+  }
+ ],
+ "versions": [
+  {
+   "time": 1700000000000,
+   "reason": "timer",
+   "doc": {
+    "app": "stitchwork",
+    "v": 4,
+    "id": "a20b019b-eac8-485f-b23e-a165e0d55634",
+    "name": "Bird 1.3.0",
+    "w": 12,
+    "h": 8,
+    "count": 14,
+    "strands": 2,
+    "fabric": "#F7F4EC",
+    "pal": [],
+    "blends": {},
+    "combos": {},
+    "customs": {},
+    "s": "0*96",
+    "b": "0*96",
+    "back": []
+   }
+  }
+ ]
+}

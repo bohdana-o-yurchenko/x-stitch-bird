@@ -3,7 +3,7 @@ import { cleanSamples } from "../../matching/match";
 import { LAYERS } from "../../layers/registry";
 import { cleanEntry, fixEntrySymbols } from "../../pattern/keyEntries";
 import { cleanMeta } from "../../pattern/meta";
-import { createPattern, DEFAULT_FABRIC, DEFAULT_GRID } from "../../pattern/createPattern";
+import { createPattern, DEFAULT_FABRIC, DEFAULT_GRID, MAX_SIZE } from "../../pattern/createPattern";
 import type { CustomColor, GridNumbering, KeyEntry, Pattern } from "../../pattern/types";
 import { upgradeSymbol } from "../../symbols/symbols";
 import { cleanUnderlay, type UnderlayData } from "../../underlay/underlay";
@@ -49,7 +49,9 @@ function cleanGrid(raw: unknown): GridNumbering {
   };
 }
 
-const isDoc = (d: unknown): d is PatternFile => !!d && typeof d === "object" && (d as PatternFile).app === "stitchwork" && !!(d as PatternFile).w && !!(d as PatternFile).h;
+/** A chart can't be bigger than the app makes one (SPEC: 5..500): a file claiming more would only exhaust memory. */
+const fits = (d: PatternFile) => d.w <= MAX_SIZE && d.h <= MAX_SIZE;
+const isDoc = (d: unknown): d is PatternFile => !!d && typeof d === "object" && (d as PatternFile).app === "stitchwork" && !!(d as PatternFile).w && !!(d as PatternFile).h && fits(d as PatternFile);
 
 /** The versions a .xbird file carries, oldest first; anything malformed is skipped. */
 export function cleanVersions(raw: unknown): FileVersion[] {
@@ -62,7 +64,7 @@ export function cleanVersions(raw: unknown): FileVersion[] {
 
 /** Reads any Stitchwork JSON (v1–v4). `symbols` normalises chart symbols to this device's set. */
 export function parsePattern(raw: unknown, symbols: readonly string[]): { pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; versions: FileVersion[] } {
-  if (!isDoc(raw)) throw new PatternFormatError("Not a Stitchwork pattern file");
+  if (!isDoc(raw)) throw new PatternFormatError(raw && typeof raw === "object" && !fits(raw as PatternFile) ? `Chart is larger than ${MAX_SIZE} × ${MAX_SIZE}` : "Not a Stitchwork pattern file");
   const d = upgradeFile(raw) as Partial<PatternFile> & PatternFile & { pal?: unknown[] };
   const p = createPattern(d.w, d.h, d.name || "Untitled pattern");
   if (d.id) p.id = d.id;

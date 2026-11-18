@@ -1,4 +1,4 @@
-import type { Layers, LayerId } from "../pattern/types";
+import type { LayerId } from "../pattern/types";
 import { ambiguousLayer } from "./ambiguous";
 import { beadsLayer, stitchesLayer } from "./dense";
 import { partialsLayer } from "./partials";
@@ -19,6 +19,3 @@ export const layerHandler = (id: LayerId): LayerHandler => LAYERS.find((l) => l.
 
 /** Picker order: knots and backstitch first, then beads, partials, stitches (SPEC §6.2, §15.14). */
 export const PICK_ORDER: readonly LayerHandler[] = [...LAYERS].sort((a, b) => a.pickPriority - b.pickPriority);
-
-export const cloneLayers = (l: Layers): Layers =>
-  Object.fromEntries(LAYERS.map((h) => [h.id, h.clone(h.get(l))])) as unknown as Layers;

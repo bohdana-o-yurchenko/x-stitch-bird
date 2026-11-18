@@ -1,6 +1,7 @@
 import { parsePattern } from "@/core/formats/json/parse";
 import type { PatternFile } from "@/core/formats/json/serialize";
 import { patternStats, type PatternDetails, type PatternStats } from "@/core/pattern/stats";
+import { MAX_SIZE } from "@/core/pattern/createPattern";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import { sql } from "./db";
 import { MAX_PATTERNS } from "./limits";
@@ -61,7 +62,7 @@ export async function getPattern(userId: string, id: string): Promise<{ doc: Pat
 /** A pattern file as the app writes it; anything else is refused. */
 export function validPattern(v: unknown, id: string): v is PatternFile {
   const d = v as Partial<PatternFile> | null;
-  return !!d && d.app === "stitchwork" && d.id === id && typeof d.name === "string" && Number.isInteger(d.w) && Number.isInteger(d.h) && JSON.stringify(d).length < MAX_DOC;
+  return !!d && d.app === "stitchwork" && d.id === id && typeof d.name === "string" && Number.isInteger(d.w) && Number.isInteger(d.h) && d.w! <= MAX_SIZE && d.h! <= MAX_SIZE && JSON.stringify(d).length < MAX_DOC;
 }
 
 export type PutResult =

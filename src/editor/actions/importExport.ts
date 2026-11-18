@@ -13,7 +13,7 @@ import type { QuantizeResult } from "@/core/imageToPattern/quantize";
 import { formatLabel, keyLabelData } from "@/core/labels/keyLabel";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { createPattern } from "@/core/pattern/createPattern";
-import { buildPalette, type Palette, type PaletteSlot } from "@/core/pattern/palette";
+import { type Palette, type PaletteSlot } from "@/core/pattern/palette";
 import { SYMBOL_FONT } from "@/core/symbols/symbolFont";
 import type { Pattern } from "@/core/pattern/types";
 import type { UnderlayData } from "@/core/underlay/underlay";
@@ -247,5 +247,3 @@ export async function openFromLibrary(ed: Editor, id: string) {
     ed.toast("toasts.openFailed");
   }
 }
-
-export const previewPalette = (p: Pattern) => buildPalette(p);

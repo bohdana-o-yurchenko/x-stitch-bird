@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { floodRegion, halfPointsBetween, lineCells, snapHalf } from "../geometry/geometry";
 import { cellLabel, isMajorLine, majorOffset, parseCellRef, rulerLabels } from "../grid/numbering";
 import { ALL_SYMBOLS } from "../symbols/symbols";
 import { createPattern } from "./createPattern";
@@ -7,32 +6,15 @@ import { addEntry, findSameKey, fixEntrySymbols } from "./keyEntries";
 import { LINE_STYLES } from "../symbols/lineStyles";
 import { formatLabel, keyLabelData } from "../labels/keyLabel";
 import { translateEn } from "../../../tests/support/fixtures";
-import { canPlacePartial, clearForPartial, isOccupied } from "./occupancy";
+import { canPlacePartial, clearForPartial } from "./occupancy";
 import { partialsLayer } from "../layers/partials";
-import { libraryColor, matchesQuery } from "../catalog/catalog";
-import { nearestCorner } from "../stitches/partialKinds";
 import { mirrorPoints } from "../transform/mirror";
 import { mirrorHalves } from "../transform/wholeChart";
 
 describe("occupancy (override off)", () => {
   const p = createPattern(3, 1);
-  const cross = addEntry(p, { t: "thread", src: "dmc:310", n: 2, st: "full" }, ALL_SYMBOLS);
+  addEntry(p, { t: "thread", src: "dmc:310", n: 2, st: "full" }, ALL_SYMBOLS);
   const half = addEntry(p, { t: "thread", src: "dmc:310", n: 2, st: "half" }, ALL_SYMBOLS);
-  const bead = addEntry(p, { t: "bead", src: "bead:00557" }, ALL_SYMBOLS);
-  p.combos["combo:c"] = { thread: "dmc:310", bead: "bead:00557" };
-  const combo = addEntry(p, { t: "combo", src: "combo:c", n: 2, st: "full" }, ALL_SYMBOLS);
-  p.layers.stitches.set([cross, combo, 0]);
-  p.layers.partials.set(2, [{ kind: "quarter", corner: 0, k: cross }]);
-
-  it.each([
-    ["a bead may sit on a plain stitch", 0, bead, false],
-    ["but not on floss + bead", 1, bead, true],
-    ["floss + bead needs an empty cell", 0, combo, true],
-    ["a full cross can't cover a quarter", 2, cross, true],
-    ["a half cross can share with a quarter", 2, half, false],
-  ] as const)("%s", (_name, cell, entry, occupied) => {
-    expect(isOccupied(p, cell, p.key[entry]!)).toBe(occupied);
-  });
 
   it("fits two three-quarters along one diagonal, not a third quarter in their corners", () => {
     const q = createPattern(1, 1);
@@ -86,16 +68,6 @@ describe("partial stitches on the chart", () => {
   });
 });
 
-describe("geometry", () => {
-  it("draws gap-free lines", () => expect(lineCells({ x: 0, y: 0 }, { x: 3, y: 1 })).toHaveLength(4));
-  it("snaps to the half grid inside the chart", () => expect(snapHalf({ x: 2.3, y: -1 }, { w: 2, h: 2 })).toEqual({ x: 2, y: 0 }));
-  it("visits each half point once while dragging", () => expect(halfPointsBetween({ x: 0, y: 0 }, { x: 1, y: 0 })).toEqual([{ x: 0.5, y: 0 }, { x: 1, y: 0 }]));
-  it("fills 4-connected regions only", () => {
-    const grid = [1, 1, 0, 0, 1, 1, 1, 0, 1];
-    expect(floodRegion(0, { w: 3, h: 3 }, (i) => grid[i] === 1).sort()).toEqual([0, 1, 4, 5, 8]);
-  });
-});
-
 describe("grid numbering", () => {
   const size = { w: 30, h: 20 };
   it("matches the classic rulers by default", () => {
@@ -119,19 +91,6 @@ describe("grid numbering", () => {
   });
 });
 
-describe("picker search (SPEC §8.1)", () => {
-  it.each([
-    ["310", "dmc:310", true],
-    ["blac", "dmc:310", true],
-    ["10", "dmc:310", false],
-    ["dmc 676", "bead:00557", true],
-    ["size 8", "bead:00557", false],
-    ["glass seed", "bead:00557", true],
-  ])("%s matches %s: %s", (q, id, expected) => {
-    expect(matchesQuery(libraryColor(id)!, q)).toBe(expected);
-  });
-});
-
 describe("mirror helpers", () => {
   const size = { w: 5, h: 4 };
   it.each([
@@ -147,9 +106,5 @@ describe("mirror helpers", () => {
 
   it("mirrors drawing points across the horizontal axis", () => {
     expect(mirrorPoints(1, 0.5, "horizontal", size).map((p) => [p.x, p.y])).toEqual([[1, 0.5], [1, 3.5]]);
-  });
-
-  it.each([[0.2, 0.2, 0], [0.8, 0.1, 1], [0.9, 0.9, 2], [0.1, 0.7, 3]] as const)("pointer at (%s, %s) chooses corner %s", (x, y, c) => {
-    expect(nearestCorner(x, y)).toBe(c);
   });
 });

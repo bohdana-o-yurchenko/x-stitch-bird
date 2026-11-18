@@ -212,6 +212,9 @@ importers:
         specifier: 5.1.0
         version: 5.1.0(@types/react@19.3.0)(react@19.3.0)
     devDependencies:
+      '@electric-sql/pglite':
+        specifier: ^0.5.16
+        version: 0.5.16
       '@playwright/test':
         specifier: 1.65.1
         version: 1.65.1
@@ -498,6 +501,9 @@ packages:
   '@boundaries/policies@1.0.2':
     resolution: {integrity: sha512-LVccanOF6nqGkork828+17QsffB8wiUJ54Hlw+I5gOJf9jGx4HhRS8wWkahSl0Fd/SvPw/NlGdAbKCCUPE/T9Q==}
     engines: {node: '>=18.18'}
+
+  '@electric-sql/pglite@0.5.16':
+    resolution: {integrity: sha512-Nj8KcIsJL748W408U2N8q4+9IlONdpRIU8MJypIAAINMJ5nqKyqpX7Mgg/5XKkXiAib3AoZGR6hnJFlrlLBrcg==}
 
   '@eloqnt/config@0.1.1':
     resolution: {integrity: sha512-YRDigSaiJEzKDfzTth5kG+L/PKfB3mo8h7yNzpXExPfvQmcD05WoZT57PdhJE0jI+Vva6eb0OCU8hnHHgdME3g==}
@@ -4029,6 +4035,8 @@ snapshots:
       '@boundaries/config': 1.0.2
       '@boundaries/elements': 3.3.3
       handlebars: 4.7.10
+
+  '@electric-sql/pglite@0.5.16': {}
 
   '@eloqnt/config@0.1.1': {}
 

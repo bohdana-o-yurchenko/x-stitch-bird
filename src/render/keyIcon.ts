@@ -30,16 +30,6 @@ export function drawKeyIcon(g: Ctx, slot: PaletteSlot, size: number, view: Chart
   } else drawStitchCell(g, 0, 0, size, slot, style);
 }
 
-export function keyIconCanvas(slot: PaletteSlot, size: number, view: ChartView, theme: CanvasTheme, fabric: string, dpr = 1): HTMLCanvasElement {
-  const c = document.createElement("canvas");
-  c.width = c.height = Math.round(size * dpr);
-  c.style.width = c.style.height = `${size}px`;
-  const g = c.getContext("2d")!;
-  g.scale(dpr, dpr);
-  drawKeyIcon(g, slot, size, view, theme, fabric);
-  return c;
-}
-
 /** A line style on its own, for the backstitch style picker; `color` is the interface's text colour (light or dark theme). */
 export function drawLineStyleSample(g: Ctx, sym: string, w: number, h: number, color: string) {
   g.clearRect(0, 0, w, h);

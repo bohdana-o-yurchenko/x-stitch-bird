@@ -82,5 +82,3 @@ export function findOrCreateTwin(p: Pattern, k: KeyIndex, symbols: readonly stri
   if (created) created.count++;
   return addEntry(p, { ...twin, sym: undefined }, symbols);
 }
-
-export const activeEntries = (p: Pattern): KeyIndex[] => p.key.flatMap((e, i) => (e && i > 0 ? [i] : []));

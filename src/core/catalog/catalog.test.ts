@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { BEAD_SERIES, BEADS, libraryColor, matchesQuery } from "./catalog";
+import { BEADS, libraryColor, matchesQuery } from "./catalog";
 import { beadShape } from "./beadShapes";
 
 const bead = (code: string) => libraryColor(`bead:${code}`)!;
 
 describe("Mill Hill catalog", () => {
-  it("has every series, Treasures included, and no code twice", () => {
-    expect(BEAD_SERIES).toEqual(["Glass Seed", "Crayon Seed", "Petite Glass", "Antique Glass", "Frosted Glass", "Magnifica", "Size 8", "Size 6", "Pebble", "Small Bugle", "Medium Bugle", "Large Bugle", "Glass Treasures", "Crystal Treasures", "Metal Treasures"]);
+  it("has no code twice and all its Treasures", () => {
     expect(new Set(BEADS.map((b) => b.id)).size).toBe(BEADS.length);
     expect(BEADS.filter((b) => b.series?.endsWith("Treasures"))).toHaveLength(269);
   });

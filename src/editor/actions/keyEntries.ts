@@ -173,5 +173,3 @@ export function updateCustomColour(ed: Editor, id: string, c: Partial<Omit<Custo
   invalidateColors(ed.doc);
   ed.changed({ keys: true });
 }
-
-export const layerOfDraft = (d: KeyDraft) => entryLayer({ t: d.t, src: "", sym: "" });

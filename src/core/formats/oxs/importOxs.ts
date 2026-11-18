@@ -1,5 +1,5 @@
 import { DMC_BY_CODE, DMC, libraryColor } from "../../catalog/catalog";
-import { createPattern, shortId } from "../../pattern/createPattern";
+import { createPattern, MAX_SIZE, shortId } from "../../pattern/createPattern";
 import { keyFor } from "../../pattern/keyEntries";
 import type { Corner, CustomColor, KeyEntry, KeyIndex, Pattern, StitchTypeId } from "../../pattern/types";
 import { snapHalf } from "../../geometry/geometry";
@@ -66,6 +66,7 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
   if (!pr) throw new OxsFormatError("no properties");
   const w = Number(pr.attrs.chartwidth), h = Number(pr.attrs.chartheight);
   if (!(w > 0 && h > 0)) throw new OxsFormatError("no size");
+  if (w > MAX_SIZE || h > MAX_SIZE) throw new OxsFormatError(`larger than ${MAX_SIZE} × ${MAX_SIZE}`);
   const p = createPattern(w, h, pr.attrs.charttitle || "Imported pattern");
   const spi = Number(pr.attrs.stitchesperinch);
   p.count = [11, 14, 16, 18, 20, 24, 31].includes(spi) ? spi : 14;
