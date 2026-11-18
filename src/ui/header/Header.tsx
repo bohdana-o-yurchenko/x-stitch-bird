@@ -124,7 +124,7 @@ function PatternMenu() {
   );
 }
 
-/** ☰ — what isn't needed while stitching: help, shortcuts, language, theme, privacy. */
+/** ☰ — what isn't needed while stitching: help, language, theme, support, privacy. */
 function AppMenu() {
   const t = useTranslations("fileMenu");
   const run = useCommand();
@@ -134,13 +134,13 @@ function AppMenu() {
   const locale = useLocale();
   const items: MenuItem[] = [
     { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
-    { id: "shortcuts", label: t("shortcuts"), onClick: () => ed.store.setState({ shortcutsOpen: true }) },
     { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
     "-",
     { id: "language", node: <LanguageSwitch before={() => ed.flush()} /> },
     { id: "theme", node: <ThemeSwitcher /> },
     { id: "toolbar", node: <ToolbarOptions /> },
     "-",
+    { id: "support", label: t("support"), hint: t("supportHint"), onClick: () => void window.open(`/${locale}/support`, "_blank", "noopener") },
     { id: "privacy", label: t("privacy"), onClick: () => void window.open(`/${locale}/privacy`, "_blank", "noopener") },
     { id: "source", label: t("source"), hint: t("sourceHint"), onClick: () => void window.open(SOURCE_URL, "_blank", "noopener") },
     "-",
@@ -219,10 +219,10 @@ export function Header() {
         </div>
       </div>
       <div className={s.spacer} data-slot="spacer" />
+      <ShortcutsPanel />
       <AppMenu />
       <AccountButton />
       <PanelToggle />
-      <ShortcutsPanel />
     </header>
   );
 }

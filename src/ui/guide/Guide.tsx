@@ -23,7 +23,7 @@ export const TOURS: Record<string, Step[]> = {
     { id: "trace", targets: ["side-references"], tip: true },
     { id: "autofill", targets: ["tool-autofill"], tip: true },
     { id: "views", targets: ["views"] },
-    { id: "tools", targets: ["toolbar", "override", "menu:shortcuts"], menu: "app", reveal: [], tip: true },
+    { id: "tools", targets: ["toolbar", "override", "shortcuts"], tip: true },
     { id: "save", targets: ["saved", "menu:download"], reveal: [] },
     { id: "versions", targets: ["side-versions"] },
     { id: "finish", targets: ["side-info", "menu", "menu:export", "menu:pdfChart", "menu:oxs"], reveal: ["export"] },

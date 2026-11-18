@@ -711,12 +711,13 @@
     "more": "More",
     "guide": "Quick start guide",
     "guideHint": "Step by step: an e-copy of a paper chart",
-    "shortcuts": "Keyboard shortcuts",
     "toolbar": "Toolbar",
     "hideShapes": "Hide line, rectangle and fill tools",
     "hidePartials": "Hide fractional stitches",
     "changelog": "What’s new",
     "changelogHint": "Version {version} — what changed",
+    "support": "Something went wrong?",
+    "supportHint": "Write to us — a problem, or a wish",
     "privacy": "Privacy policy",
     "source": "Source code",
     "sourceHint": "Free software · AGPL-3.0"
@@ -866,7 +867,7 @@
         "3": "<hl>S</hl> — select, copy, paste, move.",
         "4": "By default drawing never overwrites filled squares. Need to? Turn on <hl>Override</hl> (O)."
       },
-      "tip": "Every shortcut: <hl>☰ ▸ Keyboard shortcuts</hl>."
+      "tip": "Every shortcut: the <hl>keyboard button</hl> next to ☰."
     },
     "save": {
       "title": "7. Keep a copy",

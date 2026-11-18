@@ -368,12 +368,29 @@ test("the side panel can be resized and keeps its width", async ({ page }) => {
   expect((await aside.boundingBox())!.width).toBeCloseTo(after, 0);
 });
 
-test("☰ ▸ Keyboard shortcuts lists them all", async ({ page }) => {
-  await menuAction(page, "app", "Keyboard shortcuts");
+test("the keyboard button left of ☰ lists every shortcut, under it; again or Esc closes it", async ({ page }) => {
+  const button = page.getByTestId("shortcuts-button");
+  await button.click();
   const list = page.getByTestId("shortcuts");
   await expect(list).toBeVisible();
   await expect(list).toContainText("Fit to screen");
   await expect(list.getByText("⇧R")).toBeVisible();
+  expect((await list.boundingBox())!.y).toBeGreaterThan((await button.boundingBox())!.y);
+  await button.click();
+  await expect(list).toHaveCount(0);
+  await button.click();
+  await page.keyboard.press("Escape");
+  await expect(list).toHaveCount(0);
+});
+
+test("☰ ▸ Something went wrong? — where to write, what helps, the terms of use (SPEC §15.49)", async ({ page, context }) => {
+  await page.getByRole("button", { name: /^(More|Ще)$/ }).click();
+  const tab = context.waitForEvent("page");
+  await page.getByRole("menuitem", { name: /^Something went wrong\?/ }).click();
+  const support = await tab;
+  await expect(support.getByTestId("support")).toContainText("bohdana.o.yurchenko@gmail.com");
+  await expect(support.getByTestId("support")).toContainText("Many charts are protected by copyright");
+  await expect(support.getByTestId("support-mail")).toHaveAttribute("href", /^mailto:bohdana\.o\.yurchenko@gmail\.com\?subject=/);
 });
 
 test("the status bar shows the colour being drawn with; the view switch sits with the zoom", async ({ page }) => {

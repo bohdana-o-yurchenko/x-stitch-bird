@@ -2151,6 +2151,22 @@ nothing: straight to *Pattern read*. Back goes to the step before; Cancel adds n
 Own threads (brands the app doesn't know) are set up in the editor afterwards. Fixed on the way: a PDF page behind the
 chart whose picture can't be loaded is drawn again once, not over and over.
 
+### 15.49 Something went wrong?; the privacy policy brought up to date; shortcuts back in the header (2026-11-18)
+- **☰ ▸ Something went wrong?** ("Write to us — a problem, or a wish"), next to the privacy policy, opens `/[locale]/support`
+  in a new tab: write to bohdana.o.yurchenko@gmail.com (a **Write an email** button: mailto with "пташечка <version>: "
+  as the subject); what helps (what you did / expected / got, a screenshot, the version, browser and device, the
+  work file); **Using пташечка** — free software as is, no warranty (AGPL), keep a copy of what matters; you are
+  responsible for the patterns you make — respect a designer's copyright, usually a copy for your own stitching only;
+  the app can't publish or share patterns, they stay in your browser or your own account, we don't look at them; a
+  link to the privacy policy.
+- **Privacy policy**: what an account keeps now names versions, photos, scans and PDFs with their marks, and your own
+  threads and beads; a section **Who can see your patterns** (private to the account; not looked at; accessed only to
+  run the service, to look into a problem the user reports and asks to be checked, or when the law requires);
+  removing a photo or PDF on its own (its window, or the image behind the chart), not the "⋯ ▸ Photos" there isn't.
+- **Keyboard shortcuts**: a ⌨ button in the header, left of ☰ (no longer in ☰); the panel opens under it, wider and
+  airier (each row's keys beside it, dashed row lines); ⌨ again, Esc or a click outside closes it. The guide's
+  tools step points at it.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

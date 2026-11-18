@@ -27,8 +27,14 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "With an account (optional)",
         body: [
-          "If you sign in, we collect: your email address; your name and profile picture, if you sign in with Google; and the patterns you save while signed in — the pattern file (its key, chart, notes and pattern information you entered), its name and size, and a small preview picture of it.",
+          "If you sign in, we collect: your email address; your name and profile picture, if you sign in with Google; the patterns you save while signed in — the pattern file (its key, chart, notes and pattern information you entered), its name and size, a small preview picture of it and its earlier versions; the photos, scans and PDFs you add to a pattern (behind the chart or in floating windows) with the marks you make on them; and the threads and beads of your own you add.",
           "We use this only to let you sign in, to show who is signed in, and to keep your patterns so you can open them on any device. We do not use it for advertising or profiling.",
+        ],
+      },
+      {
+        title: "Who can see your patterns",
+        body: [
+          "Your patterns, photos and PDFs are private to your account: the app has no way to publish or share them. We don’t look at them. Stored data is accessed only to run the service, to look into a problem you report and ask us to check, or when the law requires it.",
         ],
       },
       {
@@ -45,7 +51,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "Where data is stored, and who processes it",
         body: [
-          "Accounts, saved patterns and preview pictures are stored with Neon (Neon, Inc.: database, sign-in and file storage), on servers in Frankfurt, Germany (EU). The app is hosted by Vercel (Vercel Inc.). Google provides Google sign-in; our email provider sends sign-in codes.",
+          "Accounts, saved patterns, their versions, pictures and PDFs are stored with Neon (Neon, Inc.: database, sign-in and file storage), on servers in Frankfurt, Germany (EU). The app is hosted by Vercel (Vercel Inc.). Google provides Google sign-in; our email provider sends sign-in codes.",
           "These providers process data only to run these services for us. We do not sell or rent personal data to anyone.",
         ],
       },
@@ -59,7 +65,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "How long we keep data, and how to delete it",
         body: [
-          "Your account and saved patterns are kept while you have the account. You can delete any saved pattern yourself, at any time (My patterns ▸ ⋯ ▸ Delete); this also removes it from your account. Photos attached to a pattern can be removed the same way (My patterns ▸ ⋯ ▸ Photos).",
+          "Your account and saved patterns are kept while you have the account. You can delete any saved pattern yourself, at any time (My patterns ▸ ⋯ ▸ Delete); this also removes it from your account, with its photos, PDFs and versions. A photo or PDF can also be removed on its own: close its floating window, or remove the image behind the chart (References).",
           `You can delete your account and everything stored with it yourself, at once (account menu ▸ Account ▸ Delete account). You can also email ${CONTACT_EMAIL} from the address you sign in with, and we delete it within 30 days. Signing out does not delete anything.`,
           "Data kept only in your browser stays there until you clear it (for example by clearing the site's data in your browser settings).",
         ],
@@ -67,7 +73,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "Your rights",
         body: [
-          "You can ask us what data we hold about you, to correct it, to delete it, or to receive a copy. Your patterns can be downloaded at any time as .xbird files (Pattern ▸ Download work file). If you are in the EU, you can also complain to your data protection authority.",
+          "You can ask us what data we hold about you, to correct it, to delete it, or to receive a copy. Your patterns can be downloaded at any time as .xbird files (Pattern ▾ ▸ Download work file). If you are in the EU, you can also complain to your data protection authority.",
         ],
       },
       {
@@ -99,8 +105,14 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "З обліковим записом (за бажанням)",
         body: [
-          "Якщо ви входите, ми збираємо: вашу електронну адресу; ім’я та фото профілю, якщо ви входите через Google; і схеми, які ви зберігаєте після входу, — файл схеми (ключ, схему, нотатки й інформацію про схему, яку ви ввели), її назву й розмір та невелике зображення-прев’ю.",
+          "Якщо ви входите, ми збираємо: вашу електронну адресу; ім’я та фото профілю, якщо ви входите через Google; схеми, які ви зберігаєте після входу, — файл схеми (ключ, схему, нотатки й інформацію про схему, яку ви ввели), її назву й розмір, невелике зображення-прев’ю та попередні версії; фото, скани й PDF, які ви додаєте до схеми (під схему чи в плаваючі вікна), з позначками на них; і ваші власні нитки та бісер.",
           "Ми використовуємо це лише для входу, щоб показувати, хто увійшов, і щоб зберігати ваші схеми для відкриття на будь-якому пристрої. Не для реклами й не для профілювання.",
+        ],
+      },
+      {
+        title: "Хто бачить ваші схеми",
+        body: [
+          "Ваші схеми, фото й PDF приватні для вашого облікового запису: застосунок не вміє їх публікувати чи поширювати. Ми їх не переглядаємо. До збережених даних звертаємося лише для роботи сервісу, щоб розібратися з проблемою, про яку ви повідомили й попросили перевірити, або коли цього вимагає закон.",
         ],
       },
       {
@@ -117,7 +129,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "Де зберігаються дані й хто їх обробляє",
         body: [
-          "Облікові записи, збережені схеми й прев’ю зберігаються в Neon (Neon, Inc.: база даних, вхід і сховище файлів) на серверах у Франкфурті, Німеччина (ЄС). Застосунок розміщено на Vercel (Vercel Inc.). Google забезпечує вхід через Google; наш поштовий провайдер надсилає коди входу.",
+          "Облікові записи, збережені схеми, їхні версії, зображення й PDF зберігаються в Neon (Neon, Inc.: база даних, вхід і сховище файлів) на серверах у Франкфурті, Німеччина (ЄС). Застосунок розміщено на Vercel (Vercel Inc.). Google забезпечує вхід через Google; наш поштовий провайдер надсилає коди входу.",
           "Ці провайдери обробляють дані лише для роботи цих сервісів. Ми не продаємо й не здаємо в оренду персональні дані.",
         ],
       },
@@ -131,7 +143,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "Скільки зберігаються дані й як їх видалити",
         body: [
-          "Обліковий запис і збережені схеми зберігаються, доки існує обліковий запис. Будь-яку збережену схему можна видалити самостійно будь-коли (Мої схеми ▸ ⋯ ▸ Видалити); вона зникає й з облікового запису. Так само можна прибрати фото, додані до схеми (Мої схеми ▸ ⋯ ▸ Фото).",
+          "Обліковий запис і збережені схеми зберігаються, доки існує обліковий запис. Будь-яку збережену схему можна видалити самостійно будь-коли (Мої схеми ▸ ⋯ ▸ Видалити); вона зникає й з облікового запису разом із фото, PDF і версіями. Фото чи PDF можна прибрати й окремо: закрийте його плаваюче вікно або приберіть зображення під схемою (Референси).",
           `Обліковий запис і все, що з ним збережено, можна видалити самостійно, одразу (меню облікового запису ▸ Обліковий запис ▸ Видалити обліковий запис). Або напишіть на ${CONTACT_EMAIL} з адреси, якою ви входите, — ми видалимо все протягом 30 днів. Вихід нічого не видаляє.`,
           "Дані, що зберігаються лише в браузері, лишаються там, доки ви їх не очистите (наприклад, очистивши дані сайту в налаштуваннях браузера).",
         ],
@@ -139,7 +151,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "Ваші права",
         body: [
-          "Ви можете попросити нас повідомити, які дані про вас ми маємо, виправити їх, видалити або надати копію. Схеми можна будь-коли завантажити файлами .xbird (Схема ▸ Завантажити робочий файл). Якщо ви в ЄС, ви також можете звернутися до органу із захисту даних.",
+          "Ви можете попросити нас повідомити, які дані про вас ми маємо, виправити їх, видалити або надати копію. Схеми можна будь-коли завантажити файлами .xbird (Схема ▾ ▸ Завантажити робочий файл). Якщо ви в ЄС, ви також можете звернутися до органу із захисту даних.",
         ],
       },
       {

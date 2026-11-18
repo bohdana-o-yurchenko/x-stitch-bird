@@ -30,6 +30,7 @@ const ICONS: Record<string, ReactNode> = {
   history: <g {...S}><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" /><path d="M4.5 4.5v3.5H8" /><path d="M12 8v4.3l2.8 1.7" /></g>,
   print: <g {...S}><path d="M7 9V3.5h10V9" /><rect x="3.5" y="9" width="17" height="8" rx="1.5" /><path d="M7 14.5h10V21H7z" /></g>,
   menu: <g {...S}><path d="M4.5 7h15M4.5 12h15M4.5 17h15" /></g>,
+  keyboard: <g {...S}><rect x="2.5" y="6" width="19" height="12" rx="2" /><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M6.5 13.5h.01M17 13.5h.01M9.5 14h5" strokeWidth="2.2" /></g>,
   undo: <g {...S}><path d="M9 14L4 9l5-5" /><path d="M4 9h10a6 6 0 010 12h-3" /></g>,
   redo: <g {...S}><path d="M15 14l5-5-5-5" /><path d="M20 9H10a6 6 0 000 12h3" /></g>,
   underlayEdit: <g {...S}><rect x="3.5" y="5" width="13" height="13" rx="1.5" strokeDasharray="2.5 2" /><path d="M14 16l6.5-6.5a1.6 1.6 0 00-2.3-2.3L11.7 13.7 11 17z" /></g>,

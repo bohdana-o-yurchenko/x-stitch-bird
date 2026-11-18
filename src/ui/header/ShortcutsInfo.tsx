@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { HOLD_BINDINGS, shortcutLabels } from "@/editor/shortcuts/keymap";
 import { TOOLS } from "@/editor/tools/registry";
+import { Icon } from "../common/Icon";
+import { cx, ui } from "../common/widgets";
 import { useEditor, useEditorState } from "../hooks/editor";
 import s from "./header.module.css";
 
@@ -72,13 +74,20 @@ function useGroups(): { title: string; rows: Row[] }[] {
   ];
 }
 
-/** Every keyboard shortcut, opened from ☰ ▸ Keyboard shortcuts; closes on Esc or a click outside. */
+/** ⌨ in the header, left of ☰: every keyboard shortcut in a panel under it; closes on Esc, a click outside or ⌨ again. */
 export function ShortcutsPanel() {
   const t = useTranslations("shortcuts");
   const ed = useEditor();
   const open = useEditorState((st) => st.shortcutsOpen);
   const groups = useGroups();
+  const button = useRef<HTMLButtonElement>(null);
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
 
+  useLayoutEffect(() => {
+    if (!open || !button.current) return setPos(null);
+    const r = button.current.getBoundingClientRect();
+    setPos({ top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right - 8) });
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     const close = () => ed.store.setState({ shortcutsOpen: false });
@@ -94,9 +103,24 @@ export function ShortcutsPanel() {
 
   return (
     <>
+      <button
+        ref={button}
+        type="button"
+        className={cx(ui.tool, open && ui.on)}
+        title={t("title")}
+        aria-label={t("title")}
+        aria-expanded={open}
+        data-shortcuts
+        data-guide="shortcuts"
+        data-testid="shortcuts-button"
+        onClick={() => ed.store.setState({ shortcutsOpen: !open })}
+      >
+        <Icon name="keyboard" size={18} />
+      </button>
       {open &&
+        pos &&
         createPortal(
-          <div className={s.shortcuts} role="dialog" aria-label={t("title")} data-shortcuts data-testid="shortcuts" style={{ top: 56, right: 8 }}>
+          <div className={s.shortcuts} role="dialog" aria-label={t("title")} data-shortcuts data-testid="shortcuts" style={{ top: pos.top, right: pos.right }}>
             <h3>{t("title")}</h3>
             <div className={s.shortcutGroups}>
               {groups.map((g) => (
@@ -105,7 +129,7 @@ export function ShortcutsPanel() {
                   {g.rows.map((r) => (
                     <div key={r.label} className={s.shortcutRow}>
                       <span>{r.label}</span>
-                      <span>{r.keys.map((k) => <kbd key={k}>{k}</kbd>)}</span>
+                      <span className={s.keys}>{r.keys.map((k) => <kbd key={k}>{k}</kbd>)}</span>
                     </div>
                   ))}
                 </section>
