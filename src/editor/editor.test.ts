@@ -289,6 +289,27 @@ describe("autosave", () => {
     vi.useRealTimers();
   });
 
+  it("only the time spent grown (looking around, a key): nothing to ask about on leaving, nor rushed up as the page closes — but kept and saved with the next save (SPEC §15.17)", async () => {
+    vi.useFakeTimers();
+    const saved: number[] = [], drafts: number[] = [];
+    ed.persistence.patterns.save = async (d) => (saved.push(d.spent ?? 0), { ok: true });
+    ed.persistence.draft.save = (d) => void drafts.push(d.spent ?? 0);
+    ed.store.setState({ ready: true });
+    ed.autosave.markSaved();
+    ed.timer.activity();
+    vi.advanceTimersByTime(60_000);
+    ed.timer.activity();
+    expect(ed.doc.spent).toBe(60_000);
+    expect(ed.autosave.pending).toBe(false);
+    ed.flush();
+    expect(drafts.at(-1)).toBe(60);
+    expect(saved).toEqual([]);
+    // not lost: it goes up with the regular save
+    await vi.advanceTimersByTimeAsync(LIBRARY_QUIET);
+    expect(saved).toEqual([60]);
+    vi.useRealTimers();
+  });
+
   it("doesn't save the blank placeholder over the draft when the page closes before start-up finished", () => {
     const drafts: string[] = [];
     const early = new Editor({ ...memoryPersistence([]), draft: { load: async () => null, save: (d) => void drafts.push(d.name) } }, false);

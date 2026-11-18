@@ -27,7 +27,7 @@ export class WorkTimer {
     doc.spent += gap;
     if (t - this.savedAt >= SAVE_EVERY) {
       this.savedAt = t;
-      this.ed.autosave.schedule();
+      this.ed.autosave.scheduleTime();
     }
   }
 

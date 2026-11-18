@@ -1547,6 +1547,10 @@ Idea from Pattern Maker v4 (Professional). Toggle with the eye button in the key
   Versions, with "counting now" while it runs.
 - Saved with the pattern (`spent`, whole seconds; draft, library and .xbird); not part of undo; restoring a
   version keeps the time spent so far. Not in .oxs.
+- Time spent alone (looking around, zooming, a key — no edit) is **not an unsaved change**: it goes into the draft at
+  once and to the saved patterns / account with the regular save (5 s after it stops, at least every 30 s), but the
+  page never asks "leave with unsaved changes?" over it, and closing the page doesn't rush it up (a save still on its
+  way would keep the window as the editor — §15.34). Reopened, the draft brings it back.
 
 ### 15.18 Colour themes (implemented 2026-11-15)
 

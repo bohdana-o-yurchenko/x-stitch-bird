@@ -19,6 +19,8 @@ export class Autosave {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private libraryTimer: ReturnType<typeof setTimeout> | null = null;
   private unsaved = false;
+  /** Only the time spent has grown since the last save: kept, but not a change worth asking about or rushing up. */
+  private timeUnsaved = false;
   /** When the oldest change not yet in the saved patterns was made. */
   private since = 0;
   /** A save to the saved patterns is under way. */
@@ -27,10 +29,24 @@ export class Autosave {
   constructor(private draft: DraftStore, private doc: () => Pattern, private saveToLibrary: () => Promise<unknown>, private quick: () => boolean = () => false) {}
 
   schedule() {
+    if (!this.unsaved && !this.timeUnsaved) this.since = Date.now();
+    this.unsaved = true;
+    this.later();
+  }
+
+  /**
+   * Only the time spent grew (SPEC §15.17) — looking around, zooming, a key: it goes into the draft at once and with
+   * the next save, but on its own it never makes the page ask before leaving, nor is it rushed up as the page closes.
+   */
+  scheduleTime() {
+    if (!this.unsaved && !this.timeUnsaved) this.since = Date.now();
+    this.timeUnsaved = true;
+    this.later();
+  }
+
+  private later() {
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => this.flushDraft(), DRAFT_DELAY);
-    if (!this.unsaved) this.since = Date.now();
-    this.unsaved = true;
     if (this.libraryTimer) clearTimeout(this.libraryTimer);
     const [quiet, every] = this.quick() ? [QUICK_QUIET, QUICK_EVERY] : [LIBRARY_QUIET, LIBRARY_EVERY];
     const wait = Math.max(0, Math.min(quiet, this.since + every - Date.now()));
@@ -45,6 +61,7 @@ export class Autosave {
   /** The library already has this exact pattern (just opened from it, or just saved). */
   markSaved() {
     this.unsaved = false;
+    this.timeUnsaved = false;
     if (this.libraryTimer) clearTimeout(this.libraryTimer);
     this.libraryTimer = null;
   }
@@ -55,7 +72,7 @@ export class Autosave {
    */
   saveBeforeSwitch() {
     // the pattern is serialised right away, before the call returns
-    if (this.unsaved) void this.saveLibrary();
+    if (this.unsaved || this.timeUnsaved) void this.saveLibrary();
   }
 
   private flushDraft() {
@@ -65,7 +82,7 @@ export class Autosave {
   }
 
   private async saveLibrary() {
-    const changed = this.unsaved;
+    const changed = this.unsaved || this.timeUnsaved;
     this.markSaved();
     if (!changed) return;
     const run = this.saveToLibrary();
@@ -75,7 +92,7 @@ export class Autosave {
 
   /** Any changes go to the saved patterns now, and this waits until they're there (signing out). */
   async settle() {
-    if (this.unsaved) await this.saveLibrary();
+    if (this.unsaved || this.timeUnsaved) await this.saveLibrary();
     else if (this.saving) await this.saving.catch(() => {});
   }
 
@@ -85,8 +102,9 @@ export class Autosave {
     void this.saveLibrary();
   }
 
+  /** The page hidden or closing: the draft now (time spent too); real changes to the saved patterns as well. */
   flush() {
     this.flushDraft();
-    void this.saveLibrary();
+    if (this.unsaved) void this.saveLibrary();
   }
 }
