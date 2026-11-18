@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { createLibrary } from "@/editor/library";
+import { accountUsage, createLibrary, type AccountUsage } from "@/editor/library";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Modal, cx, ui } from "../common/widgets";
 import { HomeFooter, HomeHeader } from "../home/HomeHeader";
@@ -34,6 +34,10 @@ export default function AccountApp() {
   const [confirming, setConfirming] = useState(false);
   const signedIn = !!u;
   useEffect(() => lib.setSignedIn(signedIn), [lib, signedIn]);
+  const [usage, setUsage] = useState<AccountUsage | null>(null);
+  useEffect(() => {
+    if (signedIn) void accountUsage().then(setUsage);
+  }, [signedIn]);
   const since = u?.createdAt ? new Date(u.createdAt).toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" }) : null;
 
   if (!allowed && !deleted) return <PageLoading />;
@@ -74,6 +78,7 @@ export default function AccountApp() {
                   )}
                 </dl>
               </section>
+              {usage && <UsageCard usage={usage} />}
               <section className={cx(s.card, s.danger)}>
                 <h2>{t("deleteTitle")}</h2>
                 <p className={ui.hint}>{t("deleteHint")}</p>
@@ -127,5 +132,44 @@ function DeleteAccountDialog({ email, onDelete, onClose, onDeleted }: { email: s
       </label>
       {failed && <p className={ui.hint} style={{ color: "var(--danger, #b42318)" }} role="alert">{t("failed")}</p>}
     </Modal>
+  );
+}
+
+const NEARLY_FULL = 0.8;
+const mb = (bytes: number) => (bytes ? Math.max(0.1, Math.round(bytes / 104857.6) / 10) : 0);
+
+/**
+ * What the account holds against its limits (SPEC §15.38): patterns and photos as bars — amber from 80 %, red when
+ * full — and what to do about it: remove photos or patterns, downloading them first as .xbird files to keep them.
+ */
+function UsageCard({ usage }: { usage: AccountUsage }) {
+  const t = useTranslations("accountPage");
+  const parts = [
+    { id: "patterns", label: t("usagePatterns"), value: usage.patterns, max: usage.maxPatterns, text: t("usageOf", { n: usage.patterns, max: usage.maxPatterns }) },
+    { id: "photos", label: t("usagePhotos"), value: usage.photos, max: usage.maxPhotos, text: t("usageOfMb", { n: mb(usage.photos), max: Math.round(usage.maxPhotos / 1048576) }) },
+  ];
+  const nearlyFull = parts.some((p) => p.value / p.max >= NEARLY_FULL);
+  return (
+    <section className={s.card} data-testid="account-space">
+      <h2>{t("usageTitle")}</h2>
+      {parts.map((p) => {
+        const share = Math.min(1, p.value / p.max), level = share >= 1 ? "full" : share >= NEARLY_FULL ? "high" : "ok";
+        return (
+          <div key={p.id} className={s.meter} data-level={level} data-testid={`account-space-${p.id}`}>
+            <div className={s.meterHead}>
+              <span>{p.label}</span>
+              <span className={s.meterValue}>{p.text}</span>
+            </div>
+            <div className={s.meterTrack} role="progressbar" aria-label={p.label} aria-valuemin={0} aria-valuemax={p.max} aria-valuenow={p.value} aria-valuetext={p.text}>
+              <div className={s.meterFill} style={{ width: `${Math.max(share * 100, p.value ? 1.5 : 0)}%` }} />
+            </div>
+          </div>
+        );
+      })}
+      <p className={cx(ui.hint, nearlyFull && s.meterWarn)} data-testid="account-space-hint">
+        {nearlyFull && <b>{t("usageNearlyFull")} </b>}
+        {t("usageHint")}
+      </p>
+    </section>
   );
 }

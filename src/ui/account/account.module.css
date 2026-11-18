@@ -15,10 +15,60 @@
   font-weight: 700;
   font-size: 14px;
 }
-.google {
+/* Sign in (SPEC §15.39): one column, the main action under its field, ✕ in the corner */
+.signIn {
+  position: relative;
+  width: min(400px, calc(100vw - 32px));
+  padding: 28px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+}
+.close:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+.signInHead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.signInHead h2 {
+  font-family: var(--font-serif), serif;
+  font-size: 22px;
+  margin: 4px 0 0;
+}
+.signInHead p {
+  margin: 0;
+  max-width: 320px;
+}
+.wide {
   width: 100%;
+  min-height: 42px;
   justify-content: center;
-  margin-top: 6px;
+  font-size: 15px;
+}
+.google {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
 }
 .or {
   display: flex;
@@ -39,6 +89,41 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+.form input {
+  min-height: 40px;
+  font-size: 15px;
+}
+/* the emailed code: big, spaced digits */
+.form input.code {
+  text-align: center;
+  font-size: 26px;
+  letter-spacing: 0.45em;
+  padding-left: 0.45em;
+  font-variant-numeric: tabular-nums;
+}
+.error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 13px;
+}
+.codeLinks {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.textBtn {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.textBtn:disabled {
+  color: var(--muted);
+  cursor: default;
 }
 /* the account's use of its limits (SPEC §15.35), under the email */
 .usage {

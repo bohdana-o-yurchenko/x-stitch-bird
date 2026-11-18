@@ -1032,16 +1032,15 @@
   "account": {
     "signIn": "Sign in",
     "title": "Sign in to пташечка",
-    "why": "Your patterns are kept in your account too, so you can open them on any device. Without signing in, everything stays in this browser.",
+    "why": "Your patterns are kept in your account, on any device. Without an account you work on one pattern, in this browser.",
     "google": "Continue with Google",
-    "or": "or with a code by email",
+    "or": "or",
     "email": "Email",
-    "sendCode": "Send me a code",
-    "code": "Code from the email",
-    "codeSent": "We sent a code to {email}.",
+    "sendCode": "Continue with email",
+    "code": "Code",
+    "codeSent": "We sent a 6-digit code to <b>{email}</b>.",
     "signInWithCode": "Sign in",
     "otherEmail": "Use another email",
-    "cancel": "Cancel",
     "sendFailed": "Couldn’t send the code — check the address and try again.",
     "codeFailed": "That code didn’t work — check it, or ask for a new one.",
     "googleFailed": "Couldn’t sign in with Google.",
@@ -1054,7 +1053,14 @@
     "myThreads": "My threads",
     "myBeads": "My beads",
     "usage": "Patterns: {patterns} of {maxPatterns} · Photos: {photos} of {maxPhotos} MB",
-    "account": "Account"
+    "account": "Account",
+    "emailPlaceholder": "you@example.com",
+    "sending": "Sending a code…",
+    "checkEmail": "Check your email",
+    "signingIn": "Signing in…",
+    "resend": "Send a new code",
+    "resendIn": "New code in {s} s",
+    "close": "Close"
   },
   "keepPattern": {
     "title": "Keep this pattern?",
@@ -1213,15 +1219,17 @@
     "resize": "Drag to resize · double-click for the default height"
   },
   "live": {
-    "following": "Being edited in another window. Its changes show here as they’re made.",
+    "following": "Its changes show here as they’re made. To change something here, take over.",
     "editHere": "Edit here",
-    "takingOver": "Taking over… the other window is saving its last changes.",
+    "takingOver": "The other window is saving its last changes.",
     "conflictTitle": "Changed in two places",
     "conflictBody": "This pattern was changed here and, meanwhile, in another window or on another device. Which version do you want to go on with? The other one is kept in Versions — nothing is lost.",
     "mine": "This window’s version",
     "theirs": "The other version",
     "keepMine": "Go on with this one",
-    "useTheirs": "Go on with that one"
+    "useTheirs": "Go on with that one",
+    "followingTitle": "Being edited in another window",
+    "takingOverTitle": "Taking over…"
   },
   "accountPage": {
     "nav": "Settings",
@@ -1241,6 +1249,13 @@
     "failed": "The account wasn’t deleted — check the email, or try again.",
     "deleted": "Your account and everything in it are deleted.",
     "signIn": "Sign in",
-    "toEditor": "To the editor"
+    "toEditor": "To the editor",
+    "usageTitle": "Space in your account",
+    "usagePatterns": "Patterns",
+    "usagePhotos": "Photos",
+    "usageOf": "{n} of {max}",
+    "usageOfMb": "{n} of {max} MB",
+    "usageNearlyFull": "Almost full.",
+    "usageHint": "To make room, remove photos from a pattern (My patterns ▸ ⋯ ▸ Photos) or delete patterns (⋯ ▸ Delete). To keep them, download them first as .xbird files (⋯ ▸ Download .xbird) — they open again any time, photos and all."
   }
 }

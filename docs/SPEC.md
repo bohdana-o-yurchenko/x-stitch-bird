@@ -1945,6 +1945,21 @@ limit nothing is lost — the work stays in the browser, and the app says what t
   this pattern — and in its .xbird file; with an account it's kept for good, in every pattern, on every device, with
   pages of its own (My threads, My beads).
 
+### 15.40 Space bars on the account page; a proven sign-in; the live banner (2026-11-18)
+- **Account ▸ Space in your account**: patterns ("3 of 20") and photos ("42 of 100 MB") as bars — teal while there's
+  room, amber from 80 %, red when full — and what to do: remove photos from a pattern (My patterns ▸ ⋯ ▸ Photos) or
+  delete patterns (⋯ ▸ Delete), downloading them first as .xbird files to keep them. From 80 % the note says
+  "Almost full." in an amber box.
+- **Sign in**, the way most apps do it (it was too easy to type the code and hit Cancel, right under it): one column,
+  the logo and a title; Continue with Google (with its G); "or"; the email and **Continue with email** under it, full
+  width. Then "Check your email — we sent a 6-digit code to …": a big code field that signs in by itself once all six
+  digits are in (typed or pasted), Sign in under it, Use another email · Send a new code (after 30 s). No buttons at
+  the bottom: ✕, Esc or a click outside closes. A wrong code: said under the field, the field cleared for another
+  try; nothing ever stays stuck on "Signing in…".
+- **"Being edited in another window"** (§15.34) is a banner across the top of the chart, hard to miss: an amber card,
+  an icon, a bold title, the line under it and **Edit here**. Taking over shows a spinning wheel: "Taking over… The
+  other window is saving its last changes."
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

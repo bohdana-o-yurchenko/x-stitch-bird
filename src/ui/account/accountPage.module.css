@@ -74,6 +74,54 @@
   margin: 0;
   overflow-wrap: anywhere;
 }
+/* the account against its limits: teal while there's room, amber from 80 %, red when full */
+.meter {
+  --meter: #2f7d74;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.meter[data-level="high"] {
+  --meter: #d08a12;
+}
+.meter[data-level="full"] {
+  --meter: var(--danger);
+}
+.meterHead {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+.meterValue {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.meter[data-level="high"] .meterValue,
+.meter[data-level="full"] .meterValue {
+  color: var(--meter);
+  font-weight: 600;
+}
+.meterTrack {
+  height: 10px;
+  border-radius: 99px;
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  overflow: hidden;
+}
+.meterFill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--meter);
+  transition: width 0.3s;
+}
+.meterWarn {
+  color: var(--ink) !important;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-line);
+}
+
 /* what can't be undone */
 .danger {
   border-color: color-mix(in srgb, var(--danger) 45%, var(--line2));
