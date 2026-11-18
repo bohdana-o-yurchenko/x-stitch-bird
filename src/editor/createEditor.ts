@@ -12,7 +12,8 @@ import { confirmLargePhoto } from "./images/largePhoto";
 import { photoFits } from "./images/photoRoom";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { chromeColours } from "@/platform/themeColours";
-import { createFromImage, saveToLibrary } from "./actions/importExport";
+import { createFromImage, loadFile, saveToLibrary } from "./actions/importExport";
+import type { StartIntent } from "./startRequest";
 import { demoPattern, loadPattern, replaceDoc } from "./actions/pattern";
 import { Autosave } from "./autosave";
 import { CommandRegistry } from "./commands/registry";
@@ -77,6 +78,9 @@ export class Editor {
   /** Set when the held-Alt picker picked something (SPEC §6.2). */
   momentaryPicked = false;
   private initialising: Promise<void> | null = null;
+  /** Resolved once the session is known (signed in or not): an account's pattern can be asked for. */
+  private accountReady: Promise<void>;
+  private markAccountReady!: () => void;
   private photosFullSaid = false;
 
   constructor(persistence = createPersistence(), readonly isMac = false) {
@@ -97,6 +101,7 @@ export class Editor {
     this.autosave = new Autosave(persistence.draft, () => this.doc, () => saveToLibrary(this, { quiet: true }), () => this.state.live.others > 0);
     this.timer = new WorkTimer(this);
     this.live = new LiveSync(this);
+    this.accountReady = new Promise((done) => (this.markAccountReady = done));
   }
 
   get state(): EditorState {
@@ -107,10 +112,18 @@ export class Editor {
     return this.store.getState().doc;
   }
 
-  /** Start-up: probe symbols once fonts are ready, then restore the draft or show the demo (SPEC §9.2). */
-  init(): Promise<void> {
-    this.initialising ??= this.boot();
+  /**
+   * Start-up: probe symbols once fonts are ready, then open what `intent` asks for — the pattern picked, a file, or
+   * the draft (else the demo) — as the first pattern shown: nothing else is shown before it (SPEC §9.2, §15.37).
+   */
+  init(intent: StartIntent = { kind: "resume" }): Promise<void> {
+    this.initialising ??= this.boot(intent);
     return this.initialising;
+  }
+
+  /** The session known, or a while gone by (offline: it may never be). */
+  private sessionKnown(): Promise<void> {
+    return Promise.race([this.accountReady, new Promise<void>((done) => setTimeout(done, 8_000))]);
   }
 
   /** The canvas around the fabric follows the interface theme (CSS tokens); the chart itself never changes. */
@@ -119,7 +132,7 @@ export class Editor {
     this.store.setState({});
   }
 
-  private async boot() {
+  private async boot(intent: StartIntent) {
     await document.fonts?.ready;
     const family = bodyFontFamily();
     this.theme = withChrome({ ...defaultCanvasTheme, fontFamily: family });
@@ -135,17 +148,21 @@ export class Editor {
       } catch (e) {
         console.warn(e);
       }
-    loadPattern(this, pattern ?? demoPattern(symbols));
-    // a restored draft is saved to the library once it's edited; the demo only then too
-    this.autosave.markSaved();
-    // the draft may hold changes its saved copies don't
-    if (pattern) this.live.opened(pattern.id, { unsure: true });
-    await this.keep.init();
+    // the pattern asked for, straight away: the one worked on last isn't shown first (SPEC §15.37)
+    const first = await this.openFirst(intent, pattern);
+    if (!first) {
+      loadPattern(this, pattern ?? demoPattern(symbols));
+      // a restored draft is saved to the library once it's edited; the demo only then too
+      this.autosave.markSaved();
+      // the draft may hold changes its saved copies don't
+      if (pattern) this.live.opened(pattern.id, { unsure: true });
+    }
     this.store.setState({ panelSections: savedSections(), openSection: savedOpen() });
     // what came back from an earlier visit is work if it was edited then; the demo isn't
     if (pattern) this.keep.restored();
     this.store.setState({ ready: true });
     this.live.start();
+    void this.afterStart(intent, first);
     // a photo that didn't fit in the account stays here; say so once
     this.persistence.pictures?.onFull((room) => {
       if (this.photosFullSaid) return;
@@ -158,9 +175,51 @@ export class Editor {
       void this.references.switchTo(id, null);
       void this.underlay.switchTo(id, null);
     });
-    void this.refreshPatterns();
     // pictures no record uses any more (closed windows, replaced underlays, old marks)
     setTimeout(() => void this.persistence.images.collectGarbage().catch(() => {}), 10_000);
+  }
+
+  /**
+   * Opens the pattern `intent` asks for as the first one; false when it's the draft's to show (resume, the draft is
+   * that pattern, a new one, a picture, or a file while signed out — replacing the draft may need asking then).
+   */
+  private async openFirst(intent: StartIntent, draft: Pattern | null): Promise<boolean> {
+    if (intent.kind === "open" && intent.id !== draft?.id) {
+      // in this browser, or — once the session is known — in the account
+      let doc = await this.persistence.patterns.load(intent.id).catch(() => null);
+      if (!doc) {
+        await this.sessionKnown();
+        doc = await this.persistence.patterns.load(intent.id).catch(() => null);
+      }
+      if (!doc) {
+        this.toast("toasts.openFailed");
+        return false;
+      }
+      try {
+        loadPattern(this, parsePattern(doc, this.state.symbols).pattern);
+        this.autosave.markSaved();
+        return true;
+      } catch {
+        this.toast("toasts.openFailed");
+        return false;
+      }
+    }
+    if (intent.kind === "file") {
+      await this.sessionKnown();
+      if (!this.state.account) return false;
+      const placeholder = this.doc.id;
+      await loadFile(this, intent.file);
+      return this.doc.id !== placeholder;
+    }
+    return false;
+  }
+
+  /** What's left of `intent` once the first pattern shows: a dialog for a new one or a picture, a file signed out. */
+  private async afterStart(intent: StartIntent, opened: boolean) {
+    if (intent.kind === "resume" || intent.kind === "open" || opened) return;
+    await this.sessionKnown();
+    if (intent.kind === "new") void this.commands.run("file.new");
+    else void this.commands.run(intent.kind === "image" ? "image.open" : "file.load", intent.file);
   }
 
   /** The same pattern as changed elsewhere, in place of this one: the view and tools stay (SPEC §15.34). */
@@ -233,11 +292,11 @@ export class Editor {
   setAccount(user: EditorState["account"]) {
     account.signedIn = !!user;
     if (!this.state.accountKnown) this.store.setState({ accountKnown: true });
+    this.markAccountReady();
     if (this.state.account?.id === user?.id) return;
     this.store.setState({ account: user, saveState: null, inventory: null, ...(user ? { signInOpen: false } : {}) });
     // your own threads: the account's, and the open pattern's join them
     if (user) void this.inventory.load();
-    void this.refreshPatterns();
     // signed in with work open ("Sign in to keep it"): it goes to the account now
     if (user && this.state.ready && this.keep.edited) void saveToLibrary(this, { quiet: true });
     // an upload cut off last time (tab closed mid-save): the browser copy is newer, so it goes up now
@@ -287,12 +346,6 @@ export class Editor {
   unfoldSection(id: string | null) {
     saveOpen(id);
     this.store.setState({ openSection: id });
-  }
-
-  /** Whether there are saved patterns besides the open one (Pattern ▸ Open is offered then). */
-  async refreshPatterns() {
-    const list = await this.persistence.patterns.list().catch(() => []);
-    this.store.setState({ hasOtherPatterns: list.some((p) => p.id !== this.doc.id) });
   }
 
   setTool(tool: ToolId) {

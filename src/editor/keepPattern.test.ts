@@ -14,7 +14,6 @@ beforeEach(async () => {
   t = testEditor(6, 4);
   removed = [];
   t.ed.persistence.patterns.remove = async (id) => void removed.push(id);
-  await t.ed.keep.init();
 });
 afterEach(() => localStorage.clear());
 
@@ -44,25 +43,12 @@ describe("signed out: one working pattern (SPEC §15.25)", () => {
     expect(removed).toEqual([first]);
   });
 
-  it("never asks or removes signed in, or for patterns saved here before the rule or already in the account", async () => {
+  it("never asks or removes signed in", async () => {
     const { ed } = t;
     edit();
     ed.setAccount({ id: "u1", email: "a@b.c" });
     await ed.commands.run("file.create", blank);
     expect([ed.state.dialog, removed]).toEqual([null, []]);
-    ed.setAccount(null);
-    // kept: in this browser before the rule, or it reached the account
-    ed.keep.keep(ed.doc.id);
-    edit();
-    await ed.commands.run("file.create", blank);
-    expect([ed.state.dialog, removed]).toEqual([null, []]);
-  });
-
-  it("the first start with the rule keeps every pattern already saved here", async () => {
-    localStorage.clear();
-    t.ed.persistence.patterns.list = async () => [{ id: "old-1", name: "Old", w: 5, h: 5, updatedAt: 1 }];
-    await t.ed.keep.init();
-    expect(JSON.parse(localStorage.getItem("stitchwork.keptPatterns")!)).toEqual(["old-1"]);
   });
 
   it("a pattern restored on the next visit counts as work only if it was edited before", async () => {

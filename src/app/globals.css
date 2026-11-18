@@ -168,8 +168,6 @@ button {
 }
 
 .editor-loading {
-  display: grid;
-  place-items: center;
   height: 100vh;
-  color: var(--muted);
+  background: var(--bg);
 }

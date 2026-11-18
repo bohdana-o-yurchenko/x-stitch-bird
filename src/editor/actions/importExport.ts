@@ -34,7 +34,7 @@ export type ExportFormat = "png-both" | "png-symbols" | "png-symbols-ink" | "png
 /** Extension of our own pattern files. Older files ended in `.json`; they hold the same text and still open. */
 export const PATTERN_EXT = "xbird";
 
-const safeName = (p: Pattern) => (p.name || "pattern").replace(/[^\p{L}\p{N}\- ]+/gu, "").trim().replace(/\s+/g, "-") || "pattern";
+export const safeName = (p: Pick<Pattern, "name">) => (p.name || "pattern").replace(/[^\p{L}\p{N}\- ]+/gu, "").trim().replace(/\s+/g, "-") || "pattern";
 
 function offer(ed: Editor, filename: string, data: string | Blob, ext: string) {
   try {
@@ -209,15 +209,12 @@ export async function saveToLibrary(ed: Editor, o: { quiet?: boolean } = {}) {
   }
   if (r.ok) {
     ed.store.setState({ savedAt: Date.now(), saveState: r.limit ? "full" : r.account === false ? "offline" : "saved" });
-    // in the account: safe, never taken out of this browser by the one-pattern rule
-    if (r.account) ed.keep.keep(doc.id);
     if (!o.quiet) ed.toast(ed.state.account ? "toasts.savedAccount" : "toasts.savedLocal", { name: doc.name });
     // signed in: the account also gets a small colour preview, for the list of patterns — not on every save
     if (r.account && Date.now() - (previewAt.get(doc.id) ?? 0) > PREVIEW_EVERY) {
       previewAt.set(doc.id, Date.now());
       void uploadPreview(ed).catch(() => previewAt.delete(doc.id));
     }
-    if (!ed.state.hasOtherPatterns) void ed.refreshPatterns();
   } else {
     ed.store.setState({ saveState: null });
     ed.toast(r.reason === "quota" ? "toasts.tooLarge" : "toasts.saveFailed");

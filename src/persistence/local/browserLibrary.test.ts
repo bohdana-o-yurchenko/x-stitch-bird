@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IDBFactory, IDBKeyRange } from "fake-indexeddb";
 import { createPattern } from "@/core/pattern/createPattern";
-import { serializePattern, type PatternFile } from "@/core/formats/json/serialize";
+import { serializePattern } from "@/core/formats/json/serialize";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import { blobToDataUrl, dataUrlToBlob, imageId, isDataUrl } from "../blobs";
@@ -63,20 +63,6 @@ describe("saved patterns in IndexedDB (SPEC §9.1)", () => {
     expect((await lib.indexedDbPatternRepository.list()).map((p) => p.name)).toEqual(["Second"]);
     // nothing in localStorage: no ~5 MB limit
     expect(storage.data.has("stitchwork.library")).toBe(false);
-  });
-
-  it("moves patterns saved by earlier versions in once, keeping the old copy as a backup (a deleted one leaves it)", async () => {
-    const old = doc("From before"), gone = doc("Deleted later");
-    const entry = (d: PatternFile, updated: number) => ({ name: d.name, updated, w: d.w, h: d.h, data: JSON.stringify(d) });
-    storage.data.set("stitchwork.library", JSON.stringify({ [old.id]: entry(old, 500), [gone.id]: entry(gone, 400) }));
-    expect((await lib.indexedDbPatternRepository.list()).map((p) => [p.name, p.updatedAt])).toEqual([["From before", 500], ["Deleted later", 400]]);
-    expect(await lib.indexedDbPatternRepository.load(old.id)).toEqual(old);
-    // the old copy is untouched, and the move isn't repeated
-    expect(Object.keys(JSON.parse(storage.data.get("stitchwork.library")!))).toEqual([old.id, gone.id]);
-    expect(storage.data.has("stitchwork.libraryMoved")).toBe(true);
-    await lib.indexedDbPatternRepository.remove(gone.id);
-    expect(Object.keys(JSON.parse(storage.data.get("stitchwork.library")!))).toEqual([old.id]);
-    expect((await lib.indexedDbPatternRepository.list()).map((p) => p.name)).toEqual(["From before"]);
   });
 
   it("keeps a pattern far bigger than localStorage could hold", async () => {

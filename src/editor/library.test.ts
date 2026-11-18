@@ -17,7 +17,7 @@ afterEach(() => {
 });
 
 describe("the patterns page's library (SPEC §15.26)", () => {
-  it("moves this browser's patterns into the account, and keeps them here for good", async () => {
+  it("moves this browser's patterns into the account", async () => {
     const docs = new Map([["a", createPattern(5, 5, "A")], ["b", createPattern(5, 5, "B")]].map(([id, p]) => [id as string, serializePattern({ ...(p as ReturnType<typeof createPattern>), id: id as string })]));
     const persistence = memoryPersistence();
     persistence.patterns.load = async (id) => docs.get(id) ?? null;
@@ -33,7 +33,6 @@ describe("the patterns page's library (SPEC §15.26)", () => {
     expect(await lib.moveToAccount(["a", "b", "gone"], (n) => steps.push(n))).toEqual({ moved: 2 });
     expect(put).toEqual(["a", "b"]);
     expect(steps).toEqual([1, 2]);
-    expect(JSON.parse(store.get("stitchwork.keptPatterns")!)).toEqual(["a", "b"]);
   });
 
   it("stops when the account is full: the rest stay in this browser, and it says how many fit (SPEC §15.35)", async () => {
@@ -53,7 +52,6 @@ describe("the patterns page's library (SPEC §15.26)", () => {
     lib.setSignedIn(true);
     expect(await lib.moveToAccount(["a", "b", "c"])).toEqual({ moved: 1, limit: 20 });
     expect(put).toEqual(["a"]);
-    expect(JSON.parse(store.get("stitchwork.keptPatterns")!)).toEqual(["a"]);
   });
 
   it("uses the account's preview when there is one; nothing to show for an account pattern without one", async () => {

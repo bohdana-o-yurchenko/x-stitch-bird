@@ -1,25 +1,6 @@
+/* the shared bar (common/appBar.module.css), wrapping into a second row when the toolbar doesn't fit */
 .bar {
-  min-height: 54px;
-  display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--line);
-  background: var(--panel);
-}
-.brand {
-  color: var(--ink);
-  text-decoration: none;
-  font-family: var(--font-brand), var(--font-heading);
-  font-weight: 800;
-  font-size: 21px;
-  letter-spacing: 0;
-  margin-right: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
 }
 .name {
   flex: none;
@@ -54,11 +35,6 @@
   flex-basis: 100%;
   padding-top: 4px;
   border-top: 1px solid var(--line);
-}
-@media (max-width: 760px) {
-  .brandText {
-    display: none;
-  }
 }
 .tools {
   display: flex;

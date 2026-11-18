@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createEditor, type Editor } from "@/editor/createEditor";
-import { takeStartRequest } from "@/editor/startRequest";
+import { takeStartIntent } from "@/editor/startRequest";
 import { Toasts } from "./common/widgets";
 import { DialogHost } from "./dialogs/DialogHost";
 import { Header } from "./header/Header";
@@ -63,41 +63,20 @@ function useGlobalEvents(ed: Editor, setDragging: (on: boolean) => void) {
   }, [ed, setDragging]);
 }
 
-/**
- * Coming from the patterns page: a picked picture or work file (`startRequest`), `?open=<id>` opens that pattern,
- * `?new=1` the New pattern dialog — once start-up has
- * restored the draft and the session is known (an account's pattern needs it). The address is cleaned afterwards.
- */
-function useStartRequest(ed: Editor) {
-  const ready = useEditorState((st) => st.ready && st.accountKnown);
-  useEffect(() => {
-    if (!ready) return;
-    const picked = takeStartRequest();
-    if (picked) return void ed.commands.run(picked.kind === "image" ? "image.open" : "file.load", picked.file);
-    const url = new URL(window.location.href), open = url.searchParams.get("open"), make = url.searchParams.has("new");
-    if (!open && !make) return;
-    url.searchParams.delete("open");
-    url.searchParams.delete("new");
-    window.history.replaceState(null, "", url);
-    // the open pattern is already here, newer than its saved copy
-    if (open === ed.doc.id) return;
-    void ed.commands.run(open ? "file.openSaved" : "file.new", open ?? undefined);
-  }, [ed, ready]);
-}
-
 function Shell() {
   const ed = useEditor();
   const t = useTranslations("dialogs");
   const collapsed = useEditorState((s) => s.panelCollapsed);
   const [dragging, setDragging] = useState(false);
   useGlobalEvents(ed, setDragging);
-  useStartRequest(ed);
+  // until the first pattern is in (the one asked for, SPEC §15.37), an empty workspace — never another pattern
+  const ready = useEditorState((s) => s.ready);
   return (
     <EditorLayout
       collapsed={collapsed}
       header={<Header />}
-      stage={<Stage />}
-      side={<SidePanel />}
+      stage={ready ? <Stage /> : null}
+      side={ready ? <SidePanel /> : null}
       status={<StatusBar />}
       overlays={
         <>
@@ -121,7 +100,8 @@ export default function EditorApp() {
   // debugging / end-to-end test hook: `window.__stitchwork` is the editor instance
   useEffect(() => void ((window as unknown as { __stitchwork: Editor }).__stitchwork = ed), [ed]);
   useEffect(() => {
-    void ed.init().then(() => ed.snapshots.start());
+    // what to open is read once, before anything shows: the address's ?open= / ?new=, or a file picked
+    void ed.init(takeStartIntent()).then(() => ed.snapshots.start());
     return () => ed.snapshots.stop();
   }, [ed]);
   return (

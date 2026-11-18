@@ -1,11 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AccountMenu } from "../account/AccountButton";
 import { LanguageSwitch } from "../header/LanguageSwitch";
 import { SOURCE_URL } from "../common/source";
+import { AppBrand } from "../common/AppBrand";
+import appBar from "../common/appBar.module.css";
+import { cx } from "../common/widgets";
 import s from "./home.module.css";
 
 type User = { email: string; name?: string } | null;
@@ -22,11 +24,8 @@ export function HomeHeader({ section, user, pending, signInOpen, setSignInOpen, 
 }) {
   const t = useTranslations("home");
   return (
-    <header className={s.top}>
-      <Link href="/patterns" className={s.brand}>
-        <Image src="/icon.svg" alt="" width={30} height={30} unoptimized priority />
-        <span>пташечка</span>
-      </Link>
+    <header className={cx(appBar.bar, s.top)}>
+      <AppBrand />
       <nav className={s.sections} aria-label={t("nav")}>
         <Link href="/patterns" aria-current={section === "patterns" ? "page" : undefined}>{t("patterns")}</Link>
         <Link href="/threads" aria-current={section === "threads" ? "page" : undefined}>{t("threads")}</Link>

@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Dropdown, cx, ui, type MenuItem } from "../common/widgets";
 import { Icon } from "../common/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
@@ -16,6 +15,8 @@ import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
 import { savedToolbarHide, setToolbarHide } from "./toolbarPrefs";
 import { SOURCE_URL } from "../common/source";
+import { AppBrand } from "../common/AppBrand";
+import appBar from "../common/appBar.module.css";
 import s from "./header.module.css";
 
 function PatternName() {
@@ -80,8 +81,8 @@ function PatternMenu() {
     ed.flush();
     router.push("/patterns");
   };
-  // signed out, Open only matters when patterns were saved in this browser before
-  const canOpen = useEditorState((st) => !!st.account || st.hasOtherPatterns);
+  // signed out there is one pattern, the open one (SPEC §15.37): Open… is for the account's
+  const canOpen = signedIn;
   const items: MenuItem[] = [
     { id: "new", label: t("new"), items: [
       { id: "newBlank", label: t("newBlank"), hint: t("newBlankHint"), onClick: go("file.new") },
@@ -200,13 +201,9 @@ export function Header() {
   const bar = useRef<HTMLElement>(null);
   const stacked = useStacked(bar);
   return (
-    <header ref={bar} className={cx(s.bar, stacked && s.stacked)}>
+    <header ref={bar} className={cx(appBar.bar, s.bar, stacked && s.stacked)}>
       {/* the logo leads to the main page, My patterns (the open pattern is saved first) */}
-      <Link href="/patterns" className={s.brand} title={t("home.title")} data-testid="to-home" onClick={() => ed.flush()}>
-        {/* src/app/icon.svg — Next.js serves it at /icon.svg and uses it as the favicon too */}
-        <Image src="/icon.svg" alt="" width={30} height={30} unoptimized priority />
-        <span className={s.brandText}>{t("app.brand")}</span>
-      </Link>
+      <AppBrand compact title={t("home.title")} testId="to-home" onClick={() => ed.flush()} />
       <PatternMenu />
       <PatternName />
       <div className={s.spacer} data-slot="spacer" />

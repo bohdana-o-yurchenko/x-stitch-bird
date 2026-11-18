@@ -230,37 +230,21 @@ test("exports a stitched preview: bigger cells than the flat one, with the foote
   expect(flat.w).toBeLessThan(stitched.w);
 });
 
-test("the logo leads to My patterns: continue the open one, open another from its card, or start a new one", async ({ page }) => {
-  // a pattern saved in this browser before the one-pattern rule
-  await page.evaluate(() => {
-    const doc = JSON.stringify({ app: "stitchwork", v: 4, xbird: 1, id: "roses", name: "Roses", w: 12, h: 8, count: 14, strands: 2, fabric: "#FFFFFF", pal: [{ t: "thread", src: "dmc:310", n: 2, st: "full", sym: "A" }], blends: {}, combos: {}, customs: {}, cells: "" });
-    localStorage.setItem("stitchwork.library", JSON.stringify({ roses: { name: "Roses", updated: 1000, w: 12, h: 8, data: doc } }));
-    localStorage.removeItem("stitchwork.libraryMoved");
-    localStorage.removeItem("stitchwork.keptPatterns");
-  });
-  await page.reload();
-  await expect(page.locator("[data-entry]").first()).toBeVisible();
+test("the logo leads to My patterns: signed out, the one pattern to continue, with what it is; or start a new one", async ({ page }) => {
   await page.getByRole("textbox", { name: "Pattern name" }).fill("Heart");
   await page.keyboard.press("Enter");
   await page.getByTestId("to-home").click();
   await expect(page).toHaveURL(/\/en\/patterns$/);
-  // the open one, to continue — with what it is, and the invitation to sign in
+  // the open one, to continue — with what it is, and the invitation to sign in; nothing else is listed (SPEC §15.37)
   const current = page.getByTestId("home-continue");
   await expect(current).toContainText("Heart");
   await expect(current).toContainText("60 × 60 stitches · 10.9 × 10.9 cm on 14 ct");
   await expect(current.locator("img")).toHaveAttribute("src", /^data:image\/png/);
   await expect(page.getByTestId("home-signed-out")).toBeVisible();
-  // the others as cards
-  const roses = page.getByRole("link", { name: "Open “Roses”" });
-  await expect(roses.locator("img")).toHaveAttribute("src", /^data:image\/png/);
-  await expect(page.getByTestId("home-pattern")).toContainText("Roses");
-  await roses.click();
-  await expect(page).toHaveURL(/\/en$/);
-  // the open one has edits (its new name) and is only here: the question first
-  await page.getByRole("button", { name: "Replace it" }).click();
-  await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Roses");
+  await expect(page.getByTestId("home-pattern")).toHaveCount(0);
+  await current.getByRole("link", { name: "Continue →" }).click();
+  await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Heart");
   await page.getByTestId("to-home").click();
-  await expect(page.getByTestId("home-continue")).toContainText("Roses");
   await page.getByTestId("home-new").getByRole("button").click();
   await page.getByRole("menuitem", { name: "Blank pattern" }).click();
   await expect(page.getByRole("dialog", { name: "New pattern" })).toBeVisible();
@@ -271,7 +255,7 @@ test("signed in, the account menu leads to My patterns", async ({ page }) => {
   await page.getByRole("button", { name: /e2e@example\.com/ }).click();
   await page.getByRole("menuitem", { name: "My patterns" }).click();
   await expect(page).toHaveURL(/\/en\/patterns$/);
-  await expect(page.getByRole("heading", { name: /^All patterns/ })).toBeVisible();
+  await expect(page.getByTestId("home-continue")).toBeVisible();
 });
 
 test("Threads, next to Patterns: signed out it says what it's for and invites to sign in", async ({ page }) => {

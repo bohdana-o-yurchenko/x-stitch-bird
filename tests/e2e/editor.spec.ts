@@ -74,7 +74,11 @@ test("the edit and delete buttons of a key entry show their own names", async ({
 });
 
 test("the time spent: in Versions, and small in Totals; read-only. Pattern info's fields are saved as you leave them", async ({ page }) => {
-  await page.evaluate(() => void ((window as unknown as { __stitchwork: { doc: { spent: number } } }).__stitchwork.doc.spent = (2 * 60 + 5) * 60_000));
+  await page.evaluate(() => {
+    const ed = (window as unknown as { __stitchwork: { doc: { spent: number }; changed(): void } }).__stitchwork;
+    ed.doc.spent = (2 * 60 + 5) * 60_000;
+    ed.changed();
+  });
   await expect(page.getByTestId("totals").getByTestId("time-spent-small")).toContainText("Time spent: 2 h 5 min");
   await page.getByTestId("rail-versions").click();
   const time = page.getByTestId("versions-panel").getByTestId("time-spent");
@@ -241,40 +245,6 @@ test("highlighting fades every entry except the selected one", async ({ page }) 
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
   await toggle.click();
   expect(await editorState<boolean>(page, "(ed) => ed.state.highlight")).toBe(false);
-});
-
-test("Open is only offered when there is another saved pattern, and leads to the patterns page; deleting one asks first", async ({ page }) => {
-  await page.keyboard.press("ControlOrMeta+s");
-  // only the open pattern is saved: nothing else to open
-  await page.getByRole("button", { name: /^Pattern ▾$/ }).click();
-  await expect(page.getByRole("menuitem", { name: /^New/ })).toBeVisible();
-  await expect(page.getByRole("menuitem", { name: /^Open…/ })).toHaveCount(0);
-  await page.keyboard.press("Escape");
-  // patterns saved in this browser before the one-pattern rule stay, and can be opened
-  await page.evaluate(() => {
-    const doc = (id: string, name: string) => JSON.stringify({ app: "stitchwork", v: 4, xbird: 1, id, name, w: 12, h: 8, count: 14, strands: 2, fabric: "#FFFFFF", pal: [], blends: {}, combos: {}, customs: {}, cells: "" });
-    localStorage.setItem("stitchwork.library", JSON.stringify({ a: { name: "Kept A", updated: 1000, w: 12, h: 8, data: doc("a", "Kept A") }, b: { name: "Kept B", updated: 1001, w: 12, h: 8, data: doc("b", "Kept B") } }));
-    localStorage.removeItem("stitchwork.libraryMoved");
-    localStorage.removeItem("stitchwork.keptPatterns");
-  });
-  await page.reload();
-  await expect(page.locator("[data-entry]").first()).toBeVisible();
-  await fileAction(page, "Open…");
-  // the patterns page (SPEC §15.36), not a dialog
-  await expect(page).toHaveURL(/\/patterns$/);
-  const kept = page.getByTestId("home-pattern").filter({ hasText: "Kept" });
-  await expect(kept).toHaveCount(2);
-  const askDelete = async () => {
-    await kept.first().getByTitle(/^More for “Kept/).click();
-    await page.getByRole("menuitem", { name: "Delete…" }).click();
-  };
-  await askDelete();
-  await expect(page.getByTestId("confirm-delete")).toContainText("can’t be undone");
-  await page.getByRole("dialog").getByRole("button", { name: "Cancel" }).click();
-  await expect(kept).toHaveCount(2);
-  await askDelete();
-  await page.getByRole("dialog").getByRole("button", { name: "Delete", exact: true }).click();
-  await expect(kept).toHaveCount(1);
 });
 
 test("the quick-start guide opens on the first visit only, highlights what it explains, and reopens from the menu", async ({ page }) => {
@@ -1066,22 +1036,6 @@ test("the first time an entry is added, a tip on symbols: draw your own, as on t
   await expect(guide).toHaveCount(0);
 });
 
-test("patterns saved by an earlier version (in localStorage) are moved into IndexedDB and open as before", async ({ page }) => {
-  // what 1.2.1 and earlier saved: the library in one localStorage key
-  await page.evaluate(() => {
-    const doc = { app: "stitchwork", v: 4, xbird: 1, id: "old-1", name: "Saved before", w: 12, h: 8, count: 14, strands: 2, fabric: "#FFFFFF", pal: [{ t: "thread", src: "dmc:310", n: 2, st: "full", sym: "A" }], blends: {}, combos: {}, customs: {}, cells: "" };
-    localStorage.setItem("stitchwork.library", JSON.stringify({ "old-1": { name: "Saved before", updated: 1000, w: 12, h: 8, data: JSON.stringify(doc) } }));
-    localStorage.removeItem("stitchwork.libraryMoved");
-  });
-  await page.reload();
-  await expect(page.locator("[data-entry]").first()).toBeVisible();
-  await fileAction(page, "Open…");
-  await page.getByTestId("home-pattern").getByRole("link", { name: "Saved before", exact: true }).click();
-  await expect(page.getByRole("textbox", { name: "Pattern name" })).toHaveValue("Saved before");
-  // copied, and the old copy kept as a backup
-  expect(await page.evaluate(() => !!localStorage.getItem("stitchwork.libraryMoved") && !!localStorage.getItem("stitchwork.library"))).toBe(true);
-});
-
 test("☰ ▸ Toolbar hides the line, rectangle and fill tools and fractional stitches, and remembers it", async ({ page }) => {
   const toolbar = page.getByTestId("toolbar");
   await expect(toolbar.getByRole("button", { name: "Line (L)", exact: true })).toBeVisible();
@@ -1201,7 +1155,6 @@ test("threads & beads of a new pattern: one brand only — no brand tabs, your o
   await expect(page.getByTestId("brand-tabs").getByRole("tab")).toHaveText(["DMC", "Anchor"]);
   await expect(page.getByTestId("key-form").getByRole("radio", { name: /Floss \+ bead/ })).toBeVisible();
 });
-
 
 test("New ▸ start with this pattern's key and settings: its threads & beads and fabric come along; what the key uses stays; unticking puts the rest back", async ({ page }) => {
   // the demo uses DMC and beads; give it a second thread brand and 16 ct

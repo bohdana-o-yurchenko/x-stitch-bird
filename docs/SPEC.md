@@ -1893,6 +1893,30 @@ limit nothing is lost — the work stays in the browser, and the app says what t
   every save (`patterns.stats`, `db/migrations/005_stats.sql`; older rows filled in when first listed), so the list
   never downloads whole patterns.
 
+### 15.37 Opening without a jump; signed out = one pattern; one bar; actions on every pattern (2026-11-18)
+- **The editor opens what was asked for first.** What to open is read once, before anything shows — `?open=<id>`,
+  `?new=1`, a picture or work file picked on the patterns page, or nothing (the pattern last worked on) — and handed
+  to the editor's start-up (`editor/startRequest.ts`, `Editor.init(intent)`). A picked pattern is loaded straight away
+  (from this browser, or from the account once the session is known); the pattern last worked on is shown only to
+  resume. Until the first pattern is in, the page shows the bar and an empty workspace — never another pattern. A work
+  file opens the same way signed in; signed out (and for New / a picture) the pattern last worked on shows first,
+  as replacing it may need asking.
+- **Signed out there is one pattern** (assumed from now on: no signed-out browser keeps more). So: Pattern ▸ Open…
+  only signed in; the patterns page signed out shows that one pattern (Continue), New and the invitation to sign in,
+  no list. Gone: reading libraries saved in localStorage by 1.2.1 and earlier, "kept for good" in the one-pattern
+  rule (signed out, replacing an edited pattern still asks first), and tracking whether there are other patterns.
+- **One bar on every page** (`ui/common/appBar.module.css`, `AppBrand`): the same height, padding, colour and logo in
+  the editor, on My patterns, Threads and Beads, and while a page loads — going between them nothing moves.
+- **The same actions on the Continue card, the gallery and the list** (⋯): Open · Download .xbird (the pattern with
+  its photo windows, image behind the chart and versions — this browser's and the account's — without opening the
+  editor) · Rename… · Duplicate ("Tulips (copy)", its photos shared, not its versions; counts toward the 20) ·
+  Photos… (each photo window and the image behind the chart with its picture, size and Remove, and Remove all —
+  frees its room in the account; the pattern stays) · Keep in my account (one only in this browser) · Delete… (asked
+  first: Cancel · Download .xbird, then delete · Delete). Signed out: Download, Rename, Photos.
+- **The list, redone**: a 140 px picture; the name as the title, Open and ⋯ beside it; the figures as label / value
+  lines — Size (stitches · cm on its count) · Stitches (colours · stitches · beads · backstitch lines) · Time (spent ·
+  edited …) · Space (pattern KB · photos MB · versions). The Continue card shows the same lines.
+
 ## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
 
 > Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with

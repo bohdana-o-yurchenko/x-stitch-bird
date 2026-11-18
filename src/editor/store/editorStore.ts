@@ -100,8 +100,6 @@ export interface EditorState {
   /** Saving to the saved patterns (and the account, signed in): under way, done, or the account didn't get it. */
   /** `full`: saved in this browser only — the account has its most patterns (SPEC §15.35). */
   saveState: "saving" | "saved" | "offline" | "full" | null;
-  /** Saved patterns besides the open one exist (in this browser or the account): Pattern ▸ Open is offered. */
-  hasOtherPatterns: boolean;
   /** Your own threads and beads in the account (SPEC §15.28); null signed out, or not loaded yet. */
   inventory: CustomColor[] | null;
   /** The session has been checked (signed in or not): the account's patterns can be asked for. */
@@ -181,7 +179,6 @@ export const createEditorStore = () =>
     canRedo: false,
     savedAt: null,
     saveState: null,
-    hasOtherPatterns: false,
     shortcutsOpen: false,
     panelSections: ["totals"],
     openSection: "totals",

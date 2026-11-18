@@ -23,7 +23,6 @@ export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null
   ed.viewport.fit();
   void ed.references.switchTo(p.id, refs);
   void ed.underlay.switchTo(p.id, underlay);
-  void ed.refreshPatterns();
   // signed in: its own threads join the inventory, its copies catch up
   void ed.inventory.withPattern(p);
   ed.live.opened(p.id);
