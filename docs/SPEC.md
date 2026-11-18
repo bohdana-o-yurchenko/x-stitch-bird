@@ -1913,7 +1913,7 @@ limit nothing is lost — the work stays in the browser, and the app says what t
   Photos… (each photo window and the image behind the chart with its picture, size and Remove, and Remove all —
   frees its room in the account; the pattern stays) · Keep in my account (one only in this browser) · Delete… (asked
   first: Cancel · Download .xbird, then delete · Delete). Signed out: Download, Rename, Photos.
-- **The list, redone**: a 140 px picture; the name as the title, Open and ⋯ beside it; the figures as label / value
+- **The list, redone**: a 240 px picture (1.2 × a gallery card's); the name as the title, Open and ⋯ beside it; the figures as label / value
   lines — Size (stitches · cm on its count) · Stitches (colours · stitches · beads · backstitch lines) · Time (spent ·
   edited …) · Space (pattern KB · photos MB · versions). The Continue card shows the same lines.
 

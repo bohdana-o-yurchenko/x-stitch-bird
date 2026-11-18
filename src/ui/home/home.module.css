@@ -266,15 +266,16 @@
   flex: none;
 }
 
-/* List (SPEC §15.37): a big picture; the name as the title, Open and ⋯ beside it; the figures as label / value lines */
+/* List (SPEC §15.37): a big picture (240 px); the name as the title, Open and ⋯ beside it; the figures as label / value lines */
 .rows {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
+/* the picture 1.2 × a gallery card's (~200 px at 5 a row) */
 .row {
   display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
   gap: 20px;
   padding: 14px;
   border: 1px solid var(--line2);
@@ -284,9 +285,9 @@
 .rowPreview {
   display: grid;
   place-items: center;
-  width: 140px;
-  height: 140px;
-  border-radius: 10px;
+  width: 240px;
+  height: 240px;
+  border-radius: 12px;
   background: var(--surface);
   overflow: hidden;
 }
