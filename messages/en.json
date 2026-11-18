@@ -499,9 +499,9 @@
     "resize": "Drag to resize",
     "position": "Column {col} · Row {row}",
     "heading": "References",
-    "windows": "Photos in floating windows",
-    "windowsHint": "A movable window next to the chart — the paper key, say — with progress marks.",
-    "addWindow": "Add a photo window…",
+    "windows": "Image in a floating window",
+    "windowsHint": "A photo, scan or PDF — the paper key, say — in a window you move and resize beside the chart, with a marker to tick off progress. A PDF’s pages are a click away.",
+    "addWindow": "Open in a window…",
     "show": "Show",
     "hide": "Hide",
     "removeWindow": "Remove “{name}”",
@@ -642,8 +642,8 @@
     "rotationReset": "0°",
     "match": "Autofill",
     "matchHint": "Fill one 10 × 10 block at a time from the image (Shift+F)",
-    "add": "Add an image…",
-    "addHint": "A photo, scan or PDF of the paper chart, lying under your stitches to trace over — and for Autofill to read. A PDF’s pages are shown one at a time.",
+    "add": "Put behind the chart…",
+    "addHint": "A photo, scan or PDF of the paper chart, lined up under your stitches to trace over — and for Autofill to read. A PDF’s pages are a click away.",
     "adjust": "Adjust",
     "exactPosition": "Exact position and size",
     "page": "Page",
@@ -811,7 +811,7 @@
         "1": "Every line of the paper key: <hl>+ Add to key</hl>.",
         "2": "Floss, beads, blends, floss + bead."
       },
-      "tip": "Keep the key in view: <hl>References ▸ Add a photo window</hl> (the picture icon at the bottom of the side panel). Tick off added lines with its <hl>marker</hl>."
+      "tip": "Keep the key in view: <hl>References ▸ Open in a window</hl> (the picture icon at the bottom of the side panel). Tick off added lines with its <hl>marker</hl>."
     },
     "trace": {
       "title": "3. Chart behind the stitches",

@@ -8,7 +8,7 @@ import { UnderlayPanel } from "./UnderlayPanel";
 import s from "./side.module.css";
 
 /**
- * References (SPEC §15.15, §11.1, §15.32): the photos of the paper chart — photos in floating windows first, then
+ * References (SPEC §15.15, §11.1, §15.32): the photos of the paper chart — images in floating windows first, then
  * the image behind the chart. Both are added from here; the windows are listed, shown or hidden, removed.
  */
 export function ReferencesPanel() {
