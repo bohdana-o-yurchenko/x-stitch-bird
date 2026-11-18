@@ -241,14 +241,16 @@
   --meter: #2f7d74;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 30px;
-  padding: 0 10px;
+  gap: 6px;
+  height: 24px;
+  box-sizing: border-box;
+  padding: 0 9px;
   border: 1px solid var(--line2);
   border-radius: 99px;
   background: var(--panel);
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 12px;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
   text-decoration: none;
   white-space: nowrap;
@@ -268,8 +270,8 @@
   font-weight: 600;
 }
 .storageBar {
-  width: 44px;
-  height: 6px;
+  width: 34px;
+  height: 5px;
   border-radius: 99px;
   background: var(--surface);
   border: 1px solid var(--line2);

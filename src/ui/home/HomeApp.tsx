@@ -135,8 +135,8 @@ export default function HomeApp() {
               <h2>
                 {t("all")}
               </h2>
-              {usage && <StorageButton usage={usage} />}
               <span className={s.spacer} />
+              {usage && <StorageButton usage={usage} />}
               <div className={cx(ui.seg, s.viewSwitch)} role="group" aria-label={t("view")}>
                 <button type="button" className={cx(view === "gallery" && ui.on)} aria-pressed={view === "gallery"} onClick={() => setView("gallery")}>{t("viewGallery")}</button>
                 <button type="button" className={cx(view === "list" && ui.on)} aria-pressed={view === "list"} onClick={() => setView("list")} data-testid="home-view-list">{t("viewList")}</button>
