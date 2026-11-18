@@ -155,7 +155,7 @@ export class Editor {
     if (!first) {
       // nothing worked on here yet: the demo — unless something new is being started (from a PDF, a picture, a file,
       // blank), which starts from nothing, not from the demo's heart
-      const starting = intent.kind === "new" || intent.kind === "image" || intent.kind === "file";
+      const starting = intent.kind !== "resume" && intent.kind !== "open";
       loadPattern(this, pattern ?? (starting ? emptyPattern() : demoPattern(symbols)));
       // a restored draft is saved to the library once it's edited; the demo (or the empty start) not even drafted till then
       if (pattern) this.autosave.markSaved();
@@ -222,12 +222,13 @@ export class Editor {
     return false;
   }
 
-  /** What's left of `intent` once the first pattern shows: a dialog for a new one or a picture, a file signed out or already here. */
+  /** What's left of `intent` once the first pattern shows: a dialog for a new one or a picture, the new one chosen on the patterns page, a PDF chart, a file signed out or already here. */
   private async afterStart(intent: StartIntent, opened: boolean) {
     if (intent.kind === "resume" || intent.kind === "open" || opened) return;
     await this.sessionKnown();
     if (intent.kind === "new") void this.commands.run(intent.from === "pdf" ? "file.newFromPdf" : "file.new");
-    else void this.commands.run(intent.kind === "image" ? "image.open" : "file.load", intent.file);
+    else if (intent.kind === "create") void this.commands.run("file.create", intent.options);
+    else void this.commands.run(intent.kind === "image" ? "image.open" : intent.kind === "pdf" ? "file.loadPdf" : "file.load", intent.file);
   }
 
   /** The same pattern as changed elsewhere, in place of this one: the view and tools stay (SPEC §15.34). */

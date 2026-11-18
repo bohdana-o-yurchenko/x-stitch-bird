@@ -1,15 +1,24 @@
+import type { NewPatternOptions } from "./actions/pattern";
+
 /*
  * What the editor opens on arrival (SPEC §15.37), decided before it shows anything: the pattern worked on last, a
- * pattern picked on the patterns page (`?open=<id>`), a new one (`?new=1`; `?new=pdf`: from a PDF chart), or a file
- * picked there — kept in memory across the page change (the app doesn't reload), so the file itself needn't go
- * anywhere.
+ * pattern picked on the patterns page (`?open=<id>`), a new one (`?new=1`; `?new=pdf`: from a PDF chart), or what
+ * was chosen there — a file, or a new pattern's settings — kept in memory across the page change (the app doesn't
+ * reload), so the file itself needn't go anywhere.
  */
-export type StartIntent = { kind: "resume" } | { kind: "open"; id: string } | { kind: "new"; from?: "pdf" } | { kind: "image" | "file"; file: File };
+export type StartIntent =
+  | { kind: "resume" }
+  | { kind: "open"; id: string }
+  | { kind: "new"; from?: "pdf" }
+  | { kind: "image" | "file" | "pdf"; file: File }
+  | { kind: "create"; options: NewPatternOptions };
 
-let picked: { kind: "image" | "file"; file: File } | null = null;
+type Picked = Extract<StartIntent, { file: File } | { kind: "create" }>;
 
-/** The patterns page hands over a picked picture or work file. */
-export function requestStart(r: { kind: "image" | "file"; file: File }) {
+let picked: Picked | null = null;
+
+/** The patterns page hands over a picked picture, work file or PDF chart, or a new pattern's settings. */
+export function requestStart(r: Picked) {
   picked = r;
 }
 

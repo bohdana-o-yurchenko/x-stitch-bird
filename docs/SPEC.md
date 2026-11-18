@@ -953,26 +953,22 @@ All toasts/modals listed in the sections above should be kept verbatim; they are
 > Brainstormed 2026-11-14 with **e-pattern mappers** in mind: people who turn paper charts into faithful digital
 > copies. Constraints for all of it: plain JS in the browser, no server, **no AI / ML**.
 > The sections below keep their numbers (code and ARCHITECTURE refer to them). Sections marked *implemented*
-> describe how the app works; what is still open is listed in §15.0. Cleaned up 2026-11-16.
+> describe how the app works; what is still open is in **`docs/BACKLOG.md`** (§15.0). Cleaned up 2026-11-16;
+> the backlog moved out 2026-11-18.
 
-### 15.0 Backlog — what is still open
+### 15.0 Backlog — moved to `docs/BACKLOG.md`
+This file describes what is built. What is still open — ranked by effort, with the details that were here (§15.8's
+remaining brands, §15.19–15.22, §15.27, the ideas of §15.12 and the stash, §16) — is in **`docs/BACKLOG.md`**
+(items B1–B28), reviewed against the code 2026-11-18.
 
-| Feature | Effort | Persistence impact | Status |
-|---|---|---|---|
-| Intended fabric: name, type, count (§15.19) | S | optional fields in .xbird | not started |
-| Floss usage rework + stitching bases: plastic canvas, wood (§15.20) | L | optional calculator settings | not started |
-| Finished size for several counts in the print PDF (§15.21) | S | none | not started |
-| Skeins and bead packs in the shopping list (§15.22) | S (pack sizes are in the catalogue) | none | not started |
-| Accounts and cloud storage (Neon), sign-in, pattern gallery with previews (§15.23) | XL | new server storage; browser data migrated | not started |
-| More chart checks (§15.4): backstitch, knots, beads | S–M | none | ideas |
-| More thread brands (§15.8) | M code, L data | new `src` id namespaces | not started |
-| Not yet discussed (§15.12): keyboard entry, specialty stitches, proofread tracking, second-screen window | — | — | ideas |
-| Stash management (§16) | XL | needs a server | future phase |
-| The installed app opens without the internet (§15.50, phase 2): service worker, editor files saved ahead, "new version — reload" | M–L | none (browser cache only) | backlog, added 2026-11-18 |
-
-Implemented: §15.24 Mill Hill Treasures and bead packages, §15.11 symbol matching in a block, §15.4 chart checks (empty cells, lone stitches, near symmetry), §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.5 ambiguous
-marks, §15.6 selection, §15.7 snapshots, §15.10 / §15.10b PDFs, §15.13 fractional stitches, §15.14 French knots,
-§15.15 underlay, §15.16 highlighting, §15.17 work time, §15.18 themes, and the drawn symbols of §2.5.
+Implemented: §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms and mirror modes, §15.4 chart checks
+(empty cells, lone stitches, near symmetry), §15.5 ambiguous marks, §15.6 selection, §15.7 snapshots, §15.8 in part
+(brands per pattern, Anchor and Madeira — §15.28), §15.10 / §15.10b PDFs, §15.11 symbol matching in a block, §15.13
+fractional stitches, §15.14 French knots, §15.15 underlay, §15.16 highlighting, §15.17 work time, §15.18 themes,
+§15.23 accounts and cloud storage (with §15.25–15.40: signed in / out, My patterns, threads and beads, pictures in
+the account, live editing, limits, the account page), §15.24 Mill Hill Treasures, §15.28–15.31 brands and own
+threads & beads, §15.32–15.50 (layout, PDFs as references and as charts, .oxs round trip, installing as an app),
+and the drawn symbols of §2.5.
 
 ### 15.1 Pattern metadata (implemented)
 
@@ -1061,8 +1057,7 @@ browser (`stitchwork.checks`):
   re-run behind your back.
 - Nothing is stored in the pattern or its file.
 
-**Not checked (yet)**: backstitch, knots, beads; unused or rarely used key entries (the key's counts already show
-them).
+**Not checked (yet)**: backstitch, knots, beads; unused or rarely used key entries — BACKLOG B8.
 
 ### 15.5 Mark cell as ambiguous (implemented)
 Hard requirement: **no footprint when unused**. There is no toolbar button, no panel, no prompt, and no change to
@@ -1123,33 +1118,11 @@ any existing behaviour.
   redrawn on import). Opening the file adds them to this browser's versions of the pattern — ones already there
   (same time) are kept — and the usual retention applies. `.oxs` exports never carry versions.
 
-### 15.8 Multi-brand threads
-- **Brands**: DMC (existing) plus Anchor, Cosmo, Madeira, and vintage lines common on old paper charts (e.g. J&P
-  Coats). Also a table of **discontinued / renumbered DMC** codes with their replacements.
-- **Data per brand**: a `code|name|HEX` table like `DMC_RAW`, plus a conversion table `code → DMC code` taken from
-  published manufacturer charts. **Collecting and checking this data is most of the work.** Conversion charts are
-  approximations by nature, and the data's licensing needs checking.
-- **Ids**: `anchor:403`, `cosmo:…` and so on, resolved like `dmc:`. Old files are unaffected. Blend parts may mix
-  brands.
-- **Pick list**: a brand selector. A search for `403` with "All brands" lists hits across brands with a brand tag.
-  Discontinued DMC codes are flagged "discontinued — use 3xxx".
-- **Key display**: "Show equivalents as: none | DMC | Anchor | …" adds a secondary line such as `≈ DMC 310`. It
-  uses the official table first, and falls back to the nearest colour by ΔE76, labelled "≈ by colour".
-- **Convert key to brand…** replaces every `src` with its equivalent and keeps symbols and chart. A snapshot is
-  taken first (§15.7).
-- **Shopping list**: grouped by brand, with skein length from a per-brand table.
-- **OXS**: export prefixes the name with the brand for non-DMC threads. Import (`oxsResolve`) learns the prefixes
-  `Anchor`, `ANC`, `Cosmo`, `Madeira`.
-- **Brands asked for by users (2026-11-16):** Anchor, Dimensions, Palmira, Avrora, Kreinik, Rainbow Gallery, Weeks Dye
-  Works. Loading is no concern: a brand's table is ~5–20 KB compressed, loaded only when the brand is first used.
-  The work is the data (codes, names, a screen colour, licensing), brand by brand. Hand-dyed lines (Rainbow Gallery,
-  Weeks Dye Works) are variegated: one colour only approximates them — they need a variegated look.
-- **Kreinik — sources and scope** (not built yet):
-  - Every colour, codes and names: Kreinik's stash inventory form,
-    https://kreinik.com/PDF/KREINIK_HOME_INVENTORY_2024.pdf (a list, not a colour chart — screen colours still needed).
-  - DMC → Kreinik metallics: https://www.kreinik.com/PDF/DMC_FLOSS_TO_KREINIK_METALLICS.pdf
-  - Only the most used lines: **Blending Filament**, **Very Fine #4 Braid** and **Fine #8 Braid**. The limited and
-    special lines are left out. Metallic: a flat colour is an approximation (perhaps a sheen in the key icon).
+### 15.8 Multi-brand threads (partly built — see §15.28)
+Built: thread brands per pattern, the **DMC**, **Anchor** and **Madeira** catalogues with Anchor's DMC equivalents,
+own threads in any brand (§15.28), brand prefixes in OXS (§15.42). Still open — converting a key to another brand,
+equivalents shown in the key, discontinued DMC codes, the shopping list by brand (BACKLOG B13) and more brands' data
+(Kreinik, Dimensions, Palmira, … — BACKLOG B25).
 
 ### 15.10 PDF chart export — Pattern Keeper–compatible (implemented; works in Pattern Keeper since 2026-11-15)
 **Menu ▸ Export ▸ PDF for Pattern Keeper.** A multi-page A4 PDF that the Android app **Pattern Keeper** can import
@@ -1187,7 +1160,8 @@ chart to print for the full chart. With nothing trackable at all, a toast says s
 **Text is English** (embedded DM Sans; Cyrillic letters, e.g. in pattern names, from embedded Onest).
 
 **Verified in Pattern Keeper (2026-11-15):** the grid, the symbols and the thread numbers are read; nothing has to
-be typed in. **Not yet checked:** how a two-floss blend row is read.
+be typed in. **Blends are not read** (checked 2026-11-19): Pattern Keeper doesn't see the threads of a blend row —
+they can be added by hand there. Bug: BACKLOG B1.
 
 ### 15.10b PDF chart to print (implemented 2026-11-16)
 **Menu ▸ Export ▸ PDF chart to print** — the chart for people to read and stitch from, separate from the Pattern
@@ -1313,12 +1287,8 @@ symbols) could use the patch's mean colour instead — later.
 - **Rejected 2026-11-16**: options for the print PDF (Letter paper, how many rows pages share).
 - **Parked**: exporting Pattern Maker `.xsd`. The format is proprietary, binary and undocumented.
 - *(A scan underlay inside the chart canvas was rejected at first, then specified and built as §15.15.)*
-- **Not yet discussed**:
-  - keyboard data-entry mode (cursor + type a key, run-length entry)
-  - long stitches, lazy daisies and other specialty stitches
-  - uploaded symbol images (drawn symbols exist, §2.5)
-  - proofread tracking ("mark region as proofed")
-  - two-screen pop-out window
+- **Not yet discussed** — keyboard entry, specialty stitches, uploaded symbol pictures, proofread tracking, a
+  second-screen window: BACKLOG B14–B16, B20, B26.
 
 ### 15.13 Fractional stitches — quarter, three-quarter, petite (implemented)
 Goal: several partial stitches can share **one cell**, so a mapper can reproduce exactly what the paper chart
@@ -1571,48 +1541,14 @@ Idea from Pattern Maker v4 (Professional). Toggle with the eye button in the key
   — fabric colour, floss and bead colours, symbols, grid — stays exactly the same, so what you see is what you stitch.
 - Exported PNGs don't depend on the theme.
 
-### 15.19 Intended fabric: name, type, count (backlog, added 2026-11-16) — effort S
-Today the pattern stores only a count (a dropdown) and a colour (a colour picker).
-- Add a free-text **fabric name**, e.g. "Zweigart Aida 14 ct Antique White 101" or "Lugana 25 ct 3613". It sits
-  next to the count in Fabric & size, and in Pattern info.
-- Optionally a **type**: Aida / evenweave / linen / plastic canvas / wood (§15.20 uses it).
-- Shown in the print PDF: on the cover with the finished size (§15.21), and in the key's header.
-- Stored as optional fields (`fabricName`, `fabricType`), so no version bump; old files open as before.
-- OXS: write the name where the format has a field for it, if any — check against the readers.
+### 15.19 Intended fabric: name, type, count — backlog (BACKLOG B4)
+### 15.20 Floss usage rework, and plastic and wooden bases — backlog (BACKLOG B24)
+### 15.21 Finished size for several counts in the print PDF — backlog (BACKLOG B2)
+### 15.22 Skeins and bead packs in the shopping list — in part
+The CSV writes the unit with each line ("2 skeins", `csv.unit.*`). Bead packs and the unit on the Totals panel's
+lines: BACKLOG B3.
 
-### 15.20 Floss usage rework, and plastic and wooden bases (backlog, added 2026-11-16) — effort L
-**Today** (`classicSkeins`, §7.2): one full cross with one strand = 1 unit; a skein = 3600 units on 14 ct, scaled
-by count; rounded up to whole skeins per thread. Blends are split into their threads correctly; backstitch
-counts its length × 0.42, a knot 1.5 units. **Missing**: waste (starting and ending tails, travel at the back), so
-it tends to undercount on scattered ("confetti") areas; no metres shown; no settings.
-**Plan**
-1. Thread per stitch from geometry: the two diagonals on the front plus the travel at the back, for the fabric's
-   count and the stitch type (full, half, partials), × strands. A skein = 8 m × 6 strands.
-2. Waste allowance: a tail at each start and end, estimated from how many separate patches each colour has (a
-   confetti area needs many more starts than one big block); plus a % setting.
-3. Backstitch by its real length; knots by wraps.
-4. **Bases** (the fabric type of §15.19):
-   - **Plastic canvas** (7, 10, 14 mesh): larger holes, usually more strands, and longer travel at the back.
-   - **Wooden / perforated blanks**: drilled holes, thicker material, so more thread per stitch.
-   - Both get their own factors.
-5. The totals show metres and skeins per thread. The calculator's settings live in the pattern (optional).
-6. Check against published usage tables and a few real stitched pieces; unit tests per rule.
-**Open questions**:
-- Is "plastic and wood base" meant as plastic canvas and wooden blanks to stitch on? I read it that way.
-- Which stitching style is the default (loop start, waste knot)?
-
-### 15.21 Finished size for several counts in the print PDF (backlog, added 2026-11-16) — effort S
-The cover shows the size on the pattern's own count only. Add a small table: 11, 14, 16, 18, 20, 22 ct, and 28
-and 32 over 2, in cm and inches. Optionally, the fabric to buy, with a margin (e.g. 8 cm / 3 in each side).
-Both languages.
-
-### 15.22 Skeins and bead packs in the shopping list (backlog, added 2026-11-16) — effort S code, M data
-- **Threads**: the CSV and the totals already give whole skeins, but they show a count with no unit. Write
-  "2 skeins" and, after §15.20, the metres too.
-- **Beads**: today a count of beads. Add packs: the catalogue now knows each bead's package size (§2.2,
-  `ColorEntry.pack`). The list then shows "2 packs (≈ 640 beads)". What's left is code only.
-
-### 15.23 Accounts and cloud storage with Neon; sign-in; pattern gallery (step 1 built 2026-11-16) — effort XL
+### 15.23 Accounts and cloud storage with Neon; sign-in; pattern gallery (built 2026-11-16 – 2026-11-18)
 **Built (step 1):** Neon project `still-rain-82314870` (eu-central-1), branch `production`; `neon.ts` declares Auth and
 a private `assets` bucket.
 - **Sign-in** (header, "Sign in"): Google, or a code by email (the first sign-in creates the account). Managed Better
@@ -1623,11 +1559,12 @@ a private `assets` bucket.
   account" or both. API: `/api/patterns` (list), `/api/patterns/[id]` (GET, PUT, DELETE), `/api/patterns/[id]/preview`
   (PUT png, GET → short-lived signed link); every route checks the session and touches only that user's rows.
 - Signed out, nothing changes: everything stays in the browser.
-**Still to do:** the gallery page with previews; offering to upload this browser's patterns on first sign-in; custom
-threads in the account; ~~pictures (photos behind the chart, photo windows) in the account~~ (§15.33); production setup (Vercel
-env vars, trusted domain, own SMTP, own Google OAuth app — see below).
+**Built since:** the gallery — My patterns (§15.26, §15.36, §15.37); moving this browser's patterns into the account
+(§15.25, §15.26); own threads and beads in the account (§15.28, §15.30); pictures in the account (§15.33); several
+windows and devices (§15.34); limits (§15.35); deleting an account (§15.38). Production on Vercel, own domain
+trusted for sign-in. **Still open:** own email sender, own Google OAuth app — status to check (BACKLOG B5).
 
-**Plan as discussed:**
+**Plan as discussed** (kept for the record; built as above):
 A big turn: patterns are stored on a server under a user account, not only in the browser.
 - **Sign-in**: Neon Auth (email code or magic link, Google). Without signing in, the app works as now, in the
   browser.
@@ -1647,7 +1584,7 @@ A big turn: patterns are stored on a server under a user account, not only in th
 
 ### 15.24 Mill Hill Treasures in the bead list (implemented 2026-11-16)
 In the catalogue (§2.2): 269 Treasures in three series, each with pieces per package and a colour from the photo.
-Drawn as a large round bead (radius 0.48) for now. Charm-shaped icons (heart, star, flower, leaf) could come later.
+Drawn as a large round bead (radius 0.48) for now. Charm-shaped icons (heart, star, flower, leaf): BACKLOG B6.
 
 ### 15.25 Signed out vs signed in; the header's menus (decided 2026-11-17)
 **Signed out** — the whole editor, one working pattern kept in this browser; to keep work elsewhere, the work
@@ -1711,24 +1648,10 @@ changes reach the account, then takes the account's patterns out of this browser
 when it's one of them; the editor then shows the demo. Patterns only here stay. Nothing is taken out when the
 account can't be reached.
 
-### 15.27 Importing other apps' patterns: Saga, Pattern Maker, PCStitch (backlog, assessed 2026-11-17)
-Idea: open other apps' files so пташечка also works as a converter — **import only, never write them**; out goes
-.xbird or OXS (open, documented). Already there: **OXS** import (Pattern ▸ Open work file…, and drag & drop).
-- **.saga (Cross Stitch Saga, iOS/Android)** — undocumented; no public spec or open-source parser; converters exist
-  only as closed services (e.g. crossstitch.diy, SAGA → XSD). Saga itself imports XSD, XSP, PAT, OXS, so its own
-  format holds the same things (full/half/quarter/petite/oblong, backstitch, long stitch, knots, beads). Needs real
-  sample files to study. **Check first:** designers sell patterns as .saga; if the files are encrypted or otherwise
-  protected, we don't break that (circumventing protection is a legal line, whatever the purpose) — only plain
-  files. Effort: unknown until a sample is looked at (M if plain and structured, out if protected).
-- **.xsd (Pattern Maker)** and **.pat (PCStitch)** — binary, but long since worked out by open-source projects
-  (KXStitch reads both); common in older purchased charts and what SAGA converters produce. Effort M each, with
-  real sample files for tests. Written from the format, not copied code (KXStitch is GPL).
-- Same rule as OXS import: what we can't represent is simplified and reported (`toasts.loadedReport`).
-
-**Assessed again 2026-11-18 (backlog, ranked):** Pattern Maker `.xsd` import first — the most used commercial format,
-with an open reader to learn from (KXStitch, GPL-2.0-or-later, compatible); then an SVG chart export (vector, sharp
-at any size); then PCStitch `.pat` import (older, more reverse engineering). JPEG export and copying the key as text
-are trivial but of little use. First comes a proper `.oxs` round trip (brands kept, see the open design).
+### 15.27 Importing other apps' patterns: Saga, Pattern Maker, PCStitch — backlog
+Rule: other apps' files are **imported only, never written**; out goes .xbird or OXS (open, documented). Built: OXS
+import (§15.42, New ▸ From an .oxs file) and other apps' PDF charts (§15.46–15.48). The rest, ranked 2026-11-18 —
+Pattern Maker `.xsd` (B11), SVG chart export (B10), PCStitch `.pat` (B22), `.saga` (B28) — is in BACKLOG.
 
 ### 15.28 Thread brands per pattern; your own threads (decided 2026-11-17)
 **Brands** (built): a pattern has thread brands, by name (`Pattern.brands`, optional in the file — absent means DMC;
@@ -2090,7 +2013,8 @@ Only the page picked is drawn at full size (§15.41); previews are never stored.
   line — **always a new pattern** (a new id), as with an .oxs.
 - **Any other PDF**: read as another app's chart (§15.47), then its steps (§15.48). Nothing read: "No pattern could be
   read" — it may be a scan, made from photos, or from an app not read yet — and the way to trace it.
-- **Next** (approved 2026-11-18): reading other apps' PDFs — symbols as text (Pattern Maker, WinStitch, MacStitch,
+- **Planned 2026-11-18, built in §15.47–15.48** (part stitches, knots and beads of other apps, and more apps:
+  BACKLOG B23): reading other apps' PDFs — symbols as text (Pattern Maker, WinStitch, MacStitch,
   PK-ready files, this app's older PDFs), as stamped pictures (FlossCross) or drawn shapes; pages placed by their
   edge numbers; the key's rows matched to the symbols. Then the steps: the grids found (untick the ones that don't
   fit — only when the size or overlaps don't add up), faded cells (asked only when found), the key (rows not matched
@@ -2199,64 +2123,9 @@ chart whose picture can't be loaded is drawn again once, not over and over.
   browser's install button; Safari 17+ on a Mac: **File ▸ Add to Dock…**; Firefox and phones / tablets: no item. The
   dialog says what it gives (a window and an icon of its own, the same patterns and account) and that **it still
   needs the internet to open**.
-- **Not yet** (backlog, §15.0): opening without the internet — a service worker, the editor's lazily loaded files
-  (PDF chart dialog, pdf.js and its worker, photo tools) saved ahead, a "new version — reload" prompt, a start that
-  doesn't wait for the sign-in check, calm offline account pages. Possible extras, undecided: opening .xbird / .oxs
-  files from the computer (file handlers).
+- **Not yet**: opening without the internet (BACKLOG B21); opening .xbird / .oxs files from the computer (file
+  handlers, undecided — B7).
 
-## 16. Future phase — Stash management: floss, beads, fabric (IDEA)
-
-> Added 2026-11-14. **Not to be started until the app has a real database and login** (user accounts with
-> server-side storage). This is a whole new layer of the app, not a feature of the chart editor.
-> Builds on: multi-brand threads (§15.8) and the totals / shopping list (§7.2).
-
-### 16.1 Why
-Today the shopping list (§7.2) lists everything the pattern needs, as if the stitcher owned nothing. Real stitchers
-and mappers have large stashes. The useful answer is **"what do I still need to buy?"**, which is pattern needs
-minus what is in the stash.
-
-### 16.2 Inventory (per user)
-- **Floss**: brand + code (any brand from §15.8, or a custom thread), quantity in whole skeins, plus a
-  partial-skein amount (see question 1). Optional storage location (box, bobbin card #) and notes.
-- **Beads**: Mill Hill code (or custom), quantity as packets, plus an optional "about N beads left" estimate.
-- **Fabric**:
-  - type: Aida / evenweave / linen
-  - count, including "over 2"
-  - colour: name, maker's code if known, and hex for preview
-  - size W × H (in or cm) and quantity
-  - scraps are just smaller pieces
-- **Fast entry**:
-  - bulk add by typing a list such as `310 2, 3865, 498 1.5, anchor 403 1`
-  - "add all of this pattern's key to my stash"
-  - CSV import and export of the whole stash
-
-### 16.3 Using the stash in a pattern
-- **Key and shopping list annotations**: every key entry shows one of ✓ *in stash*, *have 1 / need 2*,
-  *missing*, or *have equivalent* (e.g. Anchor 403 for DMC 310, using the conversion tables in §15.8).
-- **To buy**: the shopping list (§7.2) subtracts the stash. The CSV and PDF exports can output "missing only".
-  Blend parts and combo threads count toward their base threads, as the totals already do.
-- **Fabric match**: from the finished size and cut size (§7.3), list stash pieces that are big enough in the
-  pattern's count. Also show what other counts would give, e.g. "on your 16 ct piece the design is 9.0″ × 7.5″,
-  and that fits".
-- **Kitting (reservations)**: assign stash items to a project, so two projects don't both count the same skein.
-  Shown as *available* vs *reserved*.
-- **Project lifecycle** (optional): when a project is marked *finished*, offer to deduct its estimated usage from
-  the stash. This is never automatic.
-
-### 16.4 Data model sketch (server side, per user)
-- `stash_threads {id, brand, code, skeins, partial, location, notes, updated}`
-- `stash_beads {id, brand, code, packets, approxCount, notes, updated}`
-- `stash_fabrics {id, type, count, colourName, colourCode, hex, w, h, unit, qty, notes, updated}`
-- `allocations {id, projectId, itemType, itemId, amount}` (kitting)
-- Items are keyed by brand + code so they link to the colour libraries. Custom items carry their own hex.
-
-### 16.5 Open questions
-1. **Partial skeins**: fractions of a skein (½, ¼), metres, or just "opened / almost empty"? Precision helps the
-   maths, but nobody measures leftover floss.
-2. **Equivalents**: should *have equivalent* count toward "don't buy" by default, or only when the user accepts
-   the substitution for that project?
-3. **Usage deduction**: deduct automatically on *finished*, only on request, or never (stash edited by hand only)?
-4. **Offline / guest mode**: should a local-only stash work without login (synced on first login), or is the
-   stash strictly an account feature?
-5. **Sharing**: one stash per account, or households / groups sharing a stash?
-6. **Other supplies** later: needles, specialty threads (metallics, silk, variegated), hoops and frames?
+## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
+The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in
+BACKLOG B27.

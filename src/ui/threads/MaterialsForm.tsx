@@ -15,7 +15,7 @@ export interface MaterialsLocks {
 }
 
 /** Brands to offer: the built-in ones, then your own (the pattern's and, signed in, your inventory's). */
-export function brandChoices(p: Pattern, inventory: readonly CustomColor[] | null) {
+export function brandChoices(p: Pick<Pattern, "customs">, inventory: readonly CustomColor[] | null) {
   const own = (kind: "thread" | "bead") => [...Object.values(p.customs), ...(inventory ?? [])].filter((c) => c.kind === kind).map((c) => c.brand);
   return { threads: [...new Set([...BUILT_IN_THREAD_BRANDS, ...own("thread")])], beads: [...new Set([...BUILT_IN_BEAD_BRANDS, ...own("bead")])] };
 }

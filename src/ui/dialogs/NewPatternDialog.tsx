@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { NEW_MATERIALS, materialsOf, usedBeadBrands, usedThreadBrands, usesBeads, type Materials } from "@/core/pattern/brands";
+import type { CustomColor, Pattern } from "@/core/pattern/types";
+import type { NewPatternOptions } from "@/editor/actions/pattern";
 import { Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditorState } from "../hooks/editor";
 import { MaterialsForm, brandChoices } from "../threads/MaterialsForm";
@@ -18,19 +20,30 @@ const COUNTS = [11, 14, 16, 18, 20, 24, 31];
  */
 export function NewPatternDialog({ onClose }: { onClose: () => void }) {
   const signedIn = useEditorState((st) => !!st.account);
-  const t = useTranslations("dialogs");
-  const tf = useTranslations("fabric");
-  const tm = useTranslations("materials");
   const run = useCommand();
   const doc = useEditorState((st) => st.doc);
   const inventory = useEditorState((st) => st.inventory);
+  return <NewPatternForm doc={doc} inventory={inventory} signedIn={signedIn} onCreate={(o) => run("file.create", o)} onClose={onClose} />;
+}
+
+/** The same, on the patterns page: no pattern open, so no key of its own to start from. */
+export function NewPatternForm({ doc, inventory, signedIn, onCreate, onClose }: {
+  doc?: Pattern;
+  inventory: readonly CustomColor[] | null;
+  signedIn: boolean;
+  onCreate: (o: NewPatternOptions) => void;
+  onClose: () => void;
+}) {
+  const t = useTranslations("dialogs");
+  const tf = useTranslations("fabric");
+  const tm = useTranslations("materials");
   const [o, set] = useState({ name: "Untitled pattern", w: 80, h: 80, count: 14, keepKey: false, materials: NEW_MATERIALS });
   /** What the settings were before "this pattern's key & settings" filled them in. */
   const [before, setBefore] = useState<{ count: number; materials: Materials } | null>(null);
   const [open, setOpen] = useState(false);
   const keep = (on: boolean) => {
     if (on === o.keepKey) return;
-    if (on) {
+    if (on && doc) {
       setBefore({ count: o.count, materials: o.materials });
       set({ ...o, keepKey: true, count: doc.count, materials: materialsOf(doc) });
     } else {
@@ -38,8 +51,8 @@ export function NewPatternDialog({ onClose }: { onClose: () => void }) {
       setBefore(null);
     }
   };
-  const locks = o.keepKey ? { threads: usedThreadBrands(doc), beads: usedBeadBrands(doc), beadsUsed: usesBeads(doc) } : undefined;
-  const choices = brandChoices(doc, inventory);
+  const locks = o.keepKey && doc ? { threads: usedThreadBrands(doc), beads: usedBeadBrands(doc), beadsUsed: usesBeads(doc) } : undefined;
+  const choices = brandChoices(doc ?? { customs: {} }, inventory);
   const ct = Math.floor(o.count) || 14, cm = (n: number) => ((n / ct) * 2.54).toFixed(1);
   const m = o.materials;
   const summary = [
@@ -48,15 +61,17 @@ export function NewPatternDialog({ onClose }: { onClose: () => void }) {
   ].join(" · ");
 
   return (
-    <Modal title={t("newTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("create"), primary: true, onClick: () => run("file.create", o) }]}>
+    <Modal title={t("newTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("create"), primary: true, onClick: () => onCreate(o) }]}>
       <div className={s.form} data-testid="new-pattern">
-        <div className={s.row} role="radiogroup" aria-label={t("startFrom")}>
-          <span className={s.label}>{t("startFrom")}</span>
-          <div className={ui.seg}>
-            <button type="button" role="radio" aria-checked={!o.keepKey} className={cx(!o.keepKey && ui.on)} onClick={() => keep(false)}>{t("blankKey")}</button>
-            <button type="button" role="radio" aria-checked={o.keepKey} className={cx(o.keepKey && ui.on)} onClick={() => keep(true)}>{t("thisKey")}</button>
+        {doc && (
+          <div className={s.row} role="radiogroup" aria-label={t("startFrom")}>
+            <span className={s.label}>{t("startFrom")}</span>
+            <div className={ui.seg}>
+              <button type="button" role="radio" aria-checked={!o.keepKey} className={cx(!o.keepKey && ui.on)} onClick={() => keep(false)}>{t("blankKey")}</button>
+              <button type="button" role="radio" aria-checked={o.keepKey} className={cx(o.keepKey && ui.on)} onClick={() => keep(true)}>{t("thisKey")}</button>
+            </div>
           </div>
-        </div>
+        )}
 
         <label className={s.row}>
           <span className={s.label}>{t("name")}</span>

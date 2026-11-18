@@ -42,7 +42,9 @@ export function replaceDoc(ed: Editor, p: Pattern) {
   ed.autosave.markSaved();
 }
 
-export function newPattern(ed: Editor, o: { name: string; w: number; h: number; count: number; keepKey: boolean; materials?: Materials }) {
+export type NewPatternOptions = { name: string; w: number; h: number; count: number; keepKey: boolean; materials?: Materials };
+
+export function newPattern(ed: Editor, o: NewPatternOptions) {
   const old = ed.doc;
   const p = createPattern(clampSize(o.w), clampSize(o.h), o.name.trim() || "Untitled pattern");
   p.count = o.count;

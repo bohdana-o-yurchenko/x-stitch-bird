@@ -227,12 +227,17 @@ export function FileChoiceDialog({ prefer, onClose }: Close & { prefer: "xbird" 
 
 /** New ▸ From a PDF chart…: what this is — reading the pattern itself, not a reference to trace — before the PDF is picked. */
 export function PdfPatternIntroDialog({ onClose }: Close) {
-  const t = useTranslations("dialogs");
   const run = useCommand();
+  return <PdfPatternIntro onClose={onClose} onPick={() => run("file.pickPdfPattern")} />;
+}
+
+/** The same, on the patterns page: the PDF picked there. */
+export function PdfPatternIntro({ onClose, onPick }: Close & { onPick: () => void }) {
+  const t = useTranslations("dialogs");
   const b = (c: ReactNode) => <b>{c}</b>;
   const pick = () => {
     onClose();
-    void run("file.pickPdfPattern");
+    onPick();
     return false as const;
   };
   return (

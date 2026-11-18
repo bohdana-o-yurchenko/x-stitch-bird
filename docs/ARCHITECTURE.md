@@ -1,6 +1,7 @@
 # Stitchwork — Next.js Architecture Plan
 
-> Status: **plan**, 2026-11-14. Source of truth for behaviour: [`SPEC.md`](./SPEC.md) and the current `index.html`.
+> Status: **plan**, 2026-11-14; built since (v2.0.0). Source of truth for behaviour: [`SPEC.md`](./SPEC.md); what is
+> not built yet: [`BACKLOG.md`](./BACKLOG.md).
 > Goal: a codebase a person can find their way around in minutes, where each kind of change
 > touches a small, predictable set of files.
 >
@@ -58,7 +59,7 @@
    side: persistence/  ports (interfaces) + local adapters  — used by L2
          platform/     browser services: download, file pick, font probe, image decode
          workers/      Web Workers for heavy core functions
-         (future) server/  DB, auth — server-only, used by app/api routes
+         server/       DB, auth, storage — server-only, used by app/api routes
 ```
 
 **Import rules** (enforced by ESLint, see §12):
@@ -91,7 +92,7 @@ stitchwork/
 │  │  │  ├─ page.tsx                 server component → renders <EditorEntry/> (client, no SSR)
 │  │  │  └─ not-found.tsx
 │  │  ├─ globals.css                 UI design tokens (CSS variables)
-│  │  └─ (future) api/patterns/…     Route Handlers for DB persistence
+│  │  └─ api/…                       Route Handlers: patterns, pictures, threads, account (server level)
 │  │
 │  ├─ i18n/                          next-intl config: routing.ts, request.ts, navigation.ts
 │  │
@@ -737,7 +738,7 @@ counted toward the unit-test target.
 
 ---
 
-## 13. Ready for login and a database (not built yet)
+## 13. Ready for login and a database (the plan; built 2026-11-16 — see "Server level" at the end)
 
 **Today** — ports in `persistence/ports.ts`:
 ```ts

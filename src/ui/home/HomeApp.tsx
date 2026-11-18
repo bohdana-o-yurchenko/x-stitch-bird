@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { accountUsage, createLibrary, type AccountUsage, type AttachedPhoto, type Library } from "@/editor/library";
 import type { PatternDetails } from "@/core/pattern/stats";
+import type { CustomColor } from "@/core/pattern/types";
 import { splitDuration } from "@/core/time/workTime";
 import { requestStart } from "@/editor/startRequest";
 import type { PatternSummary } from "@/editor/types";
@@ -13,6 +14,8 @@ import { pickFile } from "@/platform/files";
 import { useSignedInOnly } from "../account/useSignedInOnly";
 import { PageLoading } from "../common/AppBrand";
 import { Dropdown, Modal, cx, ui, type MenuItem } from "../common/widgets";
+import { NewPatternForm } from "../dialogs/NewPatternDialog";
+import { PdfPatternIntro } from "../dialogs/simpleDialogs";
 import { HomeFooter, HomeHeader } from "./HomeHeader";
 import s from "./home.module.css";
 
@@ -127,7 +130,7 @@ export default function HomeApp() {
             <Image src="/icon.svg" alt="" width={72} height={72} unoptimized />
             <h1>{t("emptyTitle")}</h1>
             <p className={ui.hint}>{t("emptyHint")}</p>
-            <NewButtons />
+            <NewButtons lib={lib} />
           </section>
         ) : (
           <section>
@@ -150,7 +153,7 @@ export default function HomeApp() {
                   </select>
                 </>
               )}
-              <NewMenu />
+              <NewMenu lib={lib} />
             </div>
             {!items ? (
               <p className={ui.hint}>{t("loading")}</p>
@@ -214,13 +217,45 @@ function useAgo(time: number): string {
   return rtf.format(0, "minute");
 }
 
-/** Start something new: a blank pattern, from a photo, an .oxs or a PDF chart, or a work file — then on to the editor. */
-function useStarts() {
+/**
+ * Start something new: a blank pattern, from a photo, an .oxs or a PDF chart, or a work file — chosen here (a blank
+ * one's settings asked, a PDF chart said first what it is, SPEC §15.46), then on to the editor.
+ */
+function useStarts(lib: Library) {
   const router = useRouter();
+  const [asking, setAsking] = useState<null | "blank" | "pdf">(null);
+  const [inventory, setInventory] = useState<CustomColor[] | null>(null);
+  const close = () => setAsking(null);
+  const dialog =
+    asking === "blank" ? (
+      <NewPatternForm
+        inventory={inventory}
+        signedIn
+        onCreate={(options) => {
+          requestStart({ kind: "create", options });
+          router.push("/");
+        }}
+        onClose={close}
+      />
+    ) : asking === "pdf" ? (
+      <PdfPatternIntro
+        onClose={close}
+        onPick={async () => {
+          const f = await pickFile(".pdf,application/pdf");
+          if (!f) return;
+          requestStart({ kind: "pdf", file: f });
+          router.push("/");
+        }}
+      />
+    ) : null;
   return {
-    blank: () => router.push({ pathname: "/", query: { new: "1" } }),
-    // the editor says first what this is (SPEC §15.46), then the PDF is picked
-    pdf: () => router.push({ pathname: "/", query: { new: "pdf" } }),
+    dialog,
+    blank: () => {
+      // your own brands offered too, as in the editor
+      void lib.threads().then(setInventory);
+      setAsking("blank");
+    },
+    pdf: () => setAsking("pdf"),
     oxs: async () => {
       const f = await pickFile(".oxs");
       if (!f) return;
@@ -242,11 +277,12 @@ function useStarts() {
   };
 }
 
-function NewMenu() {
+function NewMenu({ lib }: { lib: Library }) {
   const t = useTranslations("home");
-  const go = useStarts();
+  const go = useStarts(lib);
   return (
     <span data-testid="home-new">
+      {go.dialog}
       <Dropdown
         className={cx(ui.btn, ui.primary)}
         label={t("new")}
@@ -263,11 +299,12 @@ function NewMenu() {
   );
 }
 
-function NewButtons() {
+function NewButtons({ lib }: { lib: Library }) {
   const t = useTranslations("home");
-  const go = useStarts();
+  const go = useStarts(lib);
   return (
     <div className={s.emptyButtons}>
+      {go.dialog}
       <button type="button" className={cx(ui.btn, ui.primary)} onClick={go.blank}>{t("newBlank")}</button>
       <button type="button" className={ui.btn} onClick={() => void go.picture()}>{t("newPicture")}</button>
       <button type="button" className={ui.btn} onClick={go.pdf}>{t("newPdf")}</button>

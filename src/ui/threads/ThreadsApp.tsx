@@ -12,13 +12,36 @@ import { PageLoading } from "../common/AppBrand";
 import { Modal, cx, ui } from "../common/widgets";
 import { HomeFooter, HomeHeader } from "../home/HomeHeader";
 import home from "../home/home.module.css";
-import { ThreadForm, type ThreadFields } from "./ThreadForm";
+import { SORTS, VIEWS, sortColours, type InventorySort, type InventoryView } from "./inventoryView";
+import { ThreadDialog } from "./ThreadDialog";
+import type { ThreadFields } from "./ThreadForm";
+import { ThreadList } from "./ThreadList";
 import s from "./threads.module.css";
 
 /** Built-in brands: your threads and beads can be added to them, but they can't be renamed or deleted. */
 const BUILT_IN = new Set([...BUILT_IN_THREAD_BRANDS, ...Object.keys(BEAD_CATALOGUES)]);
 
 type Editing = { kind: "thread" | "bead"; thread?: CustomColor; brand?: string } | null;
+
+/** The view and the sort are remembered in this browser, apart for threads and beads. */
+function useChoice<T extends string>(key: string, options: readonly T[], fallback: T) {
+  const [value, set] = useState<T>(fallback);
+  useEffect(() => {
+    // read once after the first render (the server has no localStorage)
+    try {
+      const v = localStorage.getItem(key) as T | null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (v && options.includes(v)) set(v);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return [value, (v: T) => {
+    set(v);
+    try {
+      localStorage.setItem(key, v);
+    } catch {}
+  }] as const;
+}
 
 const newId = () => `custom:${Math.random().toString(36).slice(2, 10)}`;
 
@@ -37,6 +60,8 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
   const [threads, setThreads] = useState<CustomColor[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [brand, setBrand] = useState<string | null>(null);
+  const [view, setView] = useChoice<InventoryView>(`stitchwork.${kind}sView`, VIEWS, "gallery");
+  const [sort, setSort] = useChoice<InventorySort>(`stitchwork.${kind}sSort`, SORTS, "code");
   const [editing, setEditing] = useState<Editing>(null);
   const [deleting, setDeleting] = useState<CustomColor | null>(null);
   const [brandAction, setBrandAction] = useState<{ kind: "rename" | "delete"; brand: string } | null>(null);
@@ -55,7 +80,7 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
     return [...counts].sort(([a], [b]) => a.localeCompare(b));
   }, [threads, kind]);
   const mine = (threads ?? []).filter((c) => c.kind === kind);
-  const shown = mine.filter((c) => !brand || c.brand === brand).sort((a, b) => a.brand.localeCompare(b.brand) || a.code.localeCompare(b.code, undefined, { numeric: true }));
+  const shown = sortColours(mine.filter((c) => !brand || c.brand === brand), sort);
 
   const save = async (f: ThreadFields) => {
     if (!editing) return;
@@ -116,45 +141,42 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
               <div className={home.listHead}>
                 <h2>{brand ?? t(kind === "thread" ? "all" : "allBeads")}</h2>
                 <span className={home.spacer} />
+                {shown.length > 0 && (
+                  <>
+                    <div className={cx(ui.seg, home.viewSwitch)} role="group" aria-label={t("view")}>
+                      {VIEWS.map((v) => (
+                        <button key={v} type="button" className={cx(view === v && ui.on)} aria-pressed={view === v} onClick={() => setView(v)} data-testid={`view-${v}`}>{t(`view_${v}`)}</button>
+                      ))}
+                    </div>
+                    <select className={home.sort} aria-label={t("sort")} value={sort} onChange={(e) => setSort(e.target.value as InventorySort)} data-testid="thread-sort">
+                      {SORTS.map((o) => <option key={o} value={o}>{t(`sort_${o}`)}</option>)}
+                    </select>
+                  </>
+                )}
                 <button type="button" className={cx(ui.btn, ui.primary)} onClick={() => setEditing({ kind, brand: brand ?? builtIn[0] })}>{t(kind === "thread" ? "addThread" : "addBead")}</button>
               </div>
               {failed && <p className={ui.warn}>{t("unreachable")}</p>}
               {!threads && !failed && <p className={ui.hint}>{t("loading")}</p>}
               {threads && !mine.length && <p className={ui.hint}>{t(kind === "thread" ? "empty" : "emptyBeads")}</p>}
-              <div className={s.threadGrid} data-testid="thread-list">
-                {shown.map((c) => (
-                  <button key={c.id} type="button" className={s.thread} onClick={() => setEditing({ kind: c.kind, thread: c })} aria-label={t("edit", { brand: c.brand, code: c.code })}>
-                    <span className={s.swatch} style={{ background: c.hex }} />
-                    <span className={s.threadText}>
-                      <b>{c.code}</b>
-                      <span>{c.name !== c.code ? c.name : ""}</span>
-                      <small>{c.brand}</small>
-                    </span>
-                  </button>
-                ))}
-              </div>
+              <ThreadList items={shown} view={view} onPick={(c) => setEditing({ kind: c.kind, thread: c })} />
             </section>
           </div>
       </main>
       <HomeFooter />
 
       {editing && (
-        <Modal title={editing.thread ? t("editTitle") : t(editing.kind === "bead" ? "newBead" : "newThread")} onClose={() => setEditing(null)} buttons={[]}>
-          <ThreadForm
-            kind={editing.kind}
-            brands={brandChoices(editing.kind)}
-            initial={editing.thread ? { brand: editing.thread.brand, code: editing.thread.code, name: editing.thread.name, hex: editing.thread.hex } : { brand: editing.brand ?? brandChoices(editing.kind)[0] ?? "", code: "", name: "", hex: "#7A9CC6" }}
-            saveLabel={editing.thread ? t("save") : t("add")}
-            onSave={(f) => void save(f)}
-            onCancel={() => setEditing(null)}
-          />
-          {editing.thread && (
-            <button type="button" className={cx(ui.btn, ui.sm, ui.dangerBtn)} style={{ marginTop: 10 }} onClick={() => {
-                setDeleting(editing.thread!);
-                setEditing(null);
-              }}>{t("delete")}</button>
-          )}
-        </Modal>
+        <ThreadDialog
+          kind={editing.kind}
+          brands={brandChoices(editing.kind)}
+          initial={editing.thread ? { brand: editing.thread.brand, code: editing.thread.code, name: editing.thread.name === editing.thread.code ? "" : editing.thread.name, hex: editing.thread.hex } : { brand: editing.brand ?? "", code: "", name: "", hex: "#7A9CC6" }}
+          editing={!!editing.thread}
+          onSave={(f) => save(f)}
+          onDelete={editing.thread ? () => {
+            setDeleting(editing.thread!);
+            setEditing(null);
+          } : undefined}
+          onClose={() => setEditing(null)}
+        />
       )}
       {deleting && (
         <Modal title={t("deleteTitle", { brand: deleting.brand, code: deleting.code })} onClose={() => setDeleting(null)} buttons={[{ label: t("cancel") }, { label: t("delete"), danger: true, onClick: () => remove(deleting) }]}>
