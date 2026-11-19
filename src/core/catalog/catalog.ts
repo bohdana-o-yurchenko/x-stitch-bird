@@ -1,5 +1,6 @@
 import { makeColor, type ColorEntry } from "../color/colorEntry";
 import anchorData from "./data/anchor.json";
+import dimensionsData from "./data/dimensions.json";
 import dmcData from "./data/dmc.json";
 import madeiraData from "./data/madeira.json";
 import millHillData from "./data/millhill.json";
@@ -20,9 +21,10 @@ const brandCatalogue = (brand: string, prefix: string, rows: string[][]): readon
 
 export const ANCHOR = brandCatalogue("Anchor", "anchor", anchorData as string[][]);
 export const MADEIRA = brandCatalogue("Madeira", "madeira", madeiraData as string[][]);
+export const DIMENSIONS = brandCatalogue("Dimensions", "dimensions", dimensionsData as string[][]);
 
 /** Built-in thread catalogues by brand, in the order brands are offered (SPEC §15.28). */
-export const THREAD_CATALOGUES: Readonly<Record<string, readonly ColorEntry[]>> = { DMC, Anchor: ANCHOR, Madeira: MADEIRA };
+export const THREAD_CATALOGUES: Readonly<Record<string, readonly ColorEntry[]>> = { DMC, Anchor: ANCHOR, Madeira: MADEIRA, Dimensions: DIMENSIONS };
 
 /**
  * Mill Hill, per series: beads per package, and the beads as [code, name, DMC equivalent, beads per package if not
@@ -52,7 +54,7 @@ export const PRECIOSA: readonly ColorEntry[] = (preciosaData as [string, string,
 /** Built-in bead catalogues by brand, in the order they're offered. */
 export const BEAD_CATALOGUES: Readonly<Record<string, readonly ColorEntry[]>> = { "Mill Hill": BEADS, Preciosa: PRECIOSA };
 
-const LIBRARY = new Map<string, ColorEntry>([...DMC, ...ANCHOR, ...MADEIRA, ...BEADS, ...PRECIOSA].map((e) => [e.id, e]));
+const LIBRARY = new Map<string, ColorEntry>([...DMC, ...ANCHOR, ...MADEIRA, ...DIMENSIONS, ...BEADS, ...PRECIOSA].map((e) => [e.id, e]));
 
 /** Built-in thread or bead by id (`dmc:310`, `anchor:403`, `madeira:2713`, `bead:00557`, `preciosa:13600`). */
 export const libraryColor = (id: string): ColorEntry | undefined => LIBRARY.get(id);

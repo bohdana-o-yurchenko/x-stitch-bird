@@ -48,7 +48,7 @@ describe("threads & beads of a pattern (SPEC §15.31)", () => {
     // a pattern that never chose: several brands, beads on with every built-in bead brand
     expect(materials(p)).toMatchObject({ threads: { brands: ["DMC"], single: false }, beads: { on: true, brands: ["Mill Hill", "Preciosa"], single: false } });
     // a new pattern starts with every brand there is (SPEC §15.39)
-    expect(NEW_MATERIALS).toMatchObject({ brands: ["DMC", "Anchor", "Madeira"], onlyBrand: false, beadBrands: ["Mill Hill", "Preciosa"], noBeads: false });
+    expect(NEW_MATERIALS).toMatchObject({ brands: ["DMC", "Anchor", "Madeira", "Dimensions"], onlyBrand: false, beadBrands: ["Mill Hill", "Preciosa"], noBeads: false });
     applyMaterials(p, { ...NEW_MATERIALS, brands: ["DMC"], onlyBrand: true });
     expect(materials(p).threads.single).toBe(true);
     p.customs[kreinik.id] = kreinik;
