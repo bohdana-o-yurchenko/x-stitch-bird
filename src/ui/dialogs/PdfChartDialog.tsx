@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { BEAD_CATALOGUES, THREAD_CATALOGUES, byNumber, libraryColor, matchesQuery } from "@/core/catalog/catalog";
 import type { ColorEntry } from "@/core/color/colorEntry";
@@ -11,7 +11,7 @@ import { allSettled, settledRead, type ChartChoice } from "@/editor/actions/pdfC
 import { renderPdfPage } from "@/platform/pdf";
 import { Modal, cx, ui } from "../common/widgets";
 import { useCommand } from "../hooks/editor";
-import { PdfViewer } from "./PdfViewer";
+import { PdfViewer, type PdfPlace } from "./PdfViewer";
 import s from "./pdfChart.module.css";
 
 /*
@@ -301,6 +301,20 @@ function KeyStep({ file, content, read, symbols, setSymbols, lines, setLines, fa
   const openLine = open?.startsWith("line:") ? read.lineStyles[Number(open.slice(5))] : null;
   const focus = openSymbol?.sample ?? openLine?.sample ?? null;
   const keyPage = read.symbols.find((x) => x.keyText && x.sample)?.sample ?? null;
+  // the PDF stays where it was left — the Chart tab and back too
+  const [place, setPlace] = useState<PdfPlace | null>(null);
+  // a row opened (or closed) stays where it was clicked, though one above closes
+  const list = useRef<HTMLDivElement>(null);
+  const clicked = useRef<{ el: HTMLElement; top: number } | null>(null);
+  const toggle = (key: string, el: HTMLElement) => {
+    clicked.current = { el, top: el.getBoundingClientRect().top };
+    setOpen(open === key ? null : key);
+  };
+  useLayoutEffect(() => {
+    const c = clicked.current;
+    clicked.current = null;
+    if (c && list.current) list.current.scrollTop += c.el.getBoundingClientRect().top - c.top;
+  }, [open]);
   return (
     <div className={s.keyStep}>
       <div className={s.left}>
@@ -309,18 +323,18 @@ function KeyStep({ file, content, read, symbols, setSymbols, lines, setLines, fa
           <button type="button" role="tab" aria-selected={view === "chart"} className={cx(s.tab, view === "chart" && s.on)} onClick={() => setView("chart")}>{t("viewChart")}</button>
         </div>
         {view === "pdf" ? (
-          <PdfViewer file={file} sizes={content.pages} start={keyPage?.page ?? 0} focus={focus} row={!!openSymbol?.keyText || !!openLine?.listed} />
+          <PdfViewer file={file} sizes={content.pages} start={keyPage?.page ?? 0} focus={focus} row={!!openSymbol?.keyText || !!openLine?.listed} kept={place} onLeave={setPlace} />
         ) : (
           <ChartPreview read={read} colours={colours} lineColours={lineColours} picked={picked} fadedEmpty={fadedEmpty} />
         )}
       </div>
-      <div className={s.keyList}>
+      <div className={s.keyList} ref={list}>
         <p className={ui.hint}>{known === read.symbols.length && read.lineStyles.every((x) => x.thread) ? t("keyAllRead") : t("keyHint", { read: known, total: read.symbols.length })}</p>
         {read.symbols.map((x, i) => {
           const c = choiceOf(x.id), thread = settled.symbols[i]!.thread, ok = !!thread || c === "skip";
           return (
             <div key={x.id} className={cx(s.row, !ok && s.unset, open === x.id && s.openRow)} data-testid="pdf-chart-row">
-              <button type="button" className={s.rowHead} onClick={() => setOpen(open === x.id ? null : x.id)}>
+              <button type="button" className={s.rowHead} onClick={(e) => toggle(x.id, e.currentTarget)}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- the symbol as the PDF draws it */}
                 <span className={s.sample}>{samples[x.id] ? <img src={samples[x.id]} alt="" /> : null}</span>
                 <span className={s.rowText}>
@@ -345,7 +359,7 @@ function KeyStep({ file, content, read, symbols, setSymbols, lines, setLines, fa
           const key = `line:${i}`, c = lines[i], thread = settled.lineStyles[i]!.thread, ok = !!thread || c === "skip";
           return (
             <div key={key} className={cx(s.row, !ok && s.unset, open === key && s.openRow)} data-testid="pdf-chart-line">
-              <button type="button" className={s.rowHead} onClick={() => setOpen(open === key ? null : key)}>
+              <button type="button" className={s.rowHead} onClick={(e) => toggle(key, e.currentTarget)}>
                 <span className={s.sample}><i className={s.lineSample} style={{ background: x.ink }} /></span>
                 <span className={s.rowText}>
                   <span className={s.chosen}>

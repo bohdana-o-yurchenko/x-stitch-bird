@@ -752,6 +752,39 @@ test("a chart with things to settle: the grids (not the size stated), faded cell
   await expect.poll(() => editorState(page, "(ed) => [!!ed.state.underlay, ed.state.references.length]")).toEqual([true, 1]);
 });
 
+test("the key: the PDF stays where it's put — another symbol picked, the Chart tab and back — and the window doesn't move as rows open (SPEC §15.48)", async ({ page }) => {
+  await readPdfChart(page, "other-app-chart-messy.pdf");
+  const dialog = page.getByRole("dialog"), next = dialog.getByRole("button", { name: "Next", exact: true });
+  await next.click();
+  await next.click();
+  const key = page.getByTestId("pdf-chart-key"), viewer = key.getByTestId("pdf-viewer");
+  const pageNo = key.getByTestId("pdf-viewer-page"), zoom = key.getByTestId("pdf-viewer-zoom");
+  const scroll = () => viewer.evaluate((v) => [v.children[1]!.scrollLeft, v.children[1]!.scrollTop]);
+  // it opens at the symbol being set up: its row of the key, closer
+  await expect(pageNo).toHaveValue("2");
+  await expect(zoom).toHaveText("200%");
+  await expect(key.getByTestId("pdf-viewer-mark")).toBeInViewport();
+  await expect(viewer.locator("img")).toBeVisible();
+  // moved a little by the user
+  await viewer.evaluate((v) => v.children[1]!.scrollBy(40, 60));
+  await expect.poll(scroll).not.toEqual([0, 0]);
+  const at = await scroll(), box = await dialog.boundingBox();
+  // another symbol: marked where it is, the PDF not moved, the window the same
+  await key.getByTestId("pdf-chart-row").filter({ hasNotText: "Not read" }).first().getByRole("button").first().click();
+  await expect(key.getByPlaceholder("Number or name")).toBeVisible();
+  await expect(key.getByTestId("pdf-viewer-mark")).toBeVisible();
+  expect([await pageNo.inputValue(), await zoom.textContent(), await scroll()]).toEqual(["2", "200%", at]);
+  expect(await dialog.boundingBox()).toEqual(box);
+  // put elsewhere, then the Chart tab and back: where it was left
+  await pageNo.selectOption("0");
+  await zoom.click();
+  await key.getByRole("tab", { name: "Chart" }).click();
+  await expect(key.getByTestId("pdf-chart-preview")).toBeVisible();
+  await key.getByRole("tab", { name: "PDF" }).click();
+  await expect(pageNo).toHaveValue("0");
+  await expect(zoom).toHaveText("100%");
+});
+
 test("New ▸ has a blank pattern, a photo, an .oxs and a PDF chart; My patterns' From a PDF chart… opens on the same explanation (SPEC §15.46)", async ({ page }) => {
   await fileAction(page, "New");
   await expect(page.getByRole("menuitem")).toContainText(["Blank pattern…", "From a photo…", "From an .oxs file…", "From a PDF chart…"]);

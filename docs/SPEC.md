@@ -2059,11 +2059,14 @@ nothing: straight to *Pattern read*. Back goes to the step before; Cancel adds n
    ticked), or another size than the PDF states. Every page with a grid, drawn, the grids outlined; per grid a tick,
    "Page 2 · columns 15–30, rows 1–20"; unticking puts the chart together again ("Together they make 16 × 20").
 2. **Faded cells** — when cells are shown only faded: "Leave them empty" (default) · "Stitch them like the rest".
-3. **The key** — when a symbol or a line style has no thread. A wider dialog: on the left **PDF | Chart** (PDF first) —
-   the PDF itself, to read the key from: ‹ Page 5 of 6 ›, − 200% + (the percentage: back to the page's width); opening
-   a row goes to that symbol's row of the key (or, not in the key, its cell in the chart; a line style: the key's list
-   of threads without symbols, else one of its lines), zoomed to 200%, scrolled to it and marked — a key row as a band
-   across the page from its symbol. *Chart*: the chart as it will be (each cell its thread's colour,
+3. **The key** — when a symbol or a line style has no thread. A wider dialog, as tall as the screen allows and always
+   that tall (rows opening and closing don't make it grow and move); on the left **PDF | Chart** (PDF first) — the PDF
+   itself, to read the key from: ‹ Page 5 of 6 ›, − 200% + (the percentage: back to the page's width). It opens at
+   the first symbol to set up — its row of the key (or, not in the key, its cell in the chart; a line style: the key's
+   list of threads without symbols, else one of its lines), zoomed to 200%, scrolled to it — and from then on **stays
+   where the user puts it** (2026-11-19): opening another row doesn't move it, the row is marked where it is when on
+   the page shown — a key row as a band across the page from its symbol; the Chart tab and back finds it where it was
+   left. A row clicked stays where it was in the list, though one above it closes. *Chart*: the chart as it will be (each cell its thread's colour,
    unsettled ones a dot on white, the symbol being set up standing out). On the right, per symbol its picture as the PDF draws it,
    its key row's text, its cells, its thread. Choose…: Thread / Bead, a brand's catalogue searched by number or name
    (Enter takes the first), "Closest to its colour in the PDF" when the chart fills cells; or leave the symbol out

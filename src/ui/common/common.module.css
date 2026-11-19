@@ -258,9 +258,14 @@
 .modal.wide {
   width: min(820px, 100%);
 }
-/* as wide as the screen allows: a document beside a list (a PDF chart's key) */
+/* as wide as the screen allows: a document beside a list (a PDF chart's key) — and as tall, always: rows opening
+   and closing don't make it grow, shrink and move */
 .modal.full {
   width: min(1240px, 100%);
+  height: 90vh;
+}
+.modal.full .modalBody {
+  flex: 1;
 }
 .modal h2 {
   font-family: var(--font-heading);
