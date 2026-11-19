@@ -45,7 +45,7 @@ export type DialogRequest =
   /** A photo above LARGE_PHOTO_PX: use it as it is (it may freeze the app for a moment), or not. */
   | { type: "largePhoto"; w: number; h: number; answer: (use: boolean) => void }
   | { type: "pdfPage"; source: string; pages: number; name: string; to: "underlay" | "window"; answer: (page: number | null) => void }
-  | { type: "fileChoice"; prefer: "xbird" | "oxs" }
+  | { type: "fileChoice" }
   | { type: "pdfPatternIntro" }
   | { type: "pdfUnreadable"; name: string }
   | { type: "pdfChart"; file: File; content: PdfContent; read: ChartRead }

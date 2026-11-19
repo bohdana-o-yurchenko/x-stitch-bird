@@ -74,8 +74,8 @@ export const COMMANDS: readonly Command[] = [
   { id: "file.export", run: (ed, f) => exportAs(ed, f as ExportFormat) },
   { id: "file.exportPatternKeeper", run: (ed, confirmed) => exportPatternKeeper(ed, confirmed === true) },
   { id: "file.exportChartPdf", run: (ed) => exportChartPdf(ed) },
-  // a work file or an .oxs: which is which, said before either is saved (SPEC §15.45)
-  { id: "file.chooseFile", run: (ed, prefer) => ed.openDialog({ type: "fileChoice", prefer: prefer === "oxs" ? "oxs" : "xbird" }) },
+  // the work file: what it is — and that the .oxs is another thing — said before it's saved (SPEC §15.45)
+  { id: "file.chooseFile", run: (ed) => ed.openDialog({ type: "fileChoice" }) },
   { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird,.oxs,.json,.xml"); if (f) await ed.commands.run("file.load", f); } },
   { id: "file.load", run: (ed, f) => loadFile(ed, f as File), destructive: "import", replacesPattern: true },
   // New ▸ From an .oxs file… / From a PDF chart… (SPEC §15.46): the PDF one says first what it is — and isn't

@@ -1992,11 +1992,11 @@ Only the page picked is drawn at full size (§15.41); previews are never stored.
 - **Pattern ▾**: New ›, Open…, — Download work file (.xbird)…, Open work file…, — **Export ›**: PDF chart to print,
   PDF for Pattern Keeper, — Chart images (PNG) ›, Preview images (PNG) ›, — Shopping list (CSV), Open Cross Stitch
   file (.oxs)…. The 🖨 button is gone; the guide's last step opens Pattern ▾ › Export.
-- **Download work file (.xbird)…** and **Open Cross Stitch file (.oxs)…** both open "Work file or .oxs?": what each
-  is for (.xbird: this app, everything in it; .oxs: other cross-stitch apps, key and chart only), that neither is
-  for printing — *PDF chart to print* and *PDF for Pattern Keeper* are in Pattern ▾ › Export. Buttons: Cancel ·
-  Save .oxs · Save .xbird, the one asked for the main one. "Keep this pattern? — Download it" saves the .xbird
-  straight away (it's already said there).
+- **Download work file (.xbird)…** opens "Work file or .oxs?": what each is for (.xbird: this app, everything in
+  it; .oxs: other cross-stitch apps, key and chart only), that neither is for printing — *PDF chart to print* and
+  *PDF for Pattern Keeper* are in Pattern ▾ › Export. Buttons: Cancel · Save .oxs · **Save .xbird**. **Open Cross
+  Stitch file (.oxs)**, found in Export, saves straight away — picked there, it's meant (2026-11-19). "Keep this
+  pattern? — Download it" saves the .xbird straight away (it's already said there).
 
 ### 15.46 New ▸ from an .oxs or a PDF chart; this app's PDFs carry the pattern (2026-11-18)
 - **New ›** (Pattern ▾, and My patterns' + New ▾): Blank pattern…, From a photo…, From an .oxs file… (the file
@@ -2127,6 +2127,36 @@ chart whose picture can't be loaded is drawn again once, not over and over.
   needs the internet to open**.
 - **Not yet**: opening without the internet (BACKLOG B21); opening .xbird / .oxs files from the computer (file
   handlers, undecided — B7).
+
+### 15.51 Does your app read it? — test files to check reader apps (2026-11-19)
+Apps read our files differently (one skips some bead sizes, another shows ¼ stitches as petites — `docs/IMPORT-PARITY.md`).
+`/[locale]/check`, for everyone, signed in or not:
+- **Three test files**, one per tab: the **.oxs** (72 samples), the **PDF for Pattern Keeper** (26: what it tracks,
+  and — marked *should be missing* — what it leaves out on purpose), the **PDF chart to print** (34: every stitch,
+  bead and line on its three views; the key, cover, pages). Each sample sits in a box with its **number drawn on the
+  chart** — backstitch digits in DMC 310 on the .oxs chart, whole crosses of DMC 3799 on the PDF charts (Pattern
+  Keeper carries nothing else); checks of the whole file (key, pages) come last, numbered on. The charts are built by
+  `core/readerCheck` (`oxsSuite`, `pkSuite`, `pdfSuite`); sample ids never change once released (marks are stored
+  by them), new samples go at the end. The .oxs is also `tests/fixtures/oxs-showcase/showcase.oxs`, described in
+  `showcase.txt` (`oxsShowcase.test.ts`).
+- **The page**: what it's for and three steps (download · open in your app · go by number); the tabs; the check's
+  bar — the app's name (suggestions per file), **Download**, progress (fine / with issues), **Results**, **Clear
+  the check**; the chart as this app shows it (zoom, fit; nothing to edit) beside the list, under headings. A number
+  picked on the chart opens its item in the list, and an item picked in the list rings its box on the chart, each
+  brought into view. The open item: how the file writes it, **All good** / **Issues** (with an optional note of
+  what's wrong); "all good" moves on to the next item not marked yet.
+- **Results** open by themselves once the last item is marked (and from the bar any time): how many are fine, then
+  what the issues have in common, by what each item tests (its tags — "your own beads", "bead sizes"): first what
+  fails wherever it was checked ("Doesn't work: bead sizes (3 of 3)"), then what fails in part ("Issues with ¼
+  stitches: 1 of 5") — as few lines as explain every issue — "Everything else works", and the items with issues and
+  their notes. **Copy results** copies it as text.
+- **Kept**: signed out, in this browser, one check per file — clearing it is how another app gets checked (the page
+  says so, with Sign in). Signed in, in the account (`reader_checks`, migration 006, `/api/checks`), as many as wanted
+  (up to 30): the .oxs tab lists them (app · progress) with **Check another app** and **Delete this check**. On
+  signing in, this browser's checks move into the account.
+- **Reached from**: ☰ ▸ Does your app read it? (editor — a new tab — and the other pages); the quick-start guide's
+  step 10 (☰ opened on the item, **Open the check**); a tip after the first .oxs export, from wherever it was saved
+  (`exportAs`), with the same button.
 
 ## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
 The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in

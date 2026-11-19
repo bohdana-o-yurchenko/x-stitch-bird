@@ -18,7 +18,7 @@ export async function openEditor(page: Page, locale = "en", o: { firstVisit?: bo
     localStorage.clear();
     // the quick-start guide, feature tips and "What's new" appear on their own; tests start past them unless they ask
     if (!first) {
-      for (const tour of ["guideSeen", "tipSeen.underlay", "tipSeen.reference", "tipSeen.autofill", "tipSeen.autofillReview", "tipSeen.keyEntry", "tipSeen.ownColours"]) localStorage.setItem(`stitchwork.${tour}`, "1");
+      for (const tour of ["guideSeen", "tipSeen.underlay", "tipSeen.reference", "tipSeen.autofill", "tipSeen.autofillReview", "tipSeen.keyEntry", "tipSeen.ownColours", "tipSeen.oxsCheck"]) localStorage.setItem(`stitchwork.${tour}`, "1");
       localStorage.setItem("stitchwork.seenVersion", version);
     }
     await new Promise((r) => { const q = indexedDB.deleteDatabase("stitchwork"); q.onsuccess = q.onerror = q.onblocked = r; });
@@ -56,11 +56,11 @@ export const fileAction = (page: Page, ...path: string[]) => menuAction(page, "p
 /** Pattern ▾ ▸ Export: `exportAction(page, "Shopping list (CSV)")`. */
 export const exportAction = (page: Page, ...path: string[]) => menuAction(page, "pattern", "Export", ...path);
 
-/** The work file or the .oxs: the menu item, then the button in the dialog saying which is which (SPEC §15.45). */
+/** The work file (the menu item, then the dialog's button — SPEC §15.45) or the .oxs (saved straight from Export). */
 export async function saveFile(page: Page, kind: "xbird" | "oxs") {
-  if (kind === "xbird") await fileAction(page, "Download work file (.xbird)");
-  else await exportAction(page, "Open Cross Stitch file (.oxs)");
-  await page.getByRole("dialog").getByRole("button", { name: `Save .${kind}` }).click();
+  if (kind === "oxs") return exportAction(page, "Open Cross Stitch file (.oxs)");
+  await fileAction(page, "Download work file (.xbird)");
+  await page.getByRole("dialog").getByRole("button", { name: "Save .xbird" }).click();
 }
 
 /** Opens ☰ (language, theme, help). */

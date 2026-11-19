@@ -711,7 +711,7 @@
     "pngColor": "Preview image — colour blocks (PNG)",
     "pngStitched": "Preview image — stitched (PNG)",
     "csv": "Shopping list (CSV)",
-    "oxs": "Open Cross Stitch file (.oxs)…",
+    "oxs": "Open Cross Stitch file (.oxs)",
     "oxsHint": "Opens in Хрестики and Ruta Stitch",
     "more": "More",
     "guide": "Quick start guide",
@@ -725,7 +725,9 @@
     "supportHint": "Write to us — a problem, or a wish",
     "privacy": "Privacy policy",
     "source": "Source code",
-    "sourceHint": "Free software · AGPL-3.0"
+    "sourceHint": "Free software · AGPL-3.0",
+    "check": "Does your app read it?",
+    "checkHint": "Test files to check what Хрестики, Pattern Keeper and others read"
   },
   "install": {
     "menu": "Install the app…",
@@ -829,7 +831,7 @@
       "title": "E-copy of a paper chart",
       "points": {
         "1": "The quickest way from a paper chart to a digital one.",
-        "2": "9 short steps — a couple of minutes.",
+        "2": "10 short steps — a couple of minutes.",
         "3": "Come back any time: <hl>☰ ▸ Quick start guide</hl>."
       }
     },
@@ -906,6 +908,14 @@
       "points": {
         "1": "In <hl>Pattern info</hl> (ⓘ at the bottom of the side panel) fill in the <hl>name</hl> and <hl>author</hl> — Хрестики show them.",
         "2": "Finished? <hl>Pattern ▾ → Export</hl>: a <hl>PDF chart to print</hl>, Pattern Keeper, images — and an <hl>Open Cross Stitch file (.oxs)</hl> for Хрестики and Ruta Stitch."
+      }
+    },
+    "check": {
+      "title": "10. Does your app read it?",
+      "points": {
+        "1": "Before you share an .oxs or a PDF: check what <hl>your app</hl> makes of it.",
+        "2": "Test files with every kind of stitch, numbered — mark each <hl>All good</hl> or <hl>Issues</hl>.",
+        "3": "Any time: <hl>☰ ▸ Does your app read it?</hl>"
       }
     },
     "done": {
@@ -994,6 +1004,14 @@
       "points": {
         "1": "Without an account, the threads and beads you make are kept <hl>inside this pattern</hl> — they go wherever it goes, also into its .xbird file.",
         "2": "With an account they’re kept for good: in every pattern, on every device, with pages of their own — <hl>My threads</hl> and <hl>My beads</hl>. Signing in is free."
+      }
+    },
+    "openCheck": "Open the check",
+    "oxsCheckTip": {
+      "title": "Will your app read this .oxs?",
+      "points": {
+        "1": "Apps read .oxs files differently: some skip bead sizes, some show ¼ stitches as petites.",
+        "2": "Check yours once with a test file: <hl>☰ ▸ Does your app read it?</hl>"
       }
     }
   },
@@ -1142,6 +1160,7 @@
     "patterns": "Patterns",
     "threads": "Threads",
     "beads": "Beads",
+    "check": "App check",
     "continue": "Continue stitching",
     "continueTo": "Continue “{name}”",
     "continueButton": "Continue →",
@@ -1391,5 +1410,138 @@
     "zoomOut": "Zoom out",
     "zoomFit": "Fit the width",
     "pageFailed": "This page can’t be shown."
+  },
+  "readerCheck": {
+    "title": "Does your app read it?",
+    "kicker": "Check your app",
+    "lead": "Test files with every kind of stitch, bead and line, each numbered on the chart. Open one in your app and see what comes through.",
+    "step1": "<b>Download</b> the test file below.",
+    "step2": "<b>Open it</b> in your app — Хрестики, Ruta Stitch, Pattern Keeper — or print it.",
+    "step3": "<b>Go by number</b>: pick it here, compare, mark <b>All good</b> or <b>Issues</b>.",
+    "files": "Files",
+    "kinds": {
+      "oxs": {
+        "name": "Open Cross Stitch (.oxs)",
+        "hint": "For Хрестики, Ruta Stitch and other apps",
+        "download": "Download the .oxs",
+        "appPlaceholder": "Which app? e.g. Хрестики",
+        "numbers": "Numbers: DMC 310 backstitch, not samples"
+      },
+      "pk": {
+        "name": "PDF for Pattern Keeper",
+        "hint": "Crosses Pattern Keeper can track",
+        "download": "Download the PDF",
+        "appPlaceholder": "Pattern Keeper",
+        "numbers": "Numbers: crosses of DMC 3799, not samples"
+      },
+      "pdf": {
+        "name": "PDF chart to print",
+        "hint": "Read by people: every stitch, the key, the pages",
+        "download": "Download the PDF",
+        "appPlaceholder": "Printed, or which viewer?",
+        "numbers": "Numbers: crosses of DMC 3799, not samples"
+      }
+    },
+    "toEditor": "← To the editor",
+    "app": "App",
+    "downloading": "Making the file…",
+    "progress": "{done} of {total} checked",
+    "results": "Results",
+    "clear": "Clear the check",
+    "delete": "Delete this check",
+    "checks": "Your checks",
+    "newCheck": "Check another app",
+    "newOne": "New check",
+    "unnamed": "Unnamed app",
+    "oneOnly": "Signed out, this browser keeps one check per file — clear it to check another app. <a>Sign in</a> to keep checks of several apps.",
+    "accountDown": "Your checks can't be reached in your account right now, so this page keeps them in this browser — they move into the account once it can be reached.",
+    "accountFull": "Your account already keeps 30 checks — delete one you don't need to save this one.",
+    "chart": "Chart",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fit": "Fit",
+    "wholeFile": "whole file",
+    "shouldBeMissing": "should be missing",
+    "inFile": "In the file:",
+    "ok": "All good",
+    "issue": "Issues",
+    "notYet": "Not checked yet",
+    "notePlaceholder": "What's wrong? (optional)",
+    "next": "Next",
+    "groups": {
+      "crosses": "Whole crosses",
+      "halves": "Half crosses",
+      "combos": "Floss + bead in a cell",
+      "beads": "Beads",
+      "points": "Beads between cells",
+      "partials": "¾, ¼ and petites",
+      "backstitch": "Backstitch",
+      "knots": "French knots",
+      "everyUse": "One colour, every use",
+      "edge": "On the chart's edge",
+      "blends": "Blends",
+      "symbols": "Symbols",
+      "leftOut": "Left out on purpose",
+      "file": "The whole file"
+    },
+    "tags": {
+      "dmc": "DMC threads",
+      "dmcNamed": "DMC colours named by a word (White, Ecru, B5200)",
+      "strands": "the number of strands",
+      "anchor": "Anchor threads",
+      "madeira": "Madeira threads",
+      "ownThread": "your own threads",
+      "blend": "blends",
+      "blendStrands": "blends with different strands",
+      "blend3": "blends of three",
+      "half": "half crosses",
+      "combo": "floss + bead",
+      "preciosa": "Preciosa beads",
+      "ownBead": "your own beads",
+      "beadSeed": "seed beads",
+      "beadSize": "bead sizes (Petite, Size 8, Size 6, Pebble)",
+      "bugle": "bugle beads",
+      "treasure": "charms (Treasures)",
+      "beadOnCross": "a bead on a cross",
+      "pointBead": "beads between cells",
+      "pointCombo": "floss + bead between cells",
+      "threeQuarter": "¾ stitches",
+      "quarter": "¼ stitches",
+      "petite": "petites",
+      "sharedCell": "several stitches in one cell",
+      "backstitch": "backstitch",
+      "halfGrid": "lines to cells' centres",
+      "lineColour": "line colours",
+      "lineStyles": "line styles",
+      "knot": "French knots",
+      "knotWraps": "knot wraps",
+      "manyUses": "one colour used in several ways",
+      "chartEdge": "the chart's edge",
+      "leftOut": "what should be missing",
+      "ownSymbol": "hand-drawn symbols",
+      "symbols": "symbols",
+      "symbolInks": "coloured symbols",
+      "key": "the key",
+      "pages": "pages",
+      "info": "the name and notes",
+      "views": "the chart views"
+    },
+    "resultsTitle": "Results",
+    "allGood": "Everything works in {app}.",
+    "someIssues": "{app}: {ok} of {total} fine.",
+    "notChecked": "{n} not checked yet.",
+    "lineAll": "Doesn't work: {tag} ({n} of {n})",
+    "linePart": "Issues with {tag}: {issues} of {of}",
+    "rest": "Everything else works.",
+    "withIssues": "With issues",
+    "copy": "Copy results",
+    "copied": "Copied ✓",
+    "close": "Close",
+    "cancel": "Cancel",
+    "clearTitle": "Clear the check?",
+    "clearText": "Every mark of {app} is removed; the app's name stays. Then check again — or check another app.",
+    "clearConfirm": "Clear",
+    "deleteTitle": "Delete this check?",
+    "deleteText": "The check of {app}, with its marks, is deleted from your account."
   }
 }

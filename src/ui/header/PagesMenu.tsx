@@ -12,7 +12,8 @@ import { LanguageSwitch } from "./LanguageSwitch";
 
 /**
  * ☰ on the pages around the editor (My patterns, threads, beads, account — SPEC §15.49): the editor's menu without
- * what is only for the editor (the guide, What's new, the toolbar) — language, theme, installing, help, privacy, source.
+ * what is only for the editor (the guide, What's new, the toolbar) — language, theme, installing, checking your app,
+ * help, privacy, source.
  */
 export function PagesMenu() {
   const t = useTranslations("fileMenu");
@@ -23,6 +24,7 @@ export function PagesMenu() {
     { id: "theme", node: <ThemeSwitcher /> },
     ...(install ? [install] : []),
     "-",
+    { id: "check", label: t("check"), hint: t("checkHint"), onClick: () => router.push("/check") },
     { id: "support", label: t("support"), hint: t("supportHint"), onClick: () => router.push("/support") },
     { id: "privacy", label: t("privacy"), onClick: () => router.push("/privacy") },
     { id: "source", label: t("source"), hint: t("sourceHint"), onClick: () => void window.open(SOURCE_URL, "_blank", "noopener") },

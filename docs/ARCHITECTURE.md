@@ -1152,6 +1152,13 @@ Decisions taken while implementing this plan. Each one lives in the single place
   circles, paths, clipping and see-through fills (ExtGState). Editor: `exportChartPdf` / command
   `file.exportChartPdf`; both PDFs load their fonts through `pdfFonts()`.
 
+- Does your app read it? (SPEC §15.51): test charts in `core/readerCheck` — `Painter` builds a chart by sample
+  (`layOut` puts them in numbered boxes; `backstitchNumber` / `crossNumber` draw the numbers), `summary.ts` explains
+  the issues by the samples' tags. Editor `readerChecks.ts`: the suites, their files (`downloadCheckFile`, PDFs via
+  `pdfFonts()`), and the store — `persistence/local/localChecks.ts` (localStorage, one per kind) signed out,
+  `persistence/cloud/accountChecks.ts` (`/api/checks`, `server/readerChecks.ts`, table `reader_checks`) signed in.
+  UI: `ui/readerCheck` (`CheckApp` state and saving, `CheckChart` canvas + box buttons, `CheckList`, `CheckResults`).
+
 ## Server level (2026-11-16)
 
 `src/server/` is server-only code, imported only by the API routes in `src/app/api/` (eslint level `server`: core +

@@ -1,0 +1,883 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chart>
+<format comments01="Designed to allow interchange of basic pattern data between any cross stitch style software" comments02="the 'properties' section establishes size, copyright, authorship and software used" comments03="The features of each software package varies, but using XML each can pick out the things it can deal with, while ignoring others" comments04="The basic items are :" comments05="'palette'..a set of colors used in the design: palettecount excludes cloth color, which is item 0" comments06="'fullstitches'.. simple crosses" comments07="'backstitches'.. lines/objects with a start and end point" comments08="(There is a wide variety of ways of treating part stitches, knots, beads and so on.)" comments09="Colors are expressed in hex RGB format." comments10="Decimal numbers use US/UK format where '.' is the indicator - eg 0.5 is 'half'" comments11="For readability, please use words not enumerations" comments12="The properties, fullstitches, and backstitches elements should be considered mandatory, even if empty" comments13="Exported by Stitchwork"/>
+<properties oxsversion="1.0" software="Stitchwork" software_version="1.3" chartheight="44" chartwidth="49" charttitle="Перевірка OXS — «усе» &amp; &lt;знаки&gt;" author="пташечка" copyright="© 2026 test" instructions="Every sample numbered; see showcase.txt" stitchesperinch="16" stitchesperinch_y="16" palettecount="50" stitchwork_materials="{&quot;brands&quot;:[&quot;DMC&quot;,&quot;Anchor&quot;,&quot;Madeira&quot;,&quot;Kreinik&quot;],&quot;onlyBrand&quot;:false,&quot;beadBrands&quot;:[&quot;Mill Hill&quot;,&quot;Preciosa&quot;,&quot;Toho&quot;],&quot;onlyBeadBrand&quot;:false,&quot;noBeads&quot;:false}"/>
+<palette>
+<palette_item index="0" number="cloth" name="cloth" color="EFE6D2" printcolor="EFE6D2" blendcolor="nil" comments="aida" strands="2" symbol="0" dashpattern="" bsstrands="1" bscolor="000000"/>
+<palette_item index="1" number="DMC 310" name="Black (backstitch)" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="1" symbol="1" dashpattern="" bsstrands="1" bscolor="000000" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;back&quot;,&quot;src&quot;:&quot;dmc:310&quot;,&quot;sym&quot;:&quot;line:solid&quot;,&quot;n&quot;:1}]}"/>
+<palette_item index="2" number="DMC 310" name="Black" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="2" symbol="2" dashpattern="" bsstrands="2" bscolor="000000" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:310&quot;,&quot;sym&quot;:&quot;sym:circle&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;full&quot;}]}"/>
+<palette_item index="3" number="DMC White" name="White" color="FCFBF8" printcolor="FCFBF8" blendcolor="nil" comments="" strands="2" symbol="3" dashpattern="" bsstrands="2" bscolor="FCFBF8" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:White&quot;,&quot;sym&quot;:&quot;sym:square&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;full&quot;}]}"/>
+<palette_item index="4" number="DMC Ecru" name="Ecru" color="F0EADA" printcolor="F0EADA" blendcolor="nil" comments="" strands="2" symbol="4" dashpattern="" bsstrands="2" bscolor="F0EADA" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:Ecru&quot;,&quot;sym&quot;:&quot;sym:triangle&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;full&quot;}]}"/>
+<palette_item index="5" number="DMC B5200" name="Snow White" color="FFFFFF" printcolor="FFFFFF" blendcolor="nil" comments="" strands="2" symbol="5" dashpattern="" bsstrands="2" bscolor="FFFFFF" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:B5200&quot;,&quot;sym&quot;:&quot;sym:diamond&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;full&quot;}]}"/>
+<palette_item index="6" number="DMC 3865" name="Winter White" color="FFFDF9" printcolor="FFFDF9" blendcolor="nil" comments="" strands="1" symbol="6" dashpattern="" bsstrands="1" bscolor="FFFDF9" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:3865&quot;,&quot;sym&quot;:&quot;sym:star&quot;,&quot;n&quot;:1,&quot;st&quot;:&quot;full&quot;}]}"/>
+<palette_item index="7" number="DMC 321" name="Red" color="C72B3B" printcolor="C72B3B" blendcolor="nil" comments="" strands="3" symbol="7" dashpattern="" bsstrands="3" bscolor="C72B3B" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:321&quot;,&quot;sym&quot;:&quot;sym:heart&quot;,&quot;n&quot;:3,&quot;st&quot;:&quot;full&quot;}]}"/>
+<palette_item index="8" number="DMC 798" name="Delft Blue Dark" color="466A8E" printcolor="466A8E" blendcolor="nil" comments="" strands="6" symbol="8" dashpattern="" bsstrands="6" bscolor="466A8E" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:798&quot;,&quot;sym&quot;:&quot;sym:hexagon&quot;,&quot;n&quot;:6,&quot;st&quot;:&quot;full&quot;}]}"/>
+<palette_item index="9" number="ANC 403" name="Black" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="2" symbol="9" dashpattern="" bsstrands="2" bscolor="000000" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;anchor:403&quot;,&quot;sym&quot;:&quot;sym:triangle-down&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;full&quot;}]}"/>
+<palette_item index="10" number="MAD 101" name="Lemon - VY LT" color="F9F7DB" printcolor="F9F7DB" blendcolor="nil" comments="" strands="2" symbol="10" dashpattern="" bsstrands="2" bscolor="F9F7DB" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;madeira:101&quot;,&quot;sym&quot;:&quot;sym:pentagon&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;full&quot;}]}"/>
+<palette_item index="11" number="Kreinik 032" name="Pearl" color="EEE8D5" printcolor="EEE8D5" blendcolor="nil" comments="" strands="1" symbol="11" dashpattern="" bsstrands="1" bscolor="EEE8D5" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;custom:kreinik&quot;,&quot;sym&quot;:&quot;sym:triangle-right&quot;,&quot;n&quot;:1,&quot;st&quot;:&quot;full&quot;}],&quot;customs&quot;:{&quot;custom:kreinik&quot;:{&quot;id&quot;:&quot;custom:kreinik&quot;,&quot;kind&quot;:&quot;thread&quot;,&quot;brand&quot;:&quot;Kreinik&quot;,&quot;code&quot;:&quot;032&quot;,&quot;name&quot;:&quot;Pearl&quot;,&quot;hex&quot;:&quot;#EEE8D5&quot;}}}"/>
+<palette_item index="12" number="DMC 310+DMC White" name="Blend 1xDMC 310 + 1xDMC White" color="B9B9B6" printcolor="B9B9B6" blendcolor="FCFBF8" comments="blend" strands="2" symbol="12" dashpattern="" bsstrands="2" bscolor="B9B9B6" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;blend:b11&quot;,&quot;sym&quot;:&quot;sym:triangle-left&quot;,&quot;n&quot;:null,&quot;st&quot;:&quot;full&quot;}],&quot;blends&quot;:{&quot;blend:b11&quot;:{&quot;parts&quot;:[{&quot;id&quot;:&quot;dmc:310&quot;,&quot;n&quot;:1},{&quot;id&quot;:&quot;dmc:White&quot;,&quot;n&quot;:1}]}}}">
+  <blend number="DMC 310" name="Black" color="000000" strands="1"/>
+  <blend number="DMC White" name="White" color="FCFBF8" strands="1"/>
+</palette_item>
+<palette_item index="13" number="DMC 310+DMC White" name="Blend 2xDMC 310 + 1xDMC White" color="9A9A98" printcolor="9A9A98" blendcolor="FCFBF8" comments="blend" strands="3" symbol="13" dashpattern="" bsstrands="3" bscolor="9A9A98" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;blend:b21&quot;,&quot;sym&quot;:&quot;sym:circle-o&quot;,&quot;n&quot;:null,&quot;st&quot;:&quot;full&quot;}],&quot;blends&quot;:{&quot;blend:b21&quot;:{&quot;parts&quot;:[{&quot;id&quot;:&quot;dmc:310&quot;,&quot;n&quot;:2},{&quot;id&quot;:&quot;dmc:White&quot;,&quot;n&quot;:1}]}}}">
+  <blend number="DMC 310" name="Black" color="000000" strands="2"/>
+  <blend number="DMC White" name="White" color="FCFBF8" strands="1"/>
+</palette_item>
+<palette_item index="14" number="DMC 321+DMC 3865+DMC 798" name="Blend 1xDMC 321 + 1xDMC 3865 + 1xDMC 798" color="C3A6AD" printcolor="C3A6AD" blendcolor="FFFDF9" comments="blend" strands="3" symbol="14" dashpattern="" bsstrands="3" bscolor="C3A6AD" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;blend:b3&quot;,&quot;sym&quot;:&quot;sym:square-o&quot;,&quot;n&quot;:null,&quot;st&quot;:&quot;full&quot;}],&quot;blends&quot;:{&quot;blend:b3&quot;:{&quot;parts&quot;:[{&quot;id&quot;:&quot;dmc:321&quot;,&quot;n&quot;:1},{&quot;id&quot;:&quot;dmc:3865&quot;,&quot;n&quot;:1},{&quot;id&quot;:&quot;dmc:798&quot;,&quot;n&quot;:1}]}}}">
+  <blend number="DMC 321" name="Red" color="C72B3B" strands="1"/>
+  <blend number="DMC 3865" name="Winter White" color="FFFDF9" strands="1"/>
+  <blend number="DMC 798" name="Delft Blue Dark" color="466A8E" strands="1"/>
+</palette_item>
+<palette_item index="15" number="DMC 321+ANC 403" name="Blend 1xDMC 321 + 1xANC 403" color="921D29" printcolor="921D29" blendcolor="000000" comments="blend" strands="2" symbol="15" dashpattern="" bsstrands="2" bscolor="921D29" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;blend:bAnc&quot;,&quot;sym&quot;:&quot;sym:triangle-o&quot;,&quot;n&quot;:null,&quot;st&quot;:&quot;full&quot;}],&quot;blends&quot;:{&quot;blend:bAnc&quot;:{&quot;parts&quot;:[{&quot;id&quot;:&quot;dmc:321&quot;,&quot;n&quot;:1},{&quot;id&quot;:&quot;anchor:403&quot;,&quot;n&quot;:1}]}}}">
+  <blend number="DMC 321" name="Red" color="C72B3B" strands="1"/>
+  <blend number="ANC 403" name="Black" color="000000" strands="1"/>
+</palette_item>
+<palette_item index="16" number="DMC 3865+Kreinik 032" name="Blend 1xDMC 3865 + 1xKreinik 032" color="F7F3E8" printcolor="F7F3E8" blendcolor="EEE8D5" comments="blend" strands="2" symbol="16" dashpattern="" bsstrands="2" bscolor="F7F3E8" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;blend:bOwn&quot;,&quot;sym&quot;:&quot;sym:diamond-o&quot;,&quot;n&quot;:null,&quot;st&quot;:&quot;full&quot;}],&quot;customs&quot;:{&quot;custom:kreinik&quot;:{&quot;id&quot;:&quot;custom:kreinik&quot;,&quot;kind&quot;:&quot;thread&quot;,&quot;brand&quot;:&quot;Kreinik&quot;,&quot;code&quot;:&quot;032&quot;,&quot;name&quot;:&quot;Pearl&quot;,&quot;hex&quot;:&quot;#EEE8D5&quot;}},&quot;blends&quot;:{&quot;blend:bOwn&quot;:{&quot;parts&quot;:[{&quot;id&quot;:&quot;dmc:3865&quot;,&quot;n&quot;:1},{&quot;id&quot;:&quot;custom:kreinik&quot;,&quot;n&quot;:1}]}}}">
+  <blend number="DMC 3865" name="Winter White" color="FFFDF9" strands="1"/>
+  <blend number="Kreinik 032" name="Pearl" color="EEE8D5" strands="1"/>
+</palette_item>
+<palette_item index="17" number="DMC 310" name="Black (half cross)" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="2" symbol="17" dashpattern="" bsstrands="2" bscolor="000000" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:310&quot;,&quot;sym&quot;:&quot;sym:star-o&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;half&quot;}]}"/>
+<palette_item index="18" number="DMC 310" name="Black (half cross)" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="2" symbol="18" dashpattern="" bsstrands="2" bscolor="000000" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:310&quot;,&quot;sym&quot;:&quot;sym:heart-o&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;halfb&quot;}]}"/>
+<palette_item index="19" number="DMC 310+DMC White" name="Blend 1xDMC 310 + 1xDMC White (half cross)" color="B9B9B6" printcolor="B9B9B6" blendcolor="FCFBF8" comments="blend" strands="2" symbol="19" dashpattern="" bsstrands="2" bscolor="B9B9B6" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;blend:b11&quot;,&quot;sym&quot;:&quot;sym:hexagon-o&quot;,&quot;n&quot;:null,&quot;st&quot;:&quot;half&quot;}],&quot;blends&quot;:{&quot;blend:b11&quot;:{&quot;parts&quot;:[{&quot;id&quot;:&quot;dmc:310&quot;,&quot;n&quot;:1},{&quot;id&quot;:&quot;dmc:White&quot;,&quot;n&quot;:1}]}}}">
+  <blend number="DMC 310" name="Black" color="000000" strands="1"/>
+  <blend number="DMC White" name="White" color="FCFBF8" strands="1"/>
+</palette_item>
+<palette_item index="20" number="ANC 403" name="Black (half cross)" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="2" symbol="20" dashpattern="" bsstrands="2" bscolor="000000" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;anchor:403&quot;,&quot;sym&quot;:&quot;sym:triangle-down-o&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;halfb&quot;}]}"/>
+<palette_item index="21" number="MH 00557+DMC 321" name="MH 00557 + DMC 321" color="C72B3B" printcolor="C72B3B" blendcolor="E5CE97" comments="blend" strands="2" symbol="21" dashpattern="" bsstrands="2" bscolor="C72B3B" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;combo&quot;,&quot;src&quot;:&quot;combo:mh&quot;,&quot;sym&quot;:&quot;sym:pentagon-o&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;full&quot;}],&quot;combos&quot;:{&quot;combo:mh&quot;:{&quot;thread&quot;:&quot;dmc:321&quot;,&quot;bead&quot;:&quot;bead:00557&quot;}}}">
+  <blend number="MH 00557" name="Old Gold" color="E5CE97" strands="1"/>
+  <blend number="DMC 321" name="Red" color="C72B3B" strands="2"/>
+</palette_item>
+<palette_item index="22" number="MH 00557+DMC 321" name="MH 00557 + DMC 321" color="C72B3B" printcolor="C72B3B" blendcolor="E5CE97" comments="blend" strands="2" symbol="22" dashpattern="" bsstrands="2" bscolor="C72B3B" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;combo&quot;,&quot;src&quot;:&quot;combo:mh&quot;,&quot;sym&quot;:&quot;sym:triangle-right-o&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;half&quot;}],&quot;combos&quot;:{&quot;combo:mh&quot;:{&quot;thread&quot;:&quot;dmc:321&quot;,&quot;bead&quot;:&quot;bead:00557&quot;}}}">
+  <blend number="MH 00557" name="Old Gold" color="E5CE97" strands="1"/>
+  <blend number="DMC 321" name="Red" color="C72B3B" strands="2"/>
+</palette_item>
+<palette_item index="23" number="MH 00557+DMC 321" name="MH 00557 + DMC 321" color="C72B3B" printcolor="C72B3B" blendcolor="E5CE97" comments="blend" strands="2" symbol="23" dashpattern="" bsstrands="2" bscolor="C72B3B" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;combo&quot;,&quot;src&quot;:&quot;combo:mh&quot;,&quot;sym&quot;:&quot;sym:triangle-left-o&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;halfb&quot;}],&quot;combos&quot;:{&quot;combo:mh&quot;:{&quot;thread&quot;:&quot;dmc:321&quot;,&quot;bead&quot;:&quot;bead:00557&quot;}}}">
+  <blend number="MH 00557" name="Old Gold" color="E5CE97" strands="1"/>
+  <blend number="DMC 321" name="Red" color="C72B3B" strands="2"/>
+</palette_item>
+<palette_item index="24" number="PREC 00050+ANC 403" name="PREC 00050 + ANC 403" color="000000" printcolor="000000" blendcolor="C5D0CD" comments="blend" strands="2" symbol="24" dashpattern="" bsstrands="2" bscolor="000000" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;combo&quot;,&quot;src&quot;:&quot;combo:prec&quot;,&quot;sym&quot;:&quot;sym:circle-dot&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;full&quot;}],&quot;combos&quot;:{&quot;combo:prec&quot;:{&quot;thread&quot;:&quot;anchor:403&quot;,&quot;bead&quot;:&quot;preciosa:00050&quot;}}}">
+  <blend number="PREC 00050" name="Natural Transparent" color="C5D0CD" strands="1"/>
+  <blend number="ANC 403" name="Black" color="000000" strands="2"/>
+</palette_item>
+<palette_item index="25" number="Toho 11-21+Kreinik 032" name="Toho 11-21 + Kreinik 032" color="EEE8D5" printcolor="EEE8D5" blendcolor="C0C0C0" comments="blend" strands="2" symbol="25" dashpattern="" bsstrands="2" bscolor="EEE8D5" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;combo&quot;,&quot;src&quot;:&quot;combo:own&quot;,&quot;sym&quot;:&quot;sym:square-dot&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;full&quot;}],&quot;customs&quot;:{&quot;custom:kreinik&quot;:{&quot;id&quot;:&quot;custom:kreinik&quot;,&quot;kind&quot;:&quot;thread&quot;,&quot;brand&quot;:&quot;Kreinik&quot;,&quot;code&quot;:&quot;032&quot;,&quot;name&quot;:&quot;Pearl&quot;,&quot;hex&quot;:&quot;#EEE8D5&quot;},&quot;custom:toho&quot;:{&quot;id&quot;:&quot;custom:toho&quot;,&quot;kind&quot;:&quot;bead&quot;,&quot;brand&quot;:&quot;Toho&quot;,&quot;code&quot;:&quot;11-21&quot;,&quot;name&quot;:&quot;Silver lined&quot;,&quot;hex&quot;:&quot;#C0C0C0&quot;}},&quot;combos&quot;:{&quot;combo:own&quot;:{&quot;thread&quot;:&quot;custom:kreinik&quot;,&quot;bead&quot;:&quot;custom:toho&quot;}}}">
+  <blend number="Toho 11-21" name="Silver lined" color="C0C0C0" strands="1"/>
+  <blend number="Kreinik 032" name="Pearl" color="EEE8D5" strands="2"/>
+</palette_item>
+<palette_item index="26" number="MH 00557" name="Old Gold" color="E5CE97" printcolor="E5CE97" blendcolor="nil" comments="bead Glass Seed" strands="1" symbol="26" dashpattern="" bsstrands="1" bscolor="E5CE97" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;bead:00557&quot;,&quot;sym&quot;:&quot;sym:triangle-dot&quot;}]}"/>
+<palette_item index="27" number="MH 40020" name="Royal Blue" color="11416E" printcolor="11416E" blendcolor="nil" comments="bead Petite Glass" strands="1" symbol="27" dashpattern="" bsstrands="1" bscolor="11416E" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;bead:40020&quot;,&quot;sym&quot;:&quot;sym:diamond-dot&quot;}]}"/>
+<palette_item index="28" number="MH 18002" name="Midnight" color="213063" printcolor="213063" blendcolor="nil" comments="bead Size 8" strands="1" symbol="28" dashpattern="" bsstrands="1" bscolor="213063" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;bead:18002&quot;,&quot;sym&quot;:&quot;sym:star-dot&quot;}]}"/>
+<palette_item index="29" number="MH 16002" name="Midnight" color="213063" printcolor="213063" blendcolor="nil" comments="bead Size 6" strands="1" symbol="29" dashpattern="" bsstrands="1" bscolor="213063" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;bead:16002&quot;,&quot;sym&quot;:&quot;sym:heart-dot&quot;}]}"/>
+<palette_item index="30" number="MH 05002" name="Yellow Creme" color="FCFCEE" printcolor="FCFCEE" blendcolor="nil" comments="bead Pebble" strands="1" symbol="30" dashpattern="" bsstrands="1" bscolor="FCFCEE" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;bead:05002&quot;,&quot;sym&quot;:&quot;sym:hexagon-dot&quot;}]}"/>
+<palette_item index="31" number="MH 70020" name="Royal Blue" color="11416E" printcolor="11416E" blendcolor="nil" comments="bead Small Bugle" strands="1" symbol="31" dashpattern="" bsstrands="1" bscolor="11416E" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;bead:70020&quot;,&quot;sym&quot;:&quot;sym:triangle-down-dot&quot;}]}"/>
+<palette_item index="32" number="MH 12005" name="5 Petal Flower Matte Jonquil, 10mm" color="51554D" printcolor="51554D" blendcolor="nil" comments="bead Glass Treasures" strands="1" symbol="32" dashpattern="" bsstrands="1" bscolor="51554D" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;bead:12005&quot;,&quot;sym&quot;:&quot;sym:pentagon-dot&quot;}]}"/>
+<palette_item index="33" number="PREC 00050" name="Natural Transparent" color="C5D0CD" printcolor="C5D0CD" blendcolor="nil" comments="bead Natural Transparent" strands="1" symbol="33" dashpattern="" bsstrands="1" bscolor="C5D0CD" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;preciosa:00050&quot;,&quot;sym&quot;:&quot;sym:triangle-right-dot&quot;}]}"/>
+<palette_item index="34" number="PREC 78102" name="Transparent - Silver Lined" color="ABB3A7" printcolor="ABB3A7" blendcolor="nil" comments="bead Transparent - Silver Lined" strands="1" symbol="34" dashpattern="" bsstrands="1" bscolor="ABB3A7" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;preciosa:78102/33129001&quot;,&quot;sym&quot;:&quot;sym:triangle-left-dot&quot;}]}"/>
+<palette_item index="35" number="Toho 11-21" name="Silver lined" color="C0C0C0" printcolor="C0C0C0" blendcolor="nil" comments="bead" strands="1" symbol="35" dashpattern="" bsstrands="1" bscolor="C0C0C0" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;custom:toho&quot;,&quot;sym&quot;:&quot;sym:circle-plus&quot;}],&quot;customs&quot;:{&quot;custom:toho&quot;:{&quot;id&quot;:&quot;custom:toho&quot;,&quot;kind&quot;:&quot;bead&quot;,&quot;brand&quot;:&quot;Toho&quot;,&quot;code&quot;:&quot;11-21&quot;,&quot;name&quot;:&quot;Silver lined&quot;,&quot;hex&quot;:&quot;#C0C0C0&quot;}}}"/>
+<palette_item index="36" number="MH 00020" name="Royal Blue" color="11416E" printcolor="11416E" blendcolor="nil" comments="bead Glass Seed" strands="1" symbol="36" dashpattern="" bsstrands="1" bscolor="11416E" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;bead:00020&quot;,&quot;sym&quot;:&quot;sym:circle-x&quot;,&quot;st&quot;:&quot;point&quot;}]}"/>
+<palette_item index="37" number="MH 00557+DMC 321" name="MH 00557 + DMC 321 (bead between cells)" color="C72B3B" printcolor="C72B3B" blendcolor="E5CE97" comments="blend" strands="2" symbol="37" dashpattern="" bsstrands="2" bscolor="C72B3B" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;combo&quot;,&quot;src&quot;:&quot;combo:mh&quot;,&quot;sym&quot;:&quot;sym:square-plus&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;point&quot;}],&quot;combos&quot;:{&quot;combo:mh&quot;:{&quot;thread&quot;:&quot;dmc:321&quot;,&quot;bead&quot;:&quot;bead:00557&quot;}}}">
+  <blend number="MH 00557" name="Old Gold" color="E5CE97" strands="1"/>
+  <blend number="DMC 321" name="Red" color="C72B3B" strands="2"/>
+</palette_item>
+<palette_item index="38" number="DMC 321" name="Red (backstitch)" color="C72B3B" printcolor="C72B3B" blendcolor="nil" comments="" strands="1" symbol="38" dashpattern="" bsstrands="1" bscolor="C72B3B" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;back&quot;,&quot;src&quot;:&quot;dmc:321&quot;,&quot;sym&quot;:&quot;line:dashed&quot;,&quot;n&quot;:1}]}"/>
+<palette_item index="39" number="DMC 310+DMC White" name="Blend 1xDMC 310 + 1xDMC White (backstitch)" color="B9B9B6" printcolor="B9B9B6" blendcolor="FCFBF8" comments="blend" strands="2" symbol="39" dashpattern="" bsstrands="2" bscolor="B9B9B6" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;back&quot;,&quot;src&quot;:&quot;blend:b11&quot;,&quot;sym&quot;:&quot;line:longDash&quot;,&quot;n&quot;:null}],&quot;blends&quot;:{&quot;blend:b11&quot;:{&quot;parts&quot;:[{&quot;id&quot;:&quot;dmc:310&quot;,&quot;n&quot;:1},{&quot;id&quot;:&quot;dmc:White&quot;,&quot;n&quot;:1}]}}}">
+  <blend number="DMC 310" name="Black" color="000000" strands="1"/>
+  <blend number="DMC White" name="White" color="FCFBF8" strands="1"/>
+</palette_item>
+<palette_item index="40" number="ANC 403" name="Black (backstitch)" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="2" symbol="40" dashpattern="" bsstrands="2" bscolor="000000" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;back&quot;,&quot;src&quot;:&quot;anchor:403&quot;,&quot;sym&quot;:&quot;line:dotted&quot;,&quot;n&quot;:2}]}"/>
+<palette_item index="41" number="Kreinik 032" name="Pearl (backstitch)" color="EEE8D5" printcolor="EEE8D5" blendcolor="nil" comments="" strands="1" symbol="41" dashpattern="" bsstrands="1" bscolor="EEE8D5" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;back&quot;,&quot;src&quot;:&quot;custom:kreinik&quot;,&quot;sym&quot;:&quot;line:dashDot&quot;,&quot;n&quot;:1}],&quot;customs&quot;:{&quot;custom:kreinik&quot;:{&quot;id&quot;:&quot;custom:kreinik&quot;,&quot;kind&quot;:&quot;thread&quot;,&quot;brand&quot;:&quot;Kreinik&quot;,&quot;code&quot;:&quot;032&quot;,&quot;name&quot;:&quot;Pearl&quot;,&quot;hex&quot;:&quot;#EEE8D5&quot;}}}"/>
+<palette_item index="42" number="DMC 3865" name="Winter White (backstitch)" color="FFFDF9" printcolor="FFFDF9" blendcolor="nil" comments="" strands="1" symbol="42" dashpattern="" bsstrands="1" bscolor="FFFDF9" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;back&quot;,&quot;src&quot;:&quot;dmc:3865&quot;,&quot;sym&quot;:&quot;line:dashDotDot&quot;,&quot;n&quot;:1,&quot;ink&quot;:&quot;#E6194B&quot;}]}"/>
+<palette_item index="43" number="DMC 310" name="Black (French knot)" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="2" symbol="43" dashpattern="" bsstrands="2" bscolor="000000" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;knot&quot;,&quot;src&quot;:&quot;dmc:310&quot;,&quot;sym&quot;:&quot;sym:square-x&quot;,&quot;n&quot;:2}]}"/>
+<palette_item index="44" number="DMC 310+DMC White" name="Blend 1xDMC 310 + 1xDMC White (French knot)" color="B9B9B6" printcolor="B9B9B6" blendcolor="FCFBF8" comments="blend" strands="2" symbol="44" dashpattern="" bsstrands="2" bscolor="B9B9B6" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;knot&quot;,&quot;src&quot;:&quot;blend:b11&quot;,&quot;sym&quot;:&quot;sym:ring&quot;,&quot;n&quot;:null}],&quot;blends&quot;:{&quot;blend:b11&quot;:{&quot;parts&quot;:[{&quot;id&quot;:&quot;dmc:310&quot;,&quot;n&quot;:1},{&quot;id&quot;:&quot;dmc:White&quot;,&quot;n&quot;:1}]}}}">
+  <blend number="DMC 310" name="Black" color="000000" strands="1"/>
+  <blend number="DMC White" name="White" color="FCFBF8" strands="1"/>
+</palette_item>
+<palette_item index="45" number="DMC 321" name="Red (French knot)" color="C72B3B" printcolor="C72B3B" blendcolor="nil" comments="" strands="2" symbol="45" dashpattern="" bsstrands="2" bscolor="C72B3B" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;knot&quot;,&quot;src&quot;:&quot;dmc:321&quot;,&quot;sym&quot;:&quot;sym:asterisk&quot;,&quot;n&quot;:2,&quot;wraps&quot;:3}]}"/>
+<palette_item index="46" number="ANC 403" name="Black (French knot)" color="000000" printcolor="000000" blendcolor="nil" comments="" strands="1" symbol="46" dashpattern="" bsstrands="1" bscolor="000000" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;knot&quot;,&quot;src&quot;:&quot;anchor:403&quot;,&quot;sym&quot;:&quot;sym:arrow-up&quot;,&quot;n&quot;:1}]}"/>
+<palette_item index="47" number="DMC 798" name="Delft Blue Dark" color="466A8E" printcolor="466A8E" blendcolor="nil" comments="" strands="1" symbol="47" dashpattern="" bsstrands="1" bscolor="466A8E" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:798&quot;,&quot;sym&quot;:&quot;sym:arrow-down&quot;,&quot;n&quot;:1,&quot;st&quot;:&quot;full&quot;}]}"/>
+<palette_item index="48" number="DMC 798" name="Delft Blue Dark (half cross)" color="466A8E" printcolor="466A8E" blendcolor="nil" comments="" strands="1" symbol="48" dashpattern="" bsstrands="1" bscolor="466A8E" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;thread&quot;,&quot;src&quot;:&quot;dmc:798&quot;,&quot;sym&quot;:&quot;sym:arrow-left&quot;,&quot;n&quot;:1,&quot;st&quot;:&quot;half&quot;}]}"/>
+<palette_item index="49" number="DMC 798" name="Delft Blue Dark (backstitch)" color="466A8E" printcolor="466A8E" blendcolor="nil" comments="" strands="1" symbol="49" dashpattern="" bsstrands="1" bscolor="466A8E" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;back&quot;,&quot;src&quot;:&quot;dmc:798&quot;,&quot;sym&quot;:&quot;line:longShort&quot;,&quot;n&quot;:1}]}"/>
+<palette_item index="50" number="DMC 798" name="Delft Blue Dark (French knot)" color="466A8E" printcolor="466A8E" blendcolor="nil" comments="" strands="1" symbol="50" dashpattern="" bsstrands="1" bscolor="466A8E" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;knot&quot;,&quot;src&quot;:&quot;dmc:798&quot;,&quot;sym&quot;:&quot;sym:arrow-right&quot;,&quot;n&quot;:1}]}"/>
+</palette>
+<fullstitches>
+<stitch x="4" y="0" palindex="2"/>
+<stitch x="5" y="0" palindex="2"/>
+<stitch x="14" y="0" palindex="3"/>
+<stitch x="15" y="0" palindex="3"/>
+<stitch x="24" y="0" palindex="4"/>
+<stitch x="25" y="0" palindex="4"/>
+<stitch x="34" y="0" palindex="5"/>
+<stitch x="35" y="0" palindex="5"/>
+<stitch x="44" y="0" palindex="6"/>
+<stitch x="45" y="0" palindex="6"/>
+<stitch x="4" y="3" palindex="7"/>
+<stitch x="5" y="3" palindex="7"/>
+<stitch x="14" y="3" palindex="8"/>
+<stitch x="15" y="3" palindex="8"/>
+<stitch x="24" y="3" palindex="9"/>
+<stitch x="25" y="3" palindex="9"/>
+<stitch x="34" y="3" palindex="10"/>
+<stitch x="35" y="3" palindex="10"/>
+<stitch x="44" y="3" palindex="11"/>
+<stitch x="45" y="3" palindex="11"/>
+<stitch x="4" y="6" palindex="12"/>
+<stitch x="5" y="6" palindex="12"/>
+<stitch x="14" y="6" palindex="13"/>
+<stitch x="15" y="6" palindex="13"/>
+<stitch x="24" y="6" palindex="14"/>
+<stitch x="25" y="6" palindex="14"/>
+<stitch x="34" y="6" palindex="15"/>
+<stitch x="35" y="6" palindex="15"/>
+<stitch x="44" y="6" palindex="16"/>
+<stitch x="45" y="6" palindex="16"/>
+<stitch x="44" y="9" palindex="21"/>
+<stitch x="45" y="9" palindex="21"/>
+<stitch x="24" y="12" palindex="24"/>
+<stitch x="25" y="12" palindex="24"/>
+<stitch x="34" y="12" palindex="25"/>
+<stitch x="35" y="12" palindex="25"/>
+<stitch x="44" y="18" palindex="6"/>
+<stitch x="24" y="36" palindex="6"/>
+<stitch x="25" y="36" palindex="6"/>
+<stitch x="26" y="36" palindex="6"/>
+<stitch x="44" y="39" palindex="6"/>
+<stitch x="45" y="39" palindex="6"/>
+<stitch x="4" y="42" palindex="47"/>
+</fullstitches>
+<partstitches>
+<partstitch x="44" y="21" palindex1="2" palindex2="0" direction="2"/>
+<partstitch x="45" y="21" palindex1="2" palindex2="0" direction="1"/>
+<partstitch x="46" y="21" palindex1="0" palindex2="2" direction="2"/>
+<partstitch x="47" y="21" palindex1="0" palindex2="2" direction="1"/>
+<partstitch x="24" y="24" palindex1="2" palindex2="7" direction="2"/>
+<partstitch x="34" y="24" palindex1="2" palindex2="7" direction="1"/>
+<partstitch x="44" y="24" palindex1="2" palindex2="0" direction="2"/>
+<partstitch x="34" y="27" palindex1="12" palindex2="0" direction="2"/>
+<partstitch x="35" y="27" palindex1="12" palindex2="0" direction="1"/>
+<partstitch x="14" y="30" palindex1="0" palindex2="11" direction="2"/>
+<partstitch x="15" y="30" palindex1="0" palindex2="11" direction="1"/>
+<partstitch x="6" y="42" palindex1="47" palindex2="0" direction="2"/>
+</partstitches>
+<backstitches>
+<backstitch x1="1" y1="0" x2="1" y2="1" palindex="1" objecttype="backstitch" sequence="0"/>
+<backstitch x1="1" y1="1" x2="1" y2="2" palindex="1" objecttype="backstitch" sequence="1"/>
+<backstitch x1="10" y1="0" x2="11" y2="0" palindex="1" objecttype="backstitch" sequence="2"/>
+<backstitch x1="11" y1="0" x2="11" y2="1" palindex="1" objecttype="backstitch" sequence="3"/>
+<backstitch x1="10" y1="1" x2="11" y2="1" palindex="1" objecttype="backstitch" sequence="4"/>
+<backstitch x1="10" y1="1" x2="10" y2="2" palindex="1" objecttype="backstitch" sequence="5"/>
+<backstitch x1="10" y1="2" x2="11" y2="2" palindex="1" objecttype="backstitch" sequence="6"/>
+<backstitch x1="20" y1="0" x2="21" y2="0" palindex="1" objecttype="backstitch" sequence="7"/>
+<backstitch x1="21" y1="0" x2="21" y2="1" palindex="1" objecttype="backstitch" sequence="8"/>
+<backstitch x1="20" y1="1" x2="21" y2="1" palindex="1" objecttype="backstitch" sequence="9"/>
+<backstitch x1="21" y1="1" x2="21" y2="2" palindex="1" objecttype="backstitch" sequence="10"/>
+<backstitch x1="20" y1="2" x2="21" y2="2" palindex="1" objecttype="backstitch" sequence="11"/>
+<backstitch x1="30" y1="0" x2="30" y2="1" palindex="1" objecttype="backstitch" sequence="12"/>
+<backstitch x1="30" y1="1" x2="31" y2="1" palindex="1" objecttype="backstitch" sequence="13"/>
+<backstitch x1="31" y1="0" x2="31" y2="1" palindex="1" objecttype="backstitch" sequence="14"/>
+<backstitch x1="31" y1="1" x2="31" y2="2" palindex="1" objecttype="backstitch" sequence="15"/>
+<backstitch x1="40" y1="0" x2="41" y2="0" palindex="1" objecttype="backstitch" sequence="16"/>
+<backstitch x1="40" y1="0" x2="40" y2="1" palindex="1" objecttype="backstitch" sequence="17"/>
+<backstitch x1="40" y1="1" x2="41" y2="1" palindex="1" objecttype="backstitch" sequence="18"/>
+<backstitch x1="41" y1="1" x2="41" y2="2" palindex="1" objecttype="backstitch" sequence="19"/>
+<backstitch x1="40" y1="2" x2="41" y2="2" palindex="1" objecttype="backstitch" sequence="20"/>
+<backstitch x1="0" y1="3" x2="1" y2="3" palindex="1" objecttype="backstitch" sequence="21"/>
+<backstitch x1="0" y1="3" x2="0" y2="4" palindex="1" objecttype="backstitch" sequence="22"/>
+<backstitch x1="0" y1="4" x2="1" y2="4" palindex="1" objecttype="backstitch" sequence="23"/>
+<backstitch x1="0" y1="4" x2="0" y2="5" palindex="1" objecttype="backstitch" sequence="24"/>
+<backstitch x1="0" y1="5" x2="1" y2="5" palindex="1" objecttype="backstitch" sequence="25"/>
+<backstitch x1="1" y1="4" x2="1" y2="5" palindex="1" objecttype="backstitch" sequence="26"/>
+<backstitch x1="10" y1="3" x2="11" y2="3" palindex="1" objecttype="backstitch" sequence="27"/>
+<backstitch x1="11" y1="3" x2="11" y2="4" palindex="1" objecttype="backstitch" sequence="28"/>
+<backstitch x1="11" y1="4" x2="11" y2="5" palindex="1" objecttype="backstitch" sequence="29"/>
+<backstitch x1="20" y1="3" x2="21" y2="3" palindex="1" objecttype="backstitch" sequence="30"/>
+<backstitch x1="21" y1="3" x2="21" y2="4" palindex="1" objecttype="backstitch" sequence="31"/>
+<backstitch x1="21" y1="4" x2="21" y2="5" palindex="1" objecttype="backstitch" sequence="32"/>
+<backstitch x1="20" y1="5" x2="21" y2="5" palindex="1" objecttype="backstitch" sequence="33"/>
+<backstitch x1="20" y1="4" x2="20" y2="5" palindex="1" objecttype="backstitch" sequence="34"/>
+<backstitch x1="20" y1="3" x2="20" y2="4" palindex="1" objecttype="backstitch" sequence="35"/>
+<backstitch x1="20" y1="4" x2="21" y2="4" palindex="1" objecttype="backstitch" sequence="36"/>
+<backstitch x1="30" y1="3" x2="31" y2="3" palindex="1" objecttype="backstitch" sequence="37"/>
+<backstitch x1="31" y1="3" x2="31" y2="4" palindex="1" objecttype="backstitch" sequence="38"/>
+<backstitch x1="31" y1="4" x2="31" y2="5" palindex="1" objecttype="backstitch" sequence="39"/>
+<backstitch x1="30" y1="5" x2="31" y2="5" palindex="1" objecttype="backstitch" sequence="40"/>
+<backstitch x1="30" y1="3" x2="30" y2="4" palindex="1" objecttype="backstitch" sequence="41"/>
+<backstitch x1="30" y1="4" x2="31" y2="4" palindex="1" objecttype="backstitch" sequence="42"/>
+<backstitch x1="41" y1="3" x2="41" y2="4" palindex="1" objecttype="backstitch" sequence="43"/>
+<backstitch x1="41" y1="4" x2="41" y2="5" palindex="1" objecttype="backstitch" sequence="44"/>
+<backstitch x1="41.5" y1="3" x2="42.5" y2="3" palindex="1" objecttype="backstitch" sequence="45"/>
+<backstitch x1="42.5" y1="3" x2="42.5" y2="4" palindex="1" objecttype="backstitch" sequence="46"/>
+<backstitch x1="42.5" y1="4" x2="42.5" y2="5" palindex="1" objecttype="backstitch" sequence="47"/>
+<backstitch x1="41.5" y1="5" x2="42.5" y2="5" palindex="1" objecttype="backstitch" sequence="48"/>
+<backstitch x1="41.5" y1="4" x2="41.5" y2="5" palindex="1" objecttype="backstitch" sequence="49"/>
+<backstitch x1="41.5" y1="3" x2="41.5" y2="4" palindex="1" objecttype="backstitch" sequence="50"/>
+<backstitch x1="1" y1="6" x2="1" y2="7" palindex="1" objecttype="backstitch" sequence="51"/>
+<backstitch x1="1" y1="7" x2="1" y2="8" palindex="1" objecttype="backstitch" sequence="52"/>
+<backstitch x1="2.5" y1="6" x2="2.5" y2="7" palindex="1" objecttype="backstitch" sequence="53"/>
+<backstitch x1="2.5" y1="7" x2="2.5" y2="8" palindex="1" objecttype="backstitch" sequence="54"/>
+<backstitch x1="11" y1="6" x2="11" y2="7" palindex="1" objecttype="backstitch" sequence="55"/>
+<backstitch x1="11" y1="7" x2="11" y2="8" palindex="1" objecttype="backstitch" sequence="56"/>
+<backstitch x1="11.5" y1="6" x2="12.5" y2="6" palindex="1" objecttype="backstitch" sequence="57"/>
+<backstitch x1="12.5" y1="6" x2="12.5" y2="7" palindex="1" objecttype="backstitch" sequence="58"/>
+<backstitch x1="11.5" y1="7" x2="12.5" y2="7" palindex="1" objecttype="backstitch" sequence="59"/>
+<backstitch x1="11.5" y1="7" x2="11.5" y2="8" palindex="1" objecttype="backstitch" sequence="60"/>
+<backstitch x1="11.5" y1="8" x2="12.5" y2="8" palindex="1" objecttype="backstitch" sequence="61"/>
+<backstitch x1="21" y1="6" x2="21" y2="7" palindex="1" objecttype="backstitch" sequence="62"/>
+<backstitch x1="21" y1="7" x2="21" y2="8" palindex="1" objecttype="backstitch" sequence="63"/>
+<backstitch x1="21.5" y1="6" x2="22.5" y2="6" palindex="1" objecttype="backstitch" sequence="64"/>
+<backstitch x1="22.5" y1="6" x2="22.5" y2="7" palindex="1" objecttype="backstitch" sequence="65"/>
+<backstitch x1="21.5" y1="7" x2="22.5" y2="7" palindex="1" objecttype="backstitch" sequence="66"/>
+<backstitch x1="22.5" y1="7" x2="22.5" y2="8" palindex="1" objecttype="backstitch" sequence="67"/>
+<backstitch x1="21.5" y1="8" x2="22.5" y2="8" palindex="1" objecttype="backstitch" sequence="68"/>
+<backstitch x1="31" y1="6" x2="31" y2="7" palindex="1" objecttype="backstitch" sequence="69"/>
+<backstitch x1="31" y1="7" x2="31" y2="8" palindex="1" objecttype="backstitch" sequence="70"/>
+<backstitch x1="31.5" y1="6" x2="31.5" y2="7" palindex="1" objecttype="backstitch" sequence="71"/>
+<backstitch x1="31.5" y1="7" x2="32.5" y2="7" palindex="1" objecttype="backstitch" sequence="72"/>
+<backstitch x1="32.5" y1="6" x2="32.5" y2="7" palindex="1" objecttype="backstitch" sequence="73"/>
+<backstitch x1="32.5" y1="7" x2="32.5" y2="8" palindex="1" objecttype="backstitch" sequence="74"/>
+<backstitch x1="41" y1="6" x2="41" y2="7" palindex="1" objecttype="backstitch" sequence="75"/>
+<backstitch x1="41" y1="7" x2="41" y2="8" palindex="1" objecttype="backstitch" sequence="76"/>
+<backstitch x1="41.5" y1="6" x2="42.5" y2="6" palindex="1" objecttype="backstitch" sequence="77"/>
+<backstitch x1="41.5" y1="6" x2="41.5" y2="7" palindex="1" objecttype="backstitch" sequence="78"/>
+<backstitch x1="41.5" y1="7" x2="42.5" y2="7" palindex="1" objecttype="backstitch" sequence="79"/>
+<backstitch x1="42.5" y1="7" x2="42.5" y2="8" palindex="1" objecttype="backstitch" sequence="80"/>
+<backstitch x1="41.5" y1="8" x2="42.5" y2="8" palindex="1" objecttype="backstitch" sequence="81"/>
+<backstitch x1="1" y1="9" x2="1" y2="10" palindex="1" objecttype="backstitch" sequence="82"/>
+<backstitch x1="1" y1="10" x2="1" y2="11" palindex="1" objecttype="backstitch" sequence="83"/>
+<backstitch x1="1.5" y1="9" x2="2.5" y2="9" palindex="1" objecttype="backstitch" sequence="84"/>
+<backstitch x1="1.5" y1="9" x2="1.5" y2="10" palindex="1" objecttype="backstitch" sequence="85"/>
+<backstitch x1="1.5" y1="10" x2="2.5" y2="10" palindex="1" objecttype="backstitch" sequence="86"/>
+<backstitch x1="1.5" y1="10" x2="1.5" y2="11" palindex="1" objecttype="backstitch" sequence="87"/>
+<backstitch x1="1.5" y1="11" x2="2.5" y2="11" palindex="1" objecttype="backstitch" sequence="88"/>
+<backstitch x1="2.5" y1="10" x2="2.5" y2="11" palindex="1" objecttype="backstitch" sequence="89"/>
+<backstitch x1="11" y1="9" x2="11" y2="10" palindex="1" objecttype="backstitch" sequence="90"/>
+<backstitch x1="11" y1="10" x2="11" y2="11" palindex="1" objecttype="backstitch" sequence="91"/>
+<backstitch x1="11.5" y1="9" x2="12.5" y2="9" palindex="1" objecttype="backstitch" sequence="92"/>
+<backstitch x1="12.5" y1="9" x2="12.5" y2="10" palindex="1" objecttype="backstitch" sequence="93"/>
+<backstitch x1="12.5" y1="10" x2="12.5" y2="11" palindex="1" objecttype="backstitch" sequence="94"/>
+<backstitch x1="21" y1="9" x2="21" y2="10" palindex="1" objecttype="backstitch" sequence="95"/>
+<backstitch x1="21" y1="10" x2="21" y2="11" palindex="1" objecttype="backstitch" sequence="96"/>
+<backstitch x1="21.5" y1="9" x2="22.5" y2="9" palindex="1" objecttype="backstitch" sequence="97"/>
+<backstitch x1="22.5" y1="9" x2="22.5" y2="10" palindex="1" objecttype="backstitch" sequence="98"/>
+<backstitch x1="22.5" y1="10" x2="22.5" y2="11" palindex="1" objecttype="backstitch" sequence="99"/>
+<backstitch x1="21.5" y1="11" x2="22.5" y2="11" palindex="1" objecttype="backstitch" sequence="100"/>
+<backstitch x1="21.5" y1="10" x2="21.5" y2="11" palindex="1" objecttype="backstitch" sequence="101"/>
+<backstitch x1="21.5" y1="9" x2="21.5" y2="10" palindex="1" objecttype="backstitch" sequence="102"/>
+<backstitch x1="21.5" y1="10" x2="22.5" y2="10" palindex="1" objecttype="backstitch" sequence="103"/>
+<backstitch x1="31" y1="9" x2="31" y2="10" palindex="1" objecttype="backstitch" sequence="104"/>
+<backstitch x1="31" y1="10" x2="31" y2="11" palindex="1" objecttype="backstitch" sequence="105"/>
+<backstitch x1="31.5" y1="9" x2="32.5" y2="9" palindex="1" objecttype="backstitch" sequence="106"/>
+<backstitch x1="32.5" y1="9" x2="32.5" y2="10" palindex="1" objecttype="backstitch" sequence="107"/>
+<backstitch x1="32.5" y1="10" x2="32.5" y2="11" palindex="1" objecttype="backstitch" sequence="108"/>
+<backstitch x1="31.5" y1="11" x2="32.5" y2="11" palindex="1" objecttype="backstitch" sequence="109"/>
+<backstitch x1="31.5" y1="9" x2="31.5" y2="10" palindex="1" objecttype="backstitch" sequence="110"/>
+<backstitch x1="31.5" y1="10" x2="32.5" y2="10" palindex="1" objecttype="backstitch" sequence="111"/>
+<backstitch x1="40" y1="9" x2="41" y2="9" palindex="1" objecttype="backstitch" sequence="112"/>
+<backstitch x1="41" y1="9" x2="41" y2="10" palindex="1" objecttype="backstitch" sequence="113"/>
+<backstitch x1="40" y1="10" x2="41" y2="10" palindex="1" objecttype="backstitch" sequence="114"/>
+<backstitch x1="40" y1="10" x2="40" y2="11" palindex="1" objecttype="backstitch" sequence="115"/>
+<backstitch x1="40" y1="11" x2="41" y2="11" palindex="1" objecttype="backstitch" sequence="116"/>
+<backstitch x1="41.5" y1="9" x2="42.5" y2="9" palindex="1" objecttype="backstitch" sequence="117"/>
+<backstitch x1="42.5" y1="9" x2="42.5" y2="10" palindex="1" objecttype="backstitch" sequence="118"/>
+<backstitch x1="42.5" y1="10" x2="42.5" y2="11" palindex="1" objecttype="backstitch" sequence="119"/>
+<backstitch x1="41.5" y1="11" x2="42.5" y2="11" palindex="1" objecttype="backstitch" sequence="120"/>
+<backstitch x1="41.5" y1="10" x2="41.5" y2="11" palindex="1" objecttype="backstitch" sequence="121"/>
+<backstitch x1="41.5" y1="9" x2="41.5" y2="10" palindex="1" objecttype="backstitch" sequence="122"/>
+<backstitch x1="0" y1="12" x2="1" y2="12" palindex="1" objecttype="backstitch" sequence="123"/>
+<backstitch x1="1" y1="12" x2="1" y2="13" palindex="1" objecttype="backstitch" sequence="124"/>
+<backstitch x1="0" y1="13" x2="1" y2="13" palindex="1" objecttype="backstitch" sequence="125"/>
+<backstitch x1="0" y1="13" x2="0" y2="14" palindex="1" objecttype="backstitch" sequence="126"/>
+<backstitch x1="0" y1="14" x2="1" y2="14" palindex="1" objecttype="backstitch" sequence="127"/>
+<backstitch x1="2.5" y1="12" x2="2.5" y2="13" palindex="1" objecttype="backstitch" sequence="128"/>
+<backstitch x1="2.5" y1="13" x2="2.5" y2="14" palindex="1" objecttype="backstitch" sequence="129"/>
+<backstitch x1="10" y1="12" x2="11" y2="12" palindex="1" objecttype="backstitch" sequence="130"/>
+<backstitch x1="11" y1="12" x2="11" y2="13" palindex="1" objecttype="backstitch" sequence="131"/>
+<backstitch x1="10" y1="13" x2="11" y2="13" palindex="1" objecttype="backstitch" sequence="132"/>
+<backstitch x1="10" y1="13" x2="10" y2="14" palindex="1" objecttype="backstitch" sequence="133"/>
+<backstitch x1="10" y1="14" x2="11" y2="14" palindex="1" objecttype="backstitch" sequence="134"/>
+<backstitch x1="11.5" y1="12" x2="12.5" y2="12" palindex="1" objecttype="backstitch" sequence="135"/>
+<backstitch x1="12.5" y1="12" x2="12.5" y2="13" palindex="1" objecttype="backstitch" sequence="136"/>
+<backstitch x1="11.5" y1="13" x2="12.5" y2="13" palindex="1" objecttype="backstitch" sequence="137"/>
+<backstitch x1="11.5" y1="13" x2="11.5" y2="14" palindex="1" objecttype="backstitch" sequence="138"/>
+<backstitch x1="11.5" y1="14" x2="12.5" y2="14" palindex="1" objecttype="backstitch" sequence="139"/>
+<backstitch x1="20" y1="12" x2="21" y2="12" palindex="1" objecttype="backstitch" sequence="140"/>
+<backstitch x1="21" y1="12" x2="21" y2="13" palindex="1" objecttype="backstitch" sequence="141"/>
+<backstitch x1="20" y1="13" x2="21" y2="13" palindex="1" objecttype="backstitch" sequence="142"/>
+<backstitch x1="20" y1="13" x2="20" y2="14" palindex="1" objecttype="backstitch" sequence="143"/>
+<backstitch x1="20" y1="14" x2="21" y2="14" palindex="1" objecttype="backstitch" sequence="144"/>
+<backstitch x1="21.5" y1="12" x2="22.5" y2="12" palindex="1" objecttype="backstitch" sequence="145"/>
+<backstitch x1="22.5" y1="12" x2="22.5" y2="13" palindex="1" objecttype="backstitch" sequence="146"/>
+<backstitch x1="21.5" y1="13" x2="22.5" y2="13" palindex="1" objecttype="backstitch" sequence="147"/>
+<backstitch x1="22.5" y1="13" x2="22.5" y2="14" palindex="1" objecttype="backstitch" sequence="148"/>
+<backstitch x1="21.5" y1="14" x2="22.5" y2="14" palindex="1" objecttype="backstitch" sequence="149"/>
+<backstitch x1="30" y1="12" x2="31" y2="12" palindex="1" objecttype="backstitch" sequence="150"/>
+<backstitch x1="31" y1="12" x2="31" y2="13" palindex="1" objecttype="backstitch" sequence="151"/>
+<backstitch x1="30" y1="13" x2="31" y2="13" palindex="1" objecttype="backstitch" sequence="152"/>
+<backstitch x1="30" y1="13" x2="30" y2="14" palindex="1" objecttype="backstitch" sequence="153"/>
+<backstitch x1="30" y1="14" x2="31" y2="14" palindex="1" objecttype="backstitch" sequence="154"/>
+<backstitch x1="31.5" y1="12" x2="31.5" y2="13" palindex="1" objecttype="backstitch" sequence="155"/>
+<backstitch x1="31.5" y1="13" x2="32.5" y2="13" palindex="1" objecttype="backstitch" sequence="156"/>
+<backstitch x1="32.5" y1="12" x2="32.5" y2="13" palindex="1" objecttype="backstitch" sequence="157"/>
+<backstitch x1="32.5" y1="13" x2="32.5" y2="14" palindex="1" objecttype="backstitch" sequence="158"/>
+<backstitch x1="40" y1="12" x2="41" y2="12" palindex="1" objecttype="backstitch" sequence="159"/>
+<backstitch x1="41" y1="12" x2="41" y2="13" palindex="1" objecttype="backstitch" sequence="160"/>
+<backstitch x1="40" y1="13" x2="41" y2="13" palindex="1" objecttype="backstitch" sequence="161"/>
+<backstitch x1="40" y1="13" x2="40" y2="14" palindex="1" objecttype="backstitch" sequence="162"/>
+<backstitch x1="40" y1="14" x2="41" y2="14" palindex="1" objecttype="backstitch" sequence="163"/>
+<backstitch x1="41.5" y1="12" x2="42.5" y2="12" palindex="1" objecttype="backstitch" sequence="164"/>
+<backstitch x1="41.5" y1="12" x2="41.5" y2="13" palindex="1" objecttype="backstitch" sequence="165"/>
+<backstitch x1="41.5" y1="13" x2="42.5" y2="13" palindex="1" objecttype="backstitch" sequence="166"/>
+<backstitch x1="42.5" y1="13" x2="42.5" y2="14" palindex="1" objecttype="backstitch" sequence="167"/>
+<backstitch x1="41.5" y1="14" x2="42.5" y2="14" palindex="1" objecttype="backstitch" sequence="168"/>
+<backstitch x1="0" y1="15" x2="1" y2="15" palindex="1" objecttype="backstitch" sequence="169"/>
+<backstitch x1="1" y1="15" x2="1" y2="16" palindex="1" objecttype="backstitch" sequence="170"/>
+<backstitch x1="0" y1="16" x2="1" y2="16" palindex="1" objecttype="backstitch" sequence="171"/>
+<backstitch x1="0" y1="16" x2="0" y2="17" palindex="1" objecttype="backstitch" sequence="172"/>
+<backstitch x1="0" y1="17" x2="1" y2="17" palindex="1" objecttype="backstitch" sequence="173"/>
+<backstitch x1="1.5" y1="15" x2="2.5" y2="15" palindex="1" objecttype="backstitch" sequence="174"/>
+<backstitch x1="1.5" y1="15" x2="1.5" y2="16" palindex="1" objecttype="backstitch" sequence="175"/>
+<backstitch x1="1.5" y1="16" x2="2.5" y2="16" palindex="1" objecttype="backstitch" sequence="176"/>
+<backstitch x1="1.5" y1="16" x2="1.5" y2="17" palindex="1" objecttype="backstitch" sequence="177"/>
+<backstitch x1="1.5" y1="17" x2="2.5" y2="17" palindex="1" objecttype="backstitch" sequence="178"/>
+<backstitch x1="2.5" y1="16" x2="2.5" y2="17" palindex="1" objecttype="backstitch" sequence="179"/>
+<backstitch x1="10" y1="15" x2="11" y2="15" palindex="1" objecttype="backstitch" sequence="180"/>
+<backstitch x1="11" y1="15" x2="11" y2="16" palindex="1" objecttype="backstitch" sequence="181"/>
+<backstitch x1="10" y1="16" x2="11" y2="16" palindex="1" objecttype="backstitch" sequence="182"/>
+<backstitch x1="10" y1="16" x2="10" y2="17" palindex="1" objecttype="backstitch" sequence="183"/>
+<backstitch x1="10" y1="17" x2="11" y2="17" palindex="1" objecttype="backstitch" sequence="184"/>
+<backstitch x1="11.5" y1="15" x2="12.5" y2="15" palindex="1" objecttype="backstitch" sequence="185"/>
+<backstitch x1="12.5" y1="15" x2="12.5" y2="16" palindex="1" objecttype="backstitch" sequence="186"/>
+<backstitch x1="12.5" y1="16" x2="12.5" y2="17" palindex="1" objecttype="backstitch" sequence="187"/>
+<backstitch x1="20" y1="15" x2="21" y2="15" palindex="1" objecttype="backstitch" sequence="188"/>
+<backstitch x1="21" y1="15" x2="21" y2="16" palindex="1" objecttype="backstitch" sequence="189"/>
+<backstitch x1="20" y1="16" x2="21" y2="16" palindex="1" objecttype="backstitch" sequence="190"/>
+<backstitch x1="20" y1="16" x2="20" y2="17" palindex="1" objecttype="backstitch" sequence="191"/>
+<backstitch x1="20" y1="17" x2="21" y2="17" palindex="1" objecttype="backstitch" sequence="192"/>
+<backstitch x1="21.5" y1="15" x2="22.5" y2="15" palindex="1" objecttype="backstitch" sequence="193"/>
+<backstitch x1="22.5" y1="15" x2="22.5" y2="16" palindex="1" objecttype="backstitch" sequence="194"/>
+<backstitch x1="22.5" y1="16" x2="22.5" y2="17" palindex="1" objecttype="backstitch" sequence="195"/>
+<backstitch x1="21.5" y1="17" x2="22.5" y2="17" palindex="1" objecttype="backstitch" sequence="196"/>
+<backstitch x1="21.5" y1="16" x2="21.5" y2="17" palindex="1" objecttype="backstitch" sequence="197"/>
+<backstitch x1="21.5" y1="15" x2="21.5" y2="16" palindex="1" objecttype="backstitch" sequence="198"/>
+<backstitch x1="21.5" y1="16" x2="22.5" y2="16" palindex="1" objecttype="backstitch" sequence="199"/>
+<backstitch x1="30" y1="15" x2="31" y2="15" palindex="1" objecttype="backstitch" sequence="200"/>
+<backstitch x1="31" y1="15" x2="31" y2="16" palindex="1" objecttype="backstitch" sequence="201"/>
+<backstitch x1="30" y1="16" x2="31" y2="16" palindex="1" objecttype="backstitch" sequence="202"/>
+<backstitch x1="30" y1="16" x2="30" y2="17" palindex="1" objecttype="backstitch" sequence="203"/>
+<backstitch x1="30" y1="17" x2="31" y2="17" palindex="1" objecttype="backstitch" sequence="204"/>
+<backstitch x1="31.5" y1="15" x2="32.5" y2="15" palindex="1" objecttype="backstitch" sequence="205"/>
+<backstitch x1="32.5" y1="15" x2="32.5" y2="16" palindex="1" objecttype="backstitch" sequence="206"/>
+<backstitch x1="32.5" y1="16" x2="32.5" y2="17" palindex="1" objecttype="backstitch" sequence="207"/>
+<backstitch x1="31.5" y1="17" x2="32.5" y2="17" palindex="1" objecttype="backstitch" sequence="208"/>
+<backstitch x1="31.5" y1="15" x2="31.5" y2="16" palindex="1" objecttype="backstitch" sequence="209"/>
+<backstitch x1="31.5" y1="16" x2="32.5" y2="16" palindex="1" objecttype="backstitch" sequence="210"/>
+<backstitch x1="40" y1="15" x2="41" y2="15" palindex="1" objecttype="backstitch" sequence="211"/>
+<backstitch x1="41" y1="15" x2="41" y2="16" palindex="1" objecttype="backstitch" sequence="212"/>
+<backstitch x1="40" y1="16" x2="41" y2="16" palindex="1" objecttype="backstitch" sequence="213"/>
+<backstitch x1="41" y1="16" x2="41" y2="17" palindex="1" objecttype="backstitch" sequence="214"/>
+<backstitch x1="40" y1="17" x2="41" y2="17" palindex="1" objecttype="backstitch" sequence="215"/>
+<backstitch x1="41.5" y1="15" x2="42.5" y2="15" palindex="1" objecttype="backstitch" sequence="216"/>
+<backstitch x1="42.5" y1="15" x2="42.5" y2="16" palindex="1" objecttype="backstitch" sequence="217"/>
+<backstitch x1="42.5" y1="16" x2="42.5" y2="17" palindex="1" objecttype="backstitch" sequence="218"/>
+<backstitch x1="41.5" y1="17" x2="42.5" y2="17" palindex="1" objecttype="backstitch" sequence="219"/>
+<backstitch x1="41.5" y1="16" x2="41.5" y2="17" palindex="1" objecttype="backstitch" sequence="220"/>
+<backstitch x1="41.5" y1="15" x2="41.5" y2="16" palindex="1" objecttype="backstitch" sequence="221"/>
+<backstitch x1="0" y1="18" x2="1" y2="18" palindex="1" objecttype="backstitch" sequence="222"/>
+<backstitch x1="1" y1="18" x2="1" y2="19" palindex="1" objecttype="backstitch" sequence="223"/>
+<backstitch x1="0" y1="19" x2="1" y2="19" palindex="1" objecttype="backstitch" sequence="224"/>
+<backstitch x1="1" y1="19" x2="1" y2="20" palindex="1" objecttype="backstitch" sequence="225"/>
+<backstitch x1="0" y1="20" x2="1" y2="20" palindex="1" objecttype="backstitch" sequence="226"/>
+<backstitch x1="2.5" y1="18" x2="2.5" y2="19" palindex="1" objecttype="backstitch" sequence="227"/>
+<backstitch x1="2.5" y1="19" x2="2.5" y2="20" palindex="1" objecttype="backstitch" sequence="228"/>
+<backstitch x1="10" y1="18" x2="11" y2="18" palindex="1" objecttype="backstitch" sequence="229"/>
+<backstitch x1="11" y1="18" x2="11" y2="19" palindex="1" objecttype="backstitch" sequence="230"/>
+<backstitch x1="10" y1="19" x2="11" y2="19" palindex="1" objecttype="backstitch" sequence="231"/>
+<backstitch x1="11" y1="19" x2="11" y2="20" palindex="1" objecttype="backstitch" sequence="232"/>
+<backstitch x1="10" y1="20" x2="11" y2="20" palindex="1" objecttype="backstitch" sequence="233"/>
+<backstitch x1="11.5" y1="18" x2="12.5" y2="18" palindex="1" objecttype="backstitch" sequence="234"/>
+<backstitch x1="12.5" y1="18" x2="12.5" y2="19" palindex="1" objecttype="backstitch" sequence="235"/>
+<backstitch x1="11.5" y1="19" x2="12.5" y2="19" palindex="1" objecttype="backstitch" sequence="236"/>
+<backstitch x1="11.5" y1="19" x2="11.5" y2="20" palindex="1" objecttype="backstitch" sequence="237"/>
+<backstitch x1="11.5" y1="20" x2="12.5" y2="20" palindex="1" objecttype="backstitch" sequence="238"/>
+<backstitch x1="20" y1="18" x2="21" y2="18" palindex="1" objecttype="backstitch" sequence="239"/>
+<backstitch x1="21" y1="18" x2="21" y2="19" palindex="1" objecttype="backstitch" sequence="240"/>
+<backstitch x1="20" y1="19" x2="21" y2="19" palindex="1" objecttype="backstitch" sequence="241"/>
+<backstitch x1="21" y1="19" x2="21" y2="20" palindex="1" objecttype="backstitch" sequence="242"/>
+<backstitch x1="20" y1="20" x2="21" y2="20" palindex="1" objecttype="backstitch" sequence="243"/>
+<backstitch x1="21.5" y1="18" x2="22.5" y2="18" palindex="1" objecttype="backstitch" sequence="244"/>
+<backstitch x1="22.5" y1="18" x2="22.5" y2="19" palindex="1" objecttype="backstitch" sequence="245"/>
+<backstitch x1="21.5" y1="19" x2="22.5" y2="19" palindex="1" objecttype="backstitch" sequence="246"/>
+<backstitch x1="22.5" y1="19" x2="22.5" y2="20" palindex="1" objecttype="backstitch" sequence="247"/>
+<backstitch x1="21.5" y1="20" x2="22.5" y2="20" palindex="1" objecttype="backstitch" sequence="248"/>
+<backstitch x1="30" y1="18" x2="31" y2="18" palindex="1" objecttype="backstitch" sequence="249"/>
+<backstitch x1="31" y1="18" x2="31" y2="19" palindex="1" objecttype="backstitch" sequence="250"/>
+<backstitch x1="30" y1="19" x2="31" y2="19" palindex="1" objecttype="backstitch" sequence="251"/>
+<backstitch x1="31" y1="19" x2="31" y2="20" palindex="1" objecttype="backstitch" sequence="252"/>
+<backstitch x1="30" y1="20" x2="31" y2="20" palindex="1" objecttype="backstitch" sequence="253"/>
+<backstitch x1="31.5" y1="18" x2="31.5" y2="19" palindex="1" objecttype="backstitch" sequence="254"/>
+<backstitch x1="31.5" y1="19" x2="32.5" y2="19" palindex="1" objecttype="backstitch" sequence="255"/>
+<backstitch x1="32.5" y1="18" x2="32.5" y2="19" palindex="1" objecttype="backstitch" sequence="256"/>
+<backstitch x1="32.5" y1="19" x2="32.5" y2="20" palindex="1" objecttype="backstitch" sequence="257"/>
+<backstitch x1="40" y1="18" x2="41" y2="18" palindex="1" objecttype="backstitch" sequence="258"/>
+<backstitch x1="41" y1="18" x2="41" y2="19" palindex="1" objecttype="backstitch" sequence="259"/>
+<backstitch x1="40" y1="19" x2="41" y2="19" palindex="1" objecttype="backstitch" sequence="260"/>
+<backstitch x1="41" y1="19" x2="41" y2="20" palindex="1" objecttype="backstitch" sequence="261"/>
+<backstitch x1="40" y1="20" x2="41" y2="20" palindex="1" objecttype="backstitch" sequence="262"/>
+<backstitch x1="41.5" y1="18" x2="42.5" y2="18" palindex="1" objecttype="backstitch" sequence="263"/>
+<backstitch x1="41.5" y1="18" x2="41.5" y2="19" palindex="1" objecttype="backstitch" sequence="264"/>
+<backstitch x1="41.5" y1="19" x2="42.5" y2="19" palindex="1" objecttype="backstitch" sequence="265"/>
+<backstitch x1="42.5" y1="19" x2="42.5" y2="20" palindex="1" objecttype="backstitch" sequence="266"/>
+<backstitch x1="41.5" y1="20" x2="42.5" y2="20" palindex="1" objecttype="backstitch" sequence="267"/>
+<backstitch x1="0" y1="21" x2="1" y2="21" palindex="1" objecttype="backstitch" sequence="268"/>
+<backstitch x1="1" y1="21" x2="1" y2="22" palindex="1" objecttype="backstitch" sequence="269"/>
+<backstitch x1="0" y1="22" x2="1" y2="22" palindex="1" objecttype="backstitch" sequence="270"/>
+<backstitch x1="1" y1="22" x2="1" y2="23" palindex="1" objecttype="backstitch" sequence="271"/>
+<backstitch x1="0" y1="23" x2="1" y2="23" palindex="1" objecttype="backstitch" sequence="272"/>
+<backstitch x1="1.5" y1="21" x2="2.5" y2="21" palindex="1" objecttype="backstitch" sequence="273"/>
+<backstitch x1="1.5" y1="21" x2="1.5" y2="22" palindex="1" objecttype="backstitch" sequence="274"/>
+<backstitch x1="1.5" y1="22" x2="2.5" y2="22" palindex="1" objecttype="backstitch" sequence="275"/>
+<backstitch x1="1.5" y1="22" x2="1.5" y2="23" palindex="1" objecttype="backstitch" sequence="276"/>
+<backstitch x1="1.5" y1="23" x2="2.5" y2="23" palindex="1" objecttype="backstitch" sequence="277"/>
+<backstitch x1="2.5" y1="22" x2="2.5" y2="23" palindex="1" objecttype="backstitch" sequence="278"/>
+<backstitch x1="10" y1="21" x2="11" y2="21" palindex="1" objecttype="backstitch" sequence="279"/>
+<backstitch x1="11" y1="21" x2="11" y2="22" palindex="1" objecttype="backstitch" sequence="280"/>
+<backstitch x1="10" y1="22" x2="11" y2="22" palindex="1" objecttype="backstitch" sequence="281"/>
+<backstitch x1="11" y1="22" x2="11" y2="23" palindex="1" objecttype="backstitch" sequence="282"/>
+<backstitch x1="10" y1="23" x2="11" y2="23" palindex="1" objecttype="backstitch" sequence="283"/>
+<backstitch x1="11.5" y1="21" x2="12.5" y2="21" palindex="1" objecttype="backstitch" sequence="284"/>
+<backstitch x1="12.5" y1="21" x2="12.5" y2="22" palindex="1" objecttype="backstitch" sequence="285"/>
+<backstitch x1="12.5" y1="22" x2="12.5" y2="23" palindex="1" objecttype="backstitch" sequence="286"/>
+<backstitch x1="20" y1="21" x2="21" y2="21" palindex="1" objecttype="backstitch" sequence="287"/>
+<backstitch x1="21" y1="21" x2="21" y2="22" palindex="1" objecttype="backstitch" sequence="288"/>
+<backstitch x1="20" y1="22" x2="21" y2="22" palindex="1" objecttype="backstitch" sequence="289"/>
+<backstitch x1="21" y1="22" x2="21" y2="23" palindex="1" objecttype="backstitch" sequence="290"/>
+<backstitch x1="20" y1="23" x2="21" y2="23" palindex="1" objecttype="backstitch" sequence="291"/>
+<backstitch x1="21.5" y1="21" x2="22.5" y2="21" palindex="1" objecttype="backstitch" sequence="292"/>
+<backstitch x1="22.5" y1="21" x2="22.5" y2="22" palindex="1" objecttype="backstitch" sequence="293"/>
+<backstitch x1="22.5" y1="22" x2="22.5" y2="23" palindex="1" objecttype="backstitch" sequence="294"/>
+<backstitch x1="21.5" y1="23" x2="22.5" y2="23" palindex="1" objecttype="backstitch" sequence="295"/>
+<backstitch x1="21.5" y1="22" x2="21.5" y2="23" palindex="1" objecttype="backstitch" sequence="296"/>
+<backstitch x1="21.5" y1="21" x2="21.5" y2="22" palindex="1" objecttype="backstitch" sequence="297"/>
+<backstitch x1="21.5" y1="22" x2="22.5" y2="22" palindex="1" objecttype="backstitch" sequence="298"/>
+<backstitch x1="30" y1="21" x2="31" y2="21" palindex="1" objecttype="backstitch" sequence="299"/>
+<backstitch x1="31" y1="21" x2="31" y2="22" palindex="1" objecttype="backstitch" sequence="300"/>
+<backstitch x1="30" y1="22" x2="31" y2="22" palindex="1" objecttype="backstitch" sequence="301"/>
+<backstitch x1="31" y1="22" x2="31" y2="23" palindex="1" objecttype="backstitch" sequence="302"/>
+<backstitch x1="30" y1="23" x2="31" y2="23" palindex="1" objecttype="backstitch" sequence="303"/>
+<backstitch x1="31.5" y1="21" x2="32.5" y2="21" palindex="1" objecttype="backstitch" sequence="304"/>
+<backstitch x1="32.5" y1="21" x2="32.5" y2="22" palindex="1" objecttype="backstitch" sequence="305"/>
+<backstitch x1="32.5" y1="22" x2="32.5" y2="23" palindex="1" objecttype="backstitch" sequence="306"/>
+<backstitch x1="31.5" y1="23" x2="32.5" y2="23" palindex="1" objecttype="backstitch" sequence="307"/>
+<backstitch x1="31.5" y1="21" x2="31.5" y2="22" palindex="1" objecttype="backstitch" sequence="308"/>
+<backstitch x1="31.5" y1="22" x2="32.5" y2="22" palindex="1" objecttype="backstitch" sequence="309"/>
+<backstitch x1="40" y1="21" x2="40" y2="22" palindex="1" objecttype="backstitch" sequence="310"/>
+<backstitch x1="40" y1="22" x2="41" y2="22" palindex="1" objecttype="backstitch" sequence="311"/>
+<backstitch x1="41" y1="21" x2="41" y2="22" palindex="1" objecttype="backstitch" sequence="312"/>
+<backstitch x1="41" y1="22" x2="41" y2="23" palindex="1" objecttype="backstitch" sequence="313"/>
+<backstitch x1="41.5" y1="21" x2="42.5" y2="21" palindex="1" objecttype="backstitch" sequence="314"/>
+<backstitch x1="42.5" y1="21" x2="42.5" y2="22" palindex="1" objecttype="backstitch" sequence="315"/>
+<backstitch x1="42.5" y1="22" x2="42.5" y2="23" palindex="1" objecttype="backstitch" sequence="316"/>
+<backstitch x1="41.5" y1="23" x2="42.5" y2="23" palindex="1" objecttype="backstitch" sequence="317"/>
+<backstitch x1="41.5" y1="22" x2="41.5" y2="23" palindex="1" objecttype="backstitch" sequence="318"/>
+<backstitch x1="41.5" y1="21" x2="41.5" y2="22" palindex="1" objecttype="backstitch" sequence="319"/>
+<backstitch x1="0" y1="24" x2="0" y2="25" palindex="1" objecttype="backstitch" sequence="320"/>
+<backstitch x1="0" y1="25" x2="1" y2="25" palindex="1" objecttype="backstitch" sequence="321"/>
+<backstitch x1="1" y1="24" x2="1" y2="25" palindex="1" objecttype="backstitch" sequence="322"/>
+<backstitch x1="1" y1="25" x2="1" y2="26" palindex="1" objecttype="backstitch" sequence="323"/>
+<backstitch x1="2.5" y1="24" x2="2.5" y2="25" palindex="1" objecttype="backstitch" sequence="324"/>
+<backstitch x1="2.5" y1="25" x2="2.5" y2="26" palindex="1" objecttype="backstitch" sequence="325"/>
+<backstitch x1="10" y1="24" x2="10" y2="25" palindex="1" objecttype="backstitch" sequence="326"/>
+<backstitch x1="10" y1="25" x2="11" y2="25" palindex="1" objecttype="backstitch" sequence="327"/>
+<backstitch x1="11" y1="24" x2="11" y2="25" palindex="1" objecttype="backstitch" sequence="328"/>
+<backstitch x1="11" y1="25" x2="11" y2="26" palindex="1" objecttype="backstitch" sequence="329"/>
+<backstitch x1="11.5" y1="24" x2="12.5" y2="24" palindex="1" objecttype="backstitch" sequence="330"/>
+<backstitch x1="12.5" y1="24" x2="12.5" y2="25" palindex="1" objecttype="backstitch" sequence="331"/>
+<backstitch x1="11.5" y1="25" x2="12.5" y2="25" palindex="1" objecttype="backstitch" sequence="332"/>
+<backstitch x1="11.5" y1="25" x2="11.5" y2="26" palindex="1" objecttype="backstitch" sequence="333"/>
+<backstitch x1="11.5" y1="26" x2="12.5" y2="26" palindex="1" objecttype="backstitch" sequence="334"/>
+<backstitch x1="20" y1="24" x2="20" y2="25" palindex="1" objecttype="backstitch" sequence="335"/>
+<backstitch x1="20" y1="25" x2="21" y2="25" palindex="1" objecttype="backstitch" sequence="336"/>
+<backstitch x1="21" y1="24" x2="21" y2="25" palindex="1" objecttype="backstitch" sequence="337"/>
+<backstitch x1="21" y1="25" x2="21" y2="26" palindex="1" objecttype="backstitch" sequence="338"/>
+<backstitch x1="21.5" y1="24" x2="22.5" y2="24" palindex="1" objecttype="backstitch" sequence="339"/>
+<backstitch x1="22.5" y1="24" x2="22.5" y2="25" palindex="1" objecttype="backstitch" sequence="340"/>
+<backstitch x1="21.5" y1="25" x2="22.5" y2="25" palindex="1" objecttype="backstitch" sequence="341"/>
+<backstitch x1="22.5" y1="25" x2="22.5" y2="26" palindex="1" objecttype="backstitch" sequence="342"/>
+<backstitch x1="21.5" y1="26" x2="22.5" y2="26" palindex="1" objecttype="backstitch" sequence="343"/>
+<backstitch x1="30" y1="24" x2="30" y2="25" palindex="1" objecttype="backstitch" sequence="344"/>
+<backstitch x1="30" y1="25" x2="31" y2="25" palindex="1" objecttype="backstitch" sequence="345"/>
+<backstitch x1="31" y1="24" x2="31" y2="25" palindex="1" objecttype="backstitch" sequence="346"/>
+<backstitch x1="31" y1="25" x2="31" y2="26" palindex="1" objecttype="backstitch" sequence="347"/>
+<backstitch x1="31.5" y1="24" x2="31.5" y2="25" palindex="1" objecttype="backstitch" sequence="348"/>
+<backstitch x1="31.5" y1="25" x2="32.5" y2="25" palindex="1" objecttype="backstitch" sequence="349"/>
+<backstitch x1="32.5" y1="24" x2="32.5" y2="25" palindex="1" objecttype="backstitch" sequence="350"/>
+<backstitch x1="32.5" y1="25" x2="32.5" y2="26" palindex="1" objecttype="backstitch" sequence="351"/>
+<backstitch x1="40" y1="24" x2="40" y2="25" palindex="1" objecttype="backstitch" sequence="352"/>
+<backstitch x1="40" y1="25" x2="41" y2="25" palindex="1" objecttype="backstitch" sequence="353"/>
+<backstitch x1="41" y1="24" x2="41" y2="25" palindex="1" objecttype="backstitch" sequence="354"/>
+<backstitch x1="41" y1="25" x2="41" y2="26" palindex="1" objecttype="backstitch" sequence="355"/>
+<backstitch x1="41.5" y1="24" x2="42.5" y2="24" palindex="1" objecttype="backstitch" sequence="356"/>
+<backstitch x1="41.5" y1="24" x2="41.5" y2="25" palindex="1" objecttype="backstitch" sequence="357"/>
+<backstitch x1="41.5" y1="25" x2="42.5" y2="25" palindex="1" objecttype="backstitch" sequence="358"/>
+<backstitch x1="42.5" y1="25" x2="42.5" y2="26" palindex="1" objecttype="backstitch" sequence="359"/>
+<backstitch x1="41.5" y1="26" x2="42.5" y2="26" palindex="1" objecttype="backstitch" sequence="360"/>
+<backstitch x1="0" y1="27" x2="0" y2="28" palindex="1" objecttype="backstitch" sequence="361"/>
+<backstitch x1="0" y1="28" x2="1" y2="28" palindex="1" objecttype="backstitch" sequence="362"/>
+<backstitch x1="1" y1="27" x2="1" y2="28" palindex="1" objecttype="backstitch" sequence="363"/>
+<backstitch x1="1" y1="28" x2="1" y2="29" palindex="1" objecttype="backstitch" sequence="364"/>
+<backstitch x1="1.5" y1="27" x2="2.5" y2="27" palindex="1" objecttype="backstitch" sequence="365"/>
+<backstitch x1="1.5" y1="27" x2="1.5" y2="28" palindex="1" objecttype="backstitch" sequence="366"/>
+<backstitch x1="1.5" y1="28" x2="2.5" y2="28" palindex="1" objecttype="backstitch" sequence="367"/>
+<backstitch x1="1.5" y1="28" x2="1.5" y2="29" palindex="1" objecttype="backstitch" sequence="368"/>
+<backstitch x1="1.5" y1="29" x2="2.5" y2="29" palindex="1" objecttype="backstitch" sequence="369"/>
+<backstitch x1="2.5" y1="28" x2="2.5" y2="29" palindex="1" objecttype="backstitch" sequence="370"/>
+<backstitch x1="10" y1="27" x2="10" y2="28" palindex="1" objecttype="backstitch" sequence="371"/>
+<backstitch x1="10" y1="28" x2="11" y2="28" palindex="1" objecttype="backstitch" sequence="372"/>
+<backstitch x1="11" y1="27" x2="11" y2="28" palindex="1" objecttype="backstitch" sequence="373"/>
+<backstitch x1="11" y1="28" x2="11" y2="29" palindex="1" objecttype="backstitch" sequence="374"/>
+<backstitch x1="11.5" y1="27" x2="12.5" y2="27" palindex="1" objecttype="backstitch" sequence="375"/>
+<backstitch x1="12.5" y1="27" x2="12.5" y2="28" palindex="1" objecttype="backstitch" sequence="376"/>
+<backstitch x1="12.5" y1="28" x2="12.5" y2="29" palindex="1" objecttype="backstitch" sequence="377"/>
+<backstitch x1="20" y1="27" x2="20" y2="28" palindex="1" objecttype="backstitch" sequence="378"/>
+<backstitch x1="20" y1="28" x2="21" y2="28" palindex="1" objecttype="backstitch" sequence="379"/>
+<backstitch x1="21" y1="27" x2="21" y2="28" palindex="1" objecttype="backstitch" sequence="380"/>
+<backstitch x1="21" y1="28" x2="21" y2="29" palindex="1" objecttype="backstitch" sequence="381"/>
+<backstitch x1="21.5" y1="27" x2="22.5" y2="27" palindex="1" objecttype="backstitch" sequence="382"/>
+<backstitch x1="22.5" y1="27" x2="22.5" y2="28" palindex="1" objecttype="backstitch" sequence="383"/>
+<backstitch x1="22.5" y1="28" x2="22.5" y2="29" palindex="1" objecttype="backstitch" sequence="384"/>
+<backstitch x1="21.5" y1="29" x2="22.5" y2="29" palindex="1" objecttype="backstitch" sequence="385"/>
+<backstitch x1="21.5" y1="28" x2="21.5" y2="29" palindex="1" objecttype="backstitch" sequence="386"/>
+<backstitch x1="21.5" y1="27" x2="21.5" y2="28" palindex="1" objecttype="backstitch" sequence="387"/>
+<backstitch x1="21.5" y1="28" x2="22.5" y2="28" palindex="1" objecttype="backstitch" sequence="388"/>
+<backstitch x1="30" y1="27" x2="30" y2="28" palindex="1" objecttype="backstitch" sequence="389"/>
+<backstitch x1="30" y1="28" x2="31" y2="28" palindex="1" objecttype="backstitch" sequence="390"/>
+<backstitch x1="31" y1="27" x2="31" y2="28" palindex="1" objecttype="backstitch" sequence="391"/>
+<backstitch x1="31" y1="28" x2="31" y2="29" palindex="1" objecttype="backstitch" sequence="392"/>
+<backstitch x1="31.5" y1="27" x2="32.5" y2="27" palindex="1" objecttype="backstitch" sequence="393"/>
+<backstitch x1="32.5" y1="27" x2="32.5" y2="28" palindex="1" objecttype="backstitch" sequence="394"/>
+<backstitch x1="32.5" y1="28" x2="32.5" y2="29" palindex="1" objecttype="backstitch" sequence="395"/>
+<backstitch x1="31.5" y1="29" x2="32.5" y2="29" palindex="1" objecttype="backstitch" sequence="396"/>
+<backstitch x1="31.5" y1="27" x2="31.5" y2="28" palindex="1" objecttype="backstitch" sequence="397"/>
+<backstitch x1="31.5" y1="28" x2="32.5" y2="28" palindex="1" objecttype="backstitch" sequence="398"/>
+<backstitch x1="40" y1="27" x2="41" y2="27" palindex="1" objecttype="backstitch" sequence="399"/>
+<backstitch x1="40" y1="27" x2="40" y2="28" palindex="1" objecttype="backstitch" sequence="400"/>
+<backstitch x1="40" y1="28" x2="41" y2="28" palindex="1" objecttype="backstitch" sequence="401"/>
+<backstitch x1="41" y1="28" x2="41" y2="29" palindex="1" objecttype="backstitch" sequence="402"/>
+<backstitch x1="40" y1="29" x2="41" y2="29" palindex="1" objecttype="backstitch" sequence="403"/>
+<backstitch x1="41.5" y1="27" x2="42.5" y2="27" palindex="1" objecttype="backstitch" sequence="404"/>
+<backstitch x1="42.5" y1="27" x2="42.5" y2="28" palindex="1" objecttype="backstitch" sequence="405"/>
+<backstitch x1="42.5" y1="28" x2="42.5" y2="29" palindex="1" objecttype="backstitch" sequence="406"/>
+<backstitch x1="41.5" y1="29" x2="42.5" y2="29" palindex="1" objecttype="backstitch" sequence="407"/>
+<backstitch x1="41.5" y1="28" x2="41.5" y2="29" palindex="1" objecttype="backstitch" sequence="408"/>
+<backstitch x1="41.5" y1="27" x2="41.5" y2="28" palindex="1" objecttype="backstitch" sequence="409"/>
+<backstitch x1="0" y1="30" x2="1" y2="30" palindex="1" objecttype="backstitch" sequence="410"/>
+<backstitch x1="0" y1="30" x2="0" y2="31" palindex="1" objecttype="backstitch" sequence="411"/>
+<backstitch x1="0" y1="31" x2="1" y2="31" palindex="1" objecttype="backstitch" sequence="412"/>
+<backstitch x1="1" y1="31" x2="1" y2="32" palindex="1" objecttype="backstitch" sequence="413"/>
+<backstitch x1="0" y1="32" x2="1" y2="32" palindex="1" objecttype="backstitch" sequence="414"/>
+<backstitch x1="2.5" y1="30" x2="2.5" y2="31" palindex="1" objecttype="backstitch" sequence="415"/>
+<backstitch x1="2.5" y1="31" x2="2.5" y2="32" palindex="1" objecttype="backstitch" sequence="416"/>
+<backstitch x1="10" y1="30" x2="11" y2="30" palindex="1" objecttype="backstitch" sequence="417"/>
+<backstitch x1="10" y1="30" x2="10" y2="31" palindex="1" objecttype="backstitch" sequence="418"/>
+<backstitch x1="10" y1="31" x2="11" y2="31" palindex="1" objecttype="backstitch" sequence="419"/>
+<backstitch x1="11" y1="31" x2="11" y2="32" palindex="1" objecttype="backstitch" sequence="420"/>
+<backstitch x1="10" y1="32" x2="11" y2="32" palindex="1" objecttype="backstitch" sequence="421"/>
+<backstitch x1="11.5" y1="30" x2="12.5" y2="30" palindex="1" objecttype="backstitch" sequence="422"/>
+<backstitch x1="12.5" y1="30" x2="12.5" y2="31" palindex="1" objecttype="backstitch" sequence="423"/>
+<backstitch x1="11.5" y1="31" x2="12.5" y2="31" palindex="1" objecttype="backstitch" sequence="424"/>
+<backstitch x1="11.5" y1="31" x2="11.5" y2="32" palindex="1" objecttype="backstitch" sequence="425"/>
+<backstitch x1="11.5" y1="32" x2="12.5" y2="32" palindex="1" objecttype="backstitch" sequence="426"/>
+<backstitch x1="20" y1="30" x2="21" y2="30" palindex="1" objecttype="backstitch" sequence="427"/>
+<backstitch x1="20" y1="30" x2="20" y2="31" palindex="1" objecttype="backstitch" sequence="428"/>
+<backstitch x1="20" y1="31" x2="21" y2="31" palindex="1" objecttype="backstitch" sequence="429"/>
+<backstitch x1="21" y1="31" x2="21" y2="32" palindex="1" objecttype="backstitch" sequence="430"/>
+<backstitch x1="20" y1="32" x2="21" y2="32" palindex="1" objecttype="backstitch" sequence="431"/>
+<backstitch x1="21.5" y1="30" x2="22.5" y2="30" palindex="1" objecttype="backstitch" sequence="432"/>
+<backstitch x1="22.5" y1="30" x2="22.5" y2="31" palindex="1" objecttype="backstitch" sequence="433"/>
+<backstitch x1="21.5" y1="31" x2="22.5" y2="31" palindex="1" objecttype="backstitch" sequence="434"/>
+<backstitch x1="22.5" y1="31" x2="22.5" y2="32" palindex="1" objecttype="backstitch" sequence="435"/>
+<backstitch x1="21.5" y1="32" x2="22.5" y2="32" palindex="1" objecttype="backstitch" sequence="436"/>
+<backstitch x1="24" y1="31" x2="25" y2="31" palindex="38" objecttype="backstitch" sequence="437"/>
+<backstitch x1="30" y1="30" x2="31" y2="30" palindex="1" objecttype="backstitch" sequence="438"/>
+<backstitch x1="30" y1="30" x2="30" y2="31" palindex="1" objecttype="backstitch" sequence="439"/>
+<backstitch x1="30" y1="31" x2="31" y2="31" palindex="1" objecttype="backstitch" sequence="440"/>
+<backstitch x1="31" y1="31" x2="31" y2="32" palindex="1" objecttype="backstitch" sequence="441"/>
+<backstitch x1="30" y1="32" x2="31" y2="32" palindex="1" objecttype="backstitch" sequence="442"/>
+<backstitch x1="31.5" y1="30" x2="31.5" y2="31" palindex="1" objecttype="backstitch" sequence="443"/>
+<backstitch x1="31.5" y1="31" x2="32.5" y2="31" palindex="1" objecttype="backstitch" sequence="444"/>
+<backstitch x1="32.5" y1="30" x2="32.5" y2="31" palindex="1" objecttype="backstitch" sequence="445"/>
+<backstitch x1="32.5" y1="31" x2="32.5" y2="32" palindex="1" objecttype="backstitch" sequence="446"/>
+<backstitch x1="35" y1="30" x2="35" y2="32" palindex="38" objecttype="backstitch" sequence="447"/>
+<backstitch x1="40" y1="30" x2="41" y2="30" palindex="1" objecttype="backstitch" sequence="448"/>
+<backstitch x1="40" y1="30" x2="40" y2="31" palindex="1" objecttype="backstitch" sequence="449"/>
+<backstitch x1="40" y1="31" x2="41" y2="31" palindex="1" objecttype="backstitch" sequence="450"/>
+<backstitch x1="41" y1="31" x2="41" y2="32" palindex="1" objecttype="backstitch" sequence="451"/>
+<backstitch x1="40" y1="32" x2="41" y2="32" palindex="1" objecttype="backstitch" sequence="452"/>
+<backstitch x1="41.5" y1="30" x2="42.5" y2="30" palindex="1" objecttype="backstitch" sequence="453"/>
+<backstitch x1="41.5" y1="30" x2="41.5" y2="31" palindex="1" objecttype="backstitch" sequence="454"/>
+<backstitch x1="41.5" y1="31" x2="42.5" y2="31" palindex="1" objecttype="backstitch" sequence="455"/>
+<backstitch x1="42.5" y1="31" x2="42.5" y2="32" palindex="1" objecttype="backstitch" sequence="456"/>
+<backstitch x1="41.5" y1="32" x2="42.5" y2="32" palindex="1" objecttype="backstitch" sequence="457"/>
+<backstitch x1="44" y1="32" x2="46" y2="30" palindex="38" objecttype="backstitch" sequence="458"/>
+<backstitch x1="0" y1="33" x2="1" y2="33" palindex="1" objecttype="backstitch" sequence="459"/>
+<backstitch x1="0" y1="33" x2="0" y2="34" palindex="1" objecttype="backstitch" sequence="460"/>
+<backstitch x1="0" y1="34" x2="1" y2="34" palindex="1" objecttype="backstitch" sequence="461"/>
+<backstitch x1="1" y1="34" x2="1" y2="35" palindex="1" objecttype="backstitch" sequence="462"/>
+<backstitch x1="0" y1="35" x2="1" y2="35" palindex="1" objecttype="backstitch" sequence="463"/>
+<backstitch x1="1.5" y1="33" x2="2.5" y2="33" palindex="1" objecttype="backstitch" sequence="464"/>
+<backstitch x1="1.5" y1="33" x2="1.5" y2="34" palindex="1" objecttype="backstitch" sequence="465"/>
+<backstitch x1="1.5" y1="34" x2="2.5" y2="34" palindex="1" objecttype="backstitch" sequence="466"/>
+<backstitch x1="1.5" y1="34" x2="1.5" y2="35" palindex="1" objecttype="backstitch" sequence="467"/>
+<backstitch x1="1.5" y1="35" x2="2.5" y2="35" palindex="1" objecttype="backstitch" sequence="468"/>
+<backstitch x1="2.5" y1="34" x2="2.5" y2="35" palindex="1" objecttype="backstitch" sequence="469"/>
+<backstitch x1="4" y1="33" x2="5.5" y2="33.5" palindex="38" objecttype="backstitch" sequence="470"/>
+<backstitch x1="10" y1="33" x2="11" y2="33" palindex="1" objecttype="backstitch" sequence="471"/>
+<backstitch x1="10" y1="33" x2="10" y2="34" palindex="1" objecttype="backstitch" sequence="472"/>
+<backstitch x1="10" y1="34" x2="11" y2="34" palindex="1" objecttype="backstitch" sequence="473"/>
+<backstitch x1="11" y1="34" x2="11" y2="35" palindex="1" objecttype="backstitch" sequence="474"/>
+<backstitch x1="10" y1="35" x2="11" y2="35" palindex="1" objecttype="backstitch" sequence="475"/>
+<backstitch x1="11.5" y1="33" x2="12.5" y2="33" palindex="1" objecttype="backstitch" sequence="476"/>
+<backstitch x1="12.5" y1="33" x2="12.5" y2="34" palindex="1" objecttype="backstitch" sequence="477"/>
+<backstitch x1="12.5" y1="34" x2="12.5" y2="35" palindex="1" objecttype="backstitch" sequence="478"/>
+<backstitch x1="14" y1="33" x2="15" y2="35" palindex="38" objecttype="backstitch" sequence="479"/>
+<backstitch x1="15" y1="35" x2="16" y2="33" palindex="38" objecttype="backstitch" sequence="480"/>
+<backstitch x1="16" y1="33" x2="17" y2="35" palindex="38" objecttype="backstitch" sequence="481"/>
+<backstitch x1="17" y1="35" x2="18" y2="33" palindex="38" objecttype="backstitch" sequence="482"/>
+<backstitch x1="20" y1="33" x2="21" y2="33" palindex="1" objecttype="backstitch" sequence="483"/>
+<backstitch x1="20" y1="33" x2="20" y2="34" palindex="1" objecttype="backstitch" sequence="484"/>
+<backstitch x1="20" y1="34" x2="21" y2="34" palindex="1" objecttype="backstitch" sequence="485"/>
+<backstitch x1="21" y1="34" x2="21" y2="35" palindex="1" objecttype="backstitch" sequence="486"/>
+<backstitch x1="20" y1="35" x2="21" y2="35" palindex="1" objecttype="backstitch" sequence="487"/>
+<backstitch x1="21.5" y1="33" x2="22.5" y2="33" palindex="1" objecttype="backstitch" sequence="488"/>
+<backstitch x1="22.5" y1="33" x2="22.5" y2="34" palindex="1" objecttype="backstitch" sequence="489"/>
+<backstitch x1="22.5" y1="34" x2="22.5" y2="35" palindex="1" objecttype="backstitch" sequence="490"/>
+<backstitch x1="21.5" y1="35" x2="22.5" y2="35" palindex="1" objecttype="backstitch" sequence="491"/>
+<backstitch x1="21.5" y1="34" x2="21.5" y2="35" palindex="1" objecttype="backstitch" sequence="492"/>
+<backstitch x1="21.5" y1="33" x2="21.5" y2="34" palindex="1" objecttype="backstitch" sequence="493"/>
+<backstitch x1="21.5" y1="34" x2="22.5" y2="34" palindex="1" objecttype="backstitch" sequence="494"/>
+<backstitch x1="24" y1="34" x2="29" y2="34" palindex="38" objecttype="backstitch" sequence="495"/>
+<backstitch x1="30" y1="33" x2="31" y2="33" palindex="1" objecttype="backstitch" sequence="496"/>
+<backstitch x1="30" y1="33" x2="30" y2="34" palindex="1" objecttype="backstitch" sequence="497"/>
+<backstitch x1="30" y1="34" x2="31" y2="34" palindex="1" objecttype="backstitch" sequence="498"/>
+<backstitch x1="31" y1="34" x2="31" y2="35" palindex="1" objecttype="backstitch" sequence="499"/>
+<backstitch x1="30" y1="35" x2="31" y2="35" palindex="1" objecttype="backstitch" sequence="500"/>
+<backstitch x1="31.5" y1="33" x2="32.5" y2="33" palindex="1" objecttype="backstitch" sequence="501"/>
+<backstitch x1="32.5" y1="33" x2="32.5" y2="34" palindex="1" objecttype="backstitch" sequence="502"/>
+<backstitch x1="32.5" y1="34" x2="32.5" y2="35" palindex="1" objecttype="backstitch" sequence="503"/>
+<backstitch x1="31.5" y1="35" x2="32.5" y2="35" palindex="1" objecttype="backstitch" sequence="504"/>
+<backstitch x1="31.5" y1="33" x2="31.5" y2="34" palindex="1" objecttype="backstitch" sequence="505"/>
+<backstitch x1="31.5" y1="34" x2="32.5" y2="34" palindex="1" objecttype="backstitch" sequence="506"/>
+<backstitch x1="34" y1="34" x2="37" y2="34" palindex="39" objecttype="backstitch" sequence="507"/>
+<backstitch x1="40" y1="33" x2="41" y2="33" palindex="1" objecttype="backstitch" sequence="508"/>
+<backstitch x1="40" y1="33" x2="40" y2="34" palindex="1" objecttype="backstitch" sequence="509"/>
+<backstitch x1="40" y1="34" x2="41" y2="34" palindex="1" objecttype="backstitch" sequence="510"/>
+<backstitch x1="40" y1="34" x2="40" y2="35" palindex="1" objecttype="backstitch" sequence="511"/>
+<backstitch x1="40" y1="35" x2="41" y2="35" palindex="1" objecttype="backstitch" sequence="512"/>
+<backstitch x1="41" y1="34" x2="41" y2="35" palindex="1" objecttype="backstitch" sequence="513"/>
+<backstitch x1="41.5" y1="33" x2="42.5" y2="33" palindex="1" objecttype="backstitch" sequence="514"/>
+<backstitch x1="42.5" y1="33" x2="42.5" y2="34" palindex="1" objecttype="backstitch" sequence="515"/>
+<backstitch x1="42.5" y1="34" x2="42.5" y2="35" palindex="1" objecttype="backstitch" sequence="516"/>
+<backstitch x1="41.5" y1="35" x2="42.5" y2="35" palindex="1" objecttype="backstitch" sequence="517"/>
+<backstitch x1="41.5" y1="34" x2="41.5" y2="35" palindex="1" objecttype="backstitch" sequence="518"/>
+<backstitch x1="41.5" y1="33" x2="41.5" y2="34" palindex="1" objecttype="backstitch" sequence="519"/>
+<backstitch x1="44" y1="34" x2="47" y2="34" palindex="40" objecttype="backstitch" sequence="520"/>
+<backstitch x1="0" y1="36" x2="1" y2="36" palindex="1" objecttype="backstitch" sequence="521"/>
+<backstitch x1="0" y1="36" x2="0" y2="37" palindex="1" objecttype="backstitch" sequence="522"/>
+<backstitch x1="0" y1="37" x2="1" y2="37" palindex="1" objecttype="backstitch" sequence="523"/>
+<backstitch x1="0" y1="37" x2="0" y2="38" palindex="1" objecttype="backstitch" sequence="524"/>
+<backstitch x1="0" y1="38" x2="1" y2="38" palindex="1" objecttype="backstitch" sequence="525"/>
+<backstitch x1="1" y1="37" x2="1" y2="38" palindex="1" objecttype="backstitch" sequence="526"/>
+<backstitch x1="2.5" y1="36" x2="2.5" y2="37" palindex="1" objecttype="backstitch" sequence="527"/>
+<backstitch x1="2.5" y1="37" x2="2.5" y2="38" palindex="1" objecttype="backstitch" sequence="528"/>
+<backstitch x1="4" y1="37" x2="7" y2="37" palindex="41" objecttype="backstitch" sequence="529"/>
+<backstitch x1="10" y1="36" x2="11" y2="36" palindex="1" objecttype="backstitch" sequence="530"/>
+<backstitch x1="10" y1="36" x2="10" y2="37" palindex="1" objecttype="backstitch" sequence="531"/>
+<backstitch x1="10" y1="37" x2="11" y2="37" palindex="1" objecttype="backstitch" sequence="532"/>
+<backstitch x1="10" y1="37" x2="10" y2="38" palindex="1" objecttype="backstitch" sequence="533"/>
+<backstitch x1="10" y1="38" x2="11" y2="38" palindex="1" objecttype="backstitch" sequence="534"/>
+<backstitch x1="11" y1="37" x2="11" y2="38" palindex="1" objecttype="backstitch" sequence="535"/>
+<backstitch x1="11.5" y1="36" x2="12.5" y2="36" palindex="1" objecttype="backstitch" sequence="536"/>
+<backstitch x1="12.5" y1="36" x2="12.5" y2="37" palindex="1" objecttype="backstitch" sequence="537"/>
+<backstitch x1="11.5" y1="37" x2="12.5" y2="37" palindex="1" objecttype="backstitch" sequence="538"/>
+<backstitch x1="11.5" y1="37" x2="11.5" y2="38" palindex="1" objecttype="backstitch" sequence="539"/>
+<backstitch x1="11.5" y1="38" x2="12.5" y2="38" palindex="1" objecttype="backstitch" sequence="540"/>
+<backstitch x1="14" y1="37" x2="17" y2="37" palindex="42" objecttype="backstitch" sequence="541"/>
+<backstitch x1="20" y1="36" x2="21" y2="36" palindex="1" objecttype="backstitch" sequence="542"/>
+<backstitch x1="20" y1="36" x2="20" y2="37" palindex="1" objecttype="backstitch" sequence="543"/>
+<backstitch x1="20" y1="37" x2="21" y2="37" palindex="1" objecttype="backstitch" sequence="544"/>
+<backstitch x1="20" y1="37" x2="20" y2="38" palindex="1" objecttype="backstitch" sequence="545"/>
+<backstitch x1="20" y1="38" x2="21" y2="38" palindex="1" objecttype="backstitch" sequence="546"/>
+<backstitch x1="21" y1="37" x2="21" y2="38" palindex="1" objecttype="backstitch" sequence="547"/>
+<backstitch x1="21.5" y1="36" x2="22.5" y2="36" palindex="1" objecttype="backstitch" sequence="548"/>
+<backstitch x1="22.5" y1="36" x2="22.5" y2="37" palindex="1" objecttype="backstitch" sequence="549"/>
+<backstitch x1="21.5" y1="37" x2="22.5" y2="37" palindex="1" objecttype="backstitch" sequence="550"/>
+<backstitch x1="22.5" y1="37" x2="22.5" y2="38" palindex="1" objecttype="backstitch" sequence="551"/>
+<backstitch x1="21.5" y1="38" x2="22.5" y2="38" palindex="1" objecttype="backstitch" sequence="552"/>
+<backstitch x1="24" y1="37" x2="27" y2="37" palindex="38" objecttype="backstitch" sequence="553"/>
+<backstitch x1="30" y1="36" x2="31" y2="36" palindex="1" objecttype="backstitch" sequence="554"/>
+<backstitch x1="30" y1="36" x2="30" y2="37" palindex="1" objecttype="backstitch" sequence="555"/>
+<backstitch x1="30" y1="37" x2="31" y2="37" palindex="1" objecttype="backstitch" sequence="556"/>
+<backstitch x1="30" y1="37" x2="30" y2="38" palindex="1" objecttype="backstitch" sequence="557"/>
+<backstitch x1="30" y1="38" x2="31" y2="38" palindex="1" objecttype="backstitch" sequence="558"/>
+<backstitch x1="31" y1="37" x2="31" y2="38" palindex="1" objecttype="backstitch" sequence="559"/>
+<backstitch x1="31.5" y1="36" x2="31.5" y2="37" palindex="1" objecttype="backstitch" sequence="560"/>
+<backstitch x1="31.5" y1="37" x2="32.5" y2="37" palindex="1" objecttype="backstitch" sequence="561"/>
+<backstitch x1="32.5" y1="36" x2="32.5" y2="37" palindex="1" objecttype="backstitch" sequence="562"/>
+<backstitch x1="32.5" y1="37" x2="32.5" y2="38" palindex="1" objecttype="backstitch" sequence="563"/>
+<backstitch x1="40" y1="36" x2="41" y2="36" palindex="1" objecttype="backstitch" sequence="564"/>
+<backstitch x1="40" y1="36" x2="40" y2="37" palindex="1" objecttype="backstitch" sequence="565"/>
+<backstitch x1="40" y1="37" x2="41" y2="37" palindex="1" objecttype="backstitch" sequence="566"/>
+<backstitch x1="40" y1="37" x2="40" y2="38" palindex="1" objecttype="backstitch" sequence="567"/>
+<backstitch x1="40" y1="38" x2="41" y2="38" palindex="1" objecttype="backstitch" sequence="568"/>
+<backstitch x1="41" y1="37" x2="41" y2="38" palindex="1" objecttype="backstitch" sequence="569"/>
+<backstitch x1="41.5" y1="36" x2="42.5" y2="36" palindex="1" objecttype="backstitch" sequence="570"/>
+<backstitch x1="41.5" y1="36" x2="41.5" y2="37" palindex="1" objecttype="backstitch" sequence="571"/>
+<backstitch x1="41.5" y1="37" x2="42.5" y2="37" palindex="1" objecttype="backstitch" sequence="572"/>
+<backstitch x1="42.5" y1="37" x2="42.5" y2="38" palindex="1" objecttype="backstitch" sequence="573"/>
+<backstitch x1="41.5" y1="38" x2="42.5" y2="38" palindex="1" objecttype="backstitch" sequence="574"/>
+<backstitch x1="0" y1="39" x2="1" y2="39" palindex="1" objecttype="backstitch" sequence="575"/>
+<backstitch x1="0" y1="39" x2="0" y2="40" palindex="1" objecttype="backstitch" sequence="576"/>
+<backstitch x1="0" y1="40" x2="1" y2="40" palindex="1" objecttype="backstitch" sequence="577"/>
+<backstitch x1="0" y1="40" x2="0" y2="41" palindex="1" objecttype="backstitch" sequence="578"/>
+<backstitch x1="0" y1="41" x2="1" y2="41" palindex="1" objecttype="backstitch" sequence="579"/>
+<backstitch x1="1" y1="40" x2="1" y2="41" palindex="1" objecttype="backstitch" sequence="580"/>
+<backstitch x1="1.5" y1="39" x2="2.5" y2="39" palindex="1" objecttype="backstitch" sequence="581"/>
+<backstitch x1="1.5" y1="39" x2="1.5" y2="40" palindex="1" objecttype="backstitch" sequence="582"/>
+<backstitch x1="1.5" y1="40" x2="2.5" y2="40" palindex="1" objecttype="backstitch" sequence="583"/>
+<backstitch x1="1.5" y1="40" x2="1.5" y2="41" palindex="1" objecttype="backstitch" sequence="584"/>
+<backstitch x1="1.5" y1="41" x2="2.5" y2="41" palindex="1" objecttype="backstitch" sequence="585"/>
+<backstitch x1="2.5" y1="40" x2="2.5" y2="41" palindex="1" objecttype="backstitch" sequence="586"/>
+<backstitch x1="10" y1="39" x2="11" y2="39" palindex="1" objecttype="backstitch" sequence="587"/>
+<backstitch x1="10" y1="39" x2="10" y2="40" palindex="1" objecttype="backstitch" sequence="588"/>
+<backstitch x1="10" y1="40" x2="11" y2="40" palindex="1" objecttype="backstitch" sequence="589"/>
+<backstitch x1="10" y1="40" x2="10" y2="41" palindex="1" objecttype="backstitch" sequence="590"/>
+<backstitch x1="10" y1="41" x2="11" y2="41" palindex="1" objecttype="backstitch" sequence="591"/>
+<backstitch x1="11" y1="40" x2="11" y2="41" palindex="1" objecttype="backstitch" sequence="592"/>
+<backstitch x1="11.5" y1="39" x2="12.5" y2="39" palindex="1" objecttype="backstitch" sequence="593"/>
+<backstitch x1="12.5" y1="39" x2="12.5" y2="40" palindex="1" objecttype="backstitch" sequence="594"/>
+<backstitch x1="12.5" y1="40" x2="12.5" y2="41" palindex="1" objecttype="backstitch" sequence="595"/>
+<backstitch x1="20" y1="39" x2="21" y2="39" palindex="1" objecttype="backstitch" sequence="596"/>
+<backstitch x1="20" y1="39" x2="20" y2="40" palindex="1" objecttype="backstitch" sequence="597"/>
+<backstitch x1="20" y1="40" x2="21" y2="40" palindex="1" objecttype="backstitch" sequence="598"/>
+<backstitch x1="20" y1="40" x2="20" y2="41" palindex="1" objecttype="backstitch" sequence="599"/>
+<backstitch x1="20" y1="41" x2="21" y2="41" palindex="1" objecttype="backstitch" sequence="600"/>
+<backstitch x1="21" y1="40" x2="21" y2="41" palindex="1" objecttype="backstitch" sequence="601"/>
+<backstitch x1="21.5" y1="39" x2="22.5" y2="39" palindex="1" objecttype="backstitch" sequence="602"/>
+<backstitch x1="22.5" y1="39" x2="22.5" y2="40" palindex="1" objecttype="backstitch" sequence="603"/>
+<backstitch x1="22.5" y1="40" x2="22.5" y2="41" palindex="1" objecttype="backstitch" sequence="604"/>
+<backstitch x1="21.5" y1="41" x2="22.5" y2="41" palindex="1" objecttype="backstitch" sequence="605"/>
+<backstitch x1="21.5" y1="40" x2="21.5" y2="41" palindex="1" objecttype="backstitch" sequence="606"/>
+<backstitch x1="21.5" y1="39" x2="21.5" y2="40" palindex="1" objecttype="backstitch" sequence="607"/>
+<backstitch x1="21.5" y1="40" x2="22.5" y2="40" palindex="1" objecttype="backstitch" sequence="608"/>
+<backstitch x1="30" y1="39" x2="31" y2="39" palindex="1" objecttype="backstitch" sequence="609"/>
+<backstitch x1="30" y1="39" x2="30" y2="40" palindex="1" objecttype="backstitch" sequence="610"/>
+<backstitch x1="30" y1="40" x2="31" y2="40" palindex="1" objecttype="backstitch" sequence="611"/>
+<backstitch x1="30" y1="40" x2="30" y2="41" palindex="1" objecttype="backstitch" sequence="612"/>
+<backstitch x1="30" y1="41" x2="31" y2="41" palindex="1" objecttype="backstitch" sequence="613"/>
+<backstitch x1="31" y1="40" x2="31" y2="41" palindex="1" objecttype="backstitch" sequence="614"/>
+<backstitch x1="31.5" y1="39" x2="32.5" y2="39" palindex="1" objecttype="backstitch" sequence="615"/>
+<backstitch x1="32.5" y1="39" x2="32.5" y2="40" palindex="1" objecttype="backstitch" sequence="616"/>
+<backstitch x1="32.5" y1="40" x2="32.5" y2="41" palindex="1" objecttype="backstitch" sequence="617"/>
+<backstitch x1="31.5" y1="41" x2="32.5" y2="41" palindex="1" objecttype="backstitch" sequence="618"/>
+<backstitch x1="31.5" y1="39" x2="31.5" y2="40" palindex="1" objecttype="backstitch" sequence="619"/>
+<backstitch x1="31.5" y1="40" x2="32.5" y2="40" palindex="1" objecttype="backstitch" sequence="620"/>
+<backstitch x1="40" y1="39" x2="41" y2="39" palindex="1" objecttype="backstitch" sequence="621"/>
+<backstitch x1="41" y1="39" x2="41" y2="40" palindex="1" objecttype="backstitch" sequence="622"/>
+<backstitch x1="41" y1="40" x2="41" y2="41" palindex="1" objecttype="backstitch" sequence="623"/>
+<backstitch x1="41.5" y1="39" x2="42.5" y2="39" palindex="1" objecttype="backstitch" sequence="624"/>
+<backstitch x1="42.5" y1="39" x2="42.5" y2="40" palindex="1" objecttype="backstitch" sequence="625"/>
+<backstitch x1="42.5" y1="40" x2="42.5" y2="41" palindex="1" objecttype="backstitch" sequence="626"/>
+<backstitch x1="41.5" y1="41" x2="42.5" y2="41" palindex="1" objecttype="backstitch" sequence="627"/>
+<backstitch x1="41.5" y1="40" x2="41.5" y2="41" palindex="1" objecttype="backstitch" sequence="628"/>
+<backstitch x1="41.5" y1="39" x2="41.5" y2="40" palindex="1" objecttype="backstitch" sequence="629"/>
+<backstitch x1="0" y1="42" x2="1" y2="42" palindex="1" objecttype="backstitch" sequence="630"/>
+<backstitch x1="1" y1="42" x2="1" y2="43" palindex="1" objecttype="backstitch" sequence="631"/>
+<backstitch x1="1" y1="43" x2="1" y2="44" palindex="1" objecttype="backstitch" sequence="632"/>
+<backstitch x1="2.5" y1="42" x2="2.5" y2="43" palindex="1" objecttype="backstitch" sequence="633"/>
+<backstitch x1="2.5" y1="43" x2="2.5" y2="44" palindex="1" objecttype="backstitch" sequence="634"/>
+<backstitch x1="4" y1="44" x2="7" y2="44" palindex="49" objecttype="backstitch" sequence="635"/>
+<backstitch x1="10" y1="42" x2="11" y2="42" palindex="1" objecttype="backstitch" sequence="636"/>
+<backstitch x1="11" y1="42" x2="11" y2="43" palindex="1" objecttype="backstitch" sequence="637"/>
+<backstitch x1="11" y1="43" x2="11" y2="44" palindex="1" objecttype="backstitch" sequence="638"/>
+<backstitch x1="11.5" y1="42" x2="12.5" y2="42" palindex="1" objecttype="backstitch" sequence="639"/>
+<backstitch x1="12.5" y1="42" x2="12.5" y2="43" palindex="1" objecttype="backstitch" sequence="640"/>
+<backstitch x1="11.5" y1="43" x2="12.5" y2="43" palindex="1" objecttype="backstitch" sequence="641"/>
+<backstitch x1="11.5" y1="43" x2="11.5" y2="44" palindex="1" objecttype="backstitch" sequence="642"/>
+<backstitch x1="11.5" y1="44" x2="12.5" y2="44" palindex="1" objecttype="backstitch" sequence="643"/>
+<backstitch x1="34.5" y1="22.5" x2="35.5" y2="21.5" palindex="37" objecttype="backstitch" sequence="644" stitchwork_x="35" stitchwork_y="22"/>
+<backstitch x1="14.5" y1="44" x2="15.5" y2="43.5" palindex="37" objecttype="backstitch" sequence="645" stitchwork_x="15" stitchwork_y="44"/>
+</backstitches>
+<ornaments_inc_knots_and_beads>
+<object x1="4" y1="9" palindex="17" objecttype="tent" direction="2"/>
+<object x1="5" y1="9" palindex="17" objecttype="tent" direction="2"/>
+<object x1="14" y1="9" palindex="18" objecttype="tent" direction="1"/>
+<object x1="15" y1="9" palindex="18" objecttype="tent" direction="1"/>
+<object x1="24" y1="9" palindex="19" objecttype="tent" direction="2"/>
+<object x1="25" y1="9" palindex="19" objecttype="tent" direction="2"/>
+<object x1="34" y1="9" palindex="20" objecttype="tent" direction="1"/>
+<object x1="35" y1="9" palindex="20" objecttype="tent" direction="1"/>
+<object x1="4" y1="12" palindex="22" objecttype="tent" direction="2"/>
+<object x1="5" y1="12" palindex="22" objecttype="tent" direction="2"/>
+<object x1="14" y1="12" palindex="23" objecttype="tent" direction="1"/>
+<object x1="15" y1="12" palindex="23" objecttype="tent" direction="1"/>
+<object x1="24" y1="27" palindex="17" objecttype="tent" direction="2"/>
+<object x1="25" y1="27" palindex="17" objecttype="tent" direction="2"/>
+<object x1="5" y1="42" palindex="48" objecttype="tent" direction="2"/>
+<object x1="44.5" y1="12.5" palindex="26" objecttype="bead"/>
+<object x1="45.5" y1="12.5" palindex="26" objecttype="bead"/>
+<object x1="4.5" y1="15.5" palindex="27" objecttype="bead2mm"/>
+<object x1="5.5" y1="15.5" palindex="27" objecttype="bead2mm"/>
+<object x1="14.5" y1="15.5" palindex="28" objecttype="bead3mm"/>
+<object x1="15.5" y1="15.5" palindex="28" objecttype="bead3mm"/>
+<object x1="24.5" y1="15.5" palindex="29" objecttype="bead5mm"/>
+<object x1="25.5" y1="15.5" palindex="29" objecttype="bead5mm"/>
+<object x1="34.5" y1="15.5" palindex="30" objecttype="bead6mm"/>
+<object x1="35.5" y1="15.5" palindex="30" objecttype="bead6mm"/>
+<object x1="44.5" y1="15.5" palindex="31" objecttype="bead"/>
+<object x1="45.5" y1="15.5" palindex="31" objecttype="bead"/>
+<object x1="4.5" y1="18.5" palindex="32" objecttype="bead"/>
+<object x1="5.5" y1="18.5" palindex="32" objecttype="bead"/>
+<object x1="14.5" y1="18.5" palindex="33" objecttype="bead"/>
+<object x1="15.5" y1="18.5" palindex="33" objecttype="bead"/>
+<object x1="24.5" y1="18.5" palindex="34" objecttype="bead"/>
+<object x1="25.5" y1="18.5" palindex="34" objecttype="bead"/>
+<object x1="34.5" y1="18.5" palindex="35" objecttype="bead"/>
+<object x1="35.5" y1="18.5" palindex="35" objecttype="bead"/>
+<object x1="44.5" y1="18.5" palindex="26" objecttype="bead"/>
+<object x1="24.5" y1="21.5" palindex="26" objecttype="bead"/>
+<object x1="4" y1="24" palindex="2" objecttype="quarter" petit="false"/>
+<object x1="5.5" y1="24" palindex="2" objecttype="quarter" petit="false"/>
+<object x1="6.5" y1="24.5" palindex="2" objecttype="quarter" petit="false"/>
+<object x1="7" y1="24.5" palindex="2" objecttype="quarter" petit="false"/>
+<object x1="14" y1="24" palindex="2" objecttype="petite"/>
+<object x1="15.5" y1="24" palindex="2" objecttype="petite"/>
+<object x1="16.5" y1="24.5" palindex="2" objecttype="petite"/>
+<object x1="17" y1="24.5" palindex="2" objecttype="petite"/>
+<object x1="44.5" y1="24.5" palindex="7" objecttype="quarter" petit="false"/>
+<object x1="4" y1="27" palindex="2" objecttype="quarter" petit="false"/>
+<object x1="4.5" y1="27" palindex="7" objecttype="quarter" petit="false"/>
+<object x1="4.5" y1="27.5" palindex="6" objecttype="quarter" petit="false"/>
+<object x1="4" y1="27.5" palindex="8" objecttype="quarter" petit="false"/>
+<object x1="14" y1="27" palindex="2" objecttype="petite"/>
+<object x1="14.5" y1="27" palindex="7" objecttype="petite"/>
+<object x1="14.5" y1="27.5" palindex="6" objecttype="petite"/>
+<object x1="14" y1="27.5" palindex="8" objecttype="petite"/>
+<object x1="24" y1="27" palindex="7" objecttype="quarter" petit="false"/>
+<object x1="25.5" y1="27.5" palindex="7" objecttype="quarter" petit="false"/>
+<object x1="44" y1="27" palindex="14" objecttype="quarter" petit="false"/>
+<object x1="45.5" y1="27.5" palindex="14" objecttype="quarter" petit="false"/>
+<object x1="4.5" y1="30" palindex="9" objecttype="petite"/>
+<object x1="5" y1="30.5" palindex="9" objecttype="petite"/>
+<object x1="5" y1="22" palindex="36" objecttype="bead" stitchwork_x="5" stitchwork_y="22"/>
+<object x1="15.5" y1="22" palindex="36" objecttype="bead" stitchwork_x="15.5" stitchwork_y="22"/>
+<object x1="27" y1="22" palindex="26" objecttype="bead" stitchwork_x="27" stitchwork_y="22"/>
+<object x1="35" y1="37" palindex="43" objecttype="knot"/>
+<object x1="45.5" y1="36.5" palindex="43" objecttype="knot"/>
+<object x1="5.5" y1="40" palindex="43" objecttype="knot"/>
+<object x1="15" y1="40" palindex="44" objecttype="knot"/>
+<object x1="25" y1="40" palindex="45" objecttype="knot"/>
+<object x1="35" y1="40" palindex="46" objecttype="knot"/>
+<object x1="45" y1="40" palindex="43" objecttype="knot"/>
+<object x1="8" y1="43" palindex="50" objecttype="knot"/>
+</ornaments_inc_knots_and_beads>
+<commentboxes>
+</commentboxes>
+</chart>

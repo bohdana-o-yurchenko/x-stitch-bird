@@ -1,19 +1,19 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { cx, ui } from "../common/widgets";
 import type { HeaderMenu } from "@/editor/store/editorStore";
 import { useEditor, useEditorState } from "../hooks/editor";
 import s from "./guide.module.css";
 
-type Step = { id: string; targets: string[]; menu?: HeaderMenu; reveal?: string[]; tip?: boolean };
+type Step = { id: string; targets: string[]; menu?: HeaderMenu; reveal?: string[]; tip?: boolean; link?: string };
 
 /**
  * Tours (SPEC §9.8). `intro` is the quick start for a перенабір; the others are feature tips shown once, right after
  * the feature is first used (`pendingTip`). `targets` are `data-guide` names to highlight (`menu:<id>` = a menu
- * option); `reveal` holds a header menu (`menu`, Pattern ▾ unless said) open on those submenus. Texts: `guide.<step id>.title`, `.points.{1,2,…}`,
- * optional `.tip`.
+ * option); `reveal` holds a header menu (`menu`, Pattern ▾ unless said) open on those submenus; `link`: a page of the app
+ * the card offers to open in a new tab. Texts: `guide.<step id>.title`, `.points.{1,2,…}`, optional `.tip`.
  */
 export const TOURS: Record<string, Step[]> = {
   intro: [
@@ -27,6 +27,7 @@ export const TOURS: Record<string, Step[]> = {
     { id: "save", targets: ["saved", "menu:download"], reveal: [] },
     { id: "versions", targets: ["side-versions"] },
     { id: "finish", targets: ["side-info", "menu", "menu:export", "menu:pdfChart", "menu:oxs"], reveal: ["export"] },
+    { id: "check", targets: ["menu:check"], menu: "app", reveal: [], link: "/check" },
     { id: "done", targets: [] },
   ],
   underlay: [{ id: "underlayTip", targets: ["underlay-edit"] }],
@@ -44,6 +45,8 @@ export const TOURS: Record<string, Step[]> = {
     { id: "autofillAlign", targets: ["underlay-edit"] },
     { id: "autofillHonest", targets: ["tool-autofill"] },
   ],
+  // after the first .oxs export (SPEC §15.51): will your app read it?
+  oxsCheck: [{ id: "oxsCheckTip", targets: ["menu:check"], menu: "app", reveal: [], link: "/check?file=oxs" }],
   // the first time Autofill shows what it found: the bar's buttons
   autofillReview: [
     { id: "autofillReview", targets: ["match-bar"] },
@@ -103,6 +106,7 @@ export function Guide() {
 function GuideTour({ steps, onClose }: { steps: Step[]; onClose: () => void }) {
   const ed = useEditor();
   const g = useTranslations("guide");
+  const locale = useLocale();
   const [i, setI] = useState(0);
   const [boxes, setBoxes] = useState<Box[]>([]);
   /** Open menus stay clear of the shade, so the highlighted option is seen in context. */
@@ -189,6 +193,7 @@ function GuideTour({ steps, onClose }: { steps: Step[]; onClose: () => void }) {
           {!last && <button type="button" className={s.skip} onClick={onClose}>{g("skip")}</button>}
           <span className={s.spacer} />
           {i > 0 && <button type="button" className={ui.btn} onClick={() => setI(i - 1)}>{g("back")}</button>}
+          {step.link && <button type="button" className={ui.btn} onClick={() => void window.open(`/${locale}${step.link}`, "_blank", "noopener")} data-testid="guide-link">{g("openCheck")}</button>}
           <button type="button" className={cx(ui.btn, ui.primary)} autoFocus onClick={() => (last ? onClose() : setI(i + 1))}>{!last ? g("next") : steps === TOURS.intro ? g("done.button") : g("gotIt")}</button>
         </div>
       </div>

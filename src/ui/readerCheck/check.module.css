@@ -1,0 +1,589 @@
+/* "Does my app read it?" (SPEC §15.51): the intro, the three files as tabs, the check's bar, chart beside list */
+.page {
+  --good: #2f7d4a;
+  --good-bg: color-mix(in srgb, var(--good) 13%, var(--surface));
+  --bad: var(--danger);
+  --bad-bg: var(--danger-bg);
+}
+
+.main {
+  flex: 1 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 26px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.toEditor {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* the intro: what it is and the three steps, side by side */
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 28px;
+  align-items: center;
+}
+.intro h1 {
+  font-family: var(--font-heading);
+  font-size: 30px;
+  margin: 2px 0 6px;
+}
+.lead {
+  margin: 0;
+  color: var(--muted);
+  max-width: 46ch;
+  line-height: 1.45;
+}
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.steps li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+.steps li > b {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 12.5px;
+}
+.steps strong {
+  color: var(--accent);
+}
+
+/* the three files */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid var(--line2);
+  border-radius: 12px;
+  background: var(--surface);
+  text-align: left;
+  color: var(--ink);
+}
+.tab:hover {
+  background: var(--sel2);
+}
+.tabOn,
+.tabOn:hover {
+  border-color: var(--accent);
+  background: var(--sel);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.tabName {
+  font-weight: 600;
+  font-size: 15px;
+}
+.tabHint {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.banner {
+  margin: 0;
+  padding: 9px 14px;
+  border: 1px solid var(--warn-line);
+  border-radius: 10px;
+  background: var(--warn-bg);
+  font-size: 13.5px;
+}
+
+/* the check: which one (signed in), the app, the file, the progress, the actions */
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+.runs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.run {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 11px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--ink);
+}
+.run small {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.runOn {
+  border-color: var(--strong);
+  background: var(--strong);
+  color: var(--on-strong);
+}
+.runOn small {
+  color: inherit;
+  opacity: 0.75;
+}
+.runNew {
+  border-style: dashed;
+  color: var(--muted);
+}
+.barRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+.app {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.app input {
+  width: 200px;
+  color: var(--ink);
+}
+.download {
+  font-weight: 600;
+}
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.meter {
+  display: flex;
+  width: 120px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.meterOk {
+  background: var(--good);
+}
+.meterBad {
+  background: var(--bad);
+}
+.hint {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.linkBtn {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+}
+.grow {
+  flex: 1;
+}
+
+/* the chart beside the list, as tall as the window allows */
+.work {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: 14px;
+  height: max(480px, calc(100vh - 150px));
+}
+
+.chartPane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  overflow: hidden;
+}
+.chartTools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.chartTitle {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.chartNote {
+  font-size: 12px;
+  color: var(--muted);
+  margin-left: 6px;
+}
+.on {
+  background: var(--strong);
+  border-color: var(--strong);
+  color: var(--on-strong);
+}
+.chartBox {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: var(--stage);
+}
+/* the chart with room around it, like a sheet on the table */
+.chartRoom {
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+.chartInner {
+  position: relative;
+  box-shadow: var(--shadow);
+}
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.area {
+  position: absolute;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.area:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.areaOk {
+  border-color: color-mix(in srgb, var(--good) 55%, transparent);
+  background: color-mix(in srgb, var(--good) 9%, transparent);
+}
+.areaBad {
+  border-color: color-mix(in srgb, var(--bad) 70%, transparent);
+  background: color-mix(in srgb, var(--bad) 12%, transparent);
+}
+.areaOn,
+.areaOn:hover {
+  border-color: var(--accent);
+  border-width: 3px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 28%, transparent);
+  z-index: 1;
+}
+
+/* the list */
+.list {
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 4px 10px 14px;
+}
+.group h3 {
+  position: sticky;
+  top: -4px;
+  z-index: 1;
+  margin: 0;
+  padding: 12px 4px 6px;
+  background: var(--panel);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.group ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.item {
+  border-radius: 9px;
+  border: 1px solid transparent;
+}
+.itemOn {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.itemHead {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  text-align: left;
+  color: var(--ink);
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+.itemHead:hover {
+  background: var(--sel2);
+}
+.itemOn .itemHead:hover {
+  background: transparent;
+}
+.num {
+  flex: none;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--surface2);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.itemOk .num {
+  background: var(--good);
+  color: #fff;
+}
+.itemBad .num {
+  background: var(--bad);
+  color: #fff;
+}
+.itemOn .num {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.what {
+  flex: 1;
+  padding-top: 1px;
+}
+.tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--surface2);
+  font-size: 11px;
+  color: var(--muted);
+  vertical-align: 1px;
+}
+.tagAbsent {
+  background: var(--warn-bg);
+  color: var(--ink);
+}
+.state {
+  flex: none;
+  width: 18px;
+  text-align: center;
+  font-weight: 700;
+  padding-top: 1px;
+}
+.itemOk .state {
+  color: var(--good);
+}
+.itemBad .state {
+  color: var(--bad);
+}
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px 10px 12px 44px;
+}
+.how {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.how code {
+  font-size: 11.5px;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.absent {
+  margin: 0;
+  padding: 6px 9px;
+  border-radius: 8px;
+  background: var(--warn-bg);
+  font-size: 12.5px;
+}
+.marks {
+  display: flex;
+  gap: 8px;
+}
+.marks button {
+  flex: 1;
+  justify-content: center;
+  padding: 8px 10px;
+  font-weight: 600;
+}
+.okBtn {
+  color: var(--good);
+}
+.okBtn:hover {
+  background: var(--good-bg);
+}
+.okOn,
+.okOn:hover {
+  background: var(--good);
+  border-color: var(--good);
+  color: #fff;
+}
+.badBtn {
+  color: var(--bad);
+}
+.badBtn:hover {
+  background: var(--bad-bg);
+}
+.badOn,
+.badOn:hover {
+  background: var(--bad);
+  border-color: var(--bad);
+  color: #fff;
+}
+.noteRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.note {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font: inherit;
+  font-size: 13px;
+}
+
+/* the results */
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.results h3 {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.headline {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 21px;
+}
+.headlineOk {
+  color: var(--good);
+}
+.lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lines li {
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-size: 14px;
+}
+.lineAll {
+  background: var(--bad-bg);
+  border-left: 4px solid var(--bad);
+}
+.linePart {
+  background: var(--warn-bg);
+  border-left: 4px solid var(--warn-line);
+}
+.lineOk {
+  background: var(--good-bg);
+  border-left: 4px solid var(--good);
+}
+.badList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13.5px;
+}
+.badList li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.badList .num {
+  background: var(--bad);
+  color: #fff;
+}
+.badList em {
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .intro,
+  .steps {
+    grid-template-columns: 1fr;
+  }
+  .tabs {
+    grid-template-columns: 1fr;
+  }
+  .work {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(300px, 50vh) minmax(360px, auto);
+    height: auto;
+  }
+  .list {
+    max-height: 70vh;
+  }
+  .app input {
+    width: 160px;
+  }
+}

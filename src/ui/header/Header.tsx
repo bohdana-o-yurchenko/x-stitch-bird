@@ -87,7 +87,7 @@ function PatternMenu() {
     ...(canOpen ? [{ id: "open", label: t("open"), hint: t(signedIn ? "openHintAccount" : "openHint"), onClick: openPatterns }] : []),
     "-",
     // the work file and the .oxs are easy to mix up: either asks first, saying which is which (SPEC §15.45)
-    { id: "download", label: t("download"), hint: t("downloadHint"), onClick: go("file.chooseFile", "xbird") },
+    { id: "download", label: t("download"), hint: t("downloadHint"), onClick: go("file.chooseFile") },
     { id: "loadFile", label: t("loadFile"), hint: t("loadFileHint"), onClick: go("file.pickToLoad") },
     "-",
     { id: "export", label: t("export"), items: [
@@ -105,7 +105,7 @@ function PatternMenu() {
       ] },
       "-",
       { id: "csv", label: t("csv"), onClick: go("file.export", "csv") },
-      { id: "oxs", label: t("oxs"), hint: t("oxsHint"), onClick: go("file.chooseFile", "oxs") },
+      { id: "oxs", label: t("oxs"), hint: t("oxsHint"), onClick: go("file.export", "oxs") },
     ] },
   ];
   return (
@@ -127,6 +127,7 @@ function AppMenu() {
   const items: MenuItem[] = [
     { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
     { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
+    { id: "check", label: t("check"), hint: t("checkHint"), onClick: () => void window.open(`/${locale}/check`, "_blank", "noopener") },
     "-",
     { id: "language", node: <LanguageSwitch before={() => ed.flush()} /> },
     { id: "theme", node: <ThemeSwitcher onChange={() => ed.refreshChrome()} /> },

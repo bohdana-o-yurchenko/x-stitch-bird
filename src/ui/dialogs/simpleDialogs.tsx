@@ -200,10 +200,11 @@ export function SamePatternDialog({ name, age, answer, onClose }: Close & { name
 }
 
 /**
- * Before a work file or an .oxs is saved (SPEC §15.45): which is which — the two are easy to mix up — and where the
- * files to print or stitch from are. `prefer`: the one asked for, the main button.
+ * Before a work file is saved (SPEC §15.45): what it is and what the .oxs is — the two are easy to mix up — and where
+ * the files to print or stitch from are. The work file is the main button. (Export ▸ .oxs saves straight away: picked
+ * there, it's meant.)
  */
-export function FileChoiceDialog({ prefer, onClose }: Close & { prefer: "xbird" | "oxs" }) {
+export function FileChoiceDialog({ onClose }: Close) {
   const t = useTranslations("dialogs");
   const run = useCommand();
   const b = (c: ReactNode) => <b>{c}</b>;
@@ -213,10 +214,10 @@ export function FileChoiceDialog({ prefer, onClose }: Close & { prefer: "xbird" 
     void run("file.export", format);
     return false as const;
   };
-  const xbird = { label: t("fileChoiceXbird"), primary: prefer === "xbird", onClick: save("pattern") };
-  const oxs = { label: t("fileChoiceOxs"), primary: prefer === "oxs", onClick: save("oxs") };
+  const xbird = { label: t("fileChoiceXbird"), primary: true, onClick: save("pattern") };
+  const oxs = { label: t("fileChoiceOxs"), onClick: save("oxs") };
   return (
-    <Modal title={t("fileChoiceTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, ...(prefer === "xbird" ? [oxs, xbird] : [xbird, oxs])]}>
+    <Modal title={t("fileChoiceTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, oxs, xbird]}>
       <div data-testid="file-choice">
         <p>{t.rich("fileChoiceXbirdText", { b })}</p>
         <p>{t.rich("fileChoiceOxsText", { b })}</p>

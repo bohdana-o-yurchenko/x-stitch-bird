@@ -15,7 +15,7 @@ type User = { email: string; name?: string } | null;
 /** The main pages' bar (SPEC §15.26): logo, the sections as tabs, ☰ (language, theme, help — SPEC §15.49), account — like the editor's. */
 export function HomeHeader({ section, user, pending, signInOpen, setSignInOpen, beforeSignOut, onSignedOut }: {
   /** The tab shown as current; the account page has none. */
-  section: "patterns" | "threads" | "beads" | "account";
+  section: "patterns" | "threads" | "beads" | "account" | "check";
   user: User;
   pending: boolean;
   signInOpen: boolean;
@@ -31,6 +31,7 @@ export function HomeHeader({ section, user, pending, signInOpen, setSignInOpen, 
         <Link href="/patterns" aria-current={section === "patterns" ? "page" : undefined}>{t("patterns")}</Link>
         <Link href="/threads" aria-current={section === "threads" ? "page" : undefined}>{t("threads")}</Link>
         <Link href="/beads" aria-current={section === "beads" ? "page" : undefined}>{t("beads")}</Link>
+        <Link href="/check" aria-current={section === "check" ? "page" : undefined}>{t("check")}</Link>
       </nav>
       <span className={s.spacer} />
       <PagesMenu />

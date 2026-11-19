@@ -73,7 +73,11 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
   if (format === "pattern") {
     return offer(ed, `${base}.${PATTERN_EXT}`, JSON.stringify(await patternFile(ed)), PATTERN_EXT);
   }
-  if (format === "oxs") return offer(ed, `${base}.oxs`, exportOxs(p), "oxs");
+  if (format === "oxs") {
+    offer(ed, `${base}.oxs`, exportOxs(p), "oxs");
+    // the first time: a tip on checking what your app reads of it (SPEC §15.51)
+    return void ed.store.setState({ pendingTip: "oxsCheck" });
+  }
   if (format === "csv") return offer(ed, `${base}-shopping-list.csv`, exportCsv(p, shoppingList(p), ed.t), "csv");
   const view: ImageView = format === "png-color" ? "color" : format === "png-stitched" ? "stitched" : format === "png-symbols" || format === "png-symbols-ink" ? "symbols" : "both";
   const byline = [p.meta.designer, p.meta.copyright && `© ${p.meta.copyright}`].filter(Boolean).join(" · ") || undefined;
@@ -85,7 +89,7 @@ export async function exportAs(ed: Editor, format: ExportFormat) {
 }
 
 /** The fonts every PDF embeds: chart symbols and the text font (regular, bold). */
-async function pdfFonts(): Promise<PdfFonts> {
+export async function pdfFonts(): Promise<PdfFonts> {
   const load = async (url: string) => new Uint8Array(await (await fetch(url)).arrayBuffer());
   const [symbols, regular, bold, cyrRegular, cyrBold] = await Promise.all([SYMBOL_FONT.url, TEXT_FONTS.regular.url, TEXT_FONTS.bold.url, TEXT_FONTS.cyrRegular.url, TEXT_FONTS.cyrBold.url].map(load));
   return { symbols: symbols!, regular: regular!, bold: bold!, cyrRegular: cyrRegular!, cyrBold: cyrBold! };

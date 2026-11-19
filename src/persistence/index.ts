@@ -24,3 +24,5 @@ export { account, accountApi, accountPatternApi, accountRevs, accountUsageApi, t
 export { liveApi, versionApi } from "./cloud/livePatterns";
 export { accountPictureApi, pictureIdsOf } from "./cloud/accountPictures";
 export { accountThreadApi } from "./cloud/accountThreads";
+export { accountCheckApi, type CheckSaved } from "./cloud/accountChecks";
+export { localCheckStore } from "./local/localChecks";

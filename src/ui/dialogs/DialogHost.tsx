@@ -41,7 +41,7 @@ export function DialogHost() {
     case "pdfChart": return <PdfChartDialog file={d.file} content={d.content} read={d.read} onClose={close} />;
     case "pdfPatternIntro": return <PdfPatternIntroDialog onClose={close} />;
     case "pdfUnreadable": return <PdfUnreadableDialog name={d.name} onClose={close} />;
-    case "fileChoice": return <FileChoiceDialog prefer={d.prefer} onClose={close} />;
+    case "fileChoice": return <FileChoiceDialog onClose={close} />;
     case "samePattern": return <SamePatternDialog name={d.name} age={d.age} answer={d.answer} onClose={close} />;
     case "liveConflict": return <LiveConflictDialog theirs={d.theirs} />;
     case "keepPattern": return <KeepPatternDialog then={d.then} onClose={close} />;

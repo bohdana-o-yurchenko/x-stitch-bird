@@ -112,22 +112,23 @@ test("downloads a .xbird pattern file that loads back", async ({ page }) => {
   expect(doc).toMatchObject({ app: "stitchwork", v: 4, w: 60, h: 60 });
 });
 
-test("the work file and the .oxs ask first, saying which is which and where the PDFs are; export lives in Pattern ▾ (SPEC §15.45)", async ({ page }) => {
+test("the work file asks first, saying what the .oxs is and where the PDFs are; the .oxs, picked in Export, saves at once (SPEC §15.45)", async ({ page }) => {
   await expect(page.getByRole("button", { name: /^Print & share$/ })).toHaveCount(0);
   let downloads = 0;
   page.on("download", () => downloads++);
   const dialog = page.getByRole("dialog");
-  // the item asked for is the main button; Cancel saves nothing
+  // the work file is the main button; Cancel saves nothing
   await fileAction(page, "Download work file (.xbird)");
   await expect(dialog.getByTestId("file-choice")).toContainText("Pattern ▾ → Export");
   await expect(dialog.getByTestId("file-choice")).toContainText("PDF for Pattern Keeper");
   await expect(dialog.locator("button[class*=primary]")).toHaveText("Save .xbird");
   await dialog.getByRole("button", { name: "Cancel" }).click();
-  await exportAction(page, "Open Cross Stitch file (.oxs)");
-  await expect(dialog.locator("button[class*=primary]")).toHaveText("Save .oxs");
-  await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
   expect(downloads).toBe(0);
+  const download = page.waitForEvent("download");
+  await exportAction(page, "Open Cross Stitch file (.oxs)");
+  expect((await download).suggestedFilename()).toMatch(/\.oxs$/);
+  await expect(dialog).toHaveCount(0);
   // the PDFs are a submenu away
   await menuAction(page, "pattern", "Export");
   await expect(page.getByRole("menuitem", { name: /^PDF chart to print/ })).toBeVisible();
@@ -300,7 +301,14 @@ test("the quick-start guide opens on the first visit only, highlights what it ex
   for (let i = 0; i < 4; i++) await guide.getByRole("button", { name: "Далі" }).click();
   await expect(guide).toContainText("4. Автозаповнення");
   await expect(page.locator('[data-guide="tool-autofill"]')).toBeVisible();
-  for (let i = 0; i < 7; i++) await guide.getByRole("button", { name: /^(Далі|До вишивання)$/ }).click();
+  for (let i = 0; i < 6; i++) await guide.getByRole("button", { name: "Далі" }).click();
+  // the last step: checking what your app reads (SPEC §15.51), its ☰ item shown, the page a click away
+  await expect(guide).toContainText("10. Чи прочитає ваш застосунок?");
+  await expect(page.getByRole("menuitem", { name: /^Чи прочитає ваш застосунок/ })).toBeVisible();
+  const opened = page.context().waitForEvent("page");
+  await guide.getByTestId("guide-link").click();
+  await expect(await opened).toHaveURL(/\/uk\/check$/);
+  for (let i = 0; i < 2; i++) await guide.getByRole("button", { name: /^(Далі|До вишивання)$/ }).click();
   await expect(guide).toHaveCount(0);
 });
 

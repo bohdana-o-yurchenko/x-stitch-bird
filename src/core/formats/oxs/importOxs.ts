@@ -1,4 +1,4 @@
-import { DMC_BY_CODE, DMC, libraryColor } from "../../catalog/catalog";
+import { DMC_BY_CODE, DMC, libraryColor, PRECIOSA } from "../../catalog/catalog";
 import { applyMaterials, type Materials } from "../../pattern/brands";
 import { createPattern, MAX_SIZE, shortId } from "../../pattern/createPattern";
 import { keyFor } from "../../pattern/keyEntries";
@@ -37,10 +37,11 @@ function resolveCode(number: string | undefined, name: string | undefined, color
     const hit = libraryColor(`${other.prefix}:${raw}`) ?? libraryColor(`${other.prefix}:${raw.padStart(4, "0")}`);
     if (hit) return hit.id;
   }
-  // Preciosa beads, "PREC 17050"
+  // Preciosa beads, "PREC 17050" — of the plain article, else the first with that code
   const prec = /^(prec|preciosa)\s*[-:#]?\s*(.+)$/i.exec(num);
   if (prec && asBead) {
-    const hit = libraryColor(`preciosa:${prec[2]!.trim()}`);
+    const code = prec[2]!.trim();
+    const hit = libraryColor(`preciosa:${code}`) ?? PRECIOSA.find((e) => e.code === code);
     if (hit) return hit.id;
   }
   const code = num.replace(/^(dmc|mill\s*hill|mh)\s*[-:#]?\s*/i, "").trim();
@@ -79,7 +80,7 @@ function exactOf(raw: string | undefined): Exact | null {
   }
 }
 
-const isBeadCode = (c: string) => /^\d{5}$/.test(c.trim().replace(/^(mill\s*hill|mh)\s*/i, ""));
+const isBeadCode = (c: string) => /^(prec|preciosa)\b/i.test(c.trim()) || /^\d{5}$/.test(c.trim().replace(/^(mill\s*hill|mh)\s*/i, ""));
 const clamp = (v: number, lo: number, hi: number, d: number) => Math.max(lo, Math.min(hi, v || d));
 
 interface ItemRecord {

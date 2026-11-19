@@ -28,6 +28,12 @@ vi.mock("@/server/threads", async (orig) => ({
   putThread: vi.fn(async () => {}),
   deleteThread: vi.fn(async () => {}),
 }));
+vi.mock("@/server/readerChecks", async (orig) => ({
+  ...(await orig<typeof import("@/server/readerChecks")>()),
+  listChecks: vi.fn(async () => []),
+  putCheck: vi.fn(async () => true),
+  deleteCheck: vi.fn(async () => {}),
+}));
 vi.mock("@/server/pictures", async (orig) => ({
   ...(await orig<typeof import("@/server/pictures")>()),
   photoUsage: vi.fn(async () => 0),
@@ -58,6 +64,8 @@ const routes: [string, () => Promise<Record<string, Handler>>, string[]][] = [
   ["/api/pictures/[id]", () => import("./pictures/[id]/route") as never, ["GET", "POST", "PUT"]],
   ["/api/threads", () => import("./threads/route") as never, ["GET"]],
   ["/api/threads/[id]", () => import("./threads/[id]/route") as never, ["PUT", "DELETE"]],
+  ["/api/checks", () => import("./checks/route") as never, ["GET"]],
+  ["/api/checks/[id]", () => import("./checks/[id]/route") as never, ["PUT", "DELETE"]],
 ];
 
 beforeEach(() => {
@@ -233,6 +241,19 @@ describe("pictures and live routes refuse what is not theirs", () => {
     expect((await m.POST!(req("POST", [{ ...v, time: 1.5 }]), ctx())).status).toBe(400);
     expect((await m.POST!(req("POST", { not: "a list" }), ctx())).status).toBe(400);
     expect((await m.POST!(req("POST", [v]), ctx())).status).toBe(404);
+  });
+
+  it("checks of reader apps: only well-formed ones are stored; over the limit, 409", async () => {
+    const m = (await import("./checks/[id]/route")) as unknown as Record<string, Handler>;
+    const { putCheck } = await import("@/server/readerChecks");
+    const ok = { id: "c1", kind: "oxs", app: "Хрестики", marks: { dmc310: { v: "ok" }, beadPetite: { v: "issue", note: "missing" } } };
+    for (const bad of [{ ...ok, id: "c2" }, { ...ok, kind: "png" }, { ...ok, app: "x".repeat(61) }, { ...ok, marks: { a: { v: "maybe" } } }, { ...ok, marks: { a: { v: "ok", extra: 1 } } }, { ...ok, marks: { a: { v: "issue", note: "x".repeat(301) } } }, { ...ok, marks: [] }])
+      expect((await m.PUT!(req("PUT", bad), ctx({ id: "c1" }))).status).toBe(400);
+    expect(putCheck).not.toHaveBeenCalled();
+    expect((await m.PUT!(req("PUT", ok), ctx({ id: "c1" }))).status).toBe(204);
+    expect(putCheck).toHaveBeenCalledWith("u1", ok);
+    vi.mocked(putCheck).mockResolvedValueOnce(false);
+    expect((await m.PUT!(req("PUT", ok), ctx({ id: "c1" }))).status).toBe(409);
   });
 
   it("threads: only well-formed own threads are stored", async () => {
