@@ -9,7 +9,7 @@ import { checkPatternKeeper, patternKeeperPdf, type PdfFonts } from "@/core/form
 import { patternFromAttachments } from "@/core/formats/pdf/patternAttachment";
 import { SYMBOL_INKS, symbolColours } from "@/core/formats/pdf/symbolColours";
 import { TEXT_FONTS } from "@/core/formats/pdf/textFonts";
-import { importOxs } from "@/core/formats/oxs/importOxs";
+import { importOxs, type OxsImportOptions } from "@/core/formats/oxs/importOxs";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
 import { formatLabel, keyLabelData } from "@/core/labels/keyLabel";
 import { addEntry } from "@/core/pattern/keyEntries";
@@ -29,7 +29,7 @@ import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import { photoFits } from "../images/photoRoom";
 import { accountPatternApi } from "@/persistence";
 import type { Editor } from "../createEditor";
-import type { SamePatternChoice } from "../store/editorStore";
+import type { SamePatternChoice, UnmatchedChoice } from "../store/editorStore";
 import { loadPattern } from "./pattern";
 
 /** "pattern": our own file — the pattern, key, reference windows and underlay, as text in a `.xbird` file. */
@@ -132,15 +132,15 @@ export async function patternFile(ed: Editor): Promise<PatternFile> {
 }
 
 /** Read a .xbird (or older .json) or .oxs file into a pattern — told apart by content; throws on anything else. */
-export async function readPatternFile(ed: Editor, file: File): Promise<{ pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; versions: FileVersion[]; simplified: number; saved?: number; xbird?: boolean }> {
+export async function readPatternFile(ed: Editor, file: File, opts?: OxsImportOptions): Promise<{ pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; versions: FileVersion[]; simplified: number; unmatched: number; saved?: number; xbird?: boolean }> {
   const text = await readText(file);
   if (text.startsWith("<")) {
-    const { pattern, report } = importOxs(text, ed.state.symbols);
-    return { pattern, refs: null, underlay: null, versions: [], simplified: report.simplified };
+    const { pattern, report } = importOxs(text, ed.state.symbols, opts);
+    return { pattern, refs: null, underlay: null, versions: [], simplified: report.simplified, unmatched: report.unmatched };
   }
   const raw = JSON.parse(text) as PatternFile;
   const saved = Number(raw?.saved);
-  return { ...parsePattern(raw, ed.state.symbols), simplified: 0, xbird: true, ...(saved > 0 ? { saved } : {}) };
+  return { ...parsePattern(raw, ed.state.symbols), simplified: 0, unmatched: 0, xbird: true, ...(saved > 0 ? { saved } : {}) };
 }
 
 /**
@@ -183,7 +183,14 @@ export async function alreadyHere(ed: Editor, file: File): Promise<boolean> {
 
 export async function loadFile(ed: Editor, file: File) {
   try {
-    const { pattern, refs, underlay, versions, simplified, saved, xbird } = await readPatternFile(ed, file);
+    let read = await readPatternFile(ed, file);
+    // an .oxs with colours no brand here has (SPEC §15.52): kept as one's own threads, or the project's own palette
+    if (read.unmatched) {
+      const where = await new Promise<UnmatchedChoice>((answer) => ed.openDialog({ type: "unmatchedColours", count: read.unmatched, answer }));
+      if (!where) return;
+      if (where === "project") read = await readPatternFile(ed, file, { unmatched: "project" });
+    }
+    const { pattern, refs, underlay, versions, simplified, saved, xbird } = read;
     if (xbird && ed.state.account && !(await settleSamePattern(ed, pattern, saved))) return;
     loadPattern(ed, pattern, refs as never, underlay);
     // straight into the library, like a pattern opened from it: listed under Open saved right away

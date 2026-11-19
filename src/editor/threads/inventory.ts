@@ -1,3 +1,4 @@
+import { ORGANIZER } from "@/core/pattern/brands";
 import type { CustomColor, Pattern } from "@/core/pattern/types";
 import { invalidateColors } from "@/core/pattern/resolve";
 import { accountThreadApi } from "@/persistence";
@@ -6,8 +7,12 @@ import type { Editor } from "../createEditor";
 /*
  * Your own threads and beads, signed in (SPEC §15.28): the inventory in the account, offered in every pattern.
  * A pattern keeps a copy of each one it uses (`customs`), so files stay whole; the inventory's version is the one
- * kept up to date. Signed out there is no inventory: custom colours live in their pattern only.
+ * kept up to date. Signed out there is no inventory: custom colours live in their pattern only. So do the colours of a
+ * pattern's own palette (SPEC §15.52): they never join the inventory, whoever is signed in.
  */
+
+/** A colour of a project's own palette: kept in that project alone. */
+export const isProjectColour = (c: CustomColor) => c.brand === ORGANIZER;
 
 /** Same thread: the same kind, brand and code (letters' case and spaces aside). */
 export const sameThread = (a: CustomColor, b: CustomColor) =>
@@ -46,6 +51,7 @@ export class ThreadInventory {
     const join: CustomColor[] = [];
     let changed = false;
     for (const c of Object.values(p.customs)) {
+      if (isProjectColour(c)) continue;
       const theirs = byId.get(c.id);
       if (theirs) {
         if (differs(c, theirs)) {
@@ -68,7 +74,7 @@ export class ThreadInventory {
 
   /** Created or changed in the editor: the inventory gets it too (signed in). */
   async save(c: CustomColor) {
-    if (!this.list) return;
+    if (!this.list || isProjectColour(c)) return;
     if (!(await accountThreadApi.save(c))) return;
     this.set([...this.list.filter((x) => x.id !== c.id), c]);
   }
@@ -76,7 +82,7 @@ export class ThreadInventory {
   /** Picking an inventory thread into the open pattern: the pattern takes a copy. */
   useIn(p: Pattern, id: string) {
     const c = this.list?.find((x) => x.id === id);
-    if (!c || p.customs[id]) return;
+    if (!c || p.customs[id] || isProjectColour(c)) return;
     p.customs[id] = { ...c };
     if (c.kind === "thread" && p.brands && !p.brands.includes(c.brand)) p.brands = [...p.brands, c.brand];
     invalidateColors(p);

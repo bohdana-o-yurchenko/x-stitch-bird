@@ -2,12 +2,14 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { contentOf, FADED_FROM, FONTS, OTHER_H, OTHER_W, otherAppChart, otherCell } from "../../../../tests/support/otherAppChart";
 import { translateEn } from "../../../../tests/support/fixtures";
+import { ORGANIZER } from "../../pattern/brands";
 import { createPattern } from "../../pattern/createPattern";
 import { addEntry } from "../../pattern/keyEntries";
 import { ALL_SYMBOLS } from "../../symbols/symbols";
 import { chartPdf } from "../pdf/chartPdf";
 import { checkPatternKeeper, patternKeeperPdf } from "../pdf/patternKeeper";
 import { threadOf } from "./key";
+import { paletteId, parsePaletteId } from "./palette";
 import { chartComplete, chartToPattern, linedUpPages, readChart } from "./read";
 
 describe("a key row's thread", () => {
@@ -112,6 +114,22 @@ describe("another app's PDF chart (SPEC §15.47)", () => {
     const k = p.key.findIndex((e) => e?.src.startsWith("blend:"));
     expect(p.blends[p.key[k]!.src]!.parts).toEqual([{ id: "dmc:3865", n: 1 }, { id: "dmc:762", n: 1 }]);
     expect(p.layers.stitches.filter((v) => v === k).length).toBe(white.count);
+  });
+
+  it("a symbol and a line named by a number and a colour become the project palette's colours (SPEC §15.52): one per number", async () => {
+    const r = readChart(await contentOf(await otherAppChart()));
+    const mine = { kind: "thread" as const, ids: [paletteId({ kind: "thread", code: "7", hex: "#336699" })] };
+    const thread = r.symbols.find((s) => s.thread?.ids[0] === "dmc:310")!;
+    const p = chartToPattern({ ...r, symbols: r.symbols.map((s) => (s === thread ? { ...s, thread: mine } : s)), lineStyles: r.lineStyles.map((s) => ({ ...s, thread: mine.ids[0]! })) }, ALL_SYMBOLS);
+    expect(Object.values(p.customs)).toMatchObject([{ kind: "thread", brand: ORGANIZER, code: "7", name: "", hex: "#336699" }]);
+    const id = Object.keys(p.customs)[0]!;
+    expect(p.key.filter((e) => e?.src === id).map((e) => e!.t).sort()).toEqual(["back", "thread"]);
+    expect(p.layers.stitches.filter((k) => k && p.key[k]!.src === id).length).toBe(thread.count);
+  });
+
+  it("a palette id carries its kind, colour and number — a number may hold colons", () => {
+    expect(parsePaletteId(paletteId({ kind: "bead", code: "A:1", hex: "#abcdef" }))).toEqual({ kind: "bead", code: "A:1", hex: "#ABCDEF" });
+    expect(parsePaletteId("dmc:310")).toBeNull();
   });
 
   it("the grids chosen make the chart; each chart page's place behind it, lined up cell for cell", async () => {

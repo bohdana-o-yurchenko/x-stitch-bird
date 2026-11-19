@@ -1,5 +1,5 @@
 import { DMC_BY_CODE, DMC, libraryColor, PRECIOSA } from "../../catalog/catalog";
-import { applyMaterials, type Materials } from "../../pattern/brands";
+import { applyMaterials, ORGANIZER, type Materials } from "../../pattern/brands";
 import { createPattern, MAX_SIZE, shortId } from "../../pattern/createPattern";
 import { keyFor } from "../../pattern/keyEntries";
 import type { Corner, CustomColor, KeyEntry, KeyIndex, Pattern, StitchTypeId } from "../../pattern/types";
@@ -12,6 +12,13 @@ export class OxsFormatError extends Error {}
 export interface OxsImportReport {
   /** Quarter stitches or ornaments simplified or skipped. */
   simplified: number;
+  /** Colours whose number matched no brand here (and weren't this app's own): made into colours of one's own. */
+  unmatched: number;
+}
+
+export interface OxsImportOptions {
+  /** Where colours that match no brand go: under a brand of one's own (default), or the project's own palette (SPEC §15.52). */
+  unmatched?: "own" | "project";
 }
 
 const DMC_LC = new Map(DMC.map((e) => [e.code.toLowerCase(), e]));
@@ -28,7 +35,7 @@ const OTHER_BRANDS = [
 const OWN_BRAND = /^([\p{L}][\p{L}\p{N} .&'’-]*?)\s+([\p{L}\p{N}][\p{L}\p{N}.\/-]*)$/u;
 
 /** OXS colour number → library id, or a new custom colour (SPEC §12.2, §15.42). */
-function resolveCode(number: string | undefined, name: string | undefined, color: string | undefined, asBead: boolean, customs: Record<string, CustomColor>): string {
+function resolveCode(number: string | undefined, name: string | undefined, color: string | undefined, asBead: boolean, customs: Record<string, CustomColor>, project = false): string {
   const num = (number ?? "").trim();
   // another brand, named in the number ("Anchor 403", "ANC-403") or the name ("Madeira Black")
   const other = OTHER_BRANDS.find((b) => b.re.test(num) || b.re.test((name ?? "").trim()));
@@ -53,12 +60,22 @@ function resolveCode(number: string | undefined, name: string | undefined, color
     const e = DMC_LC.get(code.toLowerCase().replace(/^0+(?=\d)/, "")) ?? DMC_LC.get(code.toLowerCase());
     if (e) return e.id;
   }
+  const hex = "#" + (color && /^[0-9a-f]{6}$/i.test(color) ? color : "999999");
+  // the project's own palette: the number as it is, one colour per number
+  if (project) {
+    const pc = num || code || "?";
+    const same = Object.values(customs).find((c) => c.brand === ORGANIZER && c.kind === (asBead ? "bead" : "thread") && c.code.toLowerCase() === pc.toLowerCase());
+    if (same) return same.id;
+    const pid = shortId("custom");
+    customs[pid] = { id: pid, kind: asBead ? "bead" : "thread", brand: ORGANIZER, code: pc, name: "", hex };
+    return pid;
+  }
   // not one of the app's: a colour of one's own — under its brand when the number names one ("Kreinik 032")
   const own = !other && !prec && !/^(dmc|mill\s*hill|mh)\b/i.test(num) ? OWN_BRAND.exec(num) : null;
   const id = shortId("custom");
   customs[id] = {
     id, kind: asBead ? "bead" : "thread", brand: own ? own[1]!.trim() : asBead ? "Bead" : "Thread",
-    code: (own ? own[2]! : code) || "?", name: name || code || "Colour", hex: "#" + (color && /^[0-9a-f]{6}$/i.test(color) ? color : "999999"),
+    code: (own ? own[2]! : code) || "?", name: name || code || "Colour", hex,
   };
   return id;
 }
@@ -93,7 +110,9 @@ interface ItemRecord {
   exact?: Exact;
 }
 
-export function importOxs(text: string, symbols: readonly string[]): { pattern: Pattern; report: OxsImportReport } {
+export function importOxs(text: string, symbols: readonly string[], opts: OxsImportOptions = {}): { pattern: Pattern; report: OxsImportReport } {
+  const project = opts.unmatched === "project";
+  let exactCustoms = 0;
   const els = parseXml(text);
   const pick = (name: string, parent: string) => els.filter((e) => e.name === name && e.path[e.path.length - 1] === parent);
   const pr = els.find((e) => e.name === "properties");
@@ -129,6 +148,7 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
     const exact = exactOf(it.attrs.stitchwork);
     if (exact) {
       Object.assign(p.customs, exact.customs ?? {});
+      exactCustoms += Object.keys(exact.customs ?? {}).length;
       Object.assign(p.blends, exact.blends ?? {});
       Object.assign(p.combos, exact.combos ?? {});
       items.set(index, { thread: "", strands, bs, exact });
@@ -141,16 +161,16 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
     const bp = parts.filter((q) => isBeadCode(q.number)), tp = parts.filter((q) => !isBeadCode(q.number));
     const rec: ItemRecord = { thread: "", strands, bs };
     if (parts.length === 2 && bp.length === 1 && tp.length === 1) {
-      const bead = resolveCode(bp[0]!.number, bp[0]!.name, bp[0]!.color, true, p.customs);
-      rec.thread = resolveCode(tp[0]!.number, tp[0]!.name, tp[0]!.color || color, false, p.customs);
+      const bead = resolveCode(bp[0]!.number, bp[0]!.name, bp[0]!.color, true, p.customs, project);
+      rec.thread = resolveCode(tp[0]!.number, tp[0]!.name, tp[0]!.color || color, false, p.customs, project);
       rec.combo = shortId("combo");
       p.combos[rec.combo] = { thread: rec.thread, bead };
       rec.strands = clamp(tp[0]!.n, 1, 6, strands);
     } else if (blends.length >= 2) {
       rec.thread = shortId("blend");
-      p.blends[rec.thread] = { parts: blends.map((b) => ({ id: resolveCode(b.attrs.number, b.attrs.name, b.attrs.color, false, p.customs), n: Math.max(1, Number(b.attrs.strands) || 1) })) };
-    } else rec.thread = resolveCode(number, name, color, false, p.customs);
-    if (beadIndexes.has(index)) rec.bead = resolveCode(number, name, color, true, p.customs);
+      p.blends[rec.thread] = { parts: blends.map((b) => ({ id: resolveCode(b.attrs.number, b.attrs.name, b.attrs.color, false, p.customs, project), n: Math.max(1, Number(b.attrs.strands) || 1) })) };
+    } else rec.thread = resolveCode(number, name, color, false, p.customs, project);
+    if (beadIndexes.has(index)) rec.bead = resolveCode(number, name, color, true, p.customs, project);
     items.set(index, rec);
   }
 
@@ -253,5 +273,5 @@ export function importOxs(text: string, symbols: readonly string[]): { pattern: 
     const v = key(b.attrs.palindex, "back");
     if (v) segments.push({ x1: c[0]!, y1: c[1]!, x2: c[2]!, y2: c[3]!, k: v });
   }
-  return { pattern: p, report: { simplified } };
+  return { pattern: p, report: { simplified, unmatched: Object.keys(p.customs).length - exactCustoms } };
 }

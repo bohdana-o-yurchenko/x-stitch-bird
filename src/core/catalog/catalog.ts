@@ -79,8 +79,21 @@ export const byNumber = (a: ColorEntry, b: ColorEntry) => brandRank(a) - brandRa
 
 export const byHue = (a: ColorEntry, b: ColorEntry) => a.hue - b.hue;
 
+/**
+ * The numbered organizer (SPEC §15.52): the "brand" of floss that is only a number in a kit's organizer (1, 2, 3 …), kept
+ * in one pattern. Reserved name; the UI shows it translated. Its colours show as the bare number, no brand, no name.
+ */
+export const ORGANIZER = "Numbered organizer";
+
+let beadWord = "Bead";
+/** The word that prefixes an organizer bead ("Bead 3"), in the interface language; the UI sets it. */
+export const setBeadWord = (w: string) => { beadWord = w; };
+export const getBeadWord = () => beadWord;
+
+/** A thread or bead as the key and the shopping list name it: "DMC 310", "MH 00557", or just "3" for the organizer's. */
 export const brandCode = (e: ColorEntry | undefined): string => {
   if (!e) return "?";
+  if (e.brand === ORGANIZER) return e.kind === "bead" ? `${beadWord} ${e.code}` : e.code;
   if (e.brand === "DMC") return `DMC ${e.code}`;
   if (e.brand === "Mill Hill") return `MH ${e.code}`;
   return e.brand ? `${e.brand} ${e.code}` : e.code;

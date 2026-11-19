@@ -6,6 +6,7 @@ import { BEAD_CATALOGUES, THREAD_CATALOGUES, byNumber, libraryColor, matchesQuer
 import type { ColorEntry } from "@/core/color/colorEntry";
 import type { PdfContent } from "@/core/formats/pdfChart/content";
 import type { KeyThread } from "@/core/formats/pdfChart/key";
+import { paletteId, parsePaletteId, type PaletteColour } from "@/core/formats/pdfChart/palette";
 import { readChart, type ChartRead, type SampleBox } from "@/core/formats/pdfChart/read";
 import { allSettled, settledRead, type ChartChoice } from "@/editor/actions/pdfChart";
 import { renderPdfPage } from "@/platform/pdf";
@@ -22,10 +23,22 @@ import s from "./pdfChart.module.css";
 
 type Step = "grids" | "faded" | "key" | "done";
 
-const hexOf = (id: string | undefined) => (id ? libraryColor(id)?.hex : undefined);
+/** The kinds of floss the other rows of the key use: brands, or the numbered organizer. */
+interface Others {
+  brands: Set<"thread" | "bead">;
+  organizer: Set<"thread" | "bead">;
+}
+
+const hexOf = (id: string | undefined) => (id ? (parsePaletteId(id)?.hex ?? libraryColor(id)?.hex) : undefined);
 const label = (e: ColorEntry | undefined) => (e ? `${e.brand} ${e.code}` : "?");
-const threadLabel = (t: KeyThread) => t.ids.map((id) => label(libraryColor(id))).join(" + ");
-const threadName = (t: KeyThread) => t.ids.map((id) => libraryColor(id)?.name ?? "").join(" + ");
+/** A thread id as the key row shows it: a colour of the numbered organizer by its number alone. */
+const idLabel = (id: string) => {
+  const c = parsePaletteId(id);
+  return c ? c.code : label(libraryColor(id));
+};
+const idName = (id: string) => (parsePaletteId(id) ? "" : (libraryColor(id)?.name ?? ""));
+const threadLabel = (t: KeyThread) => t.ids.map(idLabel).join(" + ");
+const threadName = (t: KeyThread) => t.ids.map(idName).join(" + ");
 const threadHex = (t: KeyThread | null) => (t ? hexOf(t.ids[0]) : undefined);
 
 /** The grids' read needs a word: they don't add up — conflicts, grids without numbers, another size than stated. */
@@ -232,10 +245,23 @@ function ChartPreview({ read, colours, lineColours, picked, fadedEmpty }: { read
   return <canvas ref={canvas} className={s.preview} data-testid="pdf-chart-preview" />;
 }
 
-/** Threads or beads to choose from: a brand's catalogue, searched by number or name. */
-function ThreadSearch({ kinds, near, onPick }: { kinds: ("thread" | "bead")[]; near: string | null; onPick: (t: KeyThread) => void }) {
+/**
+ * Threads or beads to choose from: a brand's catalogue, searched by number or name — or, for floss that is in no brand
+ * here, a colour of the numbered organizer: a number and an approximate colour (SPEC §15.52). Either / or: where the
+ * other rows use brands there's no organizer, where they use the organizer there are no brands (`others`).
+ */
+function ThreadSearch({ kinds, near, taken, others, onPick }: { kinds: ("thread" | "bead")[]; near: string | null; taken: PaletteColour[]; others: Others; onPick: (t: KeyThread) => void }) {
   const t = useTranslations("pdfChart");
   const [kind, setKind] = useState(kinds[0]!);
+  const [ownPick, setOwn] = useState(false);
+  const organizerOnly = others.organizer.has(kind) && !others.brands.has(kind);
+  const brandsOnly = others.brands.has(kind) && !others.organizer.has(kind);
+  const own = ownPick || organizerOnly;
+  const used = new Set(taken.filter((c) => c.kind === kind).map((c) => c.code.toLowerCase()));
+  let next = 1;
+  while (used.has(String(next))) next++;
+  const [code, setCode] = useState(String(next));
+  const [hex, setHex] = useState(near && /^#[0-9a-f]{6}$/i.test(near) ? near : "#7A9CC6");
   const catalogues = kind === "thread" ? THREAD_CATALOGUES : BEAD_CATALOGUES;
   const [brand, setBrand] = useState(Object.keys(catalogues)[0]!);
   const list = catalogues[brand] ?? catalogues[Object.keys(catalogues)[0]!]!;
@@ -257,26 +283,46 @@ function ThreadSearch({ kinds, near, onPick }: { kinds: ("thread" | "bead")[]; n
     <div className={s.search} data-testid="pdf-chart-search">
       <div className={s.tabs}>
         {kinds.length > 1 && kinds.map((k) => (
-          <button key={k} type="button" className={cx(s.tab, k === kind && s.on)} onClick={() => { setKind(k); setBrand(Object.keys(k === "thread" ? THREAD_CATALOGUES : BEAD_CATALOGUES)[0]!); }}>{t(k)}</button>
+          <button key={k} type="button" className={cx(s.tab, k === kind && s.on)} onClick={() => { setKind(k); setBrand(Object.keys(k === "thread" ? THREAD_CATALOGUES : BEAD_CATALOGUES)[0]!); setOwn(false); }}>{t(k)}</button>
         ))}
         {kinds.length > 1 && <span className={s.sep} />}
-        {Object.keys(catalogues).map((b) => (
-          <button key={b} type="button" className={cx(s.tab, b === brand && s.on)} onClick={() => setBrand(b)}>{b}</button>
+        {!organizerOnly && Object.keys(catalogues).map((b) => (
+          <button key={b} type="button" className={cx(s.tab, !own && b === brand && s.on)} onClick={() => { setBrand(b); setOwn(false); }}>{b}</button>
         ))}
+        {!brandsOnly && <button type="button" className={cx(s.tab, own && s.on)} aria-pressed={own} data-testid="pdf-chart-palette-tab" onClick={() => setOwn(true)}>{t("palette")}</button>}
       </div>
-      <input className={ui.input} autoFocus placeholder={t("searchPlaceholder")} value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && shown[0] && pick(shown[0])} aria-label={t("searchPlaceholder")} />
-      {closest && (
+      {own && (
+        <form
+          className={s.palette}
+          data-testid="pdf-chart-palette"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (code.trim()) onPick({ kind, ids: [paletteId({ kind, code, hex })] });
+          }}
+        >
+          <p className={ui.hint}>{t("paletteHint")}</p>
+          <div className={s.paletteRow}>
+            <label>{t("paletteNumber")}<input className={ui.input} autoFocus required value={code} onChange={(e) => setCode(e.target.value)} /></label>
+            <label>{t("paletteColour")}<input type="color" value={hex} onChange={(e) => setHex(e.target.value.toUpperCase())} /></label>
+            <button type="submit" className={cx(ui.btn, ui.primary)}>{t("paletteUse")}</button>
+          </div>
+        </form>
+      )}
+      {!own && <input className={ui.input} autoFocus placeholder={t("searchPlaceholder")} value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && shown[0] && pick(shown[0])} aria-label={t("searchPlaceholder")} />}
+      {!own && closest && (
         <button type="button" className={s.closest} onClick={() => pick(closest)}>
           <i style={{ background: near! }} /> {t("closest")} <i style={{ background: closest.hex }} /> <b>{label(closest)}</b> {closest.name}
         </button>
       )}
-      <div className={s.results} role="listbox">
-        {shown.map((e) => (
-          <button key={e.id} type="button" role="option" aria-selected={false} className={s.result} onClick={() => pick(e)}>
-            <i style={{ background: e.hex }} /> <b>{label(e)}</b> <span>{e.name}</span>
-          </button>
-        ))}
-      </div>
+      {!own && (
+        <div className={s.results} role="listbox">
+          {shown.map((e) => (
+            <button key={e.id} type="button" role="option" aria-selected={false} className={s.result} onClick={() => pick(e)}>
+              <i style={{ background: e.hex }} /> <b>{label(e)}</b> <span>{e.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -287,9 +333,24 @@ function KeyStep({ file, content, read, symbols, setSymbols, lines, setLines, fa
   lines: Record<number, ChartChoice<string>>; setLines: (v: Record<number, ChartChoice<string>>) => void;
 }) {
   const t = useTranslations("pdfChart");
+  // the organizer's colours named so far: the next number offered is a free one
+  const taken = [...Object.values(symbols), ...Object.values(lines)].flatMap((c) => (c === "skip" ? [] : typeof c === "string" ? [c] : c.ids)).flatMap((id) => parsePaletteId(id) ?? []);
   const [open, setOpen] = useState<string | null>(() => read.symbols.find((x) => !x.thread)?.id ?? (read.lineStyles.some((x) => !x.thread) ? `line:${read.lineStyles.findIndex((x) => !x.thread)}` : null));
   const samples = useCuts(file, read.symbols.flatMap((x) => (x.sample ? [{ key: x.id, box: x.sample }] : [])), content.pages, 2400);
   const settled = settledRead({ read, symbols, lines });
+  /** What the other rows use, as read or as chosen: brands or the organizer, per thread / bead. */
+  const othersOf = (except: string): Others => {
+    const o: Others = { brands: new Set(), organizer: new Set() };
+    const add = (kind: "thread" | "bead", ids: string[]) => ids.forEach((id) => (parsePaletteId(id) ? o.organizer : o.brands).add(kind));
+    read.symbols.forEach((x, i) => {
+      const th = settled.symbols[i]?.thread;
+      if (x.id !== except && th) add(th.kind, th.ids);
+    });
+    settled.lineStyles.forEach((x, i) => {
+      if (`line:${i}` !== except && x.thread) add("thread", [x.thread]);
+    });
+    return o;
+  };
   const colours = settled.symbols.map((x) => threadHex(x.thread) ?? null);
   const lineColours = settled.lineStyles.map((x) => hexOf(x.thread ?? undefined) ?? null);
   const picked = open && !open.startsWith("line:") ? read.symbols.findIndex((x) => x.id === open) : null;
@@ -347,7 +408,7 @@ function KeyStep({ file, content, read, symbols, setSymbols, lines, setLines, fa
               </button>
               {open === x.id && (
                 <div className={s.rowBody}>
-                  <ThreadSearch kinds={["thread", "bead"]} near={x.fill} onPick={(th) => { setSymbols({ ...symbols, [x.id]: th }); setOpen(null); }} />
+                  <ThreadSearch kinds={["thread", "bead"]} near={x.fill} taken={taken} others={othersOf(x.id)} onPick={(th) => { setSymbols({ ...symbols, [x.id]: th }); setOpen(null); }} />
                   <button type="button" className={cx(ui.btn, ui.ghost)} onClick={() => { setSymbols({ ...symbols, [x.id]: "skip" }); setOpen(null); }}>{t("leaveOut")}</button>
                 </div>
               )}
@@ -363,7 +424,7 @@ function KeyStep({ file, content, read, symbols, setSymbols, lines, setLines, fa
                 <span className={s.sample}><i className={s.lineSample} style={{ background: x.ink }} /></span>
                 <span className={s.rowText}>
                   <span className={s.chosen}>
-                    {thread ? <><i style={{ background: hexOf(thread) }} /><b>{label(libraryColor(thread))}</b> {libraryColor(thread)?.name}</> : c === "skip" ? <em>{t("leftOut")}</em> : <em className={s.warnText}>{t("lineNotRead")}</em>}
+                    {thread ? <><i style={{ background: hexOf(thread) }} /><b>{idLabel(thread)}</b> {idName(thread)}</> : c === "skip" ? <em>{t("leftOut")}</em> : <em className={s.warnText}>{t("lineNotRead")}</em>}
                   </span>
                   <small className={ui.hint}>{t("lineCount", { count: x.count })}</small>
                 </span>
@@ -371,7 +432,7 @@ function KeyStep({ file, content, read, symbols, setSymbols, lines, setLines, fa
               </button>
               {open === key && (
                 <div className={s.rowBody}>
-                  <ThreadSearch kinds={["thread"]} near={null} onPick={(th) => { setLines({ ...lines, [i]: th.ids[0]! }); setOpen(null); }} />
+                  <ThreadSearch kinds={["thread"]} near={null} taken={taken} others={othersOf(key)} onPick={(th) => { setLines({ ...lines, [i]: th.ids[0]! }); setOpen(null); }} />
                   <button type="button" className={cx(ui.btn, ui.ghost)} onClick={() => { setLines({ ...lines, [i]: "skip" }); setOpen(null); }}>{t("leaveOutLines")}</button>
                 </div>
               )}

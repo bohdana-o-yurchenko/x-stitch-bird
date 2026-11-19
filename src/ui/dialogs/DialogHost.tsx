@@ -10,7 +10,7 @@ import { PdfPageDialog } from "./PdfPageDialog";
 import { PdfChartDialog } from "./PdfChartDialog";
 import { NewPatternDialog } from "./NewPatternDialog";
 import {
-  DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, LargePhotoDialog, SamePatternDialog, FileChoiceDialog, PdfPatternIntroDialog, PdfUnreadableDialog, MirrorFromCentreDialog, PhotoRoomDialog,
+  DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, LargePhotoDialog, SamePatternDialog, UnmatchedColoursDialog, FileChoiceDialog, PdfPatternIntroDialog, PdfUnreadableDialog, MirrorFromCentreDialog, PhotoRoomDialog,
   PatternKeeperDialog, ReplaceKeyDialog, ResizeDialog, TextFallbackDialog,
 } from "./simpleDialogs";
 
@@ -43,6 +43,7 @@ export function DialogHost() {
     case "pdfUnreadable": return <PdfUnreadableDialog name={d.name} onClose={close} />;
     case "fileChoice": return <FileChoiceDialog onClose={close} />;
     case "samePattern": return <SamePatternDialog name={d.name} age={d.age} answer={d.answer} onClose={close} />;
+    case "unmatchedColours": return <UnmatchedColoursDialog count={d.count} answer={d.answer} onClose={close} />;
     case "liveConflict": return <LiveConflictDialog theirs={d.theirs} />;
     case "keepPattern": return <KeepPatternDialog then={d.then} onClose={close} />;
   }

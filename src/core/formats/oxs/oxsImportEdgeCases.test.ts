@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ORGANIZER } from "../../pattern/brands";
 import { resolveColor } from "../../pattern/resolve";
 import { ALL_SYMBOLS } from "../../symbols/symbols";
 import { importOxs, OxsFormatError } from "./importOxs";
@@ -48,6 +49,24 @@ ${o.palette ?? '<palette_item index="1" number="310" name="Black" color="000000"
 <backstitches>${o.back ?? ""}</backstitches>
 </chart>`;
 const read = (x: string) => importOxs(x, ALL_SYMBOLS);
+
+describe("colours no brand here has (SPEC §15.52)", () => {
+  const unknown = oxs({
+    palette: '<palette_item index="1" number="K-7" name="Pearl" color="EEEEEE"/><palette_item index="2" number="310" name="Black" color="000000"/><palette_item index="3" number="k-7" name="Pearl again" color="EEEEEE"/>',
+    full: '<stitch x="0" y="0" palindex="1"/><stitch x="1" y="0" palindex="2"/><stitch x="2" y="0" palindex="3"/>',
+  });
+
+  it("by default they become threads of one's own; the option puts them in the project palette, one colour per number", () => {
+    const own = importOxs(unknown, ALL_SYMBOLS);
+    expect(Object.values(own.pattern.customs).map((c) => c.brand)).toEqual(["Thread", "Thread"]);
+    expect(own.report.unmatched).toBe(2);
+    const { pattern: p, report } = importOxs(unknown, ALL_SYMBOLS, { unmatched: "project" });
+    expect(Object.values(p.customs).map((c) => [c.brand, c.code, c.name, c.hex])).toEqual([[ORGANIZER, "K-7", "", "#EEEEEE"]]);
+    expect(report.unmatched).toBe(1);
+    // 310 is DMC's, so it stays DMC; both K-7 cells share the one palette colour
+    expect(p.key.filter(Boolean).map((e) => e!.src)).toEqual([Object.keys(p.customs)[0], "dmc:310"]);
+  });
+});
 
 describe("opening an OXS file", () => {
   it("refuses a file that isn't a chart, or has no usable size", () => {

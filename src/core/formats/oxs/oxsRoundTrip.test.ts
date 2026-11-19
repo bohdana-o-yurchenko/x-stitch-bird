@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ORGANIZER, applyMaterials } from "../../pattern/brands";
 import { createPattern } from "../../pattern/createPattern";
 import { addEntry } from "../../pattern/keyEntries";
 import { resolveColor } from "../../pattern/resolve";
@@ -7,6 +8,40 @@ import { exportOxs } from "./exportOxs";
 import { importOxs } from "./importOxs";
 
 describe("OXS round trip", () => {
+  it("numbered organizer: bare numbers in the file, organizer mode read back unchanged", () => {
+    const p = createPattern(2, 1, "Org");
+    p.customs["custom:o1"] = { id: "custom:o1", kind: "thread", brand: ORGANIZER, code: "1", name: "", hex: "#336699" };
+    p.customs["custom:o2"] = { id: "custom:o2", kind: "thread", brand: ORGANIZER, code: "2", name: "", hex: "#993366" };
+    applyMaterials(p, { brands: [ORGANIZER], beadBrands: ["Mill Hill"], onlyBrand: true, onlyBeadBrand: false, noBeads: true });
+    const a = addEntry(p, { t: "thread", src: "custom:o1", n: 2, st: "full" }, ALL_SYMBOLS);
+    const b = addEntry(p, { t: "thread", src: "custom:o2", n: 2, st: "full" }, ALL_SYMBOLS);
+    p.layers.stitches.set([a, b]);
+    const xml = exportOxs(p);
+    expect(xml).toContain('number="1"');
+    expect(xml).toContain('number="2"');
+    expect(xml).not.toContain("Numbered organizer 1");
+    const { pattern: q } = importOxs(xml, ALL_SYMBOLS);
+    expect(q.brands).toEqual([ORGANIZER]);
+    expect(Object.values(q.customs).map((c) => [c.brand, c.code]).sort()).toEqual([[ORGANIZER, "1"], [ORGANIZER, "2"]]);
+  });
+
+  it("numbered organizer: floss is bare, bead is \"Bead N\"", () => {
+    const p = createPattern(2, 1, "Org");
+    const own = (id: string, kind: "thread" | "bead", code: string) => (p.customs[id] = { id, kind, brand: ORGANIZER, code, name: "", hex: "#336699" });
+    own("custom:f1", "thread", "1");
+    own("custom:f2", "thread", "2");
+    own("custom:b3", "bead", "3");
+    p.blends["blend:ff"] = { parts: [{ id: "custom:f1", n: 1 }, { id: "custom:f2", n: 1 }] };
+    p.combos["combo:fb"] = { thread: "custom:f1", bead: "custom:b3" };
+    applyMaterials(p, { brands: [ORGANIZER], beadBrands: [ORGANIZER], onlyBrand: true, onlyBeadBrand: true, noBeads: false });
+    const a = addEntry(p, { t: "thread", src: "blend:ff", n: null, st: "full" }, ALL_SYMBOLS);
+    const b = addEntry(p, { t: "combo", src: "combo:fb", n: 2, st: "full" }, ALL_SYMBOLS);
+    p.layers.stitches.set([a, b]);
+    const xml = exportOxs(p);
+    expect(xml).toContain('number="1+Bead 3"');
+    expect(xml).toContain('number="1+2"');
+  });
+
   it("keeps beads, floss + bead, blends, half crosses and backstitch", () => {
     const p = createPattern(6, 2, "Mix");
     p.blends["blend:a"] = { parts: [{ id: "dmc:310", n: 1 }, { id: "dmc:321", n: 1 }] };

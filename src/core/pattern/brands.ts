@@ -1,4 +1,4 @@
-import { BEAD_CATALOGUES, libraryColor, THREAD_CATALOGUES } from "../catalog/catalog";
+import { BEAD_CATALOGUES, libraryColor, ORGANIZER, THREAD_CATALOGUES } from "../catalog/catalog";
 import type { Pattern } from "./types";
 
 /*
@@ -10,6 +10,29 @@ import type { Pattern } from "./types";
 /** Thread brands built into the app (catalogues). */
 export const BUILT_IN_THREAD_BRANDS: readonly string[] = Object.keys(THREAD_CATALOGUES);
 
+/*
+ * The numbered organizer (SPEC §15.52) is a mode of the pattern's floss (or beads), instead of brands: the kit's own
+ * numbers 1, 2, 3 … Its colours live in this pattern only — never in the account's inventory, never offered in another
+ * pattern. Brands and the organizer don't mix: a pattern's floss is either one or the other.
+ */
+export { ORGANIZER };
+
+/** The colours of the organizer, threads or beads. */
+export const organizerColours = (p: Pick<Pattern, "customs">, kind: "thread" | "bead") =>
+  Object.values(p.customs).filter((c) => c.kind === kind && c.brand === ORGANIZER);
+
+/** The next free number for a colour of the organizer (1, 2, 3 …). */
+export function nextOrganizerCode(p: Pick<Pattern, "customs">, kind: "thread" | "bead"): string {
+  const taken = new Set(organizerColours(p, kind).map((c) => c.code.trim().toLowerCase()));
+  let n = 1;
+  while (taken.has(String(n))) n++;
+  return String(n);
+}
+
+/** A number the organizer already has (another colour than `except`, letters' case and spaces aside). */
+export const organizerCodeTaken = (p: Pick<Pattern, "customs">, kind: "thread" | "bead", code: string, except?: string) =>
+  organizerColours(p, kind).some((c) => c.id !== except && c.code.trim().toLowerCase() === code.trim().toLowerCase());
+
 /** The brand of a single thread id, if it's a thread: `dmc:310` → DMC, `anchor:403` → Anchor, your own → its brand. */
 function threadBrand(p: Pattern, id: string): string | null {
   if (id.startsWith("custom:")) {
@@ -20,7 +43,7 @@ function threadBrand(p: Pattern, id: string): string | null {
   return e?.kind === "thread" ? e.brand : null;
 }
 
-/** Brands the key uses: its threads, the parts of its blends, the threads of floss + bead. */
+/** Brands the key uses: its threads, the parts of its blends, the threads of floss + bead — and the project palette once it holds a thread. */
 export function usedThreadBrands(p: Pattern): Set<string> {
   const used = new Set<string>();
   const add = (id: string | undefined) => {
@@ -33,15 +56,23 @@ export function usedThreadBrands(p: Pattern): Set<string> {
     else if (e.src.startsWith("combo:")) add(p.combos[e.src]?.thread);
     else add(e.src);
   }
+  // the organizer with threads in it can't leave, used on the chart or not
+  if (organizerColours(p, "thread").length) used.add(ORGANIZER);
   return used;
 }
 
+/** Floss is the organizer's numbers, not brands: chosen, or it already holds a thread. */
+export const threadsInOrganizer = (p: Pattern) => !!p.brands?.includes(ORGANIZER) || organizerColours(p, "thread").length > 0;
+
+/** Beads likewise. */
+export const beadsInOrganizer = (p: Pattern) => !!p.beadBrands?.includes(ORGANIZER) || organizerColours(p, "bead").length > 0;
+
 /**
  * The pattern's brands, in its order: the ones chosen for it (DMC when it never chose — patterns made before brands),
- * and any the key uses — a used brand is never hidden.
+ * and any the key uses — a used brand is never hidden. In the organizer mode, that's the organizer alone.
  */
 export function patternBrands(p: Pattern): string[] {
-  const out = [...(p.brands?.length ? p.brands : ["DMC"])];
+  const out = threadsInOrganizer(p) ? [ORGANIZER] : [...(p.brands?.length ? p.brands : ["DMC"])];
   for (const b of usedThreadBrands(p)) if (!out.includes(b)) out.push(b);
   return out;
 }
@@ -65,6 +96,7 @@ export function usedBeadBrands(p: Pattern): Set<string> {
     if (e.t === "bead") add(e.src);
     else if (e.src.startsWith("combo:")) add(p.combos[e.src]?.bead);
   }
+  if (organizerColours(p, "bead").length) used.add(ORGANIZER);
   return used;
 }
 
@@ -73,7 +105,7 @@ export const usesBeads = (p: Pattern) => p.key.some((e) => !!e && (e.t === "bead
 
 /** The pattern's bead brands: the chosen ones (all built-in when it never chose), and any the key uses. */
 export function patternBeadBrands(p: Pattern): string[] {
-  const out = [...(p.beadBrands?.length ? p.beadBrands : BUILT_IN_BEAD_BRANDS)];
+  const out = beadsInOrganizer(p) ? [ORGANIZER] : [...(p.beadBrands?.length ? p.beadBrands : BUILT_IN_BEAD_BRANDS)];
   for (const b of usedBeadBrands(p)) if (!out.includes(b)) out.push(b);
   return out;
 }
@@ -88,8 +120,8 @@ export function materials(p: Pattern) {
   const threads = patternBrands(p), beads = patternBeadBrands(p);
   const beadsOn = !p.noBeads || usesBeads(p);
   return {
-    threads: { brands: threads, single: !!p.onlyBrand && threads.length === 1 },
-    beads: { on: beadsOn, brands: beads, single: beadsOn && !!p.onlyBeadBrand && beads.length === 1 },
+    threads: { brands: threads, single: threads.length === 1 && (!!p.onlyBrand || threads[0] === ORGANIZER) },
+    beads: { on: beadsOn, brands: beads, single: beadsOn && beads.length === 1 && (!!p.onlyBeadBrand || beads[0] === ORGANIZER) },
   };
 }
 
@@ -118,11 +150,13 @@ export const NEW_MATERIALS: Materials = { brands: [...BUILT_IN_THREAD_BRANDS], o
 
 /** Sets them on a pattern (only what differs from a pattern that never chose is written). */
 export function applyMaterials(p: Pattern, m: Materials) {
-  p.brands = [...new Set(m.brands)];
-  p.beadBrands = [...new Set(m.beadBrands)];
-  if (m.onlyBrand) p.onlyBrand = true;
+  // the organizer replaces brands: with it chosen, nothing else is kept beside it
+  const organizer = (list: string[]) => (list.includes(ORGANIZER) ? [ORGANIZER] : [...new Set(list)]);
+  p.brands = organizer(m.brands);
+  p.beadBrands = organizer(m.beadBrands);
+  if (m.onlyBrand || p.brands[0] === ORGANIZER) p.onlyBrand = true;
   else delete p.onlyBrand;
-  if (m.onlyBeadBrand) p.onlyBeadBrand = true;
+  if (m.onlyBeadBrand || p.beadBrands[0] === ORGANIZER) p.onlyBeadBrand = true;
   else delete p.onlyBeadBrand;
   if (m.noBeads && !usesBeads(p)) p.noBeads = true;
   else delete p.noBeads;

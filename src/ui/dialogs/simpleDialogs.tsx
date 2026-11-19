@@ -8,7 +8,7 @@ import { clampSize, MAX_SIZE, MIN_SIZE } from "@/core/pattern/createPattern";
 import { symbolText } from "@/core/symbols/lineStyles";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { stopAskingLargePhoto } from "@/editor/images/largePhoto";
-import type { SamePatternChoice } from "@/editor/store/editorStore";
+import type { SamePatternChoice, UnmatchedChoice } from "@/editor/store/editorStore";
 import { copyText, isPdfFile } from "@/platform/files";
 import { ConfirmDelete, KeyIcon, Modal, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../hooks/editor";
@@ -195,6 +195,27 @@ export function SamePatternDialog({ name, age, answer, onClose }: Close & { name
     <Modal title={t("samePatternTitle")} onClose={close} buttons={[{ label: t("cancel") }, { label: t("samePatternReplace"), onClick: choose({ kind: "replace" }) }, { label: t("samePatternNew"), primary: true, onClick: choose({ kind: "new", name: t("samePatternNewName", { name }) }) }]}>
       <p className={ui.hint} data-testid="same-pattern">{t(`samePattern_${age}`, { name })}</p>
       <p className={ui.hint}>{t("samePatternKept")}</p>
+    </Modal>
+  );
+}
+
+/** An .oxs with colours no brand here has (SPEC §15.52): keep them as your own threads, or put them in the project's own palette. */
+export function UnmatchedColoursDialog({ count, answer, onClose }: Close & { count: number; answer: (choice: UnmatchedChoice) => void }) {
+  const t = useTranslations("dialogs");
+  // closing any other way (Esc, outside, Cancel) opens nothing
+  const close = () => {
+    answer(null);
+    onClose();
+  };
+  const choose = (choice: UnmatchedChoice) => () => {
+    answer(choice);
+    onClose();
+    return false;
+  };
+  return (
+    <Modal title={t("unmatchedTitle")} onClose={close} buttons={[{ label: t("cancel") }, { label: t("unmatchedOwn"), onClick: choose("own") }, { label: t("unmatchedProject"), primary: true, onClick: choose("project") }]}>
+      <p className={ui.hint} data-testid="unmatched-colours">{t("unmatchedBody", { count })}</p>
+      <p className={ui.hint}>{t("unmatchedHint")}</p>
     </Modal>
   );
 }
