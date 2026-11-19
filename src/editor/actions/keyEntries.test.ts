@@ -111,3 +111,25 @@ describe("deleting an entry", () => {
     expect([ed.doc.key[red]?.src, ed.doc.layers.stitches[3]]).toEqual(["dmc:321", red]);
   });
 });
+
+describe("default materials", () => {
+  const withBrands = (brands: string[]) => {
+    const p = createPattern(10, 10);
+    p.brands = brands;
+    loadPattern(ed, p);
+  };
+
+  it("defaults to a thread of the pattern's own brand when it has no DMC", () => {
+    withBrands(["Anchor"]);
+    const d = draftFor(ed);
+    expect(d.thread.startsWith("anchor:")).toBe(true);
+    expect(d.slots[0]!.id).toBe(d.thread);
+    expect(d.slots[1]!.id?.startsWith("anchor:")).toBe(true);
+    expect(d.slots[1]!.id).not.toBe(d.thread);
+  });
+
+  it("prefers a black thread", () => {
+    withBrands(["DMC"]);
+    expect(draftFor(ed).thread).toBe("dmc:310");
+  });
+});
