@@ -5,7 +5,7 @@ import { brandCode, byNumber, libraryColor, THREAD_CATALOGUES } from "./catalog"
 
 describe("Anchor and Madeira catalogues (open data, NOTICE.md)", () => {
   it("are built in next to DMC, with codes, names, colours — and Anchor's DMC equivalents", () => {
-    expect(Object.keys(THREAD_CATALOGUES)).toEqual(["DMC", "Anchor", "Madeira"]);
+    expect(Object.keys(THREAD_CATALOGUES)).toEqual(["DMC", "Anchor", "Madeira", "Dimensions"]);
     expect(THREAD_CATALOGUES.Anchor!.length).toBe(445);
     expect(THREAD_CATALOGUES.Madeira!.length).toBe(369);
     const a = libraryColor("anchor:403")!;

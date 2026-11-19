@@ -2162,6 +2162,38 @@ Apps read our files differently (one skips some bead sizes, another shows ¼ sti
   on the other pages (their ☰ doesn't have it); the quick-start guide's step 10 (☰ opened on the item, **Open the
   check**); a tip after the first .oxs export, from wherever it was saved (`exportAs`), with the same button.
 
+### 15.52 Numbered organizer (2026-11-19)
+Every brand and every custom thread is global (§15.28): made anywhere, offered everywhere. A **numbered organizer** is
+the opposite: for kits whose floss (or beads) comes in an organizer and is only a number — 1, 2, 3 … — with no brand
+to name. Its colours belong to one project only.
+- **A switch, not a brand**: in **Threads & beads** (the **New** dialog and the side panel), floss and beads each
+  have **Brands | Numbered organizer**, with a one-line hint. It is either / or: with the organizer on there are no
+  brand checkboxes, no *+ New brand* and no brand tabs; with brands on there is no organizer. Floss and beads choose
+  apart. The organizer is stored as the reserved brand name `Numbered organizer` (`ORGANIZER`, `core/catalog/catalog.ts`)
+  alone in `brands` / `beadBrands`, with `onlyBrand` / `onlyBeadBrand` set (§15.31); its colours are ordinary `customs`
+  of that brand. Typing that name (or its translation) as a brand of one's own is refused.
+- **Locks**: the switch to the organizer is off while the key uses brand floss; the switch back to brands is off while
+  the organizer has any number (threads and beads counted apart). Leaving the organizer returns to the brands chosen
+  before (all built-in ones if none).
+- **No brand, no name, no "yours"**: an organizer colour is a number and a colour. In the key, the shopping list and the
+  CSV it reads as the bare number (`brandCode`: `3`, not `Custom palette 3`); it has no name, so there is no "Custom" /
+  "Своя" label, no "yours" tag, no name field in its form, and no brand line in its form.
+- **Stays in the project**: its colours never join the account's inventory, are never saved to it and never offered in
+  another pattern (`editor/threads/inventory.ts`). Starting a new pattern from this one's key copies them, and the
+  copies are independent.
+- **Numbers**: the form offers the next free number (1, 2, 3 …); a number is taken once per kind (case and spaces
+  aside). A colour can't be moved into or out of the organizer by editing. With an empty organizer the picker opens
+  straight on the form for its first number.
+- **Import**: in the PDF chart's key step, each symbol or line the reader couldn't match has a **Numbered organizer**
+  tab — a number and an approximate colour; the same number is one colour in the pattern. Once a row of a kind uses the
+  organizer, the other rows of that kind are offered only it (and the reverse: brand rows hide the tab). An **.oxs** with
+  colours no brand here has asks once — *My own threads* (as before) or *Numbered organizer* (the number as it is, the
+  file's colour, no name). This app's own files are read back exactly and aren't asked.
+- **Default floss**: in an organizer project the key form starts on its first number, and on nothing while the
+  organizer is empty (§15.31).
+- Not done: an .oxs with some colours matched and some not still mixes brands and the organizer for that file (the
+  unmatched ones all go to the organizer); the organizer can't be turned into a real brand later.
+
 ## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
 The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in
 BACKLOG B27.

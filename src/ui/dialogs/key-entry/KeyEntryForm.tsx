@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { beadShape } from "@/core/catalog/beadShapes";
 import { ENTRY_KINDS, entryKind } from "@/core/entryKinds/registry";
-import { materials } from "@/core/pattern/brands";
+import { materials, ORGANIZER } from "@/core/pattern/brands";
 import { formatLabel, keyLabelData, labelData } from "@/core/labels/keyLabel";
 import type { PaletteSlot } from "@/core/pattern/palette";
 import { blendStrands, resolveColor } from "@/core/pattern/resolve";
@@ -205,7 +205,7 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
     if (d.t === "combo")
       return [
         { kind: "thread", label: t("floss"), id: d.thread, strands, set: (thread) => update({ thread }) },
-        { kind: "bead", label: t("millHillBead"), id: d.bead, set: (bead) => update({ bead }) },
+        { kind: "bead", label: t("beadLine"), id: d.bead, set: (bead) => update({ bead }) },
       ];
     if (usesBlend(d))
       return d.slots.map((sl, i) => ({
@@ -265,7 +265,7 @@ export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
 
   const colourText = (l: ColourLine) => {
     const e = l.id ? resolveColor(ed.doc, l.id) : undefined;
-    return e ? <><b>{e.brand === "DMC" || l.kind === "bead" ? e.code : `${e.brand} ${e.code}`}</b><span className={s.lineName}>{e.name}</span></> : <span className={ui.hint}>{t("pickFromList")}</span>;
+    return e ? <><b>{e.brand === "DMC" || e.brand === ORGANIZER || l.kind === "bead" ? e.code : `${e.brand} ${e.code}`}</b><span className={s.lineName}>{e.name}</span></> : <span className={ui.hint}>{t("pickFromList")}</span>;
   };
 
   return (

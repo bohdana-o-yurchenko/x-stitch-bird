@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { translateEn } from "../../../tests/support/fixtures";
-import { brandCode, byHue, byNumber, DMC, libraryColor, matchesQuery } from "../catalog/catalog";
+import { brandCode, byHue, byNumber, DMC, libraryColor, matchesQuery, ORGANIZER } from "../catalog/catalog";
 import { customColor } from "../pattern/resolve";
 import { createPattern } from "../pattern/createPattern";
 import type { KeyEntry } from "../pattern/types";
@@ -26,6 +26,27 @@ describe("key labels (SPEC §3.4)", () => {
 
   it("shows “?” for a colour that no longer exists", () => {
     expect(label({ t: "thread", src: "dmc:nope", n: 2, st: "full" })).toEqual({ title: "?", sub: "? · 2 strands" });
+  });
+});
+
+describe("numbered organizer labels (SPEC §15.52)", () => {
+  const o = createPattern(2, 2);
+  const own = (id: string, kind: "thread" | "bead", code: string) => (o.customs[id] = { id, kind, brand: ORGANIZER, code, name: "", hex: "#336699" });
+  own("custom:f1", "thread", "1");
+  own("custom:f2", "thread", "2");
+  own("custom:b1", "bead", "1");
+  o.blends["blend:ff"] = { parts: [{ id: "custom:f1", n: 1 }, { id: "custom:f2", n: 1 }] };
+  o.combos["combo:fb"] = { thread: "custom:f1", bead: "custom:b1" };
+  const lab = (e: Omit<KeyEntry, "sym">) => formatLabel(keyLabelData(o, { ...e, sym: "A" }), translateEn).title;
+
+  it("prefixes only beads with Bead", () => {
+    expect(lab({ t: "combo", src: "combo:fb", n: 2, st: "full" })).toBe("1 + Bead 1");
+    expect(lab({ t: "thread", src: "blend:ff", n: null, st: "full" })).toBe("1+2");
+  });
+
+  it("shows a single floss as a bare number and a bead as Bead N", () => {
+    expect(lab({ t: "thread", src: "custom:f2", n: 2, st: "full" })).toBe("2");
+    expect(lab({ t: "bead", src: "custom:b1" })).toBe("Bead 1");
   });
 });
 

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createPattern } from "@/core/pattern/createPattern";
+import { ORGANIZER } from "@/core/pattern/brands";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import { memoryPersistence } from "../../../tests/support/memoryPersistence";
@@ -109,5 +110,37 @@ describe("deleting an entry", () => {
     expect([ed.doc.key[red], ed.doc.layers.stitches[3], ed.state.activeEntry]).toEqual([null, 0, 0]);
     ed.history.undo();
     expect([ed.doc.key[red]?.src, ed.doc.layers.stitches[3]]).toEqual(["dmc:321", red]);
+  });
+});
+
+describe("default materials", () => {
+  const withBrands = (brands: string[]) => {
+    const p = createPattern(10, 10);
+    p.brands = brands;
+    loadPattern(ed, p);
+  };
+
+  it("defaults to a thread of the pattern's own brand when it has no DMC", () => {
+    withBrands(["Anchor"]);
+    const d = draftFor(ed);
+    expect(d.thread.startsWith("anchor:")).toBe(true);
+    expect(d.slots[0]!.id).toBe(d.thread);
+    expect(d.slots[1]!.id?.startsWith("anchor:")).toBe(true);
+    expect(d.slots[1]!.id).not.toBe(d.thread);
+  });
+
+  it("in a project with only its own palette: its first colour, and nothing while the palette is empty", () => {
+    const p = createPattern(10, 10);
+    p.brands = [ORGANIZER];
+    p.beadBrands = [ORGANIZER];
+    loadPattern(ed, p);
+    expect(draftFor(ed)).toMatchObject({ thread: "", bead: "", slots: [{ id: null }, { id: null }] });
+    p.customs["custom:1"] = { id: "custom:1", kind: "thread", brand: ORGANIZER, code: "1", name: "", hex: "#336699" };
+    expect(draftFor(ed).thread).toBe("custom:1");
+  });
+
+  it("prefers a black thread", () => {
+    withBrands(["DMC"]);
+    expect(draftFor(ed).thread).toBe("dmc:310");
   });
 });

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { ORGANIZER } from "@/core/pattern/brands";
 import type { CustomColor } from "@/core/pattern/types";
 import { account } from "@/persistence";
 import { testEditor } from "../../../tests/support/editorHarness";
@@ -46,6 +47,21 @@ describe("your own threads in the account (SPEC §15.28)", () => {
     ed.inventory.useIn(ed.doc, "custom:w");
     expect(ed.doc.customs["custom:w"]).toMatchObject({ brand: "Weeks Dye Works", code: "1234" });
     expect(ed.doc.brands).toEqual(["DMC", "Kreinik", "Weeks Dye Works"]);
+  });
+
+  it("the project's own palette never leaves the project: not joined, not saved, not offered to another pattern (SPEC §15.52)", async () => {
+    const { ed } = testEditor(4, 4);
+    const own = thread("custom:p", ORGANIZER, "1");
+    ed.doc.customs["custom:p"] = own;
+    const saved = server([thread("custom:old", ORGANIZER, "9")]);
+    ed.setAccount({ id: "u", email: "u@x" });
+    await vi.waitFor(() => expect(ed.state.inventory).not.toBeNull());
+    await ed.inventory.save(own);
+    expect(saved).toEqual([]);
+    expect(ed.state.inventory!.map((c) => c.id)).toEqual(["custom:old"]);
+    // and a copy of one that did get into the inventory isn't taken into a pattern
+    ed.inventory.useIn(ed.doc, "custom:old");
+    expect(ed.doc.customs["custom:old"]).toBeUndefined();
   });
 
   it("signed out there is no inventory, and nothing is sent", async () => {

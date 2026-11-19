@@ -1,4 +1,4 @@
-import { brandCode } from "../catalog/catalog";
+import { brandCode, ORGANIZER } from "../catalog/catalog";
 import { blendStrands, resolveColor } from "../pattern/resolve";
 import type { EntryKindId, KeyEntry, Pattern, StitchTypeId } from "../pattern/types";
 import type { ColorEntry } from "../color/colorEntry";
@@ -23,6 +23,13 @@ export interface LabelData {
 export function labelData(e: KeyEntry, c: ColorEntry | undefined): LabelData {
   const base = { kind: e.t, name: c?.name ?? "?", strands: e.n ?? null, stitch: null, blend: false };
   if (!c) return { ...base, title: "?" };
+  // a numbered organizer's blend: floss as bare numbers, beads as "Bead N"
+  if (e.t !== "bead" && c.isBlend && c.parts?.some((q) => q.entry.brand === ORGANIZER)) {
+    const title = c.parts.map((q) => brandCode(q.entry)).join("+");
+    if (e.t === "back") return { ...base, title };
+    if (e.t === "knot") return { ...base, title, wraps: e.wraps };
+    return { ...base, title, stitch: e.st ?? "full", strands: blendStrands(c) || null };
+  }
   if (e.t === "bead") return { ...base, strands: null, title: brandCode(c), series: c.series, stitch: e.st === "point" ? "point" : null };
   if (e.t === "combo")
     return { ...base, title: `${brandCode(c.thread)} + ${brandCode(c.bead)}`, stitch: e.st ?? "full", beadName: c.bead?.name, name: c.thread?.name ?? "?" };

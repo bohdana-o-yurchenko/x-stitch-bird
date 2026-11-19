@@ -12,6 +12,16 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "2.2.0",
+    date: "2026-11-19",
+    uk: [
+      "Додано вбудовану палітру Dimensions і «режим органайзера» для схем, що йдуть з органайзерами.",
+    ],
+    en: [
+      "Added the Dimensions built-in palette, and an “organizer mode” for designs shipped with organizers.",
+    ],
+  },
+  {
     version: "2.1.1",
     date: "2026-11-19",
     uk: [

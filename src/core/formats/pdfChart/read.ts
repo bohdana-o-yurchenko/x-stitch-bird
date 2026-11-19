@@ -1,10 +1,12 @@
 import { libraryColor } from "../../catalog/catalog";
-import { createPattern, MAX_SIZE } from "../../pattern/createPattern";
+import { ORGANIZER } from "../../pattern/brands";
+import { createPattern, MAX_SIZE, shortId } from "../../pattern/createPattern";
 import { addEntry } from "../../pattern/keyEntries";
 import type { KeyIndex, Pattern, Rect } from "../../pattern/types";
 import { centre, type PdfContent, type Word } from "./content";
 import { findGrids, type MarkId, type PageGrid } from "./grids";
 import { brandWord, threadOf, type KeyThread } from "./key";
+import { parsePaletteId } from "./palette";
 
 /*
  * Another app's PDF chart → a pattern (SPEC §15.47). Grids found on every page are placed in the whole chart by the
@@ -351,16 +353,29 @@ export function chartToPattern(r: ChartRead, symbols: readonly string[], o: { fa
   const p = createPattern(r.w, r.h, r.name);
   if (r.count) p.count = r.count;
   const strands = o.strands ?? p.strands;
+  // colours named for the project's own palette (SPEC §15.52): one colour per number, made when first met
+  const made = new Map<string, string>();
+  const own = (id: string): string => {
+    const c = parsePaletteId(id);
+    if (!c) return id;
+    const k = `${c.kind}|${c.code.toLowerCase()}`;
+    if (!made.has(k)) {
+      const cid = shortId("custom");
+      p.customs[cid] = { id: cid, kind: c.kind, brand: ORGANIZER, code: c.code, name: "", hex: c.hex };
+      made.set(k, cid);
+    }
+    return made.get(k)!;
+  };
   const keys = r.symbols.map((s): KeyIndex | null => {
     const t = s.thread;
     if (!t) return null;
-    if (t.kind === "bead") return addEntry(p, { t: "bead", src: t.ids[0]! }, symbols);
+    if (t.kind === "bead") return addEntry(p, { t: "bead", src: own(t.ids[0]!) }, symbols);
     if (t.ids.length > 1) {
-      const id = `blend:${t.ids.join("+")}`;
-      p.blends[id] = { parts: t.ids.map((part) => ({ id: part, n: 1 })) };
+      const parts = t.ids.map(own), id = `blend:${parts.join("+")}`;
+      p.blends[id] = { parts: parts.map((part) => ({ id: part, n: 1 })) };
       return addEntry(p, { t: "thread", src: id, n: null, st: "full" }, symbols);
     }
-    return addEntry(p, { t: "thread", src: t.ids[0]!, n: strands, st: "full" }, symbols);
+    return addEntry(p, { t: "thread", src: own(t.ids[0]!), n: strands, st: "full" }, symbols);
   });
   r.cells.forEach((s, i) => {
     const k = s >= 0 ? keys[s] : null;
@@ -368,7 +383,7 @@ export function chartToPattern(r: ChartRead, symbols: readonly string[], o: { fa
     if (r.symbols[s]!.thread!.kind === "bead") p.layers.beads[i] = k;
     else p.layers.stitches[i] = k;
   });
-  const lineKeys = r.lineStyles.map((s) => (s.thread ? addEntry(p, { t: "back", src: s.thread, n: 1 }, symbols) : null));
+  const lineKeys = r.lineStyles.map((s) => (s.thread ? addEntry(p, { t: "back", src: own(s.thread), n: 1 }, symbols) : null));
   for (const l of r.lines) {
     const k = lineKeys[l.style];
     if (k != null) p.layers.segments.push({ x1: l.x1, y1: l.y1, x2: l.x2, y2: l.y2, k });

@@ -19,6 +19,9 @@ import type { MatchState } from "../matching/matching";
 /** A .xbird of a pattern one already has (SPEC §15.43): it replaces one's own, comes in as a new one, or not at all. */
 export type SamePatternChoice = { kind: "replace" } | { kind: "new"; name: string } | null;
 
+/** Colours of an .oxs that match no brand here (SPEC §15.52): kept as one's own threads, or put in the project's own palette; null: don't open. */
+export type UnmatchedChoice = "own" | "project" | null;
+
 export type ToolId = "pencil" | "line" | "rect" | "filledRect" | "fill" | "eraser" | "picker" | "pan" | "select" | "magicWand" | "partial" | "autofill";
 
 export interface Toast {
@@ -50,6 +53,7 @@ export type DialogRequest =
   | { type: "pdfUnreadable"; name: string }
   | { type: "pdfChart"; file: File; content: PdfContent; read: ChartRead }
   | { type: "samePattern"; name: string; age: "older" | "newer" | "other"; answer: (choice: SamePatternChoice) => void }
+  | { type: "unmatchedColours"; count: number; answer: (choice: UnmatchedChoice) => void }
   | { type: "patternKeeper"; issues: PkReport["issues"] }
   | { type: "textFallback"; ext: string; text: string }
   /** Signed out, before another pattern replaces one with work in it: download, sign in, or replace. */

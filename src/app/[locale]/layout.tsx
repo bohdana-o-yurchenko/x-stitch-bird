@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { BeadWordSync } from "@/ui/i18n/BeadWordSync";
 import { INSTALL_BOOT_SCRIPT } from "@/ui/install/install";
 import { THEME_BOOT_SCRIPT } from "@/ui/theme/appTheme";
 import { ThemeSync } from "@/ui/theme/ThemeSync";
@@ -39,7 +40,10 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       </head>
       <body>
         <ThemeSync />
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <BeadWordSync />
+          {children}
+        </NextIntlClientProvider>
         <SpeedInsights />
         <Analytics />
       </body>

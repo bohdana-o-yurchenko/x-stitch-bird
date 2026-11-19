@@ -182,6 +182,8 @@
   },
   "label": {
     "blendTitle": "Blend {code}",
+    "flossN": "Floss {n}",
+    "beadN": "Bead {n}",
     "strands": "{n, plural, one {# strand} other {# strands}}",
     "bead": "bead",
     "beadSeries": "bead ({series})",
@@ -226,7 +228,7 @@
     "findBlend": "Find a blend for a colour:",
     "find": "Find",
     "finding": "Searching…",
-    "beadLine": "Bead",
+    "beadLine": "Beads",
     "flossN": "Floss {n}",
     "addFloss": "+ Add a third floss",
     "removeFloss": "Remove this floss",
@@ -340,7 +342,11 @@
     "emptyBrand": "No {brand} threads yet — add one with +",
     "beadBrands": "Bead brands",
     "allFinishes": "All finishes",
-    "emptyBeadBrand": "No {brand} beads yet — add one with +"
+    "emptyBeadBrand": "No {brand} beads yet — add one with +",
+    "organizerCodeTaken": "This number is already in the organizer.",
+    "searchNumber": "Search by number",
+    "addNumber": "Add a number",
+    "emptyOrganizer": "The organizer has no numbers yet — add one with +"
   },
   "dialogs": {
     "cancel": "Cancel",
@@ -408,6 +414,11 @@
     "samePattern_newer": "This file is a newer version of “{name}”.",
     "samePattern_other": "This file is another version of “{name}”.",
     "samePatternKept": "Replace yours with it, or add it as a new pattern. If you replace, yours is kept in Versions.",
+    "unmatchedTitle": "Colours not in any brand here",
+    "unmatchedBody": "{count, plural, one {# colour in this file matches} other {# colours in this file match}} no thread or bead brand here.",
+    "unmatchedHint": "Keep them as your own threads (shared with your other patterns), or number them in a numbered organizer, where they stay in this project only.",
+    "unmatchedOwn": "My own threads",
+    "unmatchedProject": "Numbered organizer",
     "samePatternReplace": "Replace mine",
     "samePatternNew": "Add as a new pattern",
     "samePatternNewName": "{name} (from file)",
@@ -1251,6 +1262,8 @@
     "colour": "Colour",
     "needBrand": "Enter the brand.",
     "needCode": "Enter the code.",
+    "number": "Number",
+    "reservedBrand": "This name is reserved for the numbered organizer. Pick another brand name.",
     "cancel": "Cancel"
   },
   "threadsPage": {
@@ -1307,7 +1320,15 @@
     "heading": "Threads & beads",
     "onlyOne": "{brand} only",
     "noBeads": "no beads",
-    "beadsList": "beads: {list}"
+    "beadsList": "beads: {list}",
+    "organizer": "Numbered organizer",
+    "source": "Where the floss comes from",
+    "sourceBrands": "Brands",
+    "sourceOrganizer": "Numbered organizer",
+    "organizerHintThreads": "For kits with an organizer where each floss is just a number: 1, 2, 3 … You add the numbers and an approximate colour yourself. They stay in this project only.",
+    "organizerHintBeads": "For kits where the beads are just numbered: 1, 2, 3 … You add the numbers and an approximate colour yourself. They stay in this project only.",
+    "organizerHasNumbers": "The organizer already has numbers — it can't switch to brands",
+    "keyHasBrands": "The key already uses brand floss — it can't switch to a numbered organizer"
   },
   "side": {
     "tools": "Tools",
@@ -1395,6 +1416,11 @@
     "thread": "Thread",
     "bead": "Bead",
     "searchPlaceholder": "Number or name",
+    "palette": "Numbered organizer",
+    "paletteHint": "For floss that isn’t in any brand here, like an organizer’s 1, 2, 3 …: give it a number and an approximate colour. It stays in this project only.",
+    "paletteNumber": "Number",
+    "paletteColour": "Colour",
+    "paletteUse": "Use",
     "closest": "Closest to its colour in the PDF:",
     "done": "{name}: W {w} × H {h} stitches, {colours, plural, one {# colour} other {# colours}}{lines, plural, =0 {} one {, # backstitch line} other {, # backstitch lines}}.",
     "partialsLeft": "{count, plural, one {# half or quarter stitch was} other {# half and quarter stitches were}} left out — add them in the editor.",

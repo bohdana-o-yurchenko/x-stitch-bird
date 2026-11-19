@@ -4,11 +4,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BEAD_CATALOGUES, THREAD_CATALOGUES, byHue, byNumber, matchesQuery } from "@/core/catalog/catalog";
 import type { ColorEntry } from "@/core/color/colorEntry";
-import { BUILT_IN_BEAD_BRANDS, BUILT_IN_THREAD_BRANDS, canRemoveBeadBrand, canRemoveBrand, materials, materialsOf } from "@/core/pattern/brands";
+import { BUILT_IN_BEAD_BRANDS, BUILT_IN_THREAD_BRANDS, ORGANIZER, canRemoveBeadBrand, canRemoveBrand, materials, materialsOf, nextOrganizerCode, organizerCodeTaken } from "@/core/pattern/brands";
 import { customColor, resolveColor } from "@/core/pattern/resolve";
 import { addCustomColour, updateCustomColour } from "@/editor/actions/keyEntries";
 import { Swatch, cx, ui } from "../../common/widgets";
 import { useCommand, useEditor, useEditorState } from "../../hooks/editor";
+import { useBrandLabel } from "../../threads/brandLabel";
 import { ThreadForm, type ThreadFields } from "../../threads/ThreadForm";
 import s from "./keyEntry.module.css";
 
@@ -21,6 +22,7 @@ type FormState = { mode: "closed" } | { mode: "add" } | { mode: "edit"; id: stri
  */
 export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }: { kind: "thread" | "bead"; selected: string; onPick: (id: string) => void; height?: number; autoFocus?: boolean }) {
   const t = useTranslations("picker");
+  const label = useBrandLabel();
   const ed = useEditor();
   const run = useCommand();
   // brands and your own threads live in the pattern: redraw when it changes
@@ -49,7 +51,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   const list = useRef<HTMLDivElement>(null);
 
   // your own: the pattern's, and (signed in) the rest of your inventory
-  const extra = (inventory ?? []).filter((c) => c.kind === kind && !doc.customs[c.id]);
+  const extra = (inventory ?? []).filter((c) => c.kind === kind && !doc.customs[c.id] && c.brand !== ORGANIZER);
   const customs = [...Object.values(doc.customs).filter((c) => c.kind === kind).map((c) => resolveColor(doc, c.id)!), ...extra.map(customColor)];
   /** Picking one of your inventory's threads: the pattern takes a copy first. */
   const take = (id: string) => {
@@ -75,7 +77,19 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
     if (!query) list.current?.querySelector("[data-on='true']")?.scrollIntoView({ block: "nearest" });
   }, [query, selected]);
 
-  const otherBrands = [...new Set([...(kind === "thread" ? BUILT_IN_THREAD_BRANDS : BUILT_IN_BEAD_BRANDS), ...[...Object.values(doc.customs), ...(inventory ?? [])].filter((c) => c.kind === kind).map((c) => c.brand)])].filter((b) => !brands.includes(b));
+  const otherBrands = [...new Set([...(kind === "thread" ? BUILT_IN_THREAD_BRANDS : BUILT_IN_BEAD_BRANDS), ...[...Object.values(doc.customs), ...(inventory ?? [])].filter((c) => c.kind === kind).map((c) => c.brand)])].filter((b) => b !== ORGANIZER && !brands.includes(b));
+  // the numbered organizer is a mode of its own, instead of brands: just numbers, kept in this pattern, nothing else moved in
+  const inOrganizer = brand === ORGANIZER;
+  const formBrands = inOrganizer ? [ORGANIZER] : (single ? [brand] : [brand, ...brands, ...otherBrands]).filter((b) => b !== ORGANIZER);
+  // an empty organizer: straight to the form for its first number, until the form is closed once
+  const [dismissed, setDismissed] = useState<string | null>(null);
+  const emptyOrganizer = inOrganizer && !customs.some((c) => c.brand === ORGANIZER);
+  const shown: FormState = form.mode === "closed" && emptyOrganizer && dismissed !== kind ? { mode: "add" } : form;
+  const closeForm = () => {
+    setForm({ mode: "closed" });
+    setDismissed(kind);
+  };
+  const codeTaken = (f: ThreadFields) => (f.brand === ORGANIZER && organizerCodeTaken(doc, kind, f.code, form.mode === "edit" ? form.id : undefined) ? t("organizerCodeTaken") : null);
   // the picker only shows tabs when it's not "only one": what it changes stays "several"
   const setBrands = (list: string[]) => run("pattern.setMaterials", { ...materialsOf(doc), ...(kind === "thread" ? { brands: list, onlyBrand: false } : { beadBrands: list, onlyBeadBrand: false }) });
   const addBrand = (b: string) => {
@@ -94,11 +108,12 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   };
 
   const save = (f: ThreadFields) => {
-    const name = f.name || t("customDefault");
+    // an organizer's colour is its number alone: no name, no "Custom" label
+    const name = f.brand === ORGANIZER ? "" : f.name || t("customDefault");
     if (form.mode === "edit") {
       updateCustomColour(ed, form.id, { brand: f.brand, code: f.code, name, hex: f.hex });
     } else {
-      const id = addCustomColour(ed, { kind, brand: f.brand, code: f.code, name, hex: f.hex, series: kind === "bead" ? "Custom" : undefined });
+      const id = addCustomColour(ed, { kind, brand: f.brand, code: f.code, name, hex: f.hex, series: kind === "bead" && f.brand !== ORGANIZER ? "Custom" : undefined });
       onPick(id);
     }
     setTab(f.brand);
@@ -115,7 +130,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
             const removable = kind === "thread" ? canRemoveBrand(doc, b) : canRemoveBeadBrand(doc, b);
             return (
               <span key={b} className={cx(s.brandTab, b === brand && s.on)}>
-                <button type="button" role="tab" aria-selected={b === brand} onClick={() => (setTab(b), setSeries("all"))}>{b}</button>
+                <button type="button" role="tab" aria-selected={b === brand} onClick={() => (setTab(b), setSeries("all"))}>{label(b)}</button>
                 {brands.length > 1 && (
                   <button
                     type="button"
@@ -151,14 +166,14 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
           ) : (
             <select className={s.addBrand} aria-label={t("addBrand")} value="" onChange={(e) => (e.target.value === "\u0000new" ? setNaming(true) : addBrand(e.target.value))}>
               <option value="">{t("addBrand")}</option>
-              {otherBrands.map((b) => <option key={b} value={b}>{b}</option>)}
+              {otherBrands.map((b) => <option key={b} value={b}>{label(b)}</option>)}
               <option value={"\u0000new"}>{t("newBrand")}</option>
             </select>
           )}
         </div>
       )}
       <div className={ui.row}>
-        <input className={cx(ui.input, s.search)} autoFocus={autoFocus} placeholder={kind === "bead" && brand === "Mill Hill" ? t("searchBead") : t("searchIn", { brand })} value={query} onChange={(e) => setQuery(e.target.value)}
+        <input className={cx(ui.input, s.search)} autoFocus={autoFocus} placeholder={inOrganizer ? t("searchNumber") : kind === "bead" && brand === "Mill Hill" ? t("searchBead") : t("searchIn", { brand: label(brand) })} value={query} onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
             const q = query.trim().toLowerCase(), top = items.find((i) => i.code.toLowerCase() === q) ?? items[0];
             if (e.key !== "Enter" || !q || !top) return;
@@ -176,19 +191,20 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
         ) : (
           <button type="button" className={cx(ui.btn, ui.sm)} onClick={() => setSort(sort === "num" ? "hue" : "num")}>{sort === "num" ? t("byNumber") : t("byColour")}</button>
         )}
-        <button type="button" className={cx(ui.btn, ui.sm)} title={kind === "bead" ? t("customBead") : t("customThread")} aria-label={kind === "bead" ? t("customBead") : t("customThread")} aria-pressed={form.mode === "add"} onClick={() => setForm(form.mode === "add" ? { mode: "closed" } : { mode: "add" })}>+</button>
+        <button type="button" className={cx(ui.btn, ui.sm)} title={inOrganizer ? t("addNumber") : kind === "bead" ? t("customBead") : t("customThread")} aria-label={inOrganizer ? t("addNumber") : kind === "bead" ? t("customBead") : t("customThread")} aria-pressed={shown.mode === "add"} onClick={() => (shown.mode === "add" ? closeForm() : setForm({ mode: "add" }))}>+</button>
       </div>
-      {form.mode !== "closed" && (
+      {shown.mode !== "closed" && (
         <div data-guide="own-colour">
           <ThreadForm
-            key={form.mode === "edit" ? form.id : "add"}
+            key={shown.mode === "edit" ? shown.id : "add"}
             kind={kind}
-            brands={single ? [brand] : [brand, ...brands, ...otherBrands]}
-            fixedBrand={single}
-            initial={editing ? { brand: editing.brand, code: editing.code, name: editing.name, hex: editing.hex } : { brand, code: "", name: "", hex: "#7A9CC6" }}
-            saveLabel={form.mode === "edit" ? t("save") : t("add")}
+            brands={formBrands}
+            fixedBrand={single || inOrganizer}
+            check={codeTaken}
+            initial={editing ? { brand: editing.brand, code: editing.code, name: editing.name, hex: editing.hex } : { brand, code: inOrganizer ? nextOrganizerCode(doc, kind) : "", name: "", hex: "#7A9CC6" }}
+            saveLabel={shown.mode === "edit" ? t("save") : t("add")}
             onSave={save}
-            onCancel={() => setForm({ mode: "closed" })}
+            onCancel={closeForm}
           />
         </div>
       )}
@@ -201,7 +217,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
               {e.name}
               {e.dmc && <span style={{ opacity: 0.7 }}>{t("dmcEquivalent", { code: e.dmc })}</span>}
             </span>
-            {e.series && e.series !== "Custom" && e.series !== e.name ? <span className={s.tag}>{e.series}</span> : e.id.startsWith("custom:") && <span className={s.tag}>{t("yours")}</span>}
+            {e.series && e.series !== "Custom" && e.series !== e.name ? <span className={s.tag}>{e.series}</span> : e.id.startsWith("custom:") && e.brand !== ORGANIZER && <span className={s.tag}>{t("yours")}</span>}
             {e.id.startsWith("custom:") && (
               <button
                 type="button"
@@ -219,7 +235,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
             )}
           </div>
         ))}
-        {!items.length && <p className={ui.hint} style={{ padding: 10 }}>{!query && !catalogue.length ? t(kind === "bead" ? "emptyBeadBrand" : "emptyBrand", { brand }) : t("nothing")}</p>}
+        {!items.length && <p className={ui.hint} style={{ padding: 10 }}>{!query && !catalogue.length ? (inOrganizer ? t("emptyOrganizer") : t(kind === "bead" ? "emptyBeadBrand" : "emptyBrand", { brand: label(brand) })) : t("nothing")}</p>}
       </div>
     </div>
   );

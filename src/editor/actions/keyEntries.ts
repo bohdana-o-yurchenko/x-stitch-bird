@@ -9,6 +9,31 @@ import { DEFAULT_LINE_INK } from "@/core/symbols/lineInks";
 import { isLineStyle } from "@/core/symbols/lineStyles";
 import type { BlendPart, CustomColor, EntryKindId, KeyEntry, KeyIndex, StitchTypeId } from "@/core/pattern/types";
 import type { Editor } from "../createEditor";
+import { BEAD_CATALOGUES, THREAD_CATALOGUES } from "@/core/catalog/catalog";
+import { patternBeadBrands, patternBrands } from "@/core/pattern/brands";
+import type { Pattern } from "@/core/pattern/types";
+
+/** Ids of the threads or beads the pattern offers (its brands' catalogues, then its own), in picker order. */
+function offeredIds(p: Pattern, kind: "thread" | "bead"): { id: string; black: boolean }[] {
+  const cats: Readonly<Record<string, readonly { id: string; hex: string; name: string }[]>> = kind === "thread" ? THREAD_CATALOGUES : BEAD_CATALOGUES;
+  const brands = kind === "thread" ? patternBrands(p) : patternBeadBrands(p);
+  const isBlack = (e: { hex: string; name: string }) => e.hex.toUpperCase() === "#000000" || /^black$/i.test(e.name);
+  const out: { id: string; black: boolean }[] = [];
+  for (const b of brands) {
+    for (const e of cats[b] ?? []) out.push({ id: e.id, black: isBlack(e) });
+    for (const c of Object.values(p.customs)) if (c.kind === kind && c.brand === b) out.push({ id: c.id, black: isBlack(c) });
+  }
+  return out;
+}
+
+/** Default thread and bead for a new key entry: black if the pattern's brands have one, else the first available. */
+function defaultMaterials(p: Pattern) {
+  const threads = offeredIds(p, "thread"), beads = offeredIds(p, "bead");
+  const first = threads.find((t) => t.black) ?? threads[0];
+  const second = threads.find((t) => t.id !== first?.id);
+  const bead = beads.find((b) => b.id === "bead:00557") ?? beads.find((b) => b.black) ?? beads[0];
+  return { thread: first?.id ?? "", second: second?.id ?? null, bead: bead?.id ?? "" };
+}
 
 /** What the key-entry dialog edits (SPEC §8). */
 export interface KeyDraft {
@@ -31,10 +56,10 @@ export function draftSymbol(ed: Editor, d: KeyDraft, t: EntryKindId, edit?: KeyI
 }
 
 export function draftFor(ed: Editor, edit?: KeyIndex): KeyDraft {
-  const p = ed.doc;
+  const p = ed.doc, def = defaultMaterials(p);
   const d: KeyDraft = {
-    t: "thread", mode: "single", thread: "dmc:310", slots: [{ id: "dmc:310", n: 1 }, { id: "dmc:413", n: 1 }],
-    bead: "bead:00557", n: p.strands || 2, st: "full", sym: nextSymbol(p, ed.state.symbols, edit), wraps: 2, ink: DEFAULT_LINE_INK,
+    t: "thread", mode: "single", thread: def.thread, slots: [{ id: def.thread || null, n: 1 }, { id: def.second, n: 1 }],
+    bead: def.bead, n: p.strands || 2, st: "full", sym: nextSymbol(p, ed.state.symbols, edit), wraps: 2, ink: DEFAULT_LINE_INK,
   };
   const e = edit ? p.key[edit] : null;
   if (!e) return d;

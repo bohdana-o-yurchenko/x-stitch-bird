@@ -1,5 +1,6 @@
 import { computeUsage, entryCount, partialCount } from "../../calculator/usage";
-import { materialsOf } from "../../pattern/brands";
+import { getBeadWord } from "../../catalog/catalog";
+import { materialsOf, ORGANIZER } from "../../pattern/brands";
 import type { ColorEntry } from "../../color/colorEntry";
 import { resolveColor } from "../../pattern/resolve";
 import type { Corner, KeyEntry, KeyIndex, Pattern } from "../../pattern/types";
@@ -48,7 +49,7 @@ function usedColours(p: Pattern, used: (i: number) => boolean) {
     if (!entry || !used(i)) return;
     const e = resolveColor(p, entry.src);
     if (!e) return;
-    const add = (c: ColorEntry) => out[c.kind === "bead" ? "bead" : "thread"].add(c.brand);
+    const add = (c: ColorEntry) => { if (c.brand !== ORGANIZER) out[c.kind === "bead" ? "bead" : "thread"].add(c.brand); };
     if (e.thread && e.bead) [e.thread, e.bead].forEach(add);
     else if (e.parts) e.parts.forEach((q) => add(q.entry));
     else add(e);
@@ -87,7 +88,7 @@ export function exportOxs(p: Pattern): string {
   // brands named in numbers unless the pattern keeps to the one other apps assume (SPEC §15.42)
   const brands = usedColours(p, used);
   const prefixed = { thread: brands.thread.size > 1 || (brands.thread.size === 1 && !brands.thread.has(ASSUMED.thread)), bead: brands.bead.size > 1 || (brands.bead.size === 1 && !brands.bead.has(ASSUMED.bead)) };
-  const label = (c: ColorEntry) => (prefixed[c.kind === "bead" ? "bead" : "thread"] ? `${SHORT_BRAND[c.brand] ?? c.brand} ${c.code}` : c.code);
+  const label = (c: ColorEntry) => (c.brand === ORGANIZER ? (c.kind === "bead" ? `${getBeadWord()} ${c.code}` : c.code) : prefixed[c.kind === "bead" ? "bead" : "thread"] ? `${SHORT_BRAND[c.brand] ?? c.brand} ${c.code}` : c.code);
   const items: Item[] = [];
   const keyItem = new Map<KeyIndex, number>(), beadItem = new Map<string, number>(), beadKind = new Map<string, string>();
   const beadIndex = (e: ColorEntry, entry: KeyEntry) => {
@@ -108,7 +109,11 @@ export function exportOxs(p: Pattern): string {
     const suffix = entry.t === "back" ? " (backstitch)" : entry.t === "knot" ? " (French knot)" : stitchType(entry.st).id === "full" ? "" : " (half cross)";
     if (entry.t === "combo" && e.thread && e.bead) {
       items.push({
-        number: `${label(e.bead)}+${label(e.thread)}`, name: `${label(e.bead)} + ${label(e.thread)}${isPointBead(entry) ? " (bead between cells)" : ""}`, color: hx(e.thread.hex), blendcolor: hx(e.bead.hex),
+        // a numbered organizer's floss is a bare number, its bead "Bead N"
+        ...(e.thread.brand === ORGANIZER || e.bead.brand === ORGANIZER
+          ? { number: `${label(e.thread)}+${label(e.bead)}`, name: `${label(e.thread)} + ${label(e.bead)}${isPointBead(entry) ? " (bead between cells)" : ""}` }
+          : { number: `${label(e.bead)}+${label(e.thread)}`, name: `${label(e.bead)} + ${label(e.thread)}${isPointBead(entry) ? " (bead between cells)" : ""}` }),
+        color: hx(e.thread.hex), blendcolor: hx(e.bead.hex),
         strands: entry.n ?? 2, comments: "blend", parts: [{ e: e.bead, n: 1 }, { e: e.thread, n: entry.n ?? 2 }], entries: [entry],
       });
     } else if (e.isBlend && e.parts) {
