@@ -101,6 +101,19 @@ describe("another app's PDF chart (SPEC §15.47)", () => {
     expect([...p.layers.stitches].slice(0, 30).every((k, x) => !k || x < FADED_FROM)).toBe(true);
   });
 
+  it("a blend as Pattern Maker lists it — a row per thread, the symbol between them: both threads, not a backstitch thread", async () => {
+    const r = readChart(await contentOf(await otherAppChart({ blend: true })));
+    const white = r.symbols.find((s) => s.thread?.ids.includes("dmc:3865"))!;
+    expect(white.thread).toEqual({ kind: "thread", ids: ["dmc:3865", "dmc:762"] });
+    expect(white.keyText).toBe("1 DMC 3865 Winter White + 1 DMC 762 Pearl Gray-VY LT");
+    // the backstitch list still names one thread only
+    expect(r.lineStyles).toMatchObject([{ thread: "dmc:321", listed: true }]);
+    const p = chartToPattern(r, ALL_SYMBOLS);
+    const k = p.key.findIndex((e) => e?.src.startsWith("blend:"));
+    expect(p.blends[p.key[k]!.src]!.parts).toEqual([{ id: "dmc:3865", n: 1 }, { id: "dmc:762", n: 1 }]);
+    expect(p.layers.stitches.filter((v) => v === k).length).toBe(white.count);
+  });
+
   it("the grids chosen make the chart; each chart page's place behind it, lined up cell for cell", async () => {
     const c = await contentOf(await otherAppChart());
     const r = readChart(c);
@@ -122,7 +135,7 @@ describe("another app's PDF chart (SPEC §15.47)", () => {
 /** Other people's charts, on this computer only (tests/fixtures/private, not in the repository). */
 const privateFile = (name: string) => new URL(`../../../../tests/fixtures/private/${name}`, import.meta.url);
 describe("real charts from other apps (only where the files are)", () => {
-  const pm = privateFile("pattern-maker-vera-mouse.pdf"), fc = privateFile("flosscross-stardew-winter.pdf");
+  const pm = privateFile("pattern-maker-vera-mouse.pdf"), fc = privateFile("flosscross-stardew-winter.pdf"), lt = privateFile("pattern-maker-low-tide.pdf");
 
   it.skipIf(!existsSync(pm))("Pattern Maker: 89 × 119 over four pages, every symbol's DMC thread; its black backstitch left to set up", async () => {
     const r = readChart(await contentOf(new Uint8Array(readFileSync(pm))));
@@ -135,6 +148,20 @@ describe("real charts from other apps (only where the files are)", () => {
     expect(r.symbols.find((s) => s.thread!.ids[0] === "dmc:White")!.count).toBe(2761);
     // looked up in its list, "Floss Used for Back Stitches" (page 5)
     expect(r.lineStyles).toMatchObject([{ thread: null, listed: true, sample: { page: 4 } }]);
+  }, 60_000);
+
+  it.skipIf(!existsSync(lt))("Pattern Maker blends: the symbol between two rows is both threads (13 blends in Low Tide)", async () => {
+    const r = readChart(await contentOf(new Uint8Array(readFileSync(lt))));
+    expect([r.w, r.h]).toEqual([140, 140]);
+    expect(r.symbols.every((s) => s.thread)).toBe(true);
+    const blends = Object.fromEntries(r.symbols.filter((s) => s.thread!.ids.length > 1).map((s) => [s.id, s.thread!.ids.join("+")]));
+    expect(blends).toEqual({
+      "g:w": "dmc:772+dmc:3053", "g:0": "dmc:745+dmc:676", "g:»": "dmc:453+dmc:452", 'g:"': "dmc:415+dmc:762", "g:€": "dmc:453+dmc:White",
+      "g:f": "dmc:522+dmc:415", "g:t": "dmc:524+dmc:762", "g:^": "dmc:452+dmc:3790", "g:G": "dmc:729+dmc:452", "g:=": "dmc:453+dmc:676",
+      "g:l": "dmc:729+dmc:676", "g:>": "dmc:746+dmc:745", "g:T": "dmc:928+dmc:775",
+    });
+    // single threads stay single: the rows next to a blend aren't taken in
+    expect(r.symbols.find((s) => s.id === "g:.")!.thread!.ids).toEqual(["dmc:White"]);
   }, 60_000);
 
   it.skipIf(!existsSync(fc))("FlossCross: symbols as pictures, 125 × 125, every one matched with its key row", async () => {

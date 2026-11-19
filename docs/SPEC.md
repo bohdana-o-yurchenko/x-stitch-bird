@@ -2038,7 +2038,9 @@ stamped picture with a key of its pixels, straight strokes, filled upright recta
 - **Key**: a symbol drawn outside the grids, alone, followed on its line by a thread: a brand and number (DMC, ANC /
   Anchor, MAD / Madeira, MH / Mill Hill beads, PREC / Preciosa; "DMC310"; BLANC); a number the catalogue lacks is
   settled by the colour's name ("DMC 1 White"); a brand as a column heading covers rows giving the number alone;
-  two threads joined by + a blend. Brands the app doesn't know aren't guessed.
+  two threads joined by + a blend; so are a symbol's rows of threads one under another with the symbol halfway down
+  them (Pattern Maker: "1 DMC 772" over "1 DMC 3053", up to four) — rows nearer another symbol of the column are
+  that one's, and they aren't a backstitch list. Brands the app doesn't know aren't guessed.
 - **Backstitch**: strokes over a grid thicker than its lines (an eighth of a cell or more), ends on cell corners or
   halves, not in a style the grid itself is drawn in (three or more lines across half the grid); one line style per
   ink and width. Its thread: the only thread a key lists without a symbol; else the nearest key thread by colour —

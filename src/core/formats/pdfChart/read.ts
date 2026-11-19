@@ -99,6 +99,52 @@ function nameOf(c: PdfContent): string {
   return line.filter((w) => Math.abs(w.y - line[0]!.y) < big * 0.5).map((w) => w.text).join(" ").slice(0, 80) || "Pattern from PDF";
 }
 
+interface KeyRow {
+  words: Word[];
+  y: number;
+  h: number;
+  text: string;
+  thread: KeyThread | null;
+}
+
+/**
+ * A symbol's rows in the key, from `words` to its right: the row level with it, or — a blend, as Pattern Maker writes
+ * one — the rows of its threads, one under another, with the symbol halfway down them. Rows nearer another symbol of
+ * the column are that one's.
+ */
+function rowsOf(m: { x: number; y: number; h: number }, marks: readonly { x: number; y: number; h: number }[], words: Word[], brandAbove: (row: Word[]) => string | undefined): KeyRow[] {
+  const rows: KeyRow[] = [];
+  for (const w of [...words].sort((a, b) => centre(a).y - centre(b).y)) {
+    const last = rows[rows.length - 1];
+    if (last && centre(w).y - last.y < Math.max(last.h, w.h) * 0.5) last.words.push(w);
+    else rows.push({ words: [w], y: centre(w).y, h: w.h, text: "", thread: null });
+  }
+  const column = marks.filter((o) => o !== m && Math.abs(o.x - m.x) < Math.max(m.h, o.h) * 2);
+  const own = rows.filter((r) => !column.some((o) => Math.abs(o.y - r.y) < Math.abs(m.y - r.y)));
+  for (const r of own) {
+    r.words.sort((a, b) => a.x - b.x);
+    r.text = r.words.map((w) => w.text).join(" ");
+    r.thread = threadOf(r.text, brandAbove(r.words));
+  }
+  const at = own.reduce<number>((best, r, i) => (best < 0 || Math.abs(r.y - m.y) < Math.abs(own[best]!.y - m.y) ? i : best), -1);
+  const near = own[at];
+  if (!near || Math.abs(near.y - m.y) > Math.max(m.h, near.h) * 0.8) return [];
+  // runs of up to four rows of threads, one right under another, taking in the nearest: the one centred on the symbol
+  const blendable = (r: KeyRow) => r.thread?.kind === "thread" && r.thread.ids.length === 1;
+  const under = (a: KeyRow, b: KeyRow) => b.y - a.y < Math.max(a.h, b.h) * 1.5;
+  let best: KeyRow[] = [near];
+  for (let i = at; i >= Math.max(0, at - 3); i--) {
+    if (i < at && !(blendable(own[i]!) && under(own[i]!, own[i + 1]!))) break;
+    for (let j = Math.max(i, at); j <= Math.min(own.length - 1, i + 3); j++) {
+      if (j > at && !(blendable(own[j]!) && under(own[j - 1]!, own[j]!))) break;
+      const run = own.slice(i, j + 1), mid = (run[0]!.y + run[run.length - 1]!.y) / 2;
+      if (run.length > 1 && !blendable(near)) break;
+      if (Math.abs(mid - m.y) < Math.abs((best[0]!.y + best[best.length - 1]!.y) / 2 - m.y) - 0.5) best = run;
+    }
+  }
+  return best;
+}
+
 /**
  * Key rows: a symbol drawn outside the grids, alone, followed on its line by a thread. Per symbol, its row's text and
  * thread; also rows naming a thread without a symbol (backstitch lists).
@@ -119,18 +165,20 @@ function readKey(c: PdfContent, grids: PageGrid[], ids: Set<MarkId>) {
       if (ids.has(id) && !inGrid(at.x, at.y)) marks.push({ id, ...at, h: s.h, box: { page: n, x: s.x, y: s.y, w: s.w, h: s.h } });
     });
     const words = page.words.filter((w) => w.upright);
-    const rowOf = (x: number, y: number, h: number, until: number) =>
-      words.filter((w) => Math.abs(centre(w).y - y) < Math.max(h, w.h) * 0.6 && w.x > x && w.x < until).sort((a, b) => a.x - b.x);
     // a brand as a column heading — its own line naming no thread: rows below it may give the number alone
     const lineText = (w: Word) => words.filter((o) => Math.abs(centre(o).y - centre(w).y) < Math.max(o.h, w.h) * 0.6).sort((a, b) => a.x - b.x).map((o) => o.text).join(" ");
     const headings = words.flatMap((w) => (brandWord(w.text) && !threadOf(lineText(w)) ? [w] : []));
     const brandAbove = (row: Word[]) => headings.find((hd) => row.some((w) => w.y > hd.y && w.x < hd.x + hd.w && w.x + w.w > hd.x && !brandWord(w.text)))?.text;
+    /** Words of a key row already read with a symbol. */
+    const taken = new Set<Word>();
     for (const m of marks) {
       if (found.get(m.id)?.thread) continue;
       const next = Math.min(page.w + 1, ...marks.filter((o) => o !== m && Math.abs(o.y - m.y) < m.h * 0.6 && o.x > m.x).map((o) => o.x));
-      const row = rowOf(m.x, m.y, m.h, next);
-      const text = row.map((w) => w.text).join(" ");
-      const thread = threadOf(text, brandAbove(row));
+      const run = rowsOf(m, marks, words.filter((w) => w.x > m.x && w.x < next), brandAbove);
+      const text = run.map((r) => r.text).join(" + ");
+      // a blend (Pattern Maker): the symbol between its threads' rows, one row each
+      const thread = run.length > 1 ? { kind: "thread" as const, ids: run.flatMap((r) => r.thread!.ids) } : (run[0]?.thread ?? null);
+      if (thread) run.forEach((r) => r.words.forEach((w) => taken.add(w)));
       if (thread || !found.has(m.id)) found.set(m.id, { text, thread, at: m.box });
     }
     // lines naming a thread with no symbol before them
@@ -142,7 +190,7 @@ function readKey(c: PdfContent, grids: PageGrid[], ids: Set<MarkId>) {
     for (const row of lines.values()) {
       row.sort((a, b) => a.x - b.x);
       const y = centre(row[0]!).y;
-      if (marks.some((m) => Math.abs(m.y - y) < m.h * 0.6) || inGrid(row[0]!.x, y)) continue;
+      if (marks.some((m) => Math.abs(m.y - y) < m.h * 0.6) || row.some((w) => taken.has(w)) || inGrid(row[0]!.x, y)) continue;
       const t = threadOf(row.map((w) => w.text).join(" "), brandAbove(row));
       const x = row[0]!.x, top = Math.min(...row.map((w) => w.y));
       if (t?.kind === "thread") loose.push({ ...t, at: { page: n, x, y: top, w: Math.max(...row.map((w) => w.x + w.w)) - x, h: Math.max(...row.map((w) => w.y + w.h)) - top } });
@@ -307,7 +355,7 @@ export function chartToPattern(r: ChartRead, symbols: readonly string[], o: { fa
     const t = s.thread;
     if (!t) return null;
     if (t.kind === "bead") return addEntry(p, { t: "bead", src: t.ids[0]! }, symbols);
-    if (t.ids.length === 2) {
+    if (t.ids.length > 1) {
       const id = `blend:${t.ids.join("+")}`;
       p.blends[id] = { parts: t.ids.map((part) => ({ id: part, n: 1 })) };
       return addEntry(p, { t: "thread", src: id, n: null, st: "full" }, symbols);

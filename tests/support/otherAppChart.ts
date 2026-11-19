@@ -9,7 +9,8 @@ import type { PdfContent } from "../../src/core/formats/pdfChart/content";
  * stamped as small pictures, the chart over two pages that share two columns, numbers every ten along the edges,
  * a red backstitch, and a key — each symbol followed by its thread, a bead among them, a backstitch thread listed
  * without a symbol. `messy`: what needs the steps (SPEC §15.48) — a size that doesn't match the grids (31 × 20), the
- * last two columns printed faded, the white thread a brand the app doesn't know.
+ * last two columns printed faded, the white thread a brand the app doesn't know. `blend`: the white cross a blend, as
+ * Pattern Maker lists one — a row per thread, its symbol halfway between them.
  */
 
 const font = (name: string) => new Uint8Array(readFileSync(new URL(`../../public/fonts/${name}.ttf`, import.meta.url)));
@@ -32,7 +33,7 @@ function symbolPicture(kind: number): Raster {
 /** The columns printed faded in the messy chart. */
 export const FADED_FROM = 28;
 
-export async function otherAppChart(o: { messy?: boolean } = {}): Promise<Uint8Array> {
+export async function otherAppChart(o: { messy?: boolean; blend?: boolean } = {}): Promise<Uint8Array> {
   const pdf = new PdfWriter();
   await pdf.embedTextFonts(FONTS);
   const pictures = [0, await pdf.image(symbolPicture(1)), await pdf.image(symbolPicture(2)), await pdf.image(symbolPicture(3))];
@@ -68,7 +69,10 @@ export async function otherAppChart(o: { messy?: boolean } = {}): Promise<Uint8A
   key.text("bold", 10, L, 80, "Symbol    Thread");
   ["DMC 310 Black", o.messy ? "Kreinik 032 Pearl" : "DMC 3865 Winter White", "Mill Hill 00557 Gold"].forEach((row, i) => {
     key.image(pictures[i + 1]!, L, 92 + i * 20, 12, 12);
-    key.text("regular", 10, L + 40, 102 + i * 20, row);
+    if (o.blend && i === 1) {
+      key.text("regular", 10, L + 40, 97 + i * 20, "1 DMC 3865 Winter White");
+      key.text("regular", 10, L + 40, 107.6 + i * 20, "1 DMC 762 Pearl Gray-VY LT");
+    } else key.text("regular", 10, L + 40, 102 + i * 20, row);
   });
   key.text("bold", 10, L, 180, "Backstitch");
   key.text("regular", 10, L + 40, 200, "DMC 321 Red");
