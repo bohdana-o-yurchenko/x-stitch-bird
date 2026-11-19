@@ -12,6 +12,24 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "2.1.0",
+    date: "2026-11-19",
+    uk: [
+      "Чи прочитає ваш застосунок? Тестові файли — .oxs, PDF для Pattern Keeper і PDF-схема для друку — з усіма видами стібків, бісеру й ліній, кожен пронумерований. Відкрийте файл у своєму застосунку для вишивання й позначте номер за номером: усе добре чи є проблеми. ☰ ▸ Чи прочитає ваш застосунок?",
+      "Наприкінці — підсумок: що саме не працює, напр. «розміри бісеру». Увійшовши, можна зберігати перевірки кількох застосунків.",
+      "PDF-схеми з Pattern Maker: бленди зчитуються обома нитками.",
+      "Файл .oxs зберігається одразу з меню Експорт — без зайвого запитання.",
+      "Файли .oxs з інших програм: бісер Preciosa, зокрема з ниткою, зчитується правильно.",
+    ],
+    en: [
+      "Does your app read it? Test files — the .oxs, the PDF for Pattern Keeper and the PDF chart to print — with every kind of stitch, bead and line, each numbered. Open one in your cross-stitch app and go number by number: all good, or issues. ☰ ▸ Does your app read it?",
+      "At the end, a summary of what exactly doesn't work, such as \"bead sizes\". Signed in, you can keep checks of several apps.",
+      "PDF charts from Pattern Maker: blends are read with both threads.",
+      "The .oxs saves straight from the Export menu — no extra question.",
+      ".oxs files from other apps: Preciosa beads, with floss too, are read right.",
+    ],
+  },
+  {
     version: "2.0.1",
     date: "2026-11-19",
     uk: [
