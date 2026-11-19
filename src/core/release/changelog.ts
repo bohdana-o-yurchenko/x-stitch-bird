@@ -12,6 +12,16 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "2.1.1",
+    date: "2026-11-19",
+    uk: [
+      "PDF-схеми з інших програм, крок «Ключ»: PDF лишається там, куди ви його прокрутили, — не стрибає, коли обираєте наступний символ чи повертаєтеся з вкладки «Схема». Вікно більше не змінює висоту, коли рядки розгортаються.",
+    ],
+    en: [
+      "PDF charts from other apps, the key step: the PDF stays where you scrolled it — no jumping when you pick the next symbol or come back from the Chart tab. The window no longer changes height as rows open.",
+    ],
+  },
+  {
     version: "2.1.0",
     date: "2026-11-19",
     uk: [
