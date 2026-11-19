@@ -141,8 +141,9 @@ the symbols as paths (they exist for the PDF). Pattern ▾ › Export › Chart 
 
 ### B11. Pattern Maker `.xsd` import (§15.27, ranked 1st) — M
 The most used commercial format, common in older purchased charts and what SAGA converters produce. Binary, but
-worked out long ago by open-source projects (KXStitch reads it — GPL-2.0-or-later; written from the format, not
-copied code). **Import only, never write** (exporting `.xsd` stays parked: proprietary and undocumented).
+worked out by open-source projects (Embroiderly reads it — GPL-3.0-or-later; KXStitch doesn't). **Import only, never
+write** (exporting `.xsd` stays parked: proprietary, partly unknown). Format, mapping and plan:
+[backlog/b11-xsd.md](backlog/b11-xsd.md).
 - Real sample files for tests (other people's designs stay in `tests/fixtures/private`, not committed).
 - What we can't represent is simplified and reported (`toasts.loadedReport`), as with OXS.
 - New ▸ From another app's file…, and the Open work file picker / drag & drop.

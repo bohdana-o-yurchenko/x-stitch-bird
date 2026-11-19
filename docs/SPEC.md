@@ -2135,7 +2135,8 @@ Apps read our files differently (one skips some bead sizes, another shows ¼ sti
   and — marked *should be missing* — what it leaves out on purpose), the **PDF chart to print** (34: every stitch,
   bead and line on its three views; the key, cover, pages). Each sample sits in a box with its **number drawn on the
   chart** — backstitch digits in DMC 310 on the .oxs chart, whole crosses of DMC 3799 on the PDF charts (Pattern
-  Keeper carries nothing else); checks of the whole file (key, pages) come last, numbered on. The charts are built by
+  Keeper carries nothing else); 5 empty cells all round each chart (the .oxs's #72 sits on its bottom edge, its box
+  reaching down to it); checks of the whole file (key, pages) come last, numbered on. The charts are built by
   `core/readerCheck` (`oxsSuite`, `pkSuite`, `pdfSuite`); sample ids never change once released (marks are stored
   by them), new samples go at the end. The .oxs is also `tests/fixtures/oxs-showcase/showcase.oxs`, described in
   `showcase.txt` (`oxsShowcase.test.ts`).
@@ -2154,9 +2155,9 @@ Apps read our files differently (one skips some bead sizes, another shows ¼ sti
   says so, with Sign in). Signed in, in the account (`reader_checks`, migration 006, `/api/checks`), as many as wanted
   (up to 30): the .oxs tab lists them (app · progress) with **Check another app** and **Delete this check**. On
   signing in, this browser's checks move into the account.
-- **Reached from**: ☰ ▸ Does your app read it? (editor — a new tab — and the other pages); the quick-start guide's
-  step 10 (☰ opened on the item, **Open the check**); a tip after the first .oxs export, from wherever it was saved
-  (`exportAs`), with the same button.
+- **Reached from**: the editor's ☰ ▸ Does your app read it? (a new tab); signed in, the top bar's **App check** tab
+  on the other pages (their ☰ doesn't have it); the quick-start guide's step 10 (☰ opened on the item, **Open the
+  check**); a tip after the first .oxs export, from wherever it was saved (`exportAs`), with the same button.
 
 ## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
 The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in

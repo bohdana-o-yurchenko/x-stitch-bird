@@ -1,10 +1,10 @@
 OXS showcase — Перевірка OXS — «усе» & <знаки>
-49 × 44 cells, 16 count, fabric #EFE6D2; author "пташечка", copyright "© 2026 test"
+59 × 54 cells, 16 count, fabric #EFE6D2; author "пташечка", copyright "© 2026 test"
 
 How to read it
 - Each sample sits in a box of 5 × 2 cells; its number is backstitched just to its left in DMC 310, 1 strand
   (seven-segment digits, 1 cell wide and 2 high). Those lines are labels, not part of any sample.
-- Samples go left to right, 5 to a row of boxes.
+- Samples go left to right, 5 to a row of boxes, with 5 empty cells all round the chart; #72 sits on its bottom edge.
 - Cells are counted from 1 (column,row), as on the app's rulers. Grid points and lines are counted from 0 at the
   chart's top-left corner, in cells; .5 is halfway.
 - "other apps": what this app makes of the file without its own extras (the stitchwork attributes) — close to
@@ -66,465 +66,465 @@ Palette, as written in the file (index, number, name)
 == Whole crosses ==
 
 #1  DMC 310, 2 strands
-     box: cells 5–9,1–2
+     box: cells 10–14,6–7
      in the file: <stitch>
-     · cell 5,1: whole cross DMC 310, 2 strands
-     · cell 6,1: whole cross DMC 310, 2 strands
+     · cell 10,6: whole cross DMC 310, 2 strands
+     · cell 11,6: whole cross DMC 310, 2 strands
 
 #2  DMC White — the code is a word
-     box: cells 15–19,1–2
+     box: cells 20–24,6–7
      in the file: <stitch>; number "DMC White"
-     · cell 15,1: whole cross DMC White, 2 strands
-     · cell 16,1: whole cross DMC White, 2 strands
+     · cell 20,6: whole cross DMC White, 2 strands
+     · cell 21,6: whole cross DMC White, 2 strands
 
 #3  DMC Ecru
-     box: cells 25–29,1–2
+     box: cells 30–34,6–7
      in the file: <stitch>
-     · cell 25,1: whole cross DMC Ecru, 2 strands
-     · cell 26,1: whole cross DMC Ecru, 2 strands
+     · cell 30,6: whole cross DMC Ecru, 2 strands
+     · cell 31,6: whole cross DMC Ecru, 2 strands
 
 #4  DMC B5200
-     box: cells 35–39,1–2
+     box: cells 40–44,6–7
      in the file: <stitch>
-     · cell 35,1: whole cross DMC B5200, 2 strands
-     · cell 36,1: whole cross DMC B5200, 2 strands
+     · cell 40,6: whole cross DMC B5200, 2 strands
+     · cell 41,6: whole cross DMC B5200, 2 strands
 
 #5  DMC 3865, 1 strand
-     box: cells 45–49,1–2
+     box: cells 50–54,6–7
      in the file: <stitch>; strands="1"
-     · cell 45,1: whole cross DMC 3865, 1 strand
-     · cell 46,1: whole cross DMC 3865, 1 strand
+     · cell 50,6: whole cross DMC 3865, 1 strand
+     · cell 51,6: whole cross DMC 3865, 1 strand
 
 #6  DMC 321, 3 strands
-     box: cells 5–9,4–5
+     box: cells 10–14,9–10
      in the file: <stitch>; strands="3"
-     · cell 5,4: whole cross DMC 321, 3 strands
-     · cell 6,4: whole cross DMC 321, 3 strands
+     · cell 10,9: whole cross DMC 321, 3 strands
+     · cell 11,9: whole cross DMC 321, 3 strands
 
 #7  DMC 798, 6 strands
-     box: cells 15–19,4–5
+     box: cells 20–24,9–10
      in the file: <stitch>; strands="6"
-     · cell 15,4: whole cross DMC 798, 6 strands
-     · cell 16,4: whole cross DMC 798, 6 strands
+     · cell 20,9: whole cross DMC 798, 6 strands
+     · cell 21,9: whole cross DMC 798, 6 strands
 
 #8  Anchor 403
-     box: cells 25–29,4–5
+     box: cells 30–34,9–10
      in the file: <stitch>; number "ANC 403"
-     · cell 25,4: whole cross Anchor 403, 2 strands
-     · cell 26,4: whole cross Anchor 403, 2 strands
+     · cell 30,9: whole cross Anchor 403, 2 strands
+     · cell 31,9: whole cross Anchor 403, 2 strands
 
 #9  Madeira 101
-     box: cells 35–39,4–5
+     box: cells 40–44,9–10
      in the file: <stitch>; number "MAD …"
-     · cell 35,4: whole cross Madeira 101, 2 strands
-     · cell 36,4: whole cross Madeira 101, 2 strands
+     · cell 40,9: whole cross Madeira 101, 2 strands
+     · cell 41,9: whole cross Madeira 101, 2 strands
 
 #10  own thread: Kreinik 032 Pearl
-     box: cells 45–49,4–5
+     box: cells 50–54,9–10
      in the file: <stitch>; number "Kreinik 032"
-     · cell 45,4: whole cross Kreinik 032, 1 strand
-     · cell 46,4: whole cross Kreinik 032, 1 strand
+     · cell 50,9: whole cross Kreinik 032, 1 strand
+     · cell 51,9: whole cross Kreinik 032, 1 strand
 
 #11  blend: 1 DMC 310 + 1 DMC White
-     box: cells 5–9,7–8
+     box: cells 10–14,12–13
      in the file: <stitch>; palette item with two <blend>
-     · cell 5,7: whole cross blend 1×DMC 310 + 1×DMC White
-     · cell 6,7: whole cross blend 1×DMC 310 + 1×DMC White
+     · cell 10,12: whole cross blend 1×DMC 310 + 1×DMC White
+     · cell 11,12: whole cross blend 1×DMC 310 + 1×DMC White
 
 #12  blend: 2 DMC 310 + 1 DMC White (strands differ)
-     box: cells 15–19,7–8
+     box: cells 20–24,12–13
      in the file: <stitch>; <blend strands="2"> + <blend strands="1">
-     · cell 15,7: whole cross blend 2×DMC 310 + 1×DMC White
-     · cell 16,7: whole cross blend 2×DMC 310 + 1×DMC White
+     · cell 20,12: whole cross blend 2×DMC 310 + 1×DMC White
+     · cell 21,12: whole cross blend 2×DMC 310 + 1×DMC White
 
 #13  blend of three: DMC 321 + 3865 + 798
-     box: cells 25–29,7–8
+     box: cells 30–34,12–13
      in the file: <stitch>; three <blend>
-     · cell 25,7: whole cross blend 1×DMC 321 + 1×DMC 3865 + 1×DMC 798
-     · cell 26,7: whole cross blend 1×DMC 321 + 1×DMC 3865 + 1×DMC 798
+     · cell 30,12: whole cross blend 1×DMC 321 + 1×DMC 3865 + 1×DMC 798
+     · cell 31,12: whole cross blend 1×DMC 321 + 1×DMC 3865 + 1×DMC 798
 
 #14  blend across brands: DMC 321 + Anchor 403
-     box: cells 35–39,7–8
+     box: cells 40–44,12–13
      in the file: <stitch>; <blend number="DMC 321"> + <blend number="ANC 403">
-     · cell 35,7: whole cross blend 1×DMC 321 + 1×Anchor 403
-     · cell 36,7: whole cross blend 1×DMC 321 + 1×Anchor 403
+     · cell 40,12: whole cross blend 1×DMC 321 + 1×Anchor 403
+     · cell 41,12: whole cross blend 1×DMC 321 + 1×Anchor 403
 
 #15  blend with an own thread: DMC 3865 + Kreinik 032
-     box: cells 45–49,7–8
+     box: cells 50–54,12–13
      in the file: <stitch>; <blend number="Kreinik 032">
-     · cell 45,7: whole cross blend 1×DMC 3865 + 1×Kreinik 032
-     · cell 46,7: whole cross blend 1×DMC 3865 + 1×Kreinik 032
+     · cell 50,12: whole cross blend 1×DMC 3865 + 1×Kreinik 032
+     · cell 51,12: whole cross blend 1×DMC 3865 + 1×Kreinik 032
 
 == Half crosses ==
 
 #16  half ╱ DMC 310
-     box: cells 5–9,10–11
+     box: cells 10–14,15–16
      in the file: <object objecttype="tent" direction="2">
-     · cell 5,10: half ╱ DMC 310, 2 strands
-     · cell 6,10: half ╱ DMC 310, 2 strands
+     · cell 10,15: half ╱ DMC 310, 2 strands
+     · cell 11,15: half ╱ DMC 310, 2 strands
 
 #17  half ╲ DMC 310
-     box: cells 15–19,10–11
+     box: cells 20–24,15–16
      in the file: <object objecttype="tent" direction="1">
-     · cell 15,10: half ╲ DMC 310, 2 strands
-     · cell 16,10: half ╲ DMC 310, 2 strands
+     · cell 20,15: half ╲ DMC 310, 2 strands
+     · cell 21,15: half ╲ DMC 310, 2 strands
 
 #18  half ╱ blend 1 DMC 310 + 1 DMC White
-     box: cells 25–29,10–11
+     box: cells 30–34,15–16
      in the file: tent, direction 2, blend item
-     · cell 25,10: half ╱ blend 1×DMC 310 + 1×DMC White
-     · cell 26,10: half ╱ blend 1×DMC 310 + 1×DMC White
+     · cell 30,15: half ╱ blend 1×DMC 310 + 1×DMC White
+     · cell 31,15: half ╱ blend 1×DMC 310 + 1×DMC White
 
 #19  half ╲ Anchor 403
-     box: cells 35–39,10–11
+     box: cells 40–44,15–16
      in the file: tent, direction 1
-     · cell 35,10: half ╲ Anchor 403, 2 strands
-     · cell 36,10: half ╲ Anchor 403, 2 strands
+     · cell 40,15: half ╲ Anchor 403, 2 strands
+     · cell 41,15: half ╲ Anchor 403, 2 strands
 
 == Floss + bead in a cell ==
 
 #20  whole cross DMC 321 + bead Mill Hill 00557
-     box: cells 45–49,10–11
+     box: cells 50–54,15–16
      in the file: <stitch>; item "MH 00557+DMC 321", comments="blend", two <blend>
-     · cell 45,10: floss + bead, whole cross DMC 321 + bead Mill Hill 00557, 2 strands
-     · cell 46,10: floss + bead, whole cross DMC 321 + bead Mill Hill 00557, 2 strands
+     · cell 50,15: floss + bead, whole cross DMC 321 + bead Mill Hill 00557, 2 strands
+     · cell 51,15: floss + bead, whole cross DMC 321 + bead Mill Hill 00557, 2 strands
 
 #21  half ╱ DMC 321 + bead Mill Hill 00557
-     box: cells 5–9,13–14
+     box: cells 10–14,18–19
      in the file: tent, direction 2, the floss + bead item
-     · cell 5,13: floss + bead, half ╱ DMC 321 + bead Mill Hill 00557, 2 strands
-     · cell 6,13: floss + bead, half ╱ DMC 321 + bead Mill Hill 00557, 2 strands
+     · cell 10,18: floss + bead, half ╱ DMC 321 + bead Mill Hill 00557, 2 strands
+     · cell 11,18: floss + bead, half ╱ DMC 321 + bead Mill Hill 00557, 2 strands
 
 #22  half ╲ DMC 321 + bead Mill Hill 00557
-     box: cells 15–19,13–14
+     box: cells 20–24,18–19
      in the file: tent, direction 1
-     · cell 15,13: floss + bead, half ╲ DMC 321 + bead Mill Hill 00557, 2 strands
-     · cell 16,13: floss + bead, half ╲ DMC 321 + bead Mill Hill 00557, 2 strands
+     · cell 20,18: floss + bead, half ╲ DMC 321 + bead Mill Hill 00557, 2 strands
+     · cell 21,18: floss + bead, half ╲ DMC 321 + bead Mill Hill 00557, 2 strands
 
 #23  whole cross Anchor 403 + bead Preciosa 00050
-     box: cells 25–29,13–14
+     box: cells 30–34,18–19
      in the file: <stitch>; item "PREC 00050+ANC 403"
-     · cell 25,13: floss + bead, whole cross Anchor 403 + bead Preciosa 00050, 2 strands
-     · cell 26,13: floss + bead, whole cross Anchor 403 + bead Preciosa 00050, 2 strands
+     · cell 30,18: floss + bead, whole cross Anchor 403 + bead Preciosa 00050, 2 strands
+     · cell 31,18: floss + bead, whole cross Anchor 403 + bead Preciosa 00050, 2 strands
 
 #24  own thread + own bead: Kreinik 032 + Toho 11-21
-     box: cells 35–39,13–14
+     box: cells 40–44,18–19
      in the file: <stitch>; item "Toho 11-21+Kreinik 032"
-     · cell 35,13: floss + bead, whole cross Kreinik 032 + bead Toho 11-21, 2 strands
-     · cell 36,13: floss + bead, whole cross Kreinik 032 + bead Toho 11-21, 2 strands
-     other apps · cell 35,13: whole cross blend 1×Toho 11-21 + 2×Kreinik 032
-     other apps · cell 36,13: whole cross blend 1×Toho 11-21 + 2×Kreinik 032
+     · cell 40,18: floss + bead, whole cross Kreinik 032 + bead Toho 11-21, 2 strands
+     · cell 41,18: floss + bead, whole cross Kreinik 032 + bead Toho 11-21, 2 strands
+     other apps · cell 40,18: whole cross blend 1×Toho 11-21 + 2×Kreinik 032
+     other apps · cell 41,18: whole cross blend 1×Toho 11-21 + 2×Kreinik 032
 
 == Beads in a cell ==
 
 #25  Mill Hill 00557 (Glass Seed)
-     box: cells 45–49,13–14
+     box: cells 50–54,18–19
      in the file: <object objecttype="bead"> at the cell's centre (x + 0.5)
-     · cell 45,13: bead Mill Hill 00557
-     · cell 46,13: bead Mill Hill 00557
+     · cell 50,18: bead Mill Hill 00557
+     · cell 51,18: bead Mill Hill 00557
 
 #26  Mill Hill 40020 (Petite Glass)
-     box: cells 5–9,16–17
+     box: cells 10–14,21–22
      in the file: <object objecttype="bead2mm"> at the cell's centre (x + 0.5)
-     · cell 5,16: bead Mill Hill 40020
-     · cell 6,16: bead Mill Hill 40020
+     · cell 10,21: bead Mill Hill 40020
+     · cell 11,21: bead Mill Hill 40020
 
 #27  Mill Hill 18002 (Size 8)
-     box: cells 15–19,16–17
+     box: cells 20–24,21–22
      in the file: <object objecttype="bead3mm"> at the cell's centre (x + 0.5)
-     · cell 15,16: bead Mill Hill 18002
-     · cell 16,16: bead Mill Hill 18002
+     · cell 20,21: bead Mill Hill 18002
+     · cell 21,21: bead Mill Hill 18002
 
 #28  Mill Hill 16002 (Size 6)
-     box: cells 25–29,16–17
+     box: cells 30–34,21–22
      in the file: <object objecttype="bead5mm"> at the cell's centre (x + 0.5)
-     · cell 25,16: bead Mill Hill 16002
-     · cell 26,16: bead Mill Hill 16002
+     · cell 30,21: bead Mill Hill 16002
+     · cell 31,21: bead Mill Hill 16002
 
 #29  Mill Hill 05002 (Pebble)
-     box: cells 35–39,16–17
+     box: cells 40–44,21–22
      in the file: <object objecttype="bead6mm"> at the cell's centre (x + 0.5)
-     · cell 35,16: bead Mill Hill 05002
-     · cell 36,16: bead Mill Hill 05002
+     · cell 40,21: bead Mill Hill 05002
+     · cell 41,21: bead Mill Hill 05002
 
 #30  Mill Hill 70020 (Small Bugle)
-     box: cells 45–49,16–17
+     box: cells 50–54,21–22
      in the file: <object objecttype="bead"> at the cell's centre (x + 0.5)
-     · cell 45,16: bead Mill Hill 70020
-     · cell 46,16: bead Mill Hill 70020
+     · cell 50,21: bead Mill Hill 70020
+     · cell 51,21: bead Mill Hill 70020
 
 #31  Mill Hill 12005 (Glass Treasure)
-     box: cells 5–9,19–20
+     box: cells 10–14,24–25
      in the file: <object objecttype="bead"> at the cell's centre (x + 0.5)
-     · cell 5,19: bead Mill Hill 12005
-     · cell 6,19: bead Mill Hill 12005
+     · cell 10,24: bead Mill Hill 12005
+     · cell 11,24: bead Mill Hill 12005
 
 #32  Preciosa 00050, the plain article
-     box: cells 15–19,19–20
+     box: cells 20–24,24–25
      in the file: <object objecttype="bead"> at the cell's centre (x + 0.5)
-     · cell 15,19: bead Preciosa 00050
-     · cell 16,19: bead Preciosa 00050
+     · cell 20,24: bead Preciosa 00050
+     · cell 21,24: bead Preciosa 00050
 
 #33  Preciosa 78102/33129001 — another article of the same code
-     box: cells 25–29,19–20
+     box: cells 30–34,24–25
      in the file: <object objecttype="bead"> at the cell's centre (x + 0.5)
-     · cell 25,19: bead Preciosa 78102
-     · cell 26,19: bead Preciosa 78102
+     · cell 30,24: bead Preciosa 78102
+     · cell 31,24: bead Preciosa 78102
 
 #34  own bead: Toho 11-21
-     box: cells 35–39,19–20
+     box: cells 40–44,24–25
      in the file: <object objecttype="bead"> at the cell's centre (x + 0.5)
-     · cell 35,19: bead Toho 11-21
-     · cell 36,19: bead Toho 11-21
+     · cell 40,24: bead Toho 11-21
+     · cell 41,24: bead Toho 11-21
 
 #35  bead on a whole cross, one cell (other apps' files have it; kept together)
-     box: cells 45–49,19–20
+     box: cells 50–54,24–25
      in the file: <stitch> and a bead <object> in one cell
-     · cell 45,19: whole cross DMC 3865, 1 strand
-     · cell 45,19: bead Mill Hill 00557
+     · cell 50,24: whole cross DMC 3865, 1 strand
+     · cell 50,24: bead Mill Hill 00557
 
 == Beads between cells ==
 
 #36  bead Mill Hill 00020 on a grid corner
-     box: cells 5–9,22–23
+     box: cells 10–14,27–28
      in the file: <object objecttype="bead"> at the point, stitchwork_x/_y
-     · bead between cells at point (5,22) Mill Hill 00020
-     other apps · cell 6,23: bead Mill Hill 00020
+     · bead between cells at point (10,27) Mill Hill 00020
+     other apps · cell 11,28: bead Mill Hill 00020
 
 #37  bead Mill Hill 00020 on the middle of a cell's edge
-     box: cells 15–19,22–23
+     box: cells 20–24,27–28
      in the file: bead <object> at x.5
-     · bead between cells at point (15.5,22) Mill Hill 00020
-     other apps · cell 16,23: bead Mill Hill 00020
+     · bead between cells at point (20.5,27) Mill Hill 00020
+     other apps · cell 21,28: bead Mill Hill 00020
 
 #38  the same bead, 00557, in a cell and between cells: one palette item
-     box: cells 25–29,22–23
+     box: cells 30–34,27–28
      in the file: one bead item, two <object>
-     · cell 25,22: bead Mill Hill 00557
-     · bead between cells at point (27,22) Mill Hill 00557
-     other apps · cell 25,22: bead Mill Hill 00557
-     other apps · cell 28,23: bead Mill Hill 00557
+     · cell 30,27: bead Mill Hill 00557
+     · bead between cells at point (32,27) Mill Hill 00557
+     other apps · cell 30,27: bead Mill Hill 00557
+     other apps · cell 33,28: bead Mill Hill 00557
 
 #39  floss + bead DMC 321 + Mill Hill 00557 on a grid corner
-     box: cells 35–39,22–23
+     box: cells 40–44,27–28
      in the file: a short <backstitch> ╱ through the point, in the floss + bead item
-     · floss + bead between cells at point (35,22) DMC 321 + bead Mill Hill 00557, 2 strands
-     other apps · backstitch (34.5,22.5)–(35.5,21.5) DMC 321, 2 strands
+     · floss + bead between cells at point (40,27) DMC 321 + bead Mill Hill 00557, 2 strands
+     other apps · backstitch (39.5,27.5)–(40.5,26.5) DMC 321, 2 strands
 
 == Fractional stitches ==
 
 #40  ¾ DMC 310 — cells left to right: corner TL, TR, BR, BL
-     box: cells 45–49,22–23
+     box: cells 50–54,27–28
      in the file: <partstitch> direction 2 (TL, BR) / 1 (TR, BL), the other palindex 0
-     · cell 45,22: ¾ TL DMC 310, 2 strands
-     · cell 46,22: ¾ TR DMC 310, 2 strands
-     · cell 47,22: ¾ BR DMC 310, 2 strands
-     · cell 48,22: ¾ BL DMC 310, 2 strands
+     · cell 50,27: ¾ TL DMC 310, 2 strands
+     · cell 51,27: ¾ TR DMC 310, 2 strands
+     · cell 52,27: ¾ BR DMC 310, 2 strands
+     · cell 53,27: ¾ BL DMC 310, 2 strands
 
 #41  ¼ DMC 310 — corners TL, TR, BR, BL
-     box: cells 5–9,25–26
+     box: cells 10–14,30–31
      in the file: <object objecttype="quarter" petit="false"> at the quarter's top-left
-     · cell 5,25: ¼ TL DMC 310, 2 strands
-     · cell 6,25: ¼ TR DMC 310, 2 strands
-     · cell 7,25: ¼ BR DMC 310, 2 strands
-     · cell 8,25: ¼ BL DMC 310, 2 strands
+     · cell 10,30: ¼ TL DMC 310, 2 strands
+     · cell 11,30: ¼ TR DMC 310, 2 strands
+     · cell 12,30: ¼ BR DMC 310, 2 strands
+     · cell 13,30: ¼ BL DMC 310, 2 strands
 
 #42  petite DMC 310 — corners TL, TR, BR, BL
-     box: cells 15–19,25–26
+     box: cells 20–24,30–31
      in the file: <object objecttype="petite">
-     · cell 15,25: petite TL DMC 310, 2 strands
-     · cell 16,25: petite TR DMC 310, 2 strands
-     · cell 17,25: petite BR DMC 310, 2 strands
-     · cell 18,25: petite BL DMC 310, 2 strands
+     · cell 20,30: petite TL DMC 310, 2 strands
+     · cell 21,30: petite TR DMC 310, 2 strands
+     · cell 22,30: petite BR DMC 310, 2 strands
+     · cell 23,30: petite BL DMC 310, 2 strands
 
 #43  two ¾ in one cell, split ╱: TL DMC 310, BR DMC 321
-     box: cells 25–29,25–26
+     box: cells 30–34,30–31
      in the file: one <partstitch direction="2"> with both palindexes
-     · cell 25,25: ¾ TL DMC 310, 2 strands
-     · cell 25,25: ¾ BR DMC 321, 3 strands
+     · cell 30,30: ¾ TL DMC 310, 2 strands
+     · cell 30,30: ¾ BR DMC 321, 3 strands
 
 #44  two ¾ in one cell, split ╲: TR DMC 310, BL DMC 321
-     box: cells 35–39,25–26
+     box: cells 40–44,30–31
      in the file: one <partstitch direction="1">
-     · cell 35,25: ¾ TR DMC 310, 2 strands
-     · cell 35,25: ¾ BL DMC 321, 3 strands
+     · cell 40,30: ¾ TR DMC 310, 2 strands
+     · cell 40,30: ¾ BL DMC 321, 3 strands
 
 #45  ¾ TL DMC 310 + ¼ BR DMC 321 in one cell
-     box: cells 45–49,25–26
+     box: cells 50–54,30–31
      in the file: <partstitch> + quarter <object>
-     · cell 45,25: ¾ TL DMC 310, 2 strands
-     · cell 45,25: ¼ BR DMC 321, 3 strands
+     · cell 50,30: ¾ TL DMC 310, 2 strands
+     · cell 50,30: ¼ BR DMC 321, 3 strands
 
 #46  four ¼ in one cell: TL 310, TR 321, BR 3865, BL 798
-     box: cells 5–9,28–29
+     box: cells 10–14,33–34
      in the file: four quarter <object>
-     · cell 5,28: ¼ TL DMC 310, 2 strands
-     · cell 5,28: ¼ TR DMC 321, 3 strands
-     · cell 5,28: ¼ BR DMC 3865, 1 strand
-     · cell 5,28: ¼ BL DMC 798, 6 strands
+     · cell 10,33: ¼ TL DMC 310, 2 strands
+     · cell 10,33: ¼ TR DMC 321, 3 strands
+     · cell 10,33: ¼ BR DMC 3865, 1 strand
+     · cell 10,33: ¼ BL DMC 798, 6 strands
 
 #47  four petites in one cell: TL 310, TR 321, BR 3865, BL 798
-     box: cells 15–19,28–29
+     box: cells 20–24,33–34
      in the file: four petite <object>
-     · cell 15,28: petite TL DMC 310, 2 strands
-     · cell 15,28: petite TR DMC 321, 3 strands
-     · cell 15,28: petite BR DMC 3865, 1 strand
-     · cell 15,28: petite BL DMC 798, 6 strands
+     · cell 20,33: petite TL DMC 310, 2 strands
+     · cell 20,33: petite TR DMC 321, 3 strands
+     · cell 20,33: petite BR DMC 3865, 1 strand
+     · cell 20,33: petite BL DMC 798, 6 strands
 
 #48  half ╱ DMC 310 + ¼ DMC 321: TL in the first cell, BR in the second
-     box: cells 25–29,28–29
+     box: cells 30–34,33–34
      in the file: tent + quarter <object>
-     · cell 25,28: half ╱ DMC 310, 2 strands
-     · cell 25,28: ¼ TL DMC 321, 3 strands
-     · cell 26,28: half ╱ DMC 310, 2 strands
-     · cell 26,28: ¼ BR DMC 321, 3 strands
+     · cell 30,33: half ╱ DMC 310, 2 strands
+     · cell 30,33: ¼ TL DMC 321, 3 strands
+     · cell 31,33: half ╱ DMC 310, 2 strands
+     · cell 31,33: ¼ BR DMC 321, 3 strands
 
 #49  ¾ in a blend (1 DMC 310 + 1 DMC White), corners TL, TR
-     box: cells 35–39,28–29
+     box: cells 40–44,33–34
      in the file: <partstitch>, blend item
-     · cell 35,28: ¾ TL blend 1×DMC 310 + 1×DMC White
-     · cell 36,28: ¾ TR blend 1×DMC 310 + 1×DMC White
+     · cell 40,33: ¾ TL blend 1×DMC 310 + 1×DMC White
+     · cell 41,33: ¾ TR blend 1×DMC 310 + 1×DMC White
 
 #50  ¼ in a blend of three, corners TL, BR
-     box: cells 45–49,28–29
+     box: cells 50–54,33–34
      in the file: quarter <object>, blend item
-     · cell 45,28: ¼ TL blend 1×DMC 321 + 1×DMC 3865 + 1×DMC 798
-     · cell 46,28: ¼ BR blend 1×DMC 321 + 1×DMC 3865 + 1×DMC 798
+     · cell 50,33: ¼ TL blend 1×DMC 321 + 1×DMC 3865 + 1×DMC 798
+     · cell 51,33: ¼ BR blend 1×DMC 321 + 1×DMC 3865 + 1×DMC 798
 
 #51  petite Anchor 403, corners TR, BL
-     box: cells 5–9,31–32
+     box: cells 10–14,36–37
      in the file: petite <object>
-     · cell 5,31: petite TR Anchor 403, 2 strands
-     · cell 6,31: petite BL Anchor 403, 2 strands
+     · cell 10,36: petite TR Anchor 403, 2 strands
+     · cell 11,36: petite BL Anchor 403, 2 strands
 
 #52  ¾ own thread Kreinik 032, corners BR, BL
-     box: cells 15–19,31–32
+     box: cells 20–24,36–37
      in the file: <partstitch>
-     · cell 15,31: ¾ BR Kreinik 032, 1 strand
-     · cell 16,31: ¾ BL Kreinik 032, 1 strand
+     · cell 20,36: ¾ BR Kreinik 032, 1 strand
+     · cell 21,36: ¾ BL Kreinik 032, 1 strand
 
 == Backstitch ==
 
 #53  DMC 321, 1 strand: one cell long, level
-     box: cells 25–29,31–32
+     box: cells 30–34,36–37
      in the file: <backstitch>
-     · backstitch (24,31)–(25,31) DMC 321, 1 strand
+     · backstitch (29,36)–(30,36) DMC 321, 1 strand
 
 #54  DMC 321: two cells, upright
-     box: cells 35–39,31–32
+     box: cells 40–44,36–37
      in the file: <backstitch>
-     · backstitch (35,30)–(35,32) DMC 321, 1 strand
+     · backstitch (40,35)–(40,37) DMC 321, 1 strand
 
 #55  DMC 321: corner to corner, slanted
-     box: cells 45–49,31–32
+     box: cells 50–54,36–37
      in the file: <backstitch>
-     · backstitch (44,32)–(46,30) DMC 321, 1 strand
+     · backstitch (49,37)–(51,35) DMC 321, 1 strand
 
 #56  DMC 321: to a cell's centre (half grid)
-     box: cells 5–9,34–35
+     box: cells 10–14,39–40
      in the file: <backstitch> with x.5 / y.5
-     · backstitch (4,33)–(5.5,33.5) DMC 321, 1 strand
+     · backstitch (9,38)–(10.5,38.5) DMC 321, 1 strand
 
 #57  DMC 321: a zigzag of four lines
-     box: cells 15–19,34–35
+     box: cells 20–24,39–40
      in the file: four <backstitch>, sequence in order
-     · backstitch (14,33)–(15,35) DMC 321, 1 strand
-     · backstitch (15,35)–(16,33) DMC 321, 1 strand
-     · backstitch (16,33)–(17,35) DMC 321, 1 strand
-     · backstitch (17,35)–(18,33) DMC 321, 1 strand
+     · backstitch (19,38)–(20,40) DMC 321, 1 strand
+     · backstitch (20,40)–(21,38) DMC 321, 1 strand
+     · backstitch (21,38)–(22,40) DMC 321, 1 strand
+     · backstitch (22,40)–(23,38) DMC 321, 1 strand
 
 #58  DMC 321: one long line over five cells
-     box: cells 25–29,34–35
+     box: cells 30–34,39–40
      in the file: one <backstitch>
-     · backstitch (24,34)–(29,34) DMC 321, 1 strand
+     · backstitch (29,39)–(34,39) DMC 321, 1 strand
 
 #59  blend 1 DMC 310 + 1 DMC White
-     box: cells 35–39,34–35
+     box: cells 40–44,39–40
      in the file: <backstitch>, blend item named … (backstitch)
-     · backstitch (34,34)–(37,34) blend 1×DMC 310 + 1×DMC White
+     · backstitch (39,39)–(42,39) blend 1×DMC 310 + 1×DMC White
 
 #60  Anchor 403, 2 strands
-     box: cells 45–49,34–35
+     box: cells 50–54,39–40
      in the file: <backstitch>; bsstrands="2"
-     · backstitch (44,34)–(47,34) Anchor 403, 2 strands
+     · backstitch (49,39)–(52,39) Anchor 403, 2 strands
 
 #61  own thread Kreinik 032
-     box: cells 5–9,37–38
+     box: cells 10–14,42–43
      in the file: <backstitch>
-     · backstitch (4,37)–(7,37) Kreinik 032, 1 strand
+     · backstitch (9,42)–(12,42) Kreinik 032, 1 strand
 
 #62  DMC 3865 printed in red on the chart (line colour; only this app keeps it)
-     box: cells 15–19,37–38
+     box: cells 20–24,42–43
      in the file: <backstitch>; the colour in the stitchwork attribute
-     · backstitch (14,37)–(17,37) DMC 3865, 1 strand, drawn #E6194B
-     other apps · backstitch (14,37)–(17,37) DMC 3865, 1 strand
+     · backstitch (19,42)–(22,42) DMC 3865, 1 strand, drawn #E6194B
+     other apps · backstitch (19,42)–(22,42) DMC 3865, 1 strand
 
 #63  DMC 321 over whole crosses of DMC 3865
-     box: cells 25–29,37–38
+     box: cells 30–34,42–43
      in the file: <stitch> + <backstitch>
-     · cell 25,37: whole cross DMC 3865, 1 strand
-     · cell 26,37: whole cross DMC 3865, 1 strand
-     · cell 27,37: whole cross DMC 3865, 1 strand
-     · backstitch (24,37)–(27,37) DMC 321, 1 strand
+     · cell 30,42: whole cross DMC 3865, 1 strand
+     · cell 31,42: whole cross DMC 3865, 1 strand
+     · cell 32,42: whole cross DMC 3865, 1 strand
+     · backstitch (29,42)–(32,42) DMC 321, 1 strand
 
 == French knots ==
 
 #64  DMC 310, 2 strands, on a grid corner
-     box: cells 35–39,37–38
+     box: cells 40–44,42–43
      in the file: <object objecttype="knot">
-     · French knot at point (35,37) DMC 310, 2 strands
+     · French knot at point (40,42) DMC 310, 2 strands
 
 #65  DMC 310 in a cell's centre
-     box: cells 45–49,37–38
+     box: cells 50–54,42–43
      in the file: knot at x.5, y.5
-     · French knot at point (45.5,36.5) DMC 310, 2 strands
+     · French knot at point (50.5,41.5) DMC 310, 2 strands
 
 #66  DMC 310 on the middle of a cell's edge
-     box: cells 5–9,40–41
+     box: cells 10–14,45–46
      in the file: knot at x.5
-     · French knot at point (5.5,40) DMC 310, 2 strands
+     · French knot at point (10.5,45) DMC 310, 2 strands
 
 #67  blend 1 DMC 310 + 1 DMC White
-     box: cells 15–19,40–41
+     box: cells 20–24,45–46
      in the file: knot, blend item named … (French knot)
-     · French knot at point (15,40) blend 1×DMC 310 + 1×DMC White
+     · French knot at point (20,45) blend 1×DMC 310 + 1×DMC White
 
 #68  DMC 321, 2 strands, 3 wraps (only this app keeps wraps)
-     box: cells 25–29,40–41
+     box: cells 30–34,45–46
      in the file: knot; wraps in the stitchwork attribute
-     · French knot at point (25,40) DMC 321, 2 strands, 3 wraps
-     other apps · French knot at point (25,40) DMC 321, 2 strands
+     · French knot at point (30,45) DMC 321, 2 strands, 3 wraps
+     other apps · French knot at point (30,45) DMC 321, 2 strands
 
 #69  Anchor 403, 1 strand
-     box: cells 35–39,40–41
+     box: cells 40–44,45–46
      in the file: knot
-     · French knot at point (35,40) Anchor 403, 1 strand
+     · French knot at point (40,45) Anchor 403, 1 strand
 
 #70  DMC 310 on whole crosses of DMC 3865
-     box: cells 45–49,40–41
+     box: cells 50–54,45–46
      in the file: <stitch> + knot <object>
-     · cell 45,40: whole cross DMC 3865, 1 strand
-     · cell 46,40: whole cross DMC 3865, 1 strand
-     · French knot at point (45,40) DMC 310, 2 strands
+     · cell 50,45: whole cross DMC 3865, 1 strand
+     · cell 51,45: whole cross DMC 3865, 1 strand
+     · French knot at point (50,45) DMC 310, 2 strands
 
 == One colour, every use ==
 
 #71  DMC 798, 1 strand: whole cross, half ╱, ¾, backstitch, knot — a palette item each
-     box: cells 5–9,43–44
+     box: cells 10–14,48–49
      in the file: five items numbered 798
-     · cell 5,43: whole cross DMC 798, 1 strand
-     · cell 6,43: half ╱ DMC 798, 1 strand
-     · cell 7,43: ¾ TL DMC 798, 1 strand
-     · backstitch (4,44)–(7,44) DMC 798, 1 strand
-     · French knot at point (8,43) DMC 798, 1 strand
+     · cell 10,48: whole cross DMC 798, 1 strand
+     · cell 11,48: half ╱ DMC 798, 1 strand
+     · cell 12,48: ¾ TL DMC 798, 1 strand
+     · backstitch (9,49)–(12,49) DMC 798, 1 strand
+     · French knot at point (13,48) DMC 798, 1 strand
 
 == On the chart's edge ==
 
-#72  floss + bead DMC 321 + Mill Hill 00557 on the chart's bottom edge
-     box: cells 15–19,43–44
+#72  floss + bead DMC 321 + Mill Hill 00557 on the chart's bottom edge, below its number
+     box: cells 20–24,48–54
      in the file: its tacking <backstitch> cut at the edge: (x−0.5, h) to (x+0.5, h−0.5)
-     · floss + bead between cells at point (15,44) DMC 321 + bead Mill Hill 00557, 2 strands
-     other apps · backstitch (14.5,44)–(15.5,43.5) DMC 321, 2 strands
+     · floss + bead between cells at point (20,54) DMC 321 + bead Mill Hill 00557, 2 strands
+     other apps · backstitch (19.5,54)–(20.5,53.5) DMC 321, 2 strands
 
 Not in an .oxs (this app keeps them only in its own extras, or not at all)
 - key symbols, backstitch line styles and line colours, knot wraps — in the stitchwork attribute only

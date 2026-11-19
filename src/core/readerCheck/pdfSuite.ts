@@ -8,7 +8,8 @@ import { words as t, type CheckSuite } from "./types";
 /*
  * The test chart for the PDF chart to print (SPEC §15.51) — read by people, not apps: every kind of stitch, bead and
  * line on its three chart views, the key and the pages. Numbers are whole crosses of DMC 3799, so they show on every
- * view. 44 × 75 cells: two pages across and two down (40 × 56 a page), sharing two rows / columns.
+ * view. 54 × 85 cells with 5 empty all round: two pages across and two down (40 × 56 a page), sharing two rows /
+ * columns.
  */
 
 const MADEIRA_ID = MADEIRA.find((e) => /^\d+$/.test(e.code))!.id;
@@ -79,5 +80,5 @@ export function pdfSuite(): CheckSuite {
     { id: "key", group: file, tags: ["key"], what: t("the key: every entry with its symbol, brand, number, name, strands and count; beads and lines too", "ключ: кожен рядок із символом, брендом, номером, назвою, нитками й кількістю; бісер і лінії теж"), put: null },
   ];
   const label = thread("dmc:3799");
-  return layOut("pdf", pt, defs, { label, perRow: 3, labelW: 8, areaW: 6, areaH: 5, gapX: 1, gapY: 2, number: (n, x, y) => crossNumber(pt, n, x, y, label) });
+  return layOut("pdf", pt, defs, { label, margin: 5, perRow: 3, labelW: 8, areaW: 6, areaH: 5, gapX: 1, gapY: 2, number: (n, x, y) => crossNumber(pt, n, x, y, label) });
 }

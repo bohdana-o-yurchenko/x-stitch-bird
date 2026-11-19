@@ -6,8 +6,8 @@ import { words as t, type CheckSuite } from "./types";
 
 /*
  * The .oxs test chart (SPEC §15.51): every kind of thing an .oxs of ours carries, each sample in a box of 5 × 2 cells
- * with its number backstitched to its left in DMC 310, one strand. tests/fixtures/oxs-showcase holds the file and a
- * description of it (oxsShowcase.test.ts). Samples keep their numbers: new ones go at the end.
+ * with its number backstitched to its left in DMC 310, one strand; 5 empty cells all round. tests/fixtures/oxs-showcase
+ * holds the file and a description of it (oxsShowcase.test.ts). Samples keep their numbers: new ones go at the end.
  */
 
 export const KREINIK: CustomColor = { id: "custom:kreinik", kind: "thread", brand: "Kreinik", code: "032", name: "Pearl", hex: "#EEE8D5" };
@@ -121,9 +121,9 @@ export function oxsSuite(): CheckSuite {
       line(x, y + 2, x + 3, y + 2, back("dmc:798"));
       point(x + 4, y + 1, knot("dmc:798", 1));
     } },
-    // last: on the chart's bottom edge
-    { id: "pointComboEdge", group: "edge", tags: ["pointCombo", "chartEdge"], what: t("floss + bead DMC 321 + Mill Hill 00557 on the chart's bottom edge", "нитка + бісер DMC 321 + Mill Hill 00557 на нижньому краю схеми"), how: t("its tacking <backstitch> cut at the edge: (x−0.5, h) to (x+0.5, h−0.5)", "його закріпка <backstitch>, обрізана по краю: (x−0.5, h) – (x+0.5, h−0.5)"), put: (x, y) => point(x + 1, y + 2, combo("combo:mh", "point")) },
+    // last: on the chart's bottom edge, below its number and the margin
+    { id: "pointComboEdge", group: "edge", tags: ["pointCombo", "chartEdge"], toBottom: true, what: t("floss + bead DMC 321 + Mill Hill 00557 on the chart's bottom edge, below its number", "нитка + бісер DMC 321 + Mill Hill 00557 на нижньому краю схеми, під номером"), how: t("its tacking <backstitch> cut at the edge: (x−0.5, h) to (x+0.5, h−0.5)", "його закріпка <backstitch>, обрізана по краю: (x−0.5, h) – (x+0.5, h−0.5)"), put: (x, _y, chart) => point(x + 1, chart.h, combo("combo:mh", "point")) },
   ];
   const label = pt.back("dmc:310");
-  return layOut("oxs", pt, defs, { label, perRow: 5, labelW: 4, areaW: 5, areaH: 2, gapX: 1, gapY: 1, number: (n, x, y) => backstitchNumber(pt, n, x, y, label) });
+  return layOut("oxs", pt, defs, { label, margin: 5, perRow: 5, labelW: 4, areaW: 5, areaH: 2, gapX: 1, gapY: 1, number: (n, x, y) => backstitchNumber(pt, n, x, y, label) });
 }

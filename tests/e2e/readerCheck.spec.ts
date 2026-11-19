@@ -8,6 +8,11 @@ test("the check page: a file per tab, the chart and the list pick each other, ma
   await page.evaluate(() => localStorage.removeItem("stitchwork.readerChecks"));
   await page.reload();
   await expect(page.getByTestId("check-tab-pk")).toHaveAttribute("aria-selected", "true");
+  // ☰ here is the pages' one: the check is in the editor's ☰ (and the top bar, signed in), not in this one
+  await page.getByTestId("pages-menu").getByRole("button").click();
+  await expect(page.getByRole("menuitem", { name: /^Privacy/ })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: /^Does your app read it/ })).toHaveCount(0);
+  await page.keyboard.press("Escape");
   // each tab downloads its own file
   for (const [kind, name] of [["oxs", "ptashechka-check.oxs"], ["pdf", "ptashechka-check-chart.pdf"], ["pk", "ptashechka-check-pattern-keeper.pdf"]]) {
     await page.getByTestId(`check-tab-${kind}`).click();

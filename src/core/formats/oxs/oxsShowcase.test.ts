@@ -77,7 +77,7 @@ const GROUPS: Record<string, string> = {
 
 describe("OXS showcase: every kind of thing an .oxs carries, numbered on one chart", () => {
   const { pattern: p, items: samples, label } = oxsSuite();
-  const areas = samples.map((s) => ({ x: s.area!.x + LABEL_W, y: s.area!.y, ...AREA }));
+  const areas = samples.map((s) => ({ x: s.area!.x + LABEL_W, y: s.area!.y, w: AREA.w, h: s.area!.h }));
   const xml = exportOxs(p);
   const own = importOxs(xml, ALL_SYMBOLS);
   // another app's view: the file without this app's own extras
@@ -117,7 +117,7 @@ describe("OXS showcase: every kind of thing an .oxs carries, numbered on one cha
       // line colour and wraps: this app's own
       "#62 DMC 3865 printed in red on the chart (line colour; only this app keeps it)",
       "#68 DMC 321, 2 strands, 3 wraps (only this app keeps wraps)",
-      "#72 floss + bead DMC 321 + Mill Hill 00557 on the chart's bottom edge",
+      "#72 floss + bead DMC 321 + Mill Hill 00557 on the chart's bottom edge, below its number",
     ]);
   });
 
@@ -129,7 +129,7 @@ describe("OXS showcase: every kind of thing an .oxs carries, numbered on one cha
       "How to read it",
       `- Each sample sits in a box of ${AREA.w} × ${AREA.h} cells; its number is backstitched just to its left in DMC 310, 1 strand`,
       "  (seven-segment digits, 1 cell wide and 2 high). Those lines are labels, not part of any sample.",
-      `- Samples go left to right, ${PER_ROW} to a row of boxes.`,
+      `- Samples go left to right, ${PER_ROW} to a row of boxes, with 5 empty cells all round the chart; #72 sits on its bottom edge.`,
       "- Cells are counted from 1 (column,row), as on the app's rulers. Grid points and lines are counted from 0 at the",
       "  chart's top-left corner, in cells; .5 is halfway.",
       "- \"other apps\": what this app makes of the file without its own extras (the stitchwork attributes) — close to",

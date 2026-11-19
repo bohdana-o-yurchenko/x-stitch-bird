@@ -268,13 +268,9 @@
   overflow: auto;
   background: var(--stage);
 }
-/* the chart with room around it, like a sheet on the table */
-.chartRoom {
-  box-sizing: border-box;
-  margin: 0 auto;
-}
 .chartInner {
   position: relative;
+  margin: 0 auto;
   box-shadow: var(--shadow);
 }
 .canvas {

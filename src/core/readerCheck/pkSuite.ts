@@ -7,8 +7,9 @@ import { words as t, type CheckSuite } from "./types";
 /*
  * The Pattern Keeper test chart (SPEC §15.51): what the PDF for Pattern Keeper carries — whole crosses in one floss,
  * or blended from two flosses of one strand each — and, marked "should be missing", what it leaves out on purpose.
- * Numbers are whole crosses (the PDF carries nothing else), 3 × 5 cells a digit, in DMC 3799. Five boxes to a row
- * make the chart 74 wide: two pages across (60 columns a page).
+ * Numbers are whole crosses (the PDF carries nothing else), 3 × 5 cells a digit, in DMC 3799. Five boxes to a row and
+ * 5 empty cells all round make the chart 84 wide: two pages across (60 columns a page), the fourth column of boxes
+ * over the page edge.
  */
 
 const MADEIRA_ID = MADEIRA.find((e) => /^\d+$/.test(e.code))!.id;
@@ -62,9 +63,9 @@ export function pkSuite(): CheckSuite {
     { id: "knots", group: out, tags: ["leftOut"], absent: true, what: t("a French knot and a bead between cells", "французький вузлик і бісер між клітинками"), how: missing, put: (x, y) => { point(x + 2, y + 2, knot("dmc:310")); point(x + 4, y + 3, bead("bead:00557", "point")); } },
     { id: "threadList", group: file, tags: ["key"], what: t("the thread list: every colour by brand and number (DMC, Anchor, Madeira, Kreinik), blends as both flosses", "список ниток: кожен колір із брендом і номером (DMC, Anchor, Madeira, Kreinik), бленди — обома нитками"), put: null },
     { id: "counts", group: file, tags: ["key"], what: t("stitch counts per colour as in пташечка's key (the numbers' DMC 3799 too)", "кількість хрестиків кожного кольору — як у ключі пташечки (і DMC 3799 номерів)"), put: null },
-    { id: "pages", group: file, tags: ["pages"], what: t("two pages joined into one chart: columns 61–74 (the fifth column of boxes) on the second", "дві сторінки — одна схема: стовпці 61–74 (п'ятий стовпець рамок) на другій"), put: null },
+    { id: "pages", group: file, tags: ["pages"], what: t("two pages joined into one chart: the fourth column of boxes runs over the page edge (columns 60 | 61)", "дві сторінки — одна схема: четвертий стовпець рамок перетинає край сторінки (стовпці 60 | 61)"), put: null },
     { id: "notes", group: file, tags: ["info"], what: t("the name \"Pattern Keeper check\"; the notes page lists what was left out", "назва «Pattern Keeper check»; сторінка приміток перелічує, що не ввійшло"), put: null },
   ];
   const label = thread("dmc:3799");
-  return layOut("pk", pt, defs, { label, perRow: 5, labelW: 8, areaW: 6, areaH: 5, gapX: 1, gapY: 2, number: (n, x, y) => crossNumber(pt, n, x, y, label) });
+  return layOut("pk", pt, defs, { label, margin: 5, perRow: 5, labelW: 8, areaW: 6, areaH: 5, gapX: 1, gapY: 2, number: (n, x, y) => crossNumber(pt, n, x, y, label) });
 }

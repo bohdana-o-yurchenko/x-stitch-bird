@@ -4,7 +4,10 @@ import type { Corner, KeyEntry, KeyIndex, PartialKindId, Pattern, Rect } from ".
 import { ALL_SYMBOLS } from "../symbols/symbols";
 import type { CheckItem, CheckSuite, CheckKind, Words } from "./types";
 
-/** A test chart's sample: what it is, and how to put it on the chart with its area's top-left cell at (x, y). */
+/**
+ * A test chart's sample: what it is, and how to put it on the chart with its area's top-left cell at (x, y) — the
+ * chart's size given too, for a sample on its edge.
+ */
 export interface SampleDef {
   id: string;
   group: string;
@@ -12,8 +15,10 @@ export interface SampleDef {
   what: Words;
   how?: Words;
   absent?: true;
+  /** Its box reaches down to the chart's bottom edge (a sample on the edge, below the margin). */
+  toBottom?: true;
   /** Null: a check of the whole file, nothing on the chart. */
-  put: ((x: number, y: number) => void) | null;
+  put: ((x: number, y: number, chart: { w: number; h: number }) => void) | null;
 }
 
 /**
@@ -93,20 +98,21 @@ export function crossNumber(pt: Painter, n: number, x: number, y: number, k: Key
 /**
  * Lays samples out in boxes, `perRow` to a row: each box its number (`number`, `labelW` cells wide), then the
  * sample's area. Checks of the whole file go last, numbered on. The chart is as big as its boxes, less the gap after
- * the last column and row.
+ * the last column and row, with `margin` empty cells all round.
  */
-export function layOut(kind: CheckKind, pt: Painter, defs: SampleDef[], o: { label: KeyIndex; perRow: number; labelW: number; areaW: number; areaH: number; gapX: number; gapY: number; number: (n: number, x: number, y: number) => void }): CheckSuite {
+export function layOut(kind: CheckKind, pt: Painter, defs: SampleDef[], o: { label: KeyIndex; margin: number; perRow: number; labelW: number; areaW: number; areaH: number; gapX: number; gapY: number; number: (n: number, x: number, y: number) => void }): CheckSuite {
   const slotW = o.labelW + o.areaW + o.gapX, slotH = o.areaH + o.gapY;
   const placed = defs.filter((d) => d.put), whole = defs.filter((d) => !d.put);
+  const rows = Math.ceil(placed.length / o.perRow);
+  const chart = { w: o.perRow * slotW - o.gapX + 2 * o.margin, h: rows * slotH - o.gapY + 2 * o.margin };
   const items: CheckItem[] = placed.map((d, i) => {
-    const sx = (i % o.perRow) * slotW, sy = Math.floor(i / o.perRow) * slotH;
+    const sx = o.margin + (i % o.perRow) * slotW, sy = o.margin + Math.floor(i / o.perRow) * slotH;
     o.number(i + 1, sx, sy);
-    d.put!(sx + o.labelW, sy);
-    return item(d, { x: sx, y: sy, w: o.labelW + o.areaW, h: o.areaH });
+    d.put!(sx + o.labelW, sy, chart);
+    return item(d, { x: sx, y: sy, w: o.labelW + o.areaW, h: d.toBottom ? chart.h - sy : o.areaH });
   });
   for (const d of whole) items.push(item(d, null));
-  const rows = Math.ceil(placed.length / o.perRow);
-  return { kind, pattern: pt.finish(o.perRow * slotW - o.gapX, rows * slotH - o.gapY), items, label: o.label };
+  return { kind, pattern: pt.finish(chart.w, chart.h), items, label: o.label };
 }
 
 const item = (d: SampleDef, area: Rect | null): CheckItem => ({ id: d.id, group: d.group, tags: d.tags, what: d.what, ...(d.how && { how: d.how }), area, ...(d.absent && { absent: true }) });
