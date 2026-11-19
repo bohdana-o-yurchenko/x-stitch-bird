@@ -1159,6 +1159,17 @@ Decisions taken while implementing this plan. Each one lives in the single place
   `persistence/cloud/accountChecks.ts` (`/api/checks`, `server/readerChecks.ts`, table `reader_checks`) signed in.
   UI: `ui/readerCheck` (`CheckApp` state and saving, `CheckChart` canvas + box buttons, `CheckList`, `CheckResults`).
 
+- Opening without the internet (SPEC §15.53): `app/sw.js/route.ts` is static, made at build time from
+  `server/offlineAssets.ts` (`buildAssets`: `.next/BUILD_ID` as the version, every file under `.next/static` and
+  `public/{fonts,icons}`) and `ui/install/serviceWorker.ts` (`serviceWorkerScript` — the worker as text, cache-first
+  for the pages in `OFFLINE_PAGES` and the build's files, nothing else touched; `serviceWorker.test.ts` runs it in a
+  pretend worker). **A new page under `app/[locale]` goes into `OFFLINE_PAGES`** (a test compares them). Page side:
+  `ui/install/offline.ts` (`startOffline` registers in the app's window or on `appinstalled`, production only, and
+  watches for a waiting version; `applyUpdate`), `ui/install/AppUpdate.tsx` in the locale layout. The remembered
+  session: `ui/account/session.ts` — `useAccountSession` wraps `authClient.useSession` (the rule is `resolveSession`),
+  used by `AccountButton`, `useSignedInOnly` and `CheckApp`; the pages take `offline` from it. Back online, `AccountButton` has the
+  editor catch up (`Editor.reconnected`). E2E: `tests/e2e/offline.spec.ts`.
+
 ## Server level (2026-11-16)
 
 `src/server/` is server-only code, imported only by the API routes in `src/app/api/` (eslint level `server`: core +

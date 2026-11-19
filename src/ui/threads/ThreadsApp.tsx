@@ -53,8 +53,7 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
   const t = useTranslations("threadsPage");
   const lib = useMemo(() => createLibrary(), []);
   const router = useRouter();
-  const { session, isPending, allowed } = useSignedInOnly();
-  const u = session?.user;
+  const { user: u, isPending, offline, allowed } = useSignedInOnly();
   const user = u ? { email: u.email, ...(u.name ? { name: u.name } : {}) } : null;
   const [signInOpen, setSignInOpen] = useState(false);
   const [threads, setThreads] = useState<CustomColor[] | null>(null);
@@ -70,9 +69,14 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
     if (isPending) return;
     lib.setSignedIn(!!u);
     if (!u) return;
-    void lib.threads().then((list) => (list ? setThreads(list) : setFailed(true)));
+    // offline they come once the internet is back (SPEC §15.53)
+    if (offline) return;
+    void lib.threads().then((list) => {
+      setFailed(!list);
+      if (list) setThreads(list);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lib, isPending, u?.id]);
+  }, [lib, isPending, u?.id, offline]);
 
   const brands = useMemo(() => {
     const counts = new Map<string, number>();
@@ -114,7 +118,7 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
   if (!allowed) return <PageLoading />;
   return (
     <div className={home.page}>
-      <HomeHeader section={kind === "thread" ? "threads" : "beads"} user={user} pending={isPending} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
+      <HomeHeader section={kind === "thread" ? "threads" : "beads"} user={user} pending={isPending} offline={offline} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
       <main className={home.main}>
           <div className={s.layout}>
             <nav className={s.brandList} aria-label={t("brands")} data-testid="thread-brands">
@@ -153,12 +157,12 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
                     </select>
                   </>
                 )}
-                <button type="button" className={cx(ui.btn, ui.primary)} onClick={() => setEditing({ kind, brand: brand ?? builtIn[0] })}>{t(kind === "thread" ? "addThread" : "addBead")}</button>
+                <button type="button" className={cx(ui.btn, ui.primary)} disabled={offline} title={offline ? t("needsInternet") : undefined} onClick={() => setEditing({ kind, brand: brand ?? builtIn[0] })}>{t(kind === "thread" ? "addThread" : "addBead")}</button>
               </div>
-              {failed && <p className={ui.warn}>{t("unreachable")}</p>}
-              {!threads && !failed && <p className={ui.hint}>{t("loading")}</p>}
+              {offline ? <p className={ui.hint} data-testid="threads-offline">{t(kind === "thread" ? "offline" : "offlineBeads")}</p> : failed && <p className={ui.warn}>{t("unreachable")}</p>}
+              {!threads && !failed && !offline && <p className={ui.hint}>{t("loading")}</p>}
               {threads && !mine.length && <p className={ui.hint}>{t(kind === "thread" ? "empty" : "emptyBeads")}</p>}
-              <ThreadList items={shown} view={view} onPick={(c) => setEditing({ kind: c.kind, thread: c })} />
+              <ThreadList items={shown} view={view} onPick={(c) => !offline && setEditing({ kind: c.kind, thread: c })} />
             </section>
           </div>
       </main>

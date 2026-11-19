@@ -27,8 +27,7 @@ export default function AccountApp() {
   const lib = useMemo(() => createLibrary(), []);
   const [deleted, setDeleted] = useState(false);
   // signed out there is only the editor (SPEC §15.39) — except right after deleting the account, to say so
-  const { session, isPending, allowed } = useSignedInOnly(deleted);
-  const u = session?.user;
+  const { user: u, isPending, offline, allowed } = useSignedInOnly(deleted);
   const user = u ? { id: u.id, email: u.email, ...(u.name ? { name: u.name } : {}) } : null;
   const [signInOpen, setSignInOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -36,14 +35,14 @@ export default function AccountApp() {
   useEffect(() => lib.setSignedIn(signedIn), [lib, signedIn]);
   const [usage, setUsage] = useState<AccountUsage | null>(null);
   useEffect(() => {
-    if (signedIn) void accountUsage().then(setUsage);
-  }, [signedIn]);
+    if (signedIn && !offline) void accountUsage().then(setUsage);
+  }, [signedIn, offline]);
   const since = u?.createdAt ? new Date(u.createdAt).toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" }) : null;
 
   if (!allowed && !deleted) return <PageLoading />;
   return (
     <div className={home.page}>
-      <HomeHeader section="account" user={user} pending={isPending} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
+      <HomeHeader section="account" user={user} pending={isPending} offline={offline} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
       <div className={s.layout}>
         <nav className={s.nav} aria-label={t("nav")}>
           {SECTIONS.map((id) => (
@@ -78,11 +77,12 @@ export default function AccountApp() {
                   )}
                 </dl>
               </section>
-              {usage && <UsageCard usage={usage} />}
+              {offline && <p className={ui.hint} data-testid="account-offline">{t("offline")}</p>}
+              {usage && !offline && <UsageCard usage={usage} />}
               <section className={cx(s.card, s.danger)}>
                 <h2>{t("deleteTitle")}</h2>
                 <p className={ui.hint}>{t("deleteHint")}</p>
-                <button type="button" className={cx(ui.btn, ui.dangerBtn, s.dangerBtn)} onClick={() => setConfirming(true)} data-testid="account-delete">{t("deleteButton")}</button>
+                <button type="button" className={cx(ui.btn, ui.dangerBtn, s.dangerBtn)} disabled={offline} onClick={() => setConfirming(true)} data-testid="account-delete">{t("deleteButton")}</button>
               </section>
             </>
           )}

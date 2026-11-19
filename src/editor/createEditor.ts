@@ -319,6 +319,16 @@ export class Editor {
   }
 
   /**
+   * Back online, signed in (SPEC §15.53 — the account menu tells): patterns saved here meanwhile go up (the open one
+   * goes with its live sync), and the account's threads come if they couldn't before. Signing in does the same.
+   */
+  reconnected() {
+    if (!this.state.account) return;
+    if (!this.state.inventory) void this.inventory.load();
+    void this.persistence.patterns.catchUp?.().catch(() => {});
+  }
+
+  /**
    * Before signing out: changes reach the account, then its patterns leave this browser. When the open pattern was
    * one of them, the demo takes its place — nothing of the account stays on screen.
    */

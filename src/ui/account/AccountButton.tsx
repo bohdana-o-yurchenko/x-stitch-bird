@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { accountUsage, type AccountUsage } from "@/editor/library";
 import { useTranslations } from "next-intl";
 import { cx, Dropdown, ui } from "../common/widgets";
@@ -8,6 +8,7 @@ import { SignInDialog } from "./SignInDialog";
 import { useEditor, useEditorState } from "../hooks/editor";
 import { useRouter } from "@/i18n/navigation";
 import { authClient } from "./authClient";
+import { useAccountSession } from "./session";
 import s from "./account.module.css";
 
 /**
@@ -17,21 +18,31 @@ import s from "./account.module.css";
  */
 export function AccountButton() {
   const ed = useEditor();
-  const { data: session, isPending } = authClient.useSession();
+  // who was signed in here starts the editor at once, and stays while offline (SPEC §15.53)
+  const { user: u, isPending, offline } = useAccountSession();
   const user = useEditorState((st) => st.account);
   const open = useEditorState((st) => st.signInOpen);
   const setOpen = (on: boolean) => ed.store.setState({ signInOpen: on });
 
   useEffect(() => {
     if (isPending) return;
-    const u = session?.user;
     ed.setAccount(u ? { id: u.id, email: u.email, ...(u.name ? { name: u.name } : {}) } : null);
-  }, [ed, session, isPending]);
+  }, [ed, u, isPending]);
+  // the account reachable again: what was saved meanwhile goes up
+  const wasOffline = useRef(false);
+  useEffect(() => {
+    if (offline) wasOffline.current = true;
+    else if (wasOffline.current && u) {
+      wasOffline.current = false;
+      ed.reconnected();
+    }
+  }, [ed, u, offline]);
 
   if (isPending) return null;
   return (
     <AccountMenu
       user={user}
+      offline={offline}
       signInOpen={open}
       setSignInOpen={setOpen}
       onSignedIn={(email) => ed.toast("account.signedIn", { email })}
@@ -48,8 +59,10 @@ export function AccountButton() {
 const PAGE_LABEL = { patterns: "myPatterns", threads: "myThreads", beads: "myBeads", account: "account" } as const;
 
 /** "Sign in", or signed in: the initial, with the email and Sign out. Shared by the editor and the patterns page. */
-export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, beforeSignOut, onSignedOut, beforeLeave }: {
+export function AccountMenu({ user, offline = false, signInOpen, setSignInOpen, onSignedIn, beforeSignOut, onSignedOut, beforeLeave }: {
   user: { email: string; name?: string } | null;
+  /** Signed in, the account out of reach (SPEC §15.53): said so; signing out waits for the internet. */
+  offline?: boolean;
   signInOpen: boolean;
   setSignInOpen: (on: boolean) => void;
   onSignedIn?: (email: string) => void;
@@ -87,15 +100,15 @@ export function AccountMenu({ user, signInOpen, setSignInOpen, onSignedIn, befor
     <span data-testid="account">
       <Dropdown
         className={s.avatarBtn}
-        label={<span className={s.avatar} title={user.email} aria-label={t("menu", { email: user.email })} onPointerDown={readUsage}>{initial}</span>}
+        label={<span className={cx(s.avatar, offline && s.offline)} title={user.email} aria-label={t("menu", { email: user.email })} onPointerDown={readUsage}>{initial}</span>}
         items={[
-          { label: user.email, hint: t("signedInHint"), onClick: () => {} },
+          { label: user.email, hint: t(offline ? "offlineHint" : "signedInHint"), onClick: () => {} },
           ...(usage ? [{ id: "usage", node: <span className={s.usage} data-testid="account-usage">{t("usage", { patterns: usage.patterns, maxPatterns: usage.maxPatterns, photos: Math.ceil(usage.photos / 1048576), maxPhotos: Math.round(usage.maxPhotos / 1048576) })}</span> }] : []),
           "-",
           // the account's pages (SPEC §15.39)
           ...(["patterns", "threads", "beads", "account"] as const).map((page) => ({ label: t(PAGE_LABEL[page]), onClick: () => go(page) })),
           "-",
-          { label: t("signOut"), onClick: async () => { await beforeSignOut?.(); await authClient.signOut(); onSignedOut?.(); } },
+          { label: t("signOut"), disabled: offline, ...(offline ? { hint: t("needsInternet") } : {}), onClick: async () => { await beforeSignOut?.(); await authClient.signOut(); onSignedOut?.(); } },
         ]}
       />
     </span>

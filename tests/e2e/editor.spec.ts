@@ -421,13 +421,13 @@ test("the installed app: each language's manifest opens in that language, with i
   }
 });
 
-test("☰ ▸ Install the app… on a laptop: what it gives, that it still needs the internet; Install shows the browser's prompt — none on a narrow screen (SPEC §15.50)", async ({ page }) => {
+test("☰ ▸ Install the app… on a laptop: what it gives, that it opens without the internet too; Install shows the browser's prompt — none on a narrow screen (SPEC §15.50, §15.53)", async ({ page }) => {
   const install = page.getByRole("menuitem", { name: /^Install the app…/ });
   const dialog = page.getByTestId("install-app");
   // Chrome before it offers its prompt: its own install button
   await openAppMenu(page);
   await install.click();
-  await expect(dialog).toContainText("It still needs the internet to open.");
+  await expect(dialog).toContainText("It opens without the internet too");
   await expect(dialog).toContainText("install button at the right end of the address bar");
   await page.getByRole("button", { name: "Close", exact: true }).click();
 

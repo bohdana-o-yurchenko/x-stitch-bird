@@ -13,11 +13,13 @@ import s from "./home.module.css";
 type User = { email: string; name?: string } | null;
 
 /** The main pages' bar (SPEC §15.26): logo, the sections as tabs, ☰ (language, theme, help — SPEC §15.49), account — like the editor's. */
-export function HomeHeader({ section, user, pending, signInOpen, setSignInOpen, beforeSignOut, onSignedOut }: {
+export function HomeHeader({ section, user, pending, offline, signInOpen, setSignInOpen, beforeSignOut, onSignedOut }: {
   /** The tab shown as current; the account page has none. */
   section: "patterns" | "threads" | "beads" | "account" | "check";
   user: User;
   pending: boolean;
+  /** Signed in, the account out of reach (SPEC §15.53). */
+  offline?: boolean;
   signInOpen: boolean;
   setSignInOpen: (on: boolean) => void;
   beforeSignOut?: () => Promise<unknown>;
@@ -35,7 +37,7 @@ export function HomeHeader({ section, user, pending, signInOpen, setSignInOpen, 
       </nav>
       <span className={s.spacer} />
       <PagesMenu />
-      {!pending && <AccountMenu user={user} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={beforeSignOut} onSignedOut={onSignedOut} />}
+      {!pending && <AccountMenu user={user} offline={offline} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={beforeSignOut} onSignedOut={onSignedOut} />}
     </header>
   );
 }

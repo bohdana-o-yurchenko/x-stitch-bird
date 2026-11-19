@@ -1,0 +1,43 @@
+/* A new version is ready (SPEC §15.53): a small card at the bottom left, above the editor's status bar — clear of the
+   side panel and the zoom. */
+.update {
+  position: fixed;
+  left: 16px;
+  bottom: 44px;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 10px 10px 16px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  animation: update-in 0.2s ease-out;
+}
+.update b {
+  font-weight: 600;
+}
+.later {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.later:hover {
+  color: var(--ink);
+  background: var(--surface2);
+}
+@keyframes update-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}

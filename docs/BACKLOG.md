@@ -32,7 +32,6 @@ follows RELEASING.md's compatibility rules (optional fields only, or ask first).
 | B18 | Text / alphabet tool | M | none |
 | B19 | Read-only share links | M | new server table |
 | B20 | Symbols from uploaded pictures | M | optional field |
-| B21 | Opening without the internet (installed app, phase 2) | M–L | none (browser cache) |
 | B22 | PCStitch `.pat` import | M–L | none |
 | B23 | Other apps' PDFs: part stitches, knots, beads; more apps | M–L | none |
 | B24 | Floss usage rework; plastic canvas and wooden bases | L | optional settings |
@@ -42,7 +41,7 @@ follows RELEASING.md's compatibility rules (optional fields only, or ask first).
 | B28 | `.saga` import (Cross Stitch Saga) | ? | none |
 
 **Suggested order** (value for the effort): B2, B3, B4 together (one "fabric & shopping" release) → B1 (bug), B5 →
-B11, B10 (§15.27's ranking) → B8 → B21 → B24 → B27.
+B11, B10 (§15.27's ranking) → B8 → B24 → B27.
 
 ---
 
@@ -113,7 +112,7 @@ paths like the drawn symbols (§2.5).
 ### B7. Open .xbird / .oxs files from the computer in the installed app — S
 Undecided extra from §15.50: the manifest's `file_handlers` + `launchQueue` (Chrome / Edge), so double-clicking a
 `.xbird` opens it in пташечка. The file then goes through the usual Open work file path (asks before replacing,
-§15.25 / §15.43). Not in Safari. Small on its own; most useful together with B21.
+§15.25 / §15.43). Not in Safari. Small; goes well with opening without the internet (§15.53).
 
 ### B8. More chart checks (§15.4) — S–M
 Chart checks today: empty cells, lone stitches, near symmetry. Not checked:
@@ -196,15 +195,6 @@ OXS has no way to carry them (falls back to a font symbol). Optional field in `.
 ---
 
 ## M–L
-
-### B21. Opening without the internet — installed app, phase 2 (§15.50) — M–L
-Today the installed app still needs the internet to open. Needed:
-- a service worker; the editor's lazily loaded files (PDF chart dialog, pdf.js and its worker, photo tools) saved
-  ahead;
-- a "new version — reload" prompt;
-- a start that doesn't wait for the sign-in check;
-- calm offline account pages (My patterns from this browser's cache, the account's parts greyed).
-Stored data: browser cache only. Saving offline already works (§15.33, §15.34).
 
 ### B22. PCStitch `.pat` import (§15.27, ranked 3rd) — M–L
 Older and needs more reverse engineering than `.xsd` (KXStitch reads it too). Same rules as B11: import only, real

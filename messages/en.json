@@ -734,12 +734,15 @@
     "menuHint": "пташечка in a window of its own",
     "title": "Install пташечка",
     "what": "пташечка gets a window of its own and an icon in the Dock or taskbar — no browser bar, more room for the chart. Your patterns and account stay as they are.",
-    "internet": "<b>It still needs the internet to open.</b>",
+    "internet": "<b>It opens without the internet too</b> — your changes reach your account once you’re back online.",
     "install": "Install",
     "safari": "In Safari: <b>File ▸ Add to Dock…</b>",
     "chromium": "Use the install button at the right end of the address bar, or the browser menu ▸ <b>Install…</b>",
     "shortcutNew": "New pattern",
-    "shortcutPatterns": "My patterns"
+    "shortcutPatterns": "My patterns",
+    "updateReady": "<b>A new version of пташечка</b> is ready",
+    "updateReload": "Reload",
+    "updateLater": "Later"
   },
   "toolNames": {
     "pencil": "Draw",
@@ -1143,7 +1146,9 @@
     "signingIn": "Signing in…",
     "resend": "Send a new code",
     "resendIn": "New code in {s} s",
-    "close": "Close"
+    "close": "Close",
+    "offlineHint": "Offline — your account gets your changes once you’re back online",
+    "needsInternet": "Needs the internet"
   },
   "keepPattern": {
     "title": "Keep this pattern?",
@@ -1238,7 +1243,9 @@
     "deleteBody": "Delete <b>{name}</b> from this browser and your account? This can’t be undone. Download its .xbird file first to load it later.",
     "factEdited": "edited {when}",
     "storage": "Account storage: {percent}%",
-    "storageHint": "Patterns {patterns} of {maxPatterns} · references {photos} of {maxPhotos} MB — the fuller of the two counts. Open your account for details."
+    "storageHint": "Patterns {patterns} of {maxPatterns} · references {photos} of {maxPhotos} MB — the fuller of the two counts. Open your account for details.",
+    "offline": "You’re offline: here are the patterns kept in this browser. The rest of your account shows once you’re back online.",
+    "needsInternet": "Needs the internet"
   },
   "threadForm": {
     "brand": "Brand",
@@ -1292,7 +1299,10 @@
     "sort_colour": "By colour",
     "close": "Close",
     "brandHelp": "Pick one from the list or type a new brand.",
-    "needColour": "Use a colour like #7A9CC6."
+    "needColour": "Use a colour like #7A9CC6.",
+    "offline": "You’re offline — your own threads show once you’re back online.",
+    "offlineBeads": "You’re offline — your own beads show once you’re back online.",
+    "needsInternet": "Needs the internet"
   },
   "materials": {
     "threads": "Threads",
@@ -1355,7 +1365,8 @@
     "usageOf": "{n} of {max}",
     "usageOfMb": "{n} of {max} MB",
     "usageNearlyFull": "Almost full.",
-    "usageHint": "To make room, remove references from a pattern (My patterns ▸ ⋯ ▸ References) or delete patterns (⋯ ▸ Delete). To keep them, download them first as .xbird files (⋯ ▸ Download .xbird) — they open again any time, references and all."
+    "usageHint": "To make room, remove references from a pattern (My patterns ▸ ⋯ ▸ References) or delete patterns (⋯ ▸ Delete). To keep them, download them first as .xbird files (⋯ ▸ Download .xbird) — they open again any time, references and all.",
+    "offline": "You’re offline: the space in your account and deleting it need the internet."
   },
   "pdfChart": {
     "title_grids": "The grids found",

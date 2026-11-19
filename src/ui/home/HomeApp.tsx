@@ -32,8 +32,7 @@ const MANY = 8;
 export default function HomeApp() {
   const t = useTranslations("home");
   const lib = useMemo(() => createLibrary(), []);
-  const { session, isPending, allowed } = useSignedInOnly();
-  const u = session?.user;
+  const { user: u, isPending, offline, allowed } = useSignedInOnly();
   const user = u ? { id: u.id, email: u.email, ...(u.name ? { name: u.name } : {}) } : null;
   const signedIn = !!user;
   const [items, setItems] = useState<PatternSummary[] | null>(null);
@@ -61,10 +60,12 @@ export default function HomeApp() {
     if (isPending) return;
     lib.setSignedIn(!!u);
     refresh();
+    // back online: the account's patterns join this browser's (SPEC §15.53)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lib, isPending, u?.id]);
+  }, [lib, isPending, u?.id, offline]);
 
-  const onlyHere = signedIn ? (items ?? []).filter((p) => p.where === "browser") : [];
+  // offline nothing is known of the account's copies: none is said to be only here (SPEC §15.53)
+  const onlyHere = signedIn && !offline ? (items ?? []).filter((p) => p.where === "browser") : [];
   const move = async () => {
     setMoving({ done: 0, count: onlyHere.length });
     const r = await lib.moveToAccount(onlyHere.map((p) => p.id), (done) => setMoving({ done, count: onlyHere.length }));
@@ -81,13 +82,13 @@ export default function HomeApp() {
     .sort((a, b) => (sort === "name" ? a.name.localeCompare(b.name) : b.updatedAt - a.updatedAt));
   const currentItem: PatternSummary | null = current ? (items?.find((p) => p.id === current.id) ?? { id: current.id, name: current.name, w: current.w, h: current.h, updatedAt: openedAt }) : null;
   const nothing = !!items && !current && !others.length;
-  const actions = { lib, signedIn, onChanged: refresh, onNotice: setNotice };
+  const actions = { lib, signedIn, offline, onChanged: refresh, onNotice: setNotice };
 
   // signed out there is only the editor (SPEC §15.39)
   if (!allowed) return <PageLoading />;
   return (
     <div className={s.page}>
-      <HomeHeader section="patterns" user={user} pending={isPending} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
+      <HomeHeader section="patterns" user={user} pending={isPending} offline={offline} signInOpen={signInOpen} setSignInOpen={setSignInOpen} beforeSignOut={() => lib.forgetAccountHere()} onSignedOut={() => router.refresh()} />
 
       <main className={s.main}>
         {current && currentItem && (
@@ -103,10 +104,16 @@ export default function HomeApp() {
               <PatternFacts p={currentItem} lib={lib} />
               <div className={s.continueButtons}>
                 <Link href="/" className={cx(ui.btn, ui.primary, s.go)}>{t("continueButton")}</Link>
-                <PatternMenu p={currentItem} onlyHere={signedIn && currentItem.where === "browser"} isCurrent {...actions} />
+                <PatternMenu p={currentItem} onlyHere={signedIn && !offline && currentItem.where === "browser"} isCurrent {...actions} />
               </div>
             </div>
           </section>
+        )}
+
+        {offline && (
+          <div className={s.banner} role="status" data-testid="home-offline">
+            <p>{t("offline")}</p>
+          </div>
         )}
 
         {notice && (
@@ -163,7 +170,7 @@ export default function HomeApp() {
               <div className={view === "list" ? s.rows : s.grid}>
                 {shown.map((p) => {
                   const Item = view === "list" ? PatternRow : PatternCard;
-                  return <Item key={p.id} p={p} onlyHere={p.where === "browser"} {...actions} />;
+                  return <Item key={p.id} p={p} onlyHere={!offline && p.where === "browser"} {...actions} />;
                 })}
               </div>
             )}
@@ -313,7 +320,7 @@ function NewButtons({ lib }: { lib: Library }) {
   );
 }
 
-type Actions = { lib: Library; signedIn: boolean; onChanged: () => void; onNotice: (text: string) => void };
+type Actions = { lib: Library; signedIn: boolean; offline: boolean; onChanged: () => void; onNotice: (text: string) => void };
 type ItemProps = Actions & { p: PatternSummary; onlyHere: boolean };
 
 const openHref = (p: PatternSummary) => ({ pathname: "/", query: { open: p.id } });
@@ -377,7 +384,7 @@ function PatternFacts({ p, lib }: { p: PatternSummary; lib: Library }) {
  * ⋯ — every action on a saved pattern (SPEC §15.37), the same on the Continue card, in the gallery and the list:
  * open, download its .xbird, rename, duplicate, its photos, keep it in the account, delete.
  */
-function PatternMenu({ p, lib, signedIn, onlyHere, isCurrent = false, onChanged, onNotice }: ItemProps & { isCurrent?: boolean }) {
+function PatternMenu({ p, lib, signedIn, offline, onlyHere, isCurrent = false, onChanged, onNotice }: ItemProps & { isCurrent?: boolean }) {
   const t = useTranslations("home");
   const router = useRouter();
   const [dialog, setDialog] = useState<null | "rename" | "photos" | "delete">(null);
@@ -396,14 +403,16 @@ function PatternMenu({ p, lib, signedIn, onlyHere, isCurrent = false, onChanged,
     if (r.limit) onNotice(t("accountFull", { max: r.limit }));
     onChanged();
   };
+  // offline (SPEC §15.53): what changes the account waits for the internet — renaming catches up by itself
+  const away = offline ? { disabled: true, hint: t("needsInternet") } : {};
   const items: MenuItem[] = [
     ...(isCurrent ? [] : [{ label: t("openIt"), onClick: () => router.push(openHref(p)) }, "-" as const]),
     { label: t("download"), onClick: () => void download() },
     { label: t("rename"), onClick: () => setDialog("rename") },
-    ...(signedIn ? [{ label: t("duplicate"), onClick: () => void duplicate() }] : []),
-    { label: t("photos"), onClick: () => setDialog("photos") },
+    ...(signedIn ? [{ label: t("duplicate"), onClick: () => void duplicate(), ...away }] : []),
+    { label: t("photos"), onClick: () => setDialog("photos"), ...(signedIn ? away : {}) },
     ...(onlyHere ? [{ label: t("keepInAccount"), onClick: () => void keep() }] : []),
-    ...(signedIn ? ["-" as const, { label: t("delete"), onClick: () => setDialog("delete") }] : []),
+    ...(signedIn ? ["-" as const, { label: t("delete"), onClick: () => setDialog("delete"), ...away }] : []),
   ];
   return (
     <>

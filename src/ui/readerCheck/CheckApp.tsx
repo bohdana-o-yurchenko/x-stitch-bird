@@ -8,7 +8,7 @@ import { CHECK_KINDS, MAX_APP_NAME, type Mark, type Marks } from "@/core/readerC
 import { checkStore, checkSuite, downloadCheckFile, newCheckId, type CheckKind, type CheckRun, type CheckStore } from "@/editor/readerChecks";
 import { Link } from "@/i18n/navigation";
 import { AccountMenu } from "../account/AccountButton";
-import { authClient } from "../account/authClient";
+import { useAccountSession } from "../account/session";
 import { AppBrand } from "../common/AppBrand";
 import appBar from "../common/appBar.module.css";
 import { ConfirmDelete, Modal, cx, ui } from "../common/widgets";
@@ -45,8 +45,7 @@ export default function CheckApp() {
   const root = useTranslations();
   const locale = useLocale();
   const lang = locale === "uk" ? "uk" : "en";
-  const { data: session, isPending } = authClient.useSession();
-  const u = session?.user;
+  const { user: u, isPending, offline } = useAccountSession();
   const user = u ? { email: u.email, ...(u.name ? { name: u.name } : {}) } : null;
   const [signInOpen, setSignInOpen] = useState(false);
 
@@ -91,7 +90,8 @@ export default function CheckApp() {
     return () => {
       gone = true;
     };
-  }, [isPending, u?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    // back online, the account's checks again (SPEC §15.53)
+  }, [isPending, u?.id, offline]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     try {
@@ -184,7 +184,7 @@ export default function CheckApp() {
   const saved = ofKind.some((r) => r.id === run.id);
 
   const header = user
-    ? <HomeHeader section="check" user={user} pending={isPending} signInOpen={signInOpen} setSignInOpen={setSignInOpen} />
+    ? <HomeHeader section="check" user={user} pending={isPending} offline={offline} signInOpen={signInOpen} setSignInOpen={setSignInOpen} />
     : (
       <header className={cx(appBar.bar, home.top)}>
         <AppBrand link={false} />

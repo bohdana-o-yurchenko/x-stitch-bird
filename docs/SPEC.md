@@ -967,8 +967,8 @@ Implemented: §15.1 metadata, §15.2 numbering and Go to cell, §15.3 transforms
 fractional stitches, §15.14 French knots, §15.15 underlay, §15.16 highlighting, §15.17 work time, §15.18 themes,
 §15.23 accounts and cloud storage (with §15.25–15.40: signed in / out, My patterns, threads and beads, pictures in
 the account, live editing, limits, the account page), §15.24 Mill Hill Treasures, §15.28–15.31 brands and own
-threads & beads, §15.32–15.50 (layout, PDFs as references and as charts, .oxs round trip, installing as an app),
-and the drawn symbols of §2.5.
+threads & beads, §15.32–15.51 (layout, PDFs as references and as charts, .oxs round trip, installing as an app, the
+reader check), §15.53 opening the installed app without the internet, and the drawn symbols of §2.5.
 
 ### 15.1 Pattern metadata (implemented)
 
@@ -2126,10 +2126,9 @@ chart whose picture can't be loaded is drawn again once, not over and over.
   not in the app's own window: Chrome / Edge with their prompt kept (an inline head script catches it — it comes once,
   maybe before ☰ exists) — the dialog's **Install** shows it; without it (used already), the dialog points at the
   browser's install button; Safari 17+ on a Mac: **File ▸ Add to Dock…**; Firefox and phones / tablets: no item. The
-  dialog says what it gives (a window and an icon of its own, the same patterns and account) and that **it still
-  needs the internet to open**.
-- **Not yet**: opening without the internet (BACKLOG B21); opening .xbird / .oxs files from the computer (file
-  handlers, undecided — B7).
+  dialog says what it gives (a window and an icon of its own, the same patterns and account) and that **it opens
+  without the internet too** (§15.53).
+- **Not yet**: opening .xbird / .oxs files from the computer (file handlers, undecided — B7).
 
 ### 15.51 Does your app read it? — test files to check reader apps (2026-11-19)
 Apps read our files differently (one skips some bead sizes, another shows ¼ stitches as petites — `docs/IMPORT-PARITY.md`).
@@ -2161,6 +2160,36 @@ Apps read our files differently (one skips some bead sizes, another shows ¼ sti
 - **Reached from**: the editor's ☰ ▸ Does your app read it? (a new tab); signed in, the top bar's **App check** tab
   on the other pages (their ☰ doesn't have it); the quick-start guide's step 10 (☰ opened on the item, **Open the
   check**); a tip after the first .oxs export, from wherever it was saved (`exportAs`), with the same button.
+
+### 15.53 Opening the installed app without the internet (2026-11-19)
+- **Saved ahead**: a service worker (`/sw.js`, made while the app is built) saves the whole app in the browser —
+  every page in both languages (the editor, My patterns, Threads, Beads, Account, App check, Privacy, Support), every
+  file of the build, also those loaded only when needed (the PDF chart reader, pdf.js and its worker, the photo tools,
+  the other brands' catalogues), the PDFs' fonts, the icons and both manifests. About 4 MB.
+- **When**: in the installed app's own window, or as soon as the app is installed from a browser tab. Once there it
+  serves the site's browser tabs too. Never while developing. The browser is also asked to keep what is stored here —
+  the saved app and the patterns — when its disk runs low (granted quietly to an installed app).
+- **Opening**: pages and files come from what was saved, at once — with the internet or without. The account,
+  sign-in, in-app page data and analytics always go to the network.
+- **A new version** (every release): saved in the background — only the files that changed are downloaded — then a
+  small card at the bottom left, **A new version of пташечка is ready · Reload · ×**. Reload switches over and reloads
+  (the editor saves first, as on any reload); otherwise the new version comes by itself once every window of the app
+  has closed. The app looks for one as it opens, every hour, and on coming back to the front. The version before stays
+  saved a while (a window still running it finds its files); older ones are deleted.
+- **Signed in, offline**: this browser remembers who was signed in (`stitchwork.account`: id, email, name). The app
+  starts with them at once — no waiting for the sign-in check — and stays signed in when the check gets no answer
+  (offline, or the server out of reach); only the server saying no one is signed in forgets them. Saving is as before
+  (§15.33, §15.34): this browser's copy now, the account's once back online — then the patterns saved meanwhile go up
+  and your own threads load.
+- **Calm offline pages**:
+  - the account menu: *Offline — your account gets your changes once you're back online*, the initial greyed;
+    **Sign out** waits for the internet;
+  - **My patterns**: the patterns kept in this browser (the open one and the 10 most recent, §15.26), with a note;
+    nothing marked *only in this browser*, no Move or storage bar; Duplicate, References… and Delete greyed
+    (*Needs the internet*) — Download and Rename work (the new name goes up later);
+  - **Threads / Beads**: a note in place of your own; adding greyed;
+  - **Account**: who is signed in and a note; no storage, Delete greyed;
+  - **App check**: as when the account can't be reached (§15.51) — kept in this browser.
 
 ## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
 The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in
