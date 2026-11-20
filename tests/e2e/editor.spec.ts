@@ -99,15 +99,26 @@ test("duplicates a key entry without changing the original or shrinking its text
   expect(duplicateSymbol).not.toBe(original.sym);
   await expect(form.getByRole("button", { name: "Add anyway" })).toBeVisible();
   await form.getByRole("button", { name: "Add anyway" }).click();
-  await expect(form.getByRole("button", { name: "Add to key", exact: true })).toBeVisible();
-  expect(await editorState<number>(page, "(ed) => ed.doc.key.length")).toBe(keyLength);
-  expect(await editorState(page, `(ed) => JSON.stringify(ed.doc.key[${index}])`)).toBe(JSON.stringify(original));
-
-  await form.getByRole("button", { name: "Add to key", exact: true }).click();
+  await expect(form).toHaveCount(0);
   await expect(page.locator("[data-entry]")).toHaveCount(count + 1);
+  expect(await editorState<number>(page, "(ed) => ed.doc.key.length")).toBe(keyLength + 1);
+  expect(await editorState(page, `(ed) => JSON.stringify(ed.doc.key[${index}])`)).toBe(JSON.stringify(original));
   const added = await editorState<Record<string, unknown>>(page, "(ed) => JSON.parse(JSON.stringify(ed.doc.key.at(-1)))");
   expect({ ...added, sym: undefined }).toEqual({ ...original, sym: undefined });
   expect(added.sym).toBe(duplicateSymbol);
+
+  const addedRow = page.locator("[data-entry]").last();
+  await addedRow.hover();
+  await addedRow.getByRole("button", { name: "Edit entry" }).click();
+  const editForm = page.getByTestId("key-form");
+  await expect(editForm.getByRole("button", { name: "Save anyway" })).toBeVisible();
+  const newSymbol = editForm.getByTestId("symbol-quick").locator("button").nth(1);
+  const editedSymbol = await newSymbol.getAttribute("data-sym");
+  await newSymbol.click();
+  await editForm.getByRole("button", { name: "Save anyway" }).click();
+  await expect(editForm).toHaveCount(0);
+  expect(await editorState<string>(page, "(ed) => ed.doc.key[ed.doc.key.length - 1].sym")).toBe(editedSymbol);
+  expect(await editorState(page, `(ed) => JSON.stringify(ed.doc.key[${index}])`)).toBe(JSON.stringify(original));
 });
 
 test("the time spent: in Versions, and small in Totals; read-only. Pattern info's fields are saved as you leave them", async ({ page }) => {
@@ -1380,7 +1391,9 @@ test("thread brands: chosen for a new pattern, one tab each in the picker, your 
   await expect(page.locator("[data-entry]")).toHaveCount(1);
   await expect(page.locator("[data-entry]")).toContainText("Kreinik 032");
   // changed from the picker: the key follows
-  await page.locator("[data-entry]").getByRole("button", { name: /^Edit/ }).click();
+  const entry = page.locator("[data-entry]");
+  await entry.hover();
+  await entry.getByRole("button", { name: /^Edit/ }).click();
   await page.locator("[data-id^='custom:']").hover();
   await page.getByRole("button", { name: "Change 032" }).click();
   await page.getByTestId("thread-form").getByLabel("Name").fill("Pearl gold");
@@ -1389,7 +1402,7 @@ test("thread brands: chosen for a new pattern, one tab each in the picker, your 
   // Kreinik is used now: it can't be removed; DMC can
   await expect(tabs.getByRole("button", { name: /Kreinik is used by the key/ })).toBeDisabled();
   await tabs.getByRole("button", { name: "Remove DMC from this pattern" }).click();
-  await expect(tabs.getByRole("tab")).toHaveText(["Anchor", "Madeira", "Kreinik"]);
+  await expect(tabs.getByRole("tab")).toHaveText(["Anchor", "Madeira", "Dimensions", "Kreinik"]);
   await page.getByTestId("key-form").getByRole("button", { name: "Close" }).click();
   await expect(page.locator("[data-entry]")).toContainText("Pearl gold");
 });

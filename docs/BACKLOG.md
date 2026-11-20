@@ -13,15 +13,19 @@ bugs :
 DONE 0) create proper app-specific email for emails DONE 
 1) color picker doesn't always work correctly. something about the fact that i need to hover points directly at the item??? 
 2) picker doens't properly highlight the beads, but picks them. the same for other elements on the top layer 
-3) hide the delete and edit buttons from key unless hovered??? also add dublicate key 
+DONE 3) hide the delete and edit buttons from key unless hovered??? also add dublicate key 
 4) when i have a bead key on and move the mouse OFF the canvas and click - a bead gets placed in the edge of the canvas. the same probably with backstitch 
 5) add group level visibility? we now have element level visibiliry (mute anyghint BUG), but what if people wanna see crossess only? or key level visibiliry? 
 DONE 6) when i choose petite fractional stitch i cannot click and drag. it renders 1 cell = 1 petite. where it must be 1 cell = 2 petites . should not apply to 1/4 and 3/4 tho. 
-7) add specialty stitches : smyrna (in 1 cell in 4 cells )
+7) add specialty stitches : smyrna (in 1 cell in 4 cells ) + their own stitches 
 DONE 8) can your app read this? must open in the same tab 
 9) proper landing!! 
 10) billing options, ui, and backend. and frontend and FOP setup 
 DONE 10) replace the email in all the docs. and remove my name new email is : ptashechka.app@gmail.com  old : bohdana.o.yurchenko@gmail.com 
+11) FIX preview deploy on the vercel 
+
+
+
 
 ## Overview, by effort
 

@@ -180,12 +180,10 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
   useEditorState((st) => st.keyRevision);
   const [d, setD] = useState<KeyDraft>(() => duplicate !== undefined ? draftForDuplicate(ed, duplicate) : draftFor(ed, edit));
   const [line, setLine] = useState(0);
-  const [confirmDup, setConfirmDup] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const usedOnChart = useMemo(() => (edit ? usageCount(ed, edit) : 0), [ed, edit]);
   const before = edit ? ed.doc.key[edit] : null;
   const update = (patch: Partial<KeyDraft>) => {
-    setConfirmDup(false);
     setD((cur) => ({ ...cur, ...patch }));
   };
   const kind = entryKind(d.t);
@@ -250,9 +248,8 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
   const used = new Set(ed.doc.key.flatMap((e, i) => (e && i !== edit ? [e.sym] : [])));
   const dupLabel = dup ? formatLabel(keyLabelData(ed.doc, ed.doc.key[dup]!), tr).title : "";
 
-  const okLabel = dup && !confirmDup ? (before ? t("saveAnyway") : t("addAnyway")) : before ? t("save") : t("add");
+  const okLabel = dup ? (before ? t("saveAnyway") : t("addAnyway")) : before ? t("save") : t("add");
   const commit = () => {
-    if (dup && !confirmDup) return setConfirmDup(true);
     if (commitEntry(ed, d, edit) !== null) close();
   };
 
