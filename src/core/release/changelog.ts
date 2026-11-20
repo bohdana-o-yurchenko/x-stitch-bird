@@ -12,6 +12,24 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "2.3.0",
+    date: "2026-11-20",
+    uk: [
+      "Мініхрестики можна малювати перетягуванням: стібки правильно розміщуються в кожній половині клітинки.",
+      "Сторінка «Чи прочитає ваш застосунок?» тепер відкривається в тій самій вкладці.",
+      "Елементи ключа можна дублювати; кнопки редагування й видалення з’являються, коли ви наводите курсор або переходите до рядка клавіатурою.",
+      "Інструмент «Піпетка» підсвічує стібки, бісер, вузлики й лінії під курсором, щоб було зрозуміло, що саме ви обираєте.",
+      "Для звернень і питань конфіденційності тепер використовується окрема адреса ptashechka.app@gmail.com.",
+    ],
+    en: [
+      "You can drag to draw petite stitches: stitches now land correctly in each half of a cell.",
+      "The “Does your app read it?” page now opens in the same tab.",
+      "You can duplicate key entries; edit and delete buttons appear when you hover over a row or focus it with the keyboard.",
+      "The picker highlights stitches, beads, knots and lines under your cursor, so you can see exactly what you're picking.",
+      "Support and privacy inquiries now use a dedicated address: ptashechka.app@gmail.com.",
+    ],
+  },
+  {
     version: "2.2.0",
     date: "2026-11-19",
     uk: [
