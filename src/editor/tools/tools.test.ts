@@ -129,6 +129,60 @@ describe("partial stitches (SPEC §15.13)", () => {
     expect(lastToast()).toBe("toasts.partialNeedsCross");
     expect(ed.doc.layers.partials.size).toBe(0);
   });
+
+  it("paints two petite stitches in a cell during a horizontal drag", () => {
+    const { ed, red } = t;
+    ed.store.setState({ partialKind: "petite" });
+    ed.setTool("partial");
+    ed.tools.down(at(0, 0, { grid: { x: 0.1, y: 0.25 } }));
+    ed.tools.move(at(0, 0, { grid: { x: 0.9, y: 0.25 } }));
+    ed.tools.up(at(0, 0));
+    expect(ed.doc.layers.partials.get(0)).toEqual([
+      { kind: "petite", corner: 0, k: red },
+      { kind: "petite", corner: 1, k: red },
+    ]);
+    ed.history.undo();
+    expect(ed.doc.layers.partials.size).toBe(0);
+  });
+
+  it("samples petite quadrants across fast horizontal and vertical drags without duplicates", () => {
+    const { ed, red } = t;
+    ed.store.setState({ partialKind: "petite", override: true });
+    ed.setTool("partial");
+    ed.tools.down(at(0, 0, { grid: { x: 0.25, y: 0.25 } }));
+    ed.tools.move(at(3, 0, { grid: { x: 3.75, y: 0.25 } }));
+    ed.tools.move(at(3, 0, { grid: { x: 3.75, y: 0.25 } }));
+    ed.tools.up(at(3, 0));
+    for (let x = 0; x <= 3; x++) {
+      expect(ed.doc.layers.partials.get(x), `horizontal cell ${x}`).toEqual([
+        { kind: "petite", corner: 0, k: red },
+        { kind: "petite", corner: 1, k: red },
+      ]);
+    }
+    ed.history.undo();
+    expect(ed.doc.layers.partials.size).toBe(0);
+
+    ed.tools.down(at(0, 0, { grid: { x: 0.25, y: 0.25 } }));
+    ed.tools.move(at(0, 3, { grid: { x: 0.25, y: 3.75 } }));
+    ed.tools.up(at(0, 3));
+    for (let y = 0; y <= 3; y++) {
+      expect(ed.doc.layers.partials.get(y * ed.doc.w)).toEqual([
+        { kind: "petite", corner: 0, k: red },
+        { kind: "petite", corner: 3, k: red },
+      ]);
+    }
+  });
+
+  it("keeps three-quarter drags on the original corner per cell", () => {
+    const { ed, red } = t;
+    ed.store.setState({ partialKind: "threeQuarter" });
+    ed.setTool("partial");
+    ed.tools.down(at(0, 0, { grid: { x: 0.1, y: 0.1 } }));
+    ed.tools.move(at(1, 0, { grid: { x: 1.9, y: 0.9 } }));
+    ed.tools.up(at(1, 0));
+    expect(ed.doc.layers.partials.get(0)).toEqual([{ kind: "threeQuarter", corner: 0, k: red }]);
+    expect(ed.doc.layers.partials.get(1)).toEqual([{ kind: "threeQuarter", corner: 0, k: red }]);
+  });
 });
 
 describe("selection tools (SPEC §15.6)", () => {

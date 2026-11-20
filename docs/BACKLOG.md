@@ -8,6 +8,18 @@
 **L** 1–2 weeks · **XL** several weeks. **Files** says whether `.xbird` files or stored data change — anything there
 follows RELEASING.md's compatibility rules (optional fields only, or ask first).
 
+
+bugs : 
+0) create proper app-specific email for emails DONE 
+1) color picker doesn't always work correctly. something about the fact that i need to hover points directly at the item??? 
+2) picker doens't properly highlight the beads, but picks them. the same for other elements on the top layer 
+3) hide the delete and edit buttons from key unless hovered??? also add dublicate key 
+4) when i have a bead key on and move the mouse OFF the canvas and click - a bead gets placed in the edge of the canvas. the same probably with backstitch 
+5) add group level visibility? we now have element level visibiliry (mute anyghint BUG), but what if people wanna see crossess only? or key level visibiliry? 
+6) when i choose petite fractional stitch i cannot click and drag. it renders 1 cell = 1 petite. where it must be 1 cell = 2 petites . should not apply to 1/4 and 3/4 tho. 
+7) add specialty stitches : smyrna (in 1 cell in 4 cells )
+8) can your app read this? must open in the same tab 
+
 ## Overview, by effort
 
 | # | Item | Effort | Files / stored data |
