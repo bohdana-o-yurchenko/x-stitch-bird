@@ -74,6 +74,15 @@ test("the first .oxs export: a tip on checking your app, once; ☰ leads to the 
   await expect(guide).toHaveCount(0);
 });
 
+test("the editor menu opens the check page in the same tab", async ({ page }) => {
+  await openEditor(page);
+  await page.locator('[data-guide="app-menu"]').getByRole("button").click();
+  await page.getByRole("menuitem", { name: /^Does your app read it\?/ }).click();
+  await expect(page).toHaveURL(/\/en\/check$/);
+  await expect(page.getByTestId("check-tab-pk")).toBeVisible();
+  expect(page.context().pages()).toHaveLength(1);
+});
+
 /** Signed in, as far as the page can tell: the session and the account's checks answered here (`checks`: null — the account can't be reached). */
 async function signedInWith(page: import("@playwright/test").Page, checks: { list: unknown[] | null; saved: unknown[] }) {
   await page.route("**/api/auth/get-session*", (r) => r.fulfill({ json: { session: { id: "s", userId: "u", expiresAt: new Date(Date.now() + 864e5).toISOString() }, user: { id: "u", email: "e2e@example.com", name: "", emailVerified: true } } }));

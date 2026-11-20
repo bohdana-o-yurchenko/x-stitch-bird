@@ -120,6 +120,7 @@ function AppMenu() {
   const t = useTranslations("fileMenu");
   const run = useCommand();
   const ed = useEditor();
+  const router = useRouter();
   const go = (command: string, args?: unknown) => () => void run(command, args);
   const reveal = useReveal("app");
   const locale = useLocale();
@@ -127,7 +128,7 @@ function AppMenu() {
   const items: MenuItem[] = [
     { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
     { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
-    { id: "check", label: t("check"), hint: t("checkHint"), onClick: () => void window.open(`/${locale}/check`, "_blank", "noopener") },
+    { id: "check", label: t("check"), hint: t("checkHint"), onClick: () => { ed.flush(); router.push("/check"); } },
     "-",
     { id: "language", node: <LanguageSwitch before={() => ed.flush()} /> },
     { id: "theme", node: <ThemeSwitcher onChange={() => ed.refreshChrome()} /> },
