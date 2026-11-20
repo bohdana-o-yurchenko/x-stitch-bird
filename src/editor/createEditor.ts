@@ -363,7 +363,7 @@ export class Editor {
     this.tools.cancel();
     // the first time Autofill is picked, its guide (shown once — the guide keeps track)
     if (tool === "autofill" && this.state.tool !== "autofill") this.store.setState({ pendingTip: "autofill" });
-    this.store.setState({ tool, match: tool === "autofill" ? (this.state.match ?? PICKING) : null, overlay: { ...this.state.overlay, preview: null, partialPreview: null, knotPreview: null, hoverPoint: null, marquee: null, eraseHighlight: null } });
+    this.store.setState({ tool, match: tool === "autofill" ? (this.state.match ?? PICKING) : null, overlay: { ...this.state.overlay, preview: null, partialPreview: null, knotPreview: null, hoverPoint: null, marquee: null, eraseHighlight: null, pickerHighlight: null } });
   }
 
   setMomentaryTool(tool: ToolId) {
@@ -374,7 +374,7 @@ export class Editor {
   /** Releasing a held key returns to the tool underneath — or the pencil after picking while erasing/panning. */
   releaseMomentaryTool(tool: ToolId) {
     if (this.state.momentaryTool !== tool) return;
-    this.store.setState({ momentaryTool: null });
+    this.store.setState({ momentaryTool: null, overlay: { ...this.state.overlay, pickerHighlight: null } });
     // picked a colour with the held picker from a tool that doesn't draw with it: on to drawing with it
     if (tool === "picker" && this.momentaryPicked && ["eraser", "pan", "autofill"].includes(this.state.tool)) this.setTool("pencil");
     this.momentaryPicked = false;

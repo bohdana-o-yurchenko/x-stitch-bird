@@ -1,9 +1,12 @@
 import { brushCells, floodRegion, snapHalf } from "@/core/geometry/geometry";
 import { LAYERS, PICK_ORDER } from "@/core/layers/registry";
 import { segmentDistance } from "@/core/layers/maskGeometry";
+import { PICK_RADIUS } from "@/core/layers/points";
 import { canPlacePartial, clearForPartial, clearUnder, isOccupied } from "@/core/pattern/occupancy";
 import type { Corner, KeyEntry, KeyIndex, Point, Segment } from "@/core/pattern/types";
+import { nearestCorner } from "@/core/stitches/partialKinds";
 import { mirrorCells, mirrorPoints, mirrorTransforms } from "@/core/transform/mirror";
+import type { PickerHighlight } from "@/render/ChartRenderer";
 import type { Editor } from "../createEditor";
 
 /** The active key entry, or a toast explaining what to do. */
@@ -114,16 +117,39 @@ export function placePartial(ed: Editor, cell: Point, corner: Corner, k: KeyInde
   }
 }
 
-/** Picker: knots and backstitch first, then beads, partial stitches, stitches. */
-export function pickAt(ed: Editor, grid: Point): void {
+/** The same topmost valid entry for both the picker click and its hover outline. */
+export function pickerHit(ed: Editor, grid: Point): PickerHighlight | null {
   const p = ed.doc, size = { w: p.w, h: p.h };
   for (const l of PICK_ORDER) {
     const k = l.pickAt(l.get(p.layers), grid, size);
     if (k && p.key[k]) {
-      ed.setActiveEntry(k);
-      ed.toast("toasts.picked", { label: ed.entryLabel(k) });
-      return;
+      if (l.id === "knots") {
+        const point = [...p.layers.knots].reverse().find((o) => o.k === k && Math.hypot(o.x - grid.x, o.y - grid.y) < PICK_RADIUS)!;
+        return { kind: "knot", point, key: k };
+      }
+      if (l.id === "segments") {
+        const segment = [...p.layers.segments].reverse().find((o) => o.k === k && segmentDistance(grid.x, grid.y, o.x1, o.y1, o.x2, o.y2) < PICK_RADIUS)!;
+        return { kind: "segment", segment, key: k };
+      }
+      const x = Math.floor(grid.x), y = Math.floor(grid.y), cell = y * p.w + x;
+      if (l.id === "partials") {
+        const list = p.layers.partials.get(cell)!;
+        const corner = nearestCorner(grid.x - x, grid.y - y);
+        return { kind: "partial", cell, stitch: (list.find((o) => o.corner === corner) ?? list[0])!, key: k };
+      }
+      return l.id === "beads" ? { kind: "bead", cell, key: k } : { kind: "stitch", cell, key: k };
     }
+  }
+  return null;
+}
+
+/** Picker: knots and backstitch first, then beads, partial stitches, stitches. */
+export function pickAt(ed: Editor, grid: Point): void {
+  const hit = pickerHit(ed, grid);
+  if (hit) {
+    ed.setActiveEntry(hit.key);
+    ed.toast("toasts.picked", { label: ed.entryLabel(hit.key) });
+    return;
   }
   ed.toast("toasts.nothingToPick");
 }

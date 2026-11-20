@@ -23,7 +23,7 @@ function setup() {
   p.layers.ambiguous.add(3);
   const palette = buildPalette(p);
   const scene: ChartScene = {
-    pattern: p, palette, view: "both", viewport: { zoom: 20, offX: 0, offY: 0 }, mirror: "off", hover: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null,
+    pattern: p, palette, view: "both", viewport: { zoom: 20, offX: 0, offY: 0 }, mirror: "off", hover: null, pickerHighlight: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null,
     selection: null, floating: null, marquee: null, eraseHighlight: null, flash: null, underlay: null, underlayFrame: null, underlayHot: null, underlayButtons: [], highlight: null, checks: null, match: null,
   };
   const c = fakeCanvas();
@@ -31,7 +31,7 @@ function setup() {
   let current = scene;
   const r = new ChartRenderer(canvas, theme, () => current);
   r.resize(600, 400, 2);
-  return { r, c, canvas, scene, p, cross, back, knot, set: (s: Partial<ChartScene>) => (current = { ...current, ...s }), draw: () => { c.log.length = 0; r.draw(); } };
+  return { r, c, canvas, scene, p, cross, back, knot, bead, set: (s: Partial<ChartScene>) => (current = { ...current, ...s }), draw: () => { c.log.length = 0; r.draw(); } };
 }
 
 beforeEach(() => {
@@ -45,6 +45,30 @@ afterEach(() => {
 });
 
 describe("the chart canvas", () => {
+  it("outlines the picked bead, knot, segment and partial with the picker accent instead of a cell square", () => {
+    const t = setup();
+    const assertOutline = (hit: NonNullable<ChartScene["pickerHighlight"]>, check: () => void) => {
+      t.set({ pickerHighlight: hit });
+      t.draw();
+      expect(t.c.values("strokeStyle")).toContain(theme.accent);
+      check();
+      expect(t.c.calls("strokeRect")).not.toContainEqual([26 + 5 * 20 + 1, 26 + 2 * 20 + 1, 18, 18]);
+    };
+    assertOutline({ kind: "bead", cell: 45, key: t.bead }, () => {
+      expect(t.c.calls("arc")).toContainEqual([26 + 5.5 * 20, 26 + 2.5 * 20, 20 * (t.scene.palette[t.bead]!.bead!.shape.r ?? 0.4), 0, Math.PI * 2]);
+    });
+    assertOutline({ kind: "knot", point: t.p.layers.knots[0]!, key: t.knot }, () => {
+      expect(t.c.calls("arc")).toContainEqual([26 + 3.5 * 20, 26 + 2.5 * 20, Math.max(2, 20 * theme.knots.radius) + 1, 0, Math.PI * 2]);
+    });
+    assertOutline({ kind: "segment", segment: t.p.layers.segments[0]!, key: t.back }, () => {
+      expect(t.c.calls("moveTo")).toContainEqual([26, 26]);
+      expect(t.c.calls("lineTo")).toContainEqual([126, 26]);
+    });
+    assertOutline({ kind: "partial", cell: 50, stitch: t.p.layers.partials.get(50)![0]!, key: t.cross }, () => {
+      expect(t.c.calls("closePath").length).toBeGreaterThan(0);
+      expect(t.c.calls("stroke").length).toBeGreaterThan(0);
+    });
+  });
   it("is sized for the screen's pixel density and drawn straight away", () => {
     const t = setup();
     expect(t.canvas.width).toBe(1200);

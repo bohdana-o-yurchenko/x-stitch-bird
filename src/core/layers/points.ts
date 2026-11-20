@@ -2,7 +2,7 @@ import type { Knot, Layers, Segment } from "../pattern/types";
 import { boundsOfPoints, pointInBounds, pointInMask, segmentDistance } from "./maskGeometry";
 import type { LayerHandler } from "./types";
 
-const PICK_RADIUS = 0.25;
+export const PICK_RADIUS = 0.25;
 const valid = (n: unknown): n is number => typeof n === "number" && Number.isFinite(n);
 
 /** Backstitch: straight segments between half-grid points. */

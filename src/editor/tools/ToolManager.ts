@@ -41,6 +41,7 @@ export class ToolManager {
       return;
     }
     if (p.button === 1 || p.button === 2 || this.resolve() === panTool) {
+      if (ed.state.overlay.pickerHighlight) ed.setOverlay({ pickerHighlight: null });
       this.panning = true;
       this.active = panTool;
       panTool.down(ed, p);
@@ -69,10 +70,12 @@ export class ToolManager {
     if (this.underlayDrag) return this.ed.underlay.pointerMove(p.grid, this.lastScreen, p.shift);
     if (this.ed.underlay.editing && !this.active) {
       this.ed.underlay.hover(this.lastScreen);
+      if (this.ed.state.overlay.pickerHighlight) this.ed.setOverlay({ pickerHighlight: null });
       return this.ed.setHover(p.cell, 1, false);
     }
     const ed = this.ed, size = this.active?.usesBrush || (!this.active && this.resolve().usesBrush) ? ed.state.brush : 1;
     if (!this.active && !ed.state.floating) this.resolve().hover?.(ed, p);
+    if (this.resolve().id !== "picker" && ed.state.overlay.pickerHighlight) ed.setOverlay({ pickerHighlight: null });
     ed.setHover(p.cell, size, this.showsHoverSquare());
     if (ed.state.floating && !this.active) return ed.selection.drag(p.cell);
     this.active?.move?.(ed, p);
@@ -93,7 +96,7 @@ export class ToolManager {
   leave() {
     this.ed.underlay.hover(null);
     this.ed.setHover(null, 1, false);
-    this.ed.setOverlay({ hoverPoint: null, knotPreview: null, partialPreview: null, eraseHighlight: null });
+    this.ed.setOverlay({ hoverPoint: null, knotPreview: null, partialPreview: null, eraseHighlight: null, pickerHighlight: null });
   }
 
   /** Esc / tool switch: end chains, drop previews, close open strokes. */
@@ -106,7 +109,7 @@ export class ToolManager {
 
   private showsHoverSquare(): boolean {
     const t = this.resolve();
-    const onLine = t.id === "eraser" && !!this.ed.state.overlay.eraseHighlight;
+    const onLine = (t.id === "eraser" && !!this.ed.state.overlay.eraseHighlight) || (t.id === "picker" && !!this.ed.state.overlay.pickerHighlight);
     return t.id !== "pan" && t.id !== "autofill" && t.id !== "backstitch" && t.id !== "knot" && t.id !== "partial" && !onLine && !this.ed.state.floating;
   }
 }

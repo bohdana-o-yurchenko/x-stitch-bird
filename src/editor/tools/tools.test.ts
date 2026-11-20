@@ -229,6 +229,64 @@ describe("selection tools (SPEC §15.6)", () => {
 });
 
 describe("panning and picking", () => {
+  it("previews the same topmost item it picks, without a cell square, and clears on leave or tool switch", () => {
+    const { ed, red, entry } = t;
+    const bead = entry({ t: "bead", src: "bead:02011" });
+    const back = entry({ t: "back", src: "dmc:321", n: 1 });
+    const knot = entry({ t: "knot", src: "dmc:321", n: 2 });
+    ed.doc.layers.stitches[11] = red;
+    ed.doc.layers.beads[11] = bead;
+    ed.doc.layers.segments.push({ x1: 1, y1: 1.5, x2: 2, y2: 1.5, k: back });
+    ed.doc.layers.knots.push({ x: 1.5, y: 1.5, k: knot });
+    ed.setTool("picker");
+    ed.tools.move(point(1.5, 1.5));
+    expect(ed.state.overlay.pickerHighlight).toEqual({ kind: "knot", point: ed.doc.layers.knots[0], key: knot });
+    expect(ed.state.overlay.hover).toBeNull();
+    ed.tools.down(point(1.5, 1.5));
+    expect(ed.state.activeEntry).toBe(knot);
+    ed.setTool("picker");
+    ed.doc.layers.knots.length = 0;
+    ed.tools.move(point(1.6, 1.5));
+    expect(ed.state.overlay.pickerHighlight).toEqual({ kind: "segment", segment: ed.doc.layers.segments[0], key: back });
+    ed.doc.layers.segments.length = 0;
+    ed.tools.move(point(1.5, 1.5));
+    expect(ed.state.overlay.pickerHighlight).toEqual({ kind: "bead", cell: 11, key: bead });
+    ed.tools.down(point(1.5, 1.5));
+    expect(ed.state.activeEntry).toBe(bead);
+    ed.setTool("picker");
+    ed.doc.layers.beads[11] = 0;
+    ed.tools.move(point(1.5, 1.5));
+    expect(ed.state.overlay.pickerHighlight).toBeNull();
+    expect(ed.state.overlay.hover).toEqual({ x: 1, y: 1, size: 1 });
+    ed.tools.leave();
+    expect(ed.state.overlay.pickerHighlight).toBeNull();
+    ed.doc.layers.stitches[11] = 0;
+    ed.tools.move(point(1.5, 1.5));
+    expect(ed.state.overlay.hover).toEqual({ x: 1, y: 1, size: 1 });
+    ed.doc.layers.beads[11] = 99;
+    ed.tools.move(point(1.5, 1.5));
+    expect(ed.state.overlay.pickerHighlight).toBeNull();
+    ed.doc.layers.beads[11] = bead;
+    ed.tools.move(point(1.5, 1.5));
+    expect(ed.state.overlay.pickerHighlight?.kind).toBe("bead");
+    ed.setTool("pan");
+    expect(ed.state.overlay.pickerHighlight).toBeNull();
+  });
+
+  it("previews the partial corner selected by the picker, including its fallback corner", () => {
+    const { ed, red, entry } = t;
+    const blue = entry({ t: "thread", src: "dmc:797", n: 2, st: "full" });
+    ed.doc.layers.partials.set(11, [{ kind: "quarter", corner: 0, k: red }, { kind: "petite", corner: 1, k: blue }]);
+    ed.setTool("picker");
+    ed.tools.move(point(1.8, 1.2));
+    expect(ed.state.overlay.pickerHighlight).toEqual({ kind: "partial", cell: 11, stitch: { kind: "petite", corner: 1, k: blue }, key: blue });
+    ed.tools.down(point(1.8, 1.2));
+    expect(ed.state.activeEntry).toBe(blue);
+    ed.setTool("picker");
+    ed.tools.move(point(1.8, 1.8));
+    expect(ed.state.overlay.pickerHighlight).toEqual({ kind: "partial", cell: 11, stitch: { kind: "quarter", corner: 0, k: red }, key: red });
+  });
+
   it("pans with the Pan tool, and with the middle button whatever the tool", () => {
     const { ed } = t;
     const start = ed.state.viewport;

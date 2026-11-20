@@ -44,7 +44,7 @@ export function drawSymbol(g: Ctx, cx: number, cy: number, z: number, ch: string
   g.fillText(ch, cx, y);
 }
 
-function beadPath(g: Ctx, cx: number, cy: number, z: number, sh: BeadShape) {
+export function beadPath(g: Ctx, cx: number, cy: number, z: number, sh: BeadShape) {
   g.beginPath();
   if (sh.bugle) {
     const L = (z * sh.bugle) / 2, t = z * 0.2;

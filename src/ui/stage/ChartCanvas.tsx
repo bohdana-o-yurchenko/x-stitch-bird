@@ -19,6 +19,7 @@ function scene(ed: Editor): ChartScene {
     viewport: st.viewport,
     mirror: st.mirror,
     hover: st.overlay.hover,
+    pickerHighlight: (st.momentaryTool ?? st.tool) === "picker" ? st.overlay.pickerHighlight : null,
     preview: st.overlay.preview,
     partialPreview: st.overlay.partialPreview,
     knotPreview: st.overlay.knotPreview,

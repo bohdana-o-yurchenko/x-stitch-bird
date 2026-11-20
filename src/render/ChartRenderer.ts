@@ -1,9 +1,10 @@
 import { rulerLabels } from "@/core/grid/numbering";
 import type { Palette } from "@/core/pattern/palette";
-import type { KeyIndex, PartialStitch, Pattern, Point, Rect, Segment } from "@/core/pattern/types";
+import type { KeyIndex, Knot, PartialStitch, Pattern, Point, Rect, Segment } from "@/core/pattern/types";
 import type { MirrorMode } from "@/core/transform/mirror";
+import { partialKind } from "@/core/stitches/partialKinds";
 import { drawCells, drawGrid, drawLines, drawUnderlay, turnAround, viewStyle, type ChartFrame, type ChartView, type UnderlayView } from "./chart";
-import { drawBackstitch, drawBeadCell, drawKnot, drawPartial, drawStitchCell } from "./primitives/cells";
+import { beadPath, drawBackstitch, drawBeadCell, drawKnot, drawPartial, drawStitchCell } from "./primitives/cells";
 import { font, type CanvasTheme } from "./theme";
 
 export interface Viewport {
@@ -11,6 +12,12 @@ export interface Viewport {
   offX: number;
   offY: number;
 }
+
+export type PickerHighlight =
+  | { kind: "knot"; point: Knot; key: KeyIndex }
+  | { kind: "segment"; segment: Segment; key: KeyIndex }
+  | { kind: "bead" | "stitch"; cell: number; key: KeyIndex }
+  | { kind: "partial"; cell: number; stitch: PartialStitch; key: KeyIndex };
 
 /** Everything the screen shows, prepared by the editor. Drawing never reads editor state directly. */
 export interface ChartScene {
@@ -21,6 +28,7 @@ export interface ChartScene {
   mirror: MirrorMode;
   /** Hover square: cell and brush size; null hides it. */
   hover: { x: number; y: number; size: number } | null;
+  pickerHighlight: PickerHighlight | null;
   preview: { cells: number[]; key: KeyIndex } | null;
   partialPreview: { cell: number; stitch: PartialStitch } | null;
   knotPreview: { point: Point; key: KeyIndex } | null;
@@ -244,9 +252,47 @@ export class ChartRenderer {
     if (s.hover && s.hover.x >= 0 && s.hover.y >= 0 && s.hover.x < p.w && s.hover.y < p.h) {
       const o = Math.floor((s.hover.size - 1) / 2);
       g.strokeStyle = t.accent;
-      g.lineWidth = 2;
+      g.lineWidth = 3;
       g.strokeRect(ox + (s.hover.x - o) * z + 1, oy + (s.hover.y - o) * z + 1, s.hover.size * z - 2, s.hover.size * z - 2);
     }
+    if (s.pickerHighlight) this.drawPickerHighlight(s.pickerHighlight, s, f);
+  }
+
+  /** Outline the item under the picker instead of the cell beneath a top-layer item. */
+  private drawPickerHighlight(hit: PickerHighlight, s: ChartScene, f: ChartFrame) {
+    const g = this.g, { z, ox, oy } = f, slot = s.palette[hit.key];
+    if (!slot || hit.kind === "stitch") return;
+    g.save();
+    g.strokeStyle = this.theme.accent;
+    g.lineWidth = 3;
+    g.lineJoin = "round";
+    if (hit.kind === "segment") {
+      g.lineCap = "round";
+      g.lineWidth = Math.max(3, z * 0.13);
+      g.beginPath();
+      g.moveTo(ox + hit.segment.x1 * z, oy + hit.segment.y1 * z);
+      g.lineTo(ox + hit.segment.x2 * z, oy + hit.segment.y2 * z);
+    } else if (hit.kind === "knot") {
+      const { x, y } = hit.point, cx = ox + x * z, cy = oy + y * z;
+      if (slot.bead && (slot.t === "bead" || slot.t === "combo")) beadPath(g, cx, cy, z, slot.bead.shape);
+      else {
+        g.beginPath();
+        g.arc(cx, cy, Math.max(2, z * this.theme.knots.radius) + 1, 0, Math.PI * 2);
+      }
+    } else {
+      const px = ox + (hit.cell % s.pattern.w) * z, py = oy + ((hit.cell / s.pattern.w) | 0) * z;
+      if (hit.kind === "bead") {
+        if (!slot.bead) { g.restore(); return; }
+        beadPath(g, px + z / 2, py + z / 2, z, slot.bead.shape);
+      } else if (hit.kind === "partial") {
+        const poly = partialKind(hit.stitch.kind).polygon(hit.stitch.corner);
+        g.beginPath();
+        poly.forEach(([x, y], i) => (i ? g.lineTo(px + x * z, py + y * z) : g.moveTo(px + x * z, py + y * z)));
+        g.closePath();
+      }
+    }
+    g.stroke();
+    g.restore();
   }
 
   /**

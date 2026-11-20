@@ -8,7 +8,7 @@ import { createPattern } from "@/core/pattern/createPattern";
 import type { KeyIndex, PartialKindId, PartialStitch, Pattern, Point, Rect, Segment, CustomColor } from "@/core/pattern/types";
 import type { MirrorMode } from "@/core/transform/mirror";
 import type { ChartView } from "@/render/chart";
-import type { Viewport } from "@/render/ChartRenderer";
+import type { PickerHighlight, Viewport } from "@/render/ChartRenderer";
 import type { RefWindowData } from "@/persistence/ports";
 import type { Handle, UnderlayData } from "@/core/underlay/underlay";
 import type { ChecksState } from "../checks/checks";
@@ -63,6 +63,7 @@ export type DialogRequest =
 
 export interface Overlay {
   hover: { x: number; y: number; size: number } | null;
+  pickerHighlight: PickerHighlight | null;
   preview: { cells: number[]; key: KeyIndex } | null;
   partialPreview: { cell: number; stitch: PartialStitch } | null;
   knotPreview: { point: Point; key: KeyIndex } | null;
@@ -167,7 +168,7 @@ export interface EditorState {
   versionsRevision: number;
 }
 
-export const emptyOverlay: Overlay = { hover: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null };
+export const emptyOverlay: Overlay = { hover: null, pickerHighlight: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null };
 
 export const createEditorStore = () =>
   createStore<EditorState>()(() => ({
