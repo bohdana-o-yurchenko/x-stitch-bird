@@ -19,6 +19,9 @@ DONE 0) create proper app-specific email for emails DONE
 DONE 6) when i choose petite fractional stitch i cannot click and drag. it renders 1 cell = 1 petite. where it must be 1 cell = 2 petites . should not apply to 1/4 and 3/4 tho. 
 7) add specialty stitches : smyrna (in 1 cell in 4 cells )
 DONE 8) can your app read this? must open in the same tab 
+9) proper landing!! 
+10) billing options, ui, and backend. and frontend and FOP setup 
+DONE 10) replace the email in all the docs. and remove my name new email is : ptashechka.app@gmail.com  old : bohdana.o.yurchenko@gmail.com 
 
 ## Overview, by effort
 

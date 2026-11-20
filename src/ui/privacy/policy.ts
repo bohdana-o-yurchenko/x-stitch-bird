@@ -1,5 +1,5 @@
 /** The privacy policy's text (SPEC §15.23): one entry per language, the same sections in the same order. */
-export const CONTACT_EMAIL = "bohdana.o.yurchenko@gmail.com";
+export const CONTACT_EMAIL = "ptashechka.app@gmail.com";
 export const POLICY_UPDATED = "2026-11-18";
 
 export type Section = { title: string; body: string[] };
@@ -16,7 +16,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
     title: "Privacy policy",
     updated: `Last updated: ${POLICY_UPDATED}`,
     intro:
-      "пташечка (https://www.x-stitch-bird.app) is a free editor for cross stitch and bead patterns, made by Bohdana Yurchenko. This page explains what data the app collects, why, where it is kept, and how you can have it deleted.",
+      "пташечка (https://www.x-stitch-bird.app) is a free editor for cross stitch and bead patterns. This page explains what data the app collects, why, where it is kept, and how you can have it deleted.",
     sections: [
       {
         title: "Without an account",
@@ -94,7 +94,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
     title: "Політика конфіденційності",
     updated: `Оновлено: ${POLICY_UPDATED}`,
     intro:
-      "пташечка (https://www.x-stitch-bird.app) — безкоштовний редактор схем для вишивки хрестиком і бісером, створений Богданою Юрченко. Тут пояснено, які дані збирає застосунок, навіщо, де вони зберігаються і як їх видалити.",
+      "пташечка (https://www.x-stitch-bird.app) — безкоштовний редактор схем для вишивки хрестиком і бісером. Тут пояснено, які дані збирає застосунок, навіщо, де вони зберігаються і як їх видалити.",
     sections: [
       {
         title: "Без облікового запису",

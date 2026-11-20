@@ -93,6 +93,7 @@
     "empty": "Your key is empty.",
     "emptyHint": "Add the threads, blends, beads, knots and backstitch you’ll use — with their strands, stitch type and symbol — then pick an entry and draw.",
     "rowTitle": "Click to draw with this · double-click to edit",
+    "duplicate": "Duplicate entry",
     "edit": "Edit entry",
     "delete": "Delete entry",
     "unit": {

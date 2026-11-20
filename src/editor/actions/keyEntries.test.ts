@@ -6,7 +6,7 @@ import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import { memoryPersistence } from "../../../tests/support/memoryPersistence";
 import { Editor } from "../createEditor";
 import { loadPattern } from "./pattern";
-import { commitEntry, deleteEntry, draftFor, duplicateOf, resolveDraftSource, type KeyDraft } from "./keyEntries";
+import { commitEntry, deleteEntry, draftFor, draftForDuplicate, duplicateOf, resolveDraftSource, type KeyDraft } from "./keyEntries";
 
 /** The key-entry rules behind the add/edit form (SPEC §8). */
 let ed: Editor, red: number;
@@ -42,6 +42,39 @@ describe("adding an entry", () => {
   it("finds an identical entry for the add-anyway warning", () => {
     expect(duplicateOf(ed, draft({ thread: "dmc:321", n: 2 }))).toBe(red);
     expect(duplicateOf(ed, draft({ thread: "dmc:321", n: 1 }))).toBe(0);
+  });
+});
+
+describe("duplicating an entry", () => {
+  it("copies every entry kind's settings and picks an unused symbol in its family", () => {
+    ed.doc.blends["blend:copy"] = { parts: [{ id: "dmc:310", n: 2 }, { id: "dmc:413", n: 1 }] };
+    ed.doc.combos["combo:copy"] = { thread: "dmc:310", bead: "bead:00557" };
+    const sources = [
+      addEntry(ed.doc, { t: "thread", src: "dmc:666", n: 3, st: "half" }, ALL_SYMBOLS),
+      addEntry(ed.doc, { t: "thread", src: "blend:copy", n: null, st: "halfb" }, ALL_SYMBOLS),
+      addEntry(ed.doc, { t: "combo", src: "combo:copy", n: 2, st: "point" }, ALL_SYMBOLS),
+      addEntry(ed.doc, { t: "bead", src: "bead:00557", st: "point" }, ALL_SYMBOLS),
+      addEntry(ed.doc, { t: "back", src: "dmc:310", n: 1, ink: "#FF0000" }, ALL_SYMBOLS),
+      addEntry(ed.doc, { t: "knot", src: "dmc:310", n: 1, wraps: 3 }, ALL_SYMBOLS),
+    ];
+
+    for (const index of sources) {
+      const original = draftFor(ed, index);
+      const duplicate = draftForDuplicate(ed, index);
+      expect(duplicate).toEqual({ ...original, sym: expect.any(String) });
+      expect(duplicate.sym).not.toBe(original.sym);
+      expect(ed.doc.key.slice(1).some((entry) => entry?.sym === duplicate.sym)).toBe(false);
+      expect(ed.doc.key[index]!.sym).toBe(original.sym);
+    }
+  });
+
+  it("opens the add form for an existing entry and ignores missing entries", async () => {
+    await ed.commands.run("key.duplicate", red);
+    expect(ed.state.keyForm).toMatchObject({ duplicate: red });
+    expect(ed.state.keyForm?.edit).toBeUndefined();
+    ed.closeKeyForm();
+    await ed.commands.run("key.duplicate", 99);
+    expect(ed.state.keyForm).toBeNull();
   });
 });
 

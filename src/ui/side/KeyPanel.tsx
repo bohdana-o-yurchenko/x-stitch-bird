@@ -110,7 +110,7 @@ export function KeyPanel() {
       <div key={i} role="button" tabIndex={0} data-entry={i} className={cx(s.row, i === active && s.on, i === active && autofill && s.idleEntry)} title={i === active && autofill ? t("notUsedByAutofill") : t("rowTitle")}
         onClick={() => run("key.select", i)} onDoubleClick={() => run("key.edit", i)} onKeyDown={(ev) => ev.key === "Enter" && run("key.select", i)}>
         {slot && <KeyIcon slot={slot} />}
-        <div className={s.text}>
+        <div className={s.text} data-testid="key-entry-text">
           <div className={s.title}>
             {title}
             {nth < 9 && <span className={s.shortcut}>{nth + 1}</span>}
@@ -122,7 +122,8 @@ export function KeyPanel() {
           {parts > 0 && <div className={s.sub}>{t("partials", { count: parts })}</div>}
           <div className={s.sub}>{t(`unit.${isPointBead(e) ? "bead" : UNIT[e.t]}`, { count: n })}</div>
         </div>
-        <div className={s.actions}>
+        <div className={s.actions} data-testid="key-entry-actions">
+          <button type="button" className={ui.iconbtn} title={t("duplicate")} aria-label={t("duplicate")} onClick={(ev) => { ev.stopPropagation(); run("key.duplicate", i); }}><Icon name="duplicate" size={16} /></button>
           <button type="button" className={ui.iconbtn} title={t("edit")} aria-label={t("edit")} onClick={(ev) => { ev.stopPropagation(); run("key.edit", i); }}><Icon name="pencil" size={16} /></button>
           <DeleteButton label={t("delete")} onClick={() => run("key.requestDelete", i)} />
         </div>

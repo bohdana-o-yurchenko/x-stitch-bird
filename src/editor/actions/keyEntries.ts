@@ -73,6 +73,13 @@ export function draftFor(ed: Editor, edit?: KeyIndex): KeyDraft {
   return d;
 }
 
+/** A new entry with the selected entry's settings and the next free symbol in its kind. */
+export function draftForDuplicate(ed: Editor, source: KeyIndex): KeyDraft {
+  const entry = ed.doc.key[source];
+  if (!entry) return draftFor(ed);
+  return { ...draftFor(ed, source), sym: nextSymbol(ed.doc, ed.state.symbols, undefined, entry.t) };
+}
+
 /** The draft is a blend of 2–3 threads (single-thread kinds only). */
 export const usesBlend = (d: KeyDraft) => d.mode === "blend" && (d.t === "thread" || d.t === "back" || d.t === "knot");
 

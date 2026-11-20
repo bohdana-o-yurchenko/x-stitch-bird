@@ -76,7 +76,7 @@ export function SidePanel() {
     <div className={s.tools}>
       <div ref={main} className={s.toolMain}>
         {form ? (
-          <KeyEntryForm key={form.seq} edit={form.edit} />
+          <KeyEntryForm key={form.seq} edit={form.edit} duplicate={form.duplicate} />
         ) : (
           <>
             <CurrentTool />

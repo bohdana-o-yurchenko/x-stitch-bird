@@ -73,6 +73,43 @@ test("the edit and delete buttons of a key entry show their own names", async ({
   await expect(page.getByTestId("tooltip")).toHaveText("Delete entry");
 });
 
+test("duplicates a key entry without changing the original or shrinking its text", async ({ page }) => {
+  const row = page.locator("[data-entry]").first();
+  const index = Number(await row.getAttribute("data-entry"));
+  const original = await editorState<Record<string, unknown>>(page, `(ed) => JSON.parse(JSON.stringify(ed.doc.key[${index}]))`);
+  const actions = row.getByTestId("key-entry-actions");
+  const text = row.getByTestId("key-entry-text");
+  await expect(actions).toBeHidden();
+  const widthBefore = await text.evaluate((el) => el.getBoundingClientRect().width);
+
+  await row.hover();
+  await expect(actions).toBeVisible();
+  expect(await text.evaluate((el) => el.getBoundingClientRect().width)).toBe(widthBefore);
+  await page.mouse.move(0, 0);
+  await expect(actions).toBeHidden();
+  await row.focus();
+  await expect(actions).toBeVisible();
+  const count = await page.locator("[data-entry]").count();
+  const keyLength = await editorState<number>(page, "(ed) => ed.doc.key.length");
+  await actions.getByRole("button", { name: "Duplicate entry" }).click();
+
+  const form = page.getByTestId("key-form");
+  await expect(form).toHaveAttribute("aria-label", "Add to key");
+  const duplicateSymbol = await form.getByTestId("symbol-quick").locator("button").first().getAttribute("data-sym");
+  expect(duplicateSymbol).not.toBe(original.sym);
+  await expect(form.getByRole("button", { name: "Add anyway" })).toBeVisible();
+  await form.getByRole("button", { name: "Add anyway" }).click();
+  await expect(form.getByRole("button", { name: "Add to key", exact: true })).toBeVisible();
+  expect(await editorState<number>(page, "(ed) => ed.doc.key.length")).toBe(keyLength);
+  expect(await editorState(page, `(ed) => JSON.stringify(ed.doc.key[${index}])`)).toBe(JSON.stringify(original));
+
+  await form.getByRole("button", { name: "Add to key", exact: true }).click();
+  await expect(page.locator("[data-entry]")).toHaveCount(count + 1);
+  const added = await editorState<Record<string, unknown>>(page, "(ed) => JSON.parse(JSON.stringify(ed.doc.key.at(-1)))");
+  expect({ ...added, sym: undefined }).toEqual({ ...original, sym: undefined });
+  expect(added.sym).toBe(duplicateSymbol);
+});
+
 test("the time spent: in Versions, and small in Totals; read-only. Pattern info's fields are saved as you leave them", async ({ page }) => {
   await page.evaluate(() => {
     const ed = (window as unknown as { __stitchwork: { doc: { spent: number }; changed(): void } }).__stitchwork;
@@ -404,9 +441,9 @@ test("☰ ▸ Something went wrong? — where to write, what helps, the terms of
   const tab = context.waitForEvent("page");
   await page.getByRole("menuitem", { name: /^Something went wrong\?/ }).click();
   const support = await tab;
-  await expect(support.getByTestId("support")).toContainText("bohdana.o.yurchenko@gmail.com");
+  await expect(support.getByTestId("support")).toContainText("ptashechka.app@gmail.com");
   await expect(support.getByTestId("support")).toContainText("Many charts are protected by copyright");
-  await expect(support.getByTestId("support-mail")).toHaveAttribute("href", /^mailto:bohdana\.o\.yurchenko@gmail\.com\?subject=/);
+  await expect(support.getByTestId("support-mail")).toHaveAttribute("href", /^mailto:ptashechka\.app@gmail\.com\?subject=/);
 });
 
 test("the installed app: each language's manifest opens in that language, with its icons; the page names it (SPEC §15.50)", async ({ page }) => {
@@ -1329,7 +1366,7 @@ test("thread brands: chosen for a new pattern, one tab each in the picker, your 
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   const tabs = page.getByTestId("brand-tabs");
   // every brand the app has, as a new pattern starts (SPEC §15.39), and the one added
-  await expect(tabs.getByRole("tab")).toHaveText(["DMC", "Anchor", "Madeira", "Kreinik"]);
+  await expect(tabs.getByRole("tab")).toHaveText(["DMC", "Anchor", "Madeira", "Dimensions", "Kreinik"]);
   await tabs.getByRole("tab", { name: "Kreinik" }).click();
   await expect(page.getByText("No Kreinik threads yet")).toBeVisible();
   // your own thread, in the brand of the tab
@@ -1384,10 +1421,11 @@ test("threads & beads of a new pattern: one brand only — no brand tabs, your o
   await fileAction(page, "New", "Blank pattern…");
   const dialog = page.getByRole("dialog");
   // a new pattern starts with every brand there is (SPEC §15.39); this one keeps to DMC
-  await expect(dialog.getByTestId("materials-summary")).toHaveText("DMC, Anchor, Madeira · beads: Mill Hill, Preciosa");
+  await expect(dialog.getByTestId("materials-summary")).toHaveText("DMC, Anchor, Madeira, Dimensions · beads: Mill Hill, Preciosa");
   await dialog.getByRole("button", { name: "Change ▾" }).click();
   await dialog.getByTestId("materials-threads").getByLabel("Anchor").uncheck();
   await dialog.getByTestId("materials-threads").getByLabel("Madeira").uncheck();
+  await dialog.getByTestId("materials-threads").getByLabel("Dimensions").uncheck();
   await dialog.getByLabel("Only DMC — no other thread brands in this pattern").check();
   await dialog.getByLabel("This pattern has beads").uncheck();
   await expect(dialog.getByTestId("materials-summary")).toHaveText("DMC only · no beads");

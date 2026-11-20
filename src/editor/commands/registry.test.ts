@@ -43,7 +43,7 @@ describe("the command list", () => {
 describe("while another window edits the pattern (SPEC §15.34)", () => {
   // everything that changes the open pattern
   const EDITS = [
-    "history.undo", "history.redo", "key.add", "key.requestDelete", "key.delete", "pattern.setInfo", "pattern.setGrid", "pattern.rename", "pattern.setBrands", "pattern.setMaterials",
+    "history.undo", "history.redo", "key.add", "key.edit", "key.duplicate", "key.requestDelete", "key.delete", "pattern.setInfo", "pattern.setGrid", "pattern.rename", "pattern.setBrands", "pattern.setMaterials",
     "pattern.setFabric", "pattern.requestResize", "pattern.resize", "transform.apply", "transform.requestMirror", "transform.mirror", "transform.crop", "transform.requestExtend", "transform.extend",
     "ambiguous.toggleAtHover", "ambiguous.clearAll", "selection.clear", "selection.nudge", "selection.flipH", "selection.flipV", "selection.rotate", "selection.replaceKey", "selection.crop",
     "clipboard.cut", "clipboard.paste", "floating.commit", "match.accept", "match.decline", "snapshot.restore",

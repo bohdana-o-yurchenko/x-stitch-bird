@@ -276,11 +276,11 @@ export class Editor {
   }
 
   /** Opens the key entry form in the side panel (showing the panel if it was hidden). */
-  openKeyForm(edit?: KeyIndex) {
+  openKeyForm(edit?: KeyIndex, duplicate?: KeyIndex) {
     this.tools.cancel();
     this.shortcuts.releaseAll();
     // the first time an entry is added: a tip on symbols and drawing your own (shown once — the guide keeps track)
-    this.store.setState({ keyForm: { edit, seq: (this.state.keyForm?.seq ?? 0) + 1 }, panelCollapsed: false, ...(edit ? {} : { pendingTip: "keyEntry" }) });
+    this.store.setState({ keyForm: { edit, duplicate, seq: (this.state.keyForm?.seq ?? 0) + 1 }, panelCollapsed: false, ...(edit ? {} : { pendingTip: "keyEntry" }) });
   }
 
   closeKeyForm() {

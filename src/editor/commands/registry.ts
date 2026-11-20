@@ -63,6 +63,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "key.select", run: (ed, i) => ed.setActiveEntry(i as KeyIndex) },
   { id: "key.add", run: (ed) => ed.openKeyForm() },
   { id: "key.edit", run: (ed, i) => ed.openKeyForm(i as KeyIndex) },
+  { id: "key.duplicate", run: (ed, i) => ed.doc.key[i as KeyIndex] && ed.openKeyForm(undefined, i as KeyIndex) },
   { id: "key.requestDelete", run: (ed, i) => ed.doc.key[i as KeyIndex] && ed.openDialog({ type: "deleteEntry", index: i as KeyIndex, count: usageCount(ed, i as KeyIndex) }) },
   { id: "key.delete", run: (ed, i) => deleteEntry(ed, i as KeyIndex), destructive: "deleteKey" },
   // pattern & files
@@ -165,7 +166,7 @@ export const COMMANDS: readonly Command[] = [
 const PICTURES = "image/*,application/pdf,.pdf";
 
 const EDITS = new Set([
-  "history.undo", "history.redo", "key.add", "key.edit", "key.requestDelete", "key.delete",
+  "history.undo", "history.redo", "key.add", "key.edit", "key.duplicate", "key.requestDelete", "key.delete",
   "pattern.setInfo", "pattern.setGrid", "pattern.rename", "pattern.setBrands", "pattern.setMaterials", "pattern.setFabric", "pattern.requestResize", "pattern.resize",
   "transform.apply", "transform.requestMirror", "transform.mirror", "transform.crop", "transform.requestExtend", "transform.extend",
   "ambiguous.toggleAtHover", "ambiguous.clearAll",

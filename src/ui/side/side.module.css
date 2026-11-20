@@ -22,6 +22,7 @@
   border-top: 1px solid var(--line);
 }
 .row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -33,7 +34,8 @@
   background: transparent;
   text-align: left;
 }
-.row:hover {
+.row:hover,
+.row:focus-within {
   background: var(--surface2);
 }
 .row.on {
@@ -66,11 +68,26 @@
 }
 .actions {
   display: flex;
-  opacity: 0.45;
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  z-index: 1;
+  transform: translateY(-50%);
+  padding: 1px;
+  border-radius: 7px;
+  background: var(--surface2);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 .row:hover .actions,
-.row.on .actions {
+.row:focus-within .actions {
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.row.on .actions {
+  background: var(--sel);
 }
 .shortcut {
   display: inline-block;

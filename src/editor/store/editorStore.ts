@@ -131,7 +131,7 @@ export interface EditorState {
   toolbarHide: { shapes: boolean; partials: boolean };
   dialog: DialogRequest | null;
   /** The add/edit key entry form, docked in the side panel so the chart and references stay visible. */
-  keyForm: { edit?: KeyIndex; seq: number } | null;
+  keyForm: { edit?: KeyIndex; duplicate?: KeyIndex; seq: number } | null;
   toasts: Toast[];
   references: RefWindowData[];
   underlay: UnderlayData | null;

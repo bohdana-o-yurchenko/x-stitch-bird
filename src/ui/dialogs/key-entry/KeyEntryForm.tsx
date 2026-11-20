@@ -16,7 +16,7 @@ import { LINE_INKS } from "@/core/symbols/lineInks";
 import { isLineStyle, symbolText } from "@/core/symbols/lineStyles";
 import { symbolsFor } from "@/core/pattern/keyEntries";
 import { drawLineStyleSample } from "@/render/keyIcon";
-import { commitEntry, draftColour, draftEntry, draftFor, draftSymbol, duplicateOf, resolveDraftSource, usageCount, usesBlend, type KeyDraft } from "@/editor/actions/keyEntries";
+import { commitEntry, draftColour, draftEntry, draftFor, draftForDuplicate, draftSymbol, duplicateOf, resolveDraftSource, usageCount, usesBlend, type KeyDraft } from "@/editor/actions/keyEntries";
 import { KeyIcon, Swatch, cx, ui } from "../../common/widgets";
 import { SymbolGlyph } from "../../common/SymbolGlyph";
 import { isShapeSymbol } from "@/core/symbols/symbols";
@@ -171,14 +171,14 @@ function LineInkPicker({ value, onPick }: { value: string; onPick: (hex: string)
  * Every colour — a single floss, each floss of a blend, the floss and bead of a combo — is one line with its
  * strands; the one searchable list below fills the highlighted line. The rules live in editor/actions/keyEntries.
  */
-export function KeyEntryForm({ edit }: { edit?: KeyIndex }) {
+export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?: KeyIndex }) {
   const beadsOn = useEditorState((st) => materials(st.doc).beads.on);
   const t = useTranslations("keyDialog");
   const tr = useTranslate();
   const ed = useEditor();
   const symbols = useEditorState((st) => st.symbols);
   useEditorState((st) => st.keyRevision);
-  const [d, setD] = useState<KeyDraft>(() => draftFor(ed, edit));
+  const [d, setD] = useState<KeyDraft>(() => duplicate !== undefined ? draftForDuplicate(ed, duplicate) : draftFor(ed, edit));
   const [line, setLine] = useState(0);
   const [confirmDup, setConfirmDup] = useState(false);
   const root = useRef<HTMLDivElement>(null);
