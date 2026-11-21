@@ -26,7 +26,7 @@ describe("OXS round trip", () => {
   });
 
   it("numbered organizer: floss is bare, bead is \"Bead N\"", () => {
-    const p = createPattern(2, 1, "Org");
+    const p = createPattern(2, 2, "Org");
     const own = (id: string, kind: "thread" | "bead", code: string) => (p.customs[id] = { id, kind, brand: ORGANIZER, code, name: "", hex: "#336699" });
     own("custom:f1", "thread", "1");
     own("custom:f2", "thread", "2");
@@ -36,10 +36,17 @@ describe("OXS round trip", () => {
     applyMaterials(p, { brands: [ORGANIZER], beadBrands: [ORGANIZER], onlyBrand: true, onlyBeadBrand: true, noBeads: false });
     const a = addEntry(p, { t: "thread", src: "blend:ff", n: null, st: "full" }, ALL_SYMBOLS);
     const b = addEntry(p, { t: "combo", src: "combo:fb", n: 2, st: "full" }, ALL_SYMBOLS);
+    const point = addEntry(p, { t: "combo", src: "combo:fb", n: 1, st: "point" }, ALL_SYMBOLS);
     p.layers.stitches.set([a, b]);
+    p.layers.knots.push({ x: 1, y: 1, k: point });
     const xml = exportOxs(p);
     expect(xml).toContain('number="1+Bead 3"');
     expect(xml).toContain('number="1+2"');
+    expect(xml).toMatch(/<palette_item index="3" number="1\+Bead 3" name="1 \+ Bead 3"[^>]*comments="bead"/);
+    expect(xml).toContain('<object x1="1" y1="1" palindex="3" objecttype="bead" stitchwork_x="1" stitchwork_y="1"/>');
+    const { pattern: q } = importOxs(xml, ALL_SYMBOLS);
+    expect(q.key).toEqual(p.key);
+    expect(q.layers.knots).toEqual(p.layers.knots);
   });
 
   it("keeps beads, floss + bead, blends, half crosses and backstitch", () => {
@@ -79,13 +86,17 @@ describe("OXS round trip", () => {
     const knot = addEntry(p, { t: "knot", src: "dmc:310", n: 2 }, ALL_SYMBOLS);
     p.layers.knots.push({ x: 2, y: 2, k: tacked }, { x: 0, y: 3, k: tacked }, { x: 4, y: 4, k: plain }, { x: 5, y: 1, k: knot });
     const xml = exportOxs(p);
-    // floss + bead: its blend palette item, named so, and a short backstitch through the point (kept in the chart)
-    expect(xml).toMatch(/<palette_item index="1" number="00557\+321" name="00557 \+ 321 \(bead between cells\)"[^>]*comments="blend"/);
-    expect(xml).toContain('<backstitch x1="1.5" y1="2.5" x2="2.5" y2="1.5" palindex="1" objecttype="backstitch"');
-    expect(xml).toContain('<backstitch x1="0" y1="3.5" x2="0.5" y2="2.5" palindex="1" objecttype="backstitch"');
+    // floss + bead between cells: a bead palette item with both codes visible to other apps
+    expect(xml).toMatch(/<palette_item index="1" number="00557\+321" name="00557 \+ 321"[^>]*comments="bead Glass Seed"/);
+    expect(xml).toContain('<object x1="2" y1="2" palindex="1" objecttype="bead" stitchwork_x="2" stitchwork_y="2"/>');
+    expect(xml).toContain('<object x1="0" y1="3" palindex="1" objecttype="bead" stitchwork_x="0" stitchwork_y="3"/>');
+    expect(xml).not.toContain('palindex="1" objecttype="backstitch"');
     // a plain bead: a bead at its point; only the real knot is a knot
     expect(xml).toMatch(/<object x1="4" y1="4" palindex="\d+" objecttype="bead"[^>]*\/>/);
     expect(xml.match(/objecttype="knot"/g)).toHaveLength(1);
+    const { pattern: q } = importOxs(xml, ALL_SYMBOLS);
+    expect(q.key).toEqual(p.key);
+    expect(q.layers.knots).toEqual(p.layers.knots);
   });
 });
 
@@ -153,6 +164,7 @@ describe("OXS: this app's own file comes back as it was (SPEC §15.42)", () => {
     expect(xml).toContain('number="MH 00557"');
     expect(xml).toContain('number="PREC 00050"');
     expect(xml).toContain('number="Toho 11-21"');
+    expect(xml).toMatch(/<palette_item[^>]*number="PREC 00050\+ANC 403" name="PREC 00050 \+ ANC 403"[^>]*comments="bead/);
     // one brand: DMC threads go by code alone; Anchor alone still says so
     const dmcOnly = createPattern(2, 1, "DMC");
     dmcOnly.layers.stitches[0] = addEntry(dmcOnly, { t: "thread", src: "dmc:310", n: 2, st: "full" }, ALL_SYMBOLS);

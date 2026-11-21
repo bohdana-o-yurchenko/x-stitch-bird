@@ -48,7 +48,7 @@ Palette, as written in the file (index, number, name)
  34  PREC 78102                 Transparent - Silver Lined  · strands 1
  35  Toho 11-21                 Silver lined  · strands 1
  36  MH 00020                   Royal Blue  · strands 1
- 37  MH 00557+DMC 321           MH 00557 + DMC 321 (bead between cells)  · strands 2  · blend: 1×MH 00557 + 2×DMC 321
+ 37  MH 00557+DMC 321           MH 00557 + DMC 321  · strands 1
  38  DMC 321                    Red (backstitch)  · strands 1
  39  DMC 310+DMC White          Blend 1xDMC 310 + 1xDMC White (backstitch)  · strands 2  · blend: 1×DMC 310 + 1×DMC White
  40  ANC 403                    Black (backstitch)  · strands 2
@@ -307,9 +307,9 @@ Palette, as written in the file (index, number, name)
 
 #39  floss + bead DMC 321 + Mill Hill 00557 on a grid corner
      box: cells 40–44,27–28
-     in the file: a short <backstitch> ╱ through the point, in the floss + bead item
+     in the file: bead <object> at the point, bead item named "MH 00557 + DMC 321"
      · floss + bead between cells at point (40,27) DMC 321 + bead Mill Hill 00557, 2 strands
-     other apps · backstitch (39.5,27.5)–(40.5,26.5) DMC 321, 2 strands
+     other apps · cell 41,28: bead Bead 00557+DMC 321
 
 == Fractional stitches ==
 
@@ -522,9 +522,8 @@ Palette, as written in the file (index, number, name)
 
 #72  floss + bead DMC 321 + Mill Hill 00557 on the chart's bottom edge, below its number
      box: cells 20–24,48–54
-     in the file: its tacking <backstitch> cut at the edge: (x−0.5, h) to (x+0.5, h−0.5)
+     in the file: bead <object> at the point (x, h), with floss code in the item's name
      · floss + bead between cells at point (20,54) DMC 321 + bead Mill Hill 00557, 2 strands
-     other apps · backstitch (19.5,54)–(20.5,53.5) DMC 321, 2 strands
 
 Not in an .oxs (this app keeps them only in its own extras, or not at all)
 - key symbols, backstitch line styles and line colours, knot wraps — in the stitchwork attribute only

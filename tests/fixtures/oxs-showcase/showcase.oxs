@@ -74,10 +74,7 @@
 <palette_item index="34" number="PREC 78102" name="Transparent - Silver Lined" color="ABB3A7" printcolor="ABB3A7" blendcolor="nil" comments="bead Transparent - Silver Lined" strands="1" symbol="34" dashpattern="" bsstrands="1" bscolor="ABB3A7" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;preciosa:78102/33129001&quot;,&quot;sym&quot;:&quot;sym:triangle-left-dot&quot;}]}"/>
 <palette_item index="35" number="Toho 11-21" name="Silver lined" color="C0C0C0" printcolor="C0C0C0" blendcolor="nil" comments="bead" strands="1" symbol="35" dashpattern="" bsstrands="1" bscolor="C0C0C0" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;custom:toho&quot;,&quot;sym&quot;:&quot;sym:circle-plus&quot;}],&quot;customs&quot;:{&quot;custom:toho&quot;:{&quot;id&quot;:&quot;custom:toho&quot;,&quot;kind&quot;:&quot;bead&quot;,&quot;brand&quot;:&quot;Toho&quot;,&quot;code&quot;:&quot;11-21&quot;,&quot;name&quot;:&quot;Silver lined&quot;,&quot;hex&quot;:&quot;#C0C0C0&quot;}}}"/>
 <palette_item index="36" number="MH 00020" name="Royal Blue" color="11416E" printcolor="11416E" blendcolor="nil" comments="bead Glass Seed" strands="1" symbol="36" dashpattern="" bsstrands="1" bscolor="11416E" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;bead&quot;,&quot;src&quot;:&quot;bead:00020&quot;,&quot;sym&quot;:&quot;sym:circle-x&quot;,&quot;st&quot;:&quot;point&quot;}]}"/>
-<palette_item index="37" number="MH 00557+DMC 321" name="MH 00557 + DMC 321 (bead between cells)" color="C72B3B" printcolor="C72B3B" blendcolor="E5CE97" comments="blend" strands="2" symbol="37" dashpattern="" bsstrands="2" bscolor="C72B3B" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;combo&quot;,&quot;src&quot;:&quot;combo:mh&quot;,&quot;sym&quot;:&quot;sym:square-plus&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;point&quot;}],&quot;combos&quot;:{&quot;combo:mh&quot;:{&quot;thread&quot;:&quot;dmc:321&quot;,&quot;bead&quot;:&quot;bead:00557&quot;}}}">
-  <blend number="MH 00557" name="Old Gold" color="E5CE97" strands="1"/>
-  <blend number="DMC 321" name="Red" color="C72B3B" strands="2"/>
-</palette_item>
+<palette_item index="37" number="MH 00557+DMC 321" name="MH 00557 + DMC 321" color="E5CE97" printcolor="E5CE97" blendcolor="nil" comments="bead Glass Seed" strands="1" symbol="37" dashpattern="" bsstrands="1" bscolor="E5CE97" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;combo&quot;,&quot;src&quot;:&quot;combo:mh&quot;,&quot;sym&quot;:&quot;sym:square-plus&quot;,&quot;n&quot;:2,&quot;st&quot;:&quot;point&quot;}],&quot;combos&quot;:{&quot;combo:mh&quot;:{&quot;thread&quot;:&quot;dmc:321&quot;,&quot;bead&quot;:&quot;bead:00557&quot;}}}"/>
 <palette_item index="38" number="DMC 321" name="Red (backstitch)" color="C72B3B" printcolor="C72B3B" blendcolor="nil" comments="" strands="1" symbol="38" dashpattern="" bsstrands="1" bscolor="C72B3B" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;back&quot;,&quot;src&quot;:&quot;dmc:321&quot;,&quot;sym&quot;:&quot;line:dashed&quot;,&quot;n&quot;:1}]}"/>
 <palette_item index="39" number="DMC 310+DMC White" name="Blend 1xDMC 310 + 1xDMC White (backstitch)" color="B9B9B6" printcolor="B9B9B6" blendcolor="FCFBF8" comments="blend" strands="2" symbol="39" dashpattern="" bsstrands="2" bscolor="B9B9B6" stitchwork="{&quot;entries&quot;:[{&quot;t&quot;:&quot;back&quot;,&quot;src&quot;:&quot;blend:b11&quot;,&quot;sym&quot;:&quot;line:longDash&quot;,&quot;n&quot;:null}],&quot;blends&quot;:{&quot;blend:b11&quot;:{&quot;parts&quot;:[{&quot;id&quot;:&quot;dmc:310&quot;,&quot;n&quot;:1},{&quot;id&quot;:&quot;dmc:White&quot;,&quot;n&quot;:1}]}}}">
   <blend number="DMC 310" name="Black" color="000000" strands="1"/>
@@ -802,8 +799,6 @@
 <backstitch x1="16.5" y1="48" x2="17.5" y2="48" palindex="1" objecttype="backstitch" sequence="641"/>
 <backstitch x1="16.5" y1="48" x2="16.5" y2="49" palindex="1" objecttype="backstitch" sequence="642"/>
 <backstitch x1="16.5" y1="49" x2="17.5" y2="49" palindex="1" objecttype="backstitch" sequence="643"/>
-<backstitch x1="39.5" y1="27.5" x2="40.5" y2="26.5" palindex="37" objecttype="backstitch" sequence="644" stitchwork_x="40" stitchwork_y="27"/>
-<backstitch x1="19.5" y1="54" x2="20.5" y2="53.5" palindex="37" objecttype="backstitch" sequence="645" stitchwork_x="20" stitchwork_y="54"/>
 </backstitches>
 <ornaments_inc_knots_and_beads>
 <object x1="9" y1="14" palindex="17" objecttype="tent" direction="2"/>
@@ -869,6 +864,7 @@
 <object x1="10" y1="27" palindex="36" objecttype="bead" stitchwork_x="10" stitchwork_y="27"/>
 <object x1="20.5" y1="27" palindex="36" objecttype="bead" stitchwork_x="20.5" stitchwork_y="27"/>
 <object x1="32" y1="27" palindex="26" objecttype="bead" stitchwork_x="32" stitchwork_y="27"/>
+<object x1="40" y1="27" palindex="37" objecttype="bead" stitchwork_x="40" stitchwork_y="27"/>
 <object x1="40" y1="42" palindex="43" objecttype="knot"/>
 <object x1="50.5" y1="41.5" palindex="43" objecttype="knot"/>
 <object x1="10.5" y1="45" palindex="43" objecttype="knot"/>
@@ -877,6 +873,7 @@
 <object x1="40" y1="45" palindex="46" objecttype="knot"/>
 <object x1="50" y1="45" palindex="43" objecttype="knot"/>
 <object x1="13" y1="48" palindex="50" objecttype="knot"/>
+<object x1="20" y1="54" palindex="37" objecttype="bead" stitchwork_x="20" stitchwork_y="54"/>
 </ornaments_inc_knots_and_beads>
 <commentboxes>
 </commentboxes>

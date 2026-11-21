@@ -112,11 +112,12 @@ describe("OXS showcase: every kind of thing an .oxs carries, numbered on one cha
       "#36 bead Mill Hill 00020 on a grid corner",
       "#37 bead Mill Hill 00020 on the middle of a cell's edge",
       "#38 the same bead, 00557, in a cell and between cells: one palette item",
-      // floss + bead on a grid point goes out as its tacking stitch
+      // without this app's extras, a bead on a grid point is placed in a cell instead
       "#39 floss + bead DMC 321 + Mill Hill 00557 on a grid corner",
       // line colour and wraps: this app's own
       "#62 DMC 3865 printed in red on the chart (line colour; only this app keeps it)",
       "#68 DMC 321, 2 strands, 3 wraps (only this app keeps wraps)",
+      // a bead exactly on the bottom edge is outside the cells another app can place it in
       "#72 floss + bead DMC 321 + Mill Hill 00557 on the chart's bottom edge, below its number",
     ]);
   });

@@ -26,7 +26,10 @@ DONE 10) replace the email in all the docs. and remove my name new email is : pt
 
 7) add specialty stitches : smyrna (in 1 cell in 4 cells ) + their own stitches 
 8) write to yulia after the speciality stitches are done!!!! 
-
+9) near symmetry ignores the backstitch!!! 
+10) lone crosses must have a super lone crosses mode !!
+11) export of bead + floss between the crossess must be exported as bead. not as backstitch 
+12) user guides and probably an AI assistant that exaplains how to do one or another 
 
 ## Overview, by effort
 
