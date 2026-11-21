@@ -12,6 +12,16 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "2.3.1",
+    date: "2026-11-21",
+    uk: [
+      "Під час експорту в .oxs бісер із ниткою між хрестиками лишається бісером: нитку зазначено в коді символу, а не як бленд бекстічу.",
+    ],
+    en: [
+      "When exporting to .oxs, a bead with floss between cross stitches stays a bead: the floss appears in its symbol code instead of becoming a backstitch blend.",
+    ],
+  },
+  {
     version: "2.3.0",
     date: "2026-11-20",
     uk: [
