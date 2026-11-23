@@ -19,13 +19,25 @@ DONE 14) beads with floss in between the crossess. right now dont get read by ap
  
 
 DONE 9) proper landing!! - with a central button 'go to editor'
-19) (question answered 2026-11-23: Vercel custom events need Pro; not built yet) треба збирати статистику про те, хто які кнопки нажимає та якими шорткатами користується! щоб переробити і те і те
+DONE 19) (question answered 2026-11-23: Vercel custom events need Pro; not built yet) треба збирати статистику про те, хто які кнопки нажимає та якими шорткатами користується! щоб переробити і те і те
 
 DONE 14) + 1 feature : XSD import (SPEC §15.56; export stays out of scope). we are free to reverse engineer it. noone goona sue
 
-12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
-13) add 'similar' colors of the same brand AND translations to other brands 
+12) fix the different 'new from' dialogs. now the behavior is inconsistent 
+12) user guides and probably an AI assistant that exaplains how to do one or another
 
+13) improve the expor to pdf :
+14) the infrmation of the author and name of design should be on every page. also instructions must be exported 
+
+15) the 'replace in selection' dialog should have proper dropwowned that look the same as the original key 
+
+12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
+13) add 'similar' colors of the same brand AND translations to other brands. maybe come up with what usually is displayed there as well 
+
+
+
+
+11) intoduce more icons. match with pattern maker. fix the export oxs so it displays the icons??? 
 11) FIX preview deploy on the vercel 
 14) add fabricks!!! each fabric has a dmc code associated with it. so it's totally real 
 13) follow up : introduce 'my stash'. then introduce my projects. where i can add my kits and it would help me specify if i got all the necesary supplyes or if i can use smth from my stash 
@@ -34,8 +46,8 @@ DONE 14) + 1 feature : XSD import (SPEC §15.56; export stays out of scope). we 
 
 7) add specialty stitches : smyrna (in 1 cell in 4 cells ) + their own stitches 
 8) write to yulia after the speciality stitches are done!!!! 
-12) user guides and probably an AI assistant that exaplains how to do one or another 
-13) 
+
+13) finish a proper local app installation. this will introduce a whole lot of problems later tho. 
 
 bugs :
 DONE 0) create proper app-specific email for emails DONE
