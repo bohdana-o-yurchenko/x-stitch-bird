@@ -184,6 +184,19 @@ export class SelectionService {
     this.ed.toast("toasts.pasted");
   }
 
+  /** How many stitches (cells, beads, lines, knots, partials) each key entry has inside the selection (or the whole chart). */
+  keyCounts(): Map<KeyIndex, number> {
+    const p = this.ed.doc, n = new Map<KeyIndex, number>();
+    const mask = this.ed.state.selection?.mask ?? new Uint8Array(p.w * p.h).fill(1);
+    const f = extractFragment(p, mask);
+    if (!f) return n;
+    for (const l of LAYERS) {
+      const piece = f.layers[l.id];
+      if (piece !== undefined) l.usage(piece as never, (k) => p.key[k] && n.set(k, (n.get(k) ?? 0) + 1));
+    }
+    return n;
+  }
+
   /** Replace one key entry with another inside the selection (or the whole chart). */
   replaceKey(from: KeyIndex, to: KeyIndex) {
     const p = this.ed.doc;

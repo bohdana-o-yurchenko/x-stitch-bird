@@ -9,9 +9,10 @@ import { LiveConflictDialog } from "./LiveConflictDialog";
 import { PdfPageDialog } from "./PdfPageDialog";
 import { PdfChartDialog } from "./PdfChartDialog";
 import { NewPatternDialog } from "./NewPatternDialog";
+import { ReplaceKeyDialog } from "./ReplaceKeyDialog";
 import {
   DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, LargePhotoDialog, SamePatternDialog, UnmatchedColoursDialog, FileChoiceDialog, PdfPatternIntroDialog, PdfUnreadableDialog, MirrorFromCentreDialog, PhotoRoomDialog,
-  PatternKeeperDialog, ReplaceKeyDialog, ResizeDialog, TextFallbackDialog,
+  PatternKeeperDialog, ResizeDialog, TextFallbackDialog,
 } from "./simpleDialogs";
 
 /** Renders whichever dialog the editor asked for. */

@@ -5,7 +5,6 @@ import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { parseCellRef } from "@/core/grid/numbering";
 import { clampSize, MAX_SIZE, MIN_SIZE } from "@/core/pattern/createPattern";
-import { symbolText } from "@/core/symbols/lineStyles";
 import { mirrorTargetHasContent, type MirrorFromCentre } from "@/core/transform/wholeChart";
 import { stopAskingLargePhoto } from "@/editor/images/largePhoto";
 import type { SamePatternChoice, UnmatchedChoice } from "@/editor/store/editorStore";
@@ -109,24 +108,6 @@ export function ExtendCanvasDialog({ onClose }: Close) {
           <label key={side} className={ui.field}>{t(side)}<input type="number" min={0} max={200} value={m[side]} onChange={(e) => set({ ...m, [side]: Math.max(0, Number(e.target.value) || 0) })} /></label>
         ))}
       </div>
-    </Modal>
-  );
-}
-
-export function ReplaceKeyDialog({ onClose }: Close) {
-  const t = useTranslations("dialogs");
-  const run = useCommand();
-  const key = useEditorState((st) => st.doc.key);
-  const active = useEditorState((st) => st.activeEntry);
-  const label = useEntryLabel();
-  const entries = key.flatMap((e, i) => (e && i ? [i] : []));
-  const [from, setFrom] = useState(active || entries[0] || 0);
-  const [to, setTo] = useState(entries.find((i) => i !== from) ?? 0);
-  const option = (i: number) => <option key={i} value={i}>{`${symbolText(key[i]!.sym)}  ${label(i).title} — ${label(i).sub}`}</option>;
-  return (
-    <Modal title={t("replaceKeyTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("replace"), primary: true, disabled: !from || !to || from === to, onClick: () => run("selection.replaceKey", { from, to }) }]}>
-      <label className={ui.field}>{t("replaceFrom")}<select value={from} onChange={(e) => setFrom(Number(e.target.value))}>{entries.map(option)}</select></label>
-      <label className={ui.field}>{t("replaceTo")}<select value={to} onChange={(e) => setTo(Number(e.target.value))}>{entries.map(option)}</select></label>
     </Modal>
   );
 }

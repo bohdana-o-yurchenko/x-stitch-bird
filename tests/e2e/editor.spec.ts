@@ -914,6 +914,32 @@ test("New ▸ has a blank pattern, a photo, an .oxs and a PDF chart; My patterns
   expect(await editorState(page, "(ed) => ({ key: ed.doc.key.filter(Boolean).length, stitches: [...ed.doc.layers.stitches].filter(Boolean).length, beads: [...ed.doc.layers.beads].filter(Boolean).length, lines: ed.doc.layers.segments.length })")).toEqual({ key: 0, stitches: 0, beads: 0, lines: 0 });
 });
 
+test("Replace key… in a selection: lists like the key — what the selection has, what it can become; arrows and Enter replace", async ({ page }) => {
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.getByRole("button", { name: "Replace key…" }).click();
+  const from = page.getByTestId("replace-from"), to = page.getByTestId("replace-to");
+  // only what the selection has, each with how many; the list has the keyboard
+  await expect(from.getByRole("listbox")).toBeFocused();
+  await expect(from.getByRole("option").first()).toContainText(/\d/);
+  const fromKey = async () => Number(await from.getByRole("option", { selected: true }).getAttribute("data-entry"));
+  const first = await fromKey();
+  await page.keyboard.press("ArrowDown");
+  expect(await fromKey()).not.toBe(first);
+  await page.keyboard.press("ArrowUp");
+  expect(await fromKey()).toBe(first);
+  // what it becomes: entries of the same kind only, never itself; nothing chosen yet, so nothing to replace
+  await expect(to.locator(`[data-entry="${first}"]`)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Replace", exact: true })).toBeDisabled();
+  const target = to.getByRole("option").first();
+  const toKey = Number(await target.getAttribute("data-entry"));
+  await target.click();
+  await page.keyboard.press("Enter");
+  await expect(from).toHaveCount(0);
+  const count = (k: number) => editorState<number>(page, `(ed) => ed.selection.keyCounts().get(${k}) ?? 0`);
+  expect(await count(first)).toBe(0);
+  expect(await count(toKey)).toBeGreaterThan(0);
+});
+
 test("the selection bar can deselect without changing anything, and clears cells by name", async ({ page }) => {
   await page.keyboard.press("ControlOrMeta+a");
   const deselect = page.getByRole("button", { name: "Deselect" });
