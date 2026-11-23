@@ -171,6 +171,73 @@ test("signed in, New ▾ on the patterns page: the editor shows only once the ne
   expect(await editorState<string>(page, "(ed) => ed.doc.name")).toBe("Image pattern");
 });
 
+test("Floss: the whole catalogue with your own among it — Only mine, colour families, search; a colour's panel: other brands, shades, similar (SPEC §15.57)", async ({ page, context }) => {
+  await page.route("**/api/auth/get-session*", (r) => r.fulfill({ json: { session: { id: "s", userId: "u", expiresAt: new Date(Date.now() + 864e5).toISOString() }, user: { id: "u", email: "e2e@example.com", name: "", emailVerified: true } } }));
+  await page.route("**/api/threads", (r) => r.fulfill({ json: [{ id: "custom:mine", kind: "thread", brand: "DMC", code: "310-old", name: "Old black", hex: "#111111" }] }));
+  await context.addCookies([{ name: "neon-auth.session_token", value: "x", domain: "localhost", path: "/" }]);
+  // the demo pattern saved in this browser: one of "your patterns"
+  await page.keyboard.press("ControlOrMeta+s");
+  await expect.poll(() => editorState<number>(page, "(ed) => ed.persistence.patterns.list().then((l) => l.length)")).toBeGreaterThan(0);
+  await page.goto("/en/threads");
+  const list = page.getByTestId("thread-list");
+  // DMC, whole: hundreds of colours, yours among them with its dot
+  await expect(page.getByRole("heading", { name: "DMC", exact: true })).toBeVisible();
+  // a wide screen: the panel is always there, on the list's first colour, with nothing to close
+  const panel = page.getByTestId("colour-panel");
+  await expect(panel.getByRole("heading", { name: "DMC 01" })).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Close", exact: true })).toHaveCount(0);
+  expect(await list.locator("[data-colour]").count()).toBeGreaterThan(400);
+  await expect(list.locator('[data-colour="custom:mine"]').getByTestId("own-mark")).toBeVisible();
+  // only mine
+  await page.getByTestId("only-mine").click();
+  await expect(list.locator("[data-colour]")).toHaveCount(1);
+  await page.getByTestId("only-mine").click();
+  // the arrows move the pick
+  await list.locator('[data-colour="dmc:01"]').click();
+  await page.keyboard.press("ArrowRight");
+  await expect(panel.getByRole("heading", { name: "DMC 02" })).toBeVisible();
+  // in my patterns: just the demo's floss, DMC 798 among them
+  await page.getByTestId("in-patterns").click();
+  await expect(list.locator('[data-colour="dmc:798"]')).toBeVisible();
+  expect(await list.locator("[data-colour]").count()).toBeLessThan(20);
+  await page.getByTestId("in-patterns").click();
+  // a colour family, then a search within it
+  await page.locator("[data-family=blue]").click();
+  const blues = await list.locator("[data-colour]").count();
+  expect(blues).toBeGreaterThan(20);
+  expect(blues).toBeLessThan(120);
+  await page.locator("[data-family=blue]").click();
+  await page.getByTestId("thread-search").fill("310");
+  await list.locator('[data-colour="dmc:310"]').click();
+  // its panel: Anchor 403 by the chart, its shades, similar DMC, the patterns (none here)
+  await expect(panel.getByRole("heading", { name: "DMC 310" })).toBeVisible();
+  await expect(panel.getByTestId("colour-other-brands")).toContainText("403");
+  await expect(panel.getByTestId("colour-other-brands")).toContainText("chart");
+  await expect(panel.getByTestId("colour-shades").getByRole("button", { name: "DMC 310", exact: true })).toHaveAttribute("aria-current", "true");
+  await expect(panel.getByTestId("colour-patterns")).toContainText("Not in any of your patterns yet.");
+  // hop to Anchor 403
+  await panel.getByTestId("colour-other-brands").getByRole("button", { name: /403/ }).click();
+  await expect(panel.getByRole("heading", { name: "Anchor 403" })).toBeVisible();
+  // a catalogue colour can be duplicated into one of your own
+  await panel.getByRole("button", { name: "Duplicate" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  // only the list scrolls — the page, the brands and the panel stay put
+  await page.getByTestId("thread-search").fill("");
+  const top = (id: string) => page.getByTestId(id).evaluate((el) => Math.round(el.getBoundingClientRect().top));
+  const before = [await top("thread-brands"), await top("colour-panel")];
+  await page.getByTestId("thread-scroll").hover();
+  await page.mouse.wheel(0, 800);
+  await expect.poll(() => page.getByTestId("thread-scroll").evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  expect([await top("thread-brands"), await top("colour-panel")]).toEqual(before);
+  expect(await page.evaluate(() => [...document.querySelectorAll("main")].map((m) => m.parentElement!.scrollTop))).toEqual([0]);
+  // Beads: a brand's series one level under it
+  await page.goto("/en/beads");
+  await page.getByTestId("bead-series").getByRole("button", { name: /Antique Glass/ }).click();
+  await expect(page.getByRole("heading", { name: /Mill Hill · Antique Glass/ })).toBeVisible();
+  await expect(list.locator("[data-colour]")).toHaveCount(73);
+});
+
 test("Versions brings back the pattern as it was before a risky change", async ({ page }) => {
   const used = page.locator("[data-entry]").first();
   await used.hover();
@@ -292,11 +359,11 @@ test("signed out the logo leads to the landing page; My patterns, Threads, Beads
   }
 });
 
-test("signed in, the account menu leads to My patterns, My threads, My beads and Account", async ({ page }) => {
+test("signed in, the account menu leads to My patterns, Floss, Beads and Account", async ({ page }) => {
   await pretendSignedIn(page);
   await page.getByRole("button", { name: /e2e@example\.com/ }).click();
-  for (const name of ["My patterns", "My threads", "My beads", "Account"]) await expect(page.getByRole("menuitem", { name, exact: true })).toBeVisible();
-  await page.getByRole("menuitem", { name: "My threads", exact: true }).click();
+  for (const name of ["My patterns", "Floss", "Beads", "Account"]) await expect(page.getByRole("menuitem", { name, exact: true })).toBeVisible();
+  await page.getByRole("menuitem", { name: "Floss", exact: true }).click();
   // (only pretended signed in here: the page itself knows better, and gives way to the editor)
   await page.waitForURL(/\/en\/threads$/);
 });

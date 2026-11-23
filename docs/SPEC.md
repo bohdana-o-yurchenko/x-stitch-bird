@@ -2358,3 +2358,30 @@ Pattern Maker for Cross Stitch (HobbyWare, v4) saves `.xsd`: binary, no publishe
 ## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
 The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in
 BACKLOG B27.
+
+### 15.57 Floss and Beads: the whole catalogue (2026-11-23)
+- **My threads / My beads become Floss / Beads** (tabs, account menu): every colour of every built-in brand (DMC,
+  Anchor, Madeira, Dimensions; Mill Hill, Preciosa), your own among them with a small accent dot. Brands on the left
+  (built-in first, then your own — those can be renamed or deleted), All brands last; DMC (Mill Hill) shown first.
+- **Only mine** and **In my patterns** are switches at the top of the brands (they apply to all of them and combine;
+  brands with nothing left hide). In my patterns reads your saved patterns once (`library.colourUses`).
+- **Finding a colour**: search (number, name, `dmc 310` — a colour's chart equivalent, `#hex`), ten **colour
+  families** as one pill of dots, the chosen one named in it (reds … whites, greys & blacks —
+  `core/catalog/colourInfo.ts` `familyOf`). On Beads the chosen brand's **series** (Mill Hill's series, Preciosa's
+  glass) are a branch under it in the brands (a choice beside the search on a phone). Sorts: by code, name, **colour** (by family
+  round the wheel, then light to dark within each — also the key form's By colour), **light to dark**. Views: gallery and compact (the large list is gone).
+- **Tools**: the title (brand · series) with how many, the view and + Floss / + Bead; under it search, families, sort.
+- **Scrolling**: from 720 px the page itself doesn't scroll — the brands, the list and the panel each scroll on
+  their own, so nothing beside the list moves while it scrolls.
+- **Any colour can be duplicated** (⧉, or in its panel) into one of your own; your own are changed or deleted.
+- **A colour's panel**: from 1100 px wide a column of its own beside the list, always there and not closable (the
+  page is wider then) — nothing covers the list or moves; it shows the colour looked at last (kept in this browser),
+  else the list's first; another colour fades in. Narrower, a sheet from the bottom that closes (✕, Esc). The arrow
+  keys move the pick round the grid: swatch, brand and number, name,
+  hex (click copies), family, series and pack size, RGB · **In other brands** (floss: one per brand; beads: DMC floss
+  and the other bead brand) — from the maker's conversion chart (the catalogues' DMC equivalents) marked *chart*, else
+  the nearest by colour marked *very close / close / rough* (CIEDE2000 < 3 / < 6 / more) · **Lighter & darker**: the
+  shade ladder of the same hue and colourfulness, one per step of lightness, this one marked · **Similar in {brand}**:
+  up to 6 that look close (CIEDE2000 < 6, each said *very close* < 3 or *close*); none: said so, with the one nearest
+  (*rough*) · **In your patterns**: the saved patterns that use it (picture, name, size — opens it) (blends' parts and floss + bead count), read
+  once when a panel first opens (`library.colourUses`). Every colour named there opens in the panel.

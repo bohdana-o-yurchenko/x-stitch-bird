@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { BEAD_CATALOGUES, THREAD_CATALOGUES, byHue, byNumber, matchesQuery } from "@/core/catalog/catalog";
+import { BEAD_CATALOGUES, THREAD_CATALOGUES, byNumber, matchesQuery } from "@/core/catalog/catalog";
+import { byColour } from "@/core/catalog/colourInfo";
 import type { ColorEntry } from "@/core/color/colorEntry";
 import { BUILT_IN_BEAD_BRANDS, BUILT_IN_THREAD_BRANDS, ORGANIZER, canRemoveBeadBrand, canRemoveBrand, materials, materialsOf, nextOrganizerCode, organizerCodeTaken } from "@/core/pattern/brands";
 import { customColor, resolveColor } from "@/core/pattern/resolve";
@@ -69,7 +70,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
     all = [...catalogue, ...customs.filter((e) => e.brand === brand)];
     if (kind === "bead" && series !== "all") all = all.filter((e) => e.series === series);
     all = all.filter((e) => matchesQuery(e, query));
-    return kind === "thread" ? [...all].sort(sort === "num" ? byNumber : byHue) : all;
+    return kind === "thread" ? [...all].sort(sort === "num" ? byNumber : byColour) : all;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kind, query, sort, series, brand, customs.length, revision, inventory]);
 

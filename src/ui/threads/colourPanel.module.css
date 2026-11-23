@@ -1,0 +1,296 @@
+/* one colour (SPEC §15.57): a column of its own beside the list on a wide screen, always there — nothing covers the
+   list or moves when another colour is picked; narrower, a sheet from the bottom */
+.panel {
+  box-sizing: border-box;
+  background: var(--surface);
+}
+.column {
+  flex: none;
+  align-self: flex-start;
+  width: 340px;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+}
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  max-height: 72vh;
+  overflow-y: auto;
+  padding: 20px;
+  border-top: 1px solid var(--line2);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -10px 40px rgba(40, 25, 10, 0.2);
+  animation: slideUp 0.2s ease-out;
+}
+.sheet.closing {
+  animation: slideDown 0.16s ease-in forwards;
+}
+/* another colour: its content fades in where the last one was */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: fadeIn 0.18s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0.25;
+  }
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+@keyframes slideDown {
+  to {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .sheet.closing,
+  .body {
+    animation-duration: 0.01s;
+  }
+}
+.close {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 1;
+  background: var(--surface);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+.swatch {
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+  flex: none;
+}
+.swatch.round {
+  width: 96px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  align-self: center;
+}
+.head h2 {
+  margin: 0;
+  padding-right: 32px;
+  font-family: var(--font-serif), serif;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.name {
+  margin: 2px 0 0;
+  font-size: 14px;
+}
+.facts {
+  margin: 6px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.hex {
+  padding: 1px 6px;
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  background: none;
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  cursor: pointer;
+}
+.hex:hover {
+  border-color: var(--ink);
+}
+.yours {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--sel);
+  color: var(--accent);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.delete {
+  margin-left: auto;
+  color: var(--danger, #b3261e);
+}
+.section h3 {
+  margin: 0 0 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.chips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.chip:hover {
+  border-color: var(--ink);
+}
+.dot {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+}
+.dot.round {
+  border-radius: 50%;
+}
+.chipText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  line-height: 1.2;
+}
+.chipText b {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chipText small {
+  color: var(--muted);
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tag {
+  flex: none;
+  color: var(--muted);
+  font-size: 11px;
+}
+/* lighter & darker: one strip of steps, this colour raised */
+.ladder {
+  display: flex;
+  height: 44px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+}
+.step {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 4px;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+}
+.step span {
+  opacity: 0;
+}
+.step:hover span,
+.step.here span {
+  opacity: 1;
+}
+.step.here {
+  box-shadow: inset 0 0 0 2px var(--ink), inset 0 0 0 3px var(--surface);
+  font-weight: 700;
+}
+.patterns {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pattern {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px 6px 6px;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+  text-decoration: none;
+}
+.pattern:hover {
+  border-color: var(--ink);
+}
+.thumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 7px;
+  background: var(--bg);
+  object-fit: contain;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.patternText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.patternText b {
+  font-size: 13.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.patternText small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.go {
+  color: var(--muted);
+}
+
+.sheet .swatch {
+  height: 72px;
+  aspect-ratio: auto;
+}
+.sheet .swatch.round {
+  width: 72px;
+}
+.alone {
+  margin: 0 0 8px;
+}

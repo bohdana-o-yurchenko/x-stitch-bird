@@ -3,6 +3,7 @@ import { XBIRD_VERSION, type FileVersion, type PatternFile } from "@/core/format
 import { newPatternId } from "@/core/pattern/createPattern";
 import { patternStats, type PatternDetails } from "@/core/pattern/stats";
 import { buildPalette } from "@/core/pattern/palette";
+import { usedColourIds } from "@/core/pattern/brands";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import type { CustomColor } from "@/core/pattern/types";
 import { pictureIdsOf } from "@/persistence";
@@ -101,6 +102,24 @@ export function createLibrary(persistence: Persistence = createPersistence()) {
     threads: (): Promise<CustomColor[] | null> => accountThreadApi.list(),
     saveThread: (c: CustomColor): Promise<boolean> => accountThreadApi.save(c),
     removeThread: (id: string): Promise<boolean> => accountThreadApi.remove(id),
+    /** Which saved patterns use each thread and bead (SPEC §15.57): colour id → patterns, every pattern read once. */
+    async colourUses(): Promise<Map<string, PatternSummary[]>> {
+      const uses = new Map<string, PatternSummary[]>();
+      for (const p of await persistence.patterns.list().catch(() => [])) {
+        const doc = await fileOf(p.id);
+        if (!doc) continue;
+        try {
+          for (const id of usedColourIds(parsePattern(doc, ALL_SYMBOLS).pattern)) {
+            const list = uses.get(id) ?? [];
+            list.push(p);
+            uses.set(id, list);
+          }
+        } catch {
+          // a pattern that can't be read uses nothing here
+        }
+      }
+      return uses;
+    },
     forgetAccountHere: () => forgetAccountHere(persistence),
 
     /**

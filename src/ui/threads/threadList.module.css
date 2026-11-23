@@ -1,4 +1,4 @@
-/* the three views of your threads / beads: .gallery, .compact, .large */
+/* the two views of floss / beads: .gallery, .compact */
 .list {
   margin: 0;
   padding: 0;
@@ -128,41 +128,12 @@
   margin-left: auto;
 }
 
-/* large list: a big swatch, code and name over the brand, the colour at the end */
-.large {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.large .item {
-  align-items: center;
-  gap: 16px;
-  padding: 10px 16px 10px 10px;
-}
-.large .swatch {
-  width: 64px;
-  height: 64px;
-  border-radius: 10px;
-}
-.large .swatch.round {
-  border-radius: 50%;
-}
-.large .text {
-  flex: 1;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 15px;
-}
-
 @media (max-width: 560px) {
   .gallery {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 12px;
   }
   .compact .brand {
-    display: none;
-  }
-  .large .hex {
     display: none;
   }
 }
@@ -191,4 +162,24 @@
 .duplicate:hover {
   color: var(--ink);
   border-color: var(--ink);
+}
+
+/* the colour shown in the panel */
+.item.on {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.compact .item.on {
+  background: var(--sel);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+/* one of your own: a small accent dot after the number */
+.mine {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
 }

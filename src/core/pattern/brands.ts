@@ -43,6 +43,20 @@ function threadBrand(p: Pattern, id: string): string | null {
   return e?.kind === "thread" ? e.brand : null;
 }
 
+/** Every thread and bead id the key uses: its own, the parts of its blends, the floss and bead of floss + bead. */
+export function usedColourIds(p: Pattern): Set<string> {
+  const used = new Set<string>();
+  for (const e of p.key) {
+    if (!e) continue;
+    if (e.src.startsWith("blend:")) p.blends[e.src]?.parts.forEach((part) => used.add(part.id));
+    else if (e.src.startsWith("combo:")) {
+      const c = p.combos[e.src];
+      if (c) used.add(c.thread).add(c.bead);
+    } else used.add(e.src);
+  }
+  return used;
+}
+
 /** Brands the key uses: its threads, the parts of its blends, the threads of floss + bead — and the project palette once it holds a thread. */
 export function usedThreadBrands(p: Pattern): Set<string> {
   const used = new Set<string>();
