@@ -14,6 +14,8 @@
 /coverage
 # other people's charts, for reading tests on this computer only (SPEC §15.47)
 /tests/fixtures/private/
+# Pattern Maker files are other people's designs: never in the repository (tests build their own)
+*.xsd
 
 # next.js
 /.next/

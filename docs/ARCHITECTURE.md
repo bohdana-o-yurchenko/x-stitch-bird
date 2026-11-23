@@ -1159,6 +1159,12 @@ Decisions taken while implementing this plan. Each one lives in the single place
   `persistence/cloud/accountChecks.ts` (`/api/checks`, `server/readerChecks.ts`, table `reader_checks`) signed in.
   UI: `ui/readerCheck` (`CheckApp` state and saving, `CheckChart` canvas + box buttons, `CheckList`, `CheckResults`).
 
+- Pattern Maker `.xsd` import (SPEC §15.56): `core/formats/xsd/readXsd.ts` (bytes → `XsdPattern`: `Bytes` reader,
+  `unscramble` for the grid, special-stitch models expanded into lines; `looksLikeXsd` sniffs the signature),
+  `importXsd.ts` (→ `Pattern`, colours through `resolveCode` from `oxs/importOxs.ts`), `threadBrands.ts` (brand ids).
+  Editor: `readPatternFile` sniffs the bytes before reading text. Tests build tiny `.xsd` files byte by byte
+  (`importXsd.test.ts`); real files only in `tests/fixtures/private` (skipped without them).
+
 ## Server level (2026-11-16)
 
 `src/server/` is server-only code, imported only by the API routes in `src/app/api/` (eslint level `server`: core +

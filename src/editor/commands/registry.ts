@@ -88,10 +88,10 @@ export const COMMANDS: readonly Command[] = [
   { id: "file.exportChartPdf", run: (ed) => exportChartPdf(ed) },
   // the work file: what it is — and that the .oxs is another thing — said before it's saved (SPEC §15.45)
   { id: "file.chooseFile", run: (ed) => ed.openDialog({ type: "fileChoice" }) },
-  { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird,.oxs,.json,.xml"); if (f) await ed.commands.run("file.load", f); } },
+  { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird,.oxs,.xsd,.json,.xml"); if (f) await ed.commands.run("file.load", f); } },
   { id: "file.load", run: (ed, f) => loadFile(ed, f as File), destructive: "import", replacesPattern: true },
   // New ▸ From an .oxs file… / From a PDF chart… (SPEC §15.46): the PDF one says first what it is — and isn't
-  { id: "file.newFromOxs", run: async (ed) => { const f = await pickFile(".oxs"); if (f) await ed.commands.run("file.load", f); } },
+  { id: "file.newFromOxs", run: async (ed) => { const f = await pickFile(".oxs,.xsd"); if (f) await ed.commands.run("file.load", f); } },
   { id: "file.newFromPdf", run: (ed) => ed.openDialog({ type: "pdfPatternIntro" }) },
   { id: "file.pickPdfPattern", run: async (ed) => { const f = await pickFile(".pdf,application/pdf"); if (f) await ed.commands.run("file.loadPdf", f); } },
   { id: "file.loadPdf", run: (ed, f) => loadPdfPattern(ed, f as File), destructive: "import", replacesPattern: true },

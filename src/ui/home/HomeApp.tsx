@@ -257,7 +257,7 @@ function useStarts(lib: Library) {
     },
     pdf: () => setAsking("pdf"),
     oxs: async () => {
-      const f = await pickFile(".oxs");
+      const f = await pickFile(".oxs,.xsd");
       if (!f) return;
       requestStart({ kind: "file", file: f });
       router.push(EDITOR);
@@ -269,7 +269,7 @@ function useStarts(lib: Library) {
       router.push(EDITOR);
     },
     file: async () => {
-      const f = await pickFile(".xbird,.oxs,.json,.xml");
+      const f = await pickFile(".xbird,.oxs,.xsd,.json,.xml");
       if (!f) return;
       requestStart({ kind: "file", file: f });
       router.push(EDITOR);

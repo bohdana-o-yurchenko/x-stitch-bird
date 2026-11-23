@@ -55,6 +55,33 @@ Source code: <https://github.com/bohdana-o-yurchenko/x-stitch-bird> — linked f
 - **Mill Hill** bead codes, names and package counts — from Mill Hill's published bead inventory and DMC conversion
   chart; Treasures colours read off the maker's product photos.
 
+### Pattern Maker `.xsd` format
+- **Embroiderly** — Copyright Nazar Antoniuk and contributors (https://github.com/embroidery-space/embroiderly),
+  source code under the GNU General Public License, version 3 or (at your option) any later version. Ported from its
+  XSD parser (`crates/embroiderly-parsers/src/pmaker/xsd.rs`, commit `38b5f39`) and brand list
+  (`resources/thread_brands.txt`): `src/core/formats/xsd/readXsd.ts` and `threadBrands.ts`. Combined with this
+  AGPL program under section 13 of both licences; those two files stay under GPL-3.0-or-later.
+- **xsp-specs** — the format description `pmaker/patterns/xsd.hexpat` (https://github.com/embroidery-space/xsp-specs),
+  under the MIT License:
+
+  > Copyright (c) 2024-2026 Nazar Antoniuk
+  >
+  > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+  > documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+  > the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+  > to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+  >
+  > The above copyright notice and this permission notice shall be included in all copies or substantial portions
+  > of the Software.
+  >
+  > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+  > THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  > AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+  > CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  > IN THE SOFTWARE.
+- No Pattern Maker file or chart is in this repository: tests build their own tiny `.xsd` files; real ones stay in
+  the ignored `tests/fixtures/private`.
+
 ### Libraries
 Installed from npm under their own licences (MIT, Apache-2.0, BSD, ISC, and LGPL-3.0 for the image library used by
 the build) — `pnpm licenses list` shows each. Among them:
@@ -62,6 +89,6 @@ the build) — `pnpm licenses list` shows each. Among them:
   Apache License 2.0. Draws the pages of PDFs added as references; its worker is served with the app.
 
 ## Trademarks
-DMC, Anchor, Madeira, Mill Hill, Kreinik, Pattern Keeper and the other brand and product names are trademarks of
+DMC, Anchor, Madeira, Mill Hill, Kreinik, Pattern Keeper, Pattern Maker and the other brand and product names are trademarks of
 their owners. Thread codes and names identify the makers' products; on-screen colours are approximations.
 пташечка is not affiliated with or endorsed by any of them.

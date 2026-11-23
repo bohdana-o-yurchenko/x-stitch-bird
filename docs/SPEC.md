@@ -1699,8 +1699,8 @@ account can't be reached.
 
 ### 15.27 Importing other apps' patterns: Saga, Pattern Maker, PCStitch — backlog
 Rule: other apps' files are **imported only, never written**; out goes .xbird or OXS (open, documented). Built: OXS
-import (§15.42, New ▸ From an .oxs file) and other apps' PDF charts (§15.46–15.48). The rest, ranked 2026-11-18 —
-Pattern Maker `.xsd` (B11), SVG chart export (B10), PCStitch `.pat` (B22), `.saga` (B28) — is in BACKLOG.
+import (§15.42), Pattern Maker `.xsd` import (§15.56) and other apps' PDF charts (§15.46–15.48). The rest, ranked
+2026-11-18 — SVG chart export (B10), PCStitch `.pat` (B22), `.saga` (B28) — is in BACKLOG.
 
 ### 15.28 Thread brands per pattern; your own threads (decided 2026-11-17)
 **Brands** (built): a pattern has thread brands, by name (`Pattern.brands`, optional in the file — absent means DMC;
@@ -2312,6 +2312,40 @@ lost, and it may be minutes out of date.
   one table: feature (its argument in accent colour), clicks, shortcuts, total, and a bar of the total whose darker
   start is the shortcuts' share. Any column sorts (total, most first, by default). One request per range of days;
   who and search work on what was loaded.
+
+### 15.56 Pattern Maker `.xsd` import (2026-11-23)
+Pattern Maker for Cross Stitch (HobbyWare, v4) saves `.xsd`: binary, no published specification, the company gone.
+**Import only** — `.xsd` is never written (§15.12); out goes .xbird or OXS.
+- **Where**: New ▸ *From an .oxs or .xsd file…*, Open work file, My patterns' New, and drag & drop. Told apart by its
+  first two bytes (`10 05`), not the name — a W3C XML Schema `.xsd` still goes the OXS way and is refused there.
+  Always a new pattern, like an .oxs; colours no brand here has ask the same question (§15.52).
+- **Read** (`core/formats/xsd/readXsd.ts`): size, fabric count and colour, title / author / company / copyright /
+  notes (UTF-8 or Windows-1251), the palette (brand id, number, name, RGB, blends of 2–4, bead flag, strands per stitch
+  kind, the colour's notes), the default strands, the stitch grid (scrambled with a per-file key and run-length packed),
+  halves / quarters / petites, and the lines and points: backstitch, straight stitch, French knot, bead, special stitch.
+- **As a pattern** (`importXsd.ts`):
+
+  | Pattern Maker | here |
+  |---|---|
+  | full cross; petite, quarter | `full`; petite / quarter partials |
+  | half (either way) | `half` / `halfb`; with a quarter of its colour on a free corner: a ¾ |
+  | backstitch, straight stitch | backstitch lines, each with its own strands (two entries when they differ) |
+  | special stitch (Smyrna cross…) | its drawing's lines, as backstitch, with the special strands |
+  | French knot | knot |
+  | bead in a cell's middle / on a grid point | the cell's bead / a bead between cells (its own key entry) |
+  | brand: DMC, Anchor, Madeira, Dimensions, Mill Hill, Preciosa | the catalogue's colour (`resolveCode`, as for OXS) |
+  | any other brand (Kreinik…) | a colour of one's own under Pattern Maker's brand name |
+  | blend | a blend, each part with its strands |
+  | title, author, company, copyright, notes | name (else the file's name), designer, publisher, copyright, instructions |
+  | the colours' notes ("ecru half cross st. 2 strands") | lines after the instructions: "00123 Cream: …" |
+  | symbols (Pattern Maker's own fonts), curves, rotation of beads | our symbols; curves counted as simplified |
+
+  Anything that doesn't fit (two halves in one cell, a petite over a half) is left out and counted in the
+  *loaded* toast's "simplified".
+- **Checked** against three real files and their PDFs (crosses + backstitch; blends + petites; Mill Hill beads,
+  straight and Smyrna stitches): every count, colour and strand matched. Older Pattern Maker (v3) files are refused.
+- **Not known yet**: the half's direction bit (no sample had halves), which byte of a special stitch picks its
+  drawing when there are several (every sample had one).
 
 ## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
 The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in

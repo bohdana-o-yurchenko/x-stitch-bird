@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { cellPoint, dragCells, editorState, fileAction, fixture, gridPoint, loadFixture, openAppMenu, openEditor, pretendSignedIn, exportAction, saveFile } from "./helpers";
 
@@ -196,6 +196,17 @@ test("every kind of stitch: backstitch lines, French knots, partial stitches; th
   await page.mouse.move(mid.x, mid.y);
   await page.mouse.click(mid.x, mid.y);
   expect(await segments()).toBe(before + 1);
+});
+
+// someone else's design: on this computer only (tests/fixtures/private)
+test("opens a Pattern Maker .xsd from New ▸ From an .oxs or .xsd file: its crosses and backstitch", async ({ page }) => {
+  test.skip(!existsSync(fixture("private/pattern-maker-rabbits.xsd")), "no private sample");
+  const chooser = page.waitForEvent("filechooser");
+  await fileAction(page, "New", "From an .oxs or .xsd file…");
+  await (await chooser).setFiles(fixture("private/pattern-maker-rabbits.xsd"));
+  await expect(page.getByText(/^Loaded /)).toBeVisible();
+  await expect(page.getByTestId("totals")).toContainText("3,276 full");
+  await expect(page.getByTestId("totals")).toContainText("596 backstitch lines");
 });
 
 test("exports an .oxs that opens again with the same stitches, and a shopping list", async ({ page }) => {

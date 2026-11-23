@@ -10,6 +10,8 @@ import { patternFromAttachments } from "@/core/formats/pdf/patternAttachment";
 import { SYMBOL_INKS, symbolColours } from "@/core/formats/pdf/symbolColours";
 import { TEXT_FONTS } from "@/core/formats/pdf/textFonts";
 import { importOxs, type OxsImportOptions } from "@/core/formats/oxs/importOxs";
+import { looksLikeXsd } from "@/core/formats/xsd/readXsd";
+import { importXsd } from "@/core/formats/xsd/importXsd";
 import type { QuantizeResult } from "@/core/imageToPattern/quantize";
 import { formatLabel, keyLabelData } from "@/core/labels/keyLabel";
 import { addEntry } from "@/core/pattern/keyEntries";
@@ -131,8 +133,13 @@ export async function patternFile(ed: Editor): Promise<PatternFile> {
   return { ...serializePattern(ed.doc), xbird: XBIRD_VERSION, refs: await ed.references.exportFile(), underlay, ...(versions.length ? { versions } : {}), saved: Date.now() };
 }
 
-/** Read a .xbird (or older .json) or .oxs file into a pattern — told apart by content; throws on anything else. */
+/** Read a .xbird (or older .json), .oxs or Pattern Maker .xsd file into a pattern — told apart by content; throws on anything else. */
 export async function readPatternFile(ed: Editor, file: File, opts?: OxsImportOptions): Promise<{ pattern: Pattern; refs: unknown[] | null; underlay: UnderlayData | null; versions: FileVersion[]; simplified: number; unmatched: number; saved?: number; xbird?: boolean }> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (looksLikeXsd(bytes)) {
+    const { pattern, report } = importXsd(bytes, ed.state.symbols, { ...opts, name: file.name.replace(/\.[^.]+$/, "") });
+    return { pattern, refs: null, underlay: null, versions: [], simplified: report.simplified, unmatched: report.unmatched };
+  }
   const text = await readText(file);
   if (text.startsWith("<")) {
     const { pattern, report } = importOxs(text, ed.state.symbols, opts);

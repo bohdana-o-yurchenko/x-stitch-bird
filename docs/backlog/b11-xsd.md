@@ -1,4 +1,4 @@
-# B11. Pattern Maker `.xsd` — assessment and plan
+# B11. Pattern Maker `.xsd` — assessment and plan (built 2026-11-23: SPEC §15.56)
 
 > Written 2026-11-19 for BACKLOG B11. **Verdict:** importing is feasible, about **M** as the backlog says, and the format
 > is well understood. Writing `.xsd` stays parked: too much of the file is unknown, and it can't be checked without

@@ -35,7 +35,7 @@ const OTHER_BRANDS = [
 const OWN_BRAND = /^([\p{L}][\p{L}\p{N} .&'’-]*?)\s+([\p{L}\p{N}][\p{L}\p{N}.\/-]*)$/u;
 
 /** OXS colour number → library id, or a new custom colour (SPEC §12.2, §15.42). */
-function resolveCode(number: string | undefined, name: string | undefined, color: string | undefined, asBead: boolean, customs: Record<string, CustomColor>, project = false): string {
+export function resolveCode(number: string | undefined, name: string | undefined, color: string | undefined, asBead: boolean, customs: Record<string, CustomColor>, project = false): string {
   const num = (number ?? "").trim();
   // another brand, named in the number ("Anchor 403", "ANC-403") or the name ("Madeira Black")
   const other = OTHER_BRANDS.find((b) => b.re.test(num) || b.re.test((name ?? "").trim()));

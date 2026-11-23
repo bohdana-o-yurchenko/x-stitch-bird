@@ -21,7 +21,7 @@ DONE 14) beads with floss in between the crossess. right now dont get read by ap
 DONE 9) proper landing!! - with a central button 'go to editor'
 19) (question answered 2026-11-23: Vercel custom events need Pro; not built yet) треба збирати статистику про те, хто які кнопки нажимає та якими шорткатами користується! щоб переробити і те і те
 
-14) + 1 feature : XSD import and probably export. we are free to reverse engineer it. noone goona sue
+DONE 14) + 1 feature : XSD import (SPEC §15.56; export stays out of scope). we are free to reverse engineer it. noone goona sue
 
 12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
 13) add 'similar' colors of the same brand AND translations to other brands 
@@ -68,7 +68,6 @@ DONE 4) when i have a bead key on and move the mouse OFF the canvas and click - 
 | B8 | More chart checks: backstitch, knots, beads, unused key entries | S–M | none |
 | B9 | More sections on the account page | S–M | per section |
 | B10 | SVG chart export | M | none |
-| B11 | Pattern Maker `.xsd` import | M | none |
 | B12 | Autofill on colour-block charts (no symbols) | M | none |
 | B13 | Brand tools: convert the key, equivalents, discontinued DMC | M | none |
 | B14 | Proofread tracking ("mark region as proofed") | M | optional field |
@@ -88,7 +87,7 @@ DONE 4) when i have a bead key on and move the mouse OFF the canvas and click - 
 | B28 | `.saga` import (Cross Stitch Saga) | ? | none |
 
 **Suggested order** (value for the effort): B2, B3, B4 together (one "fabric & shopping" release) → B1 (bug), B5 →
-B11, B10 (§15.27's ranking) → B8 → B21 → B24 → B27.
+B10 (§15.27's ranking) → B8 → B21 → B24 → B27.
 
 ---
 
@@ -185,15 +184,6 @@ There is one section, **Account**. Possible ones:
 A vector chart, sharp at any size: the same drawing as the PNG chart images (colour / colour + symbols / symbols),
 the symbols as paths (they exist for the PDF). Pattern ▾ › Export › Chart images. One file per view.
 
-### B11. Pattern Maker `.xsd` import (§15.27, ranked 1st) — M
-The most used commercial format, common in older purchased charts and what SAGA converters produce. Binary, but
-worked out by open-source projects (Embroiderly reads it — GPL-3.0-or-later; KXStitch doesn't). **Import only, never
-write** (exporting `.xsd` stays parked: proprietary, partly unknown). Format, mapping and plan:
-[backlog/b11-xsd.md](backlog/b11-xsd.md).
-- Real sample files for tests (other people's designs stay in `tests/fixtures/private`, not committed).
-- What we can't represent is simplified and reported (`toasts.loadedReport`), as with OXS.
-- New ▸ From another app's file…, and the Open work file picker / drag & drop.
-
 ### B12. Autofill on colour-block charts — M
 Autofill (§15.11) matches printed symbols. Charts without symbols (colour blocks) could use each cell's mean
 colour: matched against the colour of the examples given for each key entry, with the same "sure / unsure" rule.
@@ -253,8 +243,8 @@ Today the installed app still needs the internet to open. Needed:
 Stored data: browser cache only. Saving offline already works (§15.33, §15.34).
 
 ### B22. PCStitch `.pat` import (§15.27, ranked 3rd) — M–L
-Older and needs more reverse engineering than `.xsd` (KXStitch reads it too). Same rules as B11: import only, real
-samples, simplified and reported.
+Older and needs more reverse engineering than `.xsd` (KXStitch reads it too). Same rules as the `.xsd` import (§15.56): import
+only, real samples, simplified and reported.
 
 ### B23. Other apps' PDF charts, further (§15.46–15.48) — M–L
 Read today: Pattern Maker, FlossCross, this app's own older PDFs — whole crosses, beads and backstitch.

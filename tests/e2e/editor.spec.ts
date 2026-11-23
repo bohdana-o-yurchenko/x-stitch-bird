@@ -897,7 +897,7 @@ test("the key: the PDF stays where it's put — another symbol picked, the Chart
 
 test("New ▸ has a blank pattern, a photo, an .oxs and a PDF chart; My patterns' From a PDF chart… opens on the same explanation (SPEC §15.46)", async ({ page }) => {
   await fileAction(page, "New");
-  await expect(page.getByRole("menuitem")).toContainText(["Blank pattern…", "From a photo…", "From an .oxs file…", "From a PDF chart…"]);
+  await expect(page.getByRole("menuitem")).toContainText(["Blank pattern…", "From a photo…", "From an .oxs or .xsd file…", "From a PDF chart…"]);
   await page.keyboard.press("Escape");
   // nothing worked on here yet (as from My patterns): an empty pattern behind it, not the demo's heart. The draft
   // cleared away from the editor (leaving, it would save one)
