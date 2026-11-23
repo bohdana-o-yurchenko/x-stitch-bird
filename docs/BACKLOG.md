@@ -30,6 +30,15 @@ DONE 10) replace the email in all the docs. and remove my name new email is : pt
 10) lone crosses must have a super lone crosses mode !!
 11) export of bead + floss between the crossess must be exported as bead. not as backstitch 
 12) user guides and probably an AI assistant that exaplains how to do one or another 
+13) eraser doesn't properly highlight the beads to be erased. eraser erases both bead and aligned cross in neighbour cell (use picker behaviour as reference)
+14) beads with floss in between the crossess. right now dont get read by app at all.  but only ONE of them. the other one got displayed just right .... wtf
+15) in icons popup the scroll panel hovers over the right most column. make it super thin
+16) duplicate button for custom flos!!! 
+17) 'icon' for backstitch is actually compound. and it still cannot be identical. but the type alone can be identical. the combination of type and color = not 
+18) make sure all the chortcuts work on windows AND the hints show the correct keys 
+19) треба збирати статистику про те, хто які кнопки нажимає та якими шорткатами користується! щоб переробити і те і те 
+20) треба шорткати для розміру пензля!! 
+21) шорткати мають працювати і для укр розкладки!!! 
 
 ## Overview, by effort
 
