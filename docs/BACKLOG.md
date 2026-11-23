@@ -23,18 +23,17 @@ DONE 19) (question answered 2026-11-23: Vercel custom events need Pro; not built
 
 DONE 14) + 1 feature : XSD import (SPEC §15.56; export stays out of scope). we are free to reverse engineer it. noone goona sue
 
-12) fix the different 'new from' dialogs. now the behavior is inconsistent 
+DONE 12) fix the different 'new from' dialogs. now the behavior is inconsistent 
 12) user guides and probably an AI assistant that exaplains how to do one or another
 
 13) improve the expor to pdf :
 14) the infrmation of the author and name of design should be on every page. also instructions must be exported 
+15) also improve the export to pdf for print. maybe add users the selection of what options they want??? add a preview of the resulting doc??? 
 
 15) the 'replace in selection' dialog should have proper dropwowned that look the same as the original key 
 
 12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
 13) add 'similar' colors of the same brand AND translations to other brands. maybe come up with what usually is displayed there as well 
-
-
 
 
 11) intoduce more icons. match with pattern maker. fix the export oxs so it displays the icons??? 

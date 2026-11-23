@@ -1627,7 +1627,7 @@
     },
     "files": {
       "title": "The files you need",
-      "text": "Opens PDF charts and .oxs files. Exports .oxs for your favourite embroidery app, a PDF for Pattern Keeper, and a chart to print."
+      "text": "Opens PDF charts, .oxs files and Pattern Maker .xsd files (import only — .xsd isn’t exported). Exports .oxs for your favourite embroidery app, a PDF for Pattern Keeper, and a chart to print."
     },
     "check": {
       "title": "Not sure your app reads .oxs? Check it",
