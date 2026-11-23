@@ -1139,24 +1139,26 @@ test("finds symbols in one 10 × 10 block of the photo behind the chart, and fil
   expect(await editorState<number>(page, "(ed) => Object.keys(ed.doc.samples).length")).toBe(2);
 });
 
-test("a backstitch has its own line colour for the Symbols view and the print PDF: black, a vibrant one, or any", async ({ page }) => {
+test("a backstitch has its own line colour for the Symbols view and the print PDF: black or a vibrant one", async ({ page }) => {
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   const form = page.getByTestId("key-form");
   await form.getByRole("radio", { name: "Backstitch" }).click();
   const ink = form.getByTestId("line-ink");
-  await expect(ink.getByRole("combobox", { name: "Line colour" })).toHaveValue("black");
-  await ink.getByRole("combobox", { name: "Line colour" }).selectOption({ label: "Red" });
+  // the demo has a solid black line: a new line is solid in the next colour (SPEC §2.5)
+  await expect(ink.getByRole("combobox", { name: "Line colour" })).toHaveValue("red");
+  await ink.getByRole("combobox", { name: "Line colour" }).selectOption({ label: "Blue" });
   await form.getByRole("button", { name: "Add to key", exact: true }).click();
   const added = () => editorState<string | undefined>(page, "(ed) => ed.doc.key[ed.doc.key.length - 1].ink");
-  expect(await added()).toBe("#E6194B");
-  // your own colour, when editing
+  expect(await added()).toBe("#3A5BD9");
+  // changed when editing; the sample beside the list only shows the colour
   const row = page.locator("[data-entry]").last();
   await row.hover();
   await row.getByRole("button", { name: "Edit entry" }).click();
-  await form.getByTestId("line-ink").getByLabel("Your own colour").fill("#123456");
-  await expect(form.getByTestId("line-ink").getByRole("combobox")).toHaveValue("own");
+  await expect(form.getByTestId("line-ink").locator("input")).toHaveCount(0);
+  await form.getByTestId("line-ink").getByRole("combobox").selectOption({ label: "Green" });
+  await expect(form.getByTestId("line-ink-swatch")).toHaveCSS("background-color", "rgb(46, 158, 68)");
   await form.getByRole("button", { name: "Save changes" }).click();
-  expect(await added()).toBe("#123456");
+  expect(await added()).toBe("#2E9E44");
   // only backstitch has it
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   await expect(form.getByTestId("line-ink")).toHaveCount(0);
@@ -1399,12 +1401,43 @@ test("thread brands: chosen for a new pattern, one tab each in the picker, your 
   await page.getByTestId("thread-form").getByLabel("Name").fill("Pearl gold");
   await page.getByTestId("thread-form").getByRole("button", { name: "Save" }).click();
   await expect(page.getByTestId("key-form")).toContainText(/Kreinik 032\s*Pearl gold/);
+  // duplicated: the same brand, name and colour; a code of its own
+  await page.locator("[data-id^='custom:']").hover();
+  await page.getByRole("button", { name: "Duplicate 032" }).click();
+  await expect(page.getByTestId("thread-form").getByLabel("Name")).toHaveValue("Pearl gold");
+  await expect(page.getByTestId("thread-form").getByLabel("Code")).toHaveValue("");
+  await page.getByTestId("thread-form").getByLabel("Code").fill("033");
+  await page.getByTestId("thread-form").getByRole("button", { name: "Add" }).click();
+  await expect(page.locator("[data-id^='custom:']")).toHaveCount(2);
+  await expect(page.getByTestId("key-form")).toContainText(/Kreinik 033\s*Pearl gold/);
+  await page.locator("[data-id^='custom:']", { hasText: "032" }).click();
   // Kreinik is used now: it can't be removed; DMC can
   await expect(tabs.getByRole("button", { name: /Kreinik is used by the key/ })).toBeDisabled();
   await tabs.getByRole("button", { name: "Remove DMC from this pattern" }).click();
   await expect(tabs.getByRole("tab")).toHaveText(["Anchor", "Madeira", "Dimensions", "Kreinik"]);
   await page.getByTestId("key-form").getByRole("button", { name: "Close" }).click();
   await expect(page.locator("[data-entry]")).toContainText("Pearl gold");
+});
+
+test("a built-in floss or bead can be duplicated as one's own: same brand, name and colour, a new code", async ({ page }) => {
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form");
+  await page.locator("[data-id='dmc:310']").hover();
+  await page.getByRole("button", { name: "Duplicate 310" }).click();
+  const tf = page.getByTestId("thread-form");
+  await expect(tf.getByLabel("Name")).toHaveValue("Black");
+  await expect(tf.getByLabel("Code")).toHaveValue("");
+  await tf.getByLabel("Code").fill("310b");
+  await tf.getByRole("button", { name: "Add" }).click();
+  await expect(form).toContainText(/310b\s*Black/);
+  // a Mill Hill bead the same way
+  await form.getByRole("radio", { name: "Bead", exact: true }).click();
+  await page.locator("[data-id='bead:00557']").hover();
+  await page.getByRole("button", { name: "Duplicate 00557" }).click();
+  await expect(page.getByTestId("thread-form").getByLabel("Name")).toHaveValue("Old Gold");
+  await page.getByTestId("thread-form").getByLabel("Code").fill("557x");
+  await page.getByTestId("thread-form").getByRole("button", { name: "Add" }).click();
+  await expect(form).toContainText(/557x\s*Old Gold/);
 });
 
 test("bead brands: Mill Hill and Preciosa as tabs, a finish filter, your own bead brand gets its own tab", async ({ page }) => {

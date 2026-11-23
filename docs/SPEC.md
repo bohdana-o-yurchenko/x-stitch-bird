@@ -175,8 +175,18 @@ unused one is auto-assigned; once all 20 are taken they repeat):
 solid · dashed · long dash · dotted · dash-dot · dash-dot-dot · long-short · sparse dots · short dash ·
 dash-dash-dot · double · thick-thin · ticks · wave · zigzag · scallop · circles · squares · chevrons · crosses.
 - **Line colour** (2026-11-16, backstitch only): `ink` on the entry, `#RRGGBB`; absent = black. The key form
-  offers Black, Red, Green, Blue, Orange, Purple (the PDF's line colours) and the user's own. The Colour and Both
+  offers Black, Red, Green, Blue, Orange, Purple (the PDF's line colours); *since 2026-11-23* no colour of one's own —
+  the sample beside the list only shows the colour (an own colour from an older file is kept and shown as "own" until
+  changed). The Colour and Both
   views draw the line in its floss colour; the Symbols view and the PDF chart to print in its line colour.
+- **Style and colour together are the line's symbol** (2026-11-23): two backstitch entries may share a line style
+  when their line colours differ; the same style **in the same line colour** stays unique like any symbol (picking a
+  taken one swaps, as in §8). **A new line** in the key form goes through a style's colours first: solid black,
+  solid red, green, blue, orange, purple (the six preset colours), then dashed black, and so on. A style is dimmed
+  only once all six preset colours have it. Picking a style for a new line whose colour wasn't picked by hand gives
+  it that style's first free colour; changing the colour of a new line whose style wasn't picked by hand moves it to
+  the first style free in that colour. Lines added by imports get the first style free in their colour. Older files
+  are left as they are.
 - The two lines of dots keep their dots close, and the dots are bigger than the line is wide (2026-11-16): far
   apart, small dots stopped reading as one line. Dotted: dots almost touching; sparse dots: a little looser.
   Same in the editor and the PDFs.
@@ -407,7 +417,7 @@ All painting requires an active key entry; otherwise toast:
 | Rectangle (`rect`) | R | Drag; outline of the bounding box. |
 | Filled rect (`frect`) | Shift+R | Drag; filled box. |
 | Fill (`fill`) | F | 4-connected flood fill on the active entry's layer (beads layer for bead entries, else stitches), replacing cells equal to the start value. Not available for backstitch (toast "Fill doesn’t apply to backstitch — use draw or line"). No-op if target already equals the active entry. |
-| Eraser (`eraser`) | E | Two modes, chosen by where the press starts. **On a backstitch line** — pointer within `backR = clamp(6 / zoom, 0.2, 0.45)` grid units of a segment (or of its mirror image when Mirror is on): while hovering, those segments are highlighted with a thick translucent accent stroke (`rgba(181,69,47,.5)`, width `max(7, 0.32z)`) and the cell cursor is hidden; press/drag deletes **only backstitch** within `backR` of the pointer — crosses and beads are untouched. **Anywhere else**: clears **both** stitch and bead layers within brush, and also deletes backstitch segments whose distance to the pointer (grid units) ≤ `0.3 × max(1, brush/2)`. Either way one stroke = one undo step. |
+| Eraser (`eraser`) | E | Two modes, chosen by where the press starts. **On a backstitch line** — pointer within `backR = clamp(6 / zoom, 0.2, 0.45)` grid units of a segment (or of its mirror image when Mirror is on): while hovering, those segments are highlighted with a thick translucent accent stroke (`rgba(181,69,47,.5)`, width `max(7, 0.32z)`) and the cell cursor is hidden; press/drag deletes **only backstitch** within `backR` of the pointer — crosses and beads are untouched. **Anywhere else**: clears **both** stitch and bead layers within brush, and also deletes backstitch segments whose distance to the pointer (grid units) ≤ `0.3 × max(1, brush/2)`. Either way one stroke = one undo step. *New app (2026-11-23):* a third mode, checked first like the picker's order — **on a knot or a bead between cells** (within the backstitch radius, at least the picker's 0.25): hovering outlines that knot / bead (no cell cursor) and the stroke deletes only knots and beads between cells; the crosses in the cells around the point stay. |
 | Picker (`picker`) | I, or hold Alt/⌥ | Selects the entry under the pointer: backstitch within 0.25 units (topmost/last) wins, then bead, then stitch. Toast "Picked …" or "Nothing here to pick". |
 | Pan (`pan`) | H / hold Space | Drag to pan. |
 
@@ -436,7 +446,9 @@ Flood fill also respects occupancy. Toggling shows a toast explaining the mode.
 
 ### 6.3 Backstitch drawing
 When the active entry is a backstitch and the tool is pencil/line/rect/frect:
-- Points snap to the nearest **half** grid unit, clamped to `[0,w]×[0,h]`.
+- Points snap to the nearest **half** grid unit, clamped to `[0,w]×[0,h]`. *New app (2026-11-23):* a press further
+  off the chart than the edge's own snapping reach (¼ cell) adds nothing — no line and no chain start clamped onto
+  the edge; the same for knots and beads between cells (a drag out stops at the last point on the chart).
 - First click starts a chain. Each subsequent click adds a segment from the chain end and moves the end.
 - Press-drag-release from the chain end also adds one segment (drag = one segment).
 - Chain ends on: Esc, double-click, right-click, tool switch, key entry change, undo.
@@ -458,6 +470,17 @@ re-render key panel and autosave.
 `Esc` (end chain) · hold `Alt/⌥` (temporary picker) · `K` (toggle side panel) · `O` (override) · `1`–`9` (select the n-th non-null key entry) ·
 `P`/`B` pencil · `L` line · `R` rect · `Shift+R` filled rect · `F` fill · `E` eraser · `I` picker · `H` pan ·
 `+`/`=` zoom in · `-` zoom out · `0` fit. Window blur releases Space.
+
+*New app (2026-11-23):* **every keyboard layout.** A key that types a letter of another alphabet (Ukrainian: З where
+P is, Я where Z is) is read by its physical key, so P, E, Ctrl/⌘+Z … work without switching to English; a Latin
+letter is taken as typed (AZERTY keeps its own letters). **Each computer's key names**: tooltips, hints, the guide,
+the "Drawing with" card and the ⌨ panel name the keys as that keyboard shows them — ⌘ ⌥ ⇧ on a Mac (⌘Z, ⌘⇧Z),
+Ctrl / Alt / Shift elsewhere (Ctrl+Z, Ctrl+Y) — never both at once (messages use `{undo}`, `{redo}`, `{alt}`,
+`{copy}`, filled by `keyNames` in `editor/shortcuts/keymap.ts`).
+**Brush size from the keyboard** (2026-11-23): **Shift+1 … Shift+5** set the brush size (by the digit row's physical
+keys, so the symbol Shift types there doesn't matter); from a tool without a brush it switches to Draw, like the size
+buttons (command `draw.pickBrush`). The size buttons' tooltips and the ⌨ panel show the keys. 1–9 still pick key
+entries.
 
 ---
 
@@ -1042,6 +1065,13 @@ browser (`stitchwork.checks`):
   near the middle (within 5 cells, on a grid line or through a cell's middle) where most mirrored pairs of cells
   match. If 90–99.9% match, the pairs that don't are reported (both cells); a half cross matches its mirror image
   (╱ ↔ ╲), as in §15.3. Designs that are clearly not symmetric (below 90%) report nothing.
+  *Backstitch too (2026-11-23):* each line is checked against its mirror image (same place mirrored, same thread);
+  a mirrored pair of lines counts as one pair, a line on the axis as its own pair. A line without its twin is
+  reported as the cell at its middle (a line on a grid line: the cell on its side towards the axis) ↔ that cell's
+  mirror.
+  *Beads and knots too (2026-11-23):* beads in cells are compared cell by cell like crosses (a pair of cells with a
+  bead on either side is one pair); beads between cells and French knots like backstitch — the same entry at the
+  mirrored point; one without its twin is reported as the cell at that point ↔ its mirror.
 
 **Run checks** (disabled until a check is chosen) lists what was found.
 
@@ -1057,7 +1087,7 @@ browser (`stitchwork.checks`):
   re-run behind your back.
 - Nothing is stored in the pattern or its file.
 
-**Not checked (yet)**: backstitch, knots, beads; unused or rarely used key entries — BACKLOG B8.
+**Not checked (yet)**: partial stitches in near symmetry; knots and beads in the other checks; unused or rarely used key entries — BACKLOG B8.
 
 ### 15.5 Mark cell as ambiguous (implemented)
 Hard requirement: **no footprint when unused**. There is no toolbar button, no panel, no prompt, and no change to
@@ -1678,6 +1708,10 @@ The Threads page: brands on the left (with counts; ✎ rename and 🗑 delete fo
 one), your threads and beads as swatches on the right; **+ Thread**, **+ Bead**, a click changes one (brand too) or
 deletes it (asks). Signed out the page explains and invites to sign in. In the editor, signed in, the picker lists
 the inventory's threads in their brand's tab, its brands under **+ Brand**; a picked one is copied into the pattern.
+**Duplicate** (2026-11-23): any thread or bead in the picker — built-in (DMC, Anchor, Mill Hill, Preciosa …) or your
+own — has ⧉ on its row (shown while pointing at it); on the Threads / Beads pages each of yours has ⧉ in its corner and
+**Duplicate** in its dialog. It opens the add form for one of your own with the same brand, name and colour and an
+empty code to type (in a numbered organizer: the next free number); nothing is added until it's saved.
 
 ### 15.29 Free software: AGPL-3.0-or-later (2026-11-17)
 пташечка is licensed under the GNU Affero General Public License, version 3 or later (`LICENSE`; copyright Bohdana

@@ -14,7 +14,7 @@ import { STITCH_TYPES } from "@/core/stitches/registry";
 import type { StitchTypeId } from "@/core/pattern/types";
 import { LINE_INKS } from "@/core/symbols/lineInks";
 import { isLineStyle, symbolText } from "@/core/symbols/lineStyles";
-import { symbolsFor } from "@/core/pattern/keyEntries";
+import { freeLineInks, fullLineStyles, nextSymbol, symbolsFor, usedSymbols } from "@/core/pattern/keyEntries";
 import { drawLineStyleSample } from "@/render/keyIcon";
 import { commitEntry, draftColour, draftEntry, draftFor, draftForDuplicate, draftSymbol, duplicateOf, resolveDraftSource, usageCount, usesBlend, type KeyDraft } from "@/editor/actions/keyEntries";
 import { KeyIcon, Swatch, cx, ui } from "../../common/widgets";
@@ -148,8 +148,8 @@ interface ColourLine {
 }
 
 /**
- * A backstitch's colour on the Symbols view and the PDF chart to print: black, one of five vibrant colours, or the
- * user's own (SPEC §2.5).
+ * A backstitch's colour on the Symbols view and the PDF chart to print: black or one of five vibrant colours, with a
+ * sample beside it (not a picker). A colour of one's own from an older file is shown as "own" until changed (SPEC §2.5).
  */
 function LineInkPicker({ value, onPick }: { value: string; onPick: (hex: string) => void }) {
   const t = useTranslations("keyDialog");
@@ -161,7 +161,7 @@ function LineInkPicker({ value, onPick }: { value: string; onPick: (hex: string)
         {LINE_INKS.map((c) => <option key={c.id} value={c.id}>{t(`lineInks.${c.id}`)}</option>)}
         {!preset && <option value="own">{t("lineInks.own")}</option>}
       </select>
-      <input type="color" className={s.inkWell} aria-label={t("lineInkOwn")} title={t("lineInkOwn")} value={value.toLowerCase()} onChange={(e) => onPick(e.target.value.toUpperCase())} />
+      <span className={s.inkWell} style={{ background: value }} data-testid="line-ink-swatch" aria-hidden="true" />
     </div>
   );
 }
@@ -188,12 +188,25 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
   };
   const kind = entryKind(d.t);
   const close = () => ed.closeKeyForm();
+  // a new backstitch whose style wasn't picked by hand takes the first style free in its new line colour
+  const symPicked = useRef(false);
+  const inkPicked = useRef(false);
+  const setInk = (ink: string) => {
+    inkPicked.current = true;
+    update(!edit && !symPicked.current ? { ink, sym: nextSymbol(ed.doc, symbols, undefined, "back", ink) } : { ink });
+  };
+  // a new line whose colour wasn't picked by hand: a chosen style comes in its first free colour
+  const pickSymbol = (sym: string) => {
+    symPicked.current = true;
+    const ink = d.t === "back" && !edit && !inkPicked.current ? freeLineInks(ed.doc, sym)[0] : undefined;
+    update(ink ? { sym, ink } : { sym });
+  };
 
   const setType = (t2: KeyDraft["t"]) => {
     if (before && usedOnChart && entryKind(t2).group !== entryKind(before.t).group) return ed.toast("keyDialog.typeLocked");
     const n = !before && entryKind(t2).defaultStrands ? (t2 === "back" ? 1 : d.n === 1 && d.t === "back" ? ed.doc.strands || 2 : d.n) : d.n;
     // only beads (plain or with floss) can sit on a grid point
-    update({ t: t2, n, sym: draftSymbol(ed, d, t2, edit), ...(t2 !== "combo" && t2 !== "bead" && d.st === "point" ? { st: "full" as const } : {}) });
+    update({ t: t2, n, ...draftSymbol(ed, d, t2, edit), ...(t2 !== "combo" && t2 !== "bead" && d.st === "point" ? { st: "full" as const } : {}) });
     setLine(0);
   };
 
@@ -245,7 +258,8 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
   // floss + bead may also be sewn on a grid point, like a French knot
   const stitchChoices: StitchTypeId[] = [...STITCH_TYPES.map((x) => x.id), ...(d.t === "combo" ? ["point" as const] : [])];
   const label = colour && src ? formatLabel(labelData({ ...draftEntry(d, src), sym: d.sym }, colour), tr) : null;
-  const used = new Set(ed.doc.key.flatMap((e, i) => (e && i !== edit ? [e.sym] : [])));
+  // a backstitch's symbol is its line style in its line colour: a style is dimmed once every preset colour has it
+  const used = new Set(d.t === "back" ? fullLineStyles(ed.doc, edit) : usedSymbols(ed.doc, edit));
   const dupLabel = dup ? formatLabel(keyLabelData(ed.doc, ed.doc.key[dup]!), tr).title : "";
 
   const okLabel = dup ? (before ? t("saveAnyway") : t("addAnyway")) : before ? t("save") : t("add");
@@ -345,8 +359,8 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
           </div>
         )}
 
-        <SymbolPicker value={d.sym} used={used} symbols={symbolsFor(d.t, symbols)} onPick={(sym) => update({ sym })} />
-        {d.t === "back" && <LineInkPicker value={d.ink} onPick={(ink) => update({ ink })} />}
+        <SymbolPicker value={d.sym} used={used} symbols={symbolsFor(d.t, symbols)} onPick={pickSymbol} />
+        {d.t === "back" && <LineInkPicker value={d.ink} onPick={setInk} />}
 
         <div className={s.preview} data-testid="key-preview">
           {slot && label ? (

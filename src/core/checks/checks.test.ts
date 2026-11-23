@@ -103,6 +103,41 @@ describe("near symmetry", () => {
     expect(findNearSymmetry(random.p)).toEqual([]);
   });
 
+  it("checks backstitch lines against their mirror images too", () => {
+    const rows = ["AB....BA", "ACC..CCA", "AB....BA", "AC....CA", "AB....BA", "ACC..CCA", "AB....BA"];
+    const { p, cell } = drawn(rows);
+    const back = addEntry(p, { t: "back", src: "dmc:310", n: 1 }, ALL_SYMBOLS);
+    const other = addEntry(p, { t: "back", src: "dmc:321", n: 1 }, ALL_SYMBOLS);
+    // a mirrored pair, a line on the axis (its own mirror image), and a line with no twin on the right
+    p.layers.segments.push({ x1: 1, y1: 1, x2: 2, y2: 2, k: back }, { x1: 7, y1: 1, x2: 6, y2: 2, k: back });
+    p.layers.segments.push({ x1: 3, y1: 4, x2: 5, y2: 4, k: back });
+    p.layers.segments.push({ x1: 1, y1: 3, x2: 1, y2: 4, k: back });
+    expect(findNearSymmetry(p).filter((f) => f.axis === "vertical")).toEqual([
+      expect.objectContaining({ cells: [cell(1, 3), cell(6, 3)] }),
+    ]);
+    // a twin of another colour doesn't count as a mirror image
+    p.layers.segments.push({ x1: 7, y1: 3, x2: 7, y2: 4, k: other });
+    expect(findNearSymmetry(p).filter((f) => f.axis === "vertical").map((f) => f.cells)).toEqual([[cell(1, 3), cell(6, 3)]]);
+    p.layers.segments[p.layers.segments.length - 1]!.k = back;
+    expect(findNearSymmetry(p).filter((f) => f.axis === "vertical")).toEqual([]);
+  });
+
+  it("checks beads in cells, beads between cells and French knots against their mirror images too", () => {
+    const rows = ["AB....BA", "ACC..CCA", "AB....BA", "AC....CA", "AB....BA", "ACC..CCA", "AB....BA"];
+    const { p, cell } = drawn(rows);
+    const gold = addEntry(p, { t: "bead", src: "bead:00557" }, ALL_SYMBOLS);
+    const between = addEntry(p, { t: "bead", src: "bead:00557", st: "point" }, ALL_SYMBOLS);
+    const knot = addEntry(p, { t: "knot", src: "dmc:310", n: 2 }, ALL_SYMBOLS);
+    p.layers.beads[cell(3, 1)] = gold;
+    p.layers.beads[cell(4, 1)] = gold;
+    p.layers.knots.push({ x: 2, y: 3, k: between }, { x: 6, y: 3, k: between }, { x: 4, y: 6, k: knot });
+    expect(findNearSymmetry(p).filter((f) => f.axis === "vertical")).toEqual([]);
+    // a bead in a cell without its twin, and a knot without its twin
+    p.layers.beads[cell(2, 4)] = gold;
+    p.layers.knots.push({ x: 1.5, y: 5.5, k: knot });
+    expect(findNearSymmetry(p).filter((f) => f.axis === "vertical").map((f) => f.cells)).toEqual([[cell(2, 4), cell(5, 4)], [cell(1, 5), cell(6, 5)]]);
+  });
+
   it("runs only the checks that are switched on, in the panel's order", () => {
     const { p } = drawn(["AAAA", "A.AA", "AABA", "AAAA"]);
     expect(runChecks(p, DEFAULT_CHECKS)).toEqual([]);

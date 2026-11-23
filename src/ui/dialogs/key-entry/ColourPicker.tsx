@@ -14,7 +14,7 @@ import { ThreadForm, type ThreadFields } from "../../threads/ThreadForm";
 import s from "./keyEntry.module.css";
 
 /** The thread form: closed, adding one, or changing your own thread `id`. */
-type FormState = { mode: "closed" } | { mode: "add" } | { mode: "edit"; id: string };
+type FormState = { mode: "closed" } | { mode: "add" } | { mode: "edit"; id: string } | { mode: "copy"; id: string; from: { brand: string; name: string; hex: string } };
 
 /**
  * Searchable list of threads or beads, with your own colours (SPEC §8.1, §15.28). Threads come in one tab per brand of
@@ -121,6 +121,12 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
     setForm({ mode: "closed" });
   };
   const editing = form.mode === "edit" ? doc.customs[form.id] : null;
+  // a copy (of one's own or a catalogue colour): the same brand, name and colour, a code of its own to type (the
+  // organizer's next number)
+  const source = form.mode === "copy" ? form.from : null;
+  const initial = editing ? { brand: editing.brand, code: editing.code, name: editing.name, hex: editing.hex }
+    : source ? { brand: source.brand, code: source.brand === ORGANIZER ? nextOrganizerCode(doc, kind) : "", name: source.name, hex: source.hex }
+    : { brand, code: inOrganizer ? nextOrganizerCode(doc, kind) : "", name: "", hex: "#7A9CC6" };
 
   return (
     <div className={s.picker}>
@@ -196,12 +202,12 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
       {shown.mode !== "closed" && (
         <div data-guide="own-colour">
           <ThreadForm
-            key={shown.mode === "edit" ? shown.id : "add"}
+            key={shown.mode === "edit" || shown.mode === "copy" ? `${shown.mode}:${shown.id}` : "add"}
             kind={kind}
             brands={formBrands}
             fixedBrand={single || inOrganizer}
             check={codeTaken}
-            initial={editing ? { brand: editing.brand, code: editing.code, name: editing.name, hex: editing.hex } : { brand, code: inOrganizer ? nextOrganizerCode(doc, kind) : "", name: "", hex: "#7A9CC6" }}
+            initial={initial}
             saveLabel={shown.mode === "edit" ? t("save") : t("add")}
             onSave={save}
             onCancel={closeForm}
@@ -233,6 +239,18 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
                 ✎
               </button>
             )}
+            <button
+              type="button"
+              className={s.editCustom}
+              title={t("copyCustom", { code: e.code })}
+              aria-label={t("copyCustom", { code: e.code })}
+              onClick={(ev) => {
+                ev.stopPropagation();
+                setForm({ mode: "copy", id: e.id, from: { brand: e.brand, name: e.name, hex: e.hex } });
+              }}
+            >
+              ⧉
+            </button>
           </div>
         ))}
         {!items.length && <p className={ui.hint} style={{ padding: 10 }}>{!query && !catalogue.length ? (inOrganizer ? t("emptyOrganizer") : t(kind === "bead" ? "emptyBeadBrand" : "emptyBrand", { brand: label(brand) })) : t("nothing")}</p>}

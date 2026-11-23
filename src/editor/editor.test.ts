@@ -10,13 +10,13 @@ import { patternFile } from "./actions/importExport";
 import { serializePattern, XBIRD_VERSION } from "@/core/formats/json/serialize";
 import { gridToImage } from "@/core/underlay/underlay";
 import { Editor } from "./createEditor";
-import { shortcutLabel, shortcutLabels } from "./shortcuts/keymap";
+import { keyNames, shortcutLabel, shortcutLabels } from "./shortcuts/keymap";
 import { resolveTool } from "./tools/registry";
 import type { ToolPointer } from "./tools/types";
 
 const at = (x: number, y: number, o: Partial<ToolPointer> = {}): ToolPointer => ({ sx: 0, sy: 0, grid: { x: x + 0.5, y: y + 0.5 }, cell: { x, y }, button: 0, shift: false, alt: false, ...o });
-const key = (k: string, o: Partial<{ shift: boolean; ctrl: boolean; repeat: boolean; inField: boolean }> = {}) => ({
-  key: k, shiftKey: !!o.shift, ctrlKey: !!o.ctrl, metaKey: false, altKey: k === "Alt", repeat: o.repeat, inField: o.inField, preventDefault() {},
+const key = (k: string, o: Partial<{ shift: boolean; ctrl: boolean; repeat: boolean; inField: boolean; code: string }> = {}) => ({
+  key: k, code: o.code, shiftKey: !!o.shift, ctrlKey: !!o.ctrl, metaKey: false, altKey: k === "Alt", repeat: o.repeat, inField: o.inField, preventDefault() {},
 });
 
 let ed: Editor, snaps: Snapshot[], red: number;
@@ -375,6 +375,42 @@ describe("shortcuts", () => {
     expect(resolveTool(ed.state).id).toBe("backstitch");
     ed.store.setState({ momentaryTool: "pan" });
     expect(resolveTool(ed.state).id).toBe("pan");
+  });
+
+  it("labels keys as each computer's keyboard shows them: ⌘ ⌥ ⇧ on a Mac, Ctrl Alt Shift elsewhere", () => {
+    expect(shortcutLabel("tool.select", "filledRect", false)).toBe("Shift+R");
+    expect(keyNames(true)).toEqual({ alt: "⌥", undo: "⌘Z", redo: "⌘⇧Z", copy: "⌘C" });
+    expect(keyNames(false)).toEqual({ alt: "Alt", undo: "Ctrl+Z", redo: "Ctrl+Y", copy: "Ctrl+C" });
+  });
+
+  it("works in a Ukrainian (or any non-Latin) layout: the physical key decides", () => {
+    ed.shortcuts.keyDown(key("к", { code: "KeyR" }));
+    expect(ed.state.tool).toBe("rect");
+    ed.shortcuts.keyDown(key("К", { shift: true, code: "KeyR" }));
+    expect(ed.state.tool).toBe("filledRect");
+    ed.shortcuts.keyDown(key("у", { code: "KeyE" }));
+    expect(ed.state.tool).toBe("eraser");
+    ed.doc.layers.stitches[0] = red;
+    ed.history.transaction("t", () => (ed.doc.layers.stitches[1] = red));
+    ed.shortcuts.keyDown(key("я", { ctrl: true, code: "KeyZ" }));
+    expect(ed.doc.layers.stitches[1]).toBe(0);
+    // a Latin letter is taken as typed (AZERTY's A sits where QWERTY has Q)
+    ed.shortcuts.keyDown(key("p", { code: "KeyR" }));
+    expect(ed.state.tool).toBe("pencil");
+  });
+
+  it("Shift+1…5 sets the brush size (switching to Draw from a tool without a brush); 1–9 still pick key entries", () => {
+    ed.setTool("picker");
+    ed.shortcuts.keyDown(key("#", { shift: true, code: "Digit3" }));
+    expect(ed.state.brush).toBe(3);
+    expect(ed.state.tool).toBe("pencil");
+    ed.setTool("eraser");
+    ed.shortcuts.keyDown(key("%", { shift: true, code: "Digit5" }));
+    expect([ed.state.brush, ed.state.tool]).toEqual([5, "eraser"]);
+    ed.store.setState({ activeEntry: 0 });
+    ed.shortcuts.keyDown(key("1", { code: "Digit1" }));
+    expect([ed.state.activeEntry, ed.state.brush]).toEqual([red, 5]);
+    expect(shortcutLabels("draw.pickBrush", 2, false)).toEqual(["Shift+2"]);
   });
 
   it("tells R from Shift+R and ignores keys while typing", () => {

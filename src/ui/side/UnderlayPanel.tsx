@@ -6,7 +6,7 @@ import type { Rect } from "@/core/pattern/types";
 import { ROTATION_MAX, ROTATION_STEP } from "@/core/underlay/underlay";
 import { Icon } from "../common/Icon";
 import { ConfirmDelete, cx, ui } from "../common/widgets";
-import { useCommand, useEditorState } from "../hooks/editor";
+import { useCommand, useEditorState, useKeyNames } from "../hooks/editor";
 import s from "./side.module.css";
 
 const round = (v: number) => Math.round(v * 100) / 100;
@@ -14,6 +14,7 @@ const round = (v: number) => Math.round(v * 100) / 100;
 /** The chart underlay (SPEC §15.15), in References: its controls — or, when the pattern has none, the way to add one. */
 export function UnderlayPanel({ title }: { title: string }) {
   const t = useTranslations("underlay");
+  const keys = useKeyNames();
   const run = useCommand();
   const u = useEditorState((st) => st.underlay);
   const pageBusy = useEditorState((st) => !!st.underlayPageBusy);
@@ -72,7 +73,7 @@ export function UnderlayPanel({ title }: { title: string }) {
               <button type="button" className={cx(u.tool === "move" && ui.on)} onClick={() => run("underlay.update", { tool: "move" })}>{t("move")}</button>
               <button type="button" className={cx(u.tool === "crop" && ui.on)} onClick={() => run("underlay.update", { tool: "crop" })}>{t("crop")}</button>
             </div>
-            <p className={s.prowNote} style={{ margin: 0 }}>{t("editHint")}</p>
+            <p className={s.prowNote} style={{ margin: 0 }}>{t("editHint", keys)}</p>
           </>
         ) : (
           <p className={s.prowNote} style={{ margin: 0 }}>{t("behindHint")}</p>

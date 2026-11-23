@@ -96,7 +96,7 @@ export class ToolManager {
   leave() {
     this.ed.underlay.hover(null);
     this.ed.setHover(null, 1, false);
-    this.ed.setOverlay({ hoverPoint: null, knotPreview: null, partialPreview: null, eraseHighlight: null, pickerHighlight: null });
+    this.ed.setOverlay({ hoverPoint: null, knotPreview: null, partialPreview: null, eraseHighlight: null, eraseKnots: null, pickerHighlight: null });
   }
 
   /** Esc / tool switch: end chains, drop previews, close open strokes. */
@@ -109,7 +109,7 @@ export class ToolManager {
 
   private showsHoverSquare(): boolean {
     const t = this.resolve();
-    const onLine = (t.id === "eraser" && !!this.ed.state.overlay.eraseHighlight) || (t.id === "picker" && !!this.ed.state.overlay.pickerHighlight);
+    const onLine = (t.id === "eraser" && !!(this.ed.state.overlay.eraseHighlight || this.ed.state.overlay.eraseKnots)) || (t.id === "picker" && !!this.ed.state.overlay.pickerHighlight);
     return t.id !== "pan" && t.id !== "autofill" && t.id !== "backstitch" && t.id !== "knot" && t.id !== "partial" && !onLine && !this.ed.state.floating;
   }
 }

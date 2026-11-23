@@ -151,7 +151,7 @@ describe("the chart canvas", () => {
       preview: { cells: [1, 2, 3], key: t.cross }, partialPreview: { cell: 5, stitch: { kind: "quarter", corner: 0, k: t.cross } }, knotPreview: { point: { x: 2, y: 2 }, key: t.knot },
       chain: { last: { x: 1, y: 1 }, hover: { x: 3, y: 2 }, key: t.back }, hoverPoint: { x: 4.5, y: 4 }, hover: { x: 3, y: 3, size: 2 },
       selection: { mask: new Uint8Array(300).fill(1, 0, 10), bounds: { x: 0, y: 0, w: 10, h: 1 } }, floating, marquee: { x: 1, y: 1, w: 4, h: 3 },
-      eraseHighlight: [{ x1: 0, y1: 0, x2: 5, y2: 0, k: t.back }], flash: { cell: 7, until: Date.now() + 1000 },
+      eraseHighlight: [{ x1: 0, y1: 0, x2: 5, y2: 0, k: t.back }], eraseKnots: [{ x: 2, y: 2, k: t.knot }], flash: { cell: 7, until: Date.now() + 1000 },
       checks: { all: [[1, 2], [30]], current: [1, 2] }, match: { block: { x: 0, y: 0, w: 10, h: 10 }, chosen: true, ghosts: t.p, view: "both" },
     });
     expect(() => t.draw()).not.toThrow();

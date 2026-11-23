@@ -21,7 +21,7 @@ import s from "./threads.module.css";
 /** Built-in brands: your threads and beads can be added to them, but they can't be renamed or deleted. */
 const BUILT_IN = new Set([...BUILT_IN_THREAD_BRANDS, ...Object.keys(BEAD_CATALOGUES)]);
 
-type Editing = { kind: "thread" | "bead"; thread?: CustomColor; brand?: string } | null;
+type Editing = { kind: "thread" | "bead"; thread?: CustomColor; brand?: string; copyOf?: CustomColor } | null;
 
 /** The view and the sort are remembered in this browser, apart for threads and beads. */
 function useChoice<T extends string>(key: string, options: readonly T[], fallback: T) {
@@ -158,7 +158,7 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
               {failed && <p className={ui.warn}>{t("unreachable")}</p>}
               {!threads && !failed && <p className={ui.hint}>{t("loading")}</p>}
               {threads && !mine.length && <p className={ui.hint}>{t(kind === "thread" ? "empty" : "emptyBeads")}</p>}
-              <ThreadList items={shown} view={view} onPick={(c) => setEditing({ kind: c.kind, thread: c })} />
+              <ThreadList items={shown} view={view} onPick={(c) => setEditing({ kind: c.kind, thread: c })} onDuplicate={(c) => setEditing({ kind: c.kind, copyOf: c })} />
             </section>
           </div>
       </main>
@@ -168,13 +168,17 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
         <ThreadDialog
           kind={editing.kind}
           brands={brandChoices(editing.kind)}
-          initial={editing.thread ? { brand: editing.thread.brand, code: editing.thread.code, name: editing.thread.name === editing.thread.code ? "" : editing.thread.name, hex: editing.thread.hex } : { brand: editing.brand ?? "", code: "", name: "", hex: "#7A9CC6" }}
+          key={editing.thread?.id ?? (editing.copyOf ? `copy:${editing.copyOf.id}` : "new")}
+          initial={editing.thread ? { brand: editing.thread.brand, code: editing.thread.code, name: editing.thread.name === editing.thread.code ? "" : editing.thread.name, hex: editing.thread.hex }
+            : editing.copyOf ? { brand: editing.copyOf.brand, code: "", name: editing.copyOf.name === editing.copyOf.code ? "" : editing.copyOf.name, hex: editing.copyOf.hex }
+            : { brand: editing.brand ?? "", code: "", name: "", hex: "#7A9CC6" }}
           editing={!!editing.thread}
           onSave={(f) => save(f)}
           onDelete={editing.thread ? () => {
             setDeleting(editing.thread!);
             setEditing(null);
           } : undefined}
+          onDuplicate={editing.thread ? () => setEditing({ kind: editing.kind, copyOf: editing.thread }) : undefined}
           onClose={() => setEditing(null)}
         />
       )}

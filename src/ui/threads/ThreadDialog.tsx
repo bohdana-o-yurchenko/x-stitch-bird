@@ -17,7 +17,7 @@ const asHex = (v: string) => `#${v.replace("#", "").toUpperCase()}`;
  * Not the editor's own thread form (`ThreadForm`, in the key picker) — that one is a different thing.
  * Fields are rows of the form body, so more can be added there later.
  */
-export function ThreadDialog({ kind, brands, initial, editing, onSave, onDelete, onClose }: {
+export function ThreadDialog({ kind, brands, initial, editing, onSave, onDelete, onDuplicate, onClose }: {
   kind: "thread" | "bead";
   brands: readonly string[];
   initial: ThreadFields;
@@ -25,6 +25,8 @@ export function ThreadDialog({ kind, brands, initial, editing, onSave, onDelete,
   editing: boolean;
   onSave: (f: ThreadFields) => void | Promise<void>;
   onDelete?: () => void;
+  /** A new one like this: the same brand, name and colour, a code of its own. */
+  onDuplicate?: () => void;
   onClose: () => void;
 }) {
   const t = useTranslations("threadsPage");
@@ -151,6 +153,7 @@ export function ThreadDialog({ kind, brands, initial, editing, onSave, onDelete,
           {editing && onDelete && (
             <button type="button" className={cx(ui.btn, ui.deleteText, s.delete)} onClick={onDelete}>{t("delete")}</button>
           )}
+          {editing && onDuplicate && <button type="button" className={ui.btn} onClick={onDuplicate} data-testid="thread-duplicate">{t("duplicate")}</button>}
           <span className={s.spacer} />
           <button type="button" className={ui.btn} onClick={onClose}>{t("cancel")}</button>
           <button type="submit" className={cx(ui.btn, ui.primary)} disabled={busy}>{editing ? t("save") : t("add")}</button>

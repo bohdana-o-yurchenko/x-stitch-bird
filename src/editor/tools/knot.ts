@@ -1,11 +1,14 @@
-import { halfPointsBetween, snapHalf } from "@/core/geometry/geometry";
+import { halfPointOn, halfPointsBetween } from "@/core/geometry/geometry";
 import type { Point } from "@/core/pattern/types";
 import { placeKnot, requireEntry } from "../actions/paint";
 import type { Tool } from "./types";
 
 let last: Point | null = null;
 
-/** French knots on the half grid (SPEC §15.14); used when the active entry is a knot. Drag places one per half unit. */
+/**
+ * French knots on the half grid (SPEC §15.14); used when the active entry is a knot or a bead between cells. Drag
+ * places one per half unit; off the chart nothing is placed.
+ */
 export const knotTool: Tool = {
   id: "knot",
   icon: "knot",
@@ -13,19 +16,21 @@ export const knotTool: Tool = {
   cursor: "crosshair",
   down(ed, p) {
     const a = requireEntry(ed);
-    if (!a) return;
-    last = snapHalf(p.grid, { w: ed.doc.w, h: ed.doc.h });
+    const at = halfPointOn(p.grid, ed.doc);
+    if (!a || !at) return;
+    last = at;
     ed.history.begin("knot");
     placeKnot(ed, last, a.k);
     ed.changed();
   },
   hover(ed, p) {
-    ed.setOverlay({ knotPreview: { point: snapHalf(p.grid, { w: ed.doc.w, h: ed.doc.h }), key: ed.state.activeEntry } });
+    const at = halfPointOn(p.grid, ed.doc);
+    ed.setOverlay({ knotPreview: at && { point: at, key: ed.state.activeEntry } });
   },
   move(ed, p) {
     knotTool.hover!(ed, p);
-    if (!last || !ed.history.inTransaction) return;
-    const to = snapHalf(p.grid, { w: ed.doc.w, h: ed.doc.h });
+    const to = halfPointOn(p.grid, ed.doc);
+    if (!last || !to || !ed.history.inTransaction) return;
     if (to.x === last.x && to.y === last.y) return;
     for (const pt of halfPointsBetween(last, to)) placeKnot(ed, pt, ed.state.activeEntry);
     last = to;
@@ -33,11 +38,11 @@ export const knotTool: Tool = {
   },
   up(ed) {
     last = null;
-    ed.history.commit();
+    if (ed.history.inTransaction) ed.history.commit();
   },
   cancel(ed) {
     last = null;
-    ed.history.commit();
+    if (ed.history.inTransaction) ed.history.commit();
     ed.setOverlay({ knotPreview: null });
   },
 };

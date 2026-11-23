@@ -1,4 +1,4 @@
-import { snapHalf } from "@/core/geometry/geometry";
+import { halfPointOn } from "@/core/geometry/geometry";
 import type { Point } from "@/core/pattern/types";
 import { addSegment, requireEntry } from "../actions/paint";
 import type { Editor } from "../createEditor";
@@ -6,7 +6,8 @@ import type { Tool } from "./types";
 
 let down: Point | null = null;
 
-const snap = (ed: Editor, g: Point) => snapHalf(g, { w: ed.doc.w, h: ed.doc.h });
+/** The half-grid point under the pointer; null off the chart, where a press adds nothing. */
+const snap = (ed: Editor, g: Point) => halfPointOn(g, { w: ed.doc.w, h: ed.doc.h });
 
 /**
  * Backstitch lines (SPEC §6.3), used automatically when the active entry is a backstitch. Click adds a
@@ -19,8 +20,8 @@ export const backstitchTool: Tool = {
   cursor: "crosshair",
   down(ed, p) {
     const a = requireEntry(ed);
-    if (!a) return;
     const pt = snap(ed, p.grid), chain = ed.state.overlay.chain;
+    if (!a || !pt) return;
     if (chain) {
       addSegment(ed, chain.last, pt, a.k);
       ed.changed();
@@ -37,7 +38,7 @@ export const backstitchTool: Tool = {
   },
   up(ed, p) {
     const pt = snap(ed, p.grid), chain = ed.state.overlay.chain;
-    if (down && chain && (pt.x !== chain.last.x || pt.y !== chain.last.y)) {
+    if (down && chain && pt && (pt.x !== chain.last.x || pt.y !== chain.last.y)) {
       addSegment(ed, chain.last, pt, chain.key);
       ed.setOverlay({ chain: { ...chain, last: pt, hover: pt } });
       ed.changed();

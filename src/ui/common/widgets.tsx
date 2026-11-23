@@ -7,7 +7,7 @@ import type { ColorEntry } from "@/core/color/colorEntry";
 import type { PaletteSlot } from "@/core/pattern/palette";
 import type { ChartView } from "@/render/chart";
 import { drawKeyIcon } from "@/render/keyIcon";
-import { useEditor, useEditorState } from "../hooks/editor";
+import { useEditor, useEditorState, useKeyNames } from "../hooks/editor";
 import { Icon } from "./Icon";
 import s from "./common.module.css";
 
@@ -116,11 +116,12 @@ export function KeyIcon({ slot, size = 30, view }: { slot: PaletteSlot; size?: n
 export function Toasts() {
   const toasts = useEditorState((st) => st.toasts);
   const t = useTranslations();
+  const keys = useKeyNames();
   return (
     <div className={s.toasts} aria-live="polite">
       {toasts.map((x) => (
         <div key={x.id} className={s.toast}>
-          {t.has(x.key) ? t(x.key, x.values as never) : x.key}
+          {t.has(x.key) ? t(x.key, { ...keys, ...x.values } as never) : x.key}
         </div>
       ))}
     </div>

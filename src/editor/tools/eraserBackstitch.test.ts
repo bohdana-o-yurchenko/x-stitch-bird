@@ -131,6 +131,22 @@ describe("backstitch lines", () => {
     expect(ed.doc.layers.segments).toHaveLength(1);
   });
 
+  it("a click off the chart starts or adds nothing, rather than a line clamped onto the edge", () => {
+    const { ed } = withBackstitch();
+    click(ed, -3, 4);
+    expect(ed.state.overlay.chain).toBeNull();
+    click(ed, 2, 2);
+    click(ed, 14, 2);
+    // a drag from the chain's end released off the chart
+    ed.tools.down(point(2, 2));
+    ed.tools.up(point(2, -6));
+    expect(ed.doc.layers.segments).toEqual([]);
+    expect(ed.state.overlay.chain?.last).toEqual({ x: 2, y: 2 });
+    // right on the edge it still counts
+    click(ed, 10.2, 2);
+    expect(ed.doc.layers.segments).toEqual([expect.objectContaining({ x1: 2, y1: 2, x2: 10, y2: 2 })]);
+  });
+
   it("drawing with a mirror also draws the mirrored line", () => {
     const { ed } = withBackstitch();
     ed.store.setState({ mirror: "vertical" });
@@ -138,5 +154,65 @@ describe("backstitch lines", () => {
     click(ed, 3, 2);
     expect(ed.doc.layers.segments).toHaveLength(2);
     expect(ed.doc.layers.segments.map((s) => [s.x1, s.x2].sort((a, b) => a - b))).toContainEqual([7, 9]);
+  });
+});
+
+describe("eraser on a bead between cells or a knot (like the picker)", () => {
+  function withPointBead() {
+    const t = testEditor(6, 6);
+    const bead = t.entry({ t: "bead", src: "bead:00557", st: "point" });
+    t.ed.doc.layers.stitches.fill(t.red);
+    t.ed.doc.layers.knots.push({ x: 2, y: 2, k: bead });
+    t.ed.store.setState({ viewport: { zoom: 20, offX: 0, offY: 0 } });
+    t.ed.setTool("eraser");
+    return { ...t, bead };
+  }
+
+  it("highlights the bead on hover, not the cell under it, and hides the cell cursor", () => {
+    const { ed, bead } = withPointBead();
+    ed.tools.move(point(2.1, 1.9));
+    expect(ed.state.overlay.eraseKnots).toEqual([{ x: 2, y: 2, k: bead }]);
+    expect(ed.state.overlay.hover).toBeNull();
+    ed.tools.move(at(4, 4));
+    expect(ed.state.overlay.eraseKnots).toBeNull();
+    expect(ed.state.overlay.hover).not.toBeNull();
+  });
+
+  it("erases only the bead: the crosses in the cells around it stay", () => {
+    const { ed, red } = withPointBead();
+    ed.tools.down(point(2.1, 1.9));
+    ed.tools.move(point(2.4, 1.9));
+    ed.tools.up(point(2.4, 1.9));
+    expect(ed.doc.layers.knots).toEqual([]);
+    expect(ed.doc.layers.stitches.every((v) => v === red)).toBe(true);
+    ed.history.undo();
+    expect(ed.doc.layers.knots).toHaveLength(1);
+  });
+
+  it("a press away from the bead still clears the cell", () => {
+    const { ed } = withPointBead();
+    ed.tools.down(at(4, 4));
+    ed.tools.up(at(4, 4));
+    expect(ed.doc.layers.stitches[4 * 6 + 4]).toBe(0);
+    expect(ed.doc.layers.knots).toHaveLength(1);
+  });
+});
+
+describe("beads between cells and knots off the chart", () => {
+  it("a click off the chart places nothing; a drag out stops at the last point on the chart", () => {
+    const { ed, entry } = testEditor(6, 6);
+    const bead = entry({ t: "bead", src: "bead:00557", st: "point" });
+    ed.tools.move(point(-2, 3));
+    expect(ed.state.overlay.knotPreview).toBeNull();
+    ed.tools.down(point(-2, 3));
+    ed.tools.up(point(-2, 3));
+    ed.tools.down(point(3, 9));
+    ed.tools.up(point(3, 9));
+    expect(ed.doc.layers.knots).toEqual([]);
+    ed.tools.down(point(5, 3));
+    ed.tools.move(point(6, 3));
+    ed.tools.move(point(9, 3));
+    ed.tools.up(point(9, 3));
+    expect(ed.doc.layers.knots).toEqual([{ x: 5, y: 3, k: bead }, { x: 5.5, y: 3, k: bead }, { x: 6, y: 3, k: bead }]);
   });
 });

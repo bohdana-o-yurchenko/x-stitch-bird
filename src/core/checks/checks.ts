@@ -81,11 +81,21 @@ const mirrors = (a: KeyEntry | null, b: KeyEntry | null) => !!a && !!b && a.src 
 
 /**
  * Near symmetry: the mirror axis near the middle (±5 cells, on grid lines and through cell middles) where the most
- * mirrored pairs match; when 90–99.9% match, the pairs that don't.
+ * mirrored pairs match — crosses, beads in cells, backstitch lines, knots and beads between cells; when 90–99.9%
+ * match, the pairs that don't (a line or a point by the cell at its middle and that cell's mirror).
  */
 export function findNearSymmetry(p: Pattern): Finding[] {
   const out: Finding[] = [];
   const entry = (i: number) => p.key[p.layers.stitches[i] ?? 0] ?? null;
+  const bead = (i: number) => p.key[p.layers.beads[i] ?? 0] ?? null;
+  const lines = new Map<string, (KeyEntry | null)[]>();
+  const lineAt = (x1: number, y1: number, x2: number, y2: number) => (x1 < x2 || (x1 === x2 && y1 <= y2) ? `${x1},${y1},${x2},${y2}` : `${x2},${y2},${x1},${y1}`);
+  // knots and beads between cells are checked like lines of no length (backstitch never has one)
+  const marks = [...p.layers.segments, ...p.layers.knots.map((o) => ({ x1: o.x, y1: o.y, x2: o.x, y2: o.y, k: o.k }))];
+  for (const g of marks) {
+    const id = lineAt(g.x1, g.y1, g.x2, g.y2);
+    lines.set(id, [...(lines.get(id) ?? []), p.key[g.k] ?? null]);
+  }
   for (const axis of ["vertical", "horizontal"] as const) {
     const along = axis === "vertical" ? p.w : p.h, across = axis === "vertical" ? p.h : p.w;
     const at = (u: number, v: number) => (axis === "vertical" ? v * p.w + u : u * p.w + v);
@@ -98,18 +108,45 @@ export function findNearSymmetry(p: Pattern): Finding[] {
         for (let u = 0; u < along; u++) {
           const m = s - 1 - u;
           if (m <= u || m >= along) continue;
-          const a = at(u, v), b = at(m, v), ea = entry(a), eb = entry(b);
-          if (!ea && !eb) continue;
-          pairs++;
-          if (mirrors(ea, eb)) matches++;
-          else misses.push([a, b]);
+          const a = at(u, v), b = at(m, v);
+          for (const layer of [entry, bead]) {
+            const ea = layer(a), eb = layer(b);
+            if (!ea && !eb) continue;
+            pairs++;
+            if (mirrors(ea, eb)) matches++;
+            else misses.push([a, b]);
+          }
         }
+      // backstitch, knots, beads between cells: each against its mirror image (s − x across a vertical axis); a pair of lines is one pair
+      // a line on a grid line is shown by the cell on its side towards the axis, so a pair is reported the same either way
+      const flip = (c: number) => s - c;
+      const cellOf = (c: number) => Math.min(along - 1, Math.max(0, Number.isInteger(c) && c >= s / 2 ? c - 1 : Math.floor(c)));
+      for (const g of marks) {
+        const [u1, v1, u2, v2] = axis === "vertical" ? [g.x1, g.y1, g.x2, g.y2] : [g.y1, g.x1, g.y2, g.x2];
+        if (flip(u1) < 0 || flip(u1) > along || flip(u2) < 0 || flip(u2) > along) continue;
+        const twin = axis === "vertical" ? lineAt(flip(u1), v1, flip(u2), v2) : lineAt(v1, flip(u1), v2, flip(u2));
+        const own = p.key[g.k] ?? null, self = twin === lineAt(g.x1, g.y1, g.x2, g.y2);
+        if ((lines.get(twin) ?? []).some((e) => mirrors(own, e))) {
+          pairs += self ? 1 : 0.5;
+          matches += self ? 1 : 0.5;
+          continue;
+        }
+        pairs++;
+        const u = cellOf((u1 + u2) / 2), v = Math.min(across - 1, Math.floor((v1 + v2) / 2));
+        misses.push([at(u, v), at(Math.min(along - 1, Math.max(0, s - 1 - u)), v)]);
+      }
       if (pairs < 10) continue;
       const ratio = matches / pairs;
       if (!best || ratio > best.ratio) best = { ratio, misses };
     }
+    const seen = new Set<string>();
     if (best && best.ratio >= 0.9 && best.ratio < 1)
-      for (const [a, b] of best.misses) out.push({ id: `symmetry:${axis}:${a},${b}`, check: "symmetry", axis, cells: [Math.min(a, b), Math.max(a, b)] });
+      for (const [a, b] of best.misses) {
+        const id = `symmetry:${axis}:${Math.min(a, b)},${Math.max(a, b)}`;
+        if (seen.has(id)) continue;
+        seen.add(id);
+        out.push({ id, check: "symmetry", axis, cells: [Math.min(a, b), Math.max(a, b)] });
+      }
   }
   return out;
 }

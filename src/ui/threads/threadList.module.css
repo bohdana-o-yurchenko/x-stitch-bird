@@ -166,3 +166,29 @@
     display: none;
   }
 }
+
+/* ⧉ duplicate, in the item's top right corner while pointing at it */
+.row {
+  position: relative;
+}
+.duplicate {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 7px;
+  border: 1px solid var(--line2);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+  opacity: 0;
+}
+.row:hover .duplicate,
+.duplicate:focus-visible {
+  opacity: 1;
+}
+.duplicate:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}

@@ -2,7 +2,7 @@ import type { ColorEntry } from "@/core/color/colorEntry";
 import { computeUsage, entryCount, partialCount } from "@/core/calculator/usage";
 import { entryKind } from "@/core/entryKinds/registry";
 import { LAYERS } from "@/core/layers/registry";
-import { addEntry, cleanEntry, entryLayer, findSameKey, nextSymbol } from "@/core/pattern/keyEntries";
+import { addEntry, cleanEntry, entryLayer, findSameKey, nextLine, nextSymbol, sameSymbol } from "@/core/pattern/keyEntries";
 import { makeBlendColor, makeComboColor, resolveColor, invalidateColors } from "@/core/pattern/resolve";
 import { shortId } from "@/core/pattern/createPattern";
 import { DEFAULT_LINE_INK } from "@/core/symbols/lineInks";
@@ -50,9 +50,13 @@ export interface KeyDraft {
   ink: string;
 }
 
-/** A symbol of the right family after the draft's kind changes: line styles for backstitch, characters otherwise. */
-export function draftSymbol(ed: Editor, d: KeyDraft, t: EntryKindId, edit?: KeyIndex): string {
-  return isLineStyle(d.sym) === (t === "back") ? d.sym : nextSymbol(ed.doc, ed.state.symbols, edit, t);
+/**
+ * The symbol (and for a line its colour) after the draft's kind changes: a new backstitch takes the next free style
+ * and colour (`nextLine`), other kinds the next free character.
+ */
+export function draftSymbol(ed: Editor, d: KeyDraft, t: EntryKindId, edit?: KeyIndex): Pick<KeyDraft, "sym"> & Partial<Pick<KeyDraft, "ink">> {
+  if (isLineStyle(d.sym) === (t === "back")) return { sym: d.sym };
+  return t === "back" ? nextLine(ed.doc, edit) : { sym: nextSymbol(ed.doc, ed.state.symbols, edit, t) };
 }
 
 export function draftFor(ed: Editor, edit?: KeyIndex): KeyDraft {
@@ -77,7 +81,7 @@ export function draftFor(ed: Editor, edit?: KeyIndex): KeyDraft {
 export function draftForDuplicate(ed: Editor, source: KeyIndex): KeyDraft {
   const entry = ed.doc.key[source];
   if (!entry) return draftFor(ed);
-  return { ...draftFor(ed, source), sym: nextSymbol(ed.doc, ed.state.symbols, undefined, entry.t) };
+  return { ...draftFor(ed, source), sym: nextSymbol(ed.doc, ed.state.symbols, undefined, entry.t, entry.ink) };
 }
 
 /** The draft is a blend of 2–3 threads (single-thread kinds only). */
@@ -151,9 +155,16 @@ export function commitEntry(ed: Editor, d: KeyDraft, edit?: KeyIndex): KeyIndex 
   return ed.history.transaction("keyEntry", () => {
     const src = resolveDraftSource(ed, d, true)!;
     const entry = draftEntry(d, src);
-    const other = p.key.findIndex((e, i) => e && i !== edit && e.sym === d.sym);
+    // the symbol is taken by another entry: that one gets the edited entry's old symbol, or the next free one
+    const mine = { t: entry.t, sym: d.sym, ink: entry.ink };
+    const other = p.key.findIndex((e, i) => e && i !== edit && sameSymbol(e, mine));
+    const freeFor = (o: KeyIndex) => nextSymbol(p, ed.state.symbols, o, p.key[o]!.t, p.key[o]!.ink);
     if (before && edit) {
-      if (other > 0) p.key[other] = { ...p.key[other]!, sym: isLineStyle(before.sym) === isLineStyle(d.sym) ? before.sym : nextSymbol(p, ed.state.symbols, other, p.key[other]!.t) };
+      if (other > 0) {
+        const o = p.key[other]!, old = { ...o, sym: before.sym };
+        const oldFree = isLineStyle(before.sym) === isLineStyle(d.sym) && !p.key.some((e, i) => e && i !== edit && i !== other && sameSymbol(e, old));
+        p.key[other] = { ...o, sym: oldFree ? before.sym : freeFor(other) };
+      }
       p.key[edit] = cleanEntry(entry, d.sym);
       if (entry.t === "combo") p.layers.stitches.forEach((k, i) => k === edit && (p.layers.beads[i] = 0));
       ed.changed({ keys: true });
@@ -161,7 +172,7 @@ export function commitEntry(ed: Editor, d: KeyDraft, edit?: KeyIndex): KeyIndex 
       ed.toast("toasts.entryUpdated");
       return edit;
     }
-    if (other > 0) p.key[other] = { ...p.key[other]!, sym: nextSymbol(p, ed.state.symbols, undefined, p.key[other]!.t) };
+    if (other > 0) p.key[other] = { ...p.key[other]!, sym: nextSymbol(p, ed.state.symbols, undefined, p.key[other]!.t, p.key[other]!.ink) };
     if ((entry.t === "thread" || entry.t === "combo") && entry.n) p.strands = entry.n;
     const i = addEntry(p, { ...entry, sym: d.sym }, ed.state.symbols);
     ed.changed({ keys: true });

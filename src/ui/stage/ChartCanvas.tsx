@@ -29,6 +29,7 @@ function scene(ed: Editor): ChartScene {
     floating: st.floating && { pattern: st.floating.preview.pattern, palette: st.floating.preview.palette, at: st.floating.at },
     marquee: st.overlay.marquee,
     eraseHighlight: (st.momentaryTool ?? st.tool) === "eraser" ? st.overlay.eraseHighlight : null,
+    eraseKnots: (st.momentaryTool ?? st.tool) === "eraser" ? st.overlay.eraseKnots : null,
     flash: st.flash,
     underlay: st.underlay && st.underlay.visible && st.underlayImage
       ? { image: st.underlayImage, crop: st.underlay.crop, rect: st.underlay.rect, opacity: st.underlay.opacity, rotation: st.underlay.rotation ?? 0, editing: !st.underlay.behind }

@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createPattern } from "@/core/pattern/createPattern";
 import { ORGANIZER } from "@/core/pattern/brands";
-import { addEntry } from "@/core/pattern/keyEntries";
+import { addEntry, freeLineInks, fullLineStyles } from "@/core/pattern/keyEntries";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
 import { memoryPersistence } from "../../../tests/support/memoryPersistence";
 import { Editor } from "../createEditor";
 import { loadPattern } from "./pattern";
-import { commitEntry, deleteEntry, draftFor, draftForDuplicate, duplicateOf, resolveDraftSource, type KeyDraft } from "./keyEntries";
+import { commitEntry, deleteEntry, draftFor, draftSymbol, draftForDuplicate, duplicateOf, resolveDraftSource, type KeyDraft } from "./keyEntries";
 
 /** The key-entry rules behind the add/edit form (SPEC §8). */
 let ed: Editor, red: number;
@@ -122,6 +122,51 @@ describe("editing an entry", () => {
     commitEntry(ed, draft({ t: "combo", thread: "dmc:321", bead: "bead:02011" }, red), red);
     expect(ed.doc.layers.beads[0]).toBe(0);
     expect(ed.doc.combos[ed.doc.key[red]!.src]).toEqual({ thread: "dmc:321", bead: "bead:02011" });
+  });
+});
+
+describe("backstitch symbols: line style and line colour together (SPEC §2.5)", () => {
+  const back = (patch: Partial<KeyDraft> = {}, edit?: number) => draft({ t: "back", n: 1, thread: "dmc:310", ...patch }, edit);
+
+  it("lets two lines of different colours share a style, and gives a new line the first style free in its colour", () => {
+    const black = commitEntry(ed, back({ sym: "line:solid" }))!;
+    const red2 = commitEntry(ed, back({ thread: "dmc:321", sym: "line:solid", ink: "#E6194B" }))!;
+    expect(ed.doc.key[black]!.sym).toBe("line:solid");
+    expect(ed.doc.key[red2]).toMatchObject({ sym: "line:solid", ink: "#E6194B" });
+    const blue = addEntry(ed.doc, { t: "back", src: "dmc:797", n: 1, ink: "#3A5BD9" }, ALL_SYMBOLS);
+    expect(ed.doc.key[blue]!.sym).toBe("line:solid");
+    const black2 = addEntry(ed.doc, { t: "back", src: "dmc:797", n: 1 }, ALL_SYMBOLS);
+    expect(ed.doc.key[black2]!.sym).not.toBe("line:solid");
+  });
+
+  it("a new line goes through the colours of a style first: solid black, solid red … then dashed black", () => {
+    const toBack = () => ({ ...draft(), t: "back" as const, n: 1, ...draftSymbol(ed, draft(), "back") });
+    expect(toBack()).toMatchObject({ sym: "line:solid", ink: "#1D1A16" });
+    commitEntry(ed, toBack());
+    expect(toBack()).toMatchObject({ sym: "line:solid", ink: "#E6194B" });
+    expect(fullLineStyles(ed.doc)).toEqual([]);
+    for (let i = 0; i < 5; i++) commitEntry(ed, toBack());
+    expect(new Set(ed.doc.key.filter((e) => e?.t === "back").map((e) => e!.ink ?? "#1D1A16")).size).toBe(6);
+    // solid has every preset colour now: it is dimmed, and the next line is dashed black
+    expect(fullLineStyles(ed.doc)).toEqual(["line:solid"]);
+    expect(toBack()).toMatchObject({ sym: "line:dashed", ink: "#1D1A16" });
+    expect(freeLineInks(ed.doc, "line:dashed")).toHaveLength(6);
+  });
+
+  it("still won't let two lines show the same style in the same colour: the other one gets a free style", () => {
+    const first = commitEntry(ed, back({ sym: "line:solid", ink: "#E6194B" }))!;
+    const second = commitEntry(ed, back({ thread: "dmc:321", sym: "line:solid", ink: "#E6194B" }))!;
+    expect(ed.doc.key[second]!.sym).toBe("line:solid");
+    expect(ed.doc.key[first]!.sym).not.toBe("line:solid");
+  });
+
+  it("an edit that changes the colour to one whose line has the style swaps styles only when needed", () => {
+    const black = commitEntry(ed, back({ sym: "line:solid" }))!;
+    const red2 = commitEntry(ed, back({ thread: "dmc:321", sym: "line:dashed", ink: "#E6194B" }))!;
+    // the black line turns red and takes "dashed": the red line gets the black one's old "solid"
+    commitEntry(ed, back({ sym: "line:dashed", ink: "#E6194B" }, black), black);
+    expect(ed.doc.key[black]).toMatchObject({ sym: "line:dashed", ink: "#E6194B" });
+    expect(ed.doc.key[red2]!.sym).toBe("line:solid");
   });
 });
 

@@ -3,6 +3,8 @@ import { HOLD_BINDINGS, KEYMAP, type Context, type KeyBinding } from "./keymap";
 
 export interface KeyEventLike {
   key: string;
+  /** The physical key ("KeyZ"): names the key when the layout gives a letter of another alphabet. */
+  code?: string;
   ctrlKey: boolean;
   metaKey: boolean;
   altKey: boolean;
@@ -26,7 +28,23 @@ const parse = (b: KeyBinding): Parsed => {
   return { key, mod: parts.includes("mod"), shift: parts.includes("shift"), binding: b };
 };
 
-const isLetterOrNamed = (k: string) => /^[a-z]$/.test(k) || k.length > 1;
+const respectsShift = (k: string) => /^[a-z0-9]$/.test(k) || k.length > 1;
+
+const CODE_KEYS: Record<string, string> = { BracketLeft: "[", BracketRight: "]", Minus: "-", Equal: "=", NumpadAdd: "+", NumpadSubtract: "-" };
+
+/**
+ * The key a binding names. A layout of another alphabet (Ukrainian: З for P, Я for Z) types a letter the keymap
+ * doesn't know — then the physical key decides, so shortcuts sit on the same keys in every layout.
+ */
+export function keyOf(e: Pick<KeyEventLike, "key" | "code">): string {
+  const key = e.key.toLowerCase();
+  // the digit row is digits whatever Shift or the layout types there (Shift+1 = "!", AZERTY's 1 = "&")
+  const row = /^Digit(\d)$/.exec(e.code ?? "")?.[1];
+  if (row) return row;
+  if (key.length !== 1 || /^[\x20-\x7e]$/.test(key) || !e.code) return key;
+  const letter = /^Key([A-Z])$/.exec(e.code)?.[1], digit = /^(?:Digit|Numpad)(\d)$/.exec(e.code)?.[1];
+  return letter?.toLowerCase() ?? digit ?? CODE_KEYS[e.code] ?? key;
+}
 
 /**
  * Turns key presses into commands (ARCHITECTURE §6.2): ignores keys while typing or with a dialog open,
@@ -61,9 +79,9 @@ export class ShortcutManager {
     }
     const mod = this.isMac ? e.metaKey : e.ctrlKey;
     if (e.altKey || (this.isMac ? e.ctrlKey : e.metaKey)) return;
-    const key = e.key.toLowerCase();
+    const key = keyOf(e);
     const match = this.parsed.find(
-      (p) => p.key === key && p.mod === mod && (!isLetterOrNamed(key) || p.shift === e.shiftKey) && (!p.binding.when || this.context(p.binding.when)),
+      (p) => p.key === key && p.mod === mod && (!respectsShift(key) || p.shift === e.shiftKey) && (!p.binding.when || this.context(p.binding.when)),
     );
     if (!match) return;
     e.preventDefault();

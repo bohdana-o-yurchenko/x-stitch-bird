@@ -33,6 +33,7 @@ function useGroups(): { title: string; rows: Row[] }[] {
         row(t("override"), keys("draw.toggleOverride")),
         row(t("mirror"), keys("draw.cycleMirror")),
         row(t("pickEntry"), ["1–9"]),
+        row(t("brushSize"), [mac ? "⇧1–5" : "Shift+1–5"]),
         row(t("endLine"), keys("tool.cancel")),
         row(t("ambiguous"), keys("ambiguous.toggleAtHover")),
         row(t("ambiguousNext"), keys("ambiguous.next")),

@@ -5,7 +5,7 @@ import type { PkReport } from "@/core/formats/pdf/patternKeeper";
 import type { Fragment } from "@/core/pattern/fragment";
 import type { Palette } from "@/core/pattern/palette";
 import { createPattern } from "@/core/pattern/createPattern";
-import type { KeyIndex, PartialKindId, PartialStitch, Pattern, Point, Rect, Segment, CustomColor } from "@/core/pattern/types";
+import type { KeyIndex, PartialKindId, PartialStitch, Pattern, Point, Rect, Segment, CustomColor, Knot } from "@/core/pattern/types";
 import type { MirrorMode } from "@/core/transform/mirror";
 import type { ChartView } from "@/render/chart";
 import type { PickerHighlight, Viewport } from "@/render/ChartRenderer";
@@ -72,6 +72,8 @@ export interface Overlay {
   marquee: Rect | null;
   /** Backstitch the eraser would delete on press (SPEC §6.2). */
   eraseHighlight: Segment[] | null;
+  /** Knots and beads between cells the eraser would delete on press. */
+  eraseKnots: Knot[] | null;
 }
 
 export interface FloatingContent {
@@ -168,7 +170,7 @@ export interface EditorState {
   versionsRevision: number;
 }
 
-export const emptyOverlay: Overlay = { hover: null, pickerHighlight: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null };
+export const emptyOverlay: Overlay = { hover: null, pickerHighlight: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null, eraseKnots: null };
 
 export const createEditorStore = () =>
   createStore<EditorState>()(() => ({

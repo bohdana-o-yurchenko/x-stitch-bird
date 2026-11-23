@@ -10,12 +10,12 @@ import s from "./threadList.module.css";
  * Your threads or beads in one of three views: a gallery of big swatches, a compact list (one line each), or a large
  * list (a big swatch, the name and the colour). A bead's swatch is round. Picking one opens it for changing.
  */
-export function ThreadList({ items, view, onPick }: { items: readonly CustomColor[]; view: InventoryView; onPick: (c: CustomColor) => void }) {
+export function ThreadList({ items, view, onPick, onDuplicate }: { items: readonly CustomColor[]; view: InventoryView; onPick: (c: CustomColor) => void; onDuplicate?: (c: CustomColor) => void }) {
   const t = useTranslations("threadsPage");
   return (
     <ul className={cx(s.list, s[view])} data-testid="thread-list" data-view={view}>
       {items.map((c) => (
-        <li key={c.id}>
+        <li key={c.id} className={s.row}>
           <button type="button" className={s.item} onClick={() => onPick(c)} aria-label={t("edit", { brand: c.brand, code: c.code })}>
             <span className={cx(s.swatch, c.kind === "bead" && s.round)} style={{ background: c.hex }} />
             <span className={s.text}>
@@ -25,6 +25,9 @@ export function ThreadList({ items, view, onPick }: { items: readonly CustomColo
             </span>
             {view === "large" && <span className={s.hex}>{c.hex}</span>}
           </button>
+          {onDuplicate && (
+            <button type="button" className={s.duplicate} onClick={() => onDuplicate(c)} title={t("duplicateOne", { code: c.code })} aria-label={t("duplicateOne", { code: c.code })}>⧉</button>
+          )}
         </li>
       ))}
     </ul>

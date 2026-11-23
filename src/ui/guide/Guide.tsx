@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { cx, ui } from "../common/widgets";
 import type { HeaderMenu } from "@/editor/store/editorStore";
-import { useEditor, useEditorState } from "../hooks/editor";
+import { useEditor, useEditorState, useKeyNames } from "../hooks/editor";
 import s from "./guide.module.css";
 
 type Step = { id: string; targets: string[]; menu?: HeaderMenu; reveal?: string[]; tip?: boolean; link?: string };
@@ -106,6 +106,7 @@ export function Guide() {
 function GuideTour({ steps, onClose }: { steps: Step[]; onClose: () => void }) {
   const ed = useEditor();
   const g = useTranslations("guide");
+  const keys = useKeyNames();
   const locale = useLocale();
   const [i, setI] = useState(0);
   const [boxes, setBoxes] = useState<Box[]>([]);
@@ -168,7 +169,7 @@ function GuideTour({ steps, onClose }: { steps: Step[]; onClose: () => void }) {
     return () => window.removeEventListener("keydown", key, true);
   }, [last, onClose]);
 
-  const tags = { b: (c: React.ReactNode) => <b>{c}</b>, hl: (c: React.ReactNode) => <mark className={s.hl}>{c}</mark> };
+  const tags = { ...keys, b: (c: React.ReactNode) => <b>{c}</b>, hl: (c: React.ReactNode) => <mark className={s.hl}>{c}</mark> };
   const points = Object.keys((g.raw(`${step.id}.points`) as Record<string, string>) ?? {});
   return (
     <div className={s.layer} role="dialog" aria-modal="true" aria-label={g("title")} data-testid="guide">

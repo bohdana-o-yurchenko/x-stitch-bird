@@ -1,6 +1,6 @@
 import { entryLayerOf } from "../entryKinds/registry";
 import { customShape } from "../symbols/customSymbol";
-import { cleanInk, DEFAULT_LINE_INK } from "../symbols/lineInks";
+import { cleanInk, DEFAULT_LINE_INK, LINE_INKS } from "../symbols/lineInks";
 import { mirroredStitchType } from "../stitches/registry";
 import { isLineStyle, LINE_STYLES } from "../symbols/lineStyles";
 import { firstFreeSymbol } from "../symbols/symbols";
@@ -8,15 +8,52 @@ import type { EntryKindId, KeyEntry, KeyIndex, LayerId, Pattern } from "./types"
 
 export const entryLayer = (e: KeyEntry): LayerId => entryLayerOf(e);
 
-export const usedSymbols = (p: Pattern, except?: KeyIndex): string[] =>
-  p.key.flatMap((e, i) => (e && i !== except ? [e.sym] : []));
+/** A backstitch's line colour as compared: black when it has none. */
+export const lineInkOf = (e: { ink?: string }): string => cleanInk(e.ink) ?? DEFAULT_LINE_INK;
+
+type SymbolOwner = Pick<KeyEntry, "t" | "sym" | "ink">;
+
+/**
+ * Two entries show the same symbol: the same one — for backstitch the same line style **in the same line colour**,
+ * so one style may serve several backstitch colours (SPEC §2.5).
+ */
+export const sameSymbol = (a: SymbolOwner, b: SymbolOwner): boolean =>
+  a.sym === b.sym && (a.t !== "back" || b.t !== "back" || lineInkOf(a) === lineInkOf(b));
+
+/** Symbols other entries hold; for a backstitch (`like`) only those of backstitch in its line colour. */
+export const usedSymbols = (p: Pattern, except?: KeyIndex, like?: Pick<KeyEntry, "t" | "ink">): string[] =>
+  p.key.flatMap((e, i) => (e && i !== except && (like?.t !== "back" || (e.t === "back" && lineInkOf(e) === lineInkOf(like))) ? [e.sym] : []));
 
 /** Backstitch picks from the line styles, everything else from the chart symbols. */
 export const symbolsFor = (t: EntryKindId, symbols: readonly string[]): readonly string[] => (t === "back" ? LINE_STYLES : symbols);
 
-export function nextSymbol(p: Pattern, symbols: readonly string[], except?: KeyIndex, t: EntryKindId = "thread"): string {
-  const list = symbolsFor(t, symbols), used = usedSymbols(p, except);
+/** The first free symbol for an entry of kind `t`; a backstitch's is free among the lines of its colour (`ink`). */
+export function nextSymbol(p: Pattern, symbols: readonly string[], except?: KeyIndex, t: EntryKindId = "thread", ink?: string): string {
+  const list = symbolsFor(t, symbols), used = usedSymbols(p, except, { t, ink });
   return firstFreeSymbol(used, list, t === "back" ? LINE_STYLES[used.filter(isLineStyle).length % LINE_STYLES.length] : undefined);
+}
+
+const PRESET_INKS = LINE_INKS.map((c) => c.hex as string);
+
+/** The preset line colours (black, red, green, …) not yet used with line style `style` by other backstitch entries. */
+export function freeLineInks(p: Pattern, style: string, except?: KeyIndex): string[] {
+  const taken = new Set(p.key.flatMap((e, i) => (e && i !== except && e.t === "back" && e.sym === style ? [lineInkOf(e)] : [])));
+  return PRESET_INKS.filter((ink) => !taken.has(ink));
+}
+
+/** Line styles whose preset colours are all taken: nothing new can use them without a swap. */
+export const fullLineStyles = (p: Pattern, except?: KeyIndex): string[] => LINE_STYLES.filter((s) => !freeLineInks(p, s, except).length);
+
+/**
+ * A new backstitch's style and colour: the first style that still has a preset colour free, in that colour — so
+ * solid black, solid red, solid green … then dashed black (SPEC §2.5). All taken: they repeat.
+ */
+export function nextLine(p: Pattern, except?: KeyIndex): { sym: string; ink: string } {
+  for (const sym of LINE_STYLES) {
+    const ink = freeLineInks(p, sym, except)[0];
+    if (ink) return { sym, ink };
+  }
+  return { sym: nextSymbol(p, LINE_STYLES, except, "back"), ink: DEFAULT_LINE_INK };
 }
 
 /**
@@ -59,7 +96,7 @@ export function cleanEntry(k: Omit<KeyEntry, "sym"> & { sym?: string }, sym: str
 }
 
 export function addEntry(p: Pattern, k: Omit<KeyEntry, "sym"> & { sym?: string }, symbols: readonly string[]): KeyIndex {
-  p.key.push(cleanEntry(k, k.sym ?? nextSymbol(p, symbols, undefined, k.t)));
+  p.key.push(cleanEntry(k, k.sym ?? nextSymbol(p, symbols, undefined, k.t, k.ink)));
   return p.key.length - 1;
 }
 

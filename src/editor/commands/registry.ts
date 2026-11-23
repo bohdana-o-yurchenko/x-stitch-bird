@@ -1,4 +1,5 @@
 import { PARTIAL_KINDS } from "@/core/stitches/partialKinds";
+import { toolById } from "../tools/registry";
 import { openReadChart, type ReadChartOpen } from "../actions/pdfChart";
 import type { CheckOptions } from "@/core/checks/checks";
 import { acceptMatching, declineBlock } from "../matching/matching";
@@ -44,6 +45,8 @@ export const COMMANDS: readonly Command[] = [
     },
   },
   { id: "draw.setBrush", run: (ed, n) => ed.store.setState({ brush: Number(n) }) },
+  // the size buttons and Shift+1…5: a tool without a brush gives way to Draw
+  { id: "draw.pickBrush", run: (ed, n) => { ed.store.setState({ brush: Number(n) }); if (!toolById(ed.state.tool).usesBrush) ed.setTool("pencil"); } },
   { id: "draw.setPartialKind", run: (ed, k) => ed.store.setState({ partialKind: k as never }) },
   // history
   { id: "history.undo", run: (ed) => { ed.cancelInteractions(); ed.history.undo(); }, enabled: (ed) => ed.state.canUndo || !!ed.state.floating },

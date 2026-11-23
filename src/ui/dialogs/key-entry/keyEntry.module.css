@@ -116,14 +116,13 @@
 .spacer {
   flex: 1;
 }
+/* the line colour's sample: shows the chosen colour, not a picker */
 .inkWell {
-  width: 36px;
-  height: 30px;
-  padding: 2px;
-  border: 1px solid var(--line2);
-  border-radius: 8px;
-  background: var(--panel);
-  cursor: pointer;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
 }
 /* colour lines: a single floss, each floss of a blend, a combo's floss and bead — same look, own strands */
 .lines {
@@ -312,6 +311,25 @@
   max-height: 232px;
   overflow-y: auto;
   padding: 2px;
+  padding-inline-end: 6px;
+}
+/* a 4 px scrollbar of its own that takes its own room: an overlay one (macOS) or a wide one (Windows) covered the
+   last column */
+.symgrid::-webkit-scrollbar {
+  width: 4px;
+}
+.symgrid::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: var(--line2);
+}
+.symgrid::-webkit-scrollbar-track {
+  background: transparent;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .symgrid {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line2) transparent;
+  }
 }
 .symgrid.lines {
   grid-template-columns: repeat(auto-fill, 52px);

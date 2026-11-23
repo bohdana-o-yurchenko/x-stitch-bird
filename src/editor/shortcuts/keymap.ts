@@ -35,12 +35,17 @@ export function shortcutLabels(command: string, args: unknown, mac: boolean): st
   return KEYMAP.filter((k) => k.command === command && JSON.stringify(k.args) === JSON.stringify(args)).map((k) => formatKeys(k.keys, mac));
 }
 
-/** Display form of the first binding for a command (and args), e.g. "P" or "⇧R"; null when unbound. */
-export function shortcutLabel(command: string, args?: unknown): string | null {
-  return shortcutLabels(command, args, true)[0] ?? null;
+/** Display form of the first binding for a command (and args), e.g. "P", "⇧R" on a Mac, "Shift+R" elsewhere; null when unbound. */
+export function shortcutLabel(command: string, args?: unknown, mac = true): string | null {
+  return shortcutLabels(command, args, mac)[0] ?? null;
 }
 
-/** `mod` = ⌘ on macOS, Ctrl elsewhere. Letters respect Shift; symbols and digits ignore it. */
+/** Key names for texts that mention keys (tooltips, hints, the guide), as this computer's keyboard shows them. */
+export function keyNames(mac: boolean) {
+  return { alt: mac ? "⌥" : "Alt", undo: formatKeys("mod+z", mac), redo: formatKeys(mac ? "mod+shift+z" : "mod+y", mac), copy: formatKeys("mod+c", mac) };
+}
+
+/** `mod` = ⌘ on macOS, Ctrl elsewhere. Letters and digits respect Shift (Shift+1…5 = brush size); symbols ignore it. */
 export const KEYMAP: readonly KeyBinding[] = [
   // symbol matching (SPEC §15.11): Esc and Enter answer for the block before anything else
   { keys: "escape", command: "match.decline", when: "matchReview" },
@@ -99,6 +104,7 @@ export const KEYMAP: readonly KeyBinding[] = [
   { keys: "a", command: "ambiguous.toggleAtHover" },
   { keys: "shift+a", command: "ambiguous.next" },
   ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({ keys: String(n), command: "key.selectNth", args: n })),
+  ...[1, 2, 3, 4, 5].map((n) => ({ keys: `shift+${n}`, command: "draw.pickBrush", args: n })),
   { keys: "+", command: "view.zoomIn" },
   { keys: "=", command: "view.zoomIn" },
   { keys: "-", command: "view.zoomOut" },

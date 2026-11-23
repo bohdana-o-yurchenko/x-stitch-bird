@@ -5,7 +5,7 @@ import { HOLD_BINDINGS, shortcutLabel } from "@/editor/shortcuts/keymap";
 import { resolveTool } from "@/editor/tools/registry";
 import { Icon } from "../common/Icon";
 import { KeyIcon, cx, ui } from "../common/widgets";
-import { useCommand, useEditorState } from "../hooks/editor";
+import { useCommand, useEditor, useEditorState, useKeyNames } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
 import s from "./side.module.css";
 
@@ -35,11 +35,12 @@ export function CurrentTool() {
   const override = useEditorState((st) => st.override);
   const mirror = useEditorState((st) => st.mirror);
   const partialKind = useEditorState((st) => st.partialKind);
-  const shortcut = shortcutLabel("tool.select", chosen);
+  const isMac = useEditor().isMac, keys = useKeyNames();
+  const shortcut = shortcutLabel("tool.select", chosen, isMac);
   const hold = momentary && HOLD_BINDINGS.find((h) => h.tool === momentary)?.hold;
 
   const notes: string[] = [];
-  if (hold) notes.push(t("held", { key: hold === "Alt" ? "Alt/⌥" : t("space") }));
+  if (hold) notes.push(t("held", { key: hold === "Alt" ? keys.alt : t("space") }));
   if (effective.id !== (momentary ?? chosen)) notes.push(t(effective.id === "knot" ? "placesKnots" : "placesBackstitch", { tool: tn(chosen) }));
   if (effective.usesBrush) notes.push(t("brush", { n: brush }));
   if (effective.id === "partial") notes.push(tt(`partialKind.${partialKind}`));

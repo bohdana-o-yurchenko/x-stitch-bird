@@ -60,6 +60,15 @@ export const snapHalf = (g: Point, { w, h }: Size): Point => ({
   y: Math.max(0, Math.min(h, Math.round(g.y * 2) / 2)),
 });
 
+/**
+ * The half-grid point under the pointer, or null when the pointer is off the chart (further out than the edge's own
+ * snapping reach) — a press out there places nothing, rather than a stitch clamped onto the edge.
+ */
+export function halfPointOn(g: Point, size: Size): Point | null {
+  const x = Math.round(g.x * 2) / 2, y = Math.round(g.y * 2) / 2;
+  return x < 0 || y < 0 || x > size.w || y > size.h ? null : snapHalf(g, size);
+}
+
 /** Half-grid points passed when moving from a to b (for knot dragging). */
 export function halfPointsBetween(a: Point, b: Point): Point[] {
   const steps = Math.max(1, Math.round(Math.max(Math.abs(b.x - a.x), Math.abs(b.y - a.y)) * 2));

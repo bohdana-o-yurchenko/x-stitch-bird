@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { cellLabel } from "@/core/grid/numbering";
 import { ConfirmDelete, KeyIcon, cx, ui } from "../common/widgets";
-import { useCommand, useEditorState } from "../hooks/editor";
+import { useCommand, useEditorState, useKeyNames } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
 import s from "./status.module.css";
 
@@ -66,6 +66,7 @@ function SaveStatus() {
 export function StatusBar() {
   const t = useTranslations("status");
   const tt = useTranslations("tools");
+  const keys = useKeyNames();
   const hover = useEditorState((st) => st.hoverCell);
   useEditorState((st) => st.docRevision);
   const p = useEditorState((st) => st.doc);
@@ -89,7 +90,7 @@ export function StatusBar() {
       <span className={s.cell}>{parts.join("  ·  ")}</span>
       <span className={s.spacer} />
       <AmbiguousStatus />
-      {underlayEditing && <span className={s.hint}>{t("underlayHint")}</span>}
+      {underlayEditing && <span className={s.hint}>{t("underlayHint", keys)}</span>}
       <span>{t("size", { w: p.w, h: p.h })}</span>
       <SaveStatus />
     </div>

@@ -3,7 +3,7 @@ import type { TransformContext } from "../layers/types";
 import { boundsOfCells } from "../layers/maskGeometry";
 import type { CellTransform } from "../transform/cellTransform";
 import { mirroredStitchType } from "../stitches/registry";
-import { keyFor, sameKey } from "./keyEntries";
+import { keyFor, sameKey, sameSymbol } from "./keyEntries";
 import type { Blend, Combo, CustomColor, KeyEntry, KeyIndex, LayerId, Pattern, Point, Size } from "./types";
 
 /** A cut-out piece of a chart that can travel between patterns (SPEC §15.6). */
@@ -85,7 +85,7 @@ export function insertFragment(p: Pattern, f: Fragment, at: Point, override: boo
   const map = new Map<KeyIndex, KeyIndex>();
   for (const [k, e] of f.keys) {
     const same = f.sourceId === p.id && sameKey(p.key[k], e);
-    map.set(k, same ? k : keyFor(p, { ...e, sym: e.sym && !p.key.some((o) => o?.sym === e.sym) ? e.sym : undefined }, symbols));
+    map.set(k, same ? k : keyFor(p, { ...e, sym: e.sym && !p.key.some((o) => o && sameSymbol(o, e)) ? e.sym : undefined }, symbols));
   }
   const size = { w: p.w, h: p.h }, placed = new Set<number>();
   for (const l of LAYERS) {

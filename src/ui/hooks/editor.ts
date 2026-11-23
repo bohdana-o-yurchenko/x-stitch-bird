@@ -5,6 +5,7 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import type { Editor } from "@/editor/createEditor";
 import type { EditorState } from "@/editor/store/editorStore";
+import { keyNames } from "@/editor/shortcuts/keymap";
 
 export const EditorContext = createContext<Editor | null>(null);
 
@@ -22,6 +23,11 @@ export function useEditorState<T>(selector: (s: EditorState) => T): T {
 /** For selectors that build a new object or array each time. */
 export function useEditorShallow<T>(selector: (s: EditorState) => T): T {
   return useStore(useEditor().store, useShallow(selector));
+}
+
+/** Key names for texts that mention keys ({alt}, {undo}, {redo}, {copy}), as this computer's keyboard shows them. */
+export function useKeyNames() {
+  return keyNames(useEditor().isMac);
 }
 
 /** `run(id, args)` bound to the editor's command registry. */

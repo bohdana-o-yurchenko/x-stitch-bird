@@ -3,7 +3,7 @@ import { LAYERS, PICK_ORDER } from "@/core/layers/registry";
 import { segmentDistance } from "@/core/layers/maskGeometry";
 import { PICK_RADIUS } from "@/core/layers/points";
 import { canPlacePartial, clearForPartial, clearUnder, isOccupied } from "@/core/pattern/occupancy";
-import type { Corner, KeyEntry, KeyIndex, Point, Segment } from "@/core/pattern/types";
+import type { Corner, KeyEntry, KeyIndex, Knot, Point, Segment } from "@/core/pattern/types";
 import { nearestCorner } from "@/core/stitches/partialKinds";
 import { mirrorCells, mirrorPoints, mirrorTransforms } from "@/core/transform/mirror";
 import type { PickerHighlight } from "@/render/ChartRenderer";
@@ -47,6 +47,20 @@ export const backstitchHitRadius = (zoom: number) => Math.min(0.45, Math.max(0.2
 export function segmentsAt(ed: Editor, grid: Point, radius: number): Segment[] {
   const p = ed.doc, points = mirrorPoints(grid.x, grid.y, ed.state.mirror, p);
   return p.layers.segments.filter((s) => points.some((m) => segmentDistance(m.x, m.y, s.x1, s.y1, s.x2, s.y2) <= radius));
+}
+
+/** Knots and beads between cells within `radius` (at least the picker's) of the pointer or of its mirror images. */
+export function knotsAt(ed: Editor, grid: Point, radius: number): Knot[] {
+  const p = ed.doc, points = mirrorPoints(grid.x, grid.y, ed.state.mirror, p), r = Math.max(radius, PICK_RADIUS);
+  return p.layers.knots.filter((o) => points.some((m) => Math.hypot(o.x - m.x, o.y - m.y) < r));
+}
+
+/** Delete only knots and beads between cells near the pointer; the cells around them stay. */
+export function eraseKnotsAt(ed: Editor, grid: Point, radius: number): boolean {
+  const hit = new Set(knotsAt(ed, grid, radius));
+  if (!hit.size) return false;
+  ed.doc.layers.knots = ed.doc.layers.knots.filter((o) => !hit.has(o));
+  return true;
 }
 
 /** Delete only backstitch near the pointer (and its mirror images); crosses and beads stay. */

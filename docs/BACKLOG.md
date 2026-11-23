@@ -14,31 +14,37 @@ DONE 0) create proper app-specific email for emails DONE
 1) color picker doesn't always work correctly. something about the fact that i need to hover points directly at the item??? 
 DONE 2) picker doens't properly highlight the beads, but picks them. the same for other elements on the top layer 
 DONE 3) hide the delete and edit buttons from key unless hovered??? also add dublicate key 
-4) when i have a bead key on and move the mouse OFF the canvas and click - a bead gets placed in the edge of the canvas. the same probably with backstitch 
 5) add group level visibility? we now have element level visibiliry (mute anyghint BUG), but what if people wanna see crossess only? or key level visibiliry? 
 DONE 6) when i choose petite fractional stitch i cannot click and drag. it renders 1 cell = 1 petite. where it must be 1 cell = 2 petites . should not apply to 1/4 and 3/4 tho. 
 DONE 8) can your app read this? must open in the same tab 
-9) proper landing!! 
+9) proper landing!! - with a central button 'go to editor' 
 10) billing options, ui, and backend. and frontend and FOP setup 
 DONE 10) replace the email in all the docs. and remove my name new email is : ptashechka.app@gmail.com  old : bohdana.o.yurchenko@gmail.com 
 11) FIX preview deploy on the vercel 
+12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
+13) add 'similar' colors of the same brand AND translations to other brands 
+14) add fabricks!!! each fabric has a dmc code associated with it. so it's totally real 
+13) follow up : introduce 'my stash'. then introduce my projects. where i can add my kits and it would help me specify if i got all the necesary supplyes or if i can use smth from my stash 
+14) + 1 feature : XSD import and probably export. we are free to reverse engineer it. noone goona sue
 
 
 7) add specialty stitches : smyrna (in 1 cell in 4 cells ) + their own stitches 
 8) write to yulia after the speciality stitches are done!!!! 
-9) near symmetry ignores the backstitch!!! 
 10) lone crosses must have a super lone crosses mode !!
 11) export of bead + floss between the crossess must be exported as bead. not as backstitch 
 12) user guides and probably an AI assistant that exaplains how to do one or another 
-13) eraser doesn't properly highlight the beads to be erased. eraser erases both bead and aligned cross in neighbour cell (use picker behaviour as reference)
 14) beads with floss in between the crossess. right now dont get read by app at all.  but only ONE of them. the other one got displayed just right .... wtf
-15) in icons popup the scroll panel hovers over the right most column. make it super thin
-16) duplicate button for custom flos!!! 
-17) 'icon' for backstitch is actually compound. and it still cannot be identical. but the type alone can be identical. the combination of type and color = not 
-18) make sure all the chortcuts work on windows AND the hints show the correct keys 
 19) треба збирати статистику про те, хто які кнопки нажимає та якими шорткатами користується! щоб переробити і те і те 
-20) треба шорткати для розміру пензля!! 
-21) шорткати мають працювати і для укр розкладки!!! 
+
+DONE 9) near symmetry ignores the backstitch!!!
+DONE 13) eraser doesn't properly highlight the beads to be erased. eraser erases both bead and aligned cross in neighbour cell (use picker behaviour as reference)
+DONE 16) duplicate button for custom flos!!! 
+DONE 15) in icons popup the scroll panel hovers over the right most column. make it super thin
+DONE 17) 'icon' for backstitch is actually compound. and it still cannot be identical. but the type alone can be identical. the combination of type and color = not 
+DONE 20) треба шорткати для розміру пензля!! (D + 1, 2, 3, 4, 5???)??? 
+DONE 21) шорткати мають працювати і для укр розкладки!!! 
+DONE 18) make sure all the schortcuts work on windows AND the hints show the correct keys 
+DONE 4) when i have a bead key on and move the mouse OFF the canvas and click - a bead gets placed in the edge of the canvas. the same probably with backstitch
 
 ## Overview, by effort
 

@@ -40,7 +40,7 @@
     "filledRect": "Filled rectangle (Shift+R)",
     "fill": "Fill area (F)",
     "eraser": "Eraser (E) — erases crosses, beads, partial stitches, knots and backstitch. Point at a backstitch line to delete only that line",
-    "picker": "Pick a key entry from the chart (I, or hold Alt/⌥)",
+    "picker": "Pick a key entry from the chart (I, or hold {alt})",
     "pan": "Move (H, or hold Space)",
     "select": "Select (S) — drag a box; Shift adds",
     "magicWand": "Magic wand (W) — same key, connected; Shift+click selects all of that key",
@@ -52,8 +52,8 @@
     "mirrorVertical": "Mirror left–right",
     "mirrorHorizontal": "Mirror top–bottom",
     "mirrorQuad": "Mirror 4-way",
-    "undo": "Undo (Ctrl/⌘+Z)",
-    "redo": "Redo (Ctrl+Y / ⌘⇧Z)",
+    "undo": "Undo ({undo})",
+    "redo": "Redo ({redo})",
     "partialKind": {
       "quarter": "Quarter",
       "threeQuarter": "Three-quarter",
@@ -62,7 +62,7 @@
     "fit": "Fit to screen (0)",
     "zoomIn": "Zoom in (+)",
     "zoomOut": "Zoom out (−)",
-    "brushSizeN": "Brush {n}×{n}",
+    "brushSizeN": "Brush {n}×{n} ({key})",
     "toolbar": "Drawing tools",
     "autofill": "Autofill (Shift+F) — reads a 10 × 10 block off the image behind the chart",
     "pausedForImage": "The tools wait while you edit the image behind the chart (U or Esc to finish)"
@@ -74,7 +74,7 @@
     "ambiguousNext": "Next mark (Shift+A)",
     "ambiguousClear": "Clear all marks",
     "markedAmbiguous": "marked ambiguous",
-    "underlayHint": "Editing the image behind the chart · drag to move · zoomed in: drag the frame’s sides to stretch · arrows nudge · Ctrl/⌘+Z undo · Esc or U = done",
+    "underlayHint": "Editing the image behind the chart · drag to move · zoomed in: drag the frame’s sides to stretch · arrows nudge · {undo} undo · Esc or U = done",
     "noEntry": "No key entry chosen",
     "ambiguousClearTitle": "Clear all {count, plural, one {# “?” mark} other {# “?” marks}}?",
     "ambiguousClearConfirm": "Clear marks",
@@ -299,7 +299,6 @@
     "drawNeedInk": "A cut-out needs something to cut: draw a filled shape first.",
     "lineInk": "Line colour",
     "lineInkHint": "The line’s colour on the Symbols view and the printed chart. On the colour views it is the floss colour.",
-    "lineInkOwn": "Your own colour",
     "lineInks": {
       "black": "Black",
       "red": "Red",
@@ -339,6 +338,7 @@
     "searchIn": "Search {brand} number or name",
     "yours": "yours",
     "editCustom": "Change {code}",
+    "copyCustom": "Duplicate {code}",
     "save": "Save",
     "emptyBrand": "No {brand} threads yet — add one with +",
     "beadBrands": "Bead brands",
@@ -619,7 +619,7 @@
     "imageCreated": "Pattern created — {count} colours",
     "refsTooBig": "Reference photos are too big to remember in this browser — use Pattern ▸ Download work file (.xbird) to keep them",
     "copied": "Copied",
-    "pressCopy": "Press Ctrl+C to copy",
+    "pressCopy": "Press {copy} to copy",
     "newTwins": "{count, plural, one {# new key entry} other {# new key entries}} for mirrored half crosses",
     "nothingToCrop": "The chart is empty",
     "selectionEmpty": "Nothing selected",
@@ -647,7 +647,7 @@
     "heading": "Image behind the chart",
     "behind": "Behind stitches",
     "behindHint": "The image sits under your stitches; all tools work. Turn off (or press U) to move, resize or crop it.",
-    "editHint": "Edit mode: drag to move, corners resize (Shift = free), Crop trims edges. Zoomed in, a frame appears in the middle — drag its sides to stretch the photo right there. Ctrl/⌘+Z undoes. Tick “Behind stitches” or press Esc when done.",
+    "editHint": "Edit mode: drag to move, corners resize (Shift = free), Crop trims edges. Zoomed in, a frame appears in the middle — drag its sides to stretch the photo right there. {undo} undoes. Tick “Behind stitches” or press Esc when done.",
     "show": "Show",
     "opacity": "Opacity",
     "move": "Move & resize",
@@ -793,6 +793,7 @@
     "override": "Override on/off",
     "mirror": "Mirror drawing: off → ↔ → ↕ → 4-way",
     "pickEntry": "Pick key entry 1–9",
+    "brushSize": "Brush size 1–5",
     "endLine": "End a backstitch line / cancel",
     "ambiguous": "Mark cell as ambiguous",
     "ambiguousNext": "Next ambiguous mark",
@@ -895,8 +896,8 @@
     "tools": {
       "title": "6. Fast, without mistakes",
       "points": {
-        "1": "<hl>Ctrl/⌘ + Z</hl> — undo.",
-        "2": "Hold <hl>Alt/⌥</hl> — pick a colour from the chart.",
+        "1": "<hl>{undo}</hl> — undo.",
+        "2": "Hold <hl>{alt}</hl> — pick a colour from the chart.",
         "3": "<hl>S</hl> — select, copy, paste, move.",
         "4": "By default drawing never overwrites filled squares. Need to? Turn on <hl>Override</hl> (O)."
       },
@@ -945,7 +946,7 @@
       "points": {
         "1": "The <hl>edit</hl> button by the zoom turns it on and off (or U).",
         "2": "Zoom in and a <hl>frame</hl> appears in the middle: drag its side and the photo under it follows the cursor.",
-        "3": "<hl>↺ ↻</hl> above the frame turn the photo a little, <hl>Ctrl/⌘+Z</hl> undoes."
+        "3": "<hl>↺ ↻</hl> above the frame turn the photo a little, <hl>{undo}</hl> undoes."
       }
     },
     "referenceTip": {
@@ -1090,7 +1091,7 @@
     "loneHint": "A stitch with no more of its colour around it — often a typo.",
     "loneAlone": "Also when it stands alone on empty fabric",
     "symmetry": "Near symmetry",
-    "symmetryHint": "For symmetric designs: cells that differ from their mirror image.",
+    "symmetryHint": "For symmetric designs: stitches, beads, knots and backstitch lines that differ from their mirror image.",
     "run": "Run checks",
     "close": "Close results",
     "stale": "The chart has changed — run the checks again.",
@@ -1284,6 +1285,8 @@
     "save": "Save",
     "add": "Add",
     "delete": "Delete…",
+    "duplicate": "Duplicate",
+    "duplicateOne": "Duplicate {code}",
     "cancel": "Cancel",
     "deleteTitle": "Delete {brand} {code}?",
     "deleteBody": "It leaves your threads. Patterns that use it keep their copy, so nothing on a chart changes.",

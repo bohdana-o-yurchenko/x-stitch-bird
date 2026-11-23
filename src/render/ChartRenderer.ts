@@ -38,6 +38,8 @@ export interface ChartScene {
   floating: { pattern: Pattern; palette: Palette; at: Point } | null;
   marquee: Rect | null;
   eraseHighlight: Segment[] | null;
+  /** Knots and beads between cells the eraser would take. */
+  eraseKnots?: Knot[] | null;
   flash: { cell: number; until: number } | null;
   /** Behind: drawn under the stitches. Editing: drawn on top with handles. */
   underlay: (UnderlayView & { editing: boolean }) | null;
@@ -191,6 +193,22 @@ export class ChartRenderer {
         g.lineTo(ox + seg.x2 * z, oy + seg.y2 * z);
       }
       g.stroke();
+      g.restore();
+    }
+    if (s.eraseKnots) {
+      g.save();
+      g.fillStyle = g.strokeStyle = t.eraser.highlight;
+      g.lineWidth = Math.max(3, z * 0.12);
+      for (const o of s.eraseKnots) {
+        const slot = s.palette[o.k], cx = ox + o.x * z, cy = oy + o.y * z;
+        if (slot?.bead && (slot.t === "bead" || slot.t === "combo")) beadPath(g, cx, cy, z, slot.bead.shape);
+        else {
+          g.beginPath();
+          g.arc(cx, cy, Math.max(2, z * t.knots.radius) + 2, 0, Math.PI * 2);
+        }
+        g.fill();
+        g.stroke();
+      }
       g.restore();
     }
     if (s.chain && s.chain.hover) {
