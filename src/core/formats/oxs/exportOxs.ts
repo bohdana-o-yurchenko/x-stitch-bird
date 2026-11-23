@@ -62,7 +62,10 @@ function usedColours(p: Pattern, used: (i: number) => boolean) {
   return out;
 }
 
-/** What an item stands for, for this app to read back exactly: its entries and the colours they're made of. */
+/**
+ * What an item stands for, for this app to read back exactly: its entries — each with its place in the key, `i`, as one
+ * item can hold several (a bead in cells and between cells) — and the colours they're made of.
+ */
 function exactly(p: Pattern, entries: KeyEntry[]): string {
   const customs: Pattern["customs"] = {}, blends: Pattern["blends"] = {}, combos: Pattern["combos"] = {};
   const own = (id: string) => {
@@ -81,7 +84,7 @@ function exactly(p: Pattern, entries: KeyEntry[]): string {
       own(p.combos[e.src]!.bead);
     }
   }
-  return JSON.stringify({ entries, ...(Object.keys(customs).length && { customs }), ...(Object.keys(blends).length && { blends }), ...(Object.keys(combos).length && { combos }) });
+  return JSON.stringify({ entries: entries.map((e) => ({ ...e, i: p.key.indexOf(e) })), ...(Object.keys(customs).length && { customs }), ...(Object.keys(blends).length && { blends }), ...(Object.keys(combos).length && { combos }) });
 }
 
 const FORMAT_LINE =

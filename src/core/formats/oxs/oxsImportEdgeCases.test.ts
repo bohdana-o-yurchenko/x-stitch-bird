@@ -149,6 +149,18 @@ describe("opening an OXS file", () => {
     expect(report.simplified).toBe(1);
   });
 
+  it("one bead both in cells and between cells: two key entries, each drawn where it is (not the cell's entry on a point)", () => {
+    const { pattern: p } = read(oxs({
+      palette: '<palette_item index="1" number="00557" name="bead" color="FF00FF"/>',
+      objects: '<object x1="1" y1="1" palindex="1" objecttype="bead"/><object x1="3" y1="3" stitchwork_x="3" stitchwork_y="3" palindex="1" objecttype="bead"/>',
+    }));
+    const inCell = p.key[p.layers.beads[11]!], between = p.key[p.layers.knots[0]!.k];
+    expect(inCell).toMatchObject({ t: "bead", src: "bead:00557" });
+    expect(inCell!.st).toBeUndefined();
+    expect(between).toMatchObject({ t: "bead", src: "bead:00557", st: "point" });
+    expect(p.key.filter(Boolean)).toHaveLength(2);
+  });
+
   it("backstitches keep their ends; other line objects and ones with broken numbers are counted as simplified", () => {
     const { pattern: p, report } = read(oxs({ back: '<backstitch x1="0" y1="0" x2="3" y2="0.5" palindex="1" objecttype="backstitch"/><backstitch x1="0" y1="0" x2="1" y2="1" palindex="1" objecttype="straightstitch"/><backstitch x1="a" y1="0" x2="1" y2="1" palindex="1"/><backstitch x1="0" y1="0" x2="1" y2="1" palindex="9"/>' }));
     expect(p.layers.segments).toHaveLength(1);

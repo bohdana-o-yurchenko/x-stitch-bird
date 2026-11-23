@@ -82,7 +82,7 @@ export function resolveCode(number: string | undefined, name: string | undefined
 
 /** What a palette item of this app's own stands for (SPEC §15.42), or null for anyone else's. */
 interface Exact {
-  entries: Omit<KeyEntry, "sym">[] & { sym?: string }[];
+  entries: (Omit<KeyEntry, "sym"> & { sym?: string; i?: number })[];
   customs?: Record<string, CustomColor>;
   blends?: Pattern["blends"];
   combos?: Pattern["combos"];
@@ -174,8 +174,14 @@ export function importOxs(text: string, symbols: readonly string[], opts: OxsImp
     items.set(index, rec);
   }
 
-  // this app's own file: the key as it was, in its order — before the chart puts anything in it
-  for (const r of items.values()) r.exact?.entries.forEach((e) => keyFor(p, e as KeyEntry, symbols));
+  // this app's own file: the key as it was, in its order (`i`, its place; older files: the items' order) — before the
+  // chart puts anything in it
+  const exactEntries = [...items.values()].flatMap((r) => r.exact?.entries ?? []);
+  const place = (e: { i?: unknown }) => (typeof e.i === "number" ? e.i : Infinity);
+  exactEntries
+    .map((e, n) => ({ e, n }))
+    .sort((a, b) => place(a.e) - place(b.e) || a.n - b.n)
+    .forEach(({ e }) => keyFor(p, e as KeyEntry, symbols));
 
   type Use = StitchTypeId | "bead" | "back" | "knot" | "pointBead";
   /** This app's own file: the entry the item stood for, used as `use` — created once, its symbol as it was. */

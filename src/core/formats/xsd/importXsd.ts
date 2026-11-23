@@ -1,6 +1,6 @@
 import { libraryColor } from "../../catalog/catalog";
 import { createPattern, MAX_SIZE, shortId } from "../../pattern/createPattern";
-import { addEntry, keyFor } from "../../pattern/keyEntries";
+import { keyFor } from "../../pattern/keyEntries";
 import { canPlacePartial } from "../../pattern/occupancy";
 import type { Corner, KeyEntry, KeyIndex, Pattern, StitchTypeId } from "../../pattern/types";
 import { resolveCode, type OxsImportOptions, type OxsImportReport } from "../oxs/importOxs";
@@ -82,11 +82,6 @@ export function importXsd(data: Uint8Array, symbols: readonly string[], opts: Ox
     if (!it.thread) return 0;
     return entry({ t: "thread", src: it.thread, n: it.blend ? null : strands(pal, kind), st });
   };
-  /** A bead sewn on a grid point: its own entry, not the same bead's in cells (which `keyFor` would give). */
-  const pointBead = (src: string): KeyIndex => {
-    const i = p.key.findIndex((e) => e?.t === "bead" && e.src === src && e.st === "point");
-    return i > 0 ? i : addEntry(p, { t: "bead", src, st: "point" }, symbols);
-  };
   const line = (pal: number, kind: "back" | "straight" | "special"): KeyIndex => {
     const it = items[pal];
     const src = it?.thread ?? it?.bead;
@@ -144,7 +139,7 @@ export function importXsd(data: Uint8Array, symbols: readonly string[], opts: Ox
       if (!src) continue;
       // in the middle of a cell: the cell's bead; on a grid point: a bead sewn there, like a knot
       const mid = j.x % 1 === 0.5 && j.y % 1 === 0.5;
-      const k = it?.bead ? (mid ? entry({ t: "bead", src }) : pointBead(src)) : 0;
+      const k = it?.bead ? entry({ t: "bead", src, ...(mid ? {} : { st: "point" as StitchTypeId }) }) : 0;
       if (!k) simplified++;
       else if (mid) beads[Math.floor(j.y) * w + Math.floor(j.x)] = k;
       else knots.push({ x: j.x, y: j.y, k });

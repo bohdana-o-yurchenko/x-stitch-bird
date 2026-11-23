@@ -75,7 +75,8 @@ export function fixEntrySymbols(p: Pattern, symbols: readonly string[]) {
 /** Same colour, kind, stitch type and strands (beads compare colour only). SPEC §3.2. */
 export function sameKey(a: KeyEntry | null | undefined, b: Omit<KeyEntry, "sym">): boolean {
   if (!a || a.src !== b.src || a.t !== b.t) return false;
-  if (b.t === "bead") return true;
+  // a bead in cells and the same bead between cells are two entries: they live on different layers
+  if (b.t === "bead") return (a.st ?? null) === (b.st === "point" ? "point" : null);
   return (a.st ?? null) === (b.st ?? null) && (a.n ?? null) === (b.n ?? null) && (a.wraps ?? null) === (b.wraps ?? null);
 }
 

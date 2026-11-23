@@ -1996,6 +1996,10 @@ at a time.
   between cells says where it is (`stitchwork_x/_y`), the chart its brands (`stitchwork_materials`). Read back, the
   pattern is the same: size, fabric, info, brands, the key in its order with its symbols, own colours, every stitch,
   bead, knot and line. Key entries the chart doesn't use aren't in an OXS. **Always a new pattern** (a new id).
+  *Fixed 2026-11-23:* one bead colour used both in cells and between cells is **two key entries** (they live on
+  different layers; `sameKey` tells them apart by `st`) — before, the bead between cells took the cell's entry and was
+  drawn in a cell. One palette item holds both; each entry carries its place in the key (`i`) so the order comes back
+  as it was (older files: the items' order).
 - **Other apps' files** (or ours edited elsewhere): brands read off the numbers — "ANC 403"/"Anchor 403",
   "MAD …", "MH 00557", "PREC 00050"; a number naming a brand the app doesn't know ("Kreinik 032") is a thread of
   one's own of that brand — never DMC 32; a bare number is DMC (Mill Hill for beads), as every app takes it.
