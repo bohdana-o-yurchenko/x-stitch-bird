@@ -19,6 +19,9 @@ import { defaultCanvasTheme } from "@/render/theme";
  */
 
 export type { AccountUsage };
+export type { UsageTotal } from "@/core/usage/featureUsage";
+/** Feature usage totals for the stats page (SPEC §15.55); null when not an admin, or offline. */
+export { fetchUsageTotals as usageTotals } from "@/persistence";
 
 /** What the signed-in account holds against its limits (SPEC §15.35); null signed out or offline. */
 export const accountUsage = (): Promise<AccountUsage | null> => accountUsageApi.get();

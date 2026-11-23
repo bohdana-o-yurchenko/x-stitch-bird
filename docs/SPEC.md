@@ -2280,6 +2280,39 @@ to name. Its colours belong to one project only.
 - **Links into the editor** use `EDITOR` (`src/i18n/navigation.ts`): My patterns (Continue, Open, New), Account,
   Does your app read it?, privacy and support's *back*, and signed-out visits to signed-in pages (§15.39).
 
+### 15.54 Feature usage counts (2026-11-23)
+Our own count of which features are used — instead of Vercel's custom events (paid). Not important data: some may be
+lost, and it may be minutes out of date.
+- **What is counted**: every command run from a **button or menu item** (`useCommand`, a *click*) or a **shortcut**
+  (`ShortcutManager`, a *key*; also held Space / Alt as `tool.hold:pan|picker`), and dropping files on the editor.
+  A feature is the command id, with its argument where that names the thing used (`tool.select:fill`,
+  `file.export:oxs`, `draw.pickBrush:3`… — the list is `ARG_NAMED` in `core/usage/featureUsage.ts`). Commands run by
+  other commands or at start-up are not counted. Signed in or not is noted at the time of use.
+- **In the browser** (`editor/usage.ts`): one `Map` from "signed in · click/key · feature" to a number — counting is
+  one map update. The counts go up **10 minutes after the first one**, and **when the page is hidden or closed**
+  (`Editor.flush`), in one `navigator.sendBeacon` to `POST /api/stats`; then they start again from zero. A failed send
+  just loses them: nothing is retried, kept or shown.
+- **On the server** (`app/api/stats`, `server/usage.ts`): no sign-in check, nothing about the sender read or kept.
+  The batch is checked (feature names by pattern, ≤ 400 rows, each count ≤ 5000) and added in **one upsert** to table
+  `feature_usage` (migration 007): one row per **UTC day × feature × signed in**, with `clicks` and `keys`.
+- **Reading it**: the **Stats** page, for admins (§15.55).
+- **Privacy policy**: one paragraph under *Analytics and cookies* (uk + en).
+
+### 15.55 Roles; the Stats page (2026-11-23)
+- **Admin role**: the sign-in service's own `role` column on `neon_auth."user"` (Better Auth's admin feature; new
+  users get `user`). An admin has `admin` there, set by hand in the database:
+  `update neon_auth."user" set role = 'admin' where email = '…';` — sign out and in again so the session carries it.
+  The same role also opens the sign-in service's own admin calls (list or ban users…) for that account.
+- **Who sees it**: the **Stats** tab, after *App check* in the main pages' bar, shows only when the session's role is
+  admin (`ui/account/useIsAdmin.ts`). The page `/stats` sends signed-out visitors to the editor and anyone else to
+  My patterns. The server checks the role in the database itself (`server/roles.ts`): `GET /api/stats` says 401 signed
+  out, 403 to non-admins. The page is not indexed.
+- **The page** (`ui/stats/StatsApp.tsx`): days — **All time · 7 days · 30 days · 90 days · Dates…** (from / to, UTC);
+  who — **Everyone · Signed in · Signed out**; search by feature. A summary (total, clicks, shortcuts, features), then
+  one table: feature (its argument in accent colour), clicks, shortcuts, total, and a bar of the total whose darker
+  start is the shortcuts' share. Any column sorts (total, most first, by default). One request per range of days;
+  who and search work on what was loaded.
+
 ## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
 The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in
 BACKLOG B27.

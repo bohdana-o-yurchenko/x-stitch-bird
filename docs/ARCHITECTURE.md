@@ -1170,3 +1170,9 @@ to `.env.local`. Browser side: `ui/account` (auth client, account button), `pers
 (`withAccount(local)`: local-first, also to the account while signed in; `account.signedIn` set by
 `Editor.setAccount`). Schema changes: `db/migrations/*.sql`, applied by `node scripts/db/migrate.mjs --target <host>` (it refuses without the host
 it would change). Locally `.env.local` points at the Neon `dev` branch — `.env.example` lists what goes there.
+
+Feature usage counts (SPEC §15.54): `core/usage/featureUsage.ts` (feature names, the batch format and its
+check, shared), `editor/usage.ts` (`UsageCounter`, `Editor.usage`; counted in `useCommand` and `ShortcutManager`),
+`persistence/cloud/usage.ts` (beacon; `fetchUsageTotals`), `app/api/stats` (POST from anyone, GET for admins) +
+`server/usage.ts` (one upsert into `feature_usage`; `usageTotals`). Roles (§15.55): `server/roles.ts` (`isAdmin`, from
+`neon_auth."user".role`), `ui/account/useIsAdmin.ts` (from the session; only shows the tab), page `ui/stats`.

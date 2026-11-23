@@ -73,6 +73,7 @@ export class ShortcutManager {
       e.preventDefault();
       if (!e.repeat && !this.held.has(hold.hold)) {
         this.held.add(hold.hold);
+        this.ed.usage.count("tool.hold", hold.tool, "key");
         this.ed.setMomentaryTool(hold.tool);
       }
       return;
@@ -85,6 +86,7 @@ export class ShortcutManager {
     );
     if (!match) return;
     e.preventDefault();
+    this.ed.usage.count(match.binding.command, match.binding.args, "key");
     void this.ed.commands.run(match.binding.command, match.binding.args);
   }
 

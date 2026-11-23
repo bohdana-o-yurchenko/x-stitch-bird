@@ -1266,7 +1266,8 @@
     "deleteBody": "Delete <b>{name}</b> from this browser and your account? This can’t be undone. Download its .xbird file first to load it later.",
     "factEdited": "edited {when}",
     "storage": "Account storage: {percent}%",
-    "storageHint": "Patterns {patterns} of {maxPatterns} · references {photos} of {maxPhotos} MB — the fuller of the two counts. Open your account for details."
+    "storageHint": "Patterns {patterns} of {maxPatterns} · references {photos} of {maxPhotos} MB — the fuller of the two counts. Open your account for details.",
+    "stats": "Stats"
   },
   "threadForm": {
     "brand": "Brand",
@@ -1670,5 +1671,30 @@
     "openCheck": "Test .oxs in your app",
     "openShort": "Editor",
     "openCheckShort": "Test .oxs"
+  },
+  "statsPage": {
+    "title": "Feature usage",
+    "intro": "How often each button and shortcut was used, added up over everyone. Days are UTC; the last few minutes may be missing.",
+    "range": "Days",
+    "range_all": "All time",
+    "range_7": "7 days",
+    "range_30": "30 days",
+    "range_90": "90 days",
+    "range_custom": "Dates…",
+    "from": "From",
+    "to": "To",
+    "who": "Who",
+    "who_all": "Everyone",
+    "who_in": "Signed in",
+    "who_out": "Signed out",
+    "search": "Search features",
+    "feature": "Feature",
+    "clicks": "clicks",
+    "keys": "shortcuts",
+    "total": "total",
+    "features": "features",
+    "loading": "Loading…",
+    "failed": "Couldn’t load the numbers — try again later.",
+    "empty": "Nothing counted for these days."
   }
 }

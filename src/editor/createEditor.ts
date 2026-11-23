@@ -6,7 +6,8 @@ import type { KeyIndex, Pattern, Point } from "@/core/pattern/types";
 import { ALL_SYMBOLS, isShapeSymbol } from "@/core/symbols/symbols";
 import { RULER_SIZE } from "@/render/ChartRenderer";
 import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
-import { account, createPersistence, type Persistence } from "@/persistence";
+import { account, createPersistence, sendUsage, type Persistence } from "@/persistence";
+import { UsageCounter } from "./usage";
 import { loadImage } from "@/platform/images";
 import { confirmLargePhoto } from "./images/largePhoto";
 import { photoFits } from "./images/photoRoom";
@@ -70,6 +71,8 @@ export class Editor {
   readonly images: ImageService;
   readonly timer: WorkTimer;
   readonly live: LiveSync;
+  /** Feature usage counts, sent now and then without anything about who (SPEC §15.54). */
+  readonly usage = new UsageCounter(() => !!this.state.account, sendUsage);
   theme: CanvasTheme = defaultCanvasTheme;
   /** Translation for exported texts and labels built here; set by the UI for the current locale. */
   t: Translate = (key) => key;
@@ -251,6 +254,7 @@ export class Editor {
   }
 
   flush() {
+    this.usage.flush();
     // before start-up has restored the draft, the open pattern is only a blank placeholder: saving it would
     // replace the draft (closing or reloading the page while it loads)
     if (!this.state.ready) return;

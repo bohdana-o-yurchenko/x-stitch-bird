@@ -1,6 +1,6 @@
 /** The privacy policy's text (SPEC §15.23): one entry per language, the same sections in the same order. */
 export const CONTACT_EMAIL = "ptashechka.app@gmail.com";
-export const POLICY_UPDATED = "2026-11-18";
+export const POLICY_UPDATED = "2026-11-23";
 
 export type Section = { title: string; body: string[] };
 export interface Policy {
@@ -59,6 +59,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
         title: "Analytics and cookies",
         body: [
           "We use Vercel Web Analytics and Speed Insights to count page views and measure how fast the app loads. They do not use cookies, do not collect personal data, and do not track you across other websites.",
+          "The editor also counts how often each of its buttons and keyboard shortcuts is used, to learn which features matter. Only the totals are sent — which feature, how many times, and whether you were signed in — added to everyone's counts per day. Nothing that identifies you, your device or your patterns is sent or kept.",
           "When you sign in, a sign-in session cookie keeps you signed in. We use no advertising or tracking cookies.",
         ],
       },
@@ -137,6 +138,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
         title: "Аналітика й файли cookie",
         body: [
           "Ми використовуємо Vercel Web Analytics і Speed Insights, щоб рахувати перегляди сторінок і вимірювати швидкість завантаження. Вони не використовують cookie, не збирають персональних даних і не відстежують вас на інших сайтах.",
+          "Редактор також рахує, як часто використовують кожну його кнопку й клавіатурне скорочення, щоб знати, які функції потрібні. Надсилаються лише підсумки — яка функція, скільки разів і чи ви увійшли, — і додаються до спільних лічильників за день. Нічого, що визначає вас, ваш пристрій чи ваші схеми, не надсилається й не зберігається.",
           "Коли ви входите, cookie сеансу зберігає вхід. Рекламних чи відстежувальних cookie ми не використовуємо.",
         ],
       },

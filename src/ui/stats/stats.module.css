@@ -1,0 +1,144 @@
+/* Feature usage (SPEC §15.55): ranges and filters on top, then one table — airy, numbers right-aligned */
+.main {
+  flex: 1 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.title {
+  font-family: var(--font-serif), serif;
+  font-size: 28px;
+  margin: 0;
+}
+.main > p {
+  margin: 0;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 6px;
+}
+.dates {
+  display: flex;
+  gap: 10px;
+}
+.dates label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.search {
+  margin-left: auto;
+  min-width: 180px;
+}
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.summary b {
+  color: var(--ink);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.table th,
+.table td {
+  padding: 9px 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+.table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line2);
+}
+.table th button {
+  all: unset;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--muted);
+}
+.table th[aria-sort] button {
+  color: var(--ink);
+}
+.table tbody tr + tr td {
+  border-top: 1px solid var(--line);
+}
+.table tbody tr:hover td {
+  background: var(--surface);
+}
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+.total {
+  font-weight: 600;
+}
+.feature {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+}
+.arg {
+  color: var(--accent);
+}
+.barCol {
+  width: 28%;
+  min-width: 90px;
+}
+/* the whole bar is the total; its darker start is the share that came from shortcuts */
+.bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--meter, var(--accent));
+  opacity: 0.85;
+  overflow: hidden;
+}
+.barKeys {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  opacity: 0.45;
+}
+
+@media (max-width: 640px) {
+  .search {
+    margin-left: 0;
+    width: 100%;
+  }
+  .barCol {
+    display: none;
+  }
+  .table th,
+  .table td {
+    padding: 8px 8px;
+  }
+  .feature {
+    font-size: 12px;
+  }
+}

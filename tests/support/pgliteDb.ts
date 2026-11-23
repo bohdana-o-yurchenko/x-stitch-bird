@@ -7,7 +7,7 @@ import { PGlite } from "@electric-sql/pglite";
  */
 export async function createTestDb() {
   const pg = new PGlite();
-  await pg.exec(`create schema neon_auth; create table neon_auth."user" (id uuid primary key default gen_random_uuid(), email text);`);
+  await pg.exec(`create schema neon_auth; create table neon_auth."user" (id uuid primary key default gen_random_uuid(), email text, role text);`);
   const dir = new URL("../../db/migrations/", import.meta.url);
   for (const f of readdirSync(dir).filter((f) => f.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(f, dir), "utf8"));
 

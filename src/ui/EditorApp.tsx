@@ -46,6 +46,7 @@ function useGlobalEvents(ed: Editor, setDragging: (on: boolean) => void) {
         e.preventDefault();
         depth = 0;
         setDragging(false);
+        ed.usage.count("file.drop", undefined, "click");
         void ed.commands.run("file.drop", [...(e.dataTransfer?.files ?? [])]);
       }],
     ];

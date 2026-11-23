@@ -11,6 +11,8 @@ vi.mock("@/server/auth", () => ({
 }));
 vi.mock("@/server/db", () => ({ sql: vi.fn() }));
 vi.mock("@/server/storage", () => ({ assets: {} }));
+const roles = vi.hoisted(() => ({ admin: false }));
+vi.mock("@/server/roles", () => ({ isAdmin: async () => roles.admin }));
 vi.mock("@/server/account", () => ({ deleteAccount: vi.fn(async () => {}) }));
 vi.mock("@/server/patterns", async (orig) => ({
   ...(await orig<typeof import("@/server/patterns")>()),
@@ -95,8 +97,29 @@ describe("signed out, every route says 401 and touches nothing", () => {
       }
     };
     walk(dir);
-    // sign-in itself (/api/auth/...) is the sign-in service's own
-    expect(found.filter((p) => !p.startsWith("/api/auth")).sort()).toEqual(routes.map((r) => r[0]).sort());
+    // sign-in itself (/api/auth/...) is the sign-in service's own; feature usage counts are anyone's (below)
+    expect(found.filter((p) => !p.startsWith("/api/auth") && p !== "/api/stats").sort()).toEqual(routes.map((r) => r[0]).sort());
+  });
+});
+
+describe("POST /api/stats: feature usage counts from anyone, nothing about who (SPEC §15.54)", () => {
+  const post = async (body: string) => {
+    const { POST } = await import("./stats/route");
+    const { sql } = await import("@/server/db");
+    vi.mocked(sql).mockClear();
+    const res = await POST(new Request("http://x/api/stats", { method: "POST", body }));
+    return { status: res.status, writes: vi.mocked(sql).mock.calls.length };
+  };
+
+  it("adds a batch in one write, signed out too", async () => {
+    session.user = null;
+    expect(await post(JSON.stringify({ r: [["history.undo", 0, 1, 2], ["view.fit", 1, 0, 1]] }))).toEqual({ status: 204, writes: 1 });
+  });
+
+  it("refuses what isn't a batch, and writes nothing", async () => {
+    expect(await post("{}")).toEqual({ status: 400, writes: 0 });
+    expect(await post(JSON.stringify({ r: [["drop table", 0, 1, 1]] }))).toEqual({ status: 400, writes: 0 });
+    expect(await post("x".repeat(40_000))).toEqual({ status: 400, writes: 0 });
   });
 });
 
@@ -264,5 +287,33 @@ describe("pictures and live routes refuse what is not theirs", () => {
     const ok = { id: "custom:a", kind: "thread", brand: "A", code: "1", name: "", hex: "#000000" };
     expect((await m.PUT!(req("PUT", ok), ctx({ id: "custom:a" }))).status).toBe(204);
     expect(putThread).toHaveBeenCalledWith("u1", ok);
+  });
+});
+
+describe("GET /api/stats: the totals for admins only (SPEC §15.55)", () => {
+  const get = async (query = "") => {
+    const { GET } = await import("./stats/route");
+    const { sql } = await import("@/server/db");
+    vi.mocked(sql).mockReset().mockResolvedValue([] as never);
+    const { NextRequest } = await import("next/server");
+    const res = await GET(new NextRequest(`http://x/api/stats${query}`));
+    return { status: res.status, reads: vi.mocked(sql).mock.calls.length };
+  };
+
+  it("says 401 signed out and 403 to anyone but an admin, reading nothing", async () => {
+    session.user = null;
+    roles.admin = false;
+    expect(await get()).toEqual({ status: 401, reads: 0 });
+    session.user = { id: "u1", email: "me@example.com" };
+    expect(await get()).toEqual({ status: 403, reads: 0 });
+  });
+
+  it("answers an admin, all time or for days given as YYYY-MM-DD", async () => {
+    session.user = { id: "u1", email: "me@example.com" };
+    roles.admin = true;
+    expect(await get()).toEqual({ status: 200, reads: 1 });
+    expect(await get("?from=2026-11-01&to=2026-11-30")).toEqual({ status: 200, reads: 1 });
+    expect(await get("?from=yesterday")).toEqual({ status: 400, reads: 0 });
+    roles.admin = false;
   });
 });

@@ -30,8 +30,11 @@ export function useKeyNames() {
   return keyNames(useEditor().isMac);
 }
 
-/** `run(id, args)` bound to the editor's command registry. */
+/** `run(id, args)` bound to the editor's command registry: a button or menu item, counted as a click (SPEC §15.54). */
 export function useCommand() {
   const ed = useEditor();
-  return (id: string, args?: unknown) => void ed.commands.run(id, args);
+  return (id: string, args?: unknown) => {
+    ed.usage.count(id, args, "click");
+    void ed.commands.run(id, args);
+  };
 }
