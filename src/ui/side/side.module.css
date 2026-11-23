@@ -287,6 +287,17 @@
 .checkSub {
   margin: -2px 0 2px 24px;
 }
+/* a labelled choice under a check: words on the left, the select on the right */
+.checkField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+.checkField select {
+  flex: 0 0 auto;
+}
 .findings {
   display: flex;
   flex-direction: column;

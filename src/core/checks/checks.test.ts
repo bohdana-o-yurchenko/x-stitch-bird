@@ -78,6 +78,29 @@ describe("lone stitches", () => {
     expect(findLoneStitches(p, 1, false)).toEqual([]);
     expect(findLoneStitches(p, 2, false)).toHaveLength(1);
   });
+
+  it("a wider reach: none of its colour within 2 or 3 cells either", () => {
+    const { p, cell } = drawn([
+      "AAAAAAA",
+      "ABAAAAA",
+      "AAAAAAA",
+      "AAABAAA",
+      "AAAAAAA",
+      "AAAAABA",
+      "AAAAAAA",
+    ]);
+    // the three B are each lone among their 8 neighbours; B at (3,3) has another B 2 cells away on both sides
+    expect(findLoneStitches(p, 1, false).map((f) => f.cells)).toEqual([[cell(1, 1)], [cell(3, 3)], [cell(5, 5)]]);
+    expect(findLoneStitches(p, 1, false, 2)).toEqual([]);
+    p.layers.stitches[cell(3, 3)] = p.layers.stitches[cell(0, 0)]!;
+    // with the middle one gone, the two left are 4 cells apart: lone within 2 and 3 cells
+    expect(findLoneStitches(p, 1, false, 2).map((f) => f.cells)).toEqual([[cell(1, 1)], [cell(5, 5)]]);
+    expect(findLoneStitches(p, 1, false, 3).map((f) => f.cells)).toEqual([[cell(1, 1)], [cell(5, 5)]]);
+    p.layers.stitches[cell(4, 4)] = p.layers.stitches[cell(1, 1)]!;
+    // a B 3 cells from (1,1) and touching (5,5): (1,1) is lone within 2 cells, not within 3; (4,4)+(5,5) are a group
+    expect(findLoneStitches(p, 1, false, 2).map((f) => f.cells)).toEqual([[cell(1, 1)]]);
+    expect(findLoneStitches(p, 1, false, 3)).toEqual([]);
+  });
 });
 
 describe("near symmetry", () => {

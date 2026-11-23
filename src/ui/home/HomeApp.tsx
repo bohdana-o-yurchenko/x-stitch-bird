@@ -9,7 +9,7 @@ import type { CustomColor } from "@/core/pattern/types";
 import { splitDuration } from "@/core/time/workTime";
 import { requestStart } from "@/editor/startRequest";
 import type { PatternSummary } from "@/editor/types";
-import { Link, useRouter } from "@/i18n/navigation";
+import { EDITOR, Link, useRouter } from "@/i18n/navigation";
 import { pickFile } from "@/platform/files";
 import { useSignedInOnly } from "../account/useSignedInOnly";
 import { PageLoading } from "../common/AppBrand";
@@ -92,7 +92,7 @@ export default function HomeApp() {
       <main className={s.main}>
         {current && currentItem && (
           <section className={s.continue} data-testid="home-continue">
-            <Link href="/" className={s.continuePreview} aria-label={t("continueTo", { name: current.name })}>
+            <Link href={EDITOR} className={s.continuePreview} aria-label={t("continueTo", { name: current.name })}>
               {/* a picture drawn here (data: URL): nothing for the image optimiser */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {current.preview && <img src={current.preview} alt="" />}
@@ -102,7 +102,7 @@ export default function HomeApp() {
               <h1>{current.name}</h1>
               <PatternFacts p={currentItem} lib={lib} />
               <div className={s.continueButtons}>
-                <Link href="/" className={cx(ui.btn, ui.primary, s.go)}>{t("continueButton")}</Link>
+                <Link href={EDITOR} className={cx(ui.btn, ui.primary, s.go)}>{t("continueButton")}</Link>
                 <PatternMenu p={currentItem} onlyHere={signedIn && currentItem.where === "browser"} isCurrent {...actions} />
               </div>
             </div>
@@ -233,7 +233,7 @@ function useStarts(lib: Library) {
         signedIn
         onCreate={(options) => {
           requestStart({ kind: "create", options });
-          router.push("/");
+          router.push(EDITOR);
         }}
         onClose={close}
       />
@@ -244,7 +244,7 @@ function useStarts(lib: Library) {
           const f = await pickFile(".pdf,application/pdf");
           if (!f) return;
           requestStart({ kind: "pdf", file: f });
-          router.push("/");
+          router.push(EDITOR);
         }}
       />
     ) : null;
@@ -260,19 +260,19 @@ function useStarts(lib: Library) {
       const f = await pickFile(".oxs");
       if (!f) return;
       requestStart({ kind: "file", file: f });
-      router.push("/");
+      router.push(EDITOR);
     },
     picture: async () => {
       const f = await pickFile("image/*");
       if (!f) return;
       requestStart({ kind: "image", file: f });
-      router.push("/");
+      router.push(EDITOR);
     },
     file: async () => {
       const f = await pickFile(".xbird,.oxs,.json,.xml");
       if (!f) return;
       requestStart({ kind: "file", file: f });
-      router.push("/");
+      router.push(EDITOR);
     },
   };
 }
@@ -316,7 +316,7 @@ function NewButtons({ lib }: { lib: Library }) {
 type Actions = { lib: Library; signedIn: boolean; onChanged: () => void; onNotice: (text: string) => void };
 type ItemProps = Actions & { p: PatternSummary; onlyHere: boolean };
 
-const openHref = (p: PatternSummary) => ({ pathname: "/", query: { open: p.id } });
+const openHref = (p: PatternSummary) => ({ pathname: EDITOR, query: { open: p.id } });
 
 /** The pattern's picture: the account's, or drawn here from this browser's copy. */
 function usePreview(lib: Library, p: PatternSummary) {

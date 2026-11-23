@@ -98,6 +98,34 @@ describe("OXS round trip", () => {
     expect(q.key).toEqual(p.key);
     expect(q.layers.knots).toEqual(p.layers.knots);
   });
+
+  it("every bead goes out as a type reader apps know: Petite Glass, Size 6 and Pebble as plain beads, not skipped", () => {
+    // the case found: Petite Glass 42012 + DMC 816 between cells was "bead2mm", which a reader app skipped — its colour
+    // stayed in the key as a floss with no stitches — while a Glass Treasure + 816 ("bead") read fine
+    const p = createPattern(8, 8, "Sizes");
+    p.combos["combo:petite"] = { thread: "dmc:816", bead: "bead:42012" };
+    p.combos["combo:treasure"] = { thread: "dmc:816", bead: "bead:12190" };
+    const petite = addEntry(p, { t: "combo", src: "combo:petite", n: 1, st: "point" }, ALL_SYMBOLS);
+    const treasure = addEntry(p, { t: "combo", src: "combo:treasure", n: 1, st: "point" }, ALL_SYMBOLS);
+    const cells = ["bead:40020", "bead:18002", "bead:16002", "bead:05002"].map((src) => addEntry(p, { t: "bead", src }, ALL_SYMBOLS));
+    p.layers.knots.push({ x: 2, y: 2, k: petite }, { x: 4, y: 2, k: treasure });
+    cells.forEach((k, i) => (p.layers.beads[5 * 8 + i] = k));
+    const xml = exportOxs(p);
+    const types = [...xml.matchAll(/objecttype="(bead[^"]*)"/g)].map((m) => m[1]);
+    expect(types.sort()).toEqual(["bead", "bead", "bead", "bead", "bead", "bead3mm"]);
+    const { pattern: q } = importOxs(xml, ALL_SYMBOLS);
+    expect(q.layers.knots).toEqual(p.layers.knots);
+    expect([...q.layers.beads.slice(40, 44)]).toEqual([...p.layers.beads.slice(40, 44)]);
+  });
+
+  it("older files with bead2mm / bead5mm / bead6mm are still read as beads", () => {
+    const p = createPattern(4, 1, "Old");
+    const k = addEntry(p, { t: "bead", src: "bead:40020" }, ALL_SYMBOLS);
+    p.layers.beads[1] = k;
+    const xml = exportOxs(p).replace('objecttype="bead"', 'objecttype="bead2mm"');
+    expect(xml).toContain("bead2mm");
+    expect(importOxs(xml, ALL_SYMBOLS).pattern.layers.beads[1]).toBe(k);
+  });
 });
 
 

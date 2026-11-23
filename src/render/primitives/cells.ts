@@ -1,3 +1,4 @@
+import type { ChartGroup } from "@/core/pattern/groups";
 import { hexToRgb, luma, shade } from "@/core/color/colorMath";
 import type { BeadShape } from "@/core/catalog/beadShapes";
 import type { PaletteSlot } from "@/core/pattern/palette";
@@ -18,6 +19,8 @@ export interface CellStyle {
   stitched?: boolean;
   /** Symbol-only views: the ink of each entry's symbol where it isn't the theme's dark ink (the printed chart's red, green, blue). */
   symbolInks?: ReadonlyMap<PaletteSlot, string>;
+  /** Kinds of stitches not drawn (SPEC §15.16). */
+  hidden?: ReadonlySet<ChartGroup>;
 }
 
 /** The ink of an entry's symbol when the symbol is drawn without its colour. */

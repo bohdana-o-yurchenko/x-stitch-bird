@@ -5,8 +5,8 @@ import { cellPoint, editorState, fileAction, fixture, fixtureDataUrl, gridPoint,
 test.beforeEach(async ({ page }) => openEditor(page));
 
 test("shows the demo pattern with its key and totals", async ({ page }) => {
-  await expect(page.locator("[data-entry]")).toHaveCount(8);
-  await expect(page.getByTestId("totals")).toContainText("91 full");
+  await expect(page.locator("[data-entry]")).toHaveCount(13);
+  await expect(page.getByTestId("totals")).toContainText("451 full");
 });
 
 test("draws with the pencil and undoes with Ctrl/⌘+Z", async ({ page }) => {
@@ -27,7 +27,7 @@ test("adds a key entry through the form in the side panel", async ({ page }) => 
   await expect(page.getByTestId("key-preview")).toContainText("DMC 666");
   await page.getByRole("button", { name: "Add to key", exact: true }).click();
   await expect(page.getByTestId("key-form")).toHaveCount(0);
-  await expect(page.locator("[data-entry]")).toHaveCount(9);
+  await expect(page.locator("[data-entry]")).toHaveCount(14);
 });
 
 test("the key form leaves the chart free: no modal, typed numbers fill the floss lines, no shortcuts fire", async ({ page }) => {
@@ -43,25 +43,30 @@ test("the key form leaves the chart free: no modal, typed numbers fill the floss
   await expect(form.getByTestId("colour-line")).toHaveText([/3865/, /Ecru/]);
   expect(await editorState<string>(page, "(ed) => ed.state.tool")).toBe("pencil");
   await form.getByRole("button", { name: "Add to key", exact: true }).click();
-  await expect(page.locator("[data-entry]")).toHaveCount(9);
-  await expect(page.locator("[data-entry]").last()).toContainText("3865");
+  await expect(page.locator("[data-entry]")).toHaveCount(14);
+  await expect(page.locator("[data-entry]").filter({ hasText: "3865" })).toHaveCount(1);
 });
 
 test("deleting a key entry always asks and names it, used on the chart or not", async ({ page }) => {
-  const unused = page.locator("[data-entry]").last();
+  // an entry not on the chart yet
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  await page.getByPlaceholder("Search DMC number or name").fill("666");
+  await page.locator("[data-id='dmc:666']").click();
+  await page.getByRole("button", { name: "Add to key", exact: true }).click();
+  const unused = page.locator("[data-entry]").filter({ hasText: "DMC 666" });
   await unused.hover();
   await unused.getByRole("button", { name: "Delete entry" }).click();
   const dialog = page.getByRole("dialog");
-  await expect(dialog).toContainText("Delete DMC 3865 from the key?");
+  await expect(dialog).toContainText("Delete DMC 666 from the key?");
   await expect(dialog).toContainText("isn’t used on the chart");
   await dialog.getByRole("button", { name: "Cancel" }).click();
-  await expect(page.locator("[data-entry]")).toHaveCount(8);
-  const used = page.locator("[data-entry]").first();
+  await expect(page.locator("[data-entry]")).toHaveCount(14);
+  const used = page.locator("[data-entry]").filter({ hasText: "DMC 798" });
   await used.hover();
   await used.getByRole("button", { name: "Delete entry" }).click();
-  await expect(dialog).toContainText("on the chart 43 times");
+  await expect(dialog).toContainText("on the chart 210 times");
   await dialog.getByRole("button", { name: "Delete", exact: true }).click();
-  await expect(page.locator("[data-entry]")).toHaveCount(7);
+  await expect(page.locator("[data-entry]")).toHaveCount(13);
 });
 
 test("the edit and delete buttons of a key entry show their own names", async ({ page }) => {
@@ -107,7 +112,7 @@ test("duplicates a key entry without changing the original or shrinking its text
   expect({ ...added, sym: undefined }).toEqual({ ...original, sym: undefined });
   expect(added.sym).toBe(duplicateSymbol);
 
-  const addedRow = page.locator("[data-entry]").last();
+  const addedRow = page.locator(`[data-entry='${keyLength}']`);
   await addedRow.hover();
   await addedRow.getByRole("button", { name: "Edit entry" }).click();
   const editForm = page.getByTestId("key-form");
@@ -208,18 +213,19 @@ test("marks a cell ambiguous with A without touching the chart", async ({ page }
 });
 
 test("flips the chart and undoes it in one step", async ({ page }) => {
-  const before = await editorState<number>(page, "(ed) => ed.doc.layers.stitches.indexOf(1)");
+  // the bird's beak (entry 6): the frame around it is symmetric, the bird isn't
+  const before = await editorState<number>(page, "(ed) => ed.doc.layers.stitches.indexOf(6)");
   await page.getByRole("button", { name: "Transform ▾" }).click();
   await page.getByRole("menuitem", { name: "Flip horizontal" }).click();
-  await expect.poll(() => editorState<number>(page, "(ed) => ed.doc.layers.stitches.indexOf(1)")).not.toBe(before);
+  await expect.poll(() => editorState<number>(page, "(ed) => ed.doc.layers.stitches.indexOf(6)")).not.toBe(before);
   await page.keyboard.press("ControlOrMeta+z");
-  await expect.poll(() => editorState<number>(page, "(ed) => ed.doc.layers.stitches.indexOf(1)")).toBe(before);
+  await expect.poll(() => editorState<number>(page, "(ed) => ed.doc.layers.stitches.indexOf(6)")).toBe(before);
 });
 
 test("switches to Ukrainian", async ({ page }) => {
   await openAppMenu(page);
   await page.getByTestId("language").getByRole("radio", { name: "Українська" }).click();
-  await expect(page).toHaveURL(/\/uk$/);
+  await expect(page).toHaveURL(/\/uk\/editor$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "uk");
 });
 
@@ -323,6 +329,37 @@ test("highlighting fades every entry except the selected one", async ({ page }) 
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
   await toggle.click();
   expect(await editorState<boolean>(page, "(ed) => ed.state.highlight")).toBe(false);
+});
+
+test("whole kinds of stitches can be hidden from the view box, and shown again", async ({ page }) => {
+  const toggle = page.getByTestId("groups-toggle");
+  await toggle.click();
+  const pop = page.getByTestId("groups-pop");
+  // only the kinds the demo has: no fractional stitches or knots on offer
+  await expect(pop.getByRole("checkbox")).toHaveCount(3);
+  await expect(pop.getByText("Fractional stitches")).toHaveCount(0);
+  // "Show all" is always in the header, greyed out until something is hidden: the box doesn't move
+  const showAll = pop.getByRole("button", { name: "Show all" });
+  await expect(showAll).toBeDisabled();
+  const before = await pop.boundingBox();
+  await page.getByTestId("group-beads").uncheck();
+  await page.getByTestId("group-backstitch").uncheck();
+  await expect(showAll).toBeEnabled();
+  expect(await pop.boundingBox()).toEqual(before);
+  expect(await editorState<string[]>(page, "(ed) => ed.state.hiddenGroups")).toEqual(["beads", "backstitch"]);
+  await expect(toggle).toHaveAttribute("title", "2 kinds of stitches hidden");
+  await page.keyboard.press("Escape");
+  await expect(pop).toBeHidden();
+  await toggle.click();
+  // a hidden kind stays on offer even when the chart no longer has any
+  await editorState(page, "(ed) => { ed.doc.layers.segments.length = 0; ed.changed(); return 0; }");
+  await expect(page.getByTestId("group-backstitch")).toBeVisible();
+  await pop.getByRole("button", { name: "Show all" }).click();
+  await expect(page.getByTestId("group-backstitch")).toHaveCount(0);
+  expect(await editorState<string[]>(page, "(ed) => ed.state.hiddenGroups")).toEqual([]);
+  // a click elsewhere closes it
+  await page.getByTestId("totals").click();
+  await expect(pop).toBeHidden();
 });
 
 test("the quick-start guide opens on the first visit only, highlights what it explains, and reopens from the menu", async ({ page }) => {
@@ -464,7 +501,7 @@ test("the installed app: each language's manifest opens in that language, with i
     const res = await page.request.get(`/${locale}/manifest.webmanifest`);
     expect(res.headers()["content-type"]).toContain("application/manifest+json");
     const m = (await res.json()) as { id: string; name: string; start_url: string; icons: { src: string }[] };
-    expect([m.id, m.name, m.start_url]).toEqual(["/", "пташечка", `/${locale}`]);
+    expect([m.id, m.name, m.start_url]).toEqual(["/", "пташечка", `/${locale}/editor`]);
     for (const icon of m.icons) expect((await page.request.get(icon.src)).headers()["content-type"]).toBe("image/png");
   }
 });
@@ -501,9 +538,9 @@ test("☰ ▸ Install the app… on a laptop: what it gives, that it still needs
 });
 
 test("the status bar shows the colour being drawn with; the view switch sits with the zoom", async ({ page }) => {
-  await expect(page.getByTestId("status-entry")).toContainText("DMC 321");
+  await expect(page.getByTestId("status-entry")).toContainText("DMC 798");
   await page.keyboard.press("2");
-  await expect(page.getByTestId("status-entry")).toContainText("DMC 498");
+  await expect(page.getByTestId("status-entry")).toContainText("DMC 820");
   await page.getByRole("group", { name: "Chart view" }).getByRole("button", { name: "Symbols" }).click();
   expect(await editorState<string>(page, "(ed) => ed.state.view")).toBe("symbols");
 });
@@ -511,6 +548,31 @@ test("the status bar shows the colour being drawn with; the view switch sits wit
 test("opens in Ukrainian by default", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/uk$/);
+  await expect(page.getByTestId("landing")).toBeVisible();
+});
+
+test("the landing page leads into the editor; old editor links and signed-in visitors go straight there (SPEC §15.53)", async ({ page, context }) => {
+  await page.goto("/en");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cross stitch & bead pattern editor");
+  await expect(page.getByRole("heading", { level: 2 })).toHaveCount(10);
+  // no reader app named but Pattern Keeper; the second way in: the check of one's app
+  await expect(page.getByTestId("landing")).not.toContainText(/Хрестики|Ruta/);
+  await page.getByTestId("landing-check").click();
+  await expect(page).toHaveURL(/\/en\/check$/);
+  await page.goto("/en");
+  await page.getByRole("link", { name: "Українська" }).click();
+  await expect(page).toHaveURL(/\/uk$/);
+  await page.getByTestId("landing-open").click();
+  await expect(page).toHaveURL(/\/uk\/editor$/);
+  await expect(page.getByTestId("chart")).toBeVisible();
+  // a link from before the editor moved
+  await page.goto("/en?new=1");
+  await expect(page).toHaveURL(/\/en\/editor(\?new=1)?$/);
+  // signed in: no landing
+  // (over http the cookie has no __Secure- prefix; the proxy matches either)
+  await context.addCookies([{ name: "neon-auth.session_token", value: "x", domain: "localhost", path: "/" }]);
+  await page.goto("/en");
+  await expect(page).toHaveURL(/\/en\/editor$/);
 });
 
 test("puts a reference image behind the chart and keeps it after a reload", async ({ page }) => {
@@ -616,7 +678,7 @@ test("switching the language keeps the theme, without reloading the page", async
   await page.evaluate(() => ((window as unknown as { stillHere: boolean }).stillHere = true));
   await openAppMenu(page);
   await page.getByTestId("language").getByRole("radio", { name: "Українська" }).click();
-  await expect(page).toHaveURL(/\/uk$/);
+  await expect(page).toHaveURL(/\/uk\/editor$/);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect.poll(() => editorState<string>(page, "(ed) => ed.theme.stageBackground")).toBe("#1a1b22");
   expect(await page.evaluate(() => (window as unknown as { stillHere?: boolean }).stillHere)).toBe(true);
@@ -844,7 +906,7 @@ test("New ▸ has a blank pattern, a photo, an .oxs and a PDF chart; My patterns
     localStorage.removeItem("stitchwork.current");
     await new Promise((r) => { const q = indexedDB.deleteDatabase("stitchwork"); q.onsuccess = q.onerror = q.onblocked = r; });
   });
-  await page.goto("/en?new=pdf");
+  await page.goto("/en/editor?new=pdf");
   await expect(page.getByTestId("pdf-pattern-intro")).toBeVisible();
   await page.getByRole("button", { name: "Cancel" }).click();
   await expect(page.getByTestId("pdf-pattern-intro")).toHaveCount(0);
@@ -859,7 +921,7 @@ test("the selection bar can deselect without changing anything, and clears cells
   await deselect.click();
   await expect(deselect).toHaveCount(0);
   expect(await editorState<boolean>(page, "(ed) => !!ed.state.selection")).toBe(false);
-  await expect(page.getByTestId("totals")).toContainText("91 full");
+  await expect(page.getByTestId("totals")).toContainText("451 full");
   expect(await editorState<boolean>(page, "(ed) => ed.state.canUndo")).toBe(false);
   await page.keyboard.press("ControlOrMeta+a");
   await page.getByRole("button", { name: "Clear cells" }).click();
@@ -867,6 +929,9 @@ test("the selection bar can deselect without changing anything, and clears cells
 });
 
 test("a long key can be searched, sorted and grouped by type; a short one stays a plain list", async ({ page }) => {
+  // the demo's key is long; a new pattern's empty one is short
+  await expect(page.getByTestId("key-tools")).toBeVisible();
+  await editorState(page, `(ed) => ed.commands.run("file.create", { name: "Blank", w: 10, h: 10, count: 14, keepKey: false }, true)`);
   await expect(page.getByTestId("key-tools")).toHaveCount(0);
   await loadFixture(page, "1.json");
   const tools = page.getByTestId("key-tools");
@@ -1034,6 +1099,14 @@ test("chart checks are opt-in, run on demand, and their findings can be stepped 
   // the section stays open and the chosen check stays chosen after a reload
   await page.reload();
   await expect(page.getByTestId("checks-panel").getByRole("checkbox", { name: "Empty cells" })).toBeChecked();
+  // lone stitches: its options come with it, each with words saying what it is; remembered too
+  const checksPanel = page.getByTestId("checks-panel");
+  await expect(checksPanel.getByTestId("lone-reach")).toHaveCount(0);
+  await checksPanel.getByRole("checkbox", { name: "Lone stitches" }).check();
+  await expect(checksPanel.getByLabel("Group size")).toHaveValue("1");
+  await expect(checksPanel.getByRole("checkbox", { name: "Also when it stands alone on empty fabric" })).toBeChecked();
+  await checksPanel.getByLabel("None of its colour").selectOption({ label: "within 3 cells" });
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("stitchwork.checks")!).lone.reach)).toBe(3);
 });
 
 /** A 10 × 10 block printed at 30 px a cell: crosses and rings in the top row, the first of each already stitched. */
@@ -1151,7 +1224,7 @@ test("a backstitch has its own line colour for the Symbols view and the print PD
   const added = () => editorState<string | undefined>(page, "(ed) => ed.doc.key[ed.doc.key.length - 1].ink");
   expect(await added()).toBe("#3A5BD9");
   // changed when editing; the sample beside the list only shows the colour
-  const row = page.locator("[data-entry]").last();
+  const row = page.locator(`[data-entry='${await editorState<number>(page, "(ed) => ed.doc.key.length - 1")}']`);
   await row.hover();
   await row.getByRole("button", { name: "Edit entry" }).click();
   await expect(form.getByTestId("line-ink").locator("input")).toHaveCount(0);
@@ -1216,7 +1289,7 @@ test("the key list keeps its place across the key form, and shows a new entry wh
   const scroll = () => list.evaluate((el) => ({ top: el.scrollTop }));
   // in the middle: editing an entry brings the list back to the same place
   await list.evaluate((el) => (el.scrollTop = 200));
-  const row = page.locator("[data-entry='12']");
+  const row = page.locator("[data-entry='20']");
   await row.hover();
   await row.getByRole("button", { name: "Edit entry" }).click();
   await page.getByTestId("key-form").getByRole("button", { name: "Save changes" }).click();

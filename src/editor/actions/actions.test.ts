@@ -1,8 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ALL_SYMBOLS } from "@/core/symbols/symbols";
-import { checkPatternKeeper } from "@/core/formats/pdf/patternKeeper";
 import { at, testEditor } from "../../../tests/support/editorHarness";
-import { demoPattern } from "./pattern";
 
 let t: ReturnType<typeof testEditor>;
 beforeEach(() => {
@@ -117,12 +114,6 @@ describe("pattern settings and new patterns", () => {
     expect(ed.state.activeEntry).toBe(0);
   });
 
-  it("the demo pattern shows every kind of entry", () => {
-    const demo = demoPattern(ALL_SYMBOLS);
-    expect(demo.key.slice(1).map((e) => e!.t)).toEqual(["thread", "thread", "thread", "combo", "thread", "bead", "back", "thread"]);
-    expect(new Set(demo.key.slice(1).map((e) => e!.sym)).size).toBe(8);
-    expect(checkPatternKeeper(demo).issues.map((i) => i.kind)).toEqual(["half", "combo", "bead", "back"]);
-  });
 });
 
 describe("commands", () => {

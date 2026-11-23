@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { EDITOR, useRouter } from "@/i18n/navigation";
 import { authClient } from "./authClient";
 
 /**
@@ -14,7 +14,7 @@ export function useSignedInOnly(stay = false) {
   const router = useRouter();
   const out = !isPending && !session?.user;
   useEffect(() => {
-    if (out && !stay) router.replace("/");
+    if (out && !stay) router.replace(EDITOR);
   }, [out, stay, router]);
   return { session, isPending, allowed: !isPending && !!session?.user };
 }

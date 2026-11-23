@@ -818,14 +818,14 @@
 <object x1="10" y1="47" palindex="48" objecttype="tent" direction="2"/>
 <object x1="49.5" y1="17.5" palindex="26" objecttype="bead"/>
 <object x1="50.5" y1="17.5" palindex="26" objecttype="bead"/>
-<object x1="9.5" y1="20.5" palindex="27" objecttype="bead2mm"/>
-<object x1="10.5" y1="20.5" palindex="27" objecttype="bead2mm"/>
+<object x1="9.5" y1="20.5" palindex="27" objecttype="bead"/>
+<object x1="10.5" y1="20.5" palindex="27" objecttype="bead"/>
 <object x1="19.5" y1="20.5" palindex="28" objecttype="bead3mm"/>
 <object x1="20.5" y1="20.5" palindex="28" objecttype="bead3mm"/>
-<object x1="29.5" y1="20.5" palindex="29" objecttype="bead5mm"/>
-<object x1="30.5" y1="20.5" palindex="29" objecttype="bead5mm"/>
-<object x1="39.5" y1="20.5" palindex="30" objecttype="bead6mm"/>
-<object x1="40.5" y1="20.5" palindex="30" objecttype="bead6mm"/>
+<object x1="29.5" y1="20.5" palindex="29" objecttype="bead"/>
+<object x1="30.5" y1="20.5" palindex="29" objecttype="bead"/>
+<object x1="39.5" y1="20.5" palindex="30" objecttype="bead"/>
+<object x1="40.5" y1="20.5" palindex="30" objecttype="bead"/>
 <object x1="49.5" y1="20.5" palindex="31" objecttype="bead"/>
 <object x1="50.5" y1="20.5" palindex="31" objecttype="bead"/>
 <object x1="9.5" y1="23.5" palindex="32" objecttype="bead"/>

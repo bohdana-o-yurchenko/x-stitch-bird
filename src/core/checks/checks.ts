@@ -9,11 +9,12 @@ export type CheckId = "holes" | "lone" | "symmetry";
 
 export interface CheckOptions {
   holes: { on: boolean; max: 1 | 2 | 3 | 10 };
-  lone: { on: boolean; max: 1 | 2; alone: boolean };
+  /** `reach`: how far around there must be no more of that colour — 1 = the 8 touching cells (the first meaning), 2–3 wider. */
+  lone: { on: boolean; max: 1 | 2; alone: boolean; reach?: 1 | 2 | 3 };
   symmetry: { on: boolean };
 }
 
-export const DEFAULT_CHECKS: CheckOptions = { holes: { on: false, max: 3 }, lone: { on: false, max: 1, alone: false }, symmetry: { on: false } };
+export const DEFAULT_CHECKS: CheckOptions = { holes: { on: false, max: 3 }, lone: { on: false, max: 1, alone: true, reach: 1 }, symmetry: { on: false } };
 
 export interface Finding {
   /** Stable, so a finding can be ignored for the session. */
@@ -67,11 +68,24 @@ export function findHoles(p: Pattern, max: number): Finding[] {
 /** The colour of a cell's cross or half cross: same thread or blend counts as the same, whatever the stitch. */
 const colourAt = (p: Pattern, i: number): string | null => p.key[p.layers.stitches[i] ?? 0]?.src ?? null;
 
-/** Lone stitches: small groups of one colour with no more of that colour around; by default only among other stitches. */
-export function findLoneStitches(p: Pattern, max: number, alone: boolean): Finding[] {
+/** Cells up to `r` away (in a square, not the cell itself), inside the chart. */
+const around = (p: Pattern, i: number, r: number) => {
+  const x = i % p.w, y = (i / p.w) | 0, out: number[] = [];
+  for (let dy = -r; dy <= r; dy++)
+    for (let dx = -r; dx <= r; dx++)
+      if ((dx || dy) && x + dx >= 0 && y + dy >= 0 && x + dx < p.w && y + dy < p.h) out.push((y + dy) * p.w + x + dx);
+  return out;
+};
+
+/**
+ * Lone stitches: small groups of one colour with no more of that colour around; by default only among other stitches.
+ * `reach` 2 or 3: none of that colour within that many cells of the group either, not only among the 8 touching.
+ */
+export function findLoneStitches(p: Pattern, max: number, alone: boolean, reach = 1): Finding[] {
   const { stitches } = p.layers;
   return groups(p, (i) => !!colourAt(p, i), (a, b) => colourAt(p, a) === colourAt(p, b))
     .filter((g) => g.length <= max && (alone || g.some((i) => neighbours(p, i).some((n) => stitches[n] && !g.includes(n)))))
+    .filter((g) => reach <= 1 || g.every((i) => around(p, i, reach).every((n) => g.includes(n) || colourAt(p, n) !== colourAt(p, i))))
     .map((cells) => ({ id: `lone:${cells.join(",")}`, check: "lone", cells }));
 }
 
@@ -155,7 +169,7 @@ export function findNearSymmetry(p: Pattern): Finding[] {
 export function runChecks(p: Pattern, o: CheckOptions): Finding[] {
   return [
     ...(o.holes.on ? findHoles(p, o.holes.max) : []),
-    ...(o.lone.on ? findLoneStitches(p, o.lone.max, o.lone.alone) : []),
+    ...(o.lone.on ? findLoneStitches(p, o.lone.max, o.lone.alone, o.lone.reach ?? 1) : []),
     ...(o.symmetry.on ? findNearSymmetry(p) : []),
   ];
 }

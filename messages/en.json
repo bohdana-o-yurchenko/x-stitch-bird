@@ -8,7 +8,8 @@
     "dragToMove": "Drag to move · double-click to put back",
     "resizePanel": "Drag to resize · double-click for the default width",
     "url": "https://www.x-stitch-bird.app/en",
-    "glory": "Glory to Ukraine"
+    "glory": "Glory to Ukraine",
+    "toLanding": "About пташечка"
   },
   "header": {
     "patternName": "Pattern name",
@@ -20,7 +21,18 @@
     "label": "Chart view",
     "color": "Colour",
     "both": "Both",
-    "symbols": "Symbols"
+    "symbols": "Symbols",
+    "groups": "Show or hide kinds of stitches",
+    "groupsSome": "{n, plural, one {# kind of stitches hidden} other {# kinds of stitches hidden}}",
+    "show": "Show on the chart",
+    "showAll": "Show all",
+    "group": {
+      "crosses": "Crosses",
+      "partials": "Fractional stitches",
+      "backstitch": "Backstitch",
+      "knots": "French knots",
+      "beads": "Beads"
+    }
   },
   "transformMenu": {
     "flipH": "Flip horizontal",
@@ -1087,7 +1099,10 @@
     "holesHint": "Small holes in the stitching: empty cells with stitches all around.",
     "upTo": "{count, plural, one {1 cell} other {up to # cells}}",
     "lone": "Lone stitches",
-    "loneSize": "Largest group to report",
+    "loneSize": "Group size",
+    "loneCount": "{count, plural, one {a single stitch} other {up to # stitches together}}",
+    "loneReach": "None of its colour",
+    "loneReachN": "{count, plural, one {touching it} other {within # cells}}",
     "loneHint": "A stitch with no more of its colour around it — often a typo.",
     "loneAlone": "Also when it stands alone on empty fabric",
     "symmetry": "Near symmetry",
@@ -1573,5 +1588,87 @@
     "clearConfirm": "Clear",
     "deleteTitle": "Delete this check?",
     "deleteText": "The check of {app}, with its marks, is deleted from your account."
+  },
+  "landing": {
+    "metaTitle": "пташечка — cross stitch & bead pattern editor in your browser",
+    "title": "Cross stitch & bead pattern editor",
+    "lead": "Copy a paper chart or draw your own — right in the browser. Files for your favourite embroidery app and Pattern Keeper.",
+    "open": "Open the editor",
+    "note": "Nothing to install · No sign-up needed",
+    "features": "What it does",
+    "install": {
+      "title": "Nothing to install",
+      "text": "Opens in the browser on any computer. Your work saves itself as you go — and with a free account, it’s on every device."
+    },
+    "refs": {
+      "title": "Any picture as a reference",
+      "text": "JPG, PNG or a PDF of many pages: put it behind the stitches and trace, or keep it in a window of its own — with a marker for what’s done."
+    },
+    "straighten": {
+      "title": "Crooked photo? Not a problem",
+      "text": "Drag four corners and the photo lies flat. One button lets you nudge it right under the stitches, wherever it drifts."
+    },
+    "autofill": {
+      "title": "Autofill reads the chart",
+      "text": "Stitch a few cells of each symbol, and Autofill fills the rest of the block from the scan. You look it over and accept."
+    },
+    "palettes": {
+      "title": "Every floss and bead",
+      "text": "DMC, Anchor, Madeira and Dimensions floss, Mill Hill and Preciosa beads — built in. Add your own threads and beads, blends, floss + bead."
+    },
+    "checks": {
+      "title": "Checks before you stitch",
+      "text": "Finds empty cells, lone stitches and slips in symmetry — and takes you to each one."
+    },
+    "versions": {
+      "title": "Versions",
+      "text": "The editor keeps earlier versions as you work. Made a mess? Bring one back in a click."
+    },
+    "files": {
+      "title": "The files you need",
+      "text": "Opens PDF charts and .oxs files. Exports .oxs for your favourite embroidery app, a PDF for Pattern Keeper, and a chart to print."
+    },
+    "check": {
+      "title": "Not sure your app reads .oxs? Check it",
+      "text": "Test files with every kind of stitch, bead and line, each one numbered. Open a file in your app, go through the numbers, mark what works — and know before you share a pattern."
+    },
+    "again": "Ready to stitch?",
+    "support": "Something went wrong?",
+    "mock": {
+      "saved": "Saved · just now",
+      "everywhere": "This browser and your account",
+      "key": "Key",
+      "page": "Page 1 of 3",
+      "edit": "Edit image",
+      "accept": "Accept",
+      "decline": "Decline",
+      "found": "Autofill: 46 cells",
+      "own": "My floss",
+      "blend": "Blend",
+      "bead": "Bead",
+      "checks": "Chart checks",
+      "holes": "Empty cells",
+      "lone": "Lone stitches",
+      "symmetry": "Near symmetry",
+      "versions": "Versions",
+      "restore": "Bring back",
+      "autosave": "autosave",
+      "beforeImport": "before import",
+      "print": "Chart to print",
+      "work": "Work file",
+      "flossBead": "Floss + bead",
+      "yourApp": "Your embroidery app",
+      "checkFile": "Test file · .oxs",
+      "checkProgress": "3 of 4 checked",
+      "checkFull": "Full crosses",
+      "checkCombo": "Floss + bead",
+      "checkBeads": "Beads between crosses",
+      "checkBack": "Backstitch",
+      "ok": "All good",
+      "issue": "Issues"
+    },
+    "openCheck": "Test .oxs in your app",
+    "openShort": "Editor",
+    "openCheckShort": "Test .oxs"
   }
 }

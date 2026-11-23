@@ -273,6 +273,101 @@ describe("panning and picking", () => {
     expect(ed.state.overlay.pickerHighlight).toBeNull();
   });
 
+  it("takes a bead between cells anywhere on it as drawn, not only at its middle", () => {
+    const { ed, red, entry } = t;
+    const bead = entry({ t: "bead", src: "bead:00557", st: "point" });
+    const bugle = entry({ t: "bead", src: "bead:90020", st: "point" });
+    const knot = entry({ t: "knot", src: "dmc:321", n: 2 });
+    ed.doc.layers.stitches[11] = red;
+    ed.doc.layers.knots.push({ x: 2, y: 2, k: bead }, { x: 5, y: 2, k: bugle }, { x: 2, y: 5, k: knot });
+    ed.store.setState({ viewport: { zoom: 40, offX: 0, offY: 0 } });
+    ed.setTool("picker");
+    // the seed bead's edge (radius 0.4): picked, though 0.35 from its point
+    ed.tools.move(point(1.65, 2));
+    expect(ed.state.overlay.pickerHighlight).toEqual({ kind: "knot", point: ed.doc.layers.knots[0], key: bead });
+    ed.tools.down(point(1.65, 2));
+    expect(ed.state.activeEntry).toBe(bead);
+    // the far end of a large bugle, lying across
+    ed.setTool("picker");
+    ed.tools.down(point(5.42, 2.05));
+    expect(ed.state.activeEntry).toBe(bugle);
+    ed.setTool("picker");
+    // past the bugle's thickness: not on it
+    ed.tools.move(point(5.3, 2.45));
+    expect(ed.state.overlay.pickerHighlight).toBeNull();
+    // a knot is smaller: its dot plus a few px
+    ed.tools.move(point(2.28, 5));
+    expect(ed.state.overlay.pickerHighlight?.kind).toBe("knot");
+    ed.tools.move(point(2.4, 5));
+    expect(ed.state.overlay.pickerHighlight).toBeNull();
+    // a cell's middle next to a bead still picks the cell
+    ed.setTool("picker");
+    ed.tools.down(point(1.5, 1.5));
+    expect(ed.state.activeEntry).toBe(red);
+  });
+
+  it("hidden kinds of stitches are out of the picker's and the eraser's reach", async () => {
+    const { ed, red, entry } = t;
+    const bead = entry({ t: "bead", src: "bead:00557", st: "point" });
+    const knot = entry({ t: "knot", src: "dmc:321", n: 2 });
+    const back = entry({ t: "back", src: "dmc:321", n: 1 });
+    ed.doc.layers.stitches[11] = red;
+    ed.doc.layers.knots.push({ x: 1, y: 1, k: bead }, { x: 2, y: 1.5, k: knot });
+    ed.doc.layers.segments.push({ x1: 1, y1: 2, x2: 2, y2: 2, k: back });
+    await ed.commands.run("view.toggleGroup", "beads");
+    ed.setTool("picker");
+    ed.store.setState({ viewport: { zoom: 20, offX: 0, offY: 0 } });
+    // the bead between cells is hidden: the cross under the pointer is picked instead
+    ed.tools.move(point(1.1, 1.1));
+    expect(ed.state.overlay.pickerHighlight).toBeNull();
+    ed.tools.down(point(1.1, 1.1));
+    expect(ed.state.activeEntry).toBe(red);
+    // the eraser on the cells takes the cross and the knot, the hidden bead stays
+    await ed.commands.run("view.toggleGroup", "backstitch");
+    ed.store.setState({ brush: 5 });
+    ed.setTool("eraser");
+    ed.tools.down(point(1.5, 1.5));
+    ed.tools.up(point(1.5, 1.5));
+    expect(ed.doc.layers.stitches[11]).toBe(0);
+    expect(ed.doc.layers.knots).toEqual([{ x: 1, y: 1, k: bead }]);
+    expect(ed.doc.layers.segments).toHaveLength(1);
+    await ed.commands.run("view.showAll");
+    expect(ed.state.hiddenGroups).toEqual([]);
+    // floss + bead in a cell is a bead too: hidden with the beads, out of the picker's and eraser's reach
+    ed.doc.combos["combo:x"] = { thread: "dmc:310", bead: "bead:00557" };
+    const combo = entry({ t: "combo", src: "combo:x", n: 2 });
+    ed.doc.layers.stitches[33] = combo;
+    ed.doc.layers.stitches[34] = red;
+    await ed.commands.run("view.toggleGroup", "beads");
+    ed.setTool("picker");
+    ed.setActiveEntry(red);
+    ed.tools.move(point(3.5, 3.5));
+    expect(ed.state.overlay.pickerHighlight).toBeNull();
+    ed.tools.down(point(3.5, 3.5));
+    expect(ed.state.activeEntry).toBe(red);
+    ed.store.setState({ brush: 3 });
+    ed.setTool("eraser");
+    ed.tools.down(point(3.5, 3.5));
+    ed.tools.up(point(3.5, 3.5));
+    expect([ed.doc.layers.stitches[33], ed.doc.layers.stitches[34]]).toEqual([combo, 0]);
+    await ed.commands.run("view.showAll");
+    await ed.commands.run("view.toggleGroup", "nonsense");
+    expect(ed.state.hiddenGroups).toEqual([]);
+  });
+
+  it("at low zoom a bead between cells has a few screen px of slack", () => {
+    const { ed, entry } = t;
+    const bead = entry({ t: "bead", src: "bead:00557", st: "point" });
+    ed.doc.layers.knots.push({ x: 2, y: 2, k: bead });
+    ed.setTool("picker");
+    ed.store.setState({ viewport: { zoom: 40, offX: 0, offY: 0 } });
+    ed.tools.move(point(2.53, 2));
+    expect(ed.state.overlay.pickerHighlight).toBeNull();
+    ed.store.setState({ viewport: { zoom: 6, offX: 0, offY: 0 } });
+    ed.tools.move(point(2.53, 2));
+    expect(ed.state.overlay.pickerHighlight?.kind).toBe("knot");
+  });
+
   it("previews the partial corner selected by the picker, including its fallback corner", () => {
     const { ed, red, entry } = t;
     const blue = entry({ t: "thread", src: "dmc:797", n: 2, st: "full" });

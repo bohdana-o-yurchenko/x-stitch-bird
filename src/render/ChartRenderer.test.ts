@@ -69,6 +69,32 @@ describe("the chart canvas", () => {
       expect(t.c.calls("stroke").length).toBeGreaterThan(0);
     });
   });
+  it("leaves out the kinds of stitches that are hidden, and only those", () => {
+    const t = setup();
+    const at = (x: number, y: number) => t.c.calls("arc").some((a) => a[0] === 26 + x * 20 && a[1] === 26 + y * 20);
+    const count = (hidden: ChartScene["hidden"], call: string) => { t.set({ hidden }); t.draw(); return t.c.calls(call).length; };
+    t.draw();
+    expect(at(5.5, 2.5) && at(3.5, 2.5)).toBe(true);
+    t.set({ hidden: ["beads"] });
+    t.draw();
+    expect([at(5.5, 2.5), at(3.5, 2.5)]).toEqual([false, true]);
+    t.set({ hidden: ["knots"] });
+    t.draw();
+    expect([at(5.5, 2.5), at(3.5, 2.5)]).toEqual([true, false]);
+    // crosses: their cells and symbols go; backstitch and partial stitches: their own strokes and shapes
+    expect(count(["crosses"], "fillRect")).toBeLessThan(count([], "fillRect"));
+    expect(count(["backstitch"], "stroke")).toBeLessThan(count([], "stroke"));
+    expect(count(["partials"], "fill")).toBeLessThan(count([], "fill"));
+    // floss + bead in a cell goes with the beads, not the crosses
+    t.p.combos["combo:x"] = { thread: "dmc:310", bead: "bead:00557" };
+    const combo = addEntry(t.p, { t: "combo", src: "combo:x", n: 2, st: "full" }, ALL_SYMBOLS);
+    t.p.layers.stitches.fill(0);
+    t.p.layers.stitches[60] = combo;
+    t.set({ palette: buildPalette(t.p) });
+    expect(count(["crosses"], "fillRect")).toBeGreaterThan(count(["beads"], "fillRect"));
+    expect(count(["beads"], "fillRect")).toBe(count(["crosses", "beads"], "fillRect"));
+  });
+
   it("is sized for the screen's pixel density and drawn straight away", () => {
     const t = setup();
     expect(t.canvas.width).toBe(1200);

@@ -7,7 +7,7 @@ export function PrivacyPolicy({ locale }: { locale: string }) {
   return (
     <main className={s.page} data-testid="privacy">
       <article className={s.doc}>
-        <a className={s.back} href={`/${locale}`}>← {p.back}</a>
+        <a className={s.back} href={`/${locale}/editor`}>← {p.back}</a>
         <h1>{p.title}</h1>
         <p className={s.updated}>{p.updated}</p>
         <p>{p.intro}</p>

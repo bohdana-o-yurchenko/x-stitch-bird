@@ -418,7 +418,7 @@ All painting requires an active key entry; otherwise toast:
 | Filled rect (`frect`) | Shift+R | Drag; filled box. |
 | Fill (`fill`) | F | 4-connected flood fill on the active entry's layer (beads layer for bead entries, else stitches), replacing cells equal to the start value. Not available for backstitch (toast "Fill doesn’t apply to backstitch — use draw or line"). No-op if target already equals the active entry. |
 | Eraser (`eraser`) | E | Two modes, chosen by where the press starts. **On a backstitch line** — pointer within `backR = clamp(6 / zoom, 0.2, 0.45)` grid units of a segment (or of its mirror image when Mirror is on): while hovering, those segments are highlighted with a thick translucent accent stroke (`rgba(181,69,47,.5)`, width `max(7, 0.32z)`) and the cell cursor is hidden; press/drag deletes **only backstitch** within `backR` of the pointer — crosses and beads are untouched. **Anywhere else**: clears **both** stitch and bead layers within brush, and also deletes backstitch segments whose distance to the pointer (grid units) ≤ `0.3 × max(1, brush/2)`. Either way one stroke = one undo step. *New app (2026-11-23):* a third mode, checked first like the picker's order — **on a knot or a bead between cells** (within the backstitch radius, at least the picker's 0.25): hovering outlines that knot / bead (no cell cursor) and the stroke deletes only knots and beads between cells; the crosses in the cells around the point stay. |
-| Picker (`picker`) | I, or hold Alt/⌥ | Selects the entry under the pointer: backstitch within 0.25 units (topmost/last) wins, then bead, then stitch. Toast "Picked …" or "Nothing here to pick". |
+| Picker (`picker`) | I, or hold Alt/⌥ | Selects the entry under the pointer: backstitch within 0.25 units (topmost/last) wins, then bead, then stitch. Toast "Picked …" or "Nothing here to pick". *New app (2026-11-23):* knots and beads between cells come first and are taken **anywhere on them as drawn** — a bead's whole circle (its series' size) or a bugle's whole length, a knot's dot — plus a few screen px (at most 0.15 of a cell; a knot reaches 0.35 of a cell at most), never less than 0.25. The eraser's knot mode uses the same reach. Hidden kinds of stitches (§15.16) are skipped. |
 | Pan (`pan`) | H / hold Space | Drag to pan. |
 
 - Selecting a key entry while on eraser/picker/pan switches to pencil (except during a held-Alt pick).
@@ -647,6 +647,8 @@ edit loses nothing.
    and an unused DMC 3865 entry.
 3. Set up canvas observer, fit, select pencil.
 
+*New app — the demo is a chickadee (2026-11-23):* see §15.53. The old app's heart stays in `index.html`.
+
 *New app — automatic saving (2026-11-14):* the open pattern is written as a draft 0.6 s after each change (as
 before), and **into the saved-patterns library at most once a minute** while it has unsaved changes, plus right away
 when the page is hidden. A pattern that was just opened from the library, a restored draft and the demo are not
@@ -851,8 +853,9 @@ Rules:
   `blendcolor`=bead, `strands`=n, `comments`="blend", `<blend>` children: bead (1 strand), thread (n).
 - Bead: `number`=code, `name`, `color`, `strands=1`, `comments`=`"bead <series>"`.
 - Full crosses → `<stitch>`. Half crosses → `<object objecttype="tent" direction="2">` for ╱, `"1"` for ╲.
-  Beads → `<object x1=x+0.5 y1=y+0.5 objecttype=…>` where type is `bead2mm` (Petite Glass), `bead3mm` (Size 8),
-  `bead5mm` (Size 6), `bead6mm` (Pebble), else `bead`. Combo beads are **not** emitted as separate objects.
+  Beads → `<object x1=x+0.5 y1=y+0.5 objecttype=…>` where type is `bead3mm` (Size 8), else `bead` — *since
+  2026-11-23 Petite Glass, Size 6 and Pebble are plain `bead` too (they were `bead2mm`, `bead5mm`, `bead6mm`, which a
+  reader app skipped, leaving the colour in its key as floss with 0 stitches; this app still reads them).* Combo beads are **not** emitted as separate objects.
 - Attribute values XML-escaped (`& < > "`). Colours upper-case hex without `#`.
 
 ---
@@ -1061,6 +1064,12 @@ browser (`stitchwork.checks`):
   colour around it (8 neighbours). Same colour = same thread or blend, whatever the stitch type or strands. Options:
   *also when it stands alone on empty fabric* (off: by default only stitches inside other stitches are reported,
   where a stray cell is most likely a typo). Beads are not checked.
+  *Options laid out and a wider reach (2026-11-23):* with the check ticked, three labelled lines under it —
+  **Group size** (*a single stitch* / *up to 2 stitches together*), **None of its colour** (*touching it* — the 8 cells
+  sharing a side or a corner, as before — / *within 2 cells* / *within 3 cells*: no stitch of that colour in the
+  5 × 5 or 7 × 7 square around each cell of the group), and the *alone on empty fabric* tick — **on at first** since
+  2026-11-23 (a stray stitch on bare fabric is as likely a typo; untick it for scattered designs). Remembered with the
+  other options (`lone.reach`, 1 at first); a choice saved earlier stays as it was.
 - **Near symmetry** — for designs that are symmetric left–right or top–bottom: the app looks for the mirror axis
   near the middle (within 5 cells, on a grid line or through a cell's middle) where most mirrored pairs of cells
   match. If 90–99.9% match, the pairs that don't are reported (both cells); a half cross matches its mirror image
@@ -1537,6 +1546,16 @@ Idea from Pattern Maker v4 (Professional). Toggle with the eye button in the key
   beads, backstitch, knots) at 15 % opacity; fabric, grid, underlay and overlays are unchanged. Picking another
   entry moves the highlight. With no active entry, nothing is faded.
 - View-only: not saved, not in exports or undo.
+
+**Show or hide whole kinds (2026-11-23).** A button with a layers icon in the view box (next to the zoom) opens
+a small box headed **Show on the chart**, with **Show all** on the header's right — a text link, greyed out while
+nothing is hidden, always there so the box never changes size. Below, a tick per kind the chart has: *Crosses* (whole
+and half), *Fractional stitches*, *Backstitch*, *French knots*, *Beads* (a bead alone or floss + bead, in a cell or
+between cells). A hidden kind stays listed even when the chart no longer has any, so it can be shown again; an empty
+chart has no button. Click elsewhere or Esc closes the box. While something is hidden the button is outlined in the
+accent and its tooltip says how many kinds are hidden. A hidden kind isn't drawn (a cross with a hidden bead shows
+its symbol), and the picker and eraser leave it alone — erasing crosses doesn't take beads you can't see. View-only
+like highlighting: not saved, not in exports or undo; works together with highlighting.
 
 ### 15.17 Time spent on a pattern (implemented 2026-11-15)
 - Counted automatically while the user works on the pattern: any pointer press, drag, wheel or key in the app
@@ -2227,6 +2246,39 @@ to name. Its colours belong to one project only.
   organizer is empty (§15.31).
 - Not done: an .oxs with some colours matched and some not still mixes brands and the organizer for that file (the
   unmatched ones all go to the organizer); the organizer can't be turned into a real brand later.
+
+### 15.53 Landing page (2026-11-23)
+`/uk` and `/en` are a **landing page** for newcomers; the **editor moved to `/uk/editor`, `/en/editor`**.
+- **Two ways in**, at the top and the same size: **Open the editor** (filled) and **Test .oxs in your app** (outlined,
+  to the check page, §15.51) — in the bar (short labels on phones: *Editor*, *Test .oxs*), under the heading, and again at
+  the end.
+- **Layout** (`src/ui/landing/`): the bar (logo, languages, the two ways in); a big heading, one line on what the app
+  is, the two big buttons, "Nothing to install · No sign-up needed"; the demo pattern in a small copy of the editor.
+  Then nine features, a heading, two lines and a picture each, text and picture swapping sides: nothing to install,
+  references, straighten and the edit-image button, Autofill, built-in floss and bead brands and your own, chart
+  checks, versions, files in and out, and *Not sure your app reads .oxs? Check it*. Then the buttons again and the
+  footer (free software, source, support, privacy).
+- **No reader app is named** but Pattern Keeper: the others are "your favourite embroidery app".
+- **The logo** leads here when signed out — in the editor and on the check page (before, it led nowhere signed out,
+  §15.39); signed in it leads to My patterns, as before.
+- **Pictures** are drawn, not screenshots (`art.tsx`): copies of the editor's parts in SVG and HTML, in the visitor's
+  theme and language. Floss colours are fixed DMC colours, as in the editor.
+- **Static**: the page uses no account and no storage. Texts are in `landing` in the messages.
+- **Who skips it** (`src/proxy.ts`): a request with the sign-in session cookie (only its presence is checked), and the
+  editor's old links `/uk?open=…`, `/uk?new=1`, `/uk?new=pdf` go on to the editor, keeping the query. The installed app
+  starts at `/<locale>/editor` (manifest `start_url` and the *New pattern* shortcut); one installed earlier, still
+  opening on `/<locale>`, is sent on by a line of script when it runs standalone.
+- **The demo pattern** (`src/core/pattern/demo.ts`, what a first visit opens) is the picture in the hero, drawn from
+  the pattern itself; the other pictures use its bird. A great tit (синичка, the bird of the app's icon) on a branch,
+  in a frame, 60 × 60, 13 entries — so its key opens grouped, with search (10 entries and more):
+  - the bird in full crosses: DMC 939 cap, B5200 cheek, 798 back (also the frame's ring), 820 wing and tail,
+    972 breast, 3799 beak; its eye is floss + bead (939 + MH 00479), as are the frame's four corners;
+  - the branch is a blend (433 + 801), leaves are half crosses (DMC 989), berries are beads (MH 00968);
+  - the legs are backstitch (DMC 3799); gold beads (MH 02011) ring the frame; a line of **Kreinik 002 Gold**
+    backstitch runs inside it. Kreinik is a thread of the pattern's own (`DEMO_KREINIK`): like an organizer colour it
+    stays in the pattern and never joins a signed-in account's threads (`editor/threads/inventory.ts`).
+- **Links into the editor** use `EDITOR` (`src/i18n/navigation.ts`): My patterns (Continue, Open, New), Account,
+  Does your app read it?, privacy and support's *back*, and signed-out visits to signed-in pages (§15.39).
 
 ## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
 The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in

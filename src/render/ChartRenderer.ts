@@ -1,3 +1,4 @@
+import type { ChartGroup } from "@/core/pattern/groups";
 import { rulerLabels } from "@/core/grid/numbering";
 import type { Palette } from "@/core/pattern/palette";
 import type { KeyIndex, Knot, PartialStitch, Pattern, Point, Rect, Segment } from "@/core/pattern/types";
@@ -51,6 +52,8 @@ export interface ChartScene {
   underlayButtons: { x: number; y: number; dir: -1 | 1 }[];
   /** Only this entry at full strength, the rest faded (stitch highlighting). */
   highlight: KeyIndex | null;
+  /** Kinds of stitches not drawn (SPEC §15.16). */
+  hidden?: readonly ChartGroup[];
   /** Chart checks: every finding's cells (thin outline), the current one's cells (a ring). */
   checks: { all: number[][]; current: number[] | null } | null;
   /** Symbol matching: the block (outlined; `chosen` once read) and its proposals, drawn faintly. */
@@ -111,7 +114,8 @@ export class ChartRenderer {
     g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     g.fillStyle = t.stageBackground;
     g.fillRect(0, 0, this.width, this.height);
-    const f = this.frame(s), style = viewStyle(s.view, t), { z, ox, oy } = f;
+    const f = this.frame(s), { z, ox, oy } = f;
+    const style = s.hidden?.length ? { ...viewStyle(s.view, t), hidden: new Set(s.hidden) } : viewStyle(s.view, t);
 
     const behind = s.underlay && !s.underlay.editing ? s.underlay : undefined;
     const hl = s.highlight && s.palette[s.highlight] ? s.highlight : null;

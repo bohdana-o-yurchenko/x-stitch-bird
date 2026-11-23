@@ -1,3 +1,4 @@
+import { pointGroup, stitchGroup } from "@/core/pattern/groups";
 import { shade } from "@/core/color/colorMath";
 import { isMajorLine, majorOffset } from "@/core/grid/numbering";
 import type { Palette } from "@/core/pattern/palette";
@@ -56,9 +57,14 @@ export function drawUnderlay(g: Ctx, p: Pattern, u: UnderlayView, f: ChartFrame,
   g.restore();
 }
 
+/** Stands in for the bead layer while beads are hidden: no cell has one. */
+const NO_CELLS: { readonly [i: number]: number } = {};
+
 /** Fabric, (underlay,) crosses, partial stitches and beads — everything below the grid. */
 export function drawCells(g: Ctx, p: Pattern, palette: Palette, f: ChartFrame, style: CellStyle, withFabric = true, underlay?: UnderlayView) {
-  const { z, ox, oy } = f, { stitches, beads, partials } = p.layers;
+  const { z, ox, oy } = f, { stitches, partials } = p.layers, hidden = style.hidden;
+  // a hidden kind is drawn as if it weren't there: crosses show their symbols with the beads hidden
+  const beads = hidden?.has("beads") ? NO_CELLS : p.layers.beads;
   if (withFabric) {
     g.fillStyle = style.showColour ? p.fabric : "#FFFFFF";
     g.fillRect(ox, oy, p.w * z, p.h * z);
@@ -68,21 +74,23 @@ export function drawCells(g: Ctx, p: Pattern, palette: Palette, f: ChartFrame, s
   for (let y = f.y0; y < f.y1; y++)
     for (let x = f.x0; x < f.x1; x++) {
       const i = y * p.w + x, s = palette[stitches[i] ?? 0];
-      if (s) drawStitchCell(g, ox + x * z, oy + y * z, z, s, { ...style, showSymbol: style.showSymbol && !beads[i] });
+      if (s && !hidden?.has(stitchGroup(s))) drawStitchCell(g, ox + x * z, oy + y * z, z, s, { ...style, showSymbol: style.showSymbol && !beads[i] });
     }
-  for (const [i, list] of partials) {
-    const x = i % p.w, y = (i / p.w) | 0;
-    if (x < f.x0 || x >= f.x1 || y < f.y0 || y >= f.y1) continue;
-    for (const ps of list) {
-      const s = palette[ps.k];
-      if (s) drawPartial(g, ox + x * z, oy + y * z, z, ps, s, style);
+  if (!hidden?.has("partials"))
+    for (const [i, list] of partials) {
+      const x = i % p.w, y = (i / p.w) | 0;
+      if (x < f.x0 || x >= f.x1 || y < f.y0 || y >= f.y1) continue;
+      for (const ps of list) {
+        const s = palette[ps.k];
+        if (s) drawPartial(g, ox + x * z, oy + y * z, z, ps, s, style);
+      }
     }
-  }
-  for (let y = f.y0; y < f.y1; y++)
-    for (let x = f.x0; x < f.x1; x++) {
-      const s = palette[beads[y * p.w + x] ?? 0];
-      if (s) drawBeadCell(g, ox + x * z, oy + y * z, z, s, style);
-    }
+  if (!hidden?.has("beads"))
+    for (let y = f.y0; y < f.y1; y++)
+      for (let x = f.x0; x < f.x1; x++) {
+        const s = palette[beads[y * p.w + x] ?? 0];
+        if (s) drawBeadCell(g, ox + x * z, oy + y * z, z, s, style);
+      }
 }
 
 /** The stitched preview's fabric: a faint hole at every cell corner, as in Aida. */
@@ -123,13 +131,14 @@ export function drawGrid(g: Ctx, p: Pattern, f: ChartFrame, theme: CanvasTheme, 
 
 /** Backstitch and French knots — drawn above the grid so they read clearly. */
 export function drawLines(g: Ctx, p: Pattern, palette: Palette, f: ChartFrame, style: CellStyle, alpha = 1) {
-  const { z, ox, oy } = f;
-  for (const s of p.layers.segments) {
-    const slot = palette[s.k];
-    if (slot) drawBackstitch(g, ox + s.x1 * z, oy + s.y1 * z, ox + s.x2 * z, oy + s.y2 * z, z, slot, style, alpha);
-  }
+  const { z, ox, oy } = f, hidden = style.hidden;
+  if (!hidden?.has("backstitch"))
+    for (const s of p.layers.segments) {
+      const slot = palette[s.k];
+      if (slot) drawBackstitch(g, ox + s.x1 * z, oy + s.y1 * z, ox + s.x2 * z, oy + s.y2 * z, z, slot, style, alpha);
+    }
   for (const k of p.layers.knots) {
     const slot = palette[k.k];
-    if (slot) drawKnot(g, ox + k.x * z, oy + k.y * z, z, slot, style, alpha);
+    if (slot && !hidden?.has(pointGroup(slot))) drawKnot(g, ox + k.x * z, oy + k.y * z, z, slot, style, alpha);
   }
 }

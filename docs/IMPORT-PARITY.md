@@ -12,7 +12,7 @@ chart, the same on the page. "Ours" = what our exporter writes; "Theirs" = what 
 | # | Sample | Theirs | Notes / possible fix |
 |---|---|---|---|
 | 1–25 | whole crosses, blends, half crosses, floss + bead in a cell | ✅ as ours | |
-| 26 | bead Mill Hill 40020 (Petite Glass) — `objecttype="bead2mm"` | ❌ missing from the chart **and** the key | The app ignores bead objects it doesn't know. `bead3mm` (#27, Size 8) works. Fix to try: write every bead as `objecttype="bead"` (or only the types the app knows), keeping the size in `comments` / our own attribute. |
+| 26 | bead Mill Hill 40020 (Petite Glass) — `objecttype="bead2mm"` | ❌ missing from the chart **and** the key | The app ignores bead objects it doesn't know. `bead3mm` (#27, Size 8) works. Fix to try: write every bead as `objecttype="bead"` (or only the types the app knows), keeping the size in `comments` / our own attribute. **Fixed 2026-11-23, to re-check:** Petite Glass, Size 6 and Pebble now go out as `bead` (Size 8 stays `bead3mm`). Seen in a real file too: Petite Glass 42012 + DMC 816 between cells came in as a floss with 0 stitches, Glass Treasure 12190 + 816 fine. |
 | 28 | bead Mill Hill 16002 (Size 6) — `bead5mm` | ❌ missing, as #26 | as #26 |
 | 29 | bead Mill Hill 05002 (Pebble) — `bead6mm` | ❌ missing, as #26 | as #26 |
 | 41 vs 42 | ¼ (`objecttype="quarter" petit="false"`) vs petite (`objecttype="petite"`) | ⚠️ both shown as petites (small squares) | The app follows Ursa: a "quarter" object is a miniature cross; it ignores XSPro's `petit="false"`. OXS has no other way to write a quarter (one leg, corner to centre). |

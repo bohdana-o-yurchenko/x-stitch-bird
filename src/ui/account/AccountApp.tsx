@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { accountUsage, createLibrary, type AccountUsage } from "@/editor/library";
-import { Link, useRouter } from "@/i18n/navigation";
+import { EDITOR, Link, useRouter } from "@/i18n/navigation";
 import { Modal, cx, ui } from "../common/widgets";
 import { HomeFooter, HomeHeader } from "../home/HomeHeader";
 import { PageLoading } from "../common/AppBrand";
@@ -55,7 +55,7 @@ export default function AccountApp() {
           {deleted ? (
             <section className={s.card} data-testid="account-deleted">
               <p>{t("deleted")}</p>
-              <Link href="/" className={cx(ui.btn, ui.primary, s.linkBtn)}>{t("toEditor")}</Link>
+              <Link href={EDITOR} className={cx(ui.btn, ui.primary, s.linkBtn)}>{t("toEditor")}</Link>
             </section>
           ) : !user ? null : (
             <>

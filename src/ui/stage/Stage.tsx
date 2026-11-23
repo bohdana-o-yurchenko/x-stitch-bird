@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { CHART_GROUPS, groupsIn } from "@/core/pattern/groups";
 import type { ChartView } from "@/render/chart";
 import { Icon } from "../common/Icon";
 import { cx, ui } from "../common/widgets";
@@ -22,6 +23,56 @@ function ViewSwitch() {
           {t(v)}
         </button>
       ))}
+    </div>
+  );
+}
+
+/**
+ * Show / hide whole kinds of stitches (SPEC §15.16): a button by the zoom opens five ticks. View only — the picker and
+ * eraser leave hidden ones alone. The button is marked while something is hidden.
+ */
+function GroupsToggle() {
+  const t = useTranslations("view");
+  const run = useCommand();
+  const hidden = useEditorState((st) => st.hiddenGroups);
+  const doc = useEditorState((st) => st.doc);
+  const revision = useEditorState((st) => st.docRevision);
+  // only the kinds the design has — and any hidden one, so it can be shown again
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- the doc changes in place; its revision says when
+  const present = useMemo(() => groupsIn(doc), [doc, revision]);
+  const listed = CHART_GROUPS.filter((g) => present.includes(g) || hidden.includes(g));
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: PointerEvent) => { if (!box.current?.contains(e.target as Node)) setOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setOpen(false); } };
+    document.addEventListener("pointerdown", away, true);
+    document.addEventListener("keydown", esc, true);
+    return () => { document.removeEventListener("pointerdown", away, true); document.removeEventListener("keydown", esc, true); };
+  }, [open]);
+  const label = hidden.length ? t("groupsSome", { n: hidden.length }) : t("groups");
+  if (!listed.length) return null;
+  return (
+    <div ref={box} className={s.groupsWrap}>
+      <button type="button" className={cx(s.iconBtn, hidden.length > 0 && s.on)} title={label} aria-label={label} aria-expanded={open} data-testid="groups-toggle" onClick={() => setOpen(!open)}>
+        <Icon name="layers" size={17} />
+      </button>
+      {open && (
+        <div className={s.groupsPop} role="group" aria-label={t("groups")} data-testid="groups-pop">
+          {/* a fixed header: "Show all" is always there, greyed out while nothing is hidden — the list never moves */}
+          <div className={s.groupsHead}>
+            <b className={s.groupsTitle}>{t("show")}</b>
+            <button type="button" className={s.groupsAll} disabled={!hidden.length} onClick={() => run("view.showAll")}>{t("showAll")}</button>
+          </div>
+          {listed.map((g) => (
+            <label key={g} className={ui.chk}>
+              <input type="checkbox" checked={!hidden.includes(g)} data-testid={`group-${g}`} onChange={() => run("view.toggleGroup", g)} />
+              {t(`group.${g}`)}
+            </label>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -54,6 +105,7 @@ function ZoomControls() {
       <div className={s.zoomRow}>
         {/* on the far side from "fit", so the two aren't mixed up */}
         <UnderlayEditToggle />
+        <GroupsToggle />
         <div className={s.zoomGroup}>
           <button type="button" title={t("zoomOut")} aria-label={t("zoomOut")} onClick={() => run("view.zoomOut")}>−</button>
           <span>{Math.round((zoom / 12) * 100)}%</span>

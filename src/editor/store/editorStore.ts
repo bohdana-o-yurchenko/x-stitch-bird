@@ -3,6 +3,7 @@ import type { PdfContent } from "@/core/formats/pdfChart/content";
 import type { ChartRead } from "@/core/formats/pdfChart/read";
 import type { PkReport } from "@/core/formats/pdf/patternKeeper";
 import type { Fragment } from "@/core/pattern/fragment";
+import type { ChartGroup } from "@/core/pattern/groups";
 import type { Palette } from "@/core/pattern/palette";
 import { createPattern } from "@/core/pattern/createPattern";
 import type { KeyIndex, PartialKindId, PartialStitch, Pattern, Point, Rect, Segment, CustomColor, Knot } from "@/core/pattern/types";
@@ -151,6 +152,8 @@ export interface EditorState {
   underlayHot: Exclude<Handle, "inside"> | null;
   /** Fade every key entry except the active one (SPEC §15.16). */
   highlight: boolean;
+  /** Kinds of stitches not drawn for now — view only; the picker and eraser leave them alone (SPEC §15.16). */
+  hiddenGroups: ChartGroup[];
   hasClipboard: boolean;
   /** The last run of the chart checks (SPEC §15.4); null = not run or closed. */
   checks: ChecksState | null;
@@ -213,6 +216,7 @@ export const createEditorStore = () =>
     underlay: null,
     underlayImage: null,
     highlight: false,
+    hiddenGroups: [],
     underlayFrame: null,
     underlayHot: null,
     guide: null,

@@ -1,6 +1,5 @@
 import { applyMaterials, NEW_MATERIALS, type Materials } from "@/core/pattern/brands";
 import { clampSize, createPattern } from "@/core/pattern/createPattern";
-import { addEntry } from "@/core/pattern/keyEntries";
 import { cleanMeta } from "@/core/pattern/meta";
 import { invalidateColors } from "@/core/pattern/resolve";
 import type { GridNumbering, Pattern, PatternMeta, Point, Size } from "@/core/pattern/types";
@@ -95,39 +94,5 @@ export function emptyPattern(): Pattern {
   return p;
 }
 
-export function demoPattern(symbols: readonly string[]): Pattern {
-  const p = createPattern(60, 60, "Untitled pattern");
-  // every thread and bead brand, as a new pattern (SPEC §15.39)
-  applyMaterials(p, NEW_MATERIALS);
-  const add = (e: Parameters<typeof addEntry>[1]) => addEntry(p, e, symbols);
-  const red = add({ t: "thread", src: "dmc:321", n: 2, st: "full" });
-  const dark = add({ t: "thread", src: "dmc:498", n: 3, st: "full" });
-  p.blends["blend:demo"] = { parts: [{ id: "dmc:3713", n: 1 }, { id: "dmc:Ecru", n: 1 }] };
-  const blend = add({ t: "thread", src: "blend:demo", n: null, st: "full" });
-  p.combos["combo:demo"] = { thread: "dmc:3371", bead: "bead:00557" };
-  const combo = add({ t: "combo", src: "combo:demo", n: 2, st: "half" });
-  const half = add({ t: "thread", src: "dmc:310", n: 1, st: "half" });
-  const gold = add({ t: "bead", src: "bead:02011" });
-  const back = add({ t: "back", src: "dmc:3371", n: 1 });
-  add({ t: "thread", src: "dmc:3865", n: 2, st: "full" });
-  const heart = ["..XX...XX..", ".XXXX.XXXX.", "XXXXXXXXXXX", "XXXXXXXXXXX", "XXXXXXXXXXX", ".XXXXXXXXX.", "..XXXXXXX..", "...XXXXX...", "....XXX....", ".....X....."];
-  const S = p.layers.stitches, W = p.w;
-  heart.forEach((row, y) =>
-    [...row].forEach((ch, x) => {
-      if (ch !== "X") return;
-      const edge = heart[y - 1]?.[x] !== "X" || heart[y + 1]?.[x] !== "X" || row[x - 1] !== "X" || row[x + 1] !== "X";
-      S[(22 + y) * W + 24 + x] = edge ? dark : red;
-    }),
-  );
-  for (let x = 18; x < 42; x++) {
-    S[18 * W + x] = blend;
-    S[35 * W + x] = half;
-  }
-  for (const [x, y] of [[26, 24], [32, 24], [29, 27]] as const) S[y * W + x] = combo;
-  for (const x of [20, 39]) {
-    p.layers.beads[20 * W + x] = gold;
-    p.layers.beads[33 * W + x] = gold;
-  }
-  p.layers.segments.push({ x1: 18, y1: 17, x2: 42, y2: 17, k: back }, { x1: 18, y1: 19, x2: 42, y2: 19, k: back }, { x1: 18, y1: 17, x2: 18, y2: 19, k: back }, { x1: 42, y1: 17, x2: 42, y2: 19, k: back });
-  return p;
-}
+/** The demo pattern lives in core: the landing page draws it too (SPEC §15.53). */
+export { demoPattern } from "@/core/pattern/demo";

@@ -66,10 +66,10 @@ export function oxsSuite(): CheckSuite {
     { id: "comboOwn", group: combos, tags: ["combo", "ownThread", "ownBead"], what: t("own thread + own bead: Kreinik 032 + Toho 11-21", "своя нитка + свій бісер: Kreinik 032 + Toho 11-21"), how: t('<stitch>; item "Toho 11-21+Kreinik 032"', '<stitch>; колір "Toho 11-21+Kreinik 032"'), put: (x, y) => row(x, y, 2, combo("combo:own")) },
     ...([
       ["beadSeed", "bead:00557", t("Mill Hill 00557 (Glass Seed)", "Mill Hill 00557 (Glass Seed)"), "bead", ["beadSeed"]],
-      ["beadPetite", "bead:40020", t("Mill Hill 40020 (Petite Glass)", "Mill Hill 40020 (Petite Glass)"), "bead2mm", ["beadSize"]],
+      ["beadPetite", "bead:40020", t("Mill Hill 40020 (Petite Glass)", "Mill Hill 40020 (Petite Glass)"), "bead", ["beadSize"]],
       ["beadSize8", "bead:18002", t("Mill Hill 18002 (Size 8)", "Mill Hill 18002 (Size 8)"), "bead3mm", ["beadSize"]],
-      ["beadSize6", "bead:16002", t("Mill Hill 16002 (Size 6)", "Mill Hill 16002 (Size 6)"), "bead5mm", ["beadSize"]],
-      ["beadPebble", "bead:05002", t("Mill Hill 05002 (Pebble)", "Mill Hill 05002 (Pebble)"), "bead6mm", ["beadSize"]],
+      ["beadSize6", "bead:16002", t("Mill Hill 16002 (Size 6)", "Mill Hill 16002 (Size 6)"), "bead", ["beadSize"]],
+      ["beadPebble", "bead:05002", t("Mill Hill 05002 (Pebble)", "Mill Hill 05002 (Pebble)"), "bead", ["beadSize"]],
       ["beadBugle", "bead:70020", t("Mill Hill 70020 (Small Bugle)", "Mill Hill 70020 (Small Bugle)"), "bead", ["bugle"]],
       ["beadTreasure", "bead:12005", t("Mill Hill 12005 (Glass Treasure)", "Mill Hill 12005 (Glass Treasure)"), "bead", ["treasure"]],
       ["preciosa", "preciosa:00050", t("Preciosa 00050, the plain article", "Preciosa 00050, звичайний артикул"), "bead", ["preciosa"]],

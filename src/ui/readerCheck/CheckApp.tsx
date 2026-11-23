@@ -6,7 +6,7 @@ import type { Translate } from "@/core/labels/keyLabel";
 import { summarize } from "@/core/readerCheck/summary";
 import { CHECK_KINDS, MAX_APP_NAME, type Mark, type Marks } from "@/core/readerCheck/types";
 import { checkStore, checkSuite, downloadCheckFile, newCheckId, type CheckKind, type CheckRun, type CheckStore } from "@/editor/readerChecks";
-import { Link } from "@/i18n/navigation";
+import { EDITOR, Link } from "@/i18n/navigation";
 import { AccountMenu } from "../account/AccountButton";
 import { authClient } from "../account/authClient";
 import { AppBrand } from "../common/AppBrand";
@@ -188,7 +188,7 @@ export default function CheckApp() {
     : (
       <header className={cx(appBar.bar, home.top)}>
         <AppBrand link={false} />
-        <Link href="/" className={cx(ui.btn, ui.ghost, s.toEditor)}>{t("toEditor")}</Link>
+        <Link href={EDITOR} className={cx(ui.btn, ui.ghost, s.toEditor)}>{t("toEditor")}</Link>
         <span className={home.spacer} />
         <PagesMenu />
         {!isPending && <AccountMenu user={null} signInOpen={signInOpen} setSignInOpen={setSignInOpen} />}

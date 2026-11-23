@@ -1,4 +1,5 @@
 import { ORGANIZER } from "@/core/pattern/brands";
+import { DEMO_KREINIK } from "@/core/pattern/demo";
 import type { CustomColor, Pattern } from "@/core/pattern/types";
 import { invalidateColors } from "@/core/pattern/resolve";
 import { accountThreadApi } from "@/persistence";
@@ -11,8 +12,8 @@ import type { Editor } from "../createEditor";
  * pattern's own palette (SPEC §15.52): they never join the inventory, whoever is signed in.
  */
 
-/** A colour of a project's own palette: kept in that project alone. */
-export const isProjectColour = (c: CustomColor) => c.brand === ORGANIZER;
+/** A colour of a project's own palette, or the demo's Kreinik (SPEC §15.53): kept in that project alone. */
+export const isProjectColour = (c: CustomColor) => c.brand === ORGANIZER || c.id === DEMO_KREINIK.id;
 
 /** Same thread: the same kind, brand and code (letters' case and spaces aside). */
 export const sameThread = (a: CustomColor, b: CustomColor) =>

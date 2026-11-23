@@ -193,8 +193,8 @@ export function Header() {
   const signedIn = useEditorState((st) => !!st.account);
   return (
     <header ref={bar} className={cx(appBar.bar, s.bar, stacked && s.stacked)}>
-      {/* signed in, the logo leads to the main page, My patterns (the open pattern is saved first); signed out it's
-          just the logo — there is only the editor (SPEC §15.39) */}
+      {/* signed in, the logo leads to the main page, My patterns; signed out, to the landing page (SPEC §15.53). The
+          open pattern is saved first */}
       <AppBrand compact link={signedIn} title={t("home.title")} testId="to-home" onClick={() => ed.flush()} />
       <PatternMenu />
       <PatternName />

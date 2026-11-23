@@ -13,7 +13,7 @@ export function SupportPage({ locale }: { locale: string }) {
   return (
     <main className={s.page} data-testid="support">
       <article className={s.doc}>
-        <a className={s.back} href={`/${locale}`}>← {p.back}</a>
+        <a className={s.back} href={`/${locale}/editor`}>← {p.back}</a>
         <h1>{p.title}</h1>
         <p>{p.intro}</p>
         <p>

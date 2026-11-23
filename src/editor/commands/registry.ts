@@ -1,3 +1,4 @@
+import { CHART_GROUPS, type ChartGroup } from "@/core/pattern/groups";
 import { PARTIAL_KINDS } from "@/core/stitches/partialKinds";
 import { toolById } from "../tools/registry";
 import { openReadChart, type ReadChartOpen } from "../actions/pdfChart";
@@ -58,6 +59,13 @@ export const COMMANDS: readonly Command[] = [
   { id: "view.fit", run: (ed) => ed.viewport.fit() },
   { id: "view.goToCell", run: (ed) => ed.openDialog({ type: "goToCell" }) },
   { id: "view.toggleHighlight", run: (ed) => ed.store.setState({ highlight: !ed.state.highlight }) },
+  { id: "view.toggleGroup", run: (ed, g) => {
+    const hidden = ed.state.hiddenGroups, group = g as ChartGroup;
+    if (!CHART_GROUPS.includes(group)) return;
+    ed.store.setState({ hiddenGroups: hidden.includes(group) ? hidden.filter((x) => x !== group) : [...hidden, group] });
+    ed.setOverlay({ pickerHighlight: null, eraseHighlight: null, eraseKnots: null });
+  } },
+  { id: "view.showAll", run: (ed) => ed.store.setState({ hiddenGroups: [] }) },
   { id: "help.guide", run: (ed) => ed.store.setState({ guide: "intro" }) },
   { id: "help.changelog", run: (ed) => ed.openDialog({ type: "changelog" }) },
   { id: "panel.toggle", run: (ed) => ed.store.setState({ panelCollapsed: !ed.state.panelCollapsed }) },

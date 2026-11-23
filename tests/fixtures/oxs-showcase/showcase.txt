@@ -225,7 +225,7 @@ Palette, as written in the file (index, number, name)
 
 #26  Mill Hill 40020 (Petite Glass)
      box: cells 10–14,21–22
-     in the file: <object objecttype="bead2mm"> at the cell's centre (x + 0.5)
+     in the file: <object objecttype="bead"> at the cell's centre (x + 0.5)
      · cell 10,21: bead Mill Hill 40020
      · cell 11,21: bead Mill Hill 40020
 
@@ -237,13 +237,13 @@ Palette, as written in the file (index, number, name)
 
 #28  Mill Hill 16002 (Size 6)
      box: cells 30–34,21–22
-     in the file: <object objecttype="bead5mm"> at the cell's centre (x + 0.5)
+     in the file: <object objecttype="bead"> at the cell's centre (x + 0.5)
      · cell 30,21: bead Mill Hill 16002
      · cell 31,21: bead Mill Hill 16002
 
 #29  Mill Hill 05002 (Pebble)
      box: cells 40–44,21–22
-     in the file: <object objecttype="bead6mm"> at the cell's centre (x + 0.5)
+     in the file: <object objecttype="bead"> at the cell's centre (x + 0.5)
      · cell 40,21: bead Mill Hill 05002
      · cell 41,21: bead Mill Hill 05002
 

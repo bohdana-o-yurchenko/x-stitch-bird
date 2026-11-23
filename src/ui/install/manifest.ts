@@ -20,7 +20,7 @@ export function appManifest(locale: string, t: ManifestTexts): MetadataRoute.Man
     short_name: "пташечка",
     description: t.description,
     lang: locale,
-    start_url: `/${locale}`,
+    start_url: `/${locale}/editor`,
     scope: "/",
     display: "standalone",
     background_color: APP_BACKGROUND,
@@ -31,7 +31,7 @@ export function appManifest(locale: string, t: ManifestTexts): MetadataRoute.Man
       { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
     shortcuts: [
-      { name: t.shortcutNew, url: `/${locale}?new=1` },
+      { name: t.shortcutNew, url: `/${locale}/editor?new=1` },
       { name: t.shortcutPatterns, url: `/${locale}/patterns` },
     ],
   };

@@ -74,16 +74,27 @@ export function ChecksPanel() {
         <label className={ui.chk}>
           <input type="checkbox" checked={o.lone.on} onChange={(e) => change({ ...o, lone: { ...o.lone, on: e.target.checked } })} />
           <span className={s.checkName}>{t("lone")}</span>
-          <select className={ui.input} aria-label={t("loneSize")} value={o.lone.max} disabled={!o.lone.on} onChange={(e) => change({ ...o, lone: { ...o.lone, max: Number(e.target.value) as 1 | 2 } })}>
-            {[1, 2].map((n) => <option key={n} value={n}>{t("upTo", { count: n })}</option>)}
-          </select>
         </label>
         <p className={cx(ui.hint, s.checkHint)}>{t("loneHint")}</p>
         {o.lone.on && (
-          <label className={cx(ui.chk, s.checkSub)}>
-            <input type="checkbox" checked={o.lone.alone} onChange={(e) => change({ ...o, lone: { ...o.lone, alone: e.target.checked } })} />
-            {t("loneAlone")}
-          </label>
+          <>
+            <label className={cx(s.checkSub, s.checkField)}>
+              <span>{t("loneSize")}</span>
+              <select className={ui.input} value={o.lone.max} data-testid="lone-size" onChange={(e) => change({ ...o, lone: { ...o.lone, max: Number(e.target.value) as 1 | 2 } })}>
+                {[1, 2].map((n) => <option key={n} value={n}>{t("loneCount", { count: n })}</option>)}
+              </select>
+            </label>
+            <label className={cx(s.checkSub, s.checkField)}>
+              <span>{t("loneReach")}</span>
+              <select className={ui.input} value={o.lone.reach ?? 1} data-testid="lone-reach" onChange={(e) => change({ ...o, lone: { ...o.lone, reach: Number(e.target.value) as 1 | 2 | 3 } })}>
+                {[1, 2, 3].map((n) => <option key={n} value={n}>{t("loneReachN", { count: n })}</option>)}
+              </select>
+            </label>
+            <label className={cx(ui.chk, s.checkSub)}>
+              <input type="checkbox" checked={o.lone.alone} onChange={(e) => change({ ...o, lone: { ...o.lone, alone: e.target.checked } })} />
+              {t("loneAlone")}
+            </label>
+          </>
         )}
         <label className={ui.chk}>
           <input type="checkbox" checked={o.symmetry.on} onChange={(e) => change({ ...o, symmetry: { on: e.target.checked } })} />

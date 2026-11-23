@@ -19,7 +19,12 @@ import { isPointBead } from "../../entryKinds/registry";
  * the top-left of the quarter of the cell they cover (Ursa / XSPro convention), quarters marked petit="false".
  */
 
-export const OXS_BEAD_TYPE: Record<string, string> = { "Petite Glass": "bead2mm", "Size 8": "bead3mm", "Size 6": "bead5mm", Pebble: "bead6mm" };
+/**
+ * Bead object types other than plain "bead" — only those reader apps know. `bead2mm`, `bead5mm` and `bead6mm` (Petite
+ * Glass, Size 6, Pebble) were dropped 2026-11-23: an app skipped those beads altogether, leaving their colour in the key
+ * as a floss with no stitches (docs/IMPORT-PARITY.md #26). Our own import reads any "bead…" type.
+ */
+export const OXS_BEAD_TYPE: Record<string, string> = { "Size 8": "bead3mm" };
 
 export const xmlEscape = (v: unknown) =>
   String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

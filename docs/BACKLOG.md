@@ -9,33 +9,41 @@
 follows RELEASING.md's compatibility rules (optional fields only, or ask first).
 
 
-bugs : 
-DONE 0) create proper app-specific email for emails DONE 
-1) color picker doesn't always work correctly. something about the fact that i need to hover points directly at the item??? 
-DONE 2) picker doens't properly highlight the beads, but picks them. the same for other elements on the top layer 
-DONE 3) hide the delete and edit buttons from key unless hovered??? also add dublicate key 
-5) add group level visibility? we now have element level visibiliry (mute anyghint BUG), but what if people wanna see crossess only? or key level visibiliry? 
-DONE 6) when i choose petite fractional stitch i cannot click and drag. it renders 1 cell = 1 petite. where it must be 1 cell = 2 petites . should not apply to 1/4 and 3/4 tho. 
-DONE 8) can your app read this? must open in the same tab 
-9) proper landing!! - with a central button 'go to editor' 
-10) billing options, ui, and backend. and frontend and FOP setup 
-DONE 10) replace the email in all the docs. and remove my name new email is : ptashechka.app@gmail.com  old : bohdana.o.yurchenko@gmail.com 
-11) FIX preview deploy on the vercel 
-12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
-13) add 'similar' colors of the same brand AND translations to other brands 
-14) add fabricks!!! each fabric has a dmc code associated with it. so it's totally real 
-13) follow up : introduce 'my stash'. then introduce my projects. where i can add my kits and it would help me specify if i got all the necesary supplyes or if i can use smth from my stash 
+
+
+DONE 5) add group level visibility? we now have element level visibiliry (mute anyghint BUG), but what if people wanna see crossess only? 
+DONE 10) lone crosses must have a super lone crosses mode !!
+DONE 1) color picker doesn't always work correctly. something about the fact that i need to hover points directly at the item???
+
+DONE 14) beads with floss in between the crossess. right now dont get read by app at all.  but only ONE of them. the other one got displayed just right .... wtf
+ 
+
+DONE 9) proper landing!! - with a central button 'go to editor'
+19) (question answered 2026-11-23: Vercel custom events need Pro; not built yet) треба збирати статистику про те, хто які кнопки нажимає та якими шорткатами користується! щоб переробити і те і те
+
 14) + 1 feature : XSD import and probably export. we are free to reverse engineer it. noone goona sue
 
+12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
+13) add 'similar' colors of the same brand AND translations to other brands 
+
+11) FIX preview deploy on the vercel 
+14) add fabricks!!! each fabric has a dmc code associated with it. so it's totally real 
+13) follow up : introduce 'my stash'. then introduce my projects. where i can add my kits and it would help me specify if i got all the necesary supplyes or if i can use smth from my stash 
+
+10) billing options, ui, and backend. and frontend and FOP setup 
 
 7) add specialty stitches : smyrna (in 1 cell in 4 cells ) + their own stitches 
 8) write to yulia after the speciality stitches are done!!!! 
-10) lone crosses must have a super lone crosses mode !!
-11) export of bead + floss between the crossess must be exported as bead. not as backstitch 
 12) user guides and probably an AI assistant that exaplains how to do one or another 
-14) beads with floss in between the crossess. right now dont get read by app at all.  but only ONE of them. the other one got displayed just right .... wtf
-19) треба збирати статистику про те, хто які кнопки нажимає та якими шорткатами користується! щоб переробити і те і те 
+13) 
 
+bugs :
+DONE 0) create proper app-specific email for emails DONE
+DONE 2) picker doens't properly highlight the beads, but picks them. the same for other elements on the top layer
+DONE 3) hide the delete and edit buttons from key unless hovered??? also add dublicate key
+DONE 6) when i choose petite fractional stitch i cannot click and drag. it renders 1 cell = 1 petite. where it must be 1 cell = 2 petites . should not apply to 1/4 and 3/4 tho.
+DONE 8) can your app read this? must open in the same tab
+DONE 10) replace the email in all the docs. and remove my name new email is : ptashechka.app@gmail.com  old : bohdana.o.yurchenko@gmail.com
 DONE 9) near symmetry ignores the backstitch!!!
 DONE 13) eraser doesn't properly highlight the beads to be erased. eraser erases both bead and aligned cross in neighbour cell (use picker behaviour as reference)
 DONE 16) duplicate button for custom flos!!! 
