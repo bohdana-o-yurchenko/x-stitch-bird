@@ -15,12 +15,13 @@ import { addPdf } from "./images/pdfPages";
 import { isPdf } from "@/platform/pdf";
 import { bodyFontFamily, usableSymbols } from "@/platform/fontProbe";
 import { chromeColours } from "@/platform/themeColours";
-import { alreadyHere, createFromImage, loadFile, saveToLibrary } from "./actions/importExport";
+import { createFromImage, saveToLibrary } from "./actions/importExport";
 import type { StartIntent } from "./startRequest";
 import { demoPattern, emptyPattern, loadPattern, replaceDoc } from "./actions/pattern";
 import { Autosave } from "./autosave";
 import { CommandRegistry } from "./commands/registry";
 import { KeepPattern } from "./keepPattern";
+import { Arrival } from "./arrival";
 import { LiveSync } from "./live/LiveSync";
 import { ThreadInventory } from "./threads/inventory";
 import { forgetAccountHere } from "./library";
@@ -72,6 +73,7 @@ export class Editor {
   readonly timer: WorkTimer;
   readonly live: LiveSync;
   /** Feature usage counts, sent now and then without anything about who (SPEC §15.54). */
+  readonly arrival = new Arrival(this);
   readonly usage = new UsageCounter(() => !!this.state.account, sendUsage);
   theme: CanvasTheme = defaultCanvasTheme;
   /** Translation for exported texts and labels built here; set by the UI for the current locale. */
@@ -155,20 +157,17 @@ export class Editor {
       }
     // the pattern asked for, straight away: the one worked on last isn't shown first (SPEC §15.37)
     const first = await this.openFirst(intent, pattern);
-    if (!first) {
-      // nothing worked on here yet: the demo — unless something new is being started (from a PDF, a picture, a file,
-      // blank), which starts from nothing, not from the demo's heart
-      const starting = intent.kind !== "resume" && intent.kind !== "open";
-      loadPattern(this, pattern ?? (starting ? emptyPattern() : demoPattern(symbols)));
-      // a restored draft is saved to the library once it's edited; the demo (or the empty start) not even drafted till then
-      if (pattern) this.autosave.markSaved();
-      else this.autosave.untouched();
-      // the draft may hold changes its saved copies don't
-      if (pattern) this.live.opened(pattern.id, { unsure: true });
-    }
+    const starting = intent.kind !== "resume" && intent.kind !== "open";
+    // signed in, something new is started from the patterns page: no pattern shows till it's in — only its steps.
+    // Signed out the editor is the only page: the draft shows, and replacing it asks first if it's work (keepPattern)
+    const arriving = !first && starting && (await this.sessionKnown(), !!this.state.account);
+    if (arriving) {
+      // a placeholder no one sees, never saved
+      loadPattern(this, emptyPattern());
+      this.autosave.untouched();
+      this.arrival.begin();
+    } else if (!first) this.showDraft(pattern, starting);
     this.store.setState({ panelSections: savedSections(), openSection: savedOpen() });
-    // what came back from an earlier visit is work if it was edited then; the demo isn't
-    if (pattern) this.keep.restored();
     this.store.setState({ ready: true });
     this.live.start();
     void this.afterStart(intent, first);
@@ -189,8 +188,23 @@ export class Editor {
   }
 
   /**
-   * Opens the pattern `intent` asks for as the first one; false when it's the draft's to show (resume, the draft is
-   * that pattern, a new one, a picture, or a file while signed out — replacing the draft may need asking then).
+   * The pattern worked on last (the draft) — else the demo, or nothing when something new is being started (from a
+   * PDF, a picture, a file, blank), which starts from nothing, not from the demo's heart.
+   */
+  private showDraft(pattern: Pattern | null, starting: boolean) {
+    loadPattern(this, pattern ?? (starting ? emptyPattern() : demoPattern(this.state.symbols)));
+    // a restored draft is saved to the library once it's edited; the demo (or the empty start) not even drafted till then
+    if (pattern) this.autosave.markSaved();
+    else this.autosave.untouched();
+    // the draft may hold changes its saved copies don't
+    if (pattern) this.live.opened(pattern.id, { unsure: true });
+    // what came back from an earlier visit is work if it was edited then; the demo isn't
+    if (pattern) this.keep.restored();
+  }
+
+  /**
+   * Opens the pattern picked on the patterns page as the first one; false when there's none to open, or the draft
+   * is that pattern.
    */
   private async openFirst(intent: StartIntent, draft: Pattern | null): Promise<boolean> {
     if (intent.kind === "open" && intent.id !== draft?.id) {
@@ -213,25 +227,17 @@ export class Editor {
         return false;
       }
     }
-    if (intent.kind === "file") {
-      await this.sessionKnown();
-      if (!this.state.account) return false;
-      // one already here: what to do with it is asked once the editor shows (afterStart)
-      if (await alreadyHere(this, intent.file)) return false;
-      const placeholder = this.doc.id;
-      await loadFile(this, intent.file);
-      return this.doc.id !== placeholder;
-    }
     return false;
   }
 
-  /** What's left of `intent` once the first pattern shows: a dialog for a new one or a picture, the new one chosen on the patterns page, a PDF chart, a file signed out or already here. */
+  /** What's left of `intent`: the new pattern started — its first step (a dialog, a file read), or made straight away. */
   private async afterStart(intent: StartIntent, opened: boolean) {
     if (intent.kind === "resume" || intent.kind === "open" || opened) return;
     await this.sessionKnown();
     if (intent.kind === "new") void this.commands.run(intent.from === "pdf" ? "file.newFromPdf" : "file.new");
     else if (intent.kind === "create") void this.commands.run("file.create", intent.options);
     else void this.commands.run(intent.kind === "image" ? "image.open" : intent.kind === "pdf" ? "file.loadPdf" : "file.load", intent.file);
+    this.arrival.watch();
   }
 
   /** The same pattern as changed elsewhere, in place of this one: the view and tools stay (SPEC §15.34). */

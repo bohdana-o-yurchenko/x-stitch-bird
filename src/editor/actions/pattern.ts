@@ -17,7 +17,7 @@ export function loadPattern(ed: Editor, p: Pattern, refs: RefWindowData[] | null
   ed.tools.cancel();
   const keep = ed.state.activeEntry && p.key[ed.state.activeEntry] ? ed.state.activeEntry : Math.max(0, p.key.findIndex((e, i) => i > 0 && e));
   ed.keep.opening();
-  ed.store.setState({ doc: p, selection: null, floating: null, activeEntry: keep, keyForm: null, match: ed.state.tool === "autofill" ? PICKING : null, overlay: { ...ed.state.overlay, chain: null, preview: null } });
+  ed.store.setState({ doc: p, arriving: false, selection: null, floating: null, activeEntry: keep, keyForm: null, match: ed.state.tool === "autofill" ? PICKING : null, overlay: { ...ed.state.overlay, chain: null, preview: null } });
   ed.changed({ keys: true, structural: true });
   ed.viewport.fit();
   void ed.references.switchTo(p.id, refs);

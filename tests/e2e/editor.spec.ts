@@ -232,7 +232,7 @@ test("switches to Ukrainian", async ({ page }) => {
 test("Pattern ▾ › Export opens above the chart, with submenus", async ({ page }) => {
   await page.setViewportSize({ width: 1000, height: 800 });
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Open work file…");
+  await fileAction(page, "Open .xbird work file…");
   await (await chooser).setFiles("tests/fixtures/1.oxs");
   await expect(page.locator("[data-entry]")).toHaveCount(12);
   await menuAction(page, "pattern", "Export");
@@ -1701,7 +1701,7 @@ test("a PDF behind the chart: its pages one at a time, each where it was placed;
   expect(saved.underlay.pdf.src).toMatch(/^data:application\/pdf/);
   expect(saved.refs[0]!.pdf).toMatchObject({ pages: 3 });
   chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Open work file…");
+  await fileAction(page, "Open .xbird work file…");
   await (await chooser).setFiles(path);
   await expect(page.getByText(/^Loaded /)).toBeVisible();
   await expect(select.locator("option:checked")).toHaveText("Page 2 of 3");

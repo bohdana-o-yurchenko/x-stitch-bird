@@ -130,6 +130,47 @@ test("a picture becomes a pattern with the chosen size and number of colours", a
   expect(await fulls(page)).toBe(200);
 });
 
+test("signed in, New ▾ on the patterns page: the editor shows only once the new pattern is in — given up, back there (SPEC §15.37)", async ({ page, context }) => {
+  // the session, as the account would answer it (the patterns page is for signed-in users only)
+  await page.route("**/api/auth/get-session*", (r) => r.fulfill({ json: { session: { id: "s", userId: "u", expiresAt: new Date(Date.now() + 864e5).toISOString() }, user: { id: "u", email: "e2e@example.com", name: "", emailVerified: true } } }));
+  await context.addCookies([{ name: "neon-auth.session_token", value: "x", domain: "localhost", path: "/" }]);
+  const startNew = async (item: string, file: string) => {
+    await page.goto("/en/patterns");
+    const chooser = page.waitForEvent("filechooser");
+    // nothing in the (pretend) account: the empty page's buttons — the same starts as New ▾
+    await page.getByTestId("home-empty").getByRole("button", { name: item }).click();
+    await (await chooser).setFiles(file);
+    await expect(page).toHaveURL(/\/en\/editor$/);
+  };
+  // a photo: only its settings show, never the pattern worked on last; Cancel leads back
+  await startNew("From a photo…", "tests/fixtures/underlay.png");
+  await expect(page.getByTestId("editor-arriving")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Create pattern" })).toBeVisible();
+  await expect(page.getByTestId("chart")).toHaveCount(0);
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page).toHaveURL(/\/en\/patterns$/);
+  // a file that can't be read: back, and said there
+  await startNew("Open .xbird work file…", "tests/fixtures/underlay.png");
+  await expect(page).toHaveURL(/\/en\/patterns$/);
+  await expect(page.getByTestId("home-notice")).toContainText("Couldn’t read that file");
+  // a PDF chart: read, then its steps — still no pattern behind them; cancelled, back
+  await page.goto("/en/patterns");
+  await page.getByTestId("home-empty").getByRole("button", { name: "From a PDF chart…" }).click();
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Choose a PDF…" }).click();
+  await (await chooser).setFiles("tests/fixtures/other-app-chart.pdf");
+  await expect(page.getByTestId("pdf-chart-summary")).toBeVisible();
+  await expect(page.getByTestId("chart")).toHaveCount(0);
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page).toHaveURL(/\/en\/patterns$/);
+  // made: the editor shows it
+  await startNew("From a photo…", "tests/fixtures/underlay.png");
+  await page.getByRole("button", { name: "Create pattern" }).click();
+  await expect(page.getByTestId("chart")).toBeVisible();
+  await expect(page.getByTestId("editor-arriving")).toHaveCount(0);
+  expect(await editorState<string>(page, "(ed) => ed.doc.name")).toBe("Image pattern");
+});
+
 test("Versions brings back the pattern as it was before a risky change", async ({ page }) => {
   const used = page.locator("[data-entry]").first();
   await used.hover();
@@ -215,7 +256,7 @@ test("exports an .oxs that opens again with the same stitches, and a shopping li
   const path = await (await oxs).path();
   expect(readFileSync(path, "utf8")).toContain("<chart>");
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Open work file…");
+  await fileAction(page, "Open .xbird work file…");
   await (await chooser).setFiles(path);
   await expect(page.getByText(/^Loaded /)).toBeVisible();
   await expect(page.getByTestId("totals")).toContainText("451 full");

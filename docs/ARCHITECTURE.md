@@ -1182,3 +1182,9 @@ check, shared), `editor/usage.ts` (`UsageCounter`, `Editor.usage`; counted in `u
 `persistence/cloud/usage.ts` (beacon; `fetchUsageTotals`), `app/api/stats` (POST from anyone, GET for admins) +
 `server/usage.ts` (one upsert into `feature_usage`; `usageTotals`). Roles (§15.55): `server/roles.ts` (`isAdmin`, from
 `neon_auth."user".role`), `ui/account/useIsAdmin.ts` (from the session; only shows the tab), page `ui/stats`.
+
+Starting a pattern from outside the editor (SPEC §15.37): signed in, a `create` / `image` / `pdf` / `file` / `new`
+start intent boots into `state.arriving` (`editor/arrival.ts`) — a hidden empty placeholder, not the draft; `EditorApp`
+shows only the bar, dialogs and toasts. `loadPattern` ends it; when no dialog is open and no command is running
+(`CommandRegistry.busy`) it's given up — the last toast handed back (`startRequest.handBack`) and the page goes to
+`/patterns`. No version is taken of the placeholder.

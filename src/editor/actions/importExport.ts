@@ -178,16 +178,6 @@ async function settleSamePattern(ed: Editor, pattern: Pattern, saved: number | u
   return true;
 }
 
-/** A .xbird of a pattern already here (asked about once the editor shows, when it's how the editor was opened). */
-export async function alreadyHere(ed: Editor, file: File): Promise<boolean> {
-  try {
-    const { pattern, xbird } = await readPatternFile(ed, file);
-    return !!xbird && (await ed.persistence.patterns.list()).some((s) => s.id === pattern.id);
-  } catch {
-    return false;
-  }
-}
-
 export async function loadFile(ed: Editor, file: File) {
   try {
     let read = await readPatternFile(ed, file);

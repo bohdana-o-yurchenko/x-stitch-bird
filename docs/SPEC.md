@@ -1645,7 +1645,7 @@ read-only share links.
 
 **Header** (built 2026-11-17): `[🐦 пташечка] [Pattern ▾] [name] …tools… [Transform ▾] [🖨] [☰] [👤] [▥]`.
 - **Pattern ▾** — working on it: New ›, Open… (only signed in, or when other patterns are saved in this browser),
-  Download work file (.xbird), Open work file…, Versions…, Pattern info…, Image behind the chart…, Photo in a
+  Download work file (.xbird), Open .xbird work file…, Versions…, Pattern info…, Image behind the chart…, Photo in a
   floating window…. No "Save": saving is automatic (Ctrl/⌘+S still saves at once).
 - **🖨 Print & share** — the finished chart: PDF chart to print, PDF for Pattern Keeper, Chart images (PNG) ›,
   Preview images (PNG) ›, Shopping list (CSV), Open Cross Stitch file (.oxs). *Since 2026-11-18 (§15.45) these are
@@ -1901,9 +1901,13 @@ limit nothing is lost — the work stays in the browser, and the app says what t
   `?new=1`, a picture or work file picked on the patterns page, or nothing (the pattern last worked on) — and handed
   to the editor's start-up (`editor/startRequest.ts`, `Editor.init(intent)`). A picked pattern is loaded straight away
   (from this browser, or from the account once the session is known); the pattern last worked on is shown only to
-  resume. Until the first pattern is in, the page shows the bar and an empty workspace — never another pattern. A work
-  file opens the same way signed in; signed out (and for New / a picture) the pattern last worked on shows first,
-  as replacing it may need asking.
+  resume. Until the first pattern is in, the page shows the bar and an empty workspace — never another pattern.
+  Signed out (`?new=1`, `?new=pdf`) the pattern last worked on shows first, as replacing it may need asking.
+- **A new pattern started from outside the editor** (2026-11-23; signed in: New ▾ on the patterns page — blank, a
+  photo, an .oxs/.xsd, a PDF chart, a work file): the editor shows only once the new pattern is in. Until then the
+  page is the bar and its steps (the photo's settings, the PDF's steps, the questions about the file) — no other
+  pattern behind them, not the last one, not the demo. Given up (Cancel, a file that can't be read) it's back to the
+  patterns page, with what went wrong said there (`editor/arrival.ts`).
 - **Signed out there is one pattern** (assumed from now on: no signed-out browser keeps more). So: Pattern ▸ Open…
   only signed in; the patterns page signed out shows that one pattern (Continue), New and the invitation to sign in,
   no list. Gone: reading libraries saved in localStorage by 1.2.1 and earlier, "kept for good" in the one-pattern

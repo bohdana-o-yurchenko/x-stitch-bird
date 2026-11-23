@@ -7,7 +7,7 @@ import { accountUsage, createLibrary, type AccountUsage, type AttachedPhoto, typ
 import type { PatternDetails } from "@/core/pattern/stats";
 import type { CustomColor } from "@/core/pattern/types";
 import { splitDuration } from "@/core/time/workTime";
-import { requestStart } from "@/editor/startRequest";
+import { requestStart, takeHandedBack } from "@/editor/startRequest";
 import type { PatternSummary } from "@/editor/types";
 import { EDITOR, Link, useRouter } from "@/i18n/navigation";
 import { pickFile } from "@/platform/files";
@@ -42,8 +42,16 @@ export default function HomeApp() {
   const [moving, setMoving] = useState<{ done: number; count: number } | null>(null);
   /** The account filled up while moving: how many it holds at most. */
   const [full, setFull] = useState<number | null>(null);
-  /** A word after an action ("the copy is only in this browser"). */
+  const tAll = useTranslations();
+  /** A word after an action ("the copy is only in this browser"), or why a new pattern didn't come in (a bad file). */
   const [notice, setNotice] = useState<string | null>(null);
+  useEffect(() => {
+    const back = takeHandedBack();
+    // read once, on arrival back from the editor
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (back) setNotice(tAll(back.key, back.values));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [view, setView] = useView();
   const [usage, setUsage] = useState<AccountUsage | null>(null);
   const [query, setQuery] = useState("");
@@ -269,7 +277,7 @@ function useStarts(lib: Library) {
       router.push(EDITOR);
     },
     file: async () => {
-      const f = await pickFile(".xbird,.oxs,.xsd,.json,.xml");
+      const f = await pickFile(".xbird");
       if (!f) return;
       requestStart({ kind: "file", file: f });
       router.push(EDITOR);

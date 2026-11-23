@@ -95,6 +95,8 @@ export interface EditorState {
   /** Chart symbols this device can draw. */
   symbols: string[];
   ready: boolean;
+  /** Come from outside the editor to start a pattern (SPEC §15.37): only the steps show till it's in. */
+  arriving: boolean;
 
   tool: ToolId;
   momentaryTool: ToolId | null;
@@ -183,6 +185,7 @@ export const createEditorStore = () =>
     palette: [],
     symbols: [],
     ready: false,
+    arriving: false,
     tool: "pencil",
     momentaryTool: null,
     activeEntry: 0,

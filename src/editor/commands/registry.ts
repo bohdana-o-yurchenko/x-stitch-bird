@@ -88,7 +88,7 @@ export const COMMANDS: readonly Command[] = [
   { id: "file.exportChartPdf", run: (ed) => exportChartPdf(ed) },
   // the work file: what it is — and that the .oxs is another thing — said before it's saved (SPEC §15.45)
   { id: "file.chooseFile", run: (ed) => ed.openDialog({ type: "fileChoice" }) },
-  { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird,.oxs,.xsd,.json,.xml"); if (f) await ed.commands.run("file.load", f); } },
+  { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird"); if (f) await ed.commands.run("file.load", f); } },
   { id: "file.load", run: (ed, f) => loadFile(ed, f as File), destructive: "import", replacesPattern: true },
   // New ▸ From an .oxs file… / From a PDF chart… (SPEC §15.46): the PDF one says first what it is — and isn't
   { id: "file.newFromOxs", run: async (ed) => { const f = await pickFile(".oxs,.xsd"); if (f) await ed.commands.run("file.load", f); } },
@@ -187,6 +187,8 @@ const EDITS = new Set([
 
 export class CommandRegistry {
   private byId = new Map(COMMANDS.map((c) => [c.id, c]));
+  /** Commands still running (a file being picked or read): the start of a pattern isn't given up meanwhile. */
+  busy = 0;
 
   constructor(private ed: Editor) {}
 
@@ -199,10 +201,21 @@ export class CommandRegistry {
   async run(id: string, args?: unknown, confirmed = false): Promise<void> {
     const c = this.byId.get(id);
     if (!c || !this.enabled(id)) return;
+    this.busy++;
+    try {
+      await this.runCommand(c, id, args, confirmed);
+    } finally {
+      this.busy--;
+      this.ed.arrival.check();
+    }
+  }
+
+  private async runCommand(c: Command, id: string, args: unknown, confirmed: boolean): Promise<void> {
     if (EDITS.has(id) && this.ed.live.readOnly) return this.ed.live.blocked();
     const keep = this.ed.keep;
     if (c.replacesPattern && !confirmed && keep.mustAsk) return this.ed.openDialog({ type: "keepPattern", then: { command: id, args } });
-    if (c.destructive) this.ed.snapshots.before(c.destructive);
+    // arriving, the open pattern is only a placeholder: nothing to keep a version of
+    if (c.destructive && !this.ed.state.arriving) this.ed.snapshots.before(c.destructive);
     if (c.replacesPattern && keep.leaves) return keep.replace(async () => void (await c.run(this.ed, args)));
     await c.run(this.ed, args);
   }

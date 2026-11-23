@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { createEditor, type Editor } from "@/editor/createEditor";
 import { takeStartIntent } from "@/editor/startRequest";
 import { Toasts } from "./common/widgets";
+import { PageLoading } from "./common/AppBrand";
+import { useRouter } from "@/i18n/navigation";
 import { DialogHost } from "./dialogs/DialogHost";
 import { Header } from "./header/Header";
 import { EditorContext, useEditor, useEditorState } from "./hooks/editor";
@@ -72,6 +74,17 @@ function Shell() {
   useGlobalEvents(ed, setDragging);
   // until the first pattern is in (the one asked for, SPEC §15.37), an empty workspace — never another pattern
   const ready = useEditorState((s) => s.ready);
+  // a new pattern started on the patterns page: only its steps, on an empty page, till it's in
+  const arriving = useEditorState((s) => s.arriving);
+  if (arriving)
+    return (
+      <div data-testid="editor-arriving">
+        <PageLoading compact />
+        <DialogHost />
+        <Toasts />
+        <Tooltips />
+      </div>
+    );
   return (
     <EditorLayout
       collapsed={collapsed}
@@ -97,6 +110,9 @@ function Shell() {
 export default function EditorApp() {
   const [ed] = useState(() => createEditor(/Mac|iPhone|iPad/.test(navigator.platform)));
   const translate = useTranslate();
+  const router = useRouter();
+  // a new pattern given up before it was in: back to the patterns page it was started on
+  useEffect(() => ed.arrival.onLeave(() => router.replace("/patterns")), [ed, router]);
   useEffect(() => ed.setTranslator(translate), [ed, translate]);
   // debugging / end-to-end test hook: `window.__stitchwork` is the editor instance
   useEffect(() => void ((window as unknown as { __stitchwork: Editor }).__stitchwork = ed), [ed]);

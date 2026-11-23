@@ -68,7 +68,7 @@ export const openAppMenu = (page: Page) => page.getByRole("button", { name: MENU
 
 export async function loadFixture(page: Page, name: string) {
   const chooser = page.waitForEvent("filechooser");
-  await fileAction(page, "Open work file…");
+  await fileAction(page, "Open .xbird work file…");
   await (await chooser).setFiles(fixture(name));
 }
 

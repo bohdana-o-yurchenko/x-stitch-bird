@@ -36,3 +36,19 @@ export function takeStartIntent(): StartIntent {
   if (file) return file;
   return open ? { kind: "open", id: open } : make === "pdf" ? { kind: "new", from: "pdf" } : make !== null ? { kind: "new" } : { kind: "resume" };
 }
+
+/** What went wrong while starting a pattern from the patterns page (a toast's message key), said back there. */
+export type HandedBack = { key: string; values?: Record<string, string | number> };
+
+let handedBack: HandedBack | null = null;
+
+export function handBack(note: HandedBack) {
+  handedBack = note;
+}
+
+/** Read once by the patterns page. */
+export function takeHandedBack(): HandedBack | null {
+  const note = handedBack;
+  handedBack = null;
+  return note;
+}
