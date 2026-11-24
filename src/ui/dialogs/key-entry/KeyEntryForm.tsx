@@ -336,7 +336,7 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
             {kind.fields.includes("blend") && (
               <div className={ui.seg}>
                 <button type="button" className={cx(d.mode === "single" && ui.on)} onClick={() => { update({ mode: "single" }); setLine(0); }}>{t("single")}</button>
-                <button type="button" className={cx(d.mode === "blend" && ui.on)} onClick={() => { update({ mode: "blend" }); setLine(0); }}>{t("blend")}</button>
+                <button type="button" className={cx(d.mode === "blend" && ui.on)} onClick={() => { update(d.mode === "single" && d.thread ? { mode: "blend", slots: d.slots.map((x, j) => (j === 0 ? { ...x, id: d.thread } : x)) } : { mode: "blend" }); setLine(0); }}>{t("blend")}</button>
               </div>
             )}
           </div>

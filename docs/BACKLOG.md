@@ -34,13 +34,15 @@ DONE 15) the 'replace in selection' dialog should have proper dropwowned that lo
 DONE 12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
 DONE 13) add 'similar' colors of the same brand AND translations to other brands. maybe come up with what usually is displayed there as well 
 
+
+DONE 1) little bug. when i already have an entry of a solid color and i switch to blend : the one color must stay seelcted
+
+
 12) user guides and probably an AI assistant that exaplains how to do one or another
 11) FIX preview deploy on the vercel 
 
 8) write to yulia after the speciality stitches are done!!!!
 
-
-1) little bug. when i already have an entry of a solid color and i switch to blend : the one color must stay seelcted 
 
 13) finish a proper local app installation. this will introduce a whole lot of problems later tho.
 

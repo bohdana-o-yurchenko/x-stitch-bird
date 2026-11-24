@@ -44,7 +44,7 @@ Still open:
   *kind* (not a new placement) still needs edits there.
 - Zooming draws the whole chart each wheel step (~66 ms at 4× slower CPU).
 - The PDF chart export (`chartPdf`) still runs on the main thread (it shows progress and can be cancelled).
-- `editor/actions/importExport.ts` and `editor/commands/registry.ts` coverage unchanged (62% / 71%).
+- ~~`editor/actions/importExport.ts` and `editor/commands/registry.ts` coverage (62% / 71%)~~ — done 2026-11-24: 96% / 90%, with minimums of 90% / 85% in `vitest.config.mts` (`importExport.flows.test.ts`, `commands/delegation.test.ts`).
 
 ---
 

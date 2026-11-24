@@ -23,6 +23,8 @@ export default defineConfig({
         "src/editor/references/**": { lines: 75 },
         "src/editor/actions/paint.ts": { lines: 80 },
         "src/editor/actions/transforms.ts": { lines: 90 },
+        "src/editor/actions/importExport.ts": { lines: 90 },
+        "src/editor/commands/registry.ts": { lines: 85 },
         "src/render/primitives/**": { lines: 60 },
       },
     },
