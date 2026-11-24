@@ -2572,9 +2572,10 @@ Pattern Maker for Cross Stitch (HobbyWare, v4) saves `.xsd`: binary, no publishe
 - **A backstitch can be placed as a stamp**: a block of a fixed number of cells and the straight stitches in it,
   placed with one click. The key form's **Placed as** (backstitch only): *A line at a time* (as before), **Smyrna cross
   over 1 cell**, **Smyrna cross over 4 cells**, the pattern's own, and **Draw your own…**.
-- **For now the Smyrna crosses are hidden** (to be reworked, BACKLOG item 7): **Placed as** offers only the line, the
-  pattern's own and **Draw your own…**; an entry that already uses a Smyrna cross still shows it
-  (`OFFER_BUILT_IN_STAMPS` in `ui/dialogs/key-entry/KeyEntryForm.tsx`). Help and the tip mention only one's own.
+- **Not released yet — hidden in v2.4.0** (reworked for the next release, BACKLOG item 7): the key form has no
+  **Placed as** and no **Draw your own…** (`OFFER_STAMPS` in `ui/dialogs/key-entry/KeyEntryForm.tsx`; an entry that
+  already is a stamp still shows its choice); no help questions (`stamps`, `place-stamp`) and no tip (`stamps`).
+  Files that have stamps still open, draw and export as described below.
 - Everything else about the entry is backstitch: colour or blend, strands, line style and line colour, the thread it
   takes (its lines' length), how it prints on the PDF chart and goes into an `.oxs` (as plain backstitch lines — reader
   apps show them as drawn). Its key icon and label show the stamp ("… · Smyrna cross over 4 cells").

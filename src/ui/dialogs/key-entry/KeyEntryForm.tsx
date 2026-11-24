@@ -172,10 +172,15 @@ function LineInkPicker({ value, onPick }: { value: string; onPick: (hex: string)
 }
 
 /**
- * How a backstitch is placed (ARCHITECTURE-REVIEW §3): a line at a time, or a stamp of one's own — with a way to draw a
- * new one. The built-in Smyrna crosses are hidden until they're reworked; an entry that already uses one still shows it.
+ * Special stitches (stamps) aren't offered yet: they come in the next release, reworked (BACKLOG 7). Until then the
+ * form has no **Placed as** and no **Draw your own…**; an entry that already is a stamp still shows its choice.
  */
-const OFFER_BUILT_IN_STAMPS = false;
+const OFFER_STAMPS = false;
+
+/**
+ * How a backstitch is placed (ARCHITECTURE-REVIEW §3): a line at a time, or a stamp — a Smyrna cross over one cell or
+ * four, or one of one's own — with a way to draw a new one.
+ */
 function StampChoice({ value, hex, onPick }: { value: string; hex: string; onPick: (id: string) => void }) {
   const t = useTranslations("stamps");
   const ed = useEditor();
@@ -184,7 +189,7 @@ function StampChoice({ value, hex, onPick }: { value: string; hex: string; onPic
   const sample = (stamp?: StampDef): PaletteSlot => ({ hex, ink: "#fff", sym: "line:solid", t: "back", st: "full", n: 2, ...(stamp ? { stamp } : {}) });
   const options = [
     { id: "", name: t("line"), icon: <KeyIcon slot={sample()} size={24} view="color" /> },
-    ...stampDefs(ed.doc).filter((d) => OFFER_BUILT_IN_STAMPS || !isBuiltInStamp(d.id) || d.id === value).map((d) => ({ id: d.id, name: isBuiltInStamp(d.id) ? t(d.name) : d.name || t("own"), icon: <KeyIcon slot={sample(d)} size={24} view="color" /> })),
+    ...stampDefs(ed.doc).map((d) => ({ id: d.id, name: isBuiltInStamp(d.id) ? t(d.name) : d.name || t("own"), icon: <KeyIcon slot={sample(d)} size={24} view="color" /> })),
   ];
   return (
     <div className={s.group} data-testid="stamp-choice">
@@ -390,7 +395,7 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
           </div>
         )}
 
-        {kind.fields.includes("stamp") && <StampChoice value={d.stamp} hex={colour?.hex ?? "#8C8378"} onPick={(stamp) => update({ stamp })} />}
+        {kind.fields.includes("stamp") && (OFFER_STAMPS || d.stamp) && <StampChoice value={d.stamp} hex={colour?.hex ?? "#8C8378"} onPick={(stamp) => update({ stamp })} />}
 
         <SymbolPicker value={d.sym} used={used} symbols={symbolsFor(d.t, symbols)} onPick={pickSymbol} />
         {d.t === "back" && <LineInkPicker value={d.ink} onPick={setInk} />}

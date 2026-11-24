@@ -96,7 +96,7 @@
 - A bead sitting on a grid line, not in a cell `#bead-between`: Bead ▸ Placement ▸ Between cells. ★
 - French knots, and how many wraps `#knot`
 - Backstitch style and colour on the printed chart `#line-style`
-- Stitches of my own `#stamps`: Backstitch ▸ Draw your own… / Placed as (Smyrna crosses hidden for now). ★📍
+- *(next release, hidden in v2.4.0)* Special stitches `#stamps`: Backstitch ▸ Placed as / Draw your own…. ★📍
 - Choosing symbols that match my paper chart `#symbols`: the symbol row, All…, draw your own. ★
 - My thread isn't in the list `#own-thread`: "+" on the search row; ⧉ duplicates any colour into one of your
   own. ★
@@ -127,7 +127,7 @@
 - Backstitch `#backstitch`: click, click; it snaps to half cells; Esc, double-click or right-click ends the line. ⌨ ★
 - French knots and beads between cells `#points`
 - Beads in a cell `#beads`: a bead takes the whole cell.
-- Placing your own stamps `#place-stamp`
+- *(next release)* Placing special stitches `#place-stamp`
 
 **Faster**
 - Symmetric design: draw one side, get the others `#mirror`: Mirror (M): left–right, top–bottom, 4-way. ⌨ ★
@@ -266,7 +266,7 @@ first-visit guide, or on the first day.
 | `own-pdf` | 📍 | Lost the work file? New ▸ **From a PDF chart** reads it back from this app's PDF |
 | `numbering` | 📍 | Fabric & size ▸ **Numbering**: count from 0 or from the centre, like your paper |
 | `paste-other-pattern` | 📍 | Copy in one pattern, paste in another: the key entries come along |
-| `stamps` | 📍 | Backstitch ▸ **Draw your own…**: stitches of your own, in one click |
+| `stamps` | 📍 | *(next release)* Backstitch ▸ **Placed as**: special stitches in one click |
 | `shade-stitched` | 📍 | A photo window's **Shade stitched** shows what you've already copied |
 | `marker` | 📍 | Tick off lines of the paper key with a photo window's **Marker** |
 | `key-search` | 📍 | Long key? Search it by number or name, or group it by type |

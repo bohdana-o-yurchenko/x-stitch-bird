@@ -63,7 +63,7 @@ export const TIPS: readonly Tip[] = [
   { id: "own-pdf", kind: "where", help: "import#own-pdf", when: { unused: ["file.newFromPdf"] }, show: { targets: ["menu", "menu:newFromPdf"], menu: "pattern", reveal: ["new"] } },
   { id: "numbering", kind: "where", help: "start#numbering", when: { unused: ["pattern.setGrid"] }, show: { targets: ["side-fabric"], section: "fabric" } },
   { id: "paste-other-pattern", kind: "where", help: "draw#paste-other-pattern", when: { used: ["clipboard.copy"] } },
-  { id: "stamps", kind: "where", help: "key#stamps", when: {}, show: { targets: ["add-key"] } },
+  // { id: "stamps", … } comes back with special stitches in the next release (BACKLOG 7)
   { id: "shade-stitched", kind: "where", help: "import#shade-stitched", when: { used: ["reference.pick", "reference.open"] } },
   { id: "marker", kind: "where", help: "import#marker", when: { used: ["reference.pick", "reference.open"] } },
   { id: "key-search", kind: "where", help: "key#key-search", when: {} },

@@ -398,15 +398,6 @@ export const HELP_EN: HelpTexts = {
               ],
             },
             {
-              id: "stamps",
-              q: "Special stitches of my own",
-              a: [
-                "A **Back** entry ▸ **Draw your own…**: choose its size, drag from point to point to add stitches.",
-                "Then **Placed as** shows it — the whole stitch goes down in one click.",
-              ],
-              shot: true,
-            },
-            {
               id: "symbols",
               q: "Choosing symbols that match my paper chart",
               a: [
@@ -576,14 +567,6 @@ export const HELP_EN: HelpTexts = {
               id: "beads",
               q: "Beads in a cell",
               a: ["A bead takes its whole cell: it doesn’t go on top of a stitch unless [Override](draw#override) is on."],
-            },
-            {
-              id: "place-stamp",
-              q: "Placing my own special stitches",
-              a: [
-                "Pick the entry and click: the whole stitch goes down, centred on the pointer. Drag to place a row of them.",
-                "The eraser takes a whole one at a time.",
-              ],
             },
           ],
         },

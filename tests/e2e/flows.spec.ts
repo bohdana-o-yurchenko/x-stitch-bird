@@ -306,7 +306,19 @@ test("every kind of stitch: backstitch lines, French knots, partial stitches; th
   expect(await segments()).toBe(before + 1);
 });
 
-test("stamps: a stitch of one's own drawn by hand, placed as one; Smyrna crosses not offered for now (ARCHITECTURE-REVIEW §3)", async ({ page }) => {
+test("special stitches aren't offered yet: a backstitch has no Placed as and no Draw your own (next release, BACKLOG 7)", async ({ page }) => {
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form");
+  await form.getByRole("radio", { name: "Backstitch" }).click();
+  await page.getByPlaceholder("Search DMC number or name").fill("321");
+  await page.locator("[data-id='dmc:321']").click();
+  await expect(form.getByTestId("key-preview")).toBeVisible();
+  await expect(form.getByTestId("stamp-choice")).toHaveCount(0);
+  await expect(form.getByTestId("stamp-draw")).toHaveCount(0);
+});
+
+// hidden in this release (OFFER_STAMPS in KeyEntryForm); comes back with special stitches
+test.skip("stamps: a stitch of one's own drawn by hand, placed as one; Smyrna crosses not offered for now (ARCHITECTURE-REVIEW §3)", async ({ page }) => {
   const stamps = () => editorState<{ x: number; y: number; w: number; def: string }[]>(page, "(ed) => ed.doc.layers.stamps.map((s) => ({ x: s.x, y: s.y, w: s.w, def: s.def }))");
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   const form = page.getByTestId("key-form");
