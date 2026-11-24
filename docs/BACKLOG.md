@@ -2,7 +2,7 @@
 
 > What is **not built yet**. What *is* built is in `SPEC.md`; where it lives in the code, in `ARCHITECTURE.md`.
 > When an item is built: describe it in SPEC (its own §15.x), then remove it here.
-> Reviewed against the code 2026-11-18 (v2.0.0). Section numbers (§15.x) are SPEC's.
+> Reviewed against the code 2026-11-24 (`dev` after v2.3.1; B21 is built on the `offline-app` branch). Section numbers (§15.x) are SPEC's.
 
 **Effort** (one person with the assistant, tests included): **XS** a few hours · **S** about a day · **M** 2–4 days ·
 **L** 1–2 weeks · **XL** several weeks. **Files** says whether `.xbird` files or stored data change — anything there
@@ -37,22 +37,21 @@ DONE 13) add 'similar' colors of the same brand AND translations to other brands
 12) user guides and probably an AI assistant that exaplains how to do one or another
 11) FIX preview deploy on the vercel 
 
-13) finish a proper local app installation. this will introduce a whole lot of problems later tho.
-
 7) add specialty stitches : smyrna (in 1 cell in 4 cells ) + their own stitches
 8) write to yulia after the speciality stitches are done!!!!
 
 
 
+
+13) finish a proper local app installation. this will introduce a whole lot of problems later tho.
+
 11) intoduce more icons. match with pattern maker. fix the export oxs so it displays the icons??? 
 14) add fabricks!!! each fabric has a dmc code associated with it. so it's totally real 
 13) follow up : introduce 'my stash'. then introduce my projects. where i can add my kits and it would help me specify if i got all the necesary supplyes or if i can use smth from my stash 
 
-10) billing options, ui, and backend. and frontend and FOP setup 
-
-
 14) rework the floss and beads matching. using some existing trnalstion tables. 
 
+10) billing options, ui, and backend. and frontend and FOP setup
 
 
 bugs :
@@ -80,14 +79,13 @@ DONE 4) when i have a bead key on and move the mouse OFF the canvas and click - 
 | B2 | Finished size for several counts in the print PDF | S | none |
 | B3 | Bead packs and units in the shopping list | S | none |
 | B4 | Intended fabric: name and type | S | optional fields |
-| B5 | Production sign-in: own email sender, own Google app | S | none (setup) |
 | B6 | Charm-shaped icons for Mill Hill Treasures | S | none |
 | B7 | The installed app opens .xbird / .oxs files from the computer | S | none |
 | B8 | More chart checks: backstitch, knots, beads, unused key entries | S–M | none |
 | B9 | More sections on the account page | S–M | per section |
 | B10 | SVG chart export | M | none |
 | B12 | Autofill on colour-block charts (no symbols) | M | none |
-| B13 | Brand tools: convert the key, equivalents, discontinued DMC | M | none |
+| B13 | Brand tools: convert the key, discontinued DMC, … (equivalents in the colour panel: done) | M | none |
 | B14 | Proofread tracking ("mark region as proofed") | M | optional field |
 | B15 | Second-screen window | M | none |
 | B16 | Keyboard data entry | M | none |
@@ -95,17 +93,17 @@ DONE 4) when i have a bead key on and move the mouse OFF the canvas and click - 
 | B18 | Text / alphabet tool | M | none |
 | B19 | Read-only share links | M | new server table |
 | B20 | Symbols from uploaded pictures | M | optional field |
-| B21 | Opening without the internet (installed app, phase 2) | M–L | none (browser cache) |
+| B21 | Opening without the internet — **built on `offline-app`, to merge** | M–L | none (browser cache) |
 | B22 | PCStitch `.pat` import | M–L | none |
 | B23 | Other apps' PDFs: part stitches, knots, beads; more apps | M–L | none |
 | B24 | Floss usage rework; plastic canvas and wooden bases | L | optional settings |
-| B25 | More thread brands (data) | L | new brand ids |
+| B25 | More thread brands (data; Dimensions done) | L | new brand ids |
 | B26 | Specialty stitches: long stitch, lazy daisy, … | L | new optional layer |
 | B27 | Stash management | XL | new server tables |
 | B28 | `.saga` import (Cross Stitch Saga) | ? | none |
 
-**Suggested order** (value for the effort): B2, B3, B4 together (one "fabric & shopping" release) → B1 (bug), B5 →
-B10 (§15.27's ranking) → B8 → B21 → B24 → B27.
+**Suggested order** (value for the effort): merge B21 (built) → B2, B3, B4 together (one "fabric & shopping"
+release) → B1 (bug) → B10 (§15.27's ranking) → B8 → B24 → B27.
 
 ---
 
@@ -144,7 +142,7 @@ The cover shows the size on the pattern's own count only (`chartPdf.ts`, the cov
 
 ### B3. Bead packs and units in the shopping list (§15.22) — S
 Done already: the CSV writes "2 skeins" (`csv.unit.*`), and the calculator's line type has `pack` and `meter` units.
-Still open:
+Still open (checked 2026-11-24 — nothing of it built yet):
 - **Beads**: the calculator gives a count of beads (`unit: "bead"`). The catalogue knows each Mill Hill bead's
   package size (`ColorEntry.pack`, §2.2, Treasures included) → "2 packs (≈ 640 beads)". Preciosa has no pack (sold
   by weight) → the count stays. Own beads: a count, unless a pack size is added to the form.
@@ -161,20 +159,13 @@ Today the pattern keeps a count (dropdown) and a colour (picker).
 - Stored as optional fields (`fabricName`, `fabricType`) — no `.xbird` version bump; old files open as before.
 - OXS: write the name only if the format has a field for it — check against the readers (Хрестики, Ruta Stitch).
 
-### B5. Production sign-in: own email sender and Google app — S (setup)
-From §15.23's "still to do". Done: www.x-stitch-bird.app (and the old vercel.app address) are trusted domains for
-sign-in. Open as of 2026-11-16, **not checked since** — check in the Neon / Google consoles first:
-- email codes sent from our own address / domain (own SMTP), not the provider's default sender;
-- our own Google OAuth app (name and logo on Google's screen; Google's verification, which the privacy policy's
-  "Google user data / Limited Use" section is written for).
-If both are done, remove this item and note it in §15.23.
-
 ### B6. Charm-shaped icons for Mill Hill Treasures (§15.24) — S
 Treasures are drawn as a large round bead (radius 0.48). Charm shapes — heart, star, flower, leaf, … — per series
 or per item, in the key, the chart and the PDFs. Needs a shape per Treasure (from the catalogue's names); vector
 paths like the drawn symbols (§2.5).
 
 ### B7. Open .xbird / .oxs files from the computer in the installed app — S
+Not built on any branch (checked 2026-11-24).
 Undecided extra from §15.50: the manifest's `file_handlers` + `launchQueue` (Chrome / Edge), so double-clicking a
 `.xbird` opens it in пташечка. The file then goes through the usual Open work file path (asks before replacing,
 §15.25 / §15.43). Not in Safari. Small on its own; most useful together with B21.
@@ -208,8 +199,9 @@ Autofill (§15.11) matches printed symbols. Charts without symbols (colour block
 colour: matched against the colour of the examples given for each key entry, with the same "sure / unsure" rule.
 
 ### B13. Brand tools (rest of §15.8) — M
-Built: brands per pattern, DMC / Anchor / Madeira catalogues, Anchor's "≈ DMC …", own threads in any brand, OXS
-brand prefixes (§15.28, §15.42). Still open:
+Built: brands per pattern, DMC / Anchor / Madeira / Dimensions catalogues, Anchor's "≈ DMC …", own threads in any
+brand, OXS brand prefixes (§15.28, §15.42); the Floss / Beads colour panel shows each colour in the other brands
+(conversion chart, else nearest by CIEDE2000), lighter / darker and similar colours. Still open:
 - **Convert key to brand…** — replaces every thread with its equivalent, keeps symbols and chart; a version is
   taken first (§15.7).
 - **Show equivalents as**: none | DMC | Anchor | … — a second line in the key ("≈ DMC 310"): the official table
@@ -252,14 +244,11 @@ OXS has no way to carry them (falls back to a font symbol). Optional field in `.
 
 ## M–L
 
-### B21. Opening without the internet — installed app, phase 2 (§15.50) — M–L
-Today the installed app still needs the internet to open. Needed:
-- a service worker; the editor's lazily loaded files (PDF chart dialog, pdf.js and its worker, photo tools) saved
-  ahead;
-- a "new version — reload" prompt;
-- a start that doesn't wait for the sign-in check;
-- calm offline account pages (My patterns from this browser's cache, the account's parts greyed).
-Stored data: browser cache only. Saving offline already works (§15.33, §15.34).
+### B21. Opening without the internet — installed app, phase 2 (§15.50) — M–L · **built, not merged**
+Built on the **`offline-app`** branch (one commit, `51735bd`, SPEC §15.53 there): a service worker that saves every
+page and file of the build ahead, a "new version — Reload" prompt, a start that doesn't wait for the sign-in check,
+calm offline account pages. **Left**: merge into `dev` (it branched off before v2.2, so expect conflicts), check
+offline in the installed app, release. Then remove this item.
 
 ### B22. PCStitch `.pat` import (§15.27, ranked 3rd) — M–L
 Older and needs more reverse engineering than `.xsd` (KXStitch reads it too). Same rules as the `.xsd` import (§15.56): import
@@ -294,8 +283,8 @@ waste (tails, travel at the back), so it undercounts on confetti areas; no metre
 stitching style is the default (loop start, waste knot)?
 
 ### B25. More thread brands — data (§15.8) — L in total, S–M per brand
-Built in: DMC, Anchor (445), Madeira (369), from openly licensed data (§15.28). Asked for by users (2026-11-16):
-**Dimensions, Palmira, Avrora, Kreinik, Rainbow Gallery, Weeks Dye Works**; also Cosmo and vintage lines on old
+Built in: DMC, Anchor (445), Madeira (369), Dimensions, from openly licensed data (§15.28). Asked for by users
+(2026-11-16): ~~Dimensions~~ (done), **Palmira, Avrora, Kreinik, Rainbow Gallery, Weeks Dye Works**; also Cosmo and vintage lines on old
 paper charts (J&P Coats).
 - Per brand: codes, names, a screen colour, an equivalent table where published — **only from openly licensed
   data** (the stitchmate.app library may not be reused). Until then people add them as their own threads.

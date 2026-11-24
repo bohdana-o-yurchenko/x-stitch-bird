@@ -1678,7 +1678,7 @@ a private `assets` bucket.
 **Built since:** the gallery — My patterns (§15.26, §15.36, §15.37); moving this browser's patterns into the account
 (§15.25, §15.26); own threads and beads in the account (§15.28, §15.30); pictures in the account (§15.33); several
 windows and devices (§15.34); limits (§15.35); deleting an account (§15.38). Production on Vercel, own domain
-trusted for sign-in. **Still open:** own email sender, own Google OAuth app — status to check (BACKLOG B5).
+trusted for sign-in. Own email sender and own Google OAuth app: set up (confirmed 2026-11-24, was BACKLOG B5).
 
 **Plan as discussed** (kept for the record; built as above):
 A big turn: patterns are stored on a server under a user account, not only in the browser.
