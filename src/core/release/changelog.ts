@@ -12,6 +12,40 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: "2.4.0",
+    date: "2026-11-24",
+    uk: [
+      "Довідка: відповіді на питання, як їх ставить вишивальниця, крок за кроком, із пошуком і знімками. Кнопка «?» біля заголовків відкриває потрібне питання; ☰ ▸ Довідка.",
+      "Порада дня: раз на день маленька картка з клавішею чи функцією, якою ви ще не користувалися. Вимикається одним кліком; ☰ ▸ Порада дня — будь-коли.",
+      "Друк: нове вікно PDF-схеми для друку з живим переглядом сторінок. Готові набори (Повна схема, Для себе, Чорно-біла, Великий друк), до 8 схем в одному файлі, обкладинка, зміст, інструкції й матеріали, A4 чи Letter.",
+      "Муліне й Бісер: увесь каталог усіх брендів разом із вашими кольорами. Панель кольору: інші бренди, світліші й темніші, схожі відтінки та схеми, де він є.",
+      "Відкриваються схеми Pattern Maker (.xsd): хрестики, часткові стібки, бекстіч, вузлики, бісер і кольори.",
+      "«Замінити елемент…» у виділенні: два списки, як у ключі, з кількістю стібків, пошуком і клавішами.",
+      "Показати на схемі: можна сховати цілі види — хрестики, часткові стібки, бекстіч, вузлики чи бісер. Піпетка й гумка схованого не чіпають.",
+      "Перевірка «Поодинокі стібки»: розмір групи й відстань до свого кольору — до 2 чи 3 клітинок.",
+      "Великі схеми малюються плавно: змінене перемальовується лише там, де змінилося.",
+      "Нова головна сторінка для тих, хто прийшов уперше; редактор тепер за адресою /uk/editor (старі посилання працюють).",
+      "Виправлено: бісер між клітинками і той самий бісер у клітинці — тепер два різні елементи ключа, і .oxs відкривається правильно.",
+      "Виправлено: перевірка симетрії враховує бекстіч, бісер і вузлики; гумка на бісері між клітинками чи вузлику стирає лише його; клавіші працюють за будь-якої розкладки; Shift+1…5 — розмір пензля.",
+      "Бісер Petite, Size 6 і Pebble тепер експортуються в .oxs як звичайний бісер — застосунки для читання їх більше не пропускають.",
+    ],
+    en: [
+      "Help: answers to questions as a stitcher asks them, step by step, with search and pictures. The “?” by titles opens the right question; ☰ ▸ Help.",
+      "Tip of the day: once a day, a small card with a shortcut or a feature you haven’t used yet. One click turns it off; ☰ ▸ Tip of the day brings it any time.",
+      "Printing: a new window for the PDF chart to print, with a live preview of the pages. Presets (Full pattern, For me, Black & white, Large print), up to 8 charts in one file, a cover, contents, instructions and materials, A4 or Letter.",
+      "Floss and Beads: the whole catalogue of every brand, with your own colours among them. A colour’s panel: other brands, lighter and darker, similar shades, and the patterns that use it.",
+      "Pattern Maker charts (.xsd) open: crosses, fractional stitches, backstitch, knots, beads and colours.",
+      "Replace key… in a selection: two key-like lists with stitch counts, search and keyboard keys.",
+      "Show on the chart: hide whole kinds — crosses, fractional stitches, backstitch, knots or beads. The picker and eraser leave hidden ones alone.",
+      "The Lone stitches check: group size, and how far its colour must be — up to 2 or 3 cells.",
+      "Big charts draw smoothly: only what changed is redrawn.",
+      "A new home page for first-time visitors; the editor now lives at /en/editor (old links still work).",
+      "Fixed: a bead between cells and the same bead in a cell are now two key entries, and such .oxs files open correctly.",
+      "Fixed: the symmetry check counts backstitch, beads and knots; the eraser on a bead between cells or a knot erases only that; shortcuts work in any keyboard layout; Shift+1…5 sets the brush size.",
+      "Petite, Size 6 and Pebble beads now export to .oxs as plain beads, so reader apps no longer skip them.",
+    ],
+  },
+  {
     version: "2.3.1",
     date: "2026-11-21",
     uk: [
