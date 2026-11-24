@@ -1,6 +1,6 @@
 # Releasing пташечка
 
-Work happens on `dev` (pushed to GitHub as `DEV`: `git push origin dev:DEV`). `main` is production — Vercel deploys
+Work happens on `dev` (pushed to GitHub as `dev`: `git push origin dev`). `main` is production — Vercel deploys
 every push to `main`. A release is: a version number, user-facing notes, a tag, and a push to `main`.
 
 ## Versions
@@ -30,7 +30,7 @@ for people who used an older version; brand-new users get the quick-start guide 
    Day to day, `.env.local` holds the Neon `dev` branch only (`.env.example`).
 5. Publish:
    ```sh
-   git push origin dev:DEV
+   git push origin dev
    git checkout main && git merge --ff-only dev
    git tag -a v1.1.0 -m "v1.1.0"
    git push origin main --follow-tags
