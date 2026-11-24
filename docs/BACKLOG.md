@@ -37,11 +37,10 @@ DONE 13) add 'similar' colors of the same brand AND translations to other brands
 12) user guides and probably an AI assistant that exaplains how to do one or another
 11) FIX preview deploy on the vercel 
 
-7) add specialty stitches : smyrna (in 1 cell in 4 cells ) + their own stitches
 8) write to yulia after the speciality stitches are done!!!!
 
 
-
+1) little bug. when i already have an entry of a solid color and i switch to blend : the one color must stay seelcted 
 
 13) finish a proper local app installation. this will introduce a whole lot of problems later tho.
 

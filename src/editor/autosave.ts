@@ -1,4 +1,4 @@
-import { serializePattern } from "@/core/formats/json/serialize";
+import { serializePattern, type PatternFile } from "@/core/formats/json/serialize";
 import type { DraftStore } from "@/persistence/ports";
 import type { Pattern } from "@/core/pattern/types";
 
@@ -31,7 +31,17 @@ export class Autosave {
    */
   private placeholder = false;
 
-  constructor(private draft: DraftStore, private doc: () => Pattern, private saveToLibrary: () => Promise<unknown>, private quick: () => boolean = () => false) {}
+  /** Counts draft writes asked for: one worked out off the main thread is written only if no later one was asked for. */
+  private draftSeq = 0;
+
+  constructor(
+    private draft: DraftStore,
+    private doc: () => Pattern,
+    private saveToLibrary: () => Promise<unknown>,
+    private quick: () => boolean = () => false,
+    /** The pattern's document: at once, or worked out off the main thread (editor/serialized). */
+    private file: { now(): PatternFile; later(): Promise<PatternFile> } = { now: () => serializePattern(doc()), later: async () => serializePattern(doc()) },
+  ) {}
 
   schedule() {
     this.placeholder = false;
@@ -95,11 +105,21 @@ export class Autosave {
     this.placeholder = false;
   }
 
-  private flushDraft() {
+  /** The draft, written now (`sync`: the page is closing) or once worked out off the main thread. */
+  private flushDraft(sync = false) {
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;
     if (this.placeholder) return;
-    this.draft.save(serializePattern(this.doc()));
+    const seq = ++this.draftSeq;
+    if (sync) return this.draft.save(this.file.now());
+    const id = this.doc().id;
+    void this.file.later().then(
+      (f) => {
+        // a newer draft was asked for meanwhile, or another pattern is open now
+        if (seq === this.draftSeq && !this.placeholder && f.id === id && this.doc().id === id) this.draft.save(f);
+      },
+      () => seq === this.draftSeq && this.flushDraft(true),
+    );
   }
 
   private async saveLibrary() {
@@ -125,7 +145,7 @@ export class Autosave {
 
   /** The page hidden or closing: the draft now (time spent too); real changes to the saved patterns as well. */
   flush() {
-    this.flushDraft();
+    this.flushDraft(true);
     if (this.unsaved) void this.saveLibrary();
   }
 }

@@ -28,7 +28,6 @@ import type { Ctx } from "@/render/primitives/cells";
 import { strokeLineStyle } from "@/render/primitives/lineStyles";
 import { downloadFile, isImageFile, isPatternFile, isPdfFile, readText } from "@/platform/files";
 import { pdfAttachments, pdfContent } from "@/platform/pdf";
-import { readChart } from "@/core/formats/pdfChart/read";
 import { canvasToBlob, downscaleToBlob, loadImage } from "@/platform/images";
 import { photoFits } from "../images/photoRoom";
 import { accountPatternApi } from "@/persistence";
@@ -247,7 +246,7 @@ export async function loadPdfPattern(ed: Editor, file: File) {
     const doc = patternFromAttachments(await pdfAttachments(file));
     if (!doc) {
       ed.toast("toasts.readingPdf");
-      const content = await pdfContent(file), read = readChart(content);
+      const content = await pdfContent(file), read = await ed.jobs.run("readChart", { content });
       return ed.openDialog(read.symbols.length ? { type: "pdfChart", file, content, read } : { type: "pdfUnreadable", name: file.name });
     }
     pattern = parsePattern(doc, ed.state.symbols).pattern;
@@ -311,9 +310,11 @@ export function createFromImage(ed: Editor, r: QuantizeResult, image: HTMLImageE
 
 /** Into the saved patterns (and the account, signed in). `quiet`: the automatic save — no toast unless it fails. */
 export async function saveToLibrary(ed: Editor, o: { quiet?: boolean } = {}) {
-  const doc = serializePattern(ed.doc), revision = ed.state.docRevision;
+  // made off the main thread; the pattern as it is now (the job takes its copy before this returns)
+  const revision = ed.state.docRevision, made = ed.serialized.later();
   if (!o.quiet) ed.autosave.markSaved();
   ed.store.setState({ saveState: "saving" });
+  const doc = await made.catch(() => ed.serialized.now());
   // following another window: nothing of this one's goes to the account (SPEC §15.34)
   const r = await ed.persistence.patterns.save(doc, ed.live.readOnly ? { localOnly: true } : ed.live.saveOptions());
   if (r.ok && r.conflict && doc.id === ed.doc.id) ed.live.refused(r.conflict);

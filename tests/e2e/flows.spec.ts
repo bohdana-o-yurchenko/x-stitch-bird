@@ -306,6 +306,53 @@ test("every kind of stitch: backstitch lines, French knots, partial stitches; th
   expect(await segments()).toBe(before + 1);
 });
 
+test("stamps: a Smyrna cross over four cells, and a stitch of one's own drawn by hand, each placed as one (ARCHITECTURE-REVIEW §3)", async ({ page }) => {
+  const stamps = () => editorState<{ x: number; y: number; w: number; def: string }[]>(page, "(ed) => ed.doc.layers.stamps.map((s) => ({ x: s.x, y: s.y, w: s.w, def: s.def }))");
+  // Backstitch, placed as a Smyrna cross over 4 cells
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  const form = page.getByTestId("key-form");
+  await form.getByRole("radio", { name: "Backstitch" }).click();
+  await page.getByPlaceholder("Search DMC number or name").fill("310");
+  await page.locator("[data-id='dmc:310']").click();
+  await form.getByTestId("stamp").getByRole("radio", { name: "Smyrna cross over 4 cells" }).click();
+  await expect(form.getByTestId("key-preview")).toContainText("Smyrna cross over 4 cells");
+  await form.getByRole("button", { name: "Add to key", exact: true }).click();
+  await expect(form).toHaveCount(0);
+  // the pencil places one with its middle under the pointer
+  const c = await cellPoint(page, 10, 10);
+  await page.mouse.click(c.x, c.y);
+  expect(await stamps()).toEqual([{ x: 10, y: 10, w: 2, def: "smyrna2" }]);
+  await expect(page.getByTestId("totals")).toContainText("Special stitches: 1");
+
+  // one's own: drawn in the form — a 1×1 tick — then placed
+  await page.getByRole("button", { name: "+ Add to key" }).first().click();
+  await form.getByRole("radio", { name: "Backstitch" }).click();
+  await page.getByPlaceholder("Search DMC number or name").fill("321");
+  await page.locator("[data-id='dmc:321']").click();
+  await form.getByTestId("stamp-draw").click();
+  const drawer = page.getByTestId("stamp-drawer");
+  await drawer.getByTestId("stamp-w").selectOption("1");
+  await drawer.getByTestId("stamp-h").selectOption("1");
+  await drawer.getByTestId("stamp-name").fill("Tick");
+  const area = (await drawer.getByTestId("stamp-area").boundingBox())!;
+  // the block is centred in the area with 14 px around it: corner to corner
+  await page.mouse.move(area.x + 14, area.y + 14);
+  await page.mouse.down();
+  await page.mouse.move(area.x + area.width - 14, area.y + area.height - 14, { steps: 5 });
+  await page.mouse.up();
+  await expect(drawer.getByTestId("stamp-line")).toHaveCount(1);
+  await drawer.getByTestId("stamp-use").click();
+  await expect(form.getByTestId("key-preview")).toContainText("Tick");
+  await form.getByRole("button", { name: "Add to key", exact: true }).click();
+  const d = await cellPoint(page, 3, 3);
+  await page.mouse.click(d.x, d.y);
+  expect((await stamps())[1]).toMatchObject({ x: 3, y: 3, w: 1 });
+  expect((await stamps())[1]!.def).toMatch(/^own:/);
+  // undo takes the last one away
+  await page.keyboard.press("ControlOrMeta+z");
+  expect(await stamps()).toHaveLength(1);
+});
+
 // someone else's design: on this computer only (tests/fixtures/private)
 test("opens a Pattern Maker .xsd from New ▸ From an .oxs or .xsd file: its crosses and backstitch", async ({ page }) => {
   test.skip(!existsSync(fixture("private/pattern-maker-rabbits.xsd")), "no private sample");

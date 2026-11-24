@@ -35,11 +35,11 @@ function GroupsToggle() {
   const t = useTranslations("view");
   const run = useCommand();
   const hidden = useEditorState((st) => st.hiddenGroups);
-  const doc = useEditorState((st) => st.doc);
-  const revision = useEditorState((st) => st.docRevision);
-  // only the kinds the design has — and any hidden one, so it can be shown again
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- the doc changes in place; its revision says when
-  const present = useMemo(() => groupsIn(doc), [doc, revision]);
+  const ed = useEditor();
+  // only the kinds the design has — and any hidden one, so it can be shown again; looked at once editing pauses
+  const revision = useEditorState((st) => st.settledRevision);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- the doc changes in place; the settled revision says when
+  const present = useMemo(() => ed.derived.of(groupsIn), [ed, revision]);
   const listed = CHART_GROUPS.filter((g) => present.includes(g) || hidden.includes(g));
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);

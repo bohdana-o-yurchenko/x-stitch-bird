@@ -7,11 +7,11 @@ import type { ColorEntry } from "@/core/color/colorEntry";
 import type { PdfContent } from "@/core/formats/pdfChart/content";
 import type { KeyThread } from "@/core/formats/pdfChart/key";
 import { paletteId, parsePaletteId, type PaletteColour } from "@/core/formats/pdfChart/palette";
-import { readChart, type ChartRead, type SampleBox } from "@/core/formats/pdfChart/read";
+import type { ChartRead, SampleBox } from "@/core/formats/pdfChart/read";
 import { allSettled, settledRead, type ChartChoice } from "@/editor/actions/pdfChart";
 import { renderPdfPage } from "@/platform/pdf";
 import { Modal, cx, ui } from "../common/widgets";
-import { useCommand } from "../hooks/editor";
+import { useCommand, useEditor } from "../hooks/editor";
 import { PdfViewer, type PdfPlace } from "./PdfViewer";
 import s from "./pdfChart.module.css";
 
@@ -88,7 +88,17 @@ export function PdfChartDialog({ file, content, read: first, onClose }: { file: 
   const t = useTranslations("pdfChart");
   const run = useCommand();
   const [use, setUse] = useState<boolean[]>(() => first.grids.map((g) => g.use));
-  const read = useMemo(() => (use.every((u, i) => u === first.grids[i]!.use) ? first : readChart(content, { use })), [use, first, content]);
+  const ed = useEditor();
+  // grids taken in or out: the chart read again, off the main thread; the last reading shows meanwhile
+  const original = use.every((u, i) => u === first.grids[i]!.use);
+  const [reread, setReread] = useState<ChartRead | null>(null);
+  useEffect(() => {
+    if (original) return;
+    let alive = true;
+    void ed.jobs.run("readChart", { content, use }).then((r) => alive && setReread(r));
+    return () => void (alive = false);
+  }, [ed, use, original, content]);
+  const read = original ? first : (reread ?? first);
   const [symbols, setSymbols] = useState<Record<string, ChartChoice<KeyThread>>>({});
   const [lines, setLines] = useState<Record<number, ChartChoice<string>>>({});
   const [fadedEmpty, setFadedEmpty] = useState(true);

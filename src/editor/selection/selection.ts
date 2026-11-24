@@ -192,7 +192,8 @@ export class SelectionService {
     if (!f) return n;
     for (const l of LAYERS) {
       const piece = f.layers[l.id];
-      if (piece !== undefined) l.usage(piece as never, (k) => p.key[k] && n.set(k, (n.get(k) ?? 0) + 1));
+      // one per stitch, line, knot or stamp — a line's length isn't one more
+      if (piece !== undefined) l.usage(piece as never, (k, unit) => unit !== "segmentLength" && p.key[k] && n.set(k, (n.get(k) ?? 0) + 1), p);
     }
     return n;
   }

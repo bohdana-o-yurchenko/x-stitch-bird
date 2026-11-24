@@ -11,7 +11,8 @@ import s from "./side.module.css";
 export function MaterialsPanel() {
   const t = useTranslations("materials");
   const run = useCommand();
-  useEditorState((st) => st.docRevision);
+  // brands live in the key: drawn again when it changes, not on every stroke
+  useEditorState((st) => st.keyRevision);
   const p = useEditorState((st) => st.doc);
   const inventory = useEditorState((st) => st.inventory);
   const choices = brandChoices(p, inventory);

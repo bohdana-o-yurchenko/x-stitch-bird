@@ -1,6 +1,6 @@
 import type { ColorEntry } from "@/core/color/colorEntry";
 import { computeUsage, entryCount, partialCount } from "@/core/calculator/usage";
-import { entryKind } from "@/core/entryKinds/registry";
+import { entryKind, usesLineStyles } from "@/core/entryKinds/registry";
 import { LAYERS } from "@/core/layers/registry";
 import { addEntry, cleanEntry, entryLayer, findSameKey, nextLine, nextSymbol, sameSymbol } from "@/core/pattern/keyEntries";
 import { makeBlendColor, makeComboColor, resolveColor, invalidateColors } from "@/core/pattern/resolve";
@@ -48,6 +48,8 @@ export interface KeyDraft {
   wraps: number;
   /** Backstitch: the line's colour on the Symbols view and the PDF chart to print. */
   ink: string;
+  /** Backstitch: placed as this stamp (core/stamps); "" — plain lines. */
+  stamp: string;
 }
 
 /**
@@ -55,20 +57,20 @@ export interface KeyDraft {
  * and colour (`nextLine`), other kinds the next free character.
  */
 export function draftSymbol(ed: Editor, d: KeyDraft, t: EntryKindId, edit?: KeyIndex): Pick<KeyDraft, "sym"> & Partial<Pick<KeyDraft, "ink">> {
-  if (isLineStyle(d.sym) === (t === "back")) return { sym: d.sym };
-  return t === "back" ? nextLine(ed.doc, edit) : { sym: nextSymbol(ed.doc, ed.state.symbols, edit, t) };
+  if (isLineStyle(d.sym) === usesLineStyles(t)) return { sym: d.sym };
+  return usesLineStyles(t) ? nextLine(ed.doc, edit) : { sym: nextSymbol(ed.doc, ed.state.symbols, edit, t) };
 }
 
 export function draftFor(ed: Editor, edit?: KeyIndex): KeyDraft {
   const p = ed.doc, def = defaultMaterials(p);
   const d: KeyDraft = {
     t: "thread", mode: "single", thread: def.thread, slots: [{ id: def.thread || null, n: 1 }, { id: def.second, n: 1 }],
-    bead: def.bead, n: p.strands || 2, st: "full", sym: nextSymbol(p, ed.state.symbols, edit), wraps: 2, ink: DEFAULT_LINE_INK,
+    bead: def.bead, n: p.strands || 2, st: "full", sym: nextSymbol(p, ed.state.symbols, edit), wraps: 2, ink: DEFAULT_LINE_INK, stamp: "",
   };
   const e = edit ? p.key[edit] : null;
   if (!e) return d;
   const c = resolveColor(p, e.src);
-  Object.assign(d, { t: e.t, sym: e.sym, n: e.n ?? d.n, st: e.st ?? "full", wraps: e.wraps ?? 2, ink: e.ink ?? DEFAULT_LINE_INK });
+  Object.assign(d, { t: e.t, sym: e.sym, n: e.n ?? d.n, st: e.st ?? "full", wraps: e.wraps ?? 2, ink: e.ink ?? DEFAULT_LINE_INK, stamp: e.stamp ?? "" });
   if (e.t === "bead") d.bead = e.src;
   else if (e.t === "combo" && c?.thread && c.bead) Object.assign(d, { thread: c.thread.id, bead: c.bead.id });
   else if (c?.isBlend && c.parts) Object.assign(d, { mode: "blend", slots: c.parts.map((q) => ({ id: q.entry.id, n: q.n })) });
@@ -116,7 +118,8 @@ export function draftEntry(d: KeyDraft, src: string): Omit<KeyEntry, "sym"> {
     n: d.t === "bead" ? undefined : usesBlend(d) ? null : d.n,
     st: fields.includes("stitchType") ? d.st : d.t === "bead" && d.st === "point" ? "point" : undefined,
     wraps: d.t === "knot" ? d.wraps : undefined,
-    ink: d.t === "back" ? d.ink : undefined,
+    ink: usesLineStyles(d.t) ? d.ink : undefined,
+    stamp: fields.includes("stamp") && d.stamp ? d.stamp : undefined,
   };
 }
 
@@ -148,7 +151,9 @@ export function commitEntry(ed: Editor, d: KeyDraft, edit?: KeyIndex): KeyIndex 
   const preview = resolveDraftSource(ed, d, false);
   if (!preview) return null;
   // an entry on the chart keeps its layer: no moving between cells and grid points
-  if (before && used && (entryKind(d.t).group !== entryKind(before.t).group || entryLayer(cleanEntry(draftEntry(d, before.src), d.sym)) !== entryLayer(before))) {
+  // nor between stamps: the ones placed keep their size
+  const after = cleanEntry(draftEntry(d, before?.src ?? ""), d.sym);
+  if (before && used && (entryKind(d.t).group !== entryKind(before.t).group || entryLayer(after) !== entryLayer(before) || (after.stamp ?? "") !== (before.stamp ?? ""))) {
     ed.toast("keyDialog.layerLocked");
     return null;
   }

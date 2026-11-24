@@ -83,7 +83,8 @@ export function setPatternSettings(ed: Editor, s: Partial<Pick<Pattern, "name" |
   if (s.grid) p.grid = s.grid;
   if (s.brands) p.brands = [...new Set(s.brands)];
   if (s.materials) applyMaterials(p, s.materials);
-  ed.changed();
+  // brands and materials belong with the key (the forms that offer threads follow `keyRevision`)
+  ed.changed({ keys: !!(s.brands || s.materials) });
 }
 
 /** The demo heart shown on first start (SPEC §9.2). */

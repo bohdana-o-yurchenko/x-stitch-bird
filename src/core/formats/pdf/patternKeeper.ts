@@ -1,4 +1,5 @@
 import { brandCode } from "../../catalog/catalog";
+import { chartLines } from "../../layers/registry";
 import { hexToRgb, luma } from "../../color/colorMath";
 import { resolveColor } from "../../pattern/resolve";
 import type { KeyEntry, KeyIndex, Pattern } from "../../pattern/types";
@@ -48,7 +49,7 @@ export function checkPatternKeeper(p: Pattern): PkReport {
   for (const list of p.layers.partials.values()) partials += list.length;
   bump("partial", partials);
   bump("bead", p.layers.beads.reduce((n, k) => n + (k ? 1 : 0), 0));
-  bump("back", p.layers.segments.length);
+  bump("back", chartLines(p).length);
   // a bead on a grid point is a bead (or floss + bead), not a knot
   for (const kn of p.layers.knots) {
     const t = p.key[kn.k]?.t;

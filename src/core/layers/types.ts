@@ -1,7 +1,8 @@
 import type { CellTransform } from "../transform/cellTransform";
-import type { KeyIndex, LayerId, Layers, PartialKindId, Pattern, Point, Rect, Size } from "../pattern/types";
+import type { ChartGroup } from "../pattern/groups";
+import type { KeyIndex, LayerId, Layers, PartialKindId, Pattern, Point, Rect, Segment, Size } from "../pattern/types";
 
-export type UsageUnit = "cell" | "segment" | "segmentLength" | "knot" | PartialKindId;
+export type UsageUnit = "cell" | "segment" | "segmentLength" | "knot" | "stamp" | PartialKindId;
 export type UsageSink = (k: KeyIndex, unit: UsageUnit, amount: number) => void;
 /** Old key index → new one; 0 removes the item. */
 export type KeyMap = (k: KeyIndex) => KeyIndex;
@@ -30,6 +31,14 @@ export interface EraseTarget {
 /** One kind of content on the chart. Code that touches "everything" loops over the registry (ARCHITECTURE §7.1). */
 export interface LayerHandler<T = unknown> {
   id: LayerId;
+  /** Its field in the pattern file (.xbird). */
+  fileField: string;
+  /** Written even when empty (the fields every version of the format has); otherwise only with content. */
+  alwaysWritten?: boolean;
+  /** What hides it on the chart (SPEC §15.16); absent: decided per item (stitches, knots) or never hidden. */
+  group?: ChartGroup;
+  /** Its content as straight lines: drawn above the grid, exported as backstitch (OXS, PDF). */
+  lines?(v: T, p: Pattern): Segment[];
   /** Not part of PNG/PDF/OXS/CSV exports (ambiguous marks). */
   exported: boolean;
   /** Lower picks first. */
@@ -52,7 +61,7 @@ export interface LayerHandler<T = unknown> {
   erase(v: T, target: EraseTarget, size: Size): boolean;
   pickAt(v: T, at: Point, size: Size): KeyIndex;
   remapKeys(v: T, map: KeyMap): void;
-  usage(v: T, sink: UsageSink): void;
+  usage(v: T, sink: UsageSink, p: Pattern): void;
   /** Bounding box of the content in cells, or null. */
   bounds(v: T, size: Size): Rect | null;
   serialize(v: T, map: KeyMap): unknown;

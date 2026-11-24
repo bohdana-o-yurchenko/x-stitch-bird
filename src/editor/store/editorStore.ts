@@ -69,6 +69,8 @@ export interface Overlay {
   preview: { cells: number[]; key: KeyIndex } | null;
   partialPreview: { cell: number; stitch: PartialStitch } | null;
   knotPreview: { point: Point; key: KeyIndex } | null;
+  /** Lines a press would add (a stamp under the pointer, its mirror images too). */
+  linePreview: { lines: Segment[]; key: KeyIndex } | null;
   chain: { last: Point; hover: Point | null; key: KeyIndex } | null;
   hoverPoint: Point | null;
   marquee: Rect | null;
@@ -174,9 +176,14 @@ export interface EditorState {
   underlayPageBusy?: boolean;
   /** Bumped when versions arrive from elsewhere (the Versions list reads again). */
   versionsRevision: number;
+  /**
+   * `docRevision` once editing has paused (SETTLE_MS): what's worked out from the whole pattern (totals, the kinds of
+   * stitches in it, the stitched shading of photo windows) follows this, never each step of a stroke.
+   */
+  settledRevision: number;
 }
 
-export const emptyOverlay: Overlay = { hover: null, pickerHighlight: null, preview: null, partialPreview: null, knotPreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null, eraseKnots: null };
+export const emptyOverlay: Overlay = { hover: null, pickerHighlight: null, preview: null, partialPreview: null, knotPreview: null, linePreview: null, chain: null, hoverPoint: null, marquee: null, eraseHighlight: null, eraseKnots: null };
 
 export const createEditorStore = () =>
   createStore<EditorState>()(() => ({
@@ -234,6 +241,7 @@ export const createEditorStore = () =>
     account: null,
     live: { role: "off", others: 0 },
     versionsRevision: 0,
+    settledRevision: 0,
   }));
 
 export type EditorStore = ReturnType<typeof createEditorStore>;

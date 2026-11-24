@@ -20,6 +20,9 @@ function sample(): Pattern {
   layers.segments.push({ x1: 1, y1: 1, x2: 3.5, y2: 2, k });
   layers.knots.push({ x: 2.5, y: 3, k });
   layers.ambiguous.add(6).add(33);
+  // a Smyrna cross as drawn, and one's own stamp turned a quarter (its block 2 wide, 3 tall)
+  const back = addEntry(p, { t: "back", src: "dmc:321", n: 1, stamp: "smyrna2" }, ALL_SYMBOLS);
+  layers.stamps.push({ x: 0, y: 0, w: 2, h: 2, def: "smyrna2", k: back }, { x: 4, y: 1, w: 2, h: 3, def: "own:a", k: back, m: [0, -1, 1, 0] });
   return p;
 }
 

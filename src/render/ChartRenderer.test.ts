@@ -29,9 +29,17 @@ function setup() {
   const c = fakeCanvas();
   const canvas = { getContext: () => c.g, width: 0, height: 0 } as unknown as HTMLCanvasElement;
   let current = scene;
-  const r = new ChartRenderer(canvas, theme, () => current);
+  // the cached chart image draws into the same log: a test sees everything drawn, cached or on screen
+  const r = new ChartRenderer(canvas, theme, () => current, () => ({ getContext: () => c.g, width: 0, height: 0 }));
   r.resize(600, 400, 2);
-  return { r, c, canvas, scene, p, cross, back, knot, bead, set: (s: Partial<ChartScene>) => (current = { ...current, ...s }), draw: () => { c.log.length = 0; r.draw(); } };
+  return {
+    r, c, canvas, scene, p, cross, back, knot, bead,
+    set: (s: Partial<ChartScene>) => (current = { ...current, ...s }),
+    /** The next frame: only what changed is drawn again. */
+    draw: () => { c.log.length = 0; r.draw(); },
+    /** A frame drawn from scratch, the cached chart included (as after a resize). */
+    fresh: () => { c.log.length = 0; r.resize(600, 400, 2); },
+  };
 }
 
 beforeEach(() => {
@@ -72,8 +80,8 @@ describe("the chart canvas", () => {
   it("leaves out the kinds of stitches that are hidden, and only those", () => {
     const t = setup();
     const at = (x: number, y: number) => t.c.calls("arc").some((a) => a[0] === 26 + x * 20 && a[1] === 26 + y * 20);
-    const count = (hidden: ChartScene["hidden"], call: string) => { t.set({ hidden }); t.draw(); return t.c.calls(call).length; };
-    t.draw();
+    const count = (hidden: ChartScene["hidden"], call: string) => { t.set({ hidden }); t.fresh(); return t.c.calls(call).length; };
+    t.fresh();
     expect(at(5.5, 2.5) && at(3.5, 2.5)).toBe(true);
     t.set({ hidden: ["beads"] });
     t.draw();
@@ -99,13 +107,13 @@ describe("the chart canvas", () => {
     const t = setup();
     expect(t.canvas.width).toBe(1200);
     expect(t.canvas.height).toBe(800);
-    expect(t.c.calls("setTransform")[0]).toEqual([2, 0, 0, 2, 0, 0]);
+    expect(t.c.calls("setTransform")).toContainEqual([2, 0, 0, 2, 0, 0]);
     expect(t.c.calls("fillRect").length).toBeGreaterThan(0);
   });
 
   it("starts from the stage background over the whole canvas, then draws the chart", () => {
     const t = setup();
-    t.draw();
+    t.fresh();
     expect(t.c.log.find((l) => l[0] === "set" && l[1] === "fillStyle")![2]).toBe(theme.stageBackground);
     expect(t.c.calls("fillRect")[0]).toEqual([0, 0, 600, 400]);
     expect(t.c.log.length).toBeGreaterThan(100);
@@ -117,9 +125,10 @@ describe("the chart canvas", () => {
     t.r.request();
     t.r.request();
     t.r.request();
-    expect(t.c.calls("setTransform")).toHaveLength(0);
+    expect(t.c.calls("drawImage")).toHaveLength(0);
     vi.advanceTimersByTime(20);
-    expect(t.c.calls("setTransform")).toHaveLength(1);
+    // one frame: the cached chart copied to the screen once
+    expect(t.c.calls("drawImage")).toHaveLength(1);
   });
 
   it("a new theme is drawn in the next frame", () => {
@@ -133,10 +142,10 @@ describe("the chart canvas", () => {
   it("draws more when more is zoomed in on: a cell off the screen is not drawn", () => {
     const t = setup();
     t.set({ viewport: { zoom: 20, offX: 0, offY: 0 } });
-    t.draw();
+    t.fresh();
     const whole = t.c.log.length;
     t.set({ viewport: { zoom: 20, offX: -20 * 12, offY: -20 * 10 } });
-    t.draw();
+    t.fresh();
     expect(t.c.log.length).toBeLessThan(whole);
   });
 
@@ -211,5 +220,71 @@ describe("the chart canvas", () => {
     t.set({ underlay: { ...u, editing: true } as never, underlayFrame: { x: 50, y: 50, w: 200, h: 100 }, underlayHot: "e", underlayButtons: [{ x: 100, y: 40, dir: -1 }, { x: 130, y: 40, dir: 1 }] });
     expect(() => t.draw()).not.toThrow();
     expect(t.c.calls("drawImage").length).toBeGreaterThan(0);
+  });
+});
+
+describe("the chart is kept between frames and drawn again only where it changed", () => {
+  /** The areas redrawn in the cached chart, in device px: the clip rects. */
+  const redrawn = (t: ReturnType<typeof setup>) => t.c.calls("clip").length;
+  const fabricFills = (t: ReturnType<typeof setup>) => t.c.calls("fillRect").filter((r) => r[2] === 20 * 20 && r[3] === 15 * 20).length;
+
+  it("hover, picker outline, previews and the like don't draw the chart again", () => {
+    const t = setup();
+    t.set({ hover: { x: 3, y: 3, size: 1 }, hoverPoint: { x: 2, y: 2 }, preview: { cells: [5, 6], key: t.cross } });
+    t.draw();
+    expect(redrawn(t)).toBe(0);
+    expect(fabricFills(t)).toBe(0);
+    // the cached chart is copied to the screen, the hover square drawn over it
+    expect(t.c.calls("drawImage")).toHaveLength(1);
+    expect(t.c.calls("strokeRect").length).toBeGreaterThan(0);
+  });
+
+  it("a painted cell: only its tile is drawn again, and only once", () => {
+    const t = setup();
+    t.p.layers.stitches[2 * 20 + 18] = t.cross;
+    t.draw();
+    // the tile from cell (16,0): 4 × 15 cells of 20 px, at device px (×2) past the 26 px ruler
+    expect(t.c.calls("rect")[0]).toEqual([2 * (26 + 16 * 20), 2 * 26, 2 * 4 * 20, 2 * 15 * 20]);
+    expect(redrawn(t)).toBe(1);
+    t.draw();
+    expect(redrawn(t)).toBe(0);
+  });
+
+  it("undo, a new line or a knot: drawn again where they are", () => {
+    const t = setup();
+    t.p.layers.segments.push({ x1: 1, y1: 1, x2: 2, y2: 2, k: t.back });
+    t.draw();
+    expect(redrawn(t)).toBe(1);
+    t.p.layers.knots = [];
+    t.draw();
+    expect(redrawn(t)).toBe(1);
+  });
+
+  it("panning moves the chart along and draws only the uncovered strip", () => {
+    const t = setup();
+    t.set({ viewport: { zoom: 20, offX: -10, offY: 0 } });
+    t.draw();
+    expect(t.c.values("globalCompositeOperation")).toContain("copy");
+    expect(t.c.calls("drawImage")[0]!.slice(1)).toEqual([-20, 0]);
+    // the right-hand strip, 10 px wide
+    expect(t.c.calls("rect")).toContainEqual([2 * 590, 0, 20, 800]);
+    expect(redrawn(t)).toBe(1);
+  });
+
+  it("zooming, another view, other colours or highlighting draw it all again", () => {
+    const t = setup();
+    for (const change of [{ viewport: { zoom: 21, offX: 0, offY: 0 } }, { view: "symbols" }, { palette: buildPalette(t.p) }, { highlight: t.cross }] as Partial<ChartScene>[]) {
+      t.set(change);
+      t.draw();
+      expect(t.c.calls("rect")[0]).toEqual([0, 0, 1200, 800]);
+    }
+  });
+
+  it("panning by a fraction of a device pixel draws it all again, not blurred", () => {
+    const t = setup();
+    t.set({ viewport: { zoom: 20, offX: -0.25, offY: 0 } });
+    t.draw();
+    expect(t.c.values("globalCompositeOperation")).not.toContain("copy");
+    expect(t.c.calls("rect")[0]).toEqual([0, 0, 1200, 800]);
   });
 });

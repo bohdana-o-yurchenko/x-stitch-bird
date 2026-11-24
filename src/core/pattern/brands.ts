@@ -1,4 +1,5 @@
 import { BEAD_CATALOGUES, libraryColor, ORGANIZER, THREAD_CATALOGUES } from "../catalog/catalog";
+import { hasBeads } from "../entryKinds/registry";
 import type { Pattern } from "./types";
 
 /*
@@ -115,7 +116,7 @@ export function usedBeadBrands(p: Pattern): Set<string> {
 }
 
 /** The key has beads (or floss + bead): beads can't be turned off. */
-export const usesBeads = (p: Pattern) => p.key.some((e) => !!e && (e.t === "bead" || e.t === "combo"));
+export const usesBeads = (p: Pattern) => p.key.some((e) => !!e && hasBeads(e.t));
 
 /** The pattern's bead brands: the chosen ones (all built-in when it never chose), and any the key uses. */
 export function patternBeadBrands(p: Pattern): string[] {

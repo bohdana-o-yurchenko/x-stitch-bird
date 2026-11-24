@@ -11,6 +11,7 @@ export const autofillTool: Tool = {
   icon: "autofill",
   labelKey: "tools.autofill",
   cursor: "pointer",
+  hoverSquare: false,
   down: (ed, p) => pickBlock(ed, p.cell),
   hover: (ed, p) => hoverMatching(ed, p.cell),
 };

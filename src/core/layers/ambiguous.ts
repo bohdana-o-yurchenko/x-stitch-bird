@@ -9,6 +9,7 @@ import type { LayerHandler } from "./types";
  */
 export const ambiguousLayer: LayerHandler<Set<number>> = {
   id: "ambiguous",
+  fileField: "amb",
   exported: false,
   pickPriority: Infinity,
   get: (l: Layers) => l.ambiguous,

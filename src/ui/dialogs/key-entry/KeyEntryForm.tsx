@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { beadShape } from "@/core/catalog/beadShapes";
 import { ENTRY_KINDS, entryKind } from "@/core/entryKinds/registry";
 import { materials, ORGANIZER } from "@/core/pattern/brands";
-import { formatLabel, keyLabelData, labelData } from "@/core/labels/keyLabel";
+import { formatLabel, keyLabelData, labelData, stampLabel } from "@/core/labels/keyLabel";
 import type { PaletteSlot } from "@/core/pattern/palette";
 import { blendStrands, resolveColor } from "@/core/pattern/resolve";
 import type { KeyIndex } from "@/core/pattern/types";
@@ -26,6 +26,10 @@ import { useTranslate } from "../../i18n/labels";
 import { Icon } from "../../common/Icon";
 import { BlendFinder } from "./BlendFinder";
 import { SymbolDrawer } from "./SymbolDrawer";
+import { StampDrawer } from "./StampDrawer";
+import { isBuiltInStamp, stampDef, stampDefs } from "@/core/stamps/stamps";
+import type { StampDef } from "@/core/pattern/types";
+import { addOwnStamp } from "@/editor/actions/stamps";
 import { ColourPicker } from "./ColourPicker";
 import s from "./keyEntry.module.css";
 
@@ -167,6 +171,29 @@ function LineInkPicker({ value, onPick }: { value: string; onPick: (hex: string)
 }
 
 /**
+ * How a backstitch is placed (ARCHITECTURE-REVIEW §3): a line at a time, or a stamp — a Smyrna cross over one cell or
+ * four, or one of one's own — with a way to draw a new one.
+ */
+function StampChoice({ value, hex, onPick }: { value: string; hex: string; onPick: (id: string) => void }) {
+  const t = useTranslations("stamps");
+  const ed = useEditor();
+  useEditorState((st) => st.keyRevision);
+  const [drawing, setDrawing] = useState(false);
+  const sample = (stamp?: StampDef): PaletteSlot => ({ hex, ink: "#fff", sym: "line:solid", t: "back", st: "full", n: 2, ...(stamp ? { stamp } : {}) });
+  const options = [
+    { id: "", name: t("line"), icon: <KeyIcon slot={sample()} size={24} view="color" /> },
+    ...stampDefs(ed.doc).map((d) => ({ id: d.id, name: isBuiltInStamp(d.id) ? t(d.name) : d.name || t("own"), icon: <KeyIcon slot={sample(d)} size={24} view="color" /> })),
+  ];
+  return (
+    <div className={s.group} data-testid="stamp-choice">
+      <IconChoice label={t("placedAs")} testId="stamp" value={value} onPick={onPick} options={options} />
+      <button type="button" className={cx(ui.btn, ui.sm, s.stampDraw)} data-testid="stamp-draw" onClick={() => setDrawing(true)}>{t("drawOwn")}</button>
+      {drawing && createPortal(<StampDrawer onUse={(d) => onPick(addOwnStamp(ed, d))} onClose={() => setDrawing(false)} />, document.body)}
+    </div>
+  );
+}
+
+/**
  * Add or edit a key entry (SPEC §8), docked in the side panel so the chart and reference windows stay in view.
  * Every colour — a single floss, each floss of a blend, the floss and bead of a combo — is one line with its
  * strands; the one searchable list below fills the highlighted line. The rules live in editor/actions/keyEntries.
@@ -243,6 +270,7 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
   const dup = duplicateOf(ed, d, edit);
   const slot: PaletteSlot | undefined = colour && {
     hex: colour.hex, ink: colour.ink, sym: d.sym, t: d.t, st: d.st, ...(d.t === "back" ? { lineInk: d.ink } : {}),
+    ...(d.stamp && kind.fields.includes("stamp") && stampDef(ed.doc, d.stamp) ? { stamp: stampDef(ed.doc, d.stamp) } : {}),
     n: kind.fields.includes("strands") && !usesBlend(d) ? d.n : blendStrands(colour) || 1,
     bead: d.t === "combo" && colour.bead ? { hex: colour.bead.hex, ink: colour.bead.ink, shape: beadShape(colour.bead.series) } : d.t === "bead" ? { hex: colour.hex, ink: colour.ink, shape: beadShape(colour.series) } : undefined,
   };
@@ -257,7 +285,8 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
   };
   // floss + bead may also be sewn on a grid point, like a French knot
   const stitchChoices: StitchTypeId[] = [...STITCH_TYPES.map((x) => x.id), ...(d.t === "combo" ? ["point" as const] : [])];
-  const label = colour && src ? formatLabel(labelData({ ...draftEntry(d, src), sym: d.sym }, colour), tr) : null;
+  const stampName = kind.fields.includes("stamp") ? stampLabel(ed.doc, d.stamp || undefined) : undefined;
+  const label = colour && src ? formatLabel({ ...labelData({ ...draftEntry(d, src), sym: d.sym }, colour), ...(stampName ? { stamp: stampName } : {}) }, tr) : null;
   // a backstitch's symbol is its line style in its line colour: a style is dimmed once every preset colour has it
   const used = new Set(d.t === "back" ? fullLineStyles(ed.doc, edit) : usedSymbols(ed.doc, edit));
   const dupLabel = dup ? formatLabel(keyLabelData(ed.doc, ed.doc.key[dup]!), tr).title : "";
@@ -358,6 +387,8 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
               options={(["full", "point"] as const).map((id) => ({ id, name: id === "point" ? `${tr("stitches.pointName")} · ${tr("stitches.pointSub")}` : t("placementCell"), icon: <KeyIcon slot={beadSample(id)} size={24} view="color" /> }))} />
           </div>
         )}
+
+        {kind.fields.includes("stamp") && <StampChoice value={d.stamp} hex={colour?.hex ?? "#8C8378"} onPick={(stamp) => update({ stamp })} />}
 
         <SymbolPicker value={d.sym} used={used} symbols={symbolsFor(d.t, symbols)} onPick={pickSymbol} />
         {d.t === "back" && <LineInkPicker value={d.ink} onPick={setInk} />}

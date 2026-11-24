@@ -15,6 +15,7 @@ export const emptyLayers = (w: number, h: number): Layers => ({
   segments: [],
   knots: [],
   ambiguous: new Set(),
+  stamps: [],
 });
 
 export function createPattern(w = 80, h = 80, name = "Untitled pattern"): Pattern {

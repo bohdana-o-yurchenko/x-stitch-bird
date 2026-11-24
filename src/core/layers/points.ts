@@ -8,6 +8,10 @@ const valid = (n: unknown): n is number => typeof n === "number" && Number.isFin
 /** Backstitch: straight segments between half-grid points. */
 export const segmentsLayer: LayerHandler<Segment[]> = {
   id: "segments",
+  fileField: "back",
+  alwaysWritten: true,
+  group: "backstitch",
+  lines: (v) => v,
   exported: true,
   pickPriority: 10,
   get: (l: Layers) => l.segments,
@@ -70,6 +74,7 @@ export const segmentsLayer: LayerHandler<Segment[]> = {
 /** French knots on half-grid points (SPEC §15.14). */
 export const knotsLayer: LayerHandler<Knot[]> = {
   id: "knots",
+  fileField: "knots",
   exported: true,
   pickPriority: 5,
   get: (l: Layers) => l.knots,

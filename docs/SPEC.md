@@ -2452,3 +2452,27 @@ BACKLOG B27.
   up to 6 that look close (CIEDE2000 < 6, each said *very close* < 3 or *close*); none: said so, with the one nearest
   (*rough*) · **In your patterns**: the saved patterns that use it (picture, name, size — opens it) (blends' parts and floss + bead count), read
   once when a panel first opens (`library.colourUses`). Every colour named there opens in the panel.
+
+### 15.58 Special stitches: Smyrna crosses and your own (2026-11-24)
+- **A backstitch can be placed as a stamp**: a block of a fixed number of cells and the straight stitches in it,
+  placed with one click. The key form's **Placed as** (backstitch only): *A line at a time* (as before), **Smyrna cross
+  over 1 cell**, **Smyrna cross over 4 cells**, the pattern's own, and **Draw your own…**.
+- Everything else about the entry is backstitch: colour or blend, strands, line style and line colour, the thread it
+  takes (its lines' length), how it prints on the PDF chart and goes into an `.oxs` (as plain backstitch lines — reader
+  apps show them as drawn). Its key icon and label show the stamp ("… · Smyrna cross over 4 cells").
+- **Placing**: the draw tools place the active stamp entry with the block's middle under the pointer, kept inside the
+  chart; the lines follow the pointer faintly before a click. A drag places the next one wherever the last no longer
+  covers. Mirror modes place the mirror images. A block already holding a stamp keeps it unless overriding. One click
+  is one undo step.
+- **On the chart a stamp is one thing**: the eraser takes a whole stamp (pointer on its block, or the brush over one of
+  its cells), the picker picks its entry, a selection moves, copies, flips and turns it; flipping or turning the
+  chart turns stamps with it. Hiding backstitch hides stamps too. Totals count them as **Special stitches**.
+- **Your own** (*Draw your own…*): width and height 1–8 cells, a name; drag from a point of the half grid to another to
+  add a stitch, click a stitch to take it away. Kept in the pattern (and its `.xbird`), offered in its key form; the
+  same drawing again is the same stamp. Copied to another pattern, it goes along.
+- **Size stays fixed**: an entry with stamps on the chart can't change its stamp, nor become plain lines (said with
+  the same message as moving an entry between layers).
+- Files: the `.xbird` gains optional fields — `stamps` (the placed ones) and `stampDefs` (your own); a key entry's
+  `stamp`. Older files open as before (ARCHITECTURE-REVIEW §3; the app isn't installed anywhere, so no older app has
+  to read the new fields).
+

@@ -1201,3 +1201,39 @@ start intent boots into `state.arriving` (`editor/arrival.ts`) — a hidden empt
 shows only the bar, dialogs and toasts. `loadPattern` ends it; when no dialog is open and no command is running
 (`CommandRegistry.busy`) it's given up — the last toast handed back (`startRequest.handBack`) and the page goes to
 `/patterns`. No version is taken of the placeholder.
+
+## Speed and extension points (2026-11-24, docs/ARCHITECTURE-REVIEW.md)
+
+- **Chart drawing** (`render/ChartRenderer.ts`): the stitched chart is kept in an offscreen image and redrawn only
+  where it changed — tiles of 16×16 cells found by `render/contentTracker.ts` (it compares the layers themselves, so
+  nothing has to report what it touched), the uncovered strip after panning (by whole device pixels), all of it on
+  zoom, another view, palette, highlight, hidden kinds or image behind. Each frame copies the image and draws what
+  moves (hover, previews, selection, underlay handles, rulers) on top. Flat full crosses go in one scaled bitmap
+  (`render/cellBitmap.ts`); off-screen lines and knots are skipped. Unit tests run without a canvas (cells drawn one by
+  one); `ChartRenderer` takes a `makeLayer` for the offscreen image.
+- **Whole-pattern values** (usage, kinds present, the photo windows' stitched shading) follow `state.settledRevision`
+  — `docRevision` once editing has paused `SETTLE_MS` — and are computed once per revision through `ed.derived.of(fn)`
+  (`editor/derived.ts`). Panels that only show key-level data follow `keyRevision`.
+- **Heavy work off the main thread**: `workers/jobs.ts` is the table of jobs (serialize, read a PDF chart, chart
+  checks); `editor/jobs.ts` `JobRunner` runs them in one long-lived worker (`ed.jobs.run(kind, input)`), on the main
+  thread where there's no worker or it failed. `editor/serialized.ts` makes the pattern's JSON once per change for the
+  draft, the library and live editing (`later()` in the worker, `now()` when the page closes).
+- **History** compares cell layers two cells at a time (`core/layers/cellDiff.ts`), once per commit.
+- **Layers declare themselves** (`core/layers/types.ts`): `fileField` / `alwaysWritten` (the `.xbird` field),
+  `group` (what hides it), `lines()` (content as straight lines: drawn above the grid, exported as backstitch —
+  `chartLines(p)` in `core/layers/registry.ts`), `usage(v, sink, p)`.
+- **Placement rules** (`core/entryKinds/registry.ts` `PLACEMENT_RULES`): entries placed unlike the rest of their
+  kind (a bead between cells, a stamp) → their placement and layer; `editor/tools/registry.ts` `PLACEMENT_TOOLS` maps
+  each placement to its tool. Tools without a hover square say `hoverSquare: false`.
+- **Entry-kind traits** (same file): `marks` (chart symbol or line style), `leans` (half crosses: mirrored twins),
+  `beads` (none, only, with floss) — read through `usesLineStyles`, `hasBeads`, `entryKind(t).leans` instead of naming
+  kinds.
+- **Stamps** (SPEC §15.58): `core/stamps/stamps.ts` (built-in Smyrna crosses, own stamps' cleaning, `stampLines`),
+  `core/layers/stamps.ts` (the layer: block + 2×2 turn matrix per stamp), `editor/actions/stamps.ts` (`placeStamp`,
+  `stampPreview`, `addOwnStamp`), `editor/tools/stamp.ts`, `ui/dialogs/key-entry/StampDrawer.tsx`; the key form's
+  `StampChoice` shows for kinds with the `stamp` field.
+- **Contract suites**: `core/layers/layerContract.test.ts` (every layer) and `render/entryKindContract.test.ts`
+  (every kind of entry and every placement rule: drawn, key icon, counted, bought, labelled, `.xbird` and `.oxs` round
+  trips). Time budgets on a 1000×1000 chart: `editor/perfBudget.test.ts`; in a real browser with the CPU slowed 4×:
+  `pnpm test:perf` (`tests/perf/drawing.perf.ts`, against a server on :3200).
+

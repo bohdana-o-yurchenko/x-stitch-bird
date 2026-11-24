@@ -8,6 +8,9 @@ import { RULER_SIZE } from "@/render/ChartRenderer";
 import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
 import { account, createPersistence, sendUsage, type Persistence } from "@/persistence";
 import { UsageCounter } from "./usage";
+import { Derived } from "./derived";
+import { JobRunner } from "./jobs";
+import { SerializedPattern } from "./serialized";
 import { loadImage } from "@/platform/images";
 import { confirmLargePhoto } from "./images/largePhoto";
 import { photoFits } from "./images/photoRoom";
@@ -40,6 +43,9 @@ import { UnderlayService } from "./underlay/UnderlayService";
 import { ViewportService } from "./viewport/viewport";
 
 let toastId = 0;
+
+/** How long editing must pause before whole-pattern values (totals…) are worked out again. */
+export const SETTLE_MS = 300;
 
 const mb = (bytes: number) => Math.ceil(bytes / 1048576);
 
@@ -75,6 +81,13 @@ export class Editor {
   /** Feature usage counts, sent now and then without anything about who (SPEC §15.54). */
   readonly arrival = new Arrival(this);
   readonly usage = new UsageCounter(() => !!this.state.account, sendUsage);
+  /** Whole-pattern values, once per revision (ARCHITECTURE-REVIEW §1). */
+  readonly derived = new Derived(() => this.state);
+  private settleTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Heavy work off the main thread (workers/jobs). */
+  readonly jobs = new JobRunner();
+  /** The open pattern as its JSON document, made once per change (editor/serialized). */
+  readonly serialized = new SerializedPattern(() => this.state, this.jobs);
   theme: CanvasTheme = defaultCanvasTheme;
   /** Translation for exported texts and labels built here; set by the UI for the current locale. */
   t: Translate = (key) => key;
@@ -105,7 +118,7 @@ export class Editor {
     this.underlay = new UnderlayService(this);
     this.snapshots = new SnapshotService(this);
     // another window follows this one: its changes go up within seconds (SPEC §15.34)
-    this.autosave = new Autosave(persistence.draft, () => this.doc, () => saveToLibrary(this, { quiet: true }), () => this.state.live.others > 0);
+    this.autosave = new Autosave(persistence.draft, () => this.doc, () => saveToLibrary(this, { quiet: true }), () => this.state.live.others > 0, this.serialized);
     this.timer = new WorkTimer(this);
     this.live = new LiveSync(this);
     this.accountReady = new Promise((done) => (this.markAccountReady = done));
@@ -169,6 +182,8 @@ export class Editor {
     } else if (!first) this.showDraft(pattern, starting);
     this.store.setState({ panelSections: savedSections(), openSection: savedOpen() });
     this.store.setState({ ready: true });
+    // the job worker loads while nothing else is going on: the first save then needn't wait for it
+    setTimeout(() => this.jobs.warm(), 0);
     this.live.start();
     void this.afterStart(intent, first);
     // a photo that didn't fit in the account stays here; say so once
@@ -255,8 +270,17 @@ export class Editor {
       canRedo: this.history.canRedo,
     });
     if (s.activeEntry && !s.doc.key[s.activeEntry]) this.store.setState({ activeEntry: 0 });
+    this.settleLater();
     this.autosave.schedule();
     this.keep.changed();
+  }
+
+  private settleLater() {
+    if (this.settleTimer) clearTimeout(this.settleTimer);
+    this.settleTimer = setTimeout(() => {
+      this.settleTimer = null;
+      this.store.setState({ settledRevision: this.state.docRevision });
+    }, SETTLE_MS);
   }
 
   flush() {
@@ -373,7 +397,7 @@ export class Editor {
     this.tools.cancel();
     // the first time Autofill is picked, its guide (shown once — the guide keeps track)
     if (tool === "autofill" && this.state.tool !== "autofill") this.store.setState({ pendingTip: "autofill" });
-    this.store.setState({ tool, match: tool === "autofill" ? (this.state.match ?? PICKING) : null, overlay: { ...this.state.overlay, preview: null, partialPreview: null, knotPreview: null, hoverPoint: null, marquee: null, eraseHighlight: null, eraseKnots: null, pickerHighlight: null } });
+    this.store.setState({ tool, match: tool === "autofill" ? (this.state.match ?? PICKING) : null, overlay: { ...this.state.overlay, preview: null, partialPreview: null, knotPreview: null, linePreview: null, hoverPoint: null, marquee: null, eraseHighlight: null, eraseKnots: null, pickerHighlight: null } });
   }
 
   setMomentaryTool(tool: ToolId) {

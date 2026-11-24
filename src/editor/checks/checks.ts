@@ -1,4 +1,4 @@
-import { runChecks, type CheckOptions, type Finding } from "@/core/checks/checks";
+import type { CheckOptions, Finding } from "@/core/checks/checks";
 import type { Editor } from "../createEditor";
 
 /*
@@ -19,8 +19,13 @@ export interface ChecksState {
 /** The findings not ignored, in the panel's order. */
 export const visibleFindings = (c: ChecksState | null): Finding[] => (c ? c.findings.filter((f) => !c.ignored.includes(f.id)) : []);
 
-export function runChartChecks(ed: Editor, o: CheckOptions) {
-  ed.store.setState({ checks: { findings: runChecks(ed.doc, o), ignored: [], current: -1, revision: ed.state.docRevision } });
+/** Runs the checks off the main thread, on the chart as it is now (a big chart takes a while). */
+export async function runChartChecks(ed: Editor, o: CheckOptions) {
+  const revision = ed.state.docRevision, id = ed.doc.id;
+  const findings = await ed.jobs.run("checks", { pattern: ed.doc, options: o });
+  // another pattern opened meanwhile: these findings aren't about it
+  if (ed.doc.id !== id) return;
+  ed.store.setState({ checks: { findings, ignored: [], current: -1, revision } });
 }
 
 /** Show finding `i` (of the visible ones): centre the chart on it, as Go to cell does. */

@@ -1,4 +1,5 @@
 import type { KeyEntry, Pattern, StitchTypeId } from "../pattern/types";
+import { chartLines } from "../layers/registry";
 
 /*
  * Chart checks (SPEC §15.4): likely mistakes in a copied chart, found on demand. Pure functions over a pattern; each
@@ -105,7 +106,7 @@ export function findNearSymmetry(p: Pattern): Finding[] {
   const lines = new Map<string, (KeyEntry | null)[]>();
   const lineAt = (x1: number, y1: number, x2: number, y2: number) => (x1 < x2 || (x1 === x2 && y1 <= y2) ? `${x1},${y1},${x2},${y2}` : `${x2},${y2},${x1},${y1}`);
   // knots and beads between cells are checked like lines of no length (backstitch never has one)
-  const marks = [...p.layers.segments, ...p.layers.knots.map((o) => ({ x1: o.x, y1: o.y, x2: o.x, y2: o.y, k: o.k }))];
+  const marks = [...chartLines(p), ...p.layers.knots.map((o) => ({ x1: o.x, y1: o.y, x2: o.x, y2: o.y, k: o.k }))];
   for (const g of marks) {
     const id = lineAt(g.x1, g.y1, g.x2, g.y2);
     lines.set(id, [...(lines.get(id) ?? []), p.key[g.k] ?? null]);

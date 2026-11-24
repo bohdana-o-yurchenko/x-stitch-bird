@@ -18,6 +18,7 @@ export const backstitchTool: Tool = {
   icon: "line",
   labelKey: "tools.line",
   cursor: "crosshair",
+  hoverSquare: false,
   down(ed, p) {
     const a = requireEntry(ed);
     const pt = snap(ed, p.grid), chain = ed.state.overlay.chain;

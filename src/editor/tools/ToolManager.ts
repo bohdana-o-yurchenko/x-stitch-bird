@@ -96,7 +96,7 @@ export class ToolManager {
   leave() {
     this.ed.underlay.hover(null);
     this.ed.setHover(null, 1, false);
-    this.ed.setOverlay({ hoverPoint: null, knotPreview: null, partialPreview: null, eraseHighlight: null, eraseKnots: null, pickerHighlight: null });
+    this.ed.setOverlay({ hoverPoint: null, knotPreview: null, partialPreview: null, linePreview: null, eraseHighlight: null, eraseKnots: null, pickerHighlight: null });
   }
 
   /** Esc / tool switch: end chains, drop previews, close open strokes. */
@@ -104,12 +104,12 @@ export class ToolManager {
     this.active?.cancel?.(this.ed);
     this.active = null;
     this.panning = false;
-    for (const t of [PLACEMENT_TOOLS.segment, PLACEMENT_TOOLS.point, this.resolve()]) t.cancel?.(this.ed);
+    for (const t of new Set([...Object.values(PLACEMENT_TOOLS), this.resolve()])) t.cancel?.(this.ed);
   }
 
   private showsHoverSquare(): boolean {
     const t = this.resolve();
     const onLine = (t.id === "eraser" && !!(this.ed.state.overlay.eraseHighlight || this.ed.state.overlay.eraseKnots)) || (t.id === "picker" && !!this.ed.state.overlay.pickerHighlight);
-    return t.id !== "pan" && t.id !== "autofill" && t.id !== "backstitch" && t.id !== "knot" && t.id !== "partial" && !onLine && !this.ed.state.floating;
+    return t.hoverSquare !== false && !onLine && !this.ed.state.floating;
   }
 }

@@ -2,6 +2,7 @@ import { brandCode, ORGANIZER } from "../catalog/catalog";
 import { blendStrands, resolveColor } from "../pattern/resolve";
 import type { EntryKindId, KeyEntry, Pattern, StitchTypeId } from "../pattern/types";
 import type { ColorEntry } from "../color/colorEntry";
+import { isBuiltInStamp, stampDef } from "../stamps/stamps";
 
 /** Translation function: message key + values → text. The UI passes next-intl's `t`. */
 export type Translate = (key: string, values?: Record<string, string | number>) => string;
@@ -18,6 +19,8 @@ export interface LabelData {
   beadName?: string;
   series?: string;
   wraps?: number;
+  /** Placed as a stamp: a built-in one's message key (`stamps.smyrna1`), or one's own name. */
+  stamp?: { key: string } | { name: string };
 }
 
 export function labelData(e: KeyEntry, c: ColorEntry | undefined): LabelData {
@@ -40,7 +43,14 @@ export function labelData(e: KeyEntry, c: ColorEntry | undefined): LabelData {
   return { ...base, title, blend, stitch: e.st ?? "full", strands: blend ? blendStrands(c) || null : e.n ?? null };
 }
 
-export const keyLabelData = (p: Pattern, e: KeyEntry): LabelData => labelData(e, resolveColor(p, e.src));
+/** How a stamp is named in a label: a built-in one by its message, one's own by the name given it. */
+export const stampLabel = (p: Pick<Pattern, "stamps">, id: string | undefined): LabelData["stamp"] =>
+  !id ? undefined : isBuiltInStamp(id) ? { key: `stamps.${id}` } : { name: stampDef(p, id)?.name || "" };
+
+export const keyLabelData = (p: Pattern, e: KeyEntry): LabelData => {
+  const d = labelData(e, resolveColor(p, e.src)), stamp = stampLabel(p, e.stamp);
+  return stamp ? { ...d, stamp } : d;
+};
 
 export function formatLabel(d: LabelData, t: Translate): { title: string; sub: string } {
   const title = d.blend ? t("label.blendTitle", { code: d.title }) : d.title;
@@ -55,7 +65,7 @@ export function formatLabel(d: LabelData, t: Translate): { title: string; sub: s
       parts.splice(0, 1, strands, stitch, t("label.withBead", { name: d.beadName ?? "?" }));
       break;
     case "back":
-      parts.push(d.blend ? null : strands, t("label.backstitch"));
+      parts.push(d.blend ? null : strands, !d.stamp ? t("label.backstitch") : "key" in d.stamp ? t(d.stamp.key) : d.stamp.name || t("stamps.own"));
       break;
     case "knot":
       parts.push(d.blend ? null : strands, d.wraps ? t("label.knotWraps", { wraps: d.wraps }) : t("label.knot"));

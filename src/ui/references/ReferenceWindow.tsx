@@ -38,7 +38,8 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
   const t = useTranslations();
   const ed = useEditor();
   const doc = useEditorState((st) => st.doc);
-  const rev = useEditorState((st) => st.docRevision);
+  // the stitched shading follows the pattern once editing pauses, not every step of a stroke
+  const rev = useEditorState((st) => st.settledRevision);
   const hover = useEditorState((st) => (data.grid ? st.hoverCell : null));
   const [z, setZ] = useState(() => ++topZ);
   const [renaming, setRenaming] = useState(false);

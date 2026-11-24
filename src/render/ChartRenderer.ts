@@ -2,6 +2,7 @@ import type { ChartGroup } from "@/core/pattern/groups";
 import { rulerLabels } from "@/core/grid/numbering";
 import type { Palette } from "@/core/pattern/palette";
 import type { KeyIndex, Knot, PartialStitch, Pattern, Point, Rect, Segment } from "@/core/pattern/types";
+import { ContentTracker } from "./contentTracker";
 import type { MirrorMode } from "@/core/transform/mirror";
 import { partialKind } from "@/core/stitches/partialKinds";
 import { drawCells, drawGrid, drawLines, drawUnderlay, turnAround, viewStyle, type ChartFrame, type ChartView, type UnderlayView } from "./chart";
@@ -33,6 +34,8 @@ export interface ChartScene {
   preview: { cells: number[]; key: KeyIndex } | null;
   partialPreview: { cell: number; stitch: PartialStitch } | null;
   knotPreview: { point: Point; key: KeyIndex } | null;
+  /** Lines a press would add (a stamp under the pointer). */
+  linePreview?: { lines: Segment[]; key: KeyIndex } | null;
   chain: { last: Point; hover: Point | null; key: KeyIndex } | null;
   hoverPoint: Point | null;
   selection: { mask: Uint8Array; bounds: Rect } | null;
@@ -62,6 +65,40 @@ export interface ChartScene {
 
 export const RULER_SIZE = 26;
 
+/** A canvas the size of the chart canvas, holding the stitched chart between frames. */
+export type LayerCanvas = { width: number; height: number; getContext(id: "2d"): unknown };
+
+/** What the cached chart image depends on besides the pattern's content: any change redraws all of it. */
+interface ContentKey {
+  pattern: Pattern;
+  w: number;
+  h: number;
+  palette: Palette;
+  view: ChartView;
+  zoom: number;
+  offX: number;
+  offY: number;
+  hidden: string;
+  highlight: KeyIndex | null;
+  underlay: string;
+  image: CanvasImageSource | null;
+  theme: CanvasTheme;
+  width: number;
+  height: number;
+  dpr: number;
+}
+
+const defaultLayer = (): LayerCanvas => (typeof OffscreenCanvas !== "undefined" ? new OffscreenCanvas(1, 1) : document.createElement("canvas"));
+
+/** Cells around a redrawn area that may reach into it: bugle beads, knots, thick lines, symbol halos. */
+const reachCells = (z: number) => Math.ceil(Math.max(3 * z, 12) / z);
+
+/**
+ * The chart on screen. The stitched chart (fabric, image behind, stitches, grid, lines) is kept in an offscreen
+ * image and redrawn only where the pattern changed — tiles of cells after an edit, the uncovered strip after
+ * panning, all of it after zooming or a change of view. Every frame copies it and draws what moves on top: hover,
+ * previews, selection, underlay handles, rulers (ARCHITECTURE-REVIEW §1).
+ */
 export class ChartRenderer {
   private g: CanvasRenderingContext2D;
   private width = 0;
@@ -70,17 +107,24 @@ export class ChartRenderer {
   private frameRequested = false;
   private ants = 0;
   private tickTimer: ReturnType<typeof setTimeout> | null = null;
+  private layer: LayerCanvas;
+  private lg: CanvasRenderingContext2D;
+  private key: ContentKey | null = null;
+  private tracker = new ContentTracker();
 
-  constructor(private canvas: HTMLCanvasElement, private theme: CanvasTheme, private getScene: () => ChartScene) {
+  constructor(private canvas: HTMLCanvasElement, private theme: CanvasTheme, private getScene: () => ChartScene, makeLayer: () => LayerCanvas = defaultLayer) {
     this.g = canvas.getContext("2d")!;
+    this.layer = makeLayer();
+    this.lg = this.layer.getContext("2d") as CanvasRenderingContext2D;
   }
 
   resize(width: number, height: number, dpr: number) {
     this.width = width;
     this.height = height;
     this.dpr = dpr;
-    this.canvas.width = Math.round(width * dpr);
-    this.canvas.height = Math.round(height * dpr);
+    this.canvas.width = this.layer.width = Math.round(width * dpr);
+    this.canvas.height = this.layer.height = Math.round(height * dpr);
+    this.key = null;
     this.draw();
   }
 
@@ -109,14 +153,84 @@ export class ChartRenderer {
     };
   }
 
-  draw() {
-    const s = this.getScene(), g = this.g, t = this.theme, p = s.pattern;
-    g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    g.fillStyle = t.stageBackground;
-    g.fillRect(0, 0, this.width, this.height);
-    const f = this.frame(s), { z, ox, oy } = f;
-    const style = s.hidden?.length ? { ...viewStyle(s.view, t), hidden: new Set(s.hidden) } : viewStyle(s.view, t);
+  private contentKey(s: ChartScene): ContentKey {
+    const u = s.underlay && !s.underlay.editing ? s.underlay : null;
+    return {
+      pattern: s.pattern, w: s.pattern.w, h: s.pattern.h, palette: s.palette, view: s.view,
+      zoom: s.viewport.zoom, offX: s.viewport.offX, offY: s.viewport.offY,
+      hidden: (s.hidden ?? []).join(), highlight: s.highlight && s.palette[s.highlight] ? s.highlight : null,
+      underlay: u ? JSON.stringify([u.crop, u.rect, u.opacity, u.rotation]) : "", image: u?.image ?? null,
+      theme: this.theme, width: this.width, height: this.height, dpr: this.dpr,
+    };
+  }
 
+  /** Brings the cached chart up to date: all of it, the strip uncovered by panning, or the tiles that changed. */
+  private updateContent(s: ChartScene) {
+    const key = this.contentKey(s), was = this.key;
+    this.key = key;
+    const all = { x: 0, y: 0, w: this.width, h: this.height };
+    const same = (k: keyof ContentKey) => !!was && was[k] === key[k];
+    const unchanged = (Object.keys(key) as (keyof ContentKey)[]).every((k) => k === "offX" || k === "offY" || same(k));
+    const dx = key.offX - (was?.offX ?? 0), dy = key.offY - (was?.offY ?? 0);
+    if (!unchanged) {
+      this.tracker.reset(s.pattern);
+      return this.paint(s, all);
+    }
+    if (dx || dy) {
+      // panned: what was drawn moves along; only the uncovered strips are drawn (whole device pixels only)
+      const ddx = dx * this.dpr, ddy = dy * this.dpr;
+      if (Math.abs(ddx - Math.round(ddx)) > 1e-6 || Math.abs(ddy - Math.round(ddy)) > 1e-6 || Math.abs(dx) >= this.width || Math.abs(dy) >= this.height) {
+        this.tracker.reset(s.pattern);
+        return this.paint(s, all);
+      }
+      const lg = this.lg;
+      lg.save();
+      lg.setTransform(1, 0, 0, 1, 0, 0);
+      lg.globalCompositeOperation = "copy";
+      lg.drawImage(this.layer as CanvasImageSource, Math.round(ddx), Math.round(ddy));
+      lg.restore();
+      // under the rulers the image holds no chart (they cover it): moved into view, it's drawn with the strip
+      const R = this.theme.rulers.size;
+      if (dx > 0) this.paint(s, { x: 0, y: 0, w: R + dx, h: this.height });
+      if (dx < 0) this.paint(s, { x: this.width + dx, y: 0, w: -dx, h: this.height });
+      if (dy > 0) this.paint(s, { x: 0, y: 0, w: this.width, h: R + dy });
+      if (dy < 0) this.paint(s, { x: 0, y: this.height + dy, w: this.width, h: -dy });
+    }
+    const changes = this.tracker.changes(s.pattern);
+    if (changes === "all") return this.paint(s, all);
+    const { z, ox, oy } = this.frame(s);
+    for (const c of changes) this.paint(s, { x: ox + c.x * z, y: oy + c.y * z, w: c.w * z, h: c.h * z });
+  }
+
+  /** Draws the chart afresh inside `area` (canvas px) of the cached image. */
+  private paint(s: ChartScene, area: Rect) {
+    const g = this.lg, d = this.dpr;
+    // whole device pixels, so a redrawn area meets the rest without a seam
+    const x0 = Math.max(0, Math.floor(area.x * d)), y0 = Math.max(0, Math.floor(area.y * d));
+    const x1 = Math.min(this.layer.width, Math.ceil((area.x + area.w) * d)), y1 = Math.min(this.layer.height, Math.ceil((area.y + area.h) * d));
+    if (x1 <= x0 || y1 <= y0) return;
+    g.save();
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.beginPath();
+    g.rect(x0, y0, x1 - x0, y1 - y0);
+    g.clip();
+    g.setTransform(d, 0, 0, d, 0, 0);
+    g.fillStyle = this.theme.stageBackground;
+    g.fillRect(x0 / d, y0 / d, (x1 - x0) / d, (y1 - y0) / d);
+    const full = this.frame(s), { z, ox, oy } = full, m = reachCells(z);
+    const f: ChartFrame = {
+      ...full,
+      x0: Math.max(full.x0, Math.floor((x0 / d - ox) / z) - m), y0: Math.max(full.y0, Math.floor((y0 / d - oy) / z) - m),
+      x1: Math.min(full.x1, Math.ceil((x1 / d - ox) / z) + m), y1: Math.min(full.y1, Math.ceil((y1 / d - oy) / z) + m),
+    };
+    this.drawContent(g, s, f);
+    g.restore();
+  }
+
+  /** The stitched chart within frame `f`: fabric, image behind, cells, grid, lines (highlighting fades the rest). */
+  private drawContent(g: CanvasRenderingContext2D, s: ChartScene, f: ChartFrame) {
+    const t = this.theme, p = s.pattern;
+    const style = this.style(s);
     const behind = s.underlay && !s.underlay.editing ? s.underlay : undefined;
     const hl = s.highlight && s.palette[s.highlight] ? s.highlight : null;
     // highlighting: everything else is drawn faded, then the highlighted entry on top at full strength
@@ -129,15 +243,36 @@ export class ChartRenderer {
       g.globalAlpha = 1;
       drawCells(g, p, only!, f, style, false);
     } else drawCells(g, p, s.palette, f, style, true, behind);
+    drawGrid(g, p, f, t, s.view === "symbols");
+    if (hl) {
+      drawLines(g, p, others, f, style, t.highlight.dimAlpha);
+      drawLines(g, p, only!, f, style);
+    } else drawLines(g, p, s.palette, f, style);
+  }
+
+  private style(s: ChartScene) {
+    const t = this.theme;
+    return s.hidden?.length ? { ...viewStyle(s.view, t), hidden: new Set(s.hidden) } : viewStyle(s.view, t);
+  }
+
+  draw() {
+    const s = this.getScene(), g = this.g, t = this.theme, p = s.pattern;
+    this.updateContent(s);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.drawImage(this.layer as CanvasImageSource, 0, 0);
+    g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    const f = this.frame(s), { z, ox, oy } = f, style = this.style(s);
     if (s.preview) {
       g.globalAlpha = t.preview.alpha;
       const slot = s.palette[s.preview.key];
-      if (slot)
+      if (slot) {
+        const ps = { ...style, showColour: true, showSymbol: false };
         for (const i of s.preview.cells) {
-          const px = ox + (i % p.w) * z, py = oy + ((i / p.w) | 0) * z, ps = { ...style, showColour: true, showSymbol: false };
+          const px = ox + (i % p.w) * z, py = oy + ((i / p.w) | 0) * z;
           if (slot.t === "bead") drawBeadCell(g, px, py, z, slot, ps);
           else drawStitchCell(g, px, py, z, slot, ps);
         }
+      }
       g.globalAlpha = 1;
     }
     if (s.partialPreview) {
@@ -146,11 +281,6 @@ export class ChartRenderer {
       if (slot) drawPartial(g, ox + (i % p.w) * z, oy + ((i / p.w) | 0) * z, z, s.partialPreview.stitch, slot, { ...style, showColour: true });
       g.globalAlpha = 1;
     }
-    drawGrid(g, p, f, t, s.view === "symbols");
-    if (hl) {
-      drawLines(g, p, others, f, style, t.highlight.dimAlpha);
-      drawLines(g, p, only!, f, style);
-    } else drawLines(g, p, s.palette, f, style);
     if (s.underlay?.editing) this.drawUnderlayEditor(s.underlay, p, f);
     if (s.underlayFrame) this.drawEditFrame(s.underlayFrame, s.underlayHot);
     for (const b of s.underlayButtons) this.drawRotateButton(b.x, b.y, b.dir);
@@ -218,6 +348,10 @@ export class ChartRenderer {
     if (s.chain && s.chain.hover) {
       const slot = s.palette[s.chain.key];
       if (slot) drawBackstitch(g, ox + s.chain.last.x * z, oy + s.chain.last.y * z, ox + s.chain.hover.x * z, oy + s.chain.hover.y * z, z, slot, viewStyle("both", t), t.preview.alpha);
+    }
+    if (s.linePreview) {
+      const slot = s.palette[s.linePreview.key];
+      if (slot) for (const l of s.linePreview.lines) drawBackstitch(g, ox + l.x1 * z, oy + l.y1 * z, ox + l.x2 * z, oy + l.y2 * z, z, slot, viewStyle(s.view, t), t.preview.alpha);
     }
     if (s.knotPreview) {
       const slot = s.palette[s.knotPreview.key];

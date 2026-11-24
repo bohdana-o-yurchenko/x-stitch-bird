@@ -1,7 +1,7 @@
 import { visibleOn } from "@/core/color/colorMath";
 import type { PaletteSlot } from "@/core/pattern/palette";
 import { viewStyle, type ChartView } from "./chart";
-import { darkInk, drawBackstitch, drawBeadCell, drawKnot, drawStitchCell, drawSymbol, type Ctx } from "./primitives/cells";
+import { darkInk, drawBackstitch, drawBeadCell, drawKnot, drawStitchCell, drawSymbol, type CellStyle, type Ctx } from "./primitives/cells";
 import { strokeLineStyle } from "./primitives/lineStyles";
 import type { CanvasTheme } from "./theme";
 
@@ -19,6 +19,7 @@ export function drawKeyIcon(g: Ctx, slot: PaletteSlot, size: number, view: Chart
     // a bead on a grid point: drawn on the middle of the tile, as on the chart
     drawKnot(g, size * 0.5, size * 0.5, size * 0.9, slot, style);
   } else if (slot.t === "bead") drawBeadCell(g, 0, 0, size, slot, style);
+  else if (slot.t === "back" && slot.stamp) drawStampIcon(g, slot, size, viewStyle(view, theme));
   else if (slot.t === "back") drawBackstitch(g, size * 0.12, size * 0.88, size * 0.88, size * 0.12, size * 0.8, slot, viewStyle(view, theme));
   else if (slot.t === "knot") {
     drawKnot(g, size * 0.5, size * 0.5, size * 1.4, slot, { ...style, showSymbol: false });
@@ -28,6 +29,13 @@ export function drawKeyIcon(g: Ctx, slot: PaletteSlot, size: number, view: Chart
     drawStitchCell(g, 0, 0, size, slot, { ...style, showSymbol: false });
     drawSymbol(g, size / 2, size / 2, size, slot.sym, slot.bead.ink, theme.symbols.scale.combo, theme);
   } else drawStitchCell(g, 0, 0, size, slot, style);
+}
+
+/** A stamp's lines, fitted into the icon with a little room around them. */
+function drawStampIcon(g: Ctx, slot: PaletteSlot, size: number, style: CellStyle) {
+  const d = slot.stamp!, pad = size * 0.14, k = (size - 2 * pad) / Math.max(d.w, d.h);
+  const ox = (size - d.w * k) / 2, oy = (size - d.h * k) / 2;
+  for (const l of d.lines) drawBackstitch(g, ox + l.x1 * k, oy + l.y1 * k, ox + l.x2 * k, oy + l.y2 * k, Math.max(k, size * 0.5), slot, style);
 }
 
 /** A line style on its own, for the backstitch style picker; `color` is the interface's text colour (light or dark theme). */

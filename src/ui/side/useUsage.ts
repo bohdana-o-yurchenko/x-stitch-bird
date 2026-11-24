@@ -1,27 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import type { Pattern } from "@/core/pattern/types";
 import { calculator } from "@/core/calculator/registry";
 import { chartTotals, computeUsage } from "@/core/calculator/usage";
 import { useEditor, useEditorState } from "../hooks/editor";
 
-/** Revision that follows the document after a pause, so counting never runs on every stroke (SPEC §6.5). */
-function useSettledRevision(delay = 300) {
-  const rev = useEditorState((s) => s.docRevision + s.keyRevision * 1e9);
-  const [settled, setSettled] = useState(rev);
-  useEffect(() => {
-    const t = setTimeout(() => setSettled(rev), delay);
-    return () => clearTimeout(t);
-  }, [rev, delay]);
-  return settled;
-}
+const usageOf = (p: Pattern) => {
+  const usage = computeUsage(p);
+  return { usage, totals: chartTotals(p, usage), shopping: calculator().calculate({ pattern: p, usage, settings: {} }) };
+};
 
+/** Usage, totals and the shopping list, worked out once editing pauses (SPEC §6.5): never on every stroke. */
 export function useUsage() {
   const ed = useEditor();
-  const rev = useSettledRevision();
-  return useMemo(() => {
-    void rev;
-    const p = ed.doc, usage = computeUsage(p);
-    return { usage, totals: chartTotals(p, usage), shopping: calculator().calculate({ pattern: p, usage, settings: {} }) };
-  }, [ed, rev]);
+  const rev = useEditorState((s) => s.settledRevision);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- the pattern changes in place; the settled revision says when
+  return useMemo(() => ed.derived.of(usageOf), [ed, rev]);
 }

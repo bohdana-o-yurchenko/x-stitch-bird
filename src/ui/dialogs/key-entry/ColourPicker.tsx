@@ -27,7 +27,7 @@ export function ColourPicker({ kind, selected, onPick, height = 240, autoFocus }
   const ed = useEditor();
   const run = useCommand();
   // brands and your own threads live in the pattern: redraw when it changes
-  const revision = useEditorState((st) => st.docRevision);
+  const revision = useEditorState((st) => st.keyRevision);
   const doc = useEditorState((st) => st.doc);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"num" | "hue">("num");

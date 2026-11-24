@@ -14,6 +14,7 @@ export const knotTool: Tool = {
   icon: "knot",
   labelKey: "tools.pencil",
   cursor: "crosshair",
+  hoverSquare: false,
   down(ed, p) {
     const a = requireEntry(ed);
     const at = halfPointOn(p.grid, ed.doc);

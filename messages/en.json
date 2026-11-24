@@ -172,7 +172,8 @@
     "beads": "<b>{count}</b> beads",
     "knots": "<b>{count}</b> knots",
     "toBuy": "To buy · {threads, plural, one {# thread} other {# threads}}, ≈{skeins} skeins",
-    "none": "—"
+    "none": "—",
+    "stamps": "Special stitches: <b>{count}</b>"
   },
   "calculator": {
     "classic": {
@@ -1829,5 +1830,26 @@
     "stop": "Stop",
     "download": "Download PDF",
     "cancel": "Cancel"
+  },
+  "stamps": {
+    "smyrna1": "Smyrna cross over 1 cell",
+    "smyrna2": "Smyrna cross over 4 cells",
+    "own": "own stitch",
+    "placedAs": "Placed as",
+    "line": "A line at a time",
+    "drawOwn": "Draw your own…",
+    "drawTitle": "Your own stitch",
+    "drawHintDrag": "Drag from point to point to add a stitch",
+    "drawHintClick": "Click a stitch to take it away",
+    "drawHintSize": "Its size stays fixed once placed",
+    "width": "Width",
+    "height": "Height",
+    "name": "Name",
+    "namePlaceholder": "e.g. Star",
+    "count": "{n, plural, =0 {No stitches yet} one {# stitch} other {# stitches}}",
+    "undo": "Undo",
+    "clear": "Clear",
+    "cancel": "Cancel",
+    "use": "Use it"
   }
 }

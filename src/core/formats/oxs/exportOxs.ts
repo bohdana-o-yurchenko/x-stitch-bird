@@ -7,6 +7,7 @@ import type { Corner, KeyEntry, KeyIndex, Pattern } from "../../pattern/types";
 import { stitchType } from "../../stitches/registry";
 import { cornerOffset } from "./partials";
 import { isPointBead } from "../../entryKinds/registry";
+import { chartLines } from "../../layers/registry";
 
 /*
  * Open Cross Stitch export (SPEC §10.3, §15.42). Each used key entry becomes its own palette item; beads are
@@ -162,7 +163,9 @@ export function exportOxs(p: Pattern): string {
   L.push("</palette>", "<fullstitches>");
 
   const objects: string[] = [];
-  const { stitches, beads, partials, segments, knots } = p.layers;
+  const { stitches, beads, partials, knots } = p.layers;
+  // backstitch and stamps alike: OXS has straight stitches only
+  const segments = chartLines(p);
   for (let y = 0; y < p.h; y++)
     for (let x = 0; x < p.w; x++) {
       const v = stitches[y * p.w + x] ?? 0;

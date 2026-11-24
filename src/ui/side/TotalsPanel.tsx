@@ -7,7 +7,7 @@ import s from "./side.module.css";
 import { useUsage } from "./useUsage";
 import { TimeSpent } from "../common/TimeSpent";
 
-const OPTIONAL = ["quarter", "threeQuarter", "petite", "knots"] as const;
+const OPTIONAL = ["quarter", "threeQuarter", "petite", "knots", "stamps"] as const;
 
 export function TotalsPanel() {
   const t = useTranslations();

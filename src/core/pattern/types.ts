@@ -19,6 +19,11 @@ export interface KeyEntry {
   wraps?: number;
   /** Backstitch only: the line's colour on the Symbols view and the PDF chart to print; absent = black. */
   ink?: string;
+  /**
+   * Backstitch only: placed as this stamp — a fixed block of straight stitches (Smyrna cross, one's own; core/stamps) —
+   * instead of one line at a time. Absent: plain backstitch lines.
+   */
+  stamp?: string;
 }
 
 export interface BlendPart {
@@ -61,6 +66,37 @@ export interface PartialStitch {
   k: KeyIndex;
 }
 
+/** A line inside a stamp, in half-grid units from the stamp's top-left corner (0..w, 0..h). */
+export interface StampLine {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+/** A stamp: a fixed block of `w`×`h` cells and the straight stitches in it, placed as one (ARCHITECTURE-REVIEW §3). */
+export interface StampDef {
+  id: string;
+  name: string;
+  w: number;
+  h: number;
+  lines: StampLine[];
+}
+
+/**
+ * A stamp on the chart: its block (top-left cell, size as placed) and how it's turned — `m` maps the stamp's own
+ * directions onto the chart's ([a, b, c, d]: x' = a·x + b·y, y' = c·x + d·y around the block's middle); absent: as drawn.
+ */
+export interface Stamp {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  def: string;
+  k: KeyIndex;
+  m?: [number, number, number, number];
+}
+
 export interface Layers {
   stitches: Uint16Array;
   beads: Uint16Array;
@@ -68,6 +104,7 @@ export interface Layers {
   segments: Segment[];
   knots: Knot[];
   ambiguous: Set<number>;
+  stamps: Stamp[];
 }
 export type LayerId = keyof Layers;
 
@@ -116,6 +153,8 @@ export interface Pattern {
   onlyBeadBrand?: boolean;
   /** No beads in this pattern: the key form offers no bead or floss + bead. */
   noBeads?: boolean;
+  /** The pattern's own stamps, by id (`own:…`); the built-in ones (Smyrna crosses) aren't stored. */
+  stamps?: Record<string, StampDef>;
   layers: Layers;
   /** Active work time in ms (SPEC §15.17). Counted by the editor, never edited by hand, not part of undo. */
   spent: number;

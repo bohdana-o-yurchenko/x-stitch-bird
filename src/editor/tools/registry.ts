@@ -9,7 +9,8 @@ import { pickerTool } from "./picker";
 import { magicWandTool, selectTool } from "./select";
 import { autofillTool } from "./autofill";
 import { filledRectTool, lineTool, rectTool } from "./shapes";
-import { entryPlacement } from "@/core/entryKinds/registry";
+import { entryPlacement, type Placement } from "@/core/entryKinds/registry";
+import { stampTool } from "./stamp";
 import type { EditorState, ToolId } from "../store/editorStore";
 import type { Tool } from "./types";
 
@@ -30,8 +31,11 @@ export const TOOLS: readonly Tool[] = [
 ];
 
 
-/** Behaviours picked automatically from the active entry's placement (ARCHITECTURE §7.2). */
-export const PLACEMENT_TOOLS = { segment: backstitchTool, point: knotTool } as const;
+/**
+ * Behaviours picked automatically from the active entry's placement (ARCHITECTURE §7.2): a new placement is one more
+ * line here (core/entryKinds PLACEMENT_RULES says which entries have it).
+ */
+export const PLACEMENT_TOOLS: Readonly<Record<Exclude<Placement, "cell">, Tool>> = { segment: backstitchTool, point: knotTool, block: stampTool };
 
 export const toolById = (id: string): Tool => TOOLS.find((t) => t.id === id) ?? pencilTool;
 

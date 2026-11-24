@@ -16,13 +16,15 @@ export interface ToolPointer {
 
 /** A chart tool (ARCHITECTURE §6.1). Tools change the document through `editor/actions` only. */
 export interface Tool {
-  id: ToolId | "backstitch" | "knot";
+  id: ToolId | "backstitch" | "knot" | "stamp";
   icon: string;
   /** Message key for the tooltip. */
   labelKey: string;
   cursor: string;
   /** Shows the brush-sized hover square. */
   usesBrush?: boolean;
+  /** false: no hover square at all (the tool shows its own preview, or none). */
+  hoverSquare?: false;
   down(ed: Editor, p: ToolPointer): void;
   move?(ed: Editor, p: ToolPointer): void;
   up?(ed: Editor, p: ToolPointer): void;

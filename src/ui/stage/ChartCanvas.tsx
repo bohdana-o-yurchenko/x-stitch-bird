@@ -23,6 +23,7 @@ function scene(ed: Editor): ChartScene {
     preview: st.overlay.preview,
     partialPreview: st.overlay.partialPreview,
     knotPreview: st.overlay.knotPreview,
+    linePreview: st.overlay.linePreview,
     chain: st.overlay.chain,
     hoverPoint: st.overlay.hoverPoint,
     selection: st.selection,

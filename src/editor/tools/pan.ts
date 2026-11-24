@@ -7,6 +7,7 @@ export const panTool: Tool = {
   icon: "pan",
   labelKey: "tools.pan",
   cursor: "grab",
+  hoverSquare: false,
   down(ed, p) {
     const v = ed.state.viewport;
     from = { sx: p.sx, sy: p.sy, offX: v.offX, offY: v.offY };

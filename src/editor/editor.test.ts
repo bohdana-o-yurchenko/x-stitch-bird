@@ -7,7 +7,7 @@ import { memoryPersistence } from "../../tests/support/memoryPersistence";
 import { loadPattern } from "./actions/pattern";
 import { LIBRARY_EVERY, LIBRARY_QUIET } from "./autosave";
 import { patternFile } from "./actions/importExport";
-import { serializePattern, XBIRD_VERSION } from "@/core/formats/json/serialize";
+import { serializePattern, type PatternFile, XBIRD_VERSION } from "@/core/formats/json/serialize";
 import { gridToImage } from "@/core/underlay/underlay";
 import { Editor } from "./createEditor";
 import { keyNames, shortcutLabel, shortcutLabels } from "./shortcuts/keymap";
@@ -343,21 +343,24 @@ describe("autosave", () => {
   });
 
   it("puts a file opened from the computer into the library at once, and saves changes before another pattern replaces them", async () => {
-    const saved: string[] = [];
-    ed.persistence.patterns.save = async (d) => (saved.push(d.name), { ok: true });
+    const saved: string[] = [], files: PatternFile[] = [];
+    ed.persistence.patterns.save = async (d) => (saved.push(d.name), files.push(d), { ok: true });
     ed.autosave.markSaved();
     const file = new File([JSON.stringify(serializePattern(createPattern(5, 5, "Imported")))], "imported.xbird");
     await ed.commands.run("file.load", file);
     expect(ed.doc.name).toBe("Imported");
     expect(saved).toEqual(["Imported"]);
     // changed, then straight away another pattern opens: the change is not lost
+    const imported = ed.doc.id;
     ed.doc.layers.stitches[0] = red;
     ed.changed();
     loadPattern(ed, createPattern(5, 5, "Other"));
-    expect(saved).toEqual(["Imported", "Imported"]);
+    // the pattern was taken as it was before the switch; it reaches the library a moment later
+    await vi.waitFor(() => expect(saved).toEqual(["Imported", "Imported"]));
+    expect(files[1]!.id).toBe(imported);
     // a brand-new pattern counts as unsaved too (it would have been saved within the minute)
     loadPattern(ed, createPattern(5, 5, "Third"));
-    expect(saved).toEqual(["Imported", "Imported", "Other"]);
+    await vi.waitFor(() => expect(saved).toEqual(["Imported", "Imported", "Other"]));
   });
 });
 

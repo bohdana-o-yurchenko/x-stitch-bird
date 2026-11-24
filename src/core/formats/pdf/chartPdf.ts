@@ -1,4 +1,5 @@
 import { calculator } from "../../calculator/registry";
+import { chartLines } from "../../layers/registry";
 import { computeUsage, entryCount, partialCount } from "../../calculator/usage";
 import { brandCode } from "../../catalog/catalog";
 import { shade } from "../../color/colorMath";
@@ -242,7 +243,7 @@ const onTile = (t: Tile, x: number, y: number) => x >= t.x && y >= t.y && x <= t
 
 function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayout, t: ChartLayout["tiles"][number], paint: Painter, box: PageBox, draw?: LineStyleDraw) {
   const { cell } = l, ox = box.left, oy = box.top, { colour, muted, fill, ink } = paint;
-  const { stitches, beads, partials, segments, knots } = p.layers;
+  const { stitches, beads, partials, knots } = p.layers, segments = chartLines(p);
   const X = (x: number) => ox + (x - t.x) * cell, Y = (y: number) => oy + (y - t.y) * cell;
   const inTile = (x: number, y: number) => x >= t.x && y >= t.y && x < t.x + t.w && y < t.y + t.h;
   const shared = sharedStrips(l, t).map((r) => [X(r.x), Y(r.y), r.w * cell, r.h * cell] as const);
@@ -451,7 +452,7 @@ function drawMiniKey(page: PdfPage, box: PageBox, y: number, rows: KeyRow[], ite
 
 /** The entries a page of the chart uses: in its cells, its lines and its knots. */
 function entriesOn(p: Pattern, t: Tile): Set<KeyIndex> {
-  const { stitches, beads, partials, segments, knots } = p.layers, out = new Set<KeyIndex>();
+  const { stitches, beads, partials, knots } = p.layers, segments = chartLines(p), out = new Set<KeyIndex>();
   for (let y = t.y; y < t.y + t.h; y++)
     for (let x = t.x; x < t.x + t.w; x++) {
       const i = y * p.w + x;
@@ -467,9 +468,9 @@ function entriesOn(p: Pattern, t: Tile): Set<KeyIndex> {
   return out;
 }
 
-/** The pattern has backstitch or French knots — the "lines" a chart can show or hide. */
+/** The pattern has backstitch (stamps too) or French knots — the "lines" a chart can show or hide. */
 export function hasLines(p: Pattern): boolean {
-  return p.layers.segments.length > 0 || p.layers.knots.some((kn) => p.key[kn.k]?.t === "knot");
+  return chartLines(p).length > 0 || p.layers.knots.some((kn) => p.key[kn.k]?.t === "knot");
 }
 
 /** A block of the instructions: a heading, a paragraph line, a bullet, or an empty line. */
@@ -759,7 +760,7 @@ export function planChartPdf(p: Pattern, o: Pick<ChartPdfOptions, "t" | "print" 
       const pw = p.w * k, ph = p.h * k, px = L + (W - pw) / 2, py = top + (bottom - top - ph) / 2;
       if (ctx.picture !== undefined) page.image(ctx.picture, px, py, pw, ph);
       // backstitch and knots over it, in their thread colours
-      const lines = p.layers.segments.flatMap((sg) => {
+      const lines = chartLines(p).flatMap((sg) => {
         const s = palette[sg.k];
         return s ? [{ x1: px + sg.x1 * k, y1: py + sg.y1 * k, x2: px + sg.x2 * k, y2: py + sg.y2 * k, colour: s.hex, width: Math.max(0.3, k * 0.18), unit: k, sym: "" }] : [];
       });

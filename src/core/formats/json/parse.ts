@@ -4,10 +4,11 @@ import { LAYERS } from "../../layers/registry";
 import { cleanEntry, fixEntrySymbols } from "../../pattern/keyEntries";
 import { cleanMeta } from "../../pattern/meta";
 import { createPattern, DEFAULT_FABRIC, DEFAULT_GRID, MAX_SIZE } from "../../pattern/createPattern";
-import type { CustomColor, GridNumbering, KeyEntry, Pattern } from "../../pattern/types";
+import type { CustomColor, GridNumbering, KeyEntry, Pattern, StampDef } from "../../pattern/types";
 import { upgradeSymbol } from "../../symbols/symbols";
 import { cleanUnderlay, type UnderlayData } from "../../underlay/underlay";
-import { OPTIONAL_LAYER_FIELDS, XBIRD_VERSION, type FileVersion, type PatternFile } from "./serialize";
+import { cleanStampDef } from "../../stamps/stamps";
+import { XBIRD_VERSION, type FileVersion, type PatternFile } from "./serialize";
 
 export class PatternFormatError extends Error {}
 
@@ -29,7 +30,7 @@ export function upgradeFile(d: PatternFile): PatternFile {
   return { ...out, xbird: XBIRD_VERSION };
 }
 
-const LAYER_FIELD: Record<string, string> = { stitches: "s", beads: "b", segments: "back", ...Object.fromEntries(OPTIONAL_LAYER_FIELDS.map(([f, id]) => [id, f])) };
+const LAYER_FIELD: Record<string, string> = Object.fromEntries(LAYERS.map((l) => [l.id, l.fileField]));
 
 /** v1 key entries were `{ id, sym }` and always full crosses or beads. */
 function migrateV1Key(raw: { id: string; sym: string }, strands: number): Omit<KeyEntry, "sym"> & { sym: string } {
@@ -86,6 +87,8 @@ export function parsePattern(raw: unknown, symbols: readonly string[]): { patter
   p.spent = Number.isFinite(d.spent) && d.spent! > 0 ? d.spent! * 1000 : 0;
   const samples = cleanSamples(d.samples);
   if (samples) p.samples = samples;
+  const stamps = (Array.isArray(d.stampDefs) ? d.stampDefs : []).map(cleanStampDef).filter((s): s is StampDef => !!s);
+  if (stamps.length) p.stamps = Object.fromEntries(stamps.map((s) => [s.id, s]));
   const v = d.v ?? 1;
   const pal = (d.pal ?? []).map((e) => {
     if (!e) return null;

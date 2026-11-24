@@ -1,3 +1,4 @@
+import { LAYERS } from "@/core/layers/registry";
 import { pointGroup, stitchGroup } from "@/core/pattern/groups";
 import { shade } from "@/core/color/colorMath";
 import { isMajorLine, majorOffset } from "@/core/grid/numbering";
@@ -5,6 +6,7 @@ import type { Palette } from "@/core/pattern/palette";
 import type { Pattern, Rect } from "@/core/pattern/types";
 import { drawBackstitch, drawBeadCell, drawKnot, drawPartial, drawStitchCell, type CellStyle, type Ctx } from "./primitives/cells";
 import type { CanvasTheme } from "./theme";
+import { drawCellBitmap, pixel } from "./cellBitmap";
 
 export type ChartView = "color" | "both" | "symbols";
 
@@ -71,10 +73,20 @@ export function drawCells(g: Ctx, p: Pattern, palette: Palette, f: ChartFrame, s
     if (style.stitched) fabricHoles(g, p, f);
   }
   if (underlay) drawUnderlay(g, p, underlay, f, true);
+  const shown = palette.map((s) => !!s && !hidden?.has(stitchGroup(s)));
+  // flat full crosses in one bitmap; each cell on its own only for what the bitmap can't show
+  const flat = style.showColour && !style.stitched;
+  const flatPixel = palette.map((s, k) => (flat && s && shown[k] && s.st === "full" ? pixel(s.hex) : 0));
+  const symOk = style.showSymbol && z >= style.theme.symbols.minZoom;
+  const bitmap = flatPixel.some(Boolean) && drawCellBitmap(g, f.x0, f.y0, f.x1 - f.x0, f.y1 - f.y0, ox, oy, z, (x, y) => flatPixel[stitches[y * p.w + x] ?? 0] ?? 0);
+  const filled = bitmap ? { ...style, skipFill: true } : style;
+  const plain = { ...filled, showSymbol: false };
+  const own = (k: number) => !bitmap || !flatPixel[k] || symOk || palette[k]!.t === "combo";
+  const needs = palette.map((s, k) => shown[k]! && own(k));
   for (let y = f.y0; y < f.y1; y++)
     for (let x = f.x0; x < f.x1; x++) {
-      const i = y * p.w + x, s = palette[stitches[i] ?? 0];
-      if (s && !hidden?.has(stitchGroup(s))) drawStitchCell(g, ox + x * z, oy + y * z, z, s, { ...style, showSymbol: style.showSymbol && !beads[i] });
+      const i = y * p.w + x, k = stitches[i] ?? 0;
+      if (needs[k]) drawStitchCell(g, ox + x * z, oy + y * z, z, palette[k]!, style.showSymbol && !beads[i] ? filled : plain);
     }
   if (!hidden?.has("partials"))
     for (const [i, list] of partials) {
@@ -129,15 +141,21 @@ export function drawGrid(g: Ctx, p: Pattern, f: ChartFrame, theme: CanvasTheme, 
   g.strokeRect(ox + 0.5, oy + 0.5, p.w * z, p.h * z);
 }
 
-/** Backstitch and French knots — drawn above the grid so they read clearly. */
+/** Backstitch and French knots — drawn above the grid so they read clearly. Only those near the frame's cells. */
 export function drawLines(g: Ctx, p: Pattern, palette: Palette, f: ChartFrame, style: CellStyle, alpha = 1) {
   const { z, ox, oy } = f, hidden = style.hidden;
-  if (!hidden?.has("backstitch"))
-    for (const s of p.layers.segments) {
+  const x0 = f.x0 - 1, y0 = f.y0 - 1, x1 = f.x1 + 1, y1 = f.y1 + 1;
+  // every layer that is lines (backstitch, stamps), in registry order
+  for (const l of LAYERS) {
+    if (!l.lines || (l.group && hidden?.has(l.group))) continue;
+    for (const s of l.lines(l.get(p.layers), p)) {
+      if (Math.max(s.x1, s.x2) < x0 || Math.min(s.x1, s.x2) > x1 || Math.max(s.y1, s.y2) < y0 || Math.min(s.y1, s.y2) > y1) continue;
       const slot = palette[s.k];
       if (slot) drawBackstitch(g, ox + s.x1 * z, oy + s.y1 * z, ox + s.x2 * z, oy + s.y2 * z, z, slot, style, alpha);
     }
+  }
   for (const k of p.layers.knots) {
+    if (k.x < x0 || k.x > x1 || k.y < y0 || k.y > y1) continue;
     const slot = palette[k.k];
     if (slot && !hidden?.has(pointGroup(slot))) drawKnot(g, ox + k.x * z, oy + k.y * z, z, slot, style, alpha);
   }

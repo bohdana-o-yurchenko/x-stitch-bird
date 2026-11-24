@@ -1,3 +1,4 @@
+import { changedCells } from "@/core/layers/cellDiff";
 import { LAYERS, layerHandler } from "@/core/layers/registry";
 import type { KeyEntry, LayerId, Layers, Pattern } from "@/core/pattern/types";
 
@@ -47,13 +48,11 @@ function diff(p: Pattern, before: DocState): Patch[] {
   const patches: Patch[] = [];
   for (const l of LAYERS) {
     const a = l.get(before.layers), b = l.get(p.layers);
-    if (l.equals(a, b)) continue;
-    if (a instanceof Uint16Array && b instanceof Uint16Array) {
-      const idx: number[] = [];
-      for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) idx.push(i);
-      const ix = Uint32Array.from(idx);
-      patches.push({ kind: "cells", layer: l.id, idx: ix, before: Uint16Array.from(ix, (i) => a[i] ?? 0), after: Uint16Array.from(ix, (i) => b[i] ?? 0) });
-    } else patches.push({ kind: "items", layer: l.id, before: a, after: l.clone(b) });
+    if (a instanceof Uint16Array && b instanceof Uint16Array && a.length === b.length) {
+      // one pass over the cells: what changed is the patch, nothing changed is no patch
+      const ix = changedCells(b, a);
+      if (ix.length) patches.push({ kind: "cells", layer: l.id, idx: ix, before: Uint16Array.from(ix, (i) => a[i] ?? 0), after: Uint16Array.from(ix, (i) => b[i] ?? 0) });
+    } else if (!l.equals(a, b)) patches.push({ kind: "items", layer: l.id, before: a, after: l.clone(b) });
   }
   const keysNow = captureKeys(p);
   if (JSON.stringify(keysNow) !== JSON.stringify({ key: before.key, blends: before.blends, combos: before.combos, customs: before.customs }))

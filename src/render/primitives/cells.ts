@@ -21,6 +21,8 @@ export interface CellStyle {
   symbolInks?: ReadonlyMap<PaletteSlot, string>;
   /** Kinds of stitches not drawn (SPEC §15.16). */
   hidden?: ReadonlySet<ChartGroup>;
+  /** Full crosses' flat colour is already there (drawn for many cells at once): only what goes on top. */
+  skipFill?: boolean;
 }
 
 /** The ink of an entry's symbol when the symbol is drawn without its colour. */
@@ -87,7 +89,7 @@ export function drawStitchCell(g: Ctx, px: number, py: number, z: number, s: Pal
   const { theme, showColour, showSymbol } = style;
   if (style.stitched) drawThreadLegs(g, px, py, z, s.hex, s.st === "full" ? ["up", "down"] : [s.st === "half" ? "up" : "down"]);
   else if (s.st === "full") {
-    if (showColour) {
+    if (showColour && !style.skipFill) {
       g.fillStyle = s.hex;
       g.fillRect(px, py, z, z);
     }

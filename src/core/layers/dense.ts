@@ -3,6 +3,7 @@ import { clearUnder, isOccupied } from "../pattern/occupancy";
 import type { Layers } from "../pattern/types";
 import { cellIndexMap } from "../transform/cellTransform";
 import { inBounds } from "./maskGeometry";
+import { sameCells } from "./cellDiff";
 import type { LayerHandler } from "./types";
 
 type Dense = Uint16Array;
@@ -12,14 +13,21 @@ function denseLayer(id: "stitches" | "beads", pickPriority: number): LayerHandle
   const repointable = id === "stitches";
   return {
     id,
+    fileField: id === "stitches" ? "s" : "b",
+    alwaysWritten: true,
+    // the bead layer is all beads; a cell's stitch is a cross or a floss + bead, told apart per cell (pattern/groups)
+    ...(id === "beads" ? { group: "beads" as const } : {}),
     exported: true,
     pickPriority,
     get: (l: Layers) => l[id],
     set: (l: Layers, v: Dense) => void (l[id] = v),
     create: ({ w, h }) => new Uint16Array(w * h),
     clone: (v) => v.slice(),
-    equals: (a, b) => a.length === b.length && a.every((x, i) => x === b[i]),
-    isEmpty: (v) => v.every((x) => x === 0),
+    equals: sameCells,
+    isEmpty: (v) => {
+      for (let i = 0; i < v.length; i++) if (v[i]) return false;
+      return true;
+    },
     resize(v, from, to, off) {
       const out = new Uint16Array(to.w * to.h);
       for (let y = 0; y < from.h; y++)

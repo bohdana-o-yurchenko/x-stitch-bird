@@ -22,6 +22,8 @@ function moveCells(v: Partials, to: { w: number; h: number }, place: (x: number,
 /** Quarter, three-quarter and petite stitches, sparse by cell (SPEC §15.13). */
 export const partialsLayer: LayerHandler<Partials> = {
   id: "partials",
+  fileField: "part",
+  group: "partials",
   exported: true,
   pickPriority: 30,
   get: (l: Layers) => l.partials,

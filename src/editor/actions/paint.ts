@@ -1,11 +1,11 @@
 import { brushCells, floodRegion, snapHalf } from "@/core/geometry/geometry";
-import { LAYERS, PICK_ORDER } from "@/core/layers/registry";
+import { LAYERS, PICK_ORDER, layerHandler } from "@/core/layers/registry";
 import { segmentDistance } from "@/core/layers/maskGeometry";
 import { PICK_RADIUS } from "@/core/layers/points";
 import { defaultCanvasTheme } from "@/render/theme";
-import { LAYER_GROUP, pointGroup, stitchGroup } from "@/core/pattern/groups";
+import { pointGroup, stitchGroup } from "@/core/pattern/groups";
 import { canPlacePartial, clearForPartial, clearUnder, isOccupied } from "@/core/pattern/occupancy";
-import type { Corner, KeyEntry, KeyIndex, Knot, Point, Segment } from "@/core/pattern/types";
+import type { Corner, KeyEntry, KeyIndex, Knot, LayerId, Point, Segment } from "@/core/pattern/types";
 import { nearestCorner } from "@/core/stitches/partialKinds";
 import { mirrorCells, mirrorPoints, mirrorTransforms } from "@/core/transform/mirror";
 import type { PickerHighlight } from "@/render/ChartRenderer";
@@ -14,7 +14,7 @@ import type { Editor } from "../createEditor";
 const KNOT_RADIUS = defaultCanvasTheme.knots.radius;
 
 /** Hidden kinds of stitches (SPEC §15.16) are out of the picker's and eraser's reach: a layer… */
-const layerHidden = (ed: Editor, id: string) => { const g = LAYER_GROUP[id]; return !!g && ed.state.hiddenGroups.includes(g); };
+const layerHidden = (ed: Editor, id: LayerId) => { const g = layerHandler(id).group; return !!g && ed.state.hiddenGroups.includes(g); };
 /** …a cell's cross or floss + bead… */
 const stitchHidden = (ed: Editor, k: KeyIndex) => ed.state.hiddenGroups.includes(stitchGroup(ed.doc.key[k]));
 /** …and a knot or a bead between cells. */

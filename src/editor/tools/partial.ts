@@ -47,6 +47,7 @@ export const partialTool: Tool = {
   icon: "partial",
   labelKey: "tools.partial",
   cursor: "crosshair",
+  hoverSquare: false,
   down(ed, p) {
     const a = crossEntry(ed);
     if (!a || !inChart(ed, p.cell)) return;

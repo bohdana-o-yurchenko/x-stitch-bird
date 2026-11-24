@@ -1,7 +1,7 @@
-import { layerHandler } from "../../layers/registry";
+import { LAYERS, layerHandler } from "../../layers/registry";
 import type { KeyMap } from "../../layers/types";
 import { DEFAULT_GRID } from "../../pattern/createPattern";
-import type { CustomColor, KeyEntry, LayerId, Pattern } from "../../pattern/types";
+import type { CustomColor, KeyEntry, LayerId, Pattern, StampDef } from "../../pattern/types";
 
 /** Stitchwork JSON document. v4 only adds optional fields to v3 (SPEC §9.3, §15). */
 export interface PatternFile {
@@ -42,6 +42,10 @@ export interface PatternFile {
   spent?: number;
   /** Symbol matching: learned photo examples per key entry (SPEC §15.11). Optional; older apps ignore it. */
   samples?: Record<string, string[]>;
+  /** Stamps on the chart (ARCHITECTURE-REVIEW §3): `[x, y, w, h, key, stamp id, …turn]`. */
+  stamps?: unknown[];
+  /** The pattern's own stamps (drawn by the user); the built-in ones aren't written. */
+  stampDefs?: StampDef[];
   /** The pattern's versions (automatic snapshots), oldest first; only in .xbird files. */
   versions?: FileVersion[];
   /** When a .xbird was made (ms): tells an older copy of a pattern one has from a newer one (SPEC §15.43). */
@@ -63,12 +67,8 @@ export const FORMAT_VERSION = 4;
  */
 export const XBIRD_VERSION = 1;
 
-/** Optional v4 fields: JSON field name → layer. Written only when non-empty. */
-export const OPTIONAL_LAYER_FIELDS: readonly [keyof PatternFile, LayerId][] = [
-  ["part", "partials"],
-  ["knots", "knots"],
-  ["amb", "ambiguous"],
-];
+/** Layer fields written only when the layer has content (partials, knots, ambiguous marks, stamps…): from the registry. */
+export const OPTIONAL_LAYER_FIELDS: readonly [string, LayerId][] = LAYERS.filter((l) => !l.alwaysWritten).map((l) => [l.fileField, l.id]);
 
 export function serializePattern(p: Pattern): PatternFile {
   // the file stores the key without gaps: entry i in `pal` is key index i + 1
@@ -113,6 +113,8 @@ export function serializePattern(p: Pattern): PatternFile {
   if (JSON.stringify(p.grid) !== JSON.stringify(DEFAULT_GRID)) doc.grid = p.grid;
   if (p.spent >= 1000) doc.spent = Math.round(p.spent / 1000);
   if (p.samples && Object.keys(p.samples).length) doc.samples = p.samples;
+  // own stamps the key uses (or used: kept while the pattern has them)
+  if (p.stamps && Object.keys(p.stamps).length) doc.stampDefs = Object.values(p.stamps).map((d) => ({ ...d, lines: d.lines.map((l) => ({ ...l })) }));
   for (const [field, id] of OPTIONAL_LAYER_FIELDS) {
     const h = layerHandler(id);
     if (!h.isEmpty(h.get(p.layers))) (doc as unknown as Record<string, unknown>)[field] = layer(id);
