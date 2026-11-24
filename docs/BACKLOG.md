@@ -24,7 +24,6 @@ DONE 19) (question answered 2026-11-23: Vercel custom events need Pro; not built
 DONE 14) + 1 feature : XSD import (SPEC §15.56; export stays out of scope). we are free to reverse engineer it. noone goona sue
 
 DONE 12) fix the different 'new from' dialogs. now the behavior is inconsistent 
-12) user guides and probably an AI assistant that exaplains how to do one or another
 
 DONE 13) improve the expor to pdf :
 DONE 14) the infrmation of the author and name of design should be on every page. also instructions must be exported
@@ -35,18 +34,23 @@ DONE 15) the 'replace in selection' dialog should have proper dropwowned that lo
 DONE 12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
 DONE 13) add 'similar' colors of the same brand AND translations to other brands. maybe come up with what usually is displayed there as well 
 
+12) user guides and probably an AI assistant that exaplains how to do one or another
+11) FIX preview deploy on the vercel 
+
+13) finish a proper local app installation. this will introduce a whole lot of problems later tho.
+
+7) add specialty stitches : smyrna (in 1 cell in 4 cells ) + their own stitches
+8) write to yulia after the speciality stitches are done!!!!
+
+
 
 11) intoduce more icons. match with pattern maker. fix the export oxs so it displays the icons??? 
-11) FIX preview deploy on the vercel 
 14) add fabricks!!! each fabric has a dmc code associated with it. so it's totally real 
 13) follow up : introduce 'my stash'. then introduce my projects. where i can add my kits and it would help me specify if i got all the necesary supplyes or if i can use smth from my stash 
 
 10) billing options, ui, and backend. and frontend and FOP setup 
 
-7) add specialty stitches : smyrna (in 1 cell in 4 cells ) + their own stitches 
-8) write to yulia after the speciality stitches are done!!!! 
 
-13) finish a proper local app installation. this will introduce a whole lot of problems later tho. 
 14) rework the floss and beads matching. using some existing trnalstion tables. 
 
 
