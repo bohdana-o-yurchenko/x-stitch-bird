@@ -91,11 +91,11 @@ export function PdfViewer({ file, sizes, start, focus, row, kept, onLeave }: {
   return (
     <div className={s.viewer} data-testid="pdf-viewer">
       <div className={s.bar}>
-        <button type="button" className={cx(ui.btn, ui.sm)} aria-label={t("pagePrev")} title={t("pagePrev")} disabled={page === 0} onClick={() => setPage(page - 1)}>‹</button>
+        <button type="button" className={ui.pager} aria-label={t("pagePrev")} title={t("pagePrev")} disabled={page === 0} onClick={() => setPage(page - 1)}>‹</button>
         <select className={ui.input} aria-label={t("page")} value={page} onChange={(e) => setPage(Number(e.target.value))} data-testid="pdf-viewer-page">
           {sizes.map((_, i) => <option key={i} value={i}>{t("pageOf", { page: i + 1, pages })}</option>)}
         </select>
-        <button type="button" className={cx(ui.btn, ui.sm)} aria-label={t("pageNext")} title={t("pageNext")} disabled={page >= pages - 1} onClick={() => setPage(page + 1)}>›</button>
+        <button type="button" className={ui.pager} aria-label={t("pageNext")} title={t("pageNext")} disabled={page >= pages - 1} onClick={() => setPage(page + 1)}>›</button>
         <span className={s.spacer} />
         <button type="button" className={cx(ui.btn, ui.sm)} aria-label={t("zoomOut")} title={t("zoomOut")} disabled={zoom === ZOOMS[0]} onClick={() => step(-1)}>−</button>
         <button type="button" className={cx(ui.btn, ui.sm, s.fit)} title={t("zoomFit")} onClick={() => setZoom(1)} data-testid="pdf-viewer-zoom">{Math.round(zoom * 100)}%</button>

@@ -1203,7 +1203,7 @@ be typed in. **Blends are not read** (checked 2026-11-19): Pattern Keeper doesn'
 they can be added by hand there. Bug: BACKLOG B1.
 
 ### 15.10b PDF chart to print (implemented 2026-11-16)
-**Menu ▸ Export ▸ PDF chart to print** — the chart for people to read and stitch from, separate from the Pattern
+**Menu ▸ Export ▸ PDF chart to print** (since 2026-11-24 through the Print dialog, §15.10c) — the chart for people to read and stitch from, separate from the Pattern
 Keeper PDF. All vector (symbols from the embedded symbol font, hand-drawn symbols as paths with their cut-outs,
 colours, lines), A4 portrait, in the interface language (see Language below).
 1. **Cover**: name, designer and copyright, size in stitches and on the pattern's fabric (cm and inches), the
@@ -1251,6 +1251,72 @@ Neighbouring pages **share 2 rows or columns**: on both pages those cells are sh
 the symbol chart, a see-through grey over the colours), so the pages can be laid over each other. Each page shows
 its column and row ranges, the chart's own numbering every 10, a small page map with this page filled, and
 centre marks below and right of the grid.
+
+### 15.10c Print settings for the PDF chart (2026-11-24)
+**Menu ▸ Export ▸ PDF chart to print** opens a **Print** dialog first: settings on the left, the real pages on the
+right. The file is **planned** after each change (a moment after the last one): every page counted and named,
+nothing drawn — a 1000 × 1000 chart plans in about a third of a second. Only the page looked at is **made**, as a
+PDF of its own, and drawn by pdf.js, so the preview is what prints. ‹ › and "page 3 of 14" step through it; the
+page count is big. Opening a chart in the list turns the preview to its first page.
+
+**Presets** on top fill everything below (changing anything by hand leaves no preset highlighted — nothing is added
+or moves; paper and orientation are kept):
+- **Full pattern** — symbol chart (contrast) and its key, colour chart, muted chart with bright backstitch and its
+  key; cover, contents, instructions, materials.
+- **For me** — one contrast chart with bright backstitch, large cells (6 mm), its key; cover, contents, instructions.
+- **Black & white** — the crosses alone, then the crosses with black backstitch (its key after the first);
+  cover, contents, instructions, materials.
+- **Large print** — one black-and-white chart with black backstitch, extra large cells (8 mm), its key.
+
+**Charts** — a list (at most 8), each its own chart in the file, in list order. *+ Add chart*; on each: duplicate,
+move up / down, remove. One is open at a time; its settings:
+- **Crosses** (and half crosses, partial stitches, beads): *B&W* — black symbols on white; *Contrast* — black
+  symbols, some red / green / blue where crowded (§15.10b *Symbol colours*); *Muted* — symbols in grey on pale
+  colours, so backstitch stands out; *Colours* — symbols on the thread colours.
+- **Backstitch** (backstitch and French knots — shown only when the pattern has either): *Hidden*; *B&W* — black, in
+  the line styles; *Contrast* — the line colour from the key, knots each in a bright colour; *Colours* — the thread
+  colours. Lines are thick (thicker with more strands), a little thinner over symbols than over muted colours.
+- **Cell size**: *Auto* (about 40 stitches across, bigger for small charts up to 6.4 mm), *Extra small* 2.5 mm,
+  *Small* 3.5, *Normal* 4.6, *Large* 6, *Extra large* 8 — each with "≈ N stitches across".
+- **Shared rows between pages**: 0, 2 or 3.
+- **Key on every page** (on): under the grid, the entries the page uses, as the chart shows them; the room for it is
+  the most any page of the chart needs, so its pages stay the same size; the columns are as wide as the longest label.
+- **Key after this chart** (on): the chart's own key — its entries (the lines only when it shows them), each icon as
+  on that chart — brand and number, details, count. A contrast chart's key says some symbols are red, green or blue.
+
+The chart's title says both: "Black and white chart · black backstitch", "Colour chart" (lines left out of the
+title when the pattern has none).
+
+**Also in the file**: **Cover** — the pattern's name (large, up to two lines), "Designed by …" and ©, the pattern's
+**picture** as large as the page allows (a picture of the cells: each its bead's colour, else its stitch's, else its
+first partial stitch's, else the fabric — enlarged up to 16 × for small patterns so it stays sharp — with backstitch
+and knots drawn over it in their thread colours, a thin frame), and under it the size in stitches, cm and inches;
+**Contents** — what is on which page (each part with its page range; not the cover nor itself) and how the chart
+pages fit together (the first chart's page map); **Instructions** (only when
+Pattern info has some — else greyed, with where to write them), **Materials** — the fabric (count, the design's
+size in cm, the piece to cut with 5 cm spare on each side) and what to buy: the shopping list of the CSV (§10.2,
+same calculator and its note), each line a swatch, brand and number, name, quantity. Order in the file: cover,
+contents, instructions, materials, then the charts each followed by its key. The cover's picture is the file's one
+picture; everything else is vector.
+
+**Paper**: **A4** or **US Letter**, **portrait** or **landscape**.
+
+**On every page** but the cover (always; the cover has them large): a header with the **pattern name** in bold and **designer · ©** after it
+(cut short with … when long), and the page number of the whole file at the right of the footer ("5 / 23").
+
+**Instructions pages**: the Pattern info *Instructions* text, a page or more. Line breaks are kept; an empty line
+starts a new paragraph; a line starting with "- ", "• " or "* " is a bullet with a hanging indent; "# " a bold heading.
+
+**Download PDF** makes every page — a few at a time with a pause between, so the app stays responsive — over the
+preview: "Making the PDF…", a progress bar, "page 340 of 1,789", **Stop**. Done: the file is saved
+(`<name>-chart.pdf`) and the dialog closes; stopped: nothing is saved, the dialog stays. Measured on 1000 × 1000
+(40 colours, backstitch, Full pattern): 1,789 pages, 48 MB, about 22 s; the symbol chart alone 600 pages, 6 s.
+Made in the browser, not on a server: patterns stay on the device (also signed out), and a file this size is over
+what a server function can send back.
+
+The settings are remembered **per browser** (localStorage `stitchwork.printOptions`), not in the pattern, so
+`.xbird` files don't change; settings of an older shape read back as the default. Not built yet: a one-page colour
+overview of the whole chart.
 
 ### 15.11 Autofill: symbol matching in one 10 × 10 block (implemented; a toolbar tool since 2026-11-16)
 **Why per block.** Even straightened, a photo of a paper chart is never exact: pages bend, print drifts. Mappers

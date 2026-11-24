@@ -47,11 +47,11 @@ export function UnderlayPanel({ title }: { title: string }) {
         {/* a PDF: its pages, one at a time behind the chart, each where it was placed (SPEC §15.41) */}
         {u.pdf && u.pdf.pages > 1 && (
           <div className={s.prow} data-testid="underlay-pages">
-            <button type="button" className={cx(ui.btn, ui.sm)} disabled={pageBusy || u.pdf.page <= 1} title={t("prevPage")} aria-label={t("prevPage")} onClick={() => run("underlay.page", u.pdf!.page - 1)}>‹</button>
+            <button type="button" className={ui.pager} disabled={pageBusy || u.pdf.page <= 1} title={t("prevPage")} aria-label={t("prevPage")} onClick={() => run("underlay.page", u.pdf!.page - 1)}>‹</button>
             <select className={cx(ui.input, s.prowGrow)} aria-label={t("page")} value={u.pdf.page} disabled={pageBusy} onChange={(e) => run("underlay.page", Number(e.target.value))} data-testid="underlay-page">
               {Array.from({ length: u.pdf.pages }, (_, i) => <option key={i} value={i + 1}>{t("pageOf", { page: i + 1, pages: u.pdf!.pages })}</option>)}
             </select>
-            <button type="button" className={cx(ui.btn, ui.sm)} disabled={pageBusy || u.pdf.page >= u.pdf.pages} title={t("nextPage")} aria-label={t("nextPage")} onClick={() => run("underlay.page", u.pdf!.page + 1)}>›</button>
+            <button type="button" className={ui.pager} disabled={pageBusy || u.pdf.page >= u.pdf.pages} title={t("nextPage")} aria-label={t("nextPage")} onClick={() => run("underlay.page", u.pdf!.page + 1)}>›</button>
           </div>
         )}
         {pageBusy && <p className={s.prowNote} style={{ margin: 0 }} role="status">{t("drawingPage")}</p>}

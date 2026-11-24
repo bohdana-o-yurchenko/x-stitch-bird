@@ -746,22 +746,65 @@ test("exports a PDF for Pattern Keeper after explaining what it can't track", as
   if (process.env.PK_PDF_OUT) await file.saveAs(process.env.PK_PDF_OUT);
 });
 
-test("exports a PDF chart to print: cover, symbols, symbols on colour, colour with backstitch, key", async ({ page }) => {
-  const download = page.waitForEvent("download");
+test("exports a PDF chart to print: the Print dialog previews it, the file has the pages it counted", async ({ page }) => {
   await exportAction(page, "PDF chart to print");
+  // the Print dialog: the real pages as a preview, then the file
+  const dialog = page.getByRole("dialog", { name: "Print" });
+  await expect(dialog.getByTestId("print-preview")).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Full pattern" })).toHaveAttribute("aria-pressed", "true");
+  await expect(dialog.getByTestId("print-charts").getByRole("listitem")).toHaveCount(3);
+  const counted = Number((await dialog.getByTestId("print-pages").textContent())!.match(/\d+/)![0]);
+  if (process.env.PRINT_SHOT) await dialog.screenshot({ path: process.env.PRINT_SHOT });
+  const download = page.waitForEvent("download");
+  await dialog.getByRole("button", { name: "Download PDF" }).click();
   const file = await download;
   expect(file.suggestedFilename()).toBe("Untitled-pattern-chart.pdf");
   const pdf = readFileSync((await file.path())!).toString("latin1");
   expect(pdf.startsWith("%PDF-1.7")).toBe(true);
-  // the 60 × 60 demo is 2 × 2 pages per chart: cover + symbol chart 4 + its key + 2 × 4 + key
-  expect(pdf.match(/\/Type \/Page /g)).toHaveLength(15);
-  expect(pdf).not.toContain("/Subtype /Image");
+  expect(pdf.match(/\/Type \/Page /g)).toHaveLength(counted);
+  // vector, but for the cover's picture of the pattern
+  expect(pdf.match(/\/Subtype \/Image/g)).toHaveLength(1);
+  await expect(dialog).toBeHidden();
   if (process.env.CHART_PDF_OUT) await file.saveAs(process.env.CHART_PDF_OUT);
 });
 
-test("New ▸ From a PDF chart… says first what it is; this app's PDF comes back as the same pattern, a new one; another PDF can't be read (SPEC §15.46)", async ({ page }) => {
-  const download = page.waitForEvent("download");
+test("Print dialog: presets fill the chart list; a chart's own settings; the choice is remembered", async ({ page }) => {
   await exportAction(page, "PDF chart to print");
+  const dialog = page.getByRole("dialog", { name: "Print" }), list = dialog.getByTestId("print-charts").getByRole("listitem");
+  await expect(dialog.getByTestId("print-preview")).toBeVisible();
+  // black and white: the crosses alone, then with the backstitch
+  await dialog.getByRole("button", { name: "Black & white" }).click();
+  await expect(list).toHaveCount(2);
+  await expect(list.nth(0)).toContainText("Black and white chart");
+  // For me: one chart, opened; a bigger cell makes it Custom and changes the pages
+  await dialog.getByRole("button", { name: "For me" }).click();
+  await expect(list).toHaveCount(1);
+  const before = await dialog.getByTestId("print-pages").textContent();
+  await dialog.getByTestId("print-cell").selectOption("8");
+  // changed by hand: no preset is highlighted any more
+  await expect(dialog.getByTestId("print-presets").getByRole("button", { pressed: true })).toHaveCount(0);
+  await expect(dialog.getByTestId("print-pages")).not.toHaveText(before!);
+  // one more chart, in colours, then taken out again
+  await dialog.getByRole("button", { name: "Add chart" }).click();
+  await expect(list).toHaveCount(2);
+  await list.nth(1).getByRole("group", { name: "Crosses" }).getByRole("button", { name: "Colours" }).click();
+  await expect(list.nth(1)).toContainText("Colour chart");
+  if (process.env.PRINT_SHOT2) await dialog.screenshot({ path: process.env.PRINT_SHOT2 });
+  await list.nth(1).getByRole("button", { name: "Remove chart" }).click();
+  await expect(list).toHaveCount(1);
+  // no pattern info instructions: that box can't be ticked
+  await expect(dialog.getByRole("checkbox", { name: /Instructions/ })).toBeDisabled();
+  const download = page.waitForEvent("download");
+  await dialog.getByRole("button", { name: "Download PDF" }).click();
+  await download;
+  await exportAction(page, "PDF chart to print");
+  await expect(page.getByRole("dialog", { name: "Print" }).getByTestId("print-cell")).toHaveValue("8");
+});
+
+test("New ▸ From a PDF chart… says first what it is; this app's PDF comes back as the same pattern, a new one; another PDF can't be read (SPEC §15.46)", async ({ page }) => {
+  await exportAction(page, "PDF chart to print");
+  const download = page.waitForEvent("download");
+  await page.getByRole("dialog", { name: "Print" }).getByRole("button", { name: "Download PDF" }).click();
   const pdf = (await (await download).path())!;
   const content = "(ed) => JSON.stringify({ name: ed.doc.name, key: ed.doc.key, customs: ed.doc.customs, stitches: [...ed.doc.layers.stitches], beads: [...ed.doc.layers.beads], lines: ed.doc.layers.segments })";
   const before = await editorState<string>(page, content), id = await editorState<string>(page, "(ed) => ed.doc.id");

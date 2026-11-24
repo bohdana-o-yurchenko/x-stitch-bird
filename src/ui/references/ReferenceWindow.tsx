@@ -276,11 +276,11 @@ export function ReferenceWindow({ data }: { data: RefWindowData }) {
         <>
           {data.pdf && data.pdf.pages > 1 && (
             <div className={s.pages} data-testid="ref-pages">
-              <button type="button" className={s.hbtn} disabled={data.pdf.page <= 1} title={t("references.prevPage")} aria-label={t("references.prevPage")} onClick={() => void ed.references.showPage(data.id, data.pdf!.page - 1)}>‹</button>
+              <button type="button" className={ui.pager} disabled={data.pdf.page <= 1} title={t("references.prevPage")} aria-label={t("references.prevPage")} onClick={() => void ed.references.showPage(data.id, data.pdf!.page - 1)}>‹</button>
               <select className={s.pageSelect} aria-label={t("references.page")} value={data.pdf.page} onChange={(e) => void ed.references.showPage(data.id, Number(e.target.value))}>
                 {Array.from({ length: data.pdf.pages }, (_, i) => <option key={i} value={i + 1}>{t("references.pageOf", { page: i + 1, pages: data.pdf!.pages })}</option>)}
               </select>
-              <button type="button" className={s.hbtn} disabled={data.pdf.page >= data.pdf.pages} title={t("references.nextPage")} aria-label={t("references.nextPage")} onClick={() => void ed.references.showPage(data.id, data.pdf!.page + 1)}>›</button>
+              <button type="button" className={ui.pager} disabled={data.pdf.page >= data.pdf.pages} title={t("references.nextPage")} aria-label={t("references.nextPage")} onClick={() => void ed.references.showPage(data.id, data.pdf!.page + 1)}>›</button>
             </div>
           )}
           <div className={s.bar}>

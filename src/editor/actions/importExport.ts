@@ -4,7 +4,9 @@ import { exportCsv } from "@/core/formats/csv/exportCsv";
 import { NewerFileError, parsePattern } from "@/core/formats/json/parse";
 import { serializePattern, XBIRD_VERSION, type FileVersion, type PatternFile } from "@/core/formats/json/serialize";
 import { exportOxs } from "@/core/formats/oxs/exportOxs";
-import { chartPdf } from "@/core/formats/pdf/chartPdf";
+import { chartPdf, planChartPdf } from "@/core/formats/pdf/chartPdf";
+import type { CanvasLike } from "@/core/formats/pdf/pdfCanvas";
+import type { PrintOptions } from "@/core/formats/pdf/printOptions";
 import { checkPatternKeeper, patternKeeperPdf, type PdfFonts } from "@/core/formats/pdf/patternKeeper";
 import { patternFromAttachments } from "@/core/formats/pdf/patternAttachment";
 import { SYMBOL_INKS, symbolColours } from "@/core/formats/pdf/symbolColours";
@@ -33,6 +35,7 @@ import { accountPatternApi } from "@/persistence";
 import type { Editor } from "../createEditor";
 import type { SamePatternChoice, UnmatchedChoice } from "../store/editorStore";
 import { loadPattern } from "./pattern";
+import { savePrintOptions } from "../printOptions";
 
 /** "pattern": our own file — the pattern, key, reference windows and underlay, as text in a `.xbird` file. */
 export type ExportFormat = "png-both" | "png-symbols" | "png-symbols-ink" | "png-color" | "png-stitched" | "csv" | "oxs" | "pattern";
@@ -118,12 +121,44 @@ export async function exportPatternKeeper(ed: Editor, confirmed = false) {
   await offerPdf(ed, `${safeName(p)}-pattern-keeper.pdf`, (fonts) => patternKeeperPdf(p, report, { fonts }));
 }
 
-/** The PDF chart to print and read (SPEC §15.10b): symbols, symbols on colour, colour with backstitch, the key. */
-export async function exportChartPdf(ed: Editor) {
+/** The PDF chart to print and read (SPEC §15.10b) as these print settings make it (§15.10c). */
+function chartOptions(ed: Editor, print: PrintOptions) {
+  // backstitch in the screen's own line styles
+  return { t: ed.t, print, lineStyle: (g: CanvasLike, x1: number, y1: number, x2: number, y2: number, w: number, u: number, sym: string) => strokeLineStyle(g as unknown as Ctx, x1, y1, x2, y2, w, u, sym) };
+}
+
+/** The file planned, nothing drawn: the page count and each chart's pages, for the Print dialog. */
+export const chartPdfPlan = (ed: Editor, print: PrintOptions) => planChartPdf(ed.doc, chartOptions(ed, print));
+
+/** The fonts, loaded once for the previews (the file itself loads them again, so a failure there is its own). */
+let previewFonts: Promise<PdfFonts> | null = null;
+
+/** One page of the PDF chart, as a PDF of its own: the Print dialog's preview (page from 1). */
+export async function chartPdfPage(ed: Editor, print: PrintOptions, page: number): Promise<Uint8Array> {
+  const fonts = await (previewFonts ??= pdfFonts().catch((e) => ((previewFonts = null), Promise.reject(e))));
+  return chartPdf(ed.doc, { ...chartOptions(ed, print), fonts, only: page });
+}
+
+/**
+ * The PDF chart to print (SPEC §15.10b, §15.10c): without settings, the Print dialog opens to choose them; with
+ * them, the file is made — page by page, `progress` told, `signal` cancels — saved, and the settings remembered.
+ * Says "done", "cancelled" or "failed".
+ */
+export async function exportChartPdf(ed: Editor, print?: PrintOptions, run: { progress?: (done: number, total: number) => void; signal?: AbortSignal } = {}): Promise<"done" | "cancelled" | "failed" | void> {
   const p = ed.doc;
   if (!p.key.some(Boolean)) return ed.toast("toasts.needKeyEmpty");
-  // backstitch in the screen's own line styles
-  await offerPdf(ed, `${safeName(p)}-chart.pdf`, (fonts) => chartPdf(p, { fonts, t: ed.t, lineStyle: (g, x1, y1, x2, y2, w, u, sym) => strokeLineStyle(g as unknown as Ctx, x1, y1, x2, y2, w, u, sym) }));
+  if (!print) return ed.openDialog({ type: "print" });
+  savePrintOptions(print);
+  try {
+    const pdf = await chartPdf(p, { ...chartOptions(ed, print), fonts: await pdfFonts(), onProgress: run.progress, signal: run.signal });
+    offer(ed, `${safeName(p)}-chart.pdf`, new Blob([pdf as BlobPart], { type: "application/pdf" }), "pdf");
+    return "done";
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") return "cancelled";
+    console.error(e);
+    ed.toast("toasts.pdfFailed");
+    return "failed";
+  }
 }
 
 /** Everything a .xbird file holds: the pattern, its reference windows, underlay and versions. */

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { serializePattern, XBIRD_VERSION } from "@/core/formats/json/serialize";
 import { exportOxs } from "@/core/formats/oxs/exportOxs";
+import { DEFAULT_PRINT } from "@/core/formats/pdf/printOptions";
 import { createPattern } from "@/core/pattern/createPattern";
 import { addEntry } from "@/core/pattern/keyEntries";
 import { ALL_SYMBOLS } from "@/core/symbols/symbols";
@@ -110,9 +111,15 @@ describe("PDF exports ask before, and say when they can't", () => {
     expect(downloaded.calls).toHaveLength(0);
   });
 
+  it("the printed chart opens the Print dialog first; its settings make the file", async () => {
+    await io.exportChartPdf(ed);
+    expect(ed.state.dialog).toMatchObject({ type: "print" });
+    expect(downloaded.calls).toHaveLength(0);
+  });
+
   it("a PDF that can't be made (fonts unreachable) is a message, not a crash or a half file", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("offline"); }));
-    await io.exportChartPdf(ed);
+    await io.exportChartPdf(ed, DEFAULT_PRINT);
     expect(toasts()).toContain("toasts.pdfFailed");
     expect(downloaded.calls).toHaveLength(0);
     vi.unstubAllGlobals();

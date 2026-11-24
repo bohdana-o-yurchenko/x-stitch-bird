@@ -1,4 +1,6 @@
+import { calculator } from "../../calculator/registry";
 import { computeUsage, entryCount, partialCount } from "../../calculator/usage";
+import { brandCode } from "../../catalog/catalog";
 import { shade } from "../../color/colorMath";
 import type { EntryKindId, KeyIndex } from "../../pattern/types";
 import { formatLabel, labelData, type Translate } from "../../labels/keyLabel";
@@ -11,24 +13,28 @@ import { DEFAULT_LINE_INK, LINE_INKS } from "../../symbols/lineInks";
 import { shapeSymbol } from "../../symbols/shapes";
 import { SYMBOL_FONT, SYMBOL_GLYPHS } from "../../symbols/symbolFont";
 import type { PdfFonts } from "./patternKeeper";
-import { drawFooter, drawGrid, drawRulers, PAGE, type Tile } from "./pdfLayout";
+import { drawFooter, drawGrid, drawHeader, drawRulers, fitText, PAGE, type PageBox, type Tile } from "./pdfLayout";
 import { attachPattern } from "./patternAttachment";
-import { PdfPage, PdfWriter, textWidth } from "./pdfWriter";
+import { PdfPage, PdfWriter, textWidth, type Raster, type Ref } from "./pdfWriter";
 import { PdfCanvas, type CanvasLike } from "./pdfCanvas";
 import { SYMBOL_INKS, symbolColours, type SymbolColour } from "./symbolColours";
 import { svgPathToPdf } from "./svgPath";
+import { MM, pageBox, PLAIN_PRINT, type CellSize, type ChartSpec, type Crosses, type Lines, type PrintOptions } from "./printOptions";
 
 /*
- * The PDF chart to print and read (SPEC §15.10b): a cover with a page map; the symbol chart (black symbols, with
- * red / green / blue where many different symbols are mixed — symbolColours.ts) and its own key; the symbols on
- * their colours; a colour chart in pale colours where backstitch and knots stand out in bright colours, thick, in
- * their line styles; and the full key. A4 portrait, about 40 stitches across; neighbouring pages repeat a few rows
- * or columns, shaded grey on both pages, so the pages can be lined up. Everything is vector: symbols from the
- * embedded symbol font (hand-drawn ones as paths), colours, lines. The text is in the interface language (`t`, the
- * `chartPdf.*` messages; key labels as in the app), in DM Sans with Onest for Cyrillic.
+ * The PDF chart to print and read (SPEC §15.10b, §15.10c): a cover with a page map, the instructions, the materials,
+ * then the charts the Print dialog lists — each in its own colouring of the crosses (black and white; contrast:
+ * black symbols with red / green / blue where many different symbols mix, symbolColours.ts; muted colours; real
+ * colours) and of the backstitch and knots (hidden, black, bright, thread colours), in its own cell size, each
+ * followed by its own key if wanted. Neighbouring pages repeat a few rows or columns, shaded grey on both pages, so
+ * the pages can be lined up. Everything is vector: symbols from the embedded symbol font (hand-drawn ones as paths),
+ * colours, lines. The text is in the interface language (`t`, the `chartPdf.*` messages; key labels as in the app),
+ * in DM Sans with Onest for Cyrillic. Every page but the cover has the name, designer and © at the top and its page
+ * number at the bottom.
+ *
+ * The pages are planned first (cheap: what each is, how many), then drawn — all of them for the file, a few at a
+ * time with a pause between so the page stays responsive; or just one for a preview (`only`).
  */
-
-export type ChartView = "symbols" | "symbolsColour" | "full";
 
 
 /** Stitches across a page, the biggest cell, and how many rows / columns neighbouring pages share. */
@@ -46,13 +52,19 @@ export interface ChartPdfOptions {
   fonts: PdfFonts;
   /** The interface's translations: page texts are `chartPdf.*`, key labels as in the app. */
   t: Translate;
-  /** Rows / columns repeated on neighbouring pages (default 2). */
-  overlap?: number;
   /** Backstitch line styles; without it lines are solid. */
   lineStyle?: LineStyleDraw;
+  /** What goes in and how (the Print dialog); without it, the charts as before the settings. */
+  print?: PrintOptions;
+  /** Only this page (from 1) — for a preview: the others are counted, not drawn. */
+  only?: number;
+  /** After each page made: for a progress bar. */
+  onProgress?: (done: number, total: number) => void;
+  /** Stops making the file (throws an AbortError). */
+  signal?: AbortSignal;
 }
 
-/** Colours the chart pages use beyond the threads' own: symbol inks on the symbol chart, lines and knots on the last. */
+/** Colours the charts use beyond the threads' own: symbol inks on contrast charts, bright lines and knots. */
 interface Accents {
   symbol: Map<KeyIndex, SymbolColour>;
   line: Map<KeyIndex, string>;
@@ -103,9 +115,27 @@ function starts(n: number, per: number, overlap: number): number[] {
   }
 }
 
-export function chartLayout(p: Pattern, overlap = OVERLAP): ChartLayout {
-  const usableW = PAGE.w - PAGE.left - PAGE.right, usableH = PAGE.h - PAGE.top - PAGE.bottom;
-  const cols = Math.min(p.w, COLS), cell = Math.min(MAX_CELL, usableW / cols), rows = Math.min(p.h, Math.floor(usableH / cell));
+/** The cell of "auto": 40 across an A4 page in portrait. */
+const AUTO_CELL = (PAGE.w - PAGE.left - PAGE.right) / COLS;
+
+/**
+ * The chart cut into pages: `cell` in mm or "auto" (about 40 across, bigger for small charts); `reserve` points kept
+ * free under the grid (the key of the page).
+ */
+export function chartLayout(p: Pattern, overlap = OVERLAP, o: { box?: PageBox; cell?: CellSize; reserve?: number } = {}): ChartLayout {
+  const box = o.box ?? PAGE, usableW = box.w - box.left - box.right;
+  let cols: number, cell: number;
+  if (!o.cell || o.cell === "auto") {
+    cols = Math.min(p.w, Math.floor(usableW / AUTO_CELL + 1e-6));
+    cell = Math.min(MAX_CELL, usableW / cols);
+  } else {
+    cell = o.cell * MM;
+    cols = Math.min(p.w, Math.max(1, Math.floor(usableW / cell + 1e-6)));
+  }
+  // at least a few rows, whatever the key under the grid needs
+  const usableH = Math.max(cell * 6, box.h - box.top - box.bottom - (o.reserve ?? 0));
+  const rows = Math.min(p.h, Math.max(1, Math.floor(usableH / cell)));
+  overlap = Math.max(0, Math.min(overlap, cols - 1, rows - 1));
   const xs = starts(p.w, cols, overlap), ys = starts(p.h, rows, overlap);
   const tiles = ys.flatMap((y, row) => xs.map((x, col) => ({ x, y, w: Math.min(cols, p.w - x), h: Math.min(rows, p.h - y), col, row, n: 0 })));
   tiles.forEach((t, i) => (t.n = i + 1));
@@ -177,17 +207,46 @@ function halfBand(dir: "half" | "halfb", d = 0.24): [number, number][] {
     : [[0, 0], [d, 0], [1, 1 - d], [1, 1], [1 - d, 1], [0, d]];
 }
 
-function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayout, t: ChartLayout["tiles"][number], view: ChartView, accents: Accents, draw?: LineStyleDraw) {
-  const { cell } = l, ox = PAGE.left, oy = PAGE.top, colour = view !== "symbols", bold = view === "full";
+/** How one chart paints: from its colouring of the crosses and lines. Shared by its pages and its keys. */
+interface Painter {
+  crosses: Crosses;
+  lines: Lines;
+  /** The cells are coloured (real or muted colours). */
+  colour: boolean;
+  muted: boolean;
+  /** A cell's colour on this chart. */
+  fill: (hex: string) => string;
+  /** A symbol's ink: `own` is the colour's own ink (white on dark). */
+  ink: (k: KeyIndex, s: PaletteSlot, own?: string) => string;
+  /** A backstitch line's or a knot's colour. */
+  line: (k: KeyIndex, s: PaletteSlot) => string;
+  /** Line width for `strands` in a `cell`. */
+  width: (cell: number, strands: number) => number;
+}
+
+function painter(spec: Pick<ChartSpec, "crosses" | "lines">, accents: () => Accents): Painter {
+  const { crosses, lines } = spec, muted = crosses === "muted", colour = muted || crosses === "real";
+  return {
+    crosses, lines, colour, muted,
+    fill: (hex) => (muted ? pale(hex) : hex),
+    ink: (k, s, own = s.ink) => (muted ? PALE_INK : colour ? own : crosses === "contrast" ? SYMBOL_INKS[accents().symbol.get(k) ?? "black"] : INK),
+    line: (k, s) => (lines === "real" ? s.hex : lines === "contrast" ? (accents().line.get(k) ?? INK) : INK),
+    // thick over pale colours; a little thinner over symbols, so they still show
+    width: (cell, strands) => boldWidth(cell, strands) * (muted ? 1 : 0.8),
+  };
+}
+
+const inTileLine = (t: Tile, sg: { x1: number; y1: number; x2: number; y2: number }) =>
+  !(Math.max(sg.x1, sg.x2) < t.x || Math.min(sg.x1, sg.x2) > t.x + t.w || Math.max(sg.y1, sg.y2) < t.y || Math.min(sg.y1, sg.y2) > t.y + t.h);
+const onTile = (t: Tile, x: number, y: number) => x >= t.x && y >= t.y && x <= t.x + t.w && y <= t.y + t.h;
+
+function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayout, t: ChartLayout["tiles"][number], paint: Painter, box: PageBox, draw?: LineStyleDraw) {
+  const { cell } = l, ox = box.left, oy = box.top, { colour, muted, fill, ink } = paint;
   const { stitches, beads, partials, segments, knots } = p.layers;
   const X = (x: number) => ox + (x - t.x) * cell, Y = (y: number) => oy + (y - t.y) * cell;
   const inTile = (x: number, y: number) => x >= t.x && y >= t.y && x < t.x + t.w && y < t.y + t.h;
   const shared = sharedStrips(l, t).map((r) => [X(r.x), Y(r.y), r.w * cell, r.h * cell] as const);
   const symbols = new Symbols();
-  /** Cell colours: the thread's, or pale on the backstitch chart so the lines stand out. */
-  const fill = (hex: string) => (bold ? pale(hex) : hex);
-  /** Symbol ink: red / green / blue / black on the symbol chart, the colour's own ink on colour, grey under lines. */
-  const ink = (k: KeyIndex, s: PaletteSlot, own = s.ink) => (bold ? PALE_INK : colour ? own : SYMBOL_INKS[accents.symbol.get(k) ?? "black"]);
 
   // background: the fabric (colour) or white with the shared cells grey (symbols)
   if (colour) page.rects([[ox, oy, t.w * cell, t.h * cell]], fill(p.fabric));
@@ -205,7 +264,7 @@ function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayo
       } else if (colour) {
         page.polygon(halfBand(s.st).map(([u, v]) => [px + u * cell, py + v * cell]), { fill: hex });
         // the symbol of a half cross sits half on the floss, half on the fabric: dark ink on a small white disc
-        if (!beads[i] && !bold) page.circle(px + cell / 2, py + cell / 2, cell * 0.3, { fill: "#FFFFFF" });
+        if (!beads[i] && !muted) page.circle(px + cell / 2, py + cell / 2, cell * 0.3, { fill: "#FFFFFF" });
       } else halfLines.push(s.st === "half" ? [px, py + cell, px + cell, py] : [px, py, px + cell, py + cell]);
       if (s.t === "combo" && s.bead) page.circle(px + cell * 0.8, py + cell * 0.8, cell * 0.14, colour ? { fill: fill(s.bead.hex), stroke: "#555555", width: 0.3 } : { stroke: "#777777", width: 0.4 });
       // a bead on top shows its own symbol instead
@@ -240,7 +299,7 @@ function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayo
   // beads sewn on grid points: on every chart, like the beads in cells
   for (const kn of knots) {
     const s = palette[kn.k];
-    if (!s || (s.t !== "combo" && s.t !== "bead") || kn.x < t.x || kn.y < t.y || kn.x > t.x + t.w || kn.y > t.y + t.h) continue;
+    if (!s || (s.t !== "combo" && s.t !== "bead") || !onTile(t, kn.x, kn.y)) continue;
     page.circle(X(kn.x), Y(kn.y), cell * 0.3, colour ? { fill: fill(s.bead?.hex ?? s.hex), stroke: "#555555", width: 0.4 } : { fill: "#FFFFFF", stroke: "#777777", width: 0.5 });
     symbols.add(s.sym, X(kn.x), Y(kn.y), cell * 0.55, ink(kn.k, s, s.bead?.ink ?? s.ink));
   }
@@ -248,27 +307,27 @@ function drawChartPage(page: PdfPage, p: Pattern, palette: Palette, l: ChartLayo
   // the shared cells, tinted over the colours so the symbols on them stay crisp
   if (colour && shared.length) {
     page.save();
-    page.opacity(bold ? 0.22 : 0.3);
+    page.opacity(muted ? 0.22 : 0.3);
     page.rects(shared, SHARED_TINT);
     page.restore();
   }
   drawGrid(page, p, t, cell, ox, oy);
   symbols.draw(page);
 
-  // backstitch and knots, on top: bright, thick, in their line styles
-  if (bold) {
+  // backstitch and knots, on top: thick, in their line styles
+  if (paint.lines !== "hidden") {
     page.save();
     page.clipRect(ox, oy, t.w * cell, t.h * cell);
     const lines = segments.flatMap((sg) => {
       const s = palette[sg.k];
-      if (!s || Math.max(sg.x1, sg.x2) < t.x || Math.min(sg.x1, sg.x2) > t.x + t.w || Math.max(sg.y1, sg.y2) < t.y || Math.min(sg.y1, sg.y2) > t.y + t.h) return [];
-      const width = boldWidth(cell, s.n);
-      return [{ x1: X(sg.x1), y1: Y(sg.y1), x2: X(sg.x2), y2: Y(sg.y2), colour: accents.line.get(sg.k) ?? INK, width, unit: styleUnit(cell, width), sym: s.sym }];
+      if (!s || !inTileLine(t, sg)) return [];
+      const width = paint.width(cell, s.n);
+      return [{ x1: X(sg.x1), y1: Y(sg.y1), x2: X(sg.x2), y2: Y(sg.y2), colour: paint.line(sg.k, s), width, unit: styleUnit(cell, width), sym: s.sym }];
     });
     strokeLines(page, lines, draw);
     for (const kn of knots) {
       const s = palette[kn.k];
-      if (s && s.t === "knot" && kn.x >= t.x && kn.y >= t.y && kn.x <= t.x + t.w && kn.y <= t.y + t.h) page.circle(X(kn.x), Y(kn.y), cell * 0.26, { fill: accents.line.get(kn.k) ?? s.hex, stroke: INK, width: 0.7 });
+      if (s && s.t === "knot" && onTile(t, kn.x, kn.y)) page.circle(X(kn.x), Y(kn.y), cell * 0.26, { fill: paint.line(kn.k, s), stroke: INK, width: 0.7 });
     }
     page.restore();
   }
@@ -292,12 +351,7 @@ function drawPageMap(page: PdfPage, p: Pattern, l: ChartLayout, current: number 
   if (numbers) for (const t of l.tiles) page.text("bold", Math.min(14, Math.max(7, t.h * k * 0.25)), x0 + (t.x + t.w / 2) * k, y0 + (t.y + t.h / 2) * k + 4, String(t.n), "centre", 0.25);
 }
 
-const fit = (text: string, size: number, max: number, font: "regular" | "bold" = "regular") => {
-  if (textWidth(text, size, font) <= max) return text;
-  let t = text;
-  while (t.length > 1 && textWidth(`${t}…`, size, font) > max) t = t.slice(0, -1);
-  return `${t}…`;
-};
+const fit = fitText;
 
 interface KeyRow {
   k: KeyIndex;
@@ -307,17 +361,17 @@ interface KeyRow {
   sub: string;
 }
 
-const KEY_ROW = 22, KEY_TOP = 92, KEY_PER_PAGE = Math.floor((PAGE.h - KEY_TOP - PAGE.bottom) / KEY_ROW);
-const keyPageCount = (rows: number) => Math.max(1, Math.ceil(rows / KEY_PER_PAGE));
+const KEY_ROW = 22, KEY_TOP = 92;
+const perPage = (box: PageBox, top = KEY_TOP) => Math.floor((box.h - top - box.bottom) / KEY_ROW);
+const pagesFor = (rows: number, box: PageBox, top = KEY_TOP) => Math.max(1, Math.ceil(rows / perPage(box, top)));
 
-/** Key pages: each row an icon (drawn by `icon` in a 16 pt square), brand and number, details, count. */
 /** One line of text broken into lines of at most `max` points. */
-function wrap(text: string, size: number, max: number): string[] {
+function wrap(text: string, size: number, max: number, font: "regular" | "bold" = "regular"): string[] {
   const out: string[] = [];
   let line = "";
   for (const word of text.split(" ")) {
     const next = line ? `${line} ${word}` : word;
-    if (line && textWidth(next, size) > max) {
+    if (line && textWidth(next, size, font) > max) {
       out.push(line);
       line = word;
     } else line = next;
@@ -325,143 +379,430 @@ function wrap(text: string, size: number, max: number): string[] {
   return line ? [...out, line] : out;
 }
 
-async function addKey(pdf: PdfWriter, p: Pattern, tr: Translate, title: string, note: string, rows: KeyRow[], icon: (page: PdfPage, symbols: Symbols, r: KeyRow, x: number, y: number, size: number) => void) {
-  const name = p.name || "Pattern", pages = keyPageCount(rows.length);
-  for (let n = 0; n < pages; n++) {
-    const page = new PdfPage(PAGE.w, PAGE.h), L = PAGE.left, R = PAGE.w - PAGE.right, S = 16, symbols = new Symbols();
-    page.text("bold", 10, L, 24, fit(name, 10, 400, "bold"));
-    page.text("regular", 8, L, 36, `${title} · ${tr("chartPdf.pageOf", { n: n + 1, total: pages })}`, "left", 0.35);
-    wrap(note, 9, R - L).slice(0, 2).forEach((line, i) => page.text("regular", 9, L, 56 + i * 12, line, "left", 0.3));
-    page.lines([[L, KEY_TOP - 10, R, KEY_TOP - 10]], 0.6);
-    rows.slice(n * KEY_PER_PAGE, (n + 1) * KEY_PER_PAGE).forEach((r, i) => {
-      const y = KEY_TOP + i * KEY_ROW, base = y + 11.5;
-      icon(page, symbols, r, L, y, S);
-      page.rect(L, y, S, S, { stroke: 0.45, width: 0.4 });
-      page.text("bold", 9.5, L + 26, base, fit(r.title, 9.5, 150, "bold"));
-      page.text("regular", 9, L + 182, base, fit(r.sub, 9, R - L - 182 - 80), "left", 0.2);
-      page.text("regular", 9, R, base, tr(`chartPdf.unit.${r.t}`, { count: r.count }), "right");
-      page.lines([[L, y + KEY_ROW - 3, R, y + KEY_ROW - 3]], 0.3, 0.8);
-    });
-    symbols.draw(page);
-    drawFooter(page, tr("chartPdf.footer", { app: "{app}", url: "{url}" }), tr("app.url"), tr("app.glory"));
-    await pdf.addPage(page);
-  }
+/** Draws a key row's icon in an `S` square at (x, y). */
+type Icon = (page: PdfPage, symbols: Symbols, r: KeyRow, x: number, y: number, S: number) => void;
+
+/** A key row's icon as the chart shows it: the cell (colour, symbol in its ink), the bead, the line, the knot. */
+function iconFor(paint: Painter, palette: Palette, fabric: string, draw?: LineStyleDraw): Icon {
+  return (page, symbols, r, x, y, S) => {
+    const s = palette[r.k]!, cx = x + S / 2, cy = y + S / 2, { colour, fill, ink } = paint;
+    if (r.t === "back") {
+      page.rect(x, y, S, S, { fill: "#FFFFFF" });
+      const width = boldWidth(S, s.n) * 0.6;
+      strokeLines(page, [{ x1: x + 2, y1: y + S - 2, x2: x + S - 2, y2: y + 2, colour: paint.line(r.k, s), width, unit: styleUnit(S * 0.8, width), sym: s.sym }], draw);
+    } else if (r.t === "knot") {
+      page.rect(x, y, S, S, { fill: "#FFFFFF" });
+      page.circle(cx, cy, S * 0.27, { fill: paint.line(r.k, s), stroke: INK, width: 0.6 });
+    } else if (r.t === "bead" || s.st === "point") {
+      // a bead, in a cell or on a grid point
+      page.rect(x, y, S, S, { fill: colour ? fill(fabric) : "#FFFFFF" });
+      page.circle(cx, cy, S * 0.42, colour ? { fill: fill(s.bead?.hex ?? s.hex), stroke: "#555555", width: 0.4 } : { fill: "#FFFFFF", stroke: "#777777", width: 0.5 });
+      symbols.add(s.sym, cx, cy, S * 0.72, ink(r.k, s, s.bead?.ink ?? s.ink));
+    } else {
+      if (s.st === "full") page.rect(x, y, S, S, { fill: colour ? fill(s.hex) : "#FFFFFF" });
+      else if (colour) {
+        page.rect(x, y, S, S, { fill: fill(fabric) });
+        page.polygon(halfBand(s.st).map(([u, v]) => [x + u * S, y + v * S]), { fill: fill(s.hex) });
+        if (!paint.muted) page.circle(cx, cy, S * 0.3, { fill: "#FFFFFF" });
+      } else {
+        page.rect(x, y, S, S, { fill: "#FFFFFF" });
+        page.lines([s.st === "half" ? [x, y + S, x + S, y] : [x, y, x + S, y + S]], 0.6, 0.6);
+      }
+      symbols.add(s.sym, cx, cy, s.st === "full" ? S : S * 0.75, s.st === "full" ? ink(r.k, s) : ink(r.k, s, INK));
+    }
+  };
 }
 
-/** Accent colours: symbol inks for the symbol chart; one bright colour per backstitch, then per knot, entry. */
+/** A key page: rows `from`..`to` of `rows`, each an icon, brand and number, details, count. */
+function drawKeyPage(page: PdfPage, box: PageBox, tr: Translate, note: string, rows: KeyRow[], icon: Icon) {
+  const L = box.left, R = box.w - box.right, S = 16, symbols = new Symbols();
+  wrap(note, 9, R - L).slice(0, 2).forEach((line, i) => page.text("regular", 9, L, 56 + i * 12, line, "left", 0.3));
+  page.lines([[L, KEY_TOP - 10, R, KEY_TOP - 10]], 0.6);
+  rows.forEach((r, i) => {
+    const y = KEY_TOP + i * KEY_ROW, base = y + 11.5;
+    icon(page, symbols, r, L, y, S);
+    page.rect(L, y, S, S, { stroke: 0.45, width: 0.4 });
+    page.text("bold", 9.5, L + 26, base, fit(r.title, 9.5, 150, "bold"));
+    page.text("regular", 9, L + 182, base, fit(r.sub, 9, R - L - 182 - 80), "left", 0.2);
+    page.text("regular", 9, R, base, tr(`chartPdf.unit.${r.t}`, { count: r.count }), "right");
+    page.lines([[L, y + KEY_ROW - 3, R, y + KEY_ROW - 3]], 0.3, 0.8);
+  });
+  symbols.draw(page);
+}
+
+/** The key under each chart page (SPEC §15.10c): the entries the page uses, in rows across it. */
+const MINI = { item: 84, row: 13, icon: 9, gap: 16, text: 7.5 };
+/** Column width of the page key: the longest label fits ("DMC 718 + MH 02084"), at most half the page. */
+const miniItem = (rows: KeyRow[], box: PageBox) =>
+  Math.min((box.w - box.left - box.right) / 2, Math.max(MINI.item, ...rows.map((r) => textWidth(r.title, MINI.text) + MINI.icon + 12)));
+const miniPerRow = (box: PageBox, item: number) => Math.max(1, Math.floor((box.w - box.left - box.right) / item));
+const miniHeight = (count: number, box: PageBox, item: number) => (count ? MINI.gap + Math.ceil(count / miniPerRow(box, item)) * MINI.row : 0);
+
+function drawMiniKey(page: PdfPage, box: PageBox, y: number, rows: KeyRow[], item: number, icon: Icon) {
+  const per = miniPerRow(box, item), symbols = new Symbols(), S = MINI.icon;
+  rows.forEach((r, i) => {
+    const x = box.left + (i % per) * item, top = y + MINI.gap + Math.floor(i / per) * MINI.row;
+    icon(page, symbols, r, x, top, S);
+    page.rect(x, top, S, S, { stroke: 0.45, width: 0.3 });
+    page.text("regular", MINI.text, x + S + 4, top + 7.2, fit(r.title, MINI.text, item - S - 8));
+  });
+  symbols.draw(page);
+}
+
+/** The entries a page of the chart uses: in its cells, its lines and its knots. */
+function entriesOn(p: Pattern, t: Tile): Set<KeyIndex> {
+  const { stitches, beads, partials, segments, knots } = p.layers, out = new Set<KeyIndex>();
+  for (let y = t.y; y < t.y + t.h; y++)
+    for (let x = t.x; x < t.x + t.w; x++) {
+      const i = y * p.w + x;
+      if (stitches[i]) out.add(stitches[i]!);
+      if (beads[i]) out.add(beads[i]!);
+    }
+  for (const [i, list] of partials) {
+    const x = i % p.w, y = (i / p.w) | 0;
+    if (x >= t.x && y >= t.y && x < t.x + t.w && y < t.y + t.h) for (const ps of list) out.add(ps.k);
+  }
+  for (const sg of segments) if (inTileLine(t, sg)) out.add(sg.k);
+  for (const kn of knots) if (onTile(t, kn.x, kn.y)) out.add(kn.k);
+  return out;
+}
+
+/** The pattern has backstitch or French knots — the "lines" a chart can show or hide. */
+export function hasLines(p: Pattern): boolean {
+  return p.layers.segments.length > 0 || p.layers.knots.some((kn) => p.key[kn.k]?.t === "knot");
+}
+
+/** A block of the instructions: a heading, a paragraph line, a bullet, or an empty line. */
+type Block = { kind: "h" | "p" | "b"; text: string } | { kind: "gap" };
+
+/** The instructions text as blocks (SPEC §15.10c): "# " heading, "- " / "• " / "* " bullet, empty line a gap. */
+export function instructionBlocks(text: string): Block[] {
+  const out: Block[] = [];
+  for (const raw of text.replace(/\r\n?/g, "\n").split("\n")) {
+    const line = raw.trim();
+    if (!line) {
+      if (out.length && out[out.length - 1]!.kind !== "gap") out.push({ kind: "gap" });
+    } else if (/^#+\s/.test(line)) out.push({ kind: "h", text: line.replace(/^#+\s+/, "") });
+    else if (/^[-•*]\s/.test(line)) out.push({ kind: "b", text: line.slice(2).trim() });
+    else out.push({ kind: "p", text: line });
+  }
+  while (out.length && out[out.length - 1]!.kind === "gap") out.pop();
+  return out;
+}
+
+/** One line to print on an instructions page. */
+interface InstrLine {
+  font: "regular" | "bold";
+  size: number;
+  x: number;
+  text: string;
+  /** Its baseline. */
+  y: number;
+  bullet?: boolean;
+}
+
+const BODY_TOP = 100, BODY_NEXT_TOP = 66;
+
+/** The instructions laid out into pages of lines. */
+function instructionPages(text: string, box: PageBox): InstrLine[][] {
+  const L = box.left, W = box.w - box.left - box.right, bottom = box.h - box.bottom - 12, lines: (Omit<InstrLine, "y"> & { dy: number })[] = [];
+  for (const b of instructionBlocks(text)) {
+    if (b.kind === "gap") {
+      lines.push({ font: "regular", size: 10, x: L, text: "", dy: 7 });
+      continue;
+    }
+    if (b.kind === "h") wrap(b.text, 12, W, "bold").forEach((t, i) => lines.push({ font: "bold", size: 12, x: L, text: t, dy: i ? 16 : 22 }));
+    else if (b.kind === "b") wrap(b.text, 10, W - 14).forEach((t, i) => lines.push({ font: "regular", size: 10, x: L + 14, text: t, dy: 14, bullet: !i }));
+    else wrap(b.text, 10, W).forEach((t) => lines.push({ font: "regular", size: 10, x: L, text: t, dy: 14 }));
+  }
+  const pages: InstrLine[][] = [[]];
+  let y = BODY_TOP;
+  for (const { dy, ...line } of lines) {
+    if (y + dy > bottom && pages[pages.length - 1]!.length) {
+      pages.push([]);
+      y = BODY_NEXT_TOP;
+    }
+    // a page doesn't start with an empty line, nor with the space above a heading
+    const cur = pages[pages.length - 1]!;
+    if (!cur.length && !line.text) continue;
+    y += cur.length ? dy : 12;
+    cur.push({ ...line, y });
+  }
+  return pages[0]!.length ? pages : [];
+}
+
+/** Accent colours: symbol inks for contrast charts (worked out only when one is printed); bright lines and knots. */
 function accentsFor(p: Pattern): Accents {
   const line = new Map<KeyIndex, string>();
   let n = 0;
   // backstitch in the colour chosen in the key (black unless set); knots each in a vibrant colour of their own
   p.key.forEach((e, k) => e?.t === "back" && line.set(k, e.ink ?? DEFAULT_LINE_INK));
   p.key.forEach((e, k) => e?.t === "knot" && line.set(k, LINE_COLOURS[n++ % LINE_COLOURS.length]!));
-  return { symbol: symbolColours(p), line };
+  let symbol: Map<KeyIndex, SymbolColour> | null = null;
+  return { get symbol() { return (symbol ??= symbolColours(p)); }, line };
 }
 
-export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Array> {
-  const pdf = new PdfWriter();
-  await pdf.embedTextFonts(o.fonts);
-  await pdf.embedSymbolFont(SYMBOL_FONT.name, o.fonts.symbols, Object.values(SYMBOL_GLYPHS));
-  const palette = buildPalette(p), l = chartLayout(p, o.overlap), name = p.name || "Pattern", accents = accentsFor(p), tr = o.t;
-  const view = (v: ChartView) => tr(`chartPdf.views.${v}`), footer = tr("chartPdf.footer", { app: "{app}", url: "{url}" }), url = tr("app.url"), glory = tr("app.glory");
-  const pagesPerView = l.tiles.length;
+/** What a page may need made beforehand: the cover's picture, embedded in the file. */
+interface DrawContext {
+  picture?: Ref;
+}
+
+/** One page of the file: its part of the file (for the contents) and how it's drawn. */
+interface PlannedPage {
+  section: string;
+  draw: (page: PdfPage, ctx: DrawContext) => void;
+  /** It shows the pattern's picture. */
+  picture?: boolean;
+}
+
+/** A chart of the file as planned: its title and pages. */
+export interface PlannedChart {
+  title: string;
+  /** Its chart pages, then its key's. */
+  chartPages: number;
+  keyPages: number;
+}
+
+/** The file planned: every page, without drawing any. */
+export interface ChartPlan {
+  total: number;
+  charts: PlannedChart[];
+  pages: PlannedPage[];
+  box: PageBox;
+}
+
+/**
+ * The pattern as a picture for the cover (SPEC §15.10c): each cell its colour — the bead's, else the stitch's, else
+ * its first partial stitch's, else the fabric — a block of `scale` × `scale` pixels, so a small pattern stays sharp
+ * however a viewer smooths pictures.
+ */
+export function patternPicture(p: Pattern, palette: Palette): Raster & { scale: number } {
+  const scale = Math.max(1, Math.min(16, Math.floor(1600 / Math.max(p.w, p.h)))), W = p.w * scale, H = p.h * scale;
+  const rgb = new Uint8Array(W * H * 3), { stitches, beads, partials } = p.layers;
+  const rgbOf = new Map<string, [number, number, number]>();
+  const parse = (hex: string) => rgbOf.get(hex) ?? rgbOf.set(hex, [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) || 0) as [number, number, number]).get(hex)!;
+  const fabric = parse(p.fabric);
+  for (let y = 0; y < p.h; y++)
+    for (let x = 0; x < p.w; x++) {
+      const i = y * p.w + x, b = palette[beads[i] ?? 0], s = palette[stitches[i] ?? 0], part = palette[partials.get(i)?.[0]?.k ?? 0];
+      const c = b ? parse(b.bead?.hex ?? b.hex) : s && s.st !== "point" ? parse(s.hex) : part ? parse(part.hex) : fabric;
+      for (let dy = 0; dy < scale; dy++) {
+        let at = ((y * scale + dy) * W + x * scale) * 3;
+        for (let dx = 0; dx < scale; dx++, at += 3) rgb.set(c, at);
+      }
+    }
+  return { w: W, h: H, rgb, scale };
+}
+
+/** The chart's title: its crosses, and its lines when the pattern has any and they're shown. */
+export function chartTitle(spec: Pick<ChartSpec, "crosses" | "lines">, tr: Translate, lines = true): string {
+  const crosses = tr(`chartPdf.crosses.${spec.crosses}`);
+  return lines && spec.lines !== "hidden" ? `${crosses} · ${tr(`chartPdf.lines.${spec.lines}`)}` : crosses;
+}
+
+/**
+ * Plans the file (SPEC §15.10c): every page with what it is and how to draw it. Cheap — the page count and the
+ * cover's contents without drawing a page; a 1000 × 1000 chart plans in well under a second.
+ */
+export function planChartPdf(p: Pattern, o: Pick<ChartPdfOptions, "t" | "print" | "lineStyle">): ChartPlan {
+  const print = o.print ?? PLAIN_PRINT, box = pageBox(print), tr = o.t;
+  const palette = buildPalette(p), name = p.name || "Pattern", lined = hasLines(p);
+  let accents: Accents | null = null;
+  const acc = () => (accents ??= accentsFor(p));
+  const byline = [p.meta.designer?.trim(), p.meta.copyright?.trim() && `© ${p.meta.copyright.trim()}`].filter(Boolean).join(" · ");
   const usage = computeUsage(p).perEntry;
   const rows: KeyRow[] = p.key.flatMap((e, k) => {
     const u = usage.get(k), count = entryCount(u) + partialCount(u);
     return e && k && count ? [{ k, t: e.t, count, ...formatLabel(labelData(e, resolveColor(p, e.src)), tr) }] : [];
   });
-  // the symbol chart shows what fills cells; its key lists just those
-  const symbolRows = rows.filter((r) => r.t === "thread" || r.t === "combo" || r.t === "bead");
-  const symbolKeyPages = keyPageCount(symbolRows.length), keyPages = keyPageCount(rows.length);
-  const sections = [
-    { title: view("symbols"), pages: pagesPerView },
-    { title: tr("chartPdf.symbolKey"), pages: symbolKeyPages },
-    { title: view("symbolsColour"), pages: pagesPerView },
-    { title: view("full"), pages: pagesPerView },
-    { title: tr("chartPdf.key"), pages: keyPages },
-  ];
+  const count = Math.floor(p.count) || 14, cm = (n: number) => Math.round((n / count) * 25.4) / 10, inch = (n: number) => Math.round((n / count) * 10) / 10;
+  const pages: PlannedPage[] = [], charts: PlannedChart[] = [];
+  const head = (page: PdfPage, sub: string, max?: number) => drawHeader(page, box, name, byline, sub, max);
 
-  // cover: what the pattern is, what is in the file, how the pages fit together
-  {
-    const page = new PdfPage(PAGE.w, PAGE.h), L = PAGE.left;
-    page.text("bold", 20, L, 70, fit(name, 20, PAGE.w - L - PAGE.right, "bold"));
-    let y = 92;
-    for (const line of [p.meta.designer && tr("chartPdf.designedBy", { name: p.meta.designer }), p.meta.copyright && `© ${p.meta.copyright}`].filter(Boolean) as string[]) {
-      page.text("regular", 10, L, y, line, "left", 0.3);
-      y += 14;
-    }
-    // numbers, so each language writes them its own way (10.9 / 10,9)
-    const count = Math.floor(p.count) || 14, cm = (n: number) => Math.round((n / count) * 25.4) / 10, inch = (n: number) => Math.round((n / count) * 10) / 10;
-    page.text("regular", 10, L, (y += 10), tr("chartPdf.size", { w: p.w, h: p.h, count, cmW: cm(p.w), cmH: cm(p.h), inW: inch(p.w), inH: inch(p.h) }));
-    y += 26;
-    page.text("bold", 11, L, y, tr("chartPdf.inFile"));
-    let at = 2;
-    for (const sec of sections) {
-      page.text("regular", 10, L + 8, (y += 16), sec.title);
-      page.text("regular", 10, L + 250, y, sec.pages > 1 ? tr("chartPdf.pageRange", { from: at, to: at + sec.pages - 1 }) : tr("chartPdf.pageOne", { n: at }), "left", 0.35);
-      at += sec.pages;
-    }
-    y += 30;
-    page.text("bold", 11, L, y, tr("chartPdf.howTitle"));
-    for (const line of wrap(tr("chartPdf.howText", { count: pagesPerView, overlap: l.overlap }), 9, PAGE.w - L - PAGE.right)) page.text("regular", 9, L, (y += 13), line, "left", 0.25);
-    drawPageMap(page, p, l, null, L, y + 16, PAGE.w - L - PAGE.right, PAGE.h - y - 16 - 60, true);
-    drawFooter(page, footer, url, glory);
-    await pdf.addPage(page);
+  // instructions, from Pattern info
+  const instructions = print.instructions && p.meta.instructions?.trim() ? instructionPages(p.meta.instructions, box) : [];
+  instructions.forEach((lines, n) => pages.push({
+    section: tr("chartPdf.instructions"),
+    draw: (page) => {
+      head(page, `${tr("chartPdf.instructions")}${instructions.length > 1 ? ` · ${tr("chartPdf.pageOf", { n: n + 1, total: instructions.length })}` : ""}`);
+      if (!n) page.text("bold", 16, box.left, 76, tr("chartPdf.instructions"));
+      for (const line of lines) {
+        if (line.bullet) page.text("bold", line.size, line.x - 10, line.y, "•");
+        if (line.text) page.text(line.font, line.size, line.x, line.y, line.text, "left", line.font === "bold" ? 0 : 0.1);
+      }
+    },
+  }));
+
+  // materials: the fabric, then what to buy (the shopping list)
+  if (print.materials) {
+    const shop = calculator().calculate({ pattern: p, usage: computeUsage(p), settings: {} });
+    const top = BODY_TOP + 46, per = perPage(box, top), n = pagesFor(shop.lines.length, box, top);
+    for (let i = 0; i < n; i++) pages.push({
+      section: tr("chartPdf.materials"),
+      draw: (page) => {
+        const L = box.left, R = box.w - box.right;
+        head(page, `${tr("chartPdf.materials")}${n > 1 ? ` · ${tr("chartPdf.pageOf", { n: i + 1, total: n })}` : ""}`);
+        page.text("bold", 16, L, 76, tr("chartPdf.materials"));
+        const margin = 5, cut = (stitches: number) => Math.round(cm(stitches) + 2 * margin);
+        page.text("regular", 10, L, BODY_TOP, tr("chartPdf.fabric", { count, cmW: cm(p.w), cmH: cm(p.h), cutW: cut(p.w), cutH: cut(p.h), margin }));
+        for (const [j, note] of shop.notes.entries()) for (const [m, line] of wrap(tr(note), 8.5, R - L).slice(0, 2).entries()) page.text("regular", 8.5, L, BODY_TOP + 16 + j * 22 + m * 11, line, "left", 0.35);
+        page.lines([[L, top - 10, R, top - 10]], 0.6);
+        shop.lines.slice(i * per, (i + 1) * per).forEach((l, r) => {
+          const y = top + r * KEY_ROW, base = y + 11.5;
+          page.rect(L, y, 16, 16, { fill: l.item.hex, stroke: 0.45, width: 0.4 });
+          page.text("bold", 9.5, L + 26, base, fit(brandCode(l.item), 9.5, 150, "bold"));
+          page.text("regular", 9, L + 182, base, fit(l.item.name, 9, R - L - 182 - 80), "left", 0.2);
+          page.text("regular", 9, R, base, tr(`csv.unit.${l.unit}`, { n: l.quantity }), "right");
+          page.lines([[L, y + KEY_ROW - 3, R, y + KEY_ROW - 3]], 0.3, 0.8);
+        });
+      },
+    });
   }
 
-  const chartPages = async (v: ChartView) => {
-    for (const t of l.tiles) {
-      const page = new PdfPage(PAGE.w, PAGE.h);
-      page.text("bold", 10, PAGE.left, 24, fit(name, 10, 330, "bold"));
-      page.text("regular", 8, PAGE.left, 36, `${view(v)} · ${tr("chartPdf.pageOf", { n: t.n, total: pagesPerView })} · ${tr("chartPdf.cells", { x1: t.x + 1, x2: t.x + t.w, y1: t.y + 1, y2: t.y + t.h, w: p.w, h: p.h })}`, "left", 0.35);
-      if (l.tiles.length > 1) drawPageMap(page, p, l, t.n, PAGE.w - PAGE.right - 70, 10, 70, 34, false);
-      drawRulers(page, p, t, l.cell, PAGE.left, PAGE.top);
-      drawChartPage(page, p, palette, l, t, v, accents, o.lineStyle);
-      drawFooter(page, footer, url, glory);
-      await pdf.addPage(page);
+  // the charts, each with its own layout, colouring and key
+  const layouts: ChartLayout[] = [];
+  for (const spec of print.charts) {
+    const paint = painter(spec, acc), icon = iconFor(paint, palette, p.fabric, o.lineStyle);
+    const shows = (r: KeyRow) => r.t === "thread" || r.t === "combo" || r.t === "bead" || (paint.lines !== "hidden" && lined);
+    const chartRows = rows.filter(shows), title = chartTitle(spec, tr, lined);
+    // with a key under each page: room for the most any page needs (found again as the pages change)
+    const rowsOn = (t: Tile) => {
+      const used = entriesOn(p, t);
+      return chartRows.filter((r) => used.has(r.k));
+    };
+    const item = miniItem(chartRows, box);
+    let reserve = 0, l = chartLayout(p, spec.overlap, { box, cell: spec.cell });
+    for (let i = 0; spec.pageKey && i < 4; i++) {
+      const need = Math.max(0, ...l.tiles.map((t) => miniHeight(rowsOn(t).length, box, item)));
+      if (need <= reserve) break;
+      reserve = need;
+      l = chartLayout(p, spec.overlap, { box, cell: spec.cell, reserve });
     }
-  };
+    layouts.push(l);
+    const R = box.w - box.right, n = l.tiles.length;
+    for (const t of l.tiles) pages.push({
+      section: title,
+      draw: (page) => {
+        head(page, `${title} · ${tr("chartPdf.pageOf", { n: t.n, total: n })} · ${tr("chartPdf.cells", { x1: t.x + 1, x2: t.x + t.w, y1: t.y + 1, y2: t.y + t.h, w: p.w, h: p.h })}`, R - box.left - 80);
+        if (n > 1) drawPageMap(page, p, l, t.n, R - 70, 10, 70, 34, false);
+        drawRulers(page, p, t, l.cell, box.left, box.top);
+        drawChartPage(page, p, palette, l, t, paint, box, o.lineStyle);
+        if (spec.pageKey) drawMiniKey(page, box, box.top + t.h * l.cell, rowsOn(t), item, icon);
+      },
+    });
+    // its key, straight after it
+    let keyPages = 0;
+    if (spec.key) {
+      const keyTitle = tr("chartPdf.keyFor", { chart: title }), per = perPage(box);
+      keyPages = pagesFor(chartRows.length, box);
+      const note = [spec.crosses === "contrast" ? tr("chartPdf.symbolKeyNote") : "", tr("chartPdf.keyNote", { count, w: p.w, h: p.h })].filter(Boolean).join(" ");
+      for (let i = 0; i < keyPages; i++) pages.push({
+        section: keyTitle,
+        draw: (page) => {
+          head(page, `${keyTitle} · ${tr("chartPdf.pageOf", { n: i + 1, total: keyPages })}`);
+          drawKeyPage(page, box, tr, note, chartRows.slice(i * per, (i + 1) * per), icon);
+        },
+      });
+    }
+    charts.push({ title, chartPages: n, keyPages });
+  }
 
-  // 1. the symbol chart and its own key: the symbols in the inks the chart uses
-  await chartPages("symbols");
-  await addKey(pdf, p, tr, tr("chartPdf.symbolKey"), tr("chartPdf.symbolKeyNote"), symbolRows, (page, symbols, r, x, y, S) => {
-    const s = palette[r.k]!, inkFor = SYMBOL_INKS[accents.symbol.get(r.k) ?? "black"], cx = x + S / 2, cy = y + S / 2;
-    page.rect(x, y, S, S, { fill: "#FFFFFF" });
-    if (r.t === "bead" || s.st === "point") page.circle(cx, cy, S * 0.42, { fill: "#FFFFFF", stroke: "#777777", width: 0.5 });
-    else if (s.st !== "full") page.lines([s.st === "half" ? [x, y + S, x + S, y] : [x, y, x + S, y + S]], 0.6, 0.6);
-    symbols.add(s.sym, cx, cy, r.t === "bead" || s.st === "point" ? S * 0.72 : s.st === "full" ? S : S * 0.75, inkFor);
-  });
-
-  // 2 and 3: on colour, and pale colour with the lines
-  await chartPages("symbolsColour");
-  await chartPages("full");
-
-  // the full key: thread colours; backstitch and knots in the bright colours and line styles of the last chart
-  await addKey(pdf, p, tr, tr("chartPdf.key"), tr("chartPdf.keyNote", { count: Math.floor(p.count) || 14, w: p.w, h: p.h }), rows, (page, symbols, r, x, y, S) => {
-    const s = palette[r.k]!, cx = x + S / 2, cy = y + S / 2;
-    if (r.t === "back") {
-      page.rect(x, y, S, S, { fill: "#FFFFFF" });
-      const width = boldWidth(S, s.n) * 0.6;
-      strokeLines(page, [{ x1: x + 2, y1: y + S - 2, x2: x + S - 2, y2: y + 2, colour: accents.line.get(r.k) ?? INK, width, unit: styleUnit(S * 0.8, width), sym: s.sym }], o.lineStyle);
-    } else if (r.t === "knot") {
-      page.rect(x, y, S, S, { fill: "#FFFFFF" });
-      page.circle(cx, cy, S * 0.27, { fill: accents.line.get(r.k) ?? s.hex, stroke: INK, width: 0.6 });
-    } else if (r.t === "bead" || s.st === "point") {
-      // a bead, in a cell or on a grid point
-      page.rect(x, y, S, S, { fill: p.fabric });
-      page.circle(cx, cy, S * 0.42, { fill: s.bead?.hex ?? s.hex, stroke: "#555555", width: 0.4 });
-      symbols.add(s.sym, cx, cy, S * 0.72, s.bead?.ink ?? s.ink);
-    } else {
-      if (s.st === "full") page.rect(x, y, S, S, { fill: s.hex });
-      else {
-        page.rect(x, y, S, S, { fill: p.fabric });
-        page.polygon(halfBand(s.st).map(([u, v]) => [x + u * S, y + v * S]), { fill: s.hex });
-        page.circle(cx, cy, S * 0.3, { fill: "#FFFFFF" });
+  // contents, first (the cover goes before it): what is on which page, how the chart pages fit together
+  if (print.contents) pages.unshift({
+    section: tr("chartPdf.contents"),
+    draw: (page) => {
+      const L = box.left, W = box.w - L - box.right;
+      head(page, tr("chartPdf.contents"));
+      page.text("bold", 16, L, 76, tr("chartPdf.contents"));
+      let y = 88;
+      // each run of pages of one part
+      const parts: { title: string; from: number; to: number }[] = [];
+      // (drawn once the file is planned: the cover and this page are in the list, not in the contents)
+      pages.forEach((pg, i) => {
+        const last = parts[parts.length - 1], n = i + 1;
+        if (pg.section === tr("chartPdf.cover") || pg.section === tr("chartPdf.contents")) return;
+        if (last && last.title === pg.section && last.to === n - 1) last.to = n;
+        else parts.push({ title: pg.section, from: n, to: n });
+      });
+      for (const part of parts.slice(0, 20)) {
+        page.text("regular", 10, L + 8, (y += 16), fit(part.title, 10, 300));
+        page.text("regular", 10, L + 320, y, part.to > part.from ? tr("chartPdf.pageRange", { from: part.from, to: part.to }) : tr("chartPdf.pageOne", { n: part.from }), "left", 0.35);
       }
-      symbols.add(s.sym, cx, cy, s.st === "full" ? S : S * 0.75, s.st === "full" ? s.ink : INK);
-    }
+      const l = layouts[0];
+      if (l) {
+        y += 30;
+        page.text("bold", 11, L, y, tr("chartPdf.howTitle"));
+        const how = l.overlap ? tr("chartPdf.howText", { count: l.tiles.length, overlap: l.overlap }) : tr("chartPdf.howTextNoOverlap", { count: l.tiles.length });
+        for (const line of wrap(how, 9, W)) page.text("regular", 9, L, (y += 13), line, "left", 0.25);
+        drawPageMap(page, p, l, null, L, y + 16, W, Math.max(60, box.h - y - 16 - 60), true);
+      }
+    },
   });
-  // the pattern itself, to read back exactly (SPEC §15.46)
-  await attachPattern(pdf, p);
-  return pdf.build({ title: name, producer: "ptashechka" });
+
+  // the cover: the name, designer and ©, the pattern's picture as large as the page allows, its size
+  if (print.cover) pages.unshift({
+    section: tr("chartPdf.cover"),
+    picture: true,
+    draw: (page, ctx) => {
+      const L = box.left, W = box.w - L - box.right;
+      let y = 84;
+      for (const line of wrap(name, 26, W, "bold").slice(0, 2)) {
+        page.text("bold", 26, L, y, line);
+        y += 32;
+      }
+      for (const line of [p.meta.designer && tr("chartPdf.designedBy", { name: p.meta.designer }), p.meta.copyright && `© ${p.meta.copyright}`].filter(Boolean) as string[]) {
+        page.text("regular", 12, L, y, fit(line, 12, W), "left", 0.3);
+        y += 17;
+      }
+      // the picture, centred in what's left above the size line, its cells square
+      const top = y + 14, bottom = box.h - box.bottom - 40, k = Math.min(W / p.w, (bottom - top) / p.h);
+      const pw = p.w * k, ph = p.h * k, px = L + (W - pw) / 2, py = top + (bottom - top - ph) / 2;
+      if (ctx.picture !== undefined) page.image(ctx.picture, px, py, pw, ph);
+      // backstitch and knots over it, in their thread colours
+      const lines = p.layers.segments.flatMap((sg) => {
+        const s = palette[sg.k];
+        return s ? [{ x1: px + sg.x1 * k, y1: py + sg.y1 * k, x2: px + sg.x2 * k, y2: py + sg.y2 * k, colour: s.hex, width: Math.max(0.3, k * 0.18), unit: k, sym: "" }] : [];
+      });
+      strokeLines(page, lines);
+      for (const kn of p.layers.knots) {
+        const s = palette[kn.k];
+        if (s?.t === "knot") page.circle(px + kn.x * k, py + kn.y * k, Math.max(0.4, k * 0.25), { fill: s.hex });
+      }
+      page.rect(px, py, pw, ph, { stroke: 0.6, width: 0.6 });
+      page.text("regular", 10, box.w / 2, bottom + 24, tr("chartPdf.size", { w: p.w, h: p.h, count, cmW: cm(p.w), cmH: cm(p.h), inW: inch(p.w), inH: inch(p.h) }), "centre", 0.3);
+    },
+  });
+  return { total: pages.length, charts, pages, box };
+}
+
+/** The pause between pages while making a big file: the page stays responsive, a progress bar moves. */
+const pause = () => new Promise<void>((done) => setTimeout(done, 0));
+
+export async function chartPdf(p: Pattern, o: ChartPdfOptions): Promise<Uint8Array> {
+  const plan = planChartPdf(p, o), { box } = plan, tr = o.t;
+  const footer = tr("chartPdf.footer", { app: "{app}", url: "{url}" }), url = tr("app.url"), glory = tr("app.glory");
+  const pdf = new PdfWriter();
+  await pdf.embedTextFonts(o.fonts);
+  await pdf.embedSymbolFont(SYMBOL_FONT.name, o.fonts.symbols, Object.values(SYMBOL_GLYPHS));
+  const wanted = o.only ? [Math.min(Math.max(1, o.only), plan.total)] : plan.pages.map((_, i) => i + 1);
+  // the cover's picture, made once when a page to make shows it
+  const ctx: DrawContext = {};
+  if (wanted.some((n) => plan.pages[n - 1]!.picture)) ctx.picture = await pdf.image(patternPicture(p, buildPalette(p)));
+  let done = 0, since = performance.now();
+  for (const n of wanted) {
+    if (o.signal?.aborted) throw new DOMException("The PDF was cancelled", "AbortError");
+    const page = new PdfPage(box.w, box.h);
+    plan.pages[n - 1]!.draw(page, ctx);
+    drawFooter(page, footer, url, glory, box, `${n} / ${plan.total}`);
+    await pdf.addPage(page);
+    o.onProgress?.(++done, wanted.length);
+    // a pause every ~50 ms of work
+    if (performance.now() - since > 50) {
+      await pause();
+      since = performance.now();
+    }
+  }
+  // the pattern itself, to read back exactly (SPEC §15.46) — not in a one-page preview
+  if (!o.only) await attachPattern(pdf, p);
+  return pdf.build({ title: p.name || "Pattern", producer: "ptashechka" });
 }

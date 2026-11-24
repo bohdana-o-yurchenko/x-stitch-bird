@@ -43,6 +43,7 @@ export type DialogRequest =
   | { type: "mirrorFromCentre" }
   | { type: "extendCanvas" }
   | { type: "replaceKey" }
+  | { type: "print" }
   | { type: "dropChoice"; file: File }
   /** Signed in, a photo that doesn't fit in the account's room for photos (SPEC §15.35). */
   | { type: "photoRoom"; used: number; max: number; size: number }

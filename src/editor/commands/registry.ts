@@ -12,6 +12,7 @@ import type { GridNumbering, KeyIndex, PatternMeta } from "@/core/pattern/types"
 import type { ChartView } from "@/render/chart";
 import { pickFile } from "@/platform/files";
 import { clearAmbiguous, nextAmbiguous, toggleAmbiguous } from "../actions/ambiguous";
+import type { PrintOptions } from "@/core/formats/pdf/printOptions";
 import { exportAs, exportChartPdf, exportPatternKeeper, handleDrop, loadFile, loadPdfPattern, openFromLibrary, openImageDialog, saveToLibrary, type ExportFormat } from "../actions/importExport";
 import { deleteEntry, usageCount } from "../actions/keyEntries";
 import { newPattern, resize, setPatternSettings } from "../actions/pattern";
@@ -85,7 +86,8 @@ export const COMMANDS: readonly Command[] = [
   { id: "file.versions", run: (ed) => ed.showSection("versions") },
   { id: "file.export", run: (ed, f) => exportAs(ed, f as ExportFormat) },
   { id: "file.exportPatternKeeper", run: (ed, confirmed) => exportPatternKeeper(ed, confirmed === true) },
-  { id: "file.exportChartPdf", run: (ed) => exportChartPdf(ed) },
+  // the Print dialog first; with its settings, the file (SPEC §15.10c)
+  { id: "file.exportChartPdf", run: (ed, print) => exportChartPdf(ed, print as PrintOptions | undefined) },
   // the work file: what it is — and that the .oxs is another thing — said before it's saved (SPEC §15.45)
   { id: "file.chooseFile", run: (ed) => ed.openDialog({ type: "fileChoice" }) },
   { id: "file.pickToLoad", run: async (ed) => { const f = await pickFile(".xbird"); if (f) await ed.commands.run("file.load", f); } },

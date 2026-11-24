@@ -10,6 +10,7 @@ import { PdfPageDialog } from "./PdfPageDialog";
 import { PdfChartDialog } from "./PdfChartDialog";
 import { NewPatternDialog } from "./NewPatternDialog";
 import { ReplaceKeyDialog } from "./ReplaceKeyDialog";
+import { PrintDialog } from "./PrintDialog";
 import {
   DeleteEntryDialog, DropChoiceDialog, ExtendCanvasDialog, GoToCellDialog, LargePhotoDialog, SamePatternDialog, UnmatchedColoursDialog, FileChoiceDialog, PdfPatternIntroDialog, PdfUnreadableDialog, MirrorFromCentreDialog, PhotoRoomDialog,
   PatternKeeperDialog, ResizeDialog, TextFallbackDialog,
@@ -33,6 +34,7 @@ export function DialogHost() {
     case "mirrorFromCentre": return <MirrorFromCentreDialog onClose={close} />;
     case "extendCanvas": return <ExtendCanvasDialog onClose={close} />;
     case "replaceKey": return <ReplaceKeyDialog onClose={close} />;
+    case "print": return <PrintDialog onClose={close} />;
     case "dropChoice": return <DropChoiceDialog file={d.file} onClose={close} />;
     case "patternKeeper": return <PatternKeeperDialog issues={d.issues} onClose={close} />;
     case "textFallback": return <TextFallbackDialog ext={d.ext} text={d.text} onClose={close} />;

@@ -1151,6 +1151,19 @@ Decisions taken while implementing this plan. Each one lives in the single place
   (third argument: Onest). `drawFooter` (pdfLayout) writes the app-name footer. `PdfPage` draws rectangles, polygons,
   circles, paths, clipping and see-through fills (ExtGState). Editor: `exportChartPdf` / command
   `file.exportChartPdf`; both PDFs load their fonts through `pdfFonts()`.
+- Print settings for that PDF (SPEC §15.10c): `core/formats/pdf/printOptions.ts` — `PrintOptions` is a list of
+  `ChartSpec` (crosses `bw|contrast|muted|real`, lines `hidden|bw|contrast|real`, cell, page key, overlap, key after it)
+  plus cover / instructions / materials and the paper (`pageBox`: A4 / US Letter, landscape); presets; `normalizePrint`
+  for stored settings. `chartPdf.ts` plans first: `planChartPdf` gives every page as `{ section, draw }` and each
+  chart's page counts without drawing (`ChartPlan`); `chartPdf(p, { print, only, onProgress, signal })` draws all of
+  them (pausing every ~50 ms, AbortError when cancelled) or just page `only` for a preview. A chart's look is one
+  `Painter` (fill, symbol ink, line colour, width) used by its pages, the key under each page and its key. Without
+  `print` it is the plain PDF as before the settings (the reader checks use that). `hasLines` says whether the
+  pattern has backstitch or knots. `pdfLayout.ts` has `drawHeader` (name · designer · © on every page but the cover)
+  and the page number in `drawFooter`. Editor: `file.exportChartPdf` with no args opens the `print` dialog;
+  `exportChartPdf(ed, print, { progress, signal })` makes and saves the file; `chartPdfPlan` / `chartPdfPage` serve the
+  dialog; `editor/printOptions.ts` keeps the settings in localStorage (`stitchwork.printOptions`). UI:
+  `ui/dialogs/PrintDialog.tsx`. Opt-in stress test: `PDF_STRESS=1` runs `chartPdf.stress.test.ts` (1000 × 1000).
 
 - Does your app read it? (SPEC §15.51): test charts in `core/readerCheck` — `Painter` builds a chart by sample
   (`layOut` puts them in numbered boxes; `backstitchNumber` / `crossNumber` draw the numbers), `summary.ts` explains
