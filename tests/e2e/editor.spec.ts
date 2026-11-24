@@ -1776,3 +1776,27 @@ test("a PDF behind the chart: its pages one at a time, each where it was placed;
   await expect(select.locator("option:checked")).toHaveText("Page 2 of 3");
   await expect(page.getByTestId("reference-window").getByTestId("ref-pages")).toBeVisible();
 });
+
+test("tip of the day: once the editor is calm, a tip new to this person; Show me points at the place; ☰ brings it back (SPEC §15.60)", async ({ page }) => {
+  await page.evaluate(() => localStorage.setItem("stitchwork.tips", JSON.stringify({ v: 1, since: "2000-01-01", day: null, off: false, offAt: Date.now(), shown: {}, used: { "draw.toggleOverride": [1, 0] } })));
+  await page.reload();
+  const card = page.getByTestId("tip-card");
+  await expect(card).toBeVisible({ timeout: 15_000 });
+  // the most hidden first
+  await expect(card).toHaveAttribute("data-tip", "replace-in-selection");
+  await expect(card.getByTestId("tip-more")).toHaveAttribute("href", "/en/help/draw#replace-in-selection");
+  await card.getByTestId("tip-next").click();
+  // override has been used: its tip is skipped
+  await expect(card).toHaveAttribute("data-tip", "picker");
+  await card.getByTestId("tip-show").click();
+  await expect(page.locator("[class*=ring]")).toHaveCount(1);
+  await card.getByRole("button", { name: "Close" }).click();
+  await expect(card).toHaveCount(0);
+  const state = await editorState<{ day: string; shown: Record<string, number> }>(page, "(ed) => ed.tips.state");
+  expect(Object.keys(state.shown)).toEqual(["replace-in-selection", "picker"]);
+  expect(state.day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  await openAppMenu(page);
+  await page.getByRole("menuitem", { name: /^Tip of the day/ }).click();
+  // the next one not seen yet
+  await expect(card).toHaveAttribute("data-tip", "ambiguous");
+});

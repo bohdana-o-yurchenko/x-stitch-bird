@@ -46,6 +46,11 @@ vi.mock("@/server/pictures", async (orig) => ({
   putPatternPictures: vi.fn(),
   collectPictures: vi.fn(async () => {}),
 }));
+vi.mock("@/server/tips", async (orig) => ({
+  ...(await orig<typeof import("@/server/tips")>()),
+  getTips: vi.fn(async () => null),
+  putTips: vi.fn(async (_u: string, s: unknown) => s),
+}));
 vi.mock("@/server/live", () => ({ checkIn: vi.fn(async () => null), claim: vi.fn(async () => null), release: vi.fn(async () => {}), listVersions: vi.fn(async () => []), getVersions: vi.fn(async () => []), addVersions: vi.fn(async () => false) }));
 
 const ID = `img:${"a".repeat(32)}`;
@@ -68,6 +73,7 @@ const routes: [string, () => Promise<Record<string, Handler>>, string[]][] = [
   ["/api/threads/[id]", () => import("./threads/[id]/route") as never, ["PUT", "DELETE"]],
   ["/api/checks", () => import("./checks/route") as never, ["GET"]],
   ["/api/checks/[id]", () => import("./checks/[id]/route") as never, ["PUT", "DELETE"]],
+  ["/api/tips", () => import("./tips/route") as never, ["GET", "PUT", "POST"]],
 ];
 
 beforeEach(() => {
@@ -277,6 +283,18 @@ describe("pictures and live routes refuse what is not theirs", () => {
     expect(putCheck).toHaveBeenCalledWith("u1", ok);
     vi.mocked(putCheck).mockResolvedValueOnce(false);
     expect((await m.PUT!(req("PUT", ok), ctx({ id: "c1" }))).status).toBe(409);
+  });
+
+  it("tips: only a well-formed state is stored, merged into the account's", async () => {
+    const m = (await import("./tips/route")) as unknown as Record<string, Handler>;
+    const { putTips } = await import("@/server/tips");
+    const ok = { v: 1, since: "2026-11-20", day: null, off: false, offAt: 0, shown: { override: 1 }, used: { "history.undo": [1, 0] } };
+    for (const bad of [{ ...ok, v: 2 }, { ...ok, used: { x: "many" } }, "not json", { ...ok, shown: Object.fromEntries(Array.from({ length: 201 }, (_, i) => [`t${i}`, 1])) }])
+      expect((await m.PUT!(req("PUT", bad), ctx())).status).toBe(400);
+    expect(putTips).not.toHaveBeenCalled();
+    const res = await m.PUT!(req("PUT", ok), ctx());
+    expect(res.status).toBe(200);
+    expect(putTips).toHaveBeenCalledWith("u1", ok);
   });
 
   it("threads: only well-formed own threads are stored", async () => {

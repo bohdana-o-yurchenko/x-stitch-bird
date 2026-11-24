@@ -32,6 +32,7 @@ import type { StampDef } from "@/core/pattern/types";
 import { addOwnStamp } from "@/editor/actions/stamps";
 import { ColourPicker } from "./ColourPicker";
 import s from "./keyEntry.module.css";
+import { HelpLink } from "../../common/HelpLink";
 
 function LineSample({ sym, w, h }: { sym: string; w: number; h: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -171,9 +172,10 @@ function LineInkPicker({ value, onPick }: { value: string; onPick: (hex: string)
 }
 
 /**
- * How a backstitch is placed (ARCHITECTURE-REVIEW §3): a line at a time, or a stamp — a Smyrna cross over one cell or
- * four, or one of one's own — with a way to draw a new one.
+ * How a backstitch is placed (ARCHITECTURE-REVIEW §3): a line at a time, or a stamp of one's own — with a way to draw a
+ * new one. The built-in Smyrna crosses are hidden until they're reworked; an entry that already uses one still shows it.
  */
+const OFFER_BUILT_IN_STAMPS = false;
 function StampChoice({ value, hex, onPick }: { value: string; hex: string; onPick: (id: string) => void }) {
   const t = useTranslations("stamps");
   const ed = useEditor();
@@ -182,7 +184,7 @@ function StampChoice({ value, hex, onPick }: { value: string; hex: string; onPic
   const sample = (stamp?: StampDef): PaletteSlot => ({ hex, ink: "#fff", sym: "line:solid", t: "back", st: "full", n: 2, ...(stamp ? { stamp } : {}) });
   const options = [
     { id: "", name: t("line"), icon: <KeyIcon slot={sample()} size={24} view="color" /> },
-    ...stampDefs(ed.doc).map((d) => ({ id: d.id, name: isBuiltInStamp(d.id) ? t(d.name) : d.name || t("own"), icon: <KeyIcon slot={sample(d)} size={24} view="color" /> })),
+    ...stampDefs(ed.doc).filter((d) => OFFER_BUILT_IN_STAMPS || !isBuiltInStamp(d.id) || d.id === value).map((d) => ({ id: d.id, name: isBuiltInStamp(d.id) ? t(d.name) : d.name || t("own"), icon: <KeyIcon slot={sample(d)} size={24} view="color" /> })),
   ];
   return (
     <div className={s.group} data-testid="stamp-choice">
@@ -311,7 +313,7 @@ export function KeyEntryForm({ edit, duplicate }: { edit?: KeyIndex; duplicate?:
   return (
     <div ref={root} className={s.form} data-shrink role="dialog" aria-label={before ? t("editTitle") : t("addTitle")} data-testid="key-form" data-no-shortcuts>
       <div className={s.formHead}>
-        <h3>{before ? t("editTitle") : t("addTitle")}</h3>
+        <h3>{before ? t("editTitle") : t("addTitle")}<HelpLink to="key#types" /></h3>
         <button type="button" className={ui.iconbtn} title={tr("dialogs.close")} aria-label={tr("dialogs.close")} onClick={close}>✕</button>
       </div>
 

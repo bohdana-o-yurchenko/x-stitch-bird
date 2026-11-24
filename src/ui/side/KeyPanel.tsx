@@ -11,6 +11,7 @@ import { useEntryLabel } from "../i18n/labels";
 import s from "./side.module.css";
 import { useUsage } from "./useUsage";
 import { isPointBead } from "@/core/entryKinds/registry";
+import { HelpLink } from "../common/HelpLink";
 
 const UNIT = { thread: "cell", combo: "cell", bead: "bead", back: "segment", knot: "knot" } as const;
 
@@ -134,9 +135,10 @@ export function KeyPanel() {
     <>
       <div className={s.keyHead}>
         <h3>{t("heading")}</h3>
+        <HelpLink to="key#add" className={s.headHelp} />
         <span className={s.count}>{all.length ? t("count", { count: all.length }) : ""}</span>
         <span className={s.spacer} />
-        <button type="button" className={cx(ui.tool, highlight && ui.on)} title={t("highlight")} aria-label={t("highlight")} aria-pressed={highlight} data-testid="highlight-toggle" onClick={() => run("view.toggleHighlight")}><Icon name="highlight" size={18} /></button>
+        <button type="button" className={cx(ui.tool, highlight && ui.on)} title={t("highlight")} aria-label={t("highlight")} aria-pressed={highlight} data-testid="highlight-toggle" data-guide="highlight" onClick={() => run("view.toggleHighlight")}><Icon name="highlight" size={18} /></button>
         <button type="button" className={cx(ui.btn, ui.sm, ui.primary)} data-guide="add-key" onClick={() => run("key.add")}>{t("add")}</button>
       </div>
       {long && (

@@ -44,7 +44,7 @@ export function ReplaceKeyDialog({ onClose }: { onClose: () => void }) {
   const palette = useEditorState((st) => st.palette);
   const label = useEntryLabel();
   return (
-    <Modal title={t("replaceKeyTitle")} wide onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("replace"), primary: true, disabled: !from || !chosenTo, onClick: replace }]}>
+    <Modal title={t("replaceKeyTitle")} help="draw#replace-in-selection" wide onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("replace"), primary: true, disabled: !from || !chosenTo, onClick: replace }]}>
       {!present.length ? (
         <p className={ui.hint}>{t("replaceNothing")}</p>
       ) : (

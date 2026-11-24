@@ -1,0 +1,396 @@
+/*
+ * The help pages (docs/HELP-PLAN.md): all pages on the left, the page in the middle, its contents on the right — airy,
+ * easy to scan. From 760 px the window itself doesn't scroll: each column scrolls on its own (as Floss and Beads do),
+ * between the bar and the footer, so nothing beside the text moves.
+ */
+.page {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+}
+.top {
+  flex: none;
+  gap: 12px;
+}
+.top a {
+  text-decoration: none;
+}
+.crumb {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 15px;
+}
+.spacer {
+  flex: 1;
+}
+.toEditor {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.layout {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 40px;
+  align-items: stretch;
+}
+/* the page's text: the scroll in the middle */
+.scroll {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 28px 0 64px;
+  scrollbar-width: thin;
+}
+/* a page: its own contents on the right too */
+.withToc {
+  max-width: 1320px;
+  grid-template-columns: 200px minmax(0, 1fr) 230px;
+  gap: 36px;
+}
+.toc {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  margin: 28px 0 16px;
+  padding: 2px 4px 12px 14px;
+  border-left: 1px solid var(--line);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.tocTitle {
+  margin: 0 0 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tocGroup + .tocGroup {
+  margin-top: 14px;
+}
+.tocGroupTitle {
+  margin: 0 0 4px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.toc a {
+  display: block;
+  margin-left: -15px;
+  padding: 4px 0 4px 13px;
+  border-left: 2px solid transparent;
+  color: var(--muted);
+  text-decoration: none;
+}
+.toc a:hover {
+  color: var(--ink);
+}
+.toc a[aria-current="location"] {
+  border-left-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.nav {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 28px 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.navItem {
+  padding: 7px 12px;
+  border-radius: 8px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+  border: 1px solid transparent;
+}
+.navItem:hover {
+  background: var(--surface);
+}
+.navItem[aria-current="page"] {
+  background: var(--panel);
+  border-color: var(--line2);
+  font-weight: 600;
+}
+.navAll {
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.content {
+  max-width: 720px;
+  min-width: 0;
+}
+.kicker {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.title {
+  font-family: var(--font-serif), serif;
+  font-size: 32px;
+  margin: 6px 0 6px;
+}
+.intro {
+  margin: 0 0 28px;
+  color: var(--muted);
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+.group {
+  margin: 0 0 36px;
+}
+.groupTitle {
+  font-family: var(--font-serif), serif;
+  font-size: 20px;
+  margin: 0 0 12px;
+}
+
+/* one question: a card, its answer as short bullets */
+.q {
+  scroll-margin-top: 20px;
+  margin: 0 0 12px;
+  padding: 16px 20px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.q:target {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.qTitle {
+  margin: 0 0 8px;
+  font-size: 16px;
+  line-height: 1.35;
+}
+.qTitle a {
+  color: inherit;
+  text-decoration: none;
+}
+.qTitle a:hover::after {
+  content: " #";
+  color: var(--muted);
+  font-weight: 400;
+}
+.answer {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.6;
+  font-size: 14.5px;
+}
+.answer li + li {
+  margin-top: 4px;
+}
+.ui {
+  font-weight: 600;
+  color: var(--accent);
+}
+.key {
+  display: inline-block;
+  min-width: 1.1em;
+  padding: 0 6px;
+  border: 1px solid var(--line2);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.55;
+  text-align: center;
+  white-space: nowrap;
+}
+.link {
+  color: var(--accent);
+}
+.shot {
+  margin: 14px 0 4px;
+}
+.shot img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+.next {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.next a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.next a:hover {
+  text-decoration: underline;
+}
+
+/* the index: search, then every page with its questions */
+.search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  font-size: 15px;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  margin: 0 0 24px;
+}
+.search:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-color: var(--accent);
+}
+.results {
+  list-style: none;
+  margin: 0 0 28px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.results a {
+  display: block;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+  text-decoration: none;
+}
+.results a:hover {
+  border-color: var(--line2);
+  background: var(--surface);
+}
+.resultPage {
+  display: block;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.noMatch {
+  color: var(--muted);
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+.card {
+  padding: 18px 20px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.cardNum {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.card h2 {
+  font-family: var(--font-serif), serif;
+  font-size: 19px;
+  margin: 2px 0 4px;
+}
+.card h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+.card p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.card ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.card ul a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.card ul a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* no room for the contents on the right: the page alone */
+@media (max-width: 1180px) {
+  .withToc {
+    max-width: 1120px;
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 40px;
+  }
+  .toc {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  /* a phone: one column, the window scrolls as a whole */
+  .page {
+    overflow-y: auto;
+  }
+  .layout,
+  .withToc {
+    flex: 1 0 auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 0 16px;
+  }
+  .scroll {
+    overflow: visible;
+    padding: 18px 0 48px;
+  }
+  /* the pages as a row that scrolls sideways */
+  .nav {
+    padding: 16px 0 4px;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 4px;
+    padding-bottom: 4px;
+  }
+  .navItem {
+    white-space: nowrap;
+  }
+  .navAll {
+    margin-bottom: 0;
+  }
+  .title {
+    font-size: 26px;
+  }
+  .q {
+    padding: 14px 16px 12px;
+  }
+  .crumb {
+    display: none;
+  }
+}

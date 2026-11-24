@@ -9,6 +9,7 @@ import { Icon } from "../common/Icon";
 import { cx, ui } from "../common/widgets";
 import { useEditor, useEditorState } from "../hooks/editor";
 import s from "./header.module.css";
+import { HelpLink } from "../common/HelpLink";
 
 type Row = { label: string; keys: string[] };
 
@@ -122,7 +123,7 @@ export function ShortcutsPanel() {
         pos &&
         createPortal(
           <div className={s.shortcuts} role="dialog" aria-label={t("title")} data-shortcuts data-testid="shortcuts" style={{ top: pos.top, right: pos.right }}>
-            <h3>{t("title")}</h3>
+            <h3>{t("title")}<HelpLink to="app#shortcuts" /></h3>
             <div className={s.shortcutGroups}>
               {groups.map((g) => (
                 <section key={g.title}>

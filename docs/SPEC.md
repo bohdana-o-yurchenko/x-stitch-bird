@@ -7,6 +7,11 @@
 > in exported files **are**.
 >
 > Source locations are given as `index.html:LINE` for the original implementation.
+>
+> **How to read it now (brought up to date 2026-11-24).** This file describes the app as it is — пташечка, the
+> Next.js app. Sections 2–12 started as the old app's description; where the new app differs, the text now says how
+> it works today, and the old app's behaviour is kept only where marked *Old app*. Section 15 adds what the old app
+> never had. Where an early part of §15 was later changed, the later section wins and the early one points to it.
 
 ---
 
@@ -31,6 +36,13 @@ grid of stitches. It supports:
 - Import: native JSON, OXS
 
 No build step, no dependencies other than Google Fonts (Fraunces, DM Sans).
+
+*New app (today):* пташечка, a Next.js app at https://www.x-stitch-bird.app — a landing page at `/uk` and `/en`
+(§15.53), the editor at `/<locale>/editor`. Everything above is still there, plus: partial stitches, French knots,
+special stitches, several thread and bead brands, an image behind the chart with Autofill, selection, chart checks,
+versions, PDF charts (to print, for Pattern Keeper, and read back from other apps), .oxs and Pattern Maker `.xsd`
+import, an optional account (patterns, photos and your own threads on every device), and the Floss and Beads
+catalogue pages. Patterns are stored in IndexedDB and, signed in, in the account (Neon). The native file is `.xbird`.
 
 ---
 
@@ -273,30 +285,33 @@ Brand mark · editable **pattern name** input (change → `P.name`, trimmed, def
 buttons **New**, **Open**, **Save**, **Save to file**, **Load file**, **Image → pattern**, **+ Reference** ·
 view segmented control **Colour / Both / Symbols** (default Both) · **Export ▾** menu.
 
-*New app (2026-11-14):* app name **пташечка** with its icon (`src/app/icon.svg`, also the favicon) · **Menu ▾**
-(the former File menu) · pattern name (`clamp(140px, 13vw, 260px)` wide) · **main toolbar**, in groups:
-undo · redo | override · mirror | draw · eraser · brush size 1–5 | line · rectangle · filled rectangle · fill |
-partial · ¼ ¾ ½ | picker · move view | select · magic wand | **Transform ▾** · then, on the right, **i** (hover or
-click: every keyboard shortcut, grouped, generated from the keymap) · language (UK/EN) · **side panel** toggle (K).
-Brush sizes and partial kinds always stay in place; they are dimmed while the active tool doesn't use them, and
-clicking one switches to Draw (sizes) or Partial (kinds). No Save button (saving is automatic, §9.2; ⌘/Ctrl+S and
-Menu ▸ Save still save at once) and no Check button (§15.4). The view switch moved to
-the zoom control (§4.2). When one row doesn't fit (measured, so it works for every language), the toolbar moves to
-its own centred row under the app bar. **Ukrainian is the default language**: `/` opens `/uk`; the browser language
-is not used; `/en` is English. The File menu groups everything file-related;
-items carry a muted second line saying what they do, and `▸` items open a submenu on hover or click:
-- **New ▸** Blank pattern… · From a picture…
-- Open saved pattern… · Open file from computer… (.xbird/.oxs; older .json still opens)
-  (deleting a saved pattern in that list asks first: the row turns into "Delete *name* from this browser? This can't
-  be undone…" with Cancel / Delete) · **Versions…** (automatic snapshots, §15.7 — no
-  longer inside the Open dialog)
-- Save (in this browser) · Download pattern file (.xbird, §9.7)
-- **Export ▸** chart PNG (colour + symbols / symbols only / colour blocks) · Open Cross Stitch (.oxs — opens in
-  Хрестики and Ruta Stitch) · shopping list (CSV)
-- **Reference pictures ▸** Photo in a floating window… (§11) · Image behind the chart… (§15.15)
-- Pattern info…
+*New app (as of 2026-11-24, `ui/header/Header.tsx`):* one row, left to right:
+`[🐦 пташечка] [Pattern ▾] [name] …toolbar… [Transform ▾] … [⌨] [☰] [👤] [▥]`.
+- **Logo** — signed in, to My patterns (§15.36); signed out, to the landing page (§15.53). The open pattern is saved
+  first.
+- **Pattern ▾** (the pattern as a file, §15.45): **New ▸** Blank pattern… · From a photo… · From an .oxs or .xsd
+  file… · From a PDF chart… — **Open…** (signed in only: goes to My patterns) — **Download work file (.xbird)…** (asks
+  "Work file or .oxs?") · **Open .xbird work file…** — **Export ▸** PDF chart to print · PDF for Pattern Keeper ·
+  Chart images (PNG) ▸ · Preview images (PNG) ▸ · Shopping list (CSV) · Open Cross Stitch file (.oxs). Items carry a
+  muted second line saying what they do; `▸` opens a submenu on hover or click. Versions, Pattern info and the
+  reference pictures are not here: they live in the side panel (§15.32).
+- **Pattern name** (`clamp(140px, 13vw, 260px)` wide): Enter or leaving the field renames.
+- **Toolbar**, in groups: undo · redo | override · mirror | **Autofill** | draw · eraser · brush size 1–5 | line ·
+  rectangle · filled rectangle · fill | partial · ¼ ¾ petite | picker · move | select · magic wand. Brush sizes and
+  partial kinds always stay in place; they are dimmed while the active tool doesn't use them, and clicking one
+  switches to Draw (sizes) or Partial (kinds). ☰ ▸ Toolbar can hide the line/rectangle/fill group and the partial
+  group (§15.25). While the image behind the chart is being edited, the toolbar is greyed out (§15.15).
+- **Transform ▾** — flips, rotations, Mirror from centre… (§15.3).
+- **⌨** — every keyboard shortcut, grouped, generated from the keymap (§15.49).
+- **☰** — Quick start guide · What's new · Does your app read it? — language · theme · Toolbar · Install the app…
+  (laptops) — Something went wrong? · Privacy policy · Source code — Glory to Ukraine.
+- **👤** — Sign in, or the account menu (My patterns · Floss · Beads · Account · Sign out, §15.39, §15.57).
+- **▥** — show / hide the side panel (K).
 
-The separate Export menu and the "Save to file" format dialog are gone (their items are in File ▸ Export).
+No Save button (saving is automatic, §15.25; ⌘/Ctrl+S still saves at once) and no Check button (§15.4). The view
+switch is in the zoom box (§4.2). When one row doesn't fit (measured, so it works for every language), the toolbar
+moves to its own centred row under the app bar. **Ukrainian is the default language**: `/` opens `/uk`; the browser
+language is not used; `/en` is English.
 
 ### 4.2 Stage
 - Full-size `<canvas>` with rulers (§5).
@@ -304,8 +319,12 @@ The separate Export menu and the "Save to file" format dialog are gone (their it
 - **Mini toolbar** (only when side panel collapsed): expand button, active-key icon (click = expand),
   pencil, eraser, picker, pan, override, undo, redo. *New app:* removed — the tools are in the header and the
   panel's toggle is a header button.
-- *New app:* the zoom control also holds the view switch, stacked: **Colour / Both / Symbols** on top, `−` % `+` `⤢`
-  below. Trackpad pinch (Ctrl + small pixel deltas) zooms ~5× faster per delta unit than a mouse wheel notch
+- *New app:* the zoom box, bottom-right, stacked: **Colour / Both / Symbols** on top; below, left to right: the
+  **edit image** toggle (only when there is an image behind the chart, §15.15), the **layers** button (show / hide
+  kinds of stitches, §15.16), `−` % `+`, fit `⤢`.
+- *New app:* other bars over the chart: the **selection bar** (top, while something is selected or pasted — flip,
+  rotate, Clear cells, Replace key…, Crop to selection, Deselect; while pasting Place / Cancel, §15.6), the
+  **Autofill bar** (§15.11) and the **live banner** "Being edited in another window" (§15.40). Trackpad pinch (Ctrl + small pixel deltas) zooms ~5× faster per delta unit than a mouse wheel notch
   (`exp(-0.012·d)` vs `exp(-0.0025·d)`).
 - *New app:* the side panel's width can be dragged at its left edge (280 px … min(720 px, 60 % of the window));
   remembered in this browser; double-click the edge for the default 360 px.
@@ -314,9 +333,10 @@ The separate Export menu and the "Save to file" format dialog are gone (their it
 `Column X · Row Y` (1-based) of hovered cell, labels of what's in that cell (stitch and bead
 `keyLabel`s joined by `  ·  `), fixed hint text (`Space = move · O = override · Esc ends a backstitch line · 1–9 pick key entries · K hides the panel`),
 grid size `W×H`, save status (`Patterns save in this browser` / `…to your account` / `Saved HH:MM`).
-*New app:* starts with the **active key entry** (icon, code, details) — what the brush paints with, visible even with
-the panel hidden. The fixed hint is gone (shortcuts are behind the header's **i**); the underlay edit-mode hint
-still appears while editing the image.
+*New app:* the **active key entry** (icon, code, details — dimmed while Autofill is the tool) · `Column X · Row Y` in
+the chart's own numbering (§15.2) · what is in that cell (stitch, partial stitches, bead, "marked ambiguous") ·
+`⚑ N ambiguous` (only when there are marks, §15.5) · the image-editing hint (only while editing it) · `W × H` · where
+the work is saved (§15.25). The fixed hint is gone (shortcuts are behind the header's ⌨).
 
 ### 4.4 Side panel
 1. **Tool row**: pencil, line, rect, filled rect, fill, eraser, picker, pan | brush size select (1×1…5×5) | override toggle, mirror toggle | undo, redo | collapse.
@@ -325,23 +345,31 @@ still appears while editing the image.
    **Drawing with** card: the tool that will act (icon, name, shortcut key — a held tool such as Alt = picker or
    Space = move shows in accent colour with "while … is held"; drawing tools with a backstitch or knot entry say so),
    its options (brush size, partial kind, override, mirror), and the active key entry (icon, code, details, Edit).
-   The entry is dimmed when the tool doesn't use it (picker, eraser, move, select). The panel's collapse button is in
-   the card's corner.
-2. **Key header**: "Key", count text (`N entries` / `1 entry`), **+ Add to key** button.
+   The entry is dimmed when the tool doesn't use it (picker, eraser, move, select). The panel is hidden and shown with
+   the header's ▥ button or K (not from the card).
+2. **Key header**: "Key", count text (`N entries` / `1 entry`), *new app:* the highlight eye (V, §15.16), **+ Add to
+   key** button.
 3. **Key list** (§7).
-4. Collapsible **Fabric & size**: fabric count select (11/14/16/18 ct Aida, 28 ct over 2, 32 ct over 2),
+
+*New app:* after the key, **one section at a time**, chosen in the icon bar along the panel's bottom (§15.32):
+References · Chart checks · Totals & shopping list | Fabric & size · Threads & beads · Pattern info · Versions. Items
+4 and 5 below describe the old app's two fixed sections; their content now lives in *Fabric & size* and *Totals*.
+While a key entry is added or edited, its form takes the whole panel (§8).
+
+4. *Old app:* Collapsible **Fabric & size**: fabric count select (11/14/16/18 ct Aida, 28 ct over 2, 32 ct over 2),
    *new app:* 11/14/16/18 ct Aida and 20/24/31 ct over 1; "28/32 ct over 2" are no longer offered but still shown
    (and kept) for a pattern that already uses them. The same list is in the New dialog and accepted from OXS.
    The side panel scrolls as a whole when its sections don't fit; the key list shrinks first (to 180 px).
    fabric colour picker, **Resize…** button, size info (§7.3).
-5. Collapsible (open by default) **Totals & shopping list** (§7.2).
+5. *Old app:* Collapsible (open by default) **Totals & shopping list** (§7.2).
 
 ### 4.5 Shared widgets
 - **Modal**: title, body (string HTML or element), footer buttons `{label, primary?, id?, action?}`.
   An action returning `false` keeps the modal open. Clicking the backdrop closes it. Optional `wide` (820 px).
   Only one modal at a time.
 - **Toast**: bottom-centre, auto-hides after 2.6 s.
-- **Export menu**: dropdown anchored under the Export button; closes on outside pointerdown.
+- *Old app:* **Export menu**: dropdown anchored under the Export button. *New app:* menus are the header's dropdowns
+  (§4.1); they close on an outside press or Esc.
 
 ---
 
@@ -420,6 +448,10 @@ All painting requires an active key entry; otherwise toast:
 | Eraser (`eraser`) | E | Two modes, chosen by where the press starts. **On a backstitch line** — pointer within `backR = clamp(6 / zoom, 0.2, 0.45)` grid units of a segment (or of its mirror image when Mirror is on): while hovering, those segments are highlighted with a thick translucent accent stroke (`rgba(181,69,47,.5)`, width `max(7, 0.32z)`) and the cell cursor is hidden; press/drag deletes **only backstitch** within `backR` of the pointer — crosses and beads are untouched. **Anywhere else**: clears **both** stitch and bead layers within brush, and also deletes backstitch segments whose distance to the pointer (grid units) ≤ `0.3 × max(1, brush/2)`. Either way one stroke = one undo step. *New app (2026-11-23):* a third mode, checked first like the picker's order — **on a knot or a bead between cells** (within the backstitch radius, at least the picker's 0.25): hovering outlines that knot / bead (no cell cursor) and the stroke deletes only knots and beads between cells; the crosses in the cells around the point stay. |
 | Picker (`picker`) | I, or hold Alt/⌥ | Selects the entry under the pointer: backstitch within 0.25 units (topmost/last) wins, then bead, then stitch. Toast "Picked …" or "Nothing here to pick". *New app (2026-11-23):* knots and beads between cells come first and are taken **anywhere on them as drawn** — a bead's whole circle (its series' size) or a bugle's whole length, a knot's dot — plus a few screen px (at most 0.15 of a cell; a knot reaches 0.35 of a cell at most), never less than 0.25. The eraser's knot mode uses the same reach. Hidden kinds of stitches (§15.16) are skipped. |
 | Pan (`pan`) | H / hold Space | Drag to pan. |
+| *New app:* Partial (`partial`) | Q cycles the kind | Quarter / three-quarter / petite at the nearest corner (§15.13). |
+| *New app:* Select (`select`) | S | Drag a box; Shift adds (§15.6). |
+| *New app:* Magic wand (`magicWand`) | W | Connected cells of one entry; Shift+click: all of it (§15.6). |
+| *New app:* Autofill (`autofill`) | Shift+F | Reads a 10 × 10 block off the image behind the chart (§15.11). |
 
 - Selecting a key entry while on eraser/picker/pan switches to pencil (except during a held-Alt pick).
 - **Hold Alt/⌥ = temporary picker**: Alt keydown (not auto-repeat-sensitive) switches to the picker and remembers
@@ -458,7 +490,10 @@ When the active entry is a backstitch and the tool is pencil/line/rect/frect:
 - Snapshots store copies of `stitches`, `beads`, `back` (not the key). Max 60 undo levels; any new action clears redo.
 - One stroke = one undo step. A pencil/eraser stroke that changed nothing is dropped from the stack.
 - Shape tools snapshot on release only if they paint ≥ 1 cell. Fill snapshots only if something changed.
-- Undo/redo history is **cleared** by: loading a project, creating new, resizing, deleting a key entry.
+- *Old app:* undo/redo history is **cleared** by: loading a project, creating new, resizing, deleting a key entry.
+  *New app:* every change to the pattern is an undo step — resizing, transforms, deleting a key entry (with its
+  stitches), editing the key, Replace key; the history (60 steps) is cleared only when another pattern is loaded
+  (open, new, a file) or the pattern is replaced by its copy from another window (§15.34).
 - Shortcuts: Ctrl/⌘+Z undo, Ctrl/⌘+Shift+Z or Ctrl/⌘+Y redo. Buttons disabled when stacks are empty.
 
 ### 6.5 `changed()` pipeline
@@ -470,6 +505,20 @@ re-render key panel and autosave.
 `Esc` (end chain) · hold `Alt/⌥` (temporary picker) · `K` (toggle side panel) · `O` (override) · `1`–`9` (select the n-th non-null key entry) ·
 `P`/`B` pencil · `L` line · `R` rect · `Shift+R` filled rect · `F` fill · `E` eraser · `I` picker · `H` pan ·
 `+`/`=` zoom in · `-` zoom out · `0` fit. Window blur releases Space.
+
+*New app — the whole keymap* (`editor/shortcuts/keymap.ts`; the ⌨ panel lists it):
+- Tools: `P`/`B` draw · `L` line · `R` rectangle · `Shift+R` filled rectangle · `F` fill · `Shift+F` Autofill ·
+  `E` eraser · `I` picker · `H` move · `S` select · `W` magic wand · hold `Space` move · hold `Alt/⌥` picker.
+- Drawing: `Shift+1`…`Shift+5` brush size · `Q` partial kind · `O` override · `M` mirror mode · `1`–`9` key entries ·
+  `Esc` ends a backstitch line.
+- View: `+`/`=` · `-` · `0` fit · `V` highlight · `K` side panel · `Ctrl/⌘+G` go to cell.
+- Marks: `A` mark / unmark the cell · `Shift+A` next mark (§15.5).
+- Selection: `Ctrl/⌘+A` all · `Ctrl/⌘+D` or `Esc` none · `Ctrl/⌘+C X V` · `Delete`/`Backspace` clear cells ·
+  arrows nudge (Shift: 10) · `Enter` places, `Esc` cancels what is pasted.
+- History and saving: `Ctrl/⌘+Z` · `Ctrl/⌘+Shift+Z` · `Ctrl/⌘+Y` · `Ctrl/⌘+S`.
+- Image behind the chart: `U` edit / behind · `Esc` ends editing · arrows nudge 0.1 cell (Shift: 1) · `[` `]` turn ·
+  `Ctrl/⌘+Z` undoes the image's last change while editing.
+- Autofill's review: `Enter` accept · `Esc` decline.
 
 *New app (2026-11-23):* **every keyboard layout.** A key that types a letter of another alphabet (Ukrainian: З where
 P is, Я where Z is) is read by its physical key, so P, E, Ctrl/⌘+Z … work without switching to English; a Latin
@@ -488,8 +537,9 @@ entries.
 
 ### 7.1 Key list (`renderKey`, `index.html:1730`)
 One row per non-null `P.pal` entry in index order:
-- **Collapsible side-panel sections** (image behind the chart, Fabric & size, Totals) remember whether they are open
-  across reloads, per browser (`stitchwork.sections`); first visit: Fabric closed, the others open.
+- *Old app / early new app:* collapsible side-panel sections remembered per browser (`stitchwork.sections`).
+  *Now:* one section at a time from the panel's bottom bar (§15.32; `stitchwork.panelSections`,
+  `stitchwork.openSection`, `stitchwork.sectionHeight`).
 - **Long keys (2026-11-15):** from 10 entries on, the key gets a row of tools — a search box (thread or bead
   number, "dmc 310", or part of a colour name; blends and floss + bead match by any of their parts), an order
   (As added · By number · Most used) and **Group by type** (on by default): collapsible groups Cross stitch ·
@@ -505,13 +555,15 @@ One row per non-null `P.pal` entry in index order:
   strand-sized in Colour view, the line style in Symbols view, no character.
 - Title (with shortcut badge `1`…`9` for the first nine rows) and subtitle (§3.4).
 - Usage count (`—` if 0) with unit `stitch`/`stitches`, `beads`, or `lines` (backstitch segments).
-- Edit ✎ and delete ✕ buttons.
+- Edit ✎ and delete ✕ buttons; *new app:* also **Duplicate** ⧉ (opens the form with a copy of the entry).
 - Click → set active; double-click / ✎ → edit dialog. Active row is highlighted.
 - Empty state: "Your key is empty." + explanation + **+ Add to key** button.
 
 **Delete entry**: if used, confirm modal "Delete <title>?" — "It’s used N times on the chart. Deleting the
 entry removes those stitches too." Deletion clears all its cells / segments, sets `P.pal[i] = null`,
 clears undo history, deselects if active, toast "Entry deleted".
+*New app:* always asks, used or not ("Delete <title> from the key?"; "…those stitches are deleted too. You can undo
+this."). A version is saved first, and the deletion is one undo step — the history is not cleared.
 
 ### 7.2 Totals & shopping list (`keyRows`, `index.html:1714`)
 - Counts: **full** = cells of thread/combo entries with `st='full'`; **half** = the rest of thread/combo cells;
@@ -532,10 +584,15 @@ clears undo history, deselects if active, toast "Entry deleted".
   `Cut fabric ≈ (a+6)″ × (b+6)″` (rounded).
 - **Resize…** modal: width, height (5..1000; a number outside is put back in range when the field is left), anchor "Keep design centred" (offset `floor((new-old)/2)`) or
   "Keep top-left". Cells outside are cropped; backstitch is shifted and segments with any endpoint outside
-  are dropped. Clears undo history, then fits view.
+  are dropped. *Old app:* clears undo history. *New app:* one undo step (a version is saved first); then fits view.
+- *New app:* the **Fabric & size** section (§15.32) has three groups — **Fabric** (count, colour, the finished and
+  cut sizes) · **Grid size** (Resize… · Extend canvas… · Crop to content, §15.3) · **Numbering** (first column, first
+  row, label every 5 or 10, Number from centre, §15.2).
 
 ### 7.4 Side panel collapse
 `K`, the collapse button or mini-strip expand toggles the panel; the canvas and reference windows re-layout.
+*New app:* `K` or the header's ▥ button; there is no mini strip. The panel's width is dragged at its left edge
+(§4.2).
 
 ---
 
@@ -597,7 +654,14 @@ click arms confirmation, second click commits.
 Defaults for a new entry: Cross stitch, single DMC 310, blend slots DMC 310 + DMC 413 (1 strand each),
 bead MH 00557, strands = `P.strands` (2), full cross.
 
+*New app:* the types are **Cross · Back · Knot · Floss+bead · Bead**; a backstitch entry also has **Placed as**
+(§15.58), a bead entry **Placement** (in a cell / between cells, §15.14), a knot **wraps**. **Find a blend for a
+colour** is still there (`key-entry/BlendFinder.tsx`, worked out off the main thread).
+
 ### 8.1 Pick list (`pickList`, `index.html:1774`)
+*New app:* one tab per brand of the pattern (§15.28, §15.30) or the numbered organizer (§15.52); **+ Brand**; **+** on
+the search row adds a colour of your own (brand, code, name, colour — §15.28), ✎ changes one, ⧉ duplicates any colour
+into one of your own. Sort by number or **by colour** (§15.57). The rest of this section is the old app.
 - Search box. Matching (case-insensitive): code **starts with** query, or name **contains** query, or (beads)
   `"dmc " + dmcEquivalent` starts with query, or series contains query.
 - Threads: sort toggle **By number** (DMC first in file order, then customs) / **By colour** (`hue` key).
@@ -625,13 +689,23 @@ reference windows (§11.4). Used because photos + marks quickly exceed localStor
 
 **New app (2026-11-16): saved patterns and the draft moved to IndexedDB** (database v5). localStorage holds ~5 MB for
 the whole site and one 1000 × 1000 pattern is ~1.75 MB, so the library is now in the stores `patterns` (id → file)
-and `patternMeta` (id → name, size, date, designer — what the Open dialog lists without loading every pattern).
+and `patternMeta` (id → name, size, date, designer — what My patterns lists without loading every pattern).
 - **Moving in**, once, the first time the library is used: every pattern in `stitchwork.library` is copied in (one
   already there and newer is kept); then `stitchwork.libraryMoved` is set. The old key is **kept untouched as a
   backup** and no longer written — only deleting a pattern removes it from there too.
 - **Draft**: `{ savedAt, doc }` in the store `drafts` (key `current`) on every autosave, and in `stitchwork.current`
   too while it fits (that write surely finishes when the page closes; a draft too big for it removes the stale small
   copy). On start the newer of the two is used; a bare file in `stitchwork.current` (earlier versions) counts as oldest.
+
+*Since 2.0 (§15.37):* `stitchwork.library` from 1.2.1 and earlier is no longer read; the moving-in step above is gone.
+
+*New app — localStorage keys in use (2026-11-24):* `stitchwork.current` (draft copy), `stitchwork.editedPattern`
+(§15.25), `stitchwork.guideSeen`, `stitchwork.tipSeen.<tour>`, `stitchwork.seenVersion` (§9.8–9.9),
+`stitchwork.theme` (§15.18), `stitchwork.toolbar` (§15.25), `stitchwork.sideWidth` (§4.2), `stitchwork.panelSections`,
+`stitchwork.openSection`, `stitchwork.sectionHeight` (§15.32), `stitchwork.keyView` (§7.1), `stitchwork.checks`
+(§15.4), `stitchwork.autofillView` (§15.11), `stitchwork.printOptions` (§15.10c), `stitchwork.patternsView`
+(§15.36), `stitchwork.largePhotoOk` (§15.33), `stitchwork.pictureSync`, `stitchwork.accountRevs` (§15.33–15.34),
+`stitchwork.readerChecks`, `stitchwork.checkPage` (§15.51).
 
 All storage access is wrapped in try/catch; quota failures are silent except where noted.
 
@@ -649,11 +723,11 @@ edit loses nothing.
 
 *New app — the demo is a chickadee (2026-11-23):* see §15.53. The old app's heart stays in `index.html`.
 
-*New app — automatic saving (2026-11-14):* the open pattern is written as a draft 0.6 s after each change (as
-before), and **into the saved-patterns library at most once a minute** while it has unsaved changes, plus right away
-when the page is hidden. A pattern that was just opened from the library, a restored draft and the demo are not
-re-saved until they are edited. The status bar shows `Saved HH:MM` after each library save. Manual Save (⌘/Ctrl+S,
-File ▸ Save) still saves at once, with a toast.
+*New app — automatic saving:* the open pattern is written as a draft 0.6 s after each change (as before), and into
+the saved patterns — and the account, signed in — **5 s after editing stops, at least every 30 s** while it goes on
+(about a second when another window follows it, §15.34), plus right away when the page is hidden. A pattern that was
+just opened, a restored draft, the demo and an untouched new pattern are not saved until they are edited (§15.49).
+The status bar says where the work is (§15.25). ⌘/Ctrl+S still saves at once, with a toast.
 
 ### 9.3 Native JSON format (v3) (`serialize`, `index.html:1905`)
 ```json
@@ -682,6 +756,10 @@ File ▸ Save) still saves at once, with a toast.
   windows to this project (from the file's `refs` if present, otherwise from localStorage).
 
 ### 9.4 Library: Save / Open / New
+*New app:* there is no Save button and no Open dialog. **Open…** (Pattern ▾, signed in) goes to My patterns
+(§15.36); signed out there is one pattern (§15.37). **New** is the New dialog of §15.31 (Start from, Name, Size 80 × 80
+by default, fabric, Threads & beads); replacing an edited pattern signed out asks "Keep this pattern?" (§15.25). The
+list below is the old app.
 - **Save** (button or Ctrl/⌘+S): `P.name` from the input; body `{name, updated, w, h, data}`.
   If `data.length > 240000` → toast "Pattern is too large to save online — use Save to file" and abort.
   Cloud first if available (§9.5) → "Saved “name” to your account" and status `Saved HH:MM`; quota error →
@@ -699,21 +777,24 @@ File ▸ Save) still saves at once, with a toast.
 ### 9.8 Quick-start guide (new app, 2026-11-14)
 A guided tour for making a **перенабір** (an e-copy of a paper chart). It opens by itself on the **first visit only**
 (flag `stitchwork.guideSeen` in localStorage, set as soon as it opens, so a reload never shows it again) and any time
-from **Menu ▸ Quick start guide** (uk: "Як зробити перенабір").
+from **☰ ▸ Quick start guide** (uk: "Як зробити перенабір").
 - The screen is dimmed except for the elements the step talks about (pulsing outline). When a step is about a menu
   option, the guide **opens the menu (and its submenu) itself** and outlines that option; open menus stay undimmed.
   The card (460 px, roomy) sits beside the highlights — right, left, below or above, never on top of them — with the
   step counter, a title, **2–4 short bullet points**, sometimes a tip, and Skip / Back / Next. Names of buttons and
   options are **highlighted** in the text. Keys: → or Enter next, ← back, Esc closes (and closes the menu).
-- Steps: welcome · 1 create a pattern with the chart's size · 2 fill in the key (floss, bead, blends, floss + bead;
-  the paper key in a floating photo window, ticking lines off with its marker) · 3 image behind the chart,
-  straighten by 4 corners, trace (tip: the quick move & resize panel, block by block) · **4 Autofill** — stitch a
-  few cells of each symbol, pick Autofill (Shift+F), click the lined-up block, accept or decline; works best when every
-  key symbol looks exactly like the paper chart's (tip: it fills only what it's sure about; check the result) · 5 Colour / Both / Symbols · 6 undo, hold Alt/⌥ to pick, select / copy /
-  paste / move, override off by default (tip: the **i** button) · 7 automatic saving in the browser, and download the
-  .xbird file to the device · 8 Versions · 9 pattern info and export .oxs for Хрестики and Ruta Stitch · Voilà.
-- Highlight targets are `data-guide` attributes (menu, add-key, views, toolbar, shortcuts, saved); a missing target
-  (e.g. side panel hidden) just isn't highlighted.
+- Steps (messages `guide.*`): welcome · 1 New pattern — Pattern ▾ ▸ New ▸ Blank pattern, the size, the fabric (tip:
+  From a PDF chart / From an .oxs file) · 2 the key — + Add to key (tip: the paper key in References ▸ Open in a
+  window…) · 3 chart behind the stitches — References ▸ Put behind the chart…, 4 corners, trace; a scan beats a photo
+  (tip: the edit-image button / U and its frame) · **4 Autofill** — stitch a few cells of each symbol, Autofill
+  (Shift+F), click the lined-up block, Accept or Decline (tip: only what it's sure about; check the result) · 5 Colour /
+  Both / Symbols · 6 undo, hold Alt/⌥ to pick, S to select / copy / paste / move, Override (O) (tip: the ⌨ button) ·
+  7 automatic saving; download the .xbird now and then when signed out · 8 Versions (🕘 in the side panel's bar) ·
+  9 Pattern info (name, author) and Pattern ▾ ▸ Export · 10 Does your app read it? (☰ opened on the item, **Open the
+  check**) · Voilà.
+- Highlight targets are `data-guide` attributes (menu, app-menu, add-key, views, toolbar, tool-<id>, override,
+  underlay-edit, side-<section>, saved, match-bar …); a missing target (e.g. side panel hidden) just isn't
+  highlighted.
 
 ### 9.9 Feature tips, app versions, "What's new", .xbird format version (2026-11-15)
 - **Feature tips** — one-step or two-step tours (same look as the guide, labelled "Tip"), each shown **once**, right
@@ -733,7 +814,9 @@ from **Menu ▸ Quick start guide** (uk: "Як зробити перенабір
     check every block, it gets better as you mark).
   - *Autofill's results* (2026-11-16) — the first time it shows what it found: the bar (faint suggestions, Accept /
     Enter, Decline / Esc, advice on Decline), then **Symbols only** and the hold-to-see-under eye.
-- **App version** = `package.json` `version` (semver). **Menu ▸ What's new** lists the user-facing release notes
+  - *Your own threads and beads* (signed out, the first time one is made — §15.39) and *Will your app read this
+    .oxs?* (after the first .oxs export — §15.51).
+- **App version** = `package.json` `version` (semver). **☰ ▸ What's new** lists the user-facing release notes
   (`src/core/release/changelog.ts`, uk + en). It opens by itself once after an update (`stitchwork.seenVersion` older
   than the app's version); brand-new users don't get it (the intro guide instead). Release steps:
   `docs/RELEASING.md`.
@@ -763,6 +846,8 @@ as before (v4, §9.3, plus `refs` and `underlay`) — only the extension and typ
   by content (XML → OXS), not by extension, so a renamed file still opens.
 
 ### 9.5 Optional Claude-runtime capabilities (`index.html:1930`)
+*Old app only.* The new app has none of this: the account is its own (§15.23), and every download is a standard
+browser download (the fallback with Copy is kept for when that fails).
 If `window.claude.use` exists, the app requests `db`, `user` and `downloads`:
 - `cloud = db.collection('data/users/' + userId)`, documents keyed by project id, same body as the local library.
 - `downloads.save({filename, data})` is used for all exports (§10).
@@ -791,6 +876,12 @@ fallback `pattern`.
 | Load a .json or .oxs file… | opens file picker (§12) |
 
 **Save to file** button opens a chooser modal with the JSON and OXS options and their descriptions.
+
+*New app — Pattern ▾ ▸ Export* (§15.45): PDF chart to print (§15.10b–c) · PDF for Pattern Keeper (§15.10) · Chart
+images (PNG) ▸ colour + symbols / symbols only / symbols for printing, some in colour · Preview images (PNG) ▸ colour
+blocks / stitched · Shopping list (CSV) · Open Cross Stitch file (.oxs). The work file is **Pattern ▾ ▸ Download work
+file (.xbird)…** (`<name>.xbird`, §9.7), which first asks "Work file or .oxs?". Opening files is in Pattern ▾ (Open
+.xbird work file…, New ▸ From an .oxs or .xsd file…, From a PDF chart…), not in Export.
 
 ### 10.1 PNG chart (`chartCanvas`, `index.html:1989`)
 - Cell size: colour mode `clamp(floor(2400/max(w,h)), 4, 12)`; chart modes `clamp(floor(4800/max(w,h)), 16, 24)`.
@@ -864,6 +955,11 @@ Rules:
 
 Floating, draggable, resizable windows layered over the app (multiple allowed). Opened via **+ Reference**
 (file picker) or by image→pattern with "keep as reference".
+*New app:* opened from the side panel's **References ▸ Open in a window…**, by dropping a picture or PDF and choosing
+*Floating photo window*, by image → pattern with "keep as reference", and by a PDF chart read in (§15.48). A window can
+hold a PDF, page by page (§15.41). The photo is kept **as it came** (§15.33), not as a 1600 px JPEG; the marks layer is
+at most 2400 px. Closing a window **deletes its picture** from the pattern and asks first, always ("Delete the picture
+“name”?"); hiding it is References ▸ Hide.
 
 ### 11.1 Window state
 `{id, name, src (JPEG data URL, longest side ≤ 1600 px, q=0.86, white background), x, y, w (≥240), h (≥170),
@@ -915,6 +1011,9 @@ New windows cascade from the stage's top-right (28 px offset per window).
 A leading UTF-8 BOM is stripped. Content starting with `<` → OXS import; otherwise JSON `load`. Success toast
 "Loaded <filename>" (+ OXS report), failure toast "Couldn’t read that file — it should be a Stitchwork .json or
 an .oxs". Then autosave.
+*New app:* Pattern ▾ ▸ Open .xbird work file… (and New ▸ From an .oxs or .xsd file…, §15.46, §15.56) reads `.xbird`,
+`.oxs`, Pattern Maker `.xsd` and older `.json`, told apart by content. Failure: "Couldn’t read that file — it should be
+a .xbird pattern, an .oxs or an .xsd". Opening a .xbird of a pattern already here asks first (§15.43).
 
 **Drag & drop** anywhere on the window: while files are dragged over, a full-window dashed overlay reads
 "Drop a .json or .oxs pattern, or a picture". On drop:
@@ -922,6 +1021,10 @@ an .oxs". Then autosave.
 - else an image → modal "What should this picture be?" with *Cancel*, *Open as reference* (reference window, §11)
   and *Turn into pattern* (image → pattern dialog, §12.3);
 - else toast "Drop a .json or .oxs pattern, or a picture".
+
+*New app:* the overlay and toast read "Drop a .xbird or .oxs pattern, or a picture". A pattern file (.xbird, .oxs,
+.xsd) opens as above; a picture asks "What should this picture be?" — *Floating photo window* · *Image behind the
+chart* · *Turn into pattern*; a PDF the same without *Turn into pattern* (§15.41).
 
 ### 12.2 OXS import (`fromOXS`, `index.html:2061`)
 - Requires `<properties>` with positive `chartwidth`/`chartheight`. Title → name (default "Imported pattern").
@@ -994,7 +1097,9 @@ fractional stitches, §15.14 French knots, §15.15 underlay, §15.16 highlightin
 §15.23 accounts and cloud storage (with §15.25–15.40: signed in / out, My patterns, threads and beads, pictures in
 the account, live editing, limits, the account page), §15.24 Mill Hill Treasures, §15.28–15.31 brands and own
 threads & beads, §15.32–15.50 (layout, PDFs as references and as charts, .oxs round trip, installing as an app),
-and the drawn symbols of §2.5.
+§15.51 the reader check, §15.52 the numbered organizer, §15.53 the landing page, §15.54–15.55 usage counts and the
+Stats page, §15.56 `.xsd` import, §15.57 the Floss and Beads pages, §15.58 special stitches, and the drawn symbols of
+§2.5.
 
 ### 15.1 Pattern metadata (implemented)
 
@@ -1027,6 +1132,9 @@ and the drawn symbols of §2.5.
   flashes it.
 
 ### 15.3 Whole-chart transforms & mirror modes (implemented)
+*Where (2026-11-24):* the header's **Transform ▾** has the flips, rotations and Mirror from centre…; **Crop to
+content**, **Extend canvas…** and **Resize…** are in the side panel's Fabric & size ▸ Grid size (§15.32).
+
 A **Transform ▾** menu (or a section in Fabric & size) with:
 - **Flip horizontal** and **Flip vertical**.
 - **Rotate** 90° clockwise, 90° counter-clockwise, 180°. A 90° rotation swaps `w`/`h`.
@@ -1137,7 +1245,12 @@ any existing behaviour.
 **Clipboard**
 - In memory, and kept across project switches. Pasting into another project maps key entries with `sameKey` and
   appends missing ones, including their blends, combos and customs.
-- Optional: also put a JSON copy on the system clipboard for pasting across tabs.
+- Not built: a copy on the system clipboard for pasting across tabs (the clipboard is this tab's only).
+
+**Replace key…** (on the selection bar) opens "Replace key in selection": two lists that look like the key — on the
+left the entries the selection has (with how many of each), on the right what one can become (entries of the same
+kind of stitch); arrows move in a list, typing searches, Enter replaces. Only the selected cells change; one undo
+step, a version saved first.
 
 ### 15.7 Automatic snapshots — minimal versioning (implemented)
 - Storage: IndexedDB `stitchwork` v2 gets a new store `snaps`, keyed `[projectId, time]`. The value is
@@ -1147,10 +1260,12 @@ any existing behaviour.
   - **before destructive operations**: deleting a key entry, resize, transforms, mirror from centre, key brand
     conversion (§15.8), and anything that replaces the current project (Open, New, file/OXS import, image →
     pattern)
-- **Retention**: keep the last 10, then one per hour for 24 h, then one per day for 14 days. Cap at about 50 per
-  project. When the quota is hit, drop the oldest.
-- **UI**: a **History…** entry in the Open dialog lists `time · reason · W×H` with thumbnails. **Restore** first
-  snapshots the current state, then loads the chosen one (same project id).
+- **Retention**: keep the last 10, then one per hour for 24 h, then one per day for 14 days. Cap at **30** per
+  pattern (§15.35; was 50). When the quota is hit, drop the oldest.
+- **UI**: the side panel's **Versions** section (§15.32; 🕘 in the bar) — the time spent, then `time · reason · W×H`
+  with thumbnails. **Restore** first snapshots the current state, then loads the chosen one (same project id). Also
+  saved before: Replace key, crop, extending the canvas, opening a file over a pattern (§15.43); signed in, versions
+  from every device join (§15.34).
 - Lost undo history and "New" without saving become recoverable.
 - **In .xbird files** (2026-11-15): the pattern's versions travel along as `versions: [{time, reason, doc}]`,
   oldest first (`doc` is the pattern file of that version, without pictures or nested versions; thumbnails are
@@ -1164,7 +1279,7 @@ equivalents shown in the key, discontinued DMC codes, the shopping list by brand
 (Kreinik, Dimensions, Palmira, … — BACKLOG B25).
 
 ### 15.10 PDF chart export — Pattern Keeper–compatible (implemented; works in Pattern Keeper since 2026-11-15)
-**Menu ▸ Export ▸ PDF for Pattern Keeper.** A multi-page A4 PDF that the Android app **Pattern Keeper** can import
+**Pattern ▾ ▸ Export ▸ PDF for Pattern Keeper.** A multi-page A4 PDF that the Android app **Pattern Keeper** can import
 to track stitching. This is *not* Pattern Maker's native `.xsd` (§15.12).
 
 **What Pattern Keeper needs** (no public spec — its designer page says to test in the app; these come from
@@ -1203,7 +1318,7 @@ be typed in. **Blends are not read** (checked 2026-11-19): Pattern Keeper doesn'
 they can be added by hand there. Bug: BACKLOG B1.
 
 ### 15.10b PDF chart to print (implemented 2026-11-16)
-**Menu ▸ Export ▸ PDF chart to print** (since 2026-11-24 through the Print dialog, §15.10c) — the chart for people to read and stitch from, separate from the Pattern
+**Pattern ▾ ▸ Export ▸ PDF chart to print** (since 2026-11-24 through the Print dialog, §15.10c) — the chart for people to read and stitch from, separate from the Pattern
 Keeper PDF. All vector (symbols from the embedded symbol font, hand-drawn symbols as paths with their cut-outs,
 colours, lines), A4 portrait, in the interface language (see Language below).
 1. **Cover**: name, designer and copyright, size in stitches and on the pattern's fabric (cm and inches), the
@@ -1253,7 +1368,7 @@ its column and row ranges, the chart's own numbering every 10, a small page map 
 centre marks below and right of the grid.
 
 ### 15.10c Print settings for the PDF chart (2026-11-24)
-**Menu ▸ Export ▸ PDF chart to print** opens a **Print** dialog first: settings on the left, the real pages on the
+**Pattern ▾ ▸ Export ▸ PDF chart to print** opens a **Print** dialog first: settings on the left, the real pages on the
 right. The file is **planned** after each change (a moment after the last one): every page counted and named,
 nothing drawn — a 1000 × 1000 chart plans in about a third of a second. Only the page looked at is **made**, as a
 PDF of its own, and drawn by pdf.js, so the preview is what prints. ‹ › and "page 3 of 14" step through it; the
@@ -1582,11 +1697,11 @@ which could only move and stretch.)
   previous corners, and straightening is always redone from the original (never from an already-warped picture).
 - Afterwards the zoomed-in edit frame fine-tunes; a page that is bent (book spine) isn't fixed by 4 corners.
 
-**Side panel section "Image behind the chart"** (only when one exists): Behind stitches toggle, Show/hide, opacity slider
+**Side panel** — *today inside the References section (§15.32)*; *first* a section "Image behind the chart" (only when one exists): Behind stitches toggle, Show/hide, opacity slider
 (10–100 %, default 50 %), Move & resize / Crop (edit mode only), X / Y / W / H fields, Fit to chart, Reset crop,
 Replace image…, Remove.
 
-**Adding**: File ▸ Reference pictures ▸ **Image behind the chart…**, or drop a picture and choose **Put behind the chart**. The file
+**Adding**: the side panel's References ▸ **Put behind the chart…**, or drop a picture and choose **Image behind the chart**. The file
 is stored **as it is** (no re-compression); only photos over 6000 px on the longer side are scaled down once (JPEG
 0.92). It is fitted to the chart and the straighten editor opens. Replacing keeps the placement (rect) and resets the
 crop to the whole new image.
@@ -1641,7 +1756,7 @@ like highlighting: not saved, not in exports or undo; works together with highli
 
 ### 15.18 Colour themes (implemented 2026-11-15)
 
-- **Menu ▸ Theme**: a row of five two-tone dots (accent on the theme's shade) — Terracotta (default, warm beige),
+- **☰ ▸ Theme**: a row of five two-tone dots (accent on the theme's shade) — Terracotta (default, warm beige),
   Olive (sage), Royal blue (cool grey-blue), Rose (blush) — all light, each with its own tinted background, panels,
   lines and stage — and Dark (bluish, after the Dracula colour scheme). Picking one applies at once and keeps the
   menu open.
@@ -1671,8 +1786,8 @@ a private `assets` bucket.
   Auth through the app's own `/api/auth/*`. Signed in: an initial in the header, with the email and Sign out.
 - **Patterns in the account** (Postgres table `patterns`, `db/migrations/001_patterns.sql`, `node scripts/db/migrate.mjs`):
   while signed in, every save to the library also goes to the account (toast says so), with a small colour preview in
-  the bucket (`users/<id>/previews/<pattern>.png`). The Open dialog lists both, marked "this browser", "in your
-  account" or both. API: `/api/patterns` (list), `/api/patterns/[id]` (GET, PUT, DELETE), `/api/patterns/[id]/preview`
+  the bucket (`users/<id>/previews/<pattern>.png`). *Then* the Open dialog listed both; *now* My patterns does
+  (§15.36). API: `/api/patterns` (list), `/api/patterns/[id]` (GET, PUT, DELETE), `/api/patterns/[id]/preview`
   (PUT png, GET → short-lived signed link); every route checks the session and touches only that user's rows.
 - Signed out, nothing changes: everything stays in the browser.
 **Built since:** the gallery — My patterns (§15.26, §15.36, §15.37); moving this browser's patterns into the account
@@ -1706,11 +1821,13 @@ Drawn as a large round bead (radius 0.48) for now. Charm-shaped icons (heart, st
 **Signed out** — the whole editor, one working pattern kept in this browser; to keep work elsewhere, the work
 file (.xbird). Starting a new pattern asks first: *Download .xbird* · *Sign in to keep it* · *Replace it* (never
 discarded silently). People who saved several patterns in this browser before keep them, openable; on their first
-sign-in they're offered a move to the account. **Signed in** — any number of patterns, saved to the account, on
+sign-in they're offered a move to the account (*since §15.37 signed out is strictly one pattern*). **Signed in** — any number of patterns, saved to the account, on
 any device; My patterns (a page with previews); versions in the account; My threads. Later: photos in the account,
 read-only share links.
 
-**Header** (built 2026-11-17): `[🐦 пташечка] [Pattern ▾] [name] …tools… [Transform ▾] [🖨] [☰] [👤] [▥]`.
+**Header** (built 2026-11-17; *as it is today: §4.1* — Versions, Pattern info and the pictures moved to the side
+panel (§15.32), Export into Pattern ▾ (§15.45), shortcuts to ⌨ (§15.49)): `[🐦 пташечка] [Pattern ▾] [name] …tools…
+[Transform ▾] [🖨] [☰] [👤] [▥]`.
 - **Pattern ▾** — working on it: New ›, Open… (only signed in, or when other patterns are saved in this browser),
   Download work file (.xbird), Open .xbird work file…, Versions…, Pattern info…, Image behind the chart…, Photo in a
   floating window…. No "Save": saving is automatic (Ctrl/⌘+S still saves at once).
@@ -1744,13 +1861,15 @@ account at once.
 ### 15.26 The main page: My patterns (built 2026-11-17, redesigned the same day)
 `/[locale]/patterns` (`ui/home`, `editor/library.ts`). The editor's logo and name lead here, and so does **My
 patterns** in the account menu; the open pattern is saved first. The editor stays at `/[locale]`, so links in
-exported files keep working.
-- **Header** like the editor's: logo, the sections as tabs (only *Patterns* now; threads and the stash later),
-  languages, account.
+exported files keep working. *Since §15.53 the editor is at `/[locale]/editor`, and `/[locale]` is the landing page
+(old editor links are sent on). Signed out, this page gives way to the editor (§15.39).*
+- **Header** like the editor's: logo, the sections as tabs (*today:* Patterns · Floss · Beads · App check, and Stats
+  for admins — §15.51, §15.55, §15.57), ☰, account.
 - **Continue stitching**: the pattern last worked on (the editor's draft) — big preview, name, size in stitches and
   in cm on its fabric, when it was edited, **Continue →**. Signed out, one line under it invites to sign in.
 - **All patterns** (the others) as cards: the preview fills the card (crisp, its size shown while pointing at it),
-  name, when it was edited ("3 days ago", in the page's language); ⋯ → Open · Delete… (asks). Signed in, a pattern
+  name, when it was edited ("3 days ago", in the page's language); ⋯ → Open · Delete… (asks; *more actions since
+§15.37*). Signed in, a pattern
   only in this browser says so (⚠); a banner offers **Move to my account**. **+ New ▾**: Blank pattern · From a
   picture… · Open work file… (the file is picked here and handed to the editor, `editor/startRequest.ts`). Search and
   sorting (recent, name) from 9 patterns on. Nothing yet: the bird, and the three ways to start.
@@ -1783,7 +1902,7 @@ then people add the threads they need as their own. OXS: other brands go out wit
 Black"); an OXS number or name starting with Anchor / ANC / Madeira comes back as that brand's colour.
 
 **Your own threads** (built 2026-11-17: table `threads`, `/api/threads`, `editor/threads/inventory.ts`, the
-**Threads** page `/[locale]/threads` next to Patterns): one form — brand (picked from the
+**Threads** page `/[locale]/threads` next to Patterns — *since §15.57 the **Floss** page, the whole catalogue*): one form — brand (picked from the
 pattern's and known brands, or a new one), code, name, colour — in the picker (+, and ✎ to change one; the key
 follows) and later on the Threads page. A thread can be your own in a built-in brand (a DMC shade not in the list)
 or in a brand of your own (Weeks Dye Works). Every pattern keeps a copy of the ones it uses, so shared files are
@@ -2010,7 +2129,7 @@ limit nothing is lost — the work stays in the browser, and the app says what t
   out they give way to the editor (`ui/account/useSignedInOnly.ts`; nothing of them shows meanwhile), and the logo is
   just the logo. The privacy page stays open to all. Your own threads and beads live in their pattern then; seeing
   the pages they get once signed in is part of the reason to sign in.
-- **The account menu** (signed in): My patterns · My threads · My beads · Account, then Sign out — the same in the
+- **The account menu** (signed in): My patterns · My threads · My beads (*now Floss · Beads*, §15.57) · Account, then Sign out — the same in the
   editor (which saves first) and on the other pages.
 - **Every brand from the start**: a new pattern — and the demo — has every thread brand (DMC, Anchor, Madeira) and
   every bead brand (Mill Hill, Preciosa), so the picker shows how much is there; fewer can be chosen in the New dialog
@@ -2422,10 +2541,6 @@ Pattern Maker for Cross Stitch (HobbyWare, v4) saves `.xsd`: binary, no publishe
 - **Not known yet**: the half's direction bit (no sample had halves), which byte of a special stitch picks its
   drawing when there are several (every sample had one).
 
-## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
-The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in
-BACKLOG B27.
-
 ### 15.57 Floss and Beads: the whole catalogue (2026-11-23)
 - **My threads / My beads become Floss / Beads** (tabs, account menu): every colour of every built-in brand (DMC,
   Anchor, Madeira, Dimensions; Mill Hill, Preciosa), your own among them with a small accent dot. Brands on the left
@@ -2457,6 +2572,9 @@ BACKLOG B27.
 - **A backstitch can be placed as a stamp**: a block of a fixed number of cells and the straight stitches in it,
   placed with one click. The key form's **Placed as** (backstitch only): *A line at a time* (as before), **Smyrna cross
   over 1 cell**, **Smyrna cross over 4 cells**, the pattern's own, and **Draw your own…**.
+- **For now the Smyrna crosses are hidden** (to be reworked, BACKLOG item 7): **Placed as** offers only the line, the
+  pattern's own and **Draw your own…**; an entry that already uses a Smyrna cross still shows it
+  (`OFFER_BUILT_IN_STAMPS` in `ui/dialogs/key-entry/KeyEntryForm.tsx`). Help and the tip mention only one's own.
 - Everything else about the entry is backstitch: colour or blend, strands, line style and line colour, the thread it
   takes (its lines' length), how it prints on the PDF chart and goes into an `.oxs` (as plain backstitch lines — reader
   apps show them as drawn). Its key icon and label show the stamp ("… · Smyrna cross over 4 cells").
@@ -2476,3 +2594,62 @@ BACKLOG B27.
   `stamp`. Older files open as before (ARCHITECTURE-REVIEW §3; the app isn't installed anywhere, so no older app has
   to read the new fields).
 
+### 15.59 Help pages; "?" by titles (2026-11-24)
+- **`/[locale]/help`** (`src/app/[locale]/help`, `src/ui/help`): one page per step of making a pattern, in that order —
+  Start a pattern · Bring in a chart or a picture · Compose the key · Draw · Check · Fix problems · Export, print, share ·
+  Your patterns · Floss and beads · The app (`/uk/help/draw`). Each page is **questions as a stitcher asks them**
+  ("Replacing one colour with another — only in an area"), grouped under a few headings, each answered in 2–5 short
+  bullets: names of buttons and menu items highlighted, keys as keys, links to other questions. The index has a search
+  over every question and answer, then every page with its questions. Static, no account; the same bar and footer as
+  the other pages, the pages listed on the left (a row on top on a phone), "Next: …" at the bottom. From 760 px the
+  window doesn't scroll: the pages, the text and its contents each scroll on their own between the bar and the footer
+  (as Floss and Beads); on a phone the window scrolls as a whole.
+- **Questions are anchors** (`/uk/help/draw#replace-in-selection`) and their ids **never change once released**: the
+  app's "?" links point at them, and a future *tip of the day* will too (docs/HELP-PLAN.md). The texts are
+  `content.en.ts` / `content.uk.ts` (not the messages), with the same pages, ids and screenshots in both
+  (`help.test.ts`, which also checks every link and screenshot).
+- **Screenshots**, cropped to the place with a little around it, at 2×, per language: `public/help/<locale>/<id>.png`,
+  taken by `node scripts/help-shots.mjs [ids…]` against a running app (`HELP_BASE`, default :3000; the installed
+  Chrome; the demo pattern, renamed for the pictures; its own symbol chart as the "paper chart"). Re-run after the
+  places they show change.
+- **"?"** (`ui/common/HelpLink.tsx`): a small round link beside a title that opens the help at its question in a new
+  tab. On: the "Drawing with" card, the key's header, the key form, each side-panel section's header, the selection
+  bar, Autofill's bars, the ⌨ panel, the Straighten dialog and the editor's dialogs (`Modal`'s `help`).
+  15 px by titles; 18 px in the thin bars over the chart (selection, Autofill), where it sits among buttons.
+- **On this page** (a help page, from 1180 px wide): its questions on the right, under their headings; the one being
+  read is marked — the last question whose top has scrolled above a line just under the bar (at the very bottom of the
+  page, the last one). A long list keeps the marked one in view.
+- **☰ ▸ Help** first in the editor's ☰ (a new tab) and in the other pages' ☰.
+
+### 15.60 Tip of the day (2026-11-24)
+- **What**: a small card in the editor's bottom-left corner — **a shortcut** for something the person does ("Hold ⌥
+  and click a stitch…") or **where a feature is** ("Select an area, then Replace key…"). **Show me** points at the
+  place for a moment (opening the side panel, its section or a menu first; any click ends it); **Read more ↗** opens
+  its help question (§15.59) in a new tab; ‹ › browse the others ("3 / 22"); ✕ or Esc closes; **Show a tip each day**
+  (ticked) turns it off and on. **☰ ▸ Tip of the day** brings it any time.
+- **When it comes by itself**: once a day (the person's own calendar day), 4 s after the editor is calm — started up,
+  the session known, and no dialog, guide, feature tip, key form, Autofill review or pasted piece in the way. Never on
+  the first day tips know someone (someone who had seen the quick start guide before tips existed doesn't wait), never
+  when switched off, and not when no tip is worth showing.
+- **Which tip** (`core/tips/tips.ts`, `TIPS`, most hidden first): each says when it's worth showing, from what the
+  person has used — **unused** (news while the feature was never used: Replace key, ambiguous marks, Chart checks…),
+  **used** (builds on something: the print presets after a print PDF), **clicked but never by its key** (the
+  shortcut: ⌘Z after the undo button, Shift+F after the Autofill button, Shift+1…5 after the brush buttons). The order:
+  those not seen yet in list order, then the seen ones, longest ago first — nothing repeats until every tip worth
+  showing has been seen. One tip only for signed-in people (the Floss page).
+- **What is kept** (`TipState`): the first day, the day of the last tip, on/off with when it was set (of two copies
+  the later choice wins), the tips seen and when, and the uses of each feature by click and by key — counted as
+  feature usage counting (§15.54) counts them, via its `tap`, but **per person and never sent with the shared counts**.
+  In this browser always (`stitchwork.tips`; each write merged with what is there, so two tabs don't lose each
+  other's), and **signed in, in the account** too: table `user_tips` (migration 008, one row per user, gone with the
+  account), `GET` / `PUT` (and `POST`) `/api/tips`. The browser's and the account's merge on sign-in and on every
+  save — tips seen and uses are never lost (the larger count of each, not the sum); saved a minute after a change,
+  a couple of seconds after on/off, and when the page goes.
+- **Privacy policy**: says the account keeps tips seen and feature use for the tip of the day, never added to the
+  shared counts.
+- Texts: messages `tips.items.<tip id>` (`<b>`, `<k>` keys, `{mod}` `{shift}` `{shiftKey}` `{alt}` `{undo}` `{redo}` as
+  this computer names them). Tests: every tip has both texts, a help question, and watches commands the app has.
+
+## 16. Future phase — Stash management — moved to `docs/BACKLOG.md` (B27)
+The plan (inventory of floss, beads and fabric; "what do I still need to buy?"; kitting; open questions) is in
+BACKLOG B27.

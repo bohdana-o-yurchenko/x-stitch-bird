@@ -120,6 +120,7 @@ export function PrintDialog({ onClose }: { onClose: () => void }) {
   return (
     <Modal
       title={t("title")}
+      help="export#print"
       full
       onClose={() => {
         stop.current?.abort();

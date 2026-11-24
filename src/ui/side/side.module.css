@@ -433,6 +433,23 @@
 .stackHead {
   flex: none;
 }
+/* the section's header and its "?" (HelpLink) — a link can't sit inside the header's button */
+.stackHeadRow {
+  flex: none;
+  display: flex;
+  align-items: center;
+  background: var(--bg);
+}
+.stackHeadRow .stackHead {
+  flex: 1;
+  min-width: 0;
+}
+.stackHelp {
+  margin: 0 12px 0 4px;
+}
+.headHelp {
+  margin-left: -2px;
+}
 .stackItem + .stackItem {
   border-top: 1px solid var(--line);
 }

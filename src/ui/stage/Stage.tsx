@@ -10,6 +10,7 @@ import { useCommand, useEditor, useEditorState } from "../hooks/editor";
 import { ChartCanvas } from "./ChartCanvas";
 import { LiveBar } from "./LiveBar";
 import s from "./stage.module.css";
+import { HelpLink } from "../common/HelpLink";
 
 /** Colour / Both / Symbols — how the chart is drawn; sits with the zoom. */
 function ViewSwitch() {
@@ -55,7 +56,7 @@ function GroupsToggle() {
   if (!listed.length) return null;
   return (
     <div ref={box} className={s.groupsWrap}>
-      <button type="button" className={cx(s.iconBtn, hidden.length > 0 && s.on)} title={label} aria-label={label} aria-expanded={open} data-testid="groups-toggle" onClick={() => setOpen(!open)}>
+      <button type="button" className={cx(s.iconBtn, hidden.length > 0 && s.on)} title={label} aria-label={label} aria-expanded={open} data-testid="groups-toggle" data-guide="groups" onClick={() => setOpen(!open)}>
         <Icon name="layers" size={17} />
       </button>
       {open && (
@@ -143,6 +144,7 @@ function SelectionActions() {
           <button type="button" className={btn} title={t("deselectHint")} data-testid="deselect" onClick={() => run("selection.none")}>
             <Icon name="deselect" size={15} /> {t("deselect")}
           </button>
+          <HelpLink to="draw#replace-in-selection" className={s.barHelp} />
         </>
       )}
     </div>
@@ -211,6 +213,7 @@ function MatchBar() {
     return (
       <div className={s.selectionBar} data-testid="match-bar">
         <span className={s.barText}>{paused ? t("paused") : t("pick")}</span>
+        <HelpLink to="import#autofill" className={s.barHelp} />
       </div>
     );
   const a = ed.viewport.toScreen({ x: m.block.x + m.block.w / 2, y: m.block.y }), below = ed.viewport.toScreen({ x: 0, y: m.block.y + m.block.h }).y;
@@ -238,6 +241,7 @@ function MatchBar() {
         onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); setPeek(true); }} onPointerUp={() => setPeek(false)} onPointerCancel={() => setPeek(false)} onLostPointerCapture={() => setPeek(false)}>
         <Icon name="peek" size={16} />
       </button>
+      <HelpLink to="import#autofill" className={s.barHelp} />
     </div>
   );
 }

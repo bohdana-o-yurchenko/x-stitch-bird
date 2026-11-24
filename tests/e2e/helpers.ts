@@ -20,6 +20,8 @@ export async function openEditor(page: Page, locale = "en", o: { firstVisit?: bo
     if (!first) {
       for (const tour of ["guideSeen", "tipSeen.underlay", "tipSeen.reference", "tipSeen.autofill", "tipSeen.autofillReview", "tipSeen.keyEntry", "tipSeen.ownColours", "tipSeen.oxsCheck"]) localStorage.setItem(`stitchwork.${tour}`, "1");
       localStorage.setItem("stitchwork.seenVersion", version);
+      // …and past the tip of the day (its own test turns it on)
+      localStorage.setItem("stitchwork.tips", JSON.stringify({ v: 1, since: "2000-01-01", day: null, off: true, offAt: 0, shown: {}, used: {} }));
     }
     await new Promise((r) => { const q = indexedDB.deleteDatabase("stitchwork"); q.onsuccess = q.onerror = q.onblocked = r; });
   }, [!!o.firstVisit, APP_VERSION] as const);

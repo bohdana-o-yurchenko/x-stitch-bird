@@ -18,7 +18,10 @@ export function PagesMenu() {
   const t = useTranslations("fileMenu");
   const router = useRouter();
   const [install, installDialog] = useInstallApp();
+  const h = useTranslations("help");
   const items: MenuItem[] = [
+    { id: "help", label: h("menu"), hint: h("menuHint"), onClick: () => router.push("/help") },
+    "-",
     { id: "language", node: <LanguageSwitch /> },
     { id: "theme", node: <ThemeSwitcher /> },
     ...(install ? [install] : []),

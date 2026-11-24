@@ -62,7 +62,7 @@ export function NewPatternForm({ doc, inventory, signedIn, onCreate, onClose }: 
   ].join(" · ");
 
   return (
-    <Modal title={t("newTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("create"), primary: true, onClick: () => onCreate(o) }]}>
+    <Modal title={t("newTitle")} help="start#new" onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("create"), primary: true, onClick: () => onCreate(o) }]}>
       <div className={s.form} data-testid="new-pattern">
         {doc && (
           <div className={s.row} role="radiogroup" aria-label={t("startFrom")}>

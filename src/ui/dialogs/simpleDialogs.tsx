@@ -40,7 +40,7 @@ export function ResizeDialog({ onClose }: Close) {
   const p = useEditorState((st) => st.doc);
   const [o, set] = useState({ w: p.w, h: p.h, anchor: "centre" as "centre" | "topLeft" });
   return (
-    <Modal title={t("resizeTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("resize"), primary: true, onClick: () => run("pattern.resize", o) }]}>
+    <Modal title={t("resizeTitle")} help="start#size" onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("resize"), primary: true, onClick: () => run("pattern.resize", o) }]}>
       <div className={ui.grid2}>
         <label className={ui.field}>{t("width")}<input type="number" min={MIN_SIZE} max={MAX_SIZE} value={o.w} onChange={(e) => set({ ...o, w: Number(e.target.value) })} onBlur={() => set({ ...o, w: clampSize(o.w) })} /></label>
         <label className={ui.field}>{t("height")}<input type="number" min={MIN_SIZE} max={MAX_SIZE} value={o.h} onChange={(e) => set({ ...o, h: Number(e.target.value) })} onBlur={() => set({ ...o, h: clampSize(o.h) })} /></label>
@@ -73,7 +73,7 @@ export function GoToCellDialog({ onClose }: Close) {
     ed.viewport.centreOn(c.y * p.w + c.x);
   };
   return (
-    <Modal title={t("gotoTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("go"), primary: true, onClick: go }]}>
+    <Modal title={t("gotoTitle")} help="check#go-to-cell" onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("go"), primary: true, onClick: go }]}>
       <input className={ui.input} autoFocus value={text} placeholder="12, 40" onChange={(e) => { setText(e.target.value); setError(false); }} onKeyDown={(e) => { if (e.key === "Enter" && go() !== false) onClose(); }} />
       <p className={ui.hint}>{error ? t("badCell") : t("gotoHint")}</p>
     </Modal>
@@ -88,7 +88,7 @@ export function MirrorFromCentreDialog({ onClose }: Close) {
   const ed = useEditor();
   const [dir, setDir] = useState<MirrorFromCentre>("leftToRight");
   return (
-    <Modal title={t("mirrorTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("mirror"), primary: true, onClick: () => run("transform.mirror", dir) }]}>
+    <Modal title={t("mirrorTitle")} help="draw#mirror-from-centre" onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("mirror"), primary: true, onClick: () => run("transform.mirror", dir) }]}>
       {MIRRORS.map(([d, k]) => (
         <label key={d} className={ui.chk}><input type="radio" name="mirror" checked={dir === d} onChange={() => setDir(d)} />{t(k)}</label>
       ))}
@@ -102,7 +102,7 @@ export function ExtendCanvasDialog({ onClose }: Close) {
   const run = useCommand();
   const [m, set] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   return (
-    <Modal title={t("extendTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("extend"), primary: true, onClick: () => run("transform.extend", m) }]}>
+    <Modal title={t("extendTitle")} help="start#size" onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("extend"), primary: true, onClick: () => run("transform.extend", m) }]}>
       <div className={ui.grid2}>
         {(["left", "right", "top", "bottom"] as const).map((side) => (
           <label key={side} className={ui.field}>{t(side)}<input type="number" min={0} max={200} value={m[side]} onChange={(e) => set({ ...m, [side]: Math.max(0, Number(e.target.value) || 0) })} /></label>
@@ -118,7 +118,7 @@ export function DropChoiceDialog({ file, onClose }: Close & { file: File }) {
   // a PDF is a reference only (SPEC §15.41): there's no picture to turn into a pattern
   const pdf = isPdfFile(file);
   return (
-    <Modal title={t("dropChoiceTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("openAsReference"), onClick: () => run("reference.open", file) }, { label: t("putBehind"), primary: pdf, onClick: () => run("underlay.open", file) }, ...(pdf ? [] : [{ label: t("turnIntoPattern"), primary: true, onClick: () => run("image.open", file) }])]}>
+    <Modal title={t("dropChoiceTitle")} help="import#drop" onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("openAsReference"), onClick: () => run("reference.open", file) }, { label: t("putBehind"), primary: pdf, onClick: () => run("underlay.open", file) }, ...(pdf ? [] : [{ label: t("turnIntoPattern"), primary: true, onClick: () => run("image.open", file) }])]}>
       <p className={ui.hint}>“{file.name}”</p>
     </Modal>
   );
@@ -173,7 +173,7 @@ export function SamePatternDialog({ name, age, answer, onClose }: Close & { name
     return false;
   };
   return (
-    <Modal title={t("samePatternTitle")} onClose={close} buttons={[{ label: t("cancel") }, { label: t("samePatternReplace"), onClick: choose({ kind: "replace" }) }, { label: t("samePatternNew"), primary: true, onClick: choose({ kind: "new", name: t("samePatternNewName", { name }) }) }]}>
+    <Modal title={t("samePatternTitle")} help="import#xbird-duplicate" onClose={close} buttons={[{ label: t("cancel") }, { label: t("samePatternReplace"), onClick: choose({ kind: "replace" }) }, { label: t("samePatternNew"), primary: true, onClick: choose({ kind: "new", name: t("samePatternNewName", { name }) }) }]}>
       <p className={ui.hint} data-testid="same-pattern">{t(`samePattern_${age}`, { name })}</p>
       <p className={ui.hint}>{t("samePatternKept")}</p>
     </Modal>
@@ -194,7 +194,7 @@ export function UnmatchedColoursDialog({ count, answer, onClose }: Close & { cou
     return false;
   };
   return (
-    <Modal title={t("unmatchedTitle")} onClose={close} buttons={[{ label: t("cancel") }, { label: t("unmatchedOwn"), onClick: choose("own") }, { label: t("unmatchedProject"), primary: true, onClick: choose("project") }]}>
+    <Modal title={t("unmatchedTitle")} help="import#unknown-colours" onClose={close} buttons={[{ label: t("cancel") }, { label: t("unmatchedOwn"), onClick: choose("own") }, { label: t("unmatchedProject"), primary: true, onClick: choose("project") }]}>
       <p className={ui.hint} data-testid="unmatched-colours">{t("unmatchedBody", { count })}</p>
       <p className={ui.hint}>{t("unmatchedHint")}</p>
     </Modal>
@@ -219,7 +219,7 @@ export function FileChoiceDialog({ onClose }: Close) {
   const xbird = { label: t("fileChoiceXbird"), primary: true, onClick: save("pattern") };
   const oxs = { label: t("fileChoiceOxs"), onClick: save("oxs") };
   return (
-    <Modal title={t("fileChoiceTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, oxs, xbird]}>
+    <Modal title={t("fileChoiceTitle")} help="export#share" onClose={onClose} buttons={[{ label: t("cancel") }, oxs, xbird]}>
       <div data-testid="file-choice">
         <p>{t.rich("fileChoiceXbirdText", { b })}</p>
         <p>{t.rich("fileChoiceOxsText", { b })}</p>
@@ -245,7 +245,7 @@ export function PdfPatternIntro({ onClose, onPick }: Close & { onPick: () => voi
     return false as const;
   };
   return (
-    <Modal title={t("pdfPatternTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("pdfPatternPick"), primary: true, onClick: pick }]}>
+    <Modal title={t("pdfPatternTitle")} help="import#pdf-chart" onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("pdfPatternPick"), primary: true, onClick: pick }]}>
       <div data-testid="pdf-pattern-intro">
         <p>{t.rich("pdfPatternWhat", { b })}</p>
         <p>{t.rich("pdfPatternWhich", { b })}</p>
@@ -260,7 +260,7 @@ export function PdfUnreadableDialog({ name, onClose }: Close & { name: string })
   const t = useTranslations("dialogs");
   const b = (c: ReactNode) => <b>{c}</b>;
   return (
-    <Modal title={t("pdfUnreadableTitle")} onClose={onClose} buttons={[{ label: t("close"), primary: true }]}>
+    <Modal title={t("pdfUnreadableTitle")} help="import#pdf-scan" onClose={onClose} buttons={[{ label: t("close"), primary: true }]}>
       <div data-testid="pdf-unreadable">
         <p>{t("pdfUnreadableWhy", { name })}</p>
         <p>{t.rich("pdfPatternElse", { b })}</p>
@@ -285,7 +285,7 @@ export function PatternKeeperDialog({ issues, onClose }: Close & { issues: PkRep
   const t = useTranslations("dialogs");
   const run = useCommand();
   return (
-    <Modal title={t("pkTitle")} onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("pkExport"), primary: true, onClick: () => run("file.exportPatternKeeper", true) }]}>
+    <Modal title={t("pkTitle")} help="export#pattern-keeper" onClose={onClose} buttons={[{ label: t("cancel") }, { label: t("pkExport"), primary: true, onClick: () => run("file.exportPatternKeeper", true) }]}>
       <p>{t("pkIntro")}</p>
       <ul data-testid="pk-issues" style={{ margin: "0 0 4px", paddingLeft: 20, lineHeight: 1.6 }}>
         {issues.map((i) => <li key={i.kind}>{t(`pkIssue.${i.kind}`, { count: i.count })}</li>)}

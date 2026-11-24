@@ -12,11 +12,13 @@ export class UsageCounter {
   private counts = new Map<string, number>();
   private timer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private signedIn: () => boolean, private send: (body: string) => void) {}
+  /** `tap`: each counted use as it happens — tip of the day keeps its own, per person (SPEC §15.60). */
+  constructor(private signedIn: () => boolean, private send: (body: string) => void, private tap?: (feature: string, via: UsageVia) => void) {}
 
   count(command: string, args: unknown, via: UsageVia): void {
     const feature = featureOf(command, args);
     if (!feature) return;
+    this.tap?.(feature, via);
     const key = `${this.signedIn() ? 1 : 0}${via === "key" ? "k" : "c"}${feature}`;
     const n = this.counts.get(key);
     if (n === undefined && this.counts.size >= MAX_FEATURES) return;

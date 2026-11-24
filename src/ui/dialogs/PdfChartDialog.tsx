@@ -133,7 +133,7 @@ export function PdfChartDialog({ file, content, read: first, onClose }: { file: 
       : [...back, { label: t("cancel") }, { label: t("next"), primary: true, disabled: step === "key" ? !settled : !read.symbols.length, onClick: () => (next(), false as const) }];
 
   return (
-    <Modal wide full={step === "key"} title={t(`title_${step}`)} onClose={onClose} buttons={buttons}>
+    <Modal wide full={step === "key"} title={t(`title_${step}`)} help={step === "key" ? "import#pdf-key" : "import#pdf-chart"} onClose={onClose} buttons={buttons}>
       <div data-testid={`pdf-chart-${step}`}>
         {step === "grids" && <GridsStep file={file} content={content} read={read} use={use} setUse={setUse} />}
         {step === "faded" && <FadedStep count={fadedCount(read)} fadedEmpty={fadedEmpty} setFadedEmpty={setFadedEmpty} />}

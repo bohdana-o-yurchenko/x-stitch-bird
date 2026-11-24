@@ -297,6 +297,31 @@
   margin: 0;
   padding: 16px 18px 6px;
 }
+/* the "?" by a title that opens the help there (HelpLink) — quiet until pointed at */
+.helpLink {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin-left: 7px;
+  border: 1px solid var(--line2);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  vertical-align: 0.15em;
+}
+.helpLink:hover,
+.helpLink:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 .modalBody {
   padding: 8px 18px;
   overflow-y: auto;

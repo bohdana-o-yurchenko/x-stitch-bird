@@ -125,7 +125,12 @@ function AppMenu() {
   const reveal = useReveal("app");
   const locale = useLocale();
   const [install, installDialog] = useInstallApp();
+  const h = useTranslations("help");
+  const tp = useTranslations("tips");
   const items: MenuItem[] = [
+    // the help opens beside the editor, so the work stays as it is
+    { id: "help", label: h("menu"), hint: h("menuHint"), onClick: () => void window.open(`/${locale}/help`, "_blank", "noopener") },
+    { id: "tip", label: tp("menu"), hint: tp("menuHint"), onClick: () => ed.store.setState({ tipCard: "menu" }) },
     { label: t("guide"), hint: t("guideHint"), onClick: go("help.guide") },
     { id: "changelog", label: t("changelog"), hint: t("changelogHint", { version: APP_VERSION }), onClick: go("help.changelog") },
     { id: "check", label: t("check"), hint: t("checkHint"), onClick: () => { ed.flush(); router.push("/check"); } },
@@ -176,7 +181,7 @@ function PanelToggle() {
   const open = useEditorState((st) => !st.panelCollapsed);
   const label = open ? t("hidePanel") : t("showPanel");
   return (
-    <button type="button" className={cx(ui.tool, open && ui.on)} title={label} aria-label={label} aria-pressed={open} data-testid="panel-toggle" onClick={() => run("panel.toggle")}>
+    <button type="button" className={cx(ui.tool, open && ui.on)} title={label} aria-label={label} aria-pressed={open} data-testid="panel-toggle" data-guide="panel-toggle" onClick={() => run("panel.toggle")}>
       <Icon name="panel" size={18} />
     </button>
   );

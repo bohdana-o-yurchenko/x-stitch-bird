@@ -8,6 +8,7 @@ import type { PaletteSlot } from "@/core/pattern/palette";
 import type { ChartView } from "@/render/chart";
 import { drawKeyIcon } from "@/render/keyIcon";
 import { useEditor, useEditorState, useKeyNames } from "../hooks/editor";
+import { HelpLink } from "./HelpLink";
 import { Icon } from "./Icon";
 import s from "./common.module.css";
 
@@ -23,7 +24,7 @@ export interface ModalButton {
   onClick?: () => unknown;
 }
 
-export function Modal({ title, wide, full, children, buttons, onClose }: { title: string; wide?: boolean; full?: boolean; children: ReactNode; buttons: ModalButton[]; onClose: () => void }) {
+export function Modal({ title, wide, full, children, buttons, onClose, help }: { title: string; wide?: boolean; full?: boolean; children: ReactNode; buttons: ModalButton[]; onClose: () => void; /** a "?" by the title: the help at this question (HelpLink) */ help?: string }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -32,7 +33,7 @@ export function Modal({ title, wide, full, children, buttons, onClose }: { title
   return (
     <div className={s.backdrop} onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={cx(s.modal, wide && s.wide, full && s.full)} role="dialog" aria-modal="true" aria-label={title}>
-        <h2>{title}</h2>
+        <h2>{title}{help && <HelpLink to={help} />}</h2>
         <div className={s.modalBody}>{children}</div>
         <div className={s.modalFoot}>
           {buttons.map((b) => (

@@ -2,6 +2,7 @@
 
 import { useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { HelpLink } from "../common/HelpLink";
 import { Icon } from "../common/Icon";
 import { cx } from "../common/widgets";
 import { KeyEntryForm } from "../dialogs/key-entry/KeyEntryForm";
@@ -20,16 +21,17 @@ import { VersionsPanel } from "./VersionsPanel";
 import s from "./side.module.css";
 
 /** The sections, in the panel's (and the bar's) order: icon, title (message key), content. */
-const SECTIONS: { id: string; icon: string; title: string; group: "work" | "pattern"; panel: () => ReactNode }[] = [
+/** `help`: the question its "?" opens. */
+const SECTIONS: { id: string; icon: string; title: string; group: "work" | "pattern"; help: string; panel: () => ReactNode }[] = [
   // used while stitching
-  { id: "references", icon: "image", title: "references.heading", group: "work", panel: () => <ReferencesPanel /> },
-  { id: "checks", icon: "checks", title: "checks.heading", group: "work", panel: () => <ChecksPanel /> },
-  { id: "totals", icon: "totals", title: "totals.heading", group: "work", panel: () => <TotalsPanel /> },
+  { id: "references", icon: "image", title: "references.heading", group: "work", help: "import#underlay", panel: () => <ReferencesPanel /> },
+  { id: "checks", icon: "checks", title: "checks.heading", group: "work", help: "check#chart-checks", panel: () => <ChecksPanel /> },
+  { id: "totals", icon: "totals", title: "totals.heading", group: "work", help: "check#totals", panel: () => <TotalsPanel /> },
   // about the pattern, set now and then
-  { id: "fabric", icon: "fabric", title: "fabric.heading", group: "pattern", panel: () => <FabricPanel /> },
-  { id: "materials", icon: "spool", title: "materials.heading", group: "pattern", panel: () => <MaterialsPanel /> },
-  { id: "info", icon: "info", title: "side.info", group: "pattern", panel: () => <PatternInfoPanel /> },
-  { id: "versions", icon: "history", title: "side.versions", group: "pattern", panel: () => <VersionsPanel /> },
+  { id: "fabric", icon: "fabric", title: "fabric.heading", group: "pattern", help: "start#size", panel: () => <FabricPanel /> },
+  { id: "materials", icon: "spool", title: "materials.heading", group: "pattern", help: "start#brands", panel: () => <MaterialsPanel /> },
+  { id: "info", icon: "info", title: "side.info", group: "pattern", help: "start#pattern-info", panel: () => <PatternInfoPanel /> },
+  { id: "versions", icon: "history", title: "side.versions", group: "pattern", help: "fix#versions", panel: () => <VersionsPanel /> },
 ];
 
 /**
@@ -88,10 +90,13 @@ export function SidePanel() {
                   const isOpen = x.id === unfolded?.id;
                   return (
                     <div key={x.id} className={s.stackItem}>
-                      <button type="button" className={cx(s.stackHead, isOpen && s.open)} aria-expanded={isOpen} data-testid={`section-${x.id}`} onClick={() => ed.unfoldSection(isOpen ? null : x.id)}>
-                        <span className={s.chev} aria-hidden />
-                        <span>{t(x.title)}</span>
-                      </button>
+                      <div className={s.stackHeadRow}>
+                        <button type="button" className={cx(s.stackHead, isOpen && s.open)} aria-expanded={isOpen} data-testid={`section-${x.id}`} onClick={() => ed.unfoldSection(isOpen ? null : x.id)}>
+                          <span className={s.chev} aria-hidden />
+                          <span>{t(x.title)}</span>
+                        </button>
+                        <HelpLink to={x.help} className={s.stackHelp} />
+                      </div>
                       {isOpen && (
                         <div className={s.stackBody} style={{ height }}>
                           <InSidePanel.Provider value>{x.panel()}</InSidePanel.Provider>

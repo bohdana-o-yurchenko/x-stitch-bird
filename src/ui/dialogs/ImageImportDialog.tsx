@@ -47,6 +47,7 @@ export function ImageImportDialog({ image, onClose }: { image: HTMLImageElement;
   return (
     <Modal
       title={t("imageTitle")}
+      help="start#from-photo"
       onClose={onClose}
       buttons={[
         { label: t("cancel") },

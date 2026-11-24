@@ -163,6 +163,14 @@
   align-items: center;
   gap: 5px;
 }
+/* the bar's "?" (HelpLink): bigger than by a title — the bars are thin and it sits among buttons */
+.selectionBar .barHelp {
+  align-self: center;
+  width: 18px;
+  height: 18px;
+  margin: 0 4px 0 6px;
+  font-size: 11.5px;
+}
 .barSep {
   width: 1px;
   align-self: stretch;

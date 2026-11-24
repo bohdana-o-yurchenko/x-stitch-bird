@@ -44,17 +44,17 @@ export function ToolBar() {
   };
   return (
     <div className={cx(s.tools, paused && s.paused)} role="toolbar" aria-label={t("toolbar")} aria-disabled={paused} title={paused ? t("pausedForImage") : undefined} data-guide="toolbar" data-testid="toolbar">
-      <button type="button" className={ui.tool} title={t("undo", keys)} disabled={!canUndo} onClick={() => run("history.undo")}><Icon name="undo" size={18} /></button>
+      <button type="button" className={ui.tool} title={t("undo", keys)} data-guide="undo" disabled={!canUndo} onClick={() => run("history.undo")}><Icon name="undo" size={18} /></button>
       <button type="button" className={ui.tool} title={t("redo", keys)} disabled={!canRedo} onClick={() => run("history.redo")}><Icon name="redo" size={18} /></button>
       <span className={s.sep} />
       <button type="button" className={cx(ui.tool, override && ui.on)} title={t("override")} aria-pressed={override} data-guide="override" onClick={() => run("draw.toggleOverride")}><Icon name="override" size={18} /></button>
-      <button type="button" className={cx(ui.tool, mirror !== "off" && ui.on)} title={`${t("mirror")} — ${t(MIRROR_LABEL[mirror])}`} onClick={() => run("draw.cycleMirror")}><Icon name="mirror" size={18} /></button>
+      <button type="button" className={cx(ui.tool, mirror !== "off" && ui.on)} title={`${t("mirror")} — ${t(MIRROR_LABEL[mirror])}`} data-guide="mirror" onClick={() => run("draw.cycleMirror")}><Icon name="mirror" size={18} /></button>
       <span className={s.sep} />
       {toolButton("autofill")}
       <span className={s.sep} />
       {toolButton("pencil")}
       {toolButton("eraser")}
-      <div className={cx(s.sizes, !usesBrush && s.idle)} role="group" aria-label={t("brushSize")}>
+      <div className={cx(s.sizes, !usesBrush && s.idle)} role="group" aria-label={t("brushSize")} data-guide="brush">
         {[1, 2, 3, 4, 5].map((n) => (
           <button key={n} type="button" className={cx(brush === n && s.on)} title={t("brushSizeN", { n, key: shortcutLabel("draw.pickBrush", n, isMac) ?? "" })} aria-label={t("brushSizeN", { n, key: shortcutLabel("draw.pickBrush", n, isMac) ?? "" })} aria-pressed={brush === n} onClick={() => setBrush(n)}>{n}</button>
         ))}

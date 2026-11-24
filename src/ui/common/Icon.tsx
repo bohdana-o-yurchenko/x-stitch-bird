@@ -4,6 +4,8 @@ const S = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap:
 
 const ICONS: Record<string, ReactNode> = {
   pencil: <g {...S}><path d="M4 20l1-4L16 5l3 3L8 19z" /><path d="M14 7l3 3" /></g>,
+  // tip of the day
+  bulb: <g {...S}><path d="M9 18h6M10 21h4" /><path d="M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z" /></g>,
   duplicate: <g {...S}><rect x="8" y="8" width="12" height="12" rx="1.5" /><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3" /></g>,
   line: <g {...S}><path d="M5 19L19 5" /></g>,
   rect: <g {...S}><rect x="4.5" y="6.5" width="15" height="11" rx="1" /></g>,

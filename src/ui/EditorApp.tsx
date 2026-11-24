@@ -16,6 +16,7 @@ import { ReferenceLayer } from "./references/ReferenceLayer";
 import { Tooltips } from "./common/Tooltips";
 import { WhatsNewOnUpdate } from "./dialogs/ChangelogDialog";
 import { Guide } from "./guide/Guide";
+import { TipOfTheDay } from "./tips/TipOfTheDay";
 import { SidePanel } from "./side/SidePanel";
 import { Stage } from "./stage/Stage";
 import { StatusBar } from "./status/StatusBar";
@@ -100,6 +101,7 @@ function Shell() {
           <Tooltips />
           <WhatsNewOnUpdate />
           <Guide />
+          <TipOfTheDay />
           {dragging && <DropZoneOverlay text={t("drop")} />}
         </>
       }

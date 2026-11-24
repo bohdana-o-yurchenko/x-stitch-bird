@@ -25,5 +25,6 @@ export { liveApi, versionApi } from "./cloud/livePatterns";
 export { accountPictureApi, pictureIdsOf } from "./cloud/accountPictures";
 export { accountThreadApi } from "./cloud/accountThreads";
 export { accountCheckApi, type CheckSaved } from "./cloud/accountChecks";
+export { accountTipApi } from "./cloud/accountTips";
 export { localCheckStore } from "./local/localChecks";
 export { fetchUsageTotals, sendUsage } from "./cloud/usage";

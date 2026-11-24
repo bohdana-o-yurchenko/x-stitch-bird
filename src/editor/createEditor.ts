@@ -7,6 +7,7 @@ import { ALL_SYMBOLS, isShapeSymbol } from "@/core/symbols/symbols";
 import { RULER_SIZE } from "@/render/ChartRenderer";
 import { defaultCanvasTheme, type CanvasTheme } from "@/render/theme";
 import { account, createPersistence, sendUsage, type Persistence } from "@/persistence";
+import { TipsService } from "./tips";
 import { UsageCounter } from "./usage";
 import { Derived } from "./derived";
 import { JobRunner } from "./jobs";
@@ -80,7 +81,9 @@ export class Editor {
   readonly live: LiveSync;
   /** Feature usage counts, sent now and then without anything about who (SPEC §15.54). */
   readonly arrival = new Arrival(this);
-  readonly usage = new UsageCounter(() => !!this.state.account, sendUsage);
+  /** Tip of the day's memory: tips seen, feature use per person (SPEC §15.60). */
+  readonly tips = new TipsService();
+  readonly usage = new UsageCounter(() => !!this.state.account, sendUsage, (f, via) => this.tips.count(f, via));
   /** Whole-pattern values, once per revision (ARCHITECTURE-REVIEW §1). */
   readonly derived = new Derived(() => this.state);
   private settleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -285,6 +288,7 @@ export class Editor {
 
   flush() {
     this.usage.flush();
+    this.tips.flush();
     // before start-up has restored the draft, the open pattern is only a blank placeholder: saving it would
     // replace the draft (closing or reloading the page while it loads)
     if (!this.state.ready) return;
@@ -334,6 +338,7 @@ export class Editor {
   /** Signed in or out (the account menu tells): while signed in, saved patterns also go to the account. */
   setAccount(user: EditorState["account"]) {
     account.signedIn = !!user;
+    void this.tips.setSignedIn(!!user);
     if (!this.state.accountKnown) this.store.setState({ accountKnown: true });
     this.markAccountReady();
     if (this.state.account?.id === user?.id) return;

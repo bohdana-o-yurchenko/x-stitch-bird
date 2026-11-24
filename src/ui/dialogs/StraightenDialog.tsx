@@ -8,6 +8,7 @@ import { defaultCorners, type Quad } from "@/core/underlay/underlay";
 import { cx, ui } from "../common/widgets";
 import { useEditor } from "../hooks/editor";
 import s from "./straighten.module.css";
+import { HelpLink } from "../common/HelpLink";
 
 const HANDLE_R = 9, GRAB_R = 24, LOUPE_R = 80, LOUPE_ZOOM = 4, PAD = 28;
 
@@ -225,7 +226,7 @@ export function StraightenDialog({ onClose }: { onClose: () => void }) {
     <div className={s.backdrop} role="dialog" aria-modal="true" aria-label={t("title")} data-testid="straighten">
       <div className={s.panel}>
         <div className={s.head}>
-          <h2>{t("title")}</h2>
+          <h2>{t("title")}<HelpLink to="import#straighten" /></h2>
           <p className={ui.hint}>{t("hint")}</p>
         </div>
         <div ref={area} className={s.area}>

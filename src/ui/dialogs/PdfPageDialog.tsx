@@ -77,7 +77,7 @@ export function PdfPageDialog({ source, pages, name, to, answer, onClose }: { so
     return false as const;
   };
   return (
-    <Modal wide title={t("pdfPageTitle")} onClose={close} buttons={[{ label: t("cancel") }, { label: t(to === "underlay" ? "pdfPageAlign" : "pdfPageOpen", { page: picked }), primary: true, onClick: () => pick(picked) }]}>
+    <Modal wide title={t("pdfPageTitle")} help="import#pdf-pages" onClose={close} buttons={[{ label: t("cancel") }, { label: t(to === "underlay" ? "pdfPageAlign" : "pdfPageOpen", { page: picked }), primary: true, onClick: () => pick(picked) }]}>
       <p className={ui.hint} data-testid="pdf-page-hint">{t(to === "underlay" ? "pdfPageHintUnderlay" : "pdfPageHintWindow", { name, pages })}</p>
       {failed && <p className={ui.hint}>{t("pdfPageNoPreview")}</p>}
       <div className={s.grid} ref={grid} role="listbox" aria-label={t("pdfPageTitle")} data-testid="pdf-pages">

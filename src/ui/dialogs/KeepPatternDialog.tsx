@@ -16,6 +16,7 @@ export function KeepPatternDialog({ then, onClose }: { then: { command: string; 
   return (
     <Modal
       title={t("title")}
+      help="start#keep-pattern"
       wide
       onClose={onClose}
       buttons={[

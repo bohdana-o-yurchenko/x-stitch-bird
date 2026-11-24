@@ -1,6 +1,6 @@
 /** The privacy policy's text (SPEC §15.23): one entry per language, the same sections in the same order. */
 export const CONTACT_EMAIL = "ptashechka.app@gmail.com";
-export const POLICY_UPDATED = "2026-11-23";
+export const POLICY_UPDATED = "2026-11-24";
 
 export type Section = { title: string; body: string[] };
 export interface Policy {
@@ -27,8 +27,8 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "With an account (optional)",
         body: [
-          "If you sign in, we collect: your email address; your name and profile picture, if you sign in with Google; the patterns you save while signed in — the pattern file (its key, chart, notes and pattern information you entered), its name and size, a small preview picture of it and its earlier versions; the photos, scans and PDFs you add to a pattern (behind the chart or in floating windows) with the marks you make on them; and the threads and beads of your own you add.",
-          "We use this only to let you sign in, to show who is signed in, and to keep your patterns so you can open them on any device. We do not use it for advertising or profiling.",
+          "If you sign in, we collect: your email address; your name and profile picture, if you sign in with Google; the patterns you save while signed in — the pattern file (its key, chart, notes and pattern information you entered), its name and size, a small preview picture of it and its earlier versions; the photos, scans and PDFs you add to a pattern (behind the chart or in floating windows) with the marks you make on them; and the threads and beads of your own you add; and, for the tip of the day, which tips you have seen and how many times you have used each of the editor's features, by button and by keyboard shortcut.",
+          "We use this only to let you sign in, to show who is signed in, to keep your patterns so you can open them on any device, and to pick tips of the day you'd find new. We do not use it for advertising or profiling.",
         ],
       },
       {
@@ -60,6 +60,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
         body: [
           "We use Vercel Web Analytics and Speed Insights to count page views and measure how fast the app loads. They do not use cookies, do not collect personal data, and do not track you across other websites.",
           "The editor also counts how often each of its buttons and keyboard shortcuts is used, to learn which features matter. Only the totals are sent — which feature, how many times, and whether you were signed in — added to everyone's counts per day. Nothing that identifies you, your device or your patterns is sent or kept.",
+          "For the tip of the day, the editor also keeps its own count of the features you use and the tips you have seen — in your browser, and in your account when you are signed in — only to choose tips that are new to you. It is never added to the shared counts or shown to anyone.",
           "When you sign in, a sign-in session cookie keeps you signed in. We use no advertising or tracking cookies.",
         ],
       },
@@ -106,8 +107,8 @@ export const POLICY: Record<"en" | "uk", Policy> = {
       {
         title: "З обліковим записом (за бажанням)",
         body: [
-          "Якщо ви входите, ми збираємо: вашу електронну адресу; ім’я та фото профілю, якщо ви входите через Google; схеми, які ви зберігаєте після входу, — файл схеми (ключ, схему, нотатки й інформацію про схему, яку ви ввели), її назву й розмір, невелике зображення-прев’ю та попередні версії; фото, скани й PDF, які ви додаєте до схеми (під схему чи в плаваючі вікна), з позначками на них; і ваші власні нитки та бісер.",
-          "Ми використовуємо це лише для входу, щоб показувати, хто увійшов, і щоб зберігати ваші схеми для відкриття на будь-якому пристрої. Не для реклами й не для профілювання.",
+          "Якщо ви входите, ми збираємо: вашу електронну адресу; ім’я та фото профілю, якщо ви входите через Google; схеми, які ви зберігаєте після входу, — файл схеми (ключ, схему, нотатки й інформацію про схему, яку ви ввели), її назву й розмір, невелике зображення-прев’ю та попередні версії; фото, скани й PDF, які ви додаєте до схеми (під схему чи в плаваючі вікна), з позначками на них; і ваші власні нитки та бісер; а для поради дня — які поради ви вже бачили й скільки разів ви користувалися кожною можливістю редактора, кнопкою чи гарячою клавішею.",
+          "Ми використовуємо це лише для входу, щоб показувати, хто увійшов, щоб зберігати ваші схеми для відкриття на будь-якому пристрої й щоб добирати поради дня, нові для вас. Не для реклами й не для профілювання.",
         ],
       },
       {
@@ -139,6 +140,7 @@ export const POLICY: Record<"en" | "uk", Policy> = {
         body: [
           "Ми використовуємо Vercel Web Analytics і Speed Insights, щоб рахувати перегляди сторінок і вимірювати швидкість завантаження. Вони не використовують cookie, не збирають персональних даних і не відстежують вас на інших сайтах.",
           "Редактор також рахує, як часто використовують кожну його кнопку й клавіатурне скорочення, щоб знати, які функції потрібні. Надсилаються лише підсумки — яка функція, скільки разів і чи ви увійшли, — і додаються до спільних лічильників за день. Нічого, що визначає вас, ваш пристрій чи ваші схеми, не надсилається й не зберігається.",
+          "Для поради дня редактор ще й сам рахує, якими можливостями ви користуєтеся і які поради вже бачили, — у вашому браузері, а якщо ви увійшли, то й в обліковому записі, — лише щоб добирати нові для вас поради. До спільних лічильників це не додається й нікому не показується.",
           "Коли ви входите, cookie сеансу зберігає вхід. Рекламних чи відстежувальних cookie ми не використовуємо.",
         ],
       },

@@ -8,6 +8,7 @@ import { KeyIcon, cx, ui } from "../common/widgets";
 import { useCommand, useEditor, useEditorState, useKeyNames } from "../hooks/editor";
 import { useEntryLabel } from "../i18n/labels";
 import s from "./side.module.css";
+import { HelpLink } from "../common/HelpLink";
 
 /** Tools that put the active entry on the chart; for the others the entry is shown dimmed. */
 const USES_ENTRY = new Set(["pencil", "line", "rect", "filledRect", "fill", "partial", "backstitch", "knot"]);
@@ -52,6 +53,7 @@ export function CurrentTool() {
     <section className={s.current} aria-label={t("title")} data-testid="current-tool">
       <div className={s.currentHead}>
         <span>{t("title")}</span>
+        <HelpLink to="draw#pencil" />
       </div>
       <div className={s.currentRow}>
         <span className={cx(s.toolBadge, hold && s.held)}><Icon name={effective.icon} size={20} /></span>

@@ -306,29 +306,17 @@ test("every kind of stitch: backstitch lines, French knots, partial stitches; th
   expect(await segments()).toBe(before + 1);
 });
 
-test("stamps: a Smyrna cross over four cells, and a stitch of one's own drawn by hand, each placed as one (ARCHITECTURE-REVIEW §3)", async ({ page }) => {
+test("stamps: a stitch of one's own drawn by hand, placed as one; Smyrna crosses not offered for now (ARCHITECTURE-REVIEW §3)", async ({ page }) => {
   const stamps = () => editorState<{ x: number; y: number; w: number; def: string }[]>(page, "(ed) => ed.doc.layers.stamps.map((s) => ({ x: s.x, y: s.y, w: s.w, def: s.def }))");
-  // Backstitch, placed as a Smyrna cross over 4 cells
   await page.getByRole("button", { name: "+ Add to key" }).first().click();
   const form = page.getByTestId("key-form");
   await form.getByRole("radio", { name: "Backstitch" }).click();
-  await page.getByPlaceholder("Search DMC number or name").fill("310");
-  await page.locator("[data-id='dmc:310']").click();
-  await form.getByTestId("stamp").getByRole("radio", { name: "Smyrna cross over 4 cells" }).click();
-  await expect(form.getByTestId("key-preview")).toContainText("Smyrna cross over 4 cells");
-  await form.getByRole("button", { name: "Add to key", exact: true }).click();
-  await expect(form).toHaveCount(0);
-  // the pencil places one with its middle under the pointer
-  const c = await cellPoint(page, 10, 10);
-  await page.mouse.click(c.x, c.y);
-  expect(await stamps()).toEqual([{ x: 10, y: 10, w: 2, def: "smyrna2" }]);
-  await expect(page.getByTestId("totals")).toContainText("Special stitches: 1");
-
-  // one's own: drawn in the form — a 1×1 tick — then placed
-  await page.getByRole("button", { name: "+ Add to key" }).first().click();
-  await form.getByRole("radio", { name: "Backstitch" }).click();
   await page.getByPlaceholder("Search DMC number or name").fill("321");
   await page.locator("[data-id='dmc:321']").click();
+  // the built-in Smyrna crosses are hidden until they're reworked
+  await expect(form.getByTestId("stamp").getByRole("radio")).toHaveCount(1);
+  await expect(form.getByTestId("stamp")).not.toContainText("Smyrna");
+  // one's own: drawn in the form — a 1×1 tick — then placed
   await form.getByTestId("stamp-draw").click();
   const drawer = page.getByTestId("stamp-drawer");
   await drawer.getByTestId("stamp-w").selectOption("1");
@@ -344,13 +332,16 @@ test("stamps: a Smyrna cross over four cells, and a stitch of one's own drawn by
   await drawer.getByTestId("stamp-use").click();
   await expect(form.getByTestId("key-preview")).toContainText("Tick");
   await form.getByRole("button", { name: "Add to key", exact: true }).click();
+  await expect(form).toHaveCount(0);
   const d = await cellPoint(page, 3, 3);
   await page.mouse.click(d.x, d.y);
-  expect((await stamps())[1]).toMatchObject({ x: 3, y: 3, w: 1 });
-  expect((await stamps())[1]!.def).toMatch(/^own:/);
-  // undo takes the last one away
-  await page.keyboard.press("ControlOrMeta+z");
   expect(await stamps()).toHaveLength(1);
+  expect((await stamps())[0]).toMatchObject({ x: 3, y: 3, w: 1 });
+  expect((await stamps())[0]!.def).toMatch(/^own:/);
+  await expect(page.getByTestId("totals")).toContainText("Special stitches: 1");
+  // undo takes it away
+  await page.keyboard.press("ControlOrMeta+z");
+  expect(await stamps()).toHaveLength(0);
 });
 
 // someone else's design: on this computer only (tests/fixtures/private)

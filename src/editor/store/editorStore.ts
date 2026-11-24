@@ -151,6 +151,8 @@ export interface EditorState {
   guide: string | null;
   /** A feature tip to show once nothing else is in the way (each tip appears only the first time). */
   pendingTip: string | null;
+  /** Tip of the day's card (SPEC §15.60): open by itself (`auto`, today's tip) or from ☰ (`menu`). */
+  tipCard: "auto" | "menu" | null;
   /** The zoomed-in edit frame of the underlay, in canvas px, once the user has resized it (SPEC §15.15). */
   underlayFrame: Rect | null;
   /** The side or corner of the edit frame under the pointer (or being dragged): drawn highlighted. */
@@ -232,6 +234,7 @@ export const createEditorStore = () =>
     underlayHot: null,
     guide: null,
     pendingTip: null,
+    tipCard: null,
     menuReveal: null,
     hasClipboard: false,
     checks: null,
