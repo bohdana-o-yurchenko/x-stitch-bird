@@ -369,13 +369,40 @@ button.brandItem,
   flex-direction: column;
   gap: 2px;
 }
+/* the fold: its height slides from nothing to the series' own */
+.fold {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.22s ease, opacity 0.18s ease;
+}
+.fold.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.fold > .branches {
+  min-height: 0;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fold {
+    transition: none;
+  }
+}
 .branches {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  margin: 2px 0 6px 14px;
+  /* the room above and below is the rows' own: a folded branch takes none at all */
+  margin-left: 14px;
   padding-left: 6px;
   border-left: 1px solid var(--line2);
+}
+.branches > :first-child {
+  margin-top: 2px;
+}
+.branches > :last-child {
+  margin-bottom: 6px;
 }
 button.branch {
   padding: 5px 10px;
@@ -400,6 +427,11 @@ button.branch {
   .brandList {
     position: static;
     overflow-y: auto;
+    /* the scrollbar gets a lane of its own, right of the counts (it floats over the content on a Mac) */
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    padding-right: 10px;
+    margin-right: -10px;
   }
   .listSide {
     display: flex;
@@ -446,7 +478,7 @@ button.branch {
   display: none;
 }
 @media (max-width: 720px) {
-  .branches {
+  .fold {
     display: none;
   }
   .seriesSelect {

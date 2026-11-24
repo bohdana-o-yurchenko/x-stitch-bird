@@ -210,16 +210,23 @@ export default function ThreadsApp({ kind }: { kind: "thread" | "bead" }) {
                       </span>
                     )}
                   </div>
-                  {brand === b && branches.length > 0 && (
-                    <div className={s.branches} role="group" aria-label={t("series")} data-testid="bead-series">
-                      {branches.map(([x, c]) => (
-                        <button key={x} type="button" className={cx(s.brandItem, s.branch, inSeries === x && s.on)} aria-current={inSeries === x || undefined} onClick={() => setSeries(x)}>
-                          <span>{x}</span>
-                          <small>{c}</small>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  {kind === "bead" && (() => {
+                    const open = brand === b, list = open ? branches : seriesOfBrand(b);
+                    if (!list.length) return null;
+                    // always there, folded away unless its brand is chosen: opening and closing slide
+                    return (
+                      <div className={cx(s.fold, open && s.open)} inert={!open}>
+                        <div className={s.branches} role="group" aria-label={t("series")} data-testid={open ? "bead-series" : undefined}>
+                          {list.map(([x, c]) => (
+                            <button key={x} type="button" className={cx(s.brandItem, s.branch, open && inSeries === x && s.on)} aria-current={(open && inSeries === x) || undefined} onClick={() => setSeries(x)}>
+                              <span>{x}</span>
+                              <small>{c}</small>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
               <button type="button" className={cx(s.brandItem, !brand && s.on)} onClick={() => pickBrand(null)} aria-current={!brand || undefined}>

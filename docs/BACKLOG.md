@@ -26,14 +26,14 @@ DONE 14) + 1 feature : XSD import (SPEC §15.56; export stays out of scope). we 
 DONE 12) fix the different 'new from' dialogs. now the behavior is inconsistent 
 12) user guides and probably an AI assistant that exaplains how to do one or another
 
-13) improve the expor to pdf :
-14) the infrmation of the author and name of design should be on every page. also instructions must be exported 
-15) also improve the export to pdf for print. maybe add users the selection of what options they want??? add a preview of the resulting doc??? 
+DONE 13) improve the expor to pdf :
+DONE 14) the infrmation of the author and name of design should be on every page. also instructions must be exported
+DONE 15) also improve the export to pdf for print. maybe add users the selection of what options they want??? add a preview of the resulting doc??? 
 
-15) the 'replace in selection' dialog should have proper dropwowned that look the same as the original key 
+DONE 15) the 'replace in selection' dialog should have proper dropwowned that look the same as the original key 
 
-12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
-13) add 'similar' colors of the same brand AND translations to other brands. maybe come up with what usually is displayed there as well 
+DONE 12) treads and beads must alway display full catalogue of floss. existing floss can be duplicated. custom floss has just like an indicator . there is a quick filter 'only own' 
+DONE 13) add 'similar' colors of the same brand AND translations to other brands. maybe come up with what usually is displayed there as well 
 
 
 11) intoduce more icons. match with pattern maker. fix the export oxs so it displays the icons??? 
@@ -47,6 +47,9 @@ DONE 12) fix the different 'new from' dialogs. now the behavior is inconsistent
 8) write to yulia after the speciality stitches are done!!!! 
 
 13) finish a proper local app installation. this will introduce a whole lot of problems later tho. 
+14) rework the floss and beads matching. using some existing trnalstion tables. 
+
+
 
 bugs :
 DONE 0) create proper app-specific email for emails DONE

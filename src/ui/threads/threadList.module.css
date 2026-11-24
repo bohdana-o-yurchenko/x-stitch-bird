@@ -94,8 +94,8 @@
 }
 .compact .item {
   align-items: center;
-  gap: 12px;
-  padding: 5px 12px;
+  gap: 14px;
+  padding: 6px 12px 6px 8px;
   border: 0;
   border-radius: 0;
   background: none;
@@ -104,9 +104,9 @@
   background: var(--sel);
 }
 .compact .swatch {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
 }
 .compact .swatch.round {
   border-radius: 50%;
