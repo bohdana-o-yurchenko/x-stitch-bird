@@ -409,12 +409,16 @@ button.branch {
   font-size: 13px;
 }
 
-/* from 720 px the page itself doesn't scroll: the brands, the list and the panel each scroll on their own */
+/*
+ * From 720 px the page itself doesn't scroll: the brands, the list and the panel each scroll on their own.
+ * `.page.page` / `.main.main`: these override home.module.css's .page and .main on the same elements, whichever
+ * stylesheet a production build happens to load last (it loaded home's last, and the whole page scrolled).
+ */
 @media (min-width: 720px) {
-  .page {
+  .page.page {
     overflow: hidden;
   }
-  .main {
+  .main.main {
     flex: 1 1 0;
     min-height: 0;
     padding-bottom: 16px;
@@ -464,7 +468,7 @@ button.branch {
 }
 /* with the colour's panel as a column of its own, the page takes more of a wide screen */
 @media (min-width: 1100px) {
-  .main {
+  .main.main {
     max-width: 1440px;
   }
 }
