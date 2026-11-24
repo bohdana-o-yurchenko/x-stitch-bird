@@ -19,7 +19,7 @@ DONE 14) beads with floss in between the crossess. right now dont get read by ap
  
 
 DONE 9) proper landing!! - with a central button 'go to editor'
-DONE 19) (question answered 2026-11-23: Vercel custom events need Pro; not built yet) треба збирати статистику про те, хто які кнопки нажимає та якими шорткатами користується! щоб переробити і те і те
+DONE 19) (built 2026-11-23 as our own counts instead of Vercel's paid custom events: SPEC §15.54 usage counts, §15.55 admin Stats page) треба збирати статистику про те, хто які кнопки нажимає та якими шорткатами користується! щоб переробити і те і те
 
 DONE 14) + 1 feature : XSD import (SPEC §15.56; export stays out of scope). we are free to reverse engineer it. noone goona sue
 
@@ -148,6 +148,7 @@ Still open:
 - **Beads**: the calculator gives a count of beads (`unit: "bead"`). The catalogue knows each Mill Hill bead's
   package size (`ColorEntry.pack`, §2.2, Treasures included) → "2 packs (≈ 640 beads)". Preciosa has no pack (sold
   by weight) → the count stays. Own beads: a count, unless a pack size is added to the form.
+- The PDF's **Materials** page (§15.10c) prints the same lines — it gets the packs too.
 - **Totals panel**: each line shows "× 2" with the unit only in the heading — say "2 skeins" / "2 packs" on the line.
 - After B24, metres as well.
 
@@ -367,4 +368,5 @@ M if plain and structured; out if protected.
 
 ## Parked and rejected
 Kept in SPEC §15.12 (decisions): AI / ML features (rejected), scan calibration in reference windows (rejected —
-the underlay does it), print PDF options (rejected), `.xsd` **export** (parked: proprietary, undocumented).
+the underlay does it), `.xsd` **export** (parked: proprietary, undocumented). Print PDF options were rejected there
+too, but are built since 2026-11-24 (§15.10c).

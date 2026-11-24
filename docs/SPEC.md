@@ -1389,7 +1389,8 @@ symbols) could use the patch's mean colour instead — later.
 - **Rejected**: AI / ML-based features.
 - **Rejected 2026-11-16**: scan calibration in reference windows (the former §15.9) — not needed; the underlay with
   its edit frame (§15.15) is how scans are lined up.
-- **Rejected 2026-11-16**: options for the print PDF (Letter paper, how many rows pages share).
+- ~~**Rejected 2026-11-16**: options for the print PDF (Letter paper, how many rows pages share).~~ Built after all
+  on 2026-11-24, with much more: the Print dialog (§15.10c).
 - **Parked**: exporting Pattern Maker `.xsd`. The format is proprietary, binary and undocumented.
 - *(A scan underlay inside the chart canvas was rejected at first, then specified and built as §15.15.)*
 - **Not yet discussed** — keyboard entry, specialty stitches, uploaded symbol pictures, proofread tracking, a
